@@ -126,6 +126,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_token',
         'google_refresh_token',
         'google_token_expires_at',
+        'google_token_scopes',
         'microsoft_token',
         'microsoft_refresh_token',
         'microsoft_token_expires_at',
@@ -1029,6 +1030,27 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasGoogleCalendarConnected(): bool
     {
         return ! is_null($this->google_token) && ! is_null($this->google_refresh_token);
+    }
+
+    /**
+     * Whether the Google connection may add, change and remove events in the person's calendar.
+     * A connection made from the import page is read-only; one made before the grant was
+     * recorded (NULL) asked for everything, as every connection then did.
+     */
+    public function googleCanWrite(): bool
+    {
+        if (is_null($this->google_token)) {
+            return false;
+        }
+
+        if (is_null($this->google_token_scopes)) {
+            return true;
+        }
+
+        $granted = preg_split('/\s+/', trim($this->google_token_scopes)) ?: [];
+
+        return in_array(\Google\Service\Calendar::CALENDAR_EVENTS, $granted, true)
+            || in_array(\Google\Service\Calendar::CALENDAR, $granted, true);
     }
 
     /**

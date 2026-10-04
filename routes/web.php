@@ -713,6 +713,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/google-calendar/reauthorize', [GoogleCalendarController::class, 'reauthorize'])->name('google.calendar.reauthorize');
     Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
+    Route::get('/google-calendar/import/{subdomain}/calendars', [GoogleCalendarController::class, 'importCalendars'])->name('google.calendar.import_calendars')->middleware('throttle:30,1');
+    Route::post('/google-calendar/import/{subdomain}/events', [GoogleCalendarController::class, 'importEvents'])->name('google.calendar.import_events')->middleware('throttle:30,1');
     Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
     Route::post('/google-calendar/force-sync-to-google/{subdomain}', [GoogleCalendarController::class, 'forceSyncToGoogle'])->name('google.calendar.force_sync_to_google')->middleware('throttle:5,1');
     Route::post('/google-calendar/member-sync/{subdomain}', [GoogleCalendarController::class, 'memberSync'])->name('google.calendar.member_sync');

@@ -7,6 +7,7 @@
     <x-slot:toc>
         <x-doc-nav-group label="AI Import" href="#ai-import" expanded>
             <x-doc-nav-link href="#link-import">From a Link</x-doc-nav-link>
+            <x-doc-nav-link href="#google-import">From Google Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#text-import">From Text</x-doc-nav-link>
             <x-doc-nav-link href="#new-pages">New Pages and Requests</x-doc-nav-link>
             <x-doc-nav-link href="#image-import">From Images/Flyers</x-doc-nav-link>
@@ -35,7 +36,7 @@
             <li>Click <strong class="text-gray-900 dark:text-white">Actions</strong> in the top right</li>
             <li>Choose <strong class="text-gray-900 dark:text-white">Import Events</strong></li>
         </ol>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Under the box, <strong class="text-gray-900 dark:text-white">Other ways to bring events in</strong> holds <strong class="text-gray-900 dark:text-white">Import from Eventbrite</strong> <x-doc-badge plan="pro" />, the connector that pulls your events, tickets and venues from a connected Eventbrite account.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Under the box, <strong class="text-gray-900 dark:text-white">Other ways to bring events in</strong> holds <a href="#google-import" class="doc-link">Google Calendar</a>, for the schedule's owner, and <strong class="text-gray-900 dark:text-white">Import from Eventbrite</strong> <x-doc-badge plan="pro" />, the connector that pulls your events, tickets and venues from a connected Eventbrite account.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">A link is a one-time copy</div>
@@ -147,6 +148,31 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What a link cannot reach</div>
             <p>Facebook and Instagram do not let other sites read their pages, so those links are turned down straight away: add a screenshot of your events instead. A Google Calendar that is not public cannot be read from its link. A page behind a sign-in, or one that only fills in its events after it loads, comes back with no events: paste its text or add a screenshot. Links are read on this import page only, not on the public request form.</p>
+        </div>
+    </section>
+
+    <!-- Google Calendar Import -->
+    <section id="google-import" class="doc-section">
+        <h3 class="doc-subheading">Importing from Google Calendar</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When your events live in a Google calendar that is not public, connect it and choose which of its events to bring over. This is for the schedule's owner, and it copies: nothing in your Google calendar is changed.</p>
+
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>On the import page, under <strong class="text-gray-900 dark:text-white">Other ways to bring events in</strong>, click <strong class="text-gray-900 dark:text-white">Google Calendar</strong></li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Connect Google Calendar</strong>. Google asks whether Event Schedule may <em>see</em> your calendars, and nothing more: the page says <em>Read-only. We never change your calendar.</em> and that is what is requested</li>
+            <li>Back on the import page, pick one calendar under <strong class="text-gray-900 dark:text-white">Choose a calendar</strong>. Your own calendars come first and the account's <strong class="text-gray-900 dark:text-white">Main calendar</strong> last. Google's holiday, birthday and week-number calendars are not offered</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Show events</strong>, then tick what you want in the <a href="#choosing-events" class="doc-link">list</a> and add it</li>
+        </ol>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">What comes over</strong> - The calendar's events for the next 12 months, up to 100 at a time, read the way a <a href="#link-import" class="doc-link">calendar link</a> is: a repeating event as one repeating event, an all-day entry as all day, times in your schedule's time zone</li>
+            <li><strong class="text-gray-900 dark:text-white">What is left out</strong> - Entries marked private, cancelled entries, events already on your schedule, and things that are not events: birthdays, working locations, out-of-office and focus-time blocks, and entries Google made from your mail</li>
+            <li><strong class="text-gray-900 dark:text-white">Use a different account</strong> - Offered beside the connected address while none of your schedules is synced with Google Calendar, since a sync runs on the same connection</li>
+            <li><strong class="text-gray-900 dark:text-white">A one-time copy</strong> - Events added to that calendar later do not arrive by themselves: choose the calendar again to add them, or turn on a sync under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Integrations</a></li>
+        </ul>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Read-only until you say otherwise</div>
+            <p>A connection made here can read your calendars and cannot write to them. That is enough to import, and to sync <em>from</em> Google Calendar. To send your schedule's events <em>to</em> Google Calendar, open <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations &rarr; Google Calendar</strong> and click <strong class="text-gray-900 dark:text-white">Allow at Google</strong>. On a selfhosted install the Google Calendar source appears once Google API credentials are set, see the <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">selfhost Google Calendar docs</a>.</p>
         </div>
     </section>
 

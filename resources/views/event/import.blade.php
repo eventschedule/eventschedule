@@ -64,6 +64,13 @@
     // An editor on an install with no AI key still gets the box: a calendar link, or a page that
     // publishes its own event data, needs no model.
     $linksOnly = ! $hasAi && ! $isGuestPage;
+    // Google Calendar as a place to bring events in from. The owner's alone: a schedule's Google
+    // connection is its owner's. Absent where Google is not set up, and in the demo.
+    $googleSource = ! $isGuestPage && config('services.google.client_id')
+        && auth()->id() === $role->user_id && ! is_demo_mode();
+    $googleConnectUrl = $googleSource
+        ? route('google.calendar.redirect', ['from' => 'import', 'subdomain' => $role->subdomain])
+        : null;
 @endphp
 @if (! $hasAi && $isGuestPage)
 <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
@@ -110,12 +117,104 @@
                         @if ($isGuestPage)
                         <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_processing_notice') }}</p>
                         @elseif (! $linksOnly)
-                        <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_processing_notice_links') }}</p>
+                        <p v-show="source !== 'google'" class="mb-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_processing_notice_links') }}</p>
+                        @endif
+
+                        @if ($googleSource)
+                        {{-- Google Calendar, in place of the box: connect, choose a calendar, then the
+                             same list any other source ends in. Nothing here is read by an AI service. --}}
+                        <div v-if="source === 'google'" v-cloak>
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-gray-100">
+                                    <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                    {{ __('messages.google_calendar_integration') }}
+                                </h3>
+                                <button type="button" @click="closeGoogle" :disabled="isLoading"
+                                        class="rounded-md px-2 py-1 text-sm font-medium text-gray-600 underline-offset-2 transition-all duration-200 hover:text-gray-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] disabled:opacity-50 dark:text-gray-400 dark:hover:text-gray-100">
+                                    {{ __('messages.import_google_back') }}
+                                </button>
+                            </div>
+
+                            <div v-if="google.error" role="alert" class="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                                <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <p class="text-sm text-amber-800 dark:text-amber-200" v-text="google.error"></p>
+                            </div>
+
+                            {{-- Not connected: what will happen, what it may do, and the button. --}}
+                            <div v-if="!google.connected">
+                                <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('messages.import_google_intro') }}</p>
+                                <p class="mt-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                    {{ __('messages.import_google_read_only') }}
+                                </p>
+                                <div class="mt-4 sm:max-w-xs">
+                                    <x-google-button :href="$googleConnectUrl" class="js-leave-import min-h-[44px]">{{ __('messages.connect_google_calendar') }}</x-google-button>
+                                </div>
+                            </div>
+
+                            <div v-else>
+                                <div v-if="google.loading" role="status" aria-live="polite">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.import_google_loading') }}</p>
+                                    <div class="mt-3 space-y-2" aria-hidden="true">
+                                        @foreach ([0, 1, 2] as $row)
+                                        <div class="h-12 rounded-xl bg-gray-200 motion-safe:animate-pulse dark:bg-gray-700"></div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div v-else-if="google.loaded">
+                                    {{-- Whose calendars these are. No picture: it would be fetched from Google. --}}
+                                    <div v-if="google.account" class="mb-4 flex flex-wrap items-center gap-3">
+                                        <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-200" aria-hidden="true" v-text="google.account.charAt(0)"></span>
+                                        <span dir="ltr" class="min-w-[10rem] flex-1 truncate text-sm font-medium text-gray-900 dark:text-gray-100" v-text="google.account"></span>
+                                        <a v-if="google.canSwitch" href="{{ $googleConnectUrl }}&amp;choose=1"
+                                           class="js-leave-import flex-shrink-0 rounded-md px-2 py-1 text-sm font-medium text-gray-600 underline-offset-2 transition-all duration-200 hover:text-gray-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] dark:text-gray-400 dark:hover:text-gray-100">
+                                            {{ __('messages.import_google_different_account') }}
+                                        </a>
+                                    </div>
+
+                                    <p v-if="!google.calendars.length" class="text-sm text-gray-600 dark:text-gray-300">{{ __('messages.import_google_no_calendars') }}</p>
+
+                                    <fieldset v-else :disabled="isLoading">
+                                        <legend class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.import_google_choose_calendar') }}</legend>
+                                        <div class="space-y-2">
+                                            <label v-for="calendar in google.calendars" :key="calendar.id"
+                                                   :class="['flex min-h-[48px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 transition-all duration-200',
+                                                       google.selected === calendar.id
+                                                           ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-500/10'
+                                                           : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50']">
+                                                <input type="radio" name="google_import_calendar" :value="calendar.id" v-model="google.selected"
+                                                       class="h-4 w-4 border-gray-300 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:border-gray-600 dark:[&:not(:checked)]:bg-gray-900">
+                                                <span class="h-3 w-3 flex-shrink-0 rounded-full" :style="{ backgroundColor: calendar.color || '#9ca3af' }" aria-hidden="true"></span>
+                                                <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900 dark:text-gray-100"><bdi v-text="calendar.name"></bdi></span>
+                                                <span v-if="calendar.primary" class="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">{{ __('messages.import_google_main_calendar') }}</span>
+                                                <span v-else-if="calendar.read_only" class="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">{{ __('messages.import_google_shared_calendar') }}</span>
+                                            </label>
+                                        </div>
+                                    </fieldset>
+
+                                    <div v-if="google.calendars.length" class="mt-4 flex justify-end">
+                                        <x-brand-button type="button" @click="showGoogleEvents" v-bind:disabled="!google.selected || isLoading">
+                                            {{ __('messages.import_google_show_events') }}
+                                        </x-brand-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         @endif
 
                         <!-- Combined textarea and image section -->
                         <div class="mb-1">
-                            <div class="relative">
+                            <div class="relative" v-show="source !== 'google'">
                                 <textarea id="event_details" 
                                     ref="eventDetails"
                                     name="event_details" 
@@ -226,14 +325,14 @@
 
                             @unless ($isGuestPage)
                             {{-- The box holds a link and nothing else: say so, and name where it goes. --}}
-                            <p v-if="isLink && !errorMessage" v-cloak class="mt-2 inline-flex max-w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm text-blue-800 dark:bg-blue-500/10 dark:text-blue-200">
+                            <p v-if="source !== 'google' && isLink && !errorMessage" v-cloak class="mt-2 inline-flex max-w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-sm text-blue-800 dark:bg-blue-500/10 dark:text-blue-200">
                                 <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                                 </svg>
                                 <span dir="ltr" class="truncate font-medium" v-text="linkLabel"></span>
                                 <span class="flex-shrink-0 opacity-80">{{ __('messages.import_link_detected') }}</span>
                             </p>
-                            <p v-else-if="!eventDetails.trim() && !detailsImage && !isLoading && !errorMessage" v-cloak class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            <p v-else-if="source !== 'google' && !eventDetails.trim() && !detailsImage && !isLoading && !errorMessage" v-cloak class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 {{ $linksOnly ? __('messages.import_box_examples_links') : __('messages.import_box_examples') }}
                             </p>
                             @endunless
@@ -383,7 +482,8 @@
         @unless ($isGuestPage)
         {{-- A link that read fine and found nothing new. --}}
         <div v-if="preview && preview.parsed && preview.parsed.length === 0 && preview.meta" v-cloak class="ap-card mb-4 rounded-xl p-6" role="status">
-            <p class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.import_all_on_schedule') }}</p>
+            <p v-if="preview.meta.source === 'google'" class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.import_all_on_schedule_google') }}</p>
+            <p v-else class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.import_all_on_schedule') }}</p>
         </div>
 
         {{-- Two or more events are a list to choose from, whatever they were read from: one row
@@ -1359,6 +1459,19 @@
                 readingHost: '',
                 isSlow: false,
                 slowTimer: null,
+                // Where events are being brought in from: the box, or Google Calendar.
+                source: @json($googleSource && request('source') === 'google' ? 'google' : 'box'),
+                google: {
+                    connected: @json($googleSource && (bool) auth()->user()->google_token),
+                    loading: false,
+                    loaded: false,
+                    account: null,
+                    calendars: [],
+                    canSwitch: false,
+                    selected: null,
+                    // What went wrong at Google on the way back, said beside the button.
+                    error: @json($googleSource ? session('google_import_error') : null, JSON_UNESCAPED_UNICODE),
+                },
                 // The list a preview of two or more becomes.
                 selectedRows: [],
                 expandedRow: null,
@@ -1390,6 +1503,9 @@
             this.$nextTick(() => {
                 document.getElementById('event-import-app').classList.add('loaded');
             });
+            if (this.source === 'google' && this.google.connected) {
+                this.loadGoogleCalendars();
+            }
         },
 
         computed: {
@@ -1533,6 +1649,11 @@
 
                 // The host is isolated (LRI ... PDI): inside a right-to-left sentence it otherwise
                 // takes the count that follows it into its own left-to-right run.
+                if (meta && meta.source === 'google' && meta.host) {
+                    // A calendar's name is the person's own text: isolated, whichever way it runs.
+                    return @json(__('messages.import_found_in_calendar', ['calendar' => '__C__', 'count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__C__', '\u2068' + meta.host + '\u2069').replace('__N__', count);
+                }
+
                 return meta && meta.host
                     ? @json(__('messages.import_found_on_host', ['host' => '__H__', 'count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__H__', '\u2066' + meta.host + '\u2069').replace('__N__', count)
                     : @json(__('messages.import_found_events', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', count);
@@ -1564,7 +1685,9 @@
                 if (meta.text_truncated) {
                     notes.push(@json(__('messages.import_text_truncated'), JSON_UNESCAPED_UNICODE));
                 }
-                notes.push(@json(__('messages.import_one_time_copy'), JSON_UNESCAPED_UNICODE));
+                notes.push(meta.source === 'google'
+                    ? @json(__('messages.import_one_time_copy_google'), JSON_UNESCAPED_UNICODE)
+                    : @json(__('messages.import_one_time_copy'), JSON_UNESCAPED_UNICODE));
 
                 return notes;
             },
@@ -2210,6 +2333,70 @@
                 }
             },
 
+            // Google Calendar in place of the box.
+            openGoogle() {
+                this.errorMessage = null;
+                this.source = 'google';
+                if (this.google.connected && ! this.google.loaded && ! this.google.loading) {
+                    this.loadGoogleCalendars();
+                }
+            },
+
+            closeGoogle() {
+                this.errorMessage = null;
+                this.source = 'box';
+            },
+
+            async loadGoogleCalendars() {
+                this.google.loading = true;
+                this.google.error = null;
+
+                try {
+                    const response = await fetch(@json($googleSource ? route('google.calendar.import_calendars', ['subdomain' => $role->subdomain]) : null), {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        data = null;
+                    }
+
+                    if (! data || (! response.ok && ! data.error)) {
+                        throw new Error(@json(__('messages.google_import_load_failed'), JSON_UNESCAPED_UNICODE));
+                    }
+                    // A connection that is gone or expired puts the button back, with why.
+                    this.google.connected = data.connected !== false;
+                    if (data.error) {
+                        this.google.error = data.error;
+
+                        return;
+                    }
+                    if (! this.google.connected) {
+                        return;
+                    }
+
+                    this.google.account = data.account || null;
+                    this.google.calendars = Array.isArray(data.calendars) ? data.calendars : [];
+                    this.google.canSwitch = !! data.can_switch_account;
+                    // Nothing is chosen for the person: which calendar goes public is theirs to say.
+                    this.google.selected = this.google.calendars.length === 1 ? this.google.calendars[0].id : null;
+                    this.google.loaded = true;
+                } catch (error) {
+                    this.google.error = error.message || @json(__('messages.google_import_load_failed'), JSON_UNESCAPED_UNICODE);
+                } finally {
+                    this.google.loading = false;
+                }
+            },
+
+            showGoogleEvents() {
+                const calendar = this.google.calendars.find(item => item.id === this.google.selected);
+                if (calendar) {
+                    this.google.error = null;
+                    this.fetchPreview(false, calendar);
+                }
+            },
+
             cancelReading() {
                 // The answer, when it comes, is for a request nobody is waiting on any more.
                 this.currentRequestId = null;
@@ -2223,14 +2410,15 @@
                 this.isSlow = false;
             },
 
-            async fetchPreview(wholePage = false) {
-                if (!this.eventDetails.trim() && !this.detailsImage) {
+            // calendar: one of the person's Google calendars, read in place of what is in the box.
+            async fetchPreview(wholePage = false, calendar = null) {
+                if (! calendar && !this.eventDetails.trim() && !this.detailsImage) {
                     this.preview = null;
                     return;
                 }
 
-                const readingLink = this.isLink;
-                this.readingHost = readingLink ? this.linkHost : '';
+                const readingLink = ! calendar && this.isLink;
+                this.readingHost = calendar ? calendar.name : (readingLink ? this.linkHost : '');
                 this.stopSlowTimer();
                 this.slowTimer = setTimeout(() => { this.isSlow = true; }, 5000);
 
@@ -2255,7 +2443,9 @@
                     formData.append('event_details', this.eventDetails);
                     formData.append('website', this.honeypot);
                     @else
-                    if (readingLink) {
+                    if (calendar) {
+                        formData.append('calendar_id', calendar.id);
+                    } else if (readingLink) {
                         formData.append('source_url', this.linkUrl);
                         if (wholePage) {
                             formData.append('source_mode', 'page');
@@ -2264,13 +2454,17 @@
                         formData.append('event_details', this.eventDetails);
                     }
                     @endif
-                    if (this.detailsImage) {
+                    if (this.detailsImage && ! calendar) {
                         formData.append('details_image', this.detailsImage);
                     }
 
-                    const response = await fetch('{{ isset($isGuest) && $isGuest ? route("event.guest_parse", ["subdomain" => $role->subdomain]) : route("event.parse", ["subdomain" => $role->subdomain]) }}', {
+                    const endpoint = calendar
+                        ? @json($googleSource ? route('google.calendar.import_events', ['subdomain' => $role->subdomain]) : null)
+                        : '{{ isset($isGuest) && $isGuest ? route("event.guest_parse", ["subdomain" => $role->subdomain]) : route("event.parse", ["subdomain" => $role->subdomain]) }}';
+                    const response = await fetch(endpoint, {
                         method: 'POST',
                         headers: {
+                            'Accept': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: formData

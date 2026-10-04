@@ -1347,7 +1347,7 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> and choose <strong class="text-gray-900 dark:text-white">Integrations &rarr; Google Calendar</strong>.</li>
             <li>Pick the <strong class="text-gray-900 dark:text-white">calendar</strong> to sync with from the dropdown.</li>
-            <li>Choose a <strong class="text-gray-900 dark:text-white">sync direction</strong>: to Google Calendar, from Google Calendar, bidirectional, or no sync.</li>
+            <li>Choose a <strong class="text-gray-900 dark:text-white">sync direction</strong>: to Google Calendar, from Google Calendar, bidirectional, or no sync. If you connected Google from the <a href="{{ route('marketing.docs.ai_import') }}#google-import" class="doc-link">import page</a>, the connection is read-only and the two choices that send events to Google are off until you click <strong class="text-gray-900 dark:text-white">Allow at Google</strong>.</li>
             <li>If you are pulling events in, set <a href="#delete-sync" class="doc-link">what happens when an event is deleted there</a>.</li>
             <li>Save. The schedule's owner also gets a <strong class="text-gray-900 dark:text-white">Sync events</strong> button for forcing a full re-sync if the two ever drift apart.</li>
         </ol>

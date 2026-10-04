@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\LinkImportException;
+use App\Models\Event;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\GoogleCalendarService;
+use App\Services\LinkImportService;
+use App\Utils\GoogleImportUtils;
+use App\Utils\IcsImportUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class GoogleCalendarController extends Controller
 {
@@ -37,12 +44,40 @@ class GoogleCalendarController extends Controller
         return now()->diffInSeconds($expiresAt);
     }
 
+    /** Where a connection may be started from, other than account settings. */
+    private const RETURN_TARGETS = ['import', 'settings'];
+
     /**
-     * Redirect to Google OAuth
+     * Redirect to Google OAuth.
+     *
+     * From the import page (?from=import&subdomain=...) the request is for read access only, and
+     * the person comes back to that page. From a schedule's settings (?from=settings) it is the
+     * full request, which is how a read-only connection gains the right to send events to
+     * Google. What is remembered for the way back is the schedule's id and one of two words,
+     * never an address: callback() builds the address itself.
      */
-    public function redirect(): RedirectResponse
+    public function redirect(Request $request): RedirectResponse
     {
         $user = Auth::user();
+
+        session()->forget('google_oauth_return');
+        $from = null;
+        if (in_array($request->query('from'), self::RETURN_TARGETS, true)) {
+            $role = Role::subdomain((string) $request->query('subdomain'))->first();
+            // The owner's alone: a schedule's Google connection is its owner's.
+            if ($role && (int) $role->user_id === (int) $user->id) {
+                $from = $request->query('from');
+                session(['google_oauth_return' => ['role_id' => $role->id, 'from' => $from, 'at' => now()->getTimestamp()]]);
+            }
+        }
+
+        if ($from === 'import') {
+            // Another account would take over the token every synced schedule of this person
+            // runs on, so the choice is only offered while nothing is synced.
+            $chooseAccount = $request->boolean('choose') && ! $this->hasSyncedSchedule($user);
+
+            return redirect($this->googleCalendarService->getAuthUrl(true, $chooseAccount));
+        }
 
         // If user has tokens but no refresh token, force re-authorization
         if ($user->google_token && ! $user->google_refresh_token) {
@@ -54,17 +89,69 @@ class GoogleCalendarController extends Controller
         return redirect($authUrl);
     }
 
+    private function hasSyncedSchedule($user): bool
+    {
+        return Role::where('user_id', $user->id)->whereNotNull('sync_direction')->exists();
+    }
+
+    /**
+     * Where the person started, as [address, target]. Read once: the session entry is single use.
+     * Anything stale, unknown or about a schedule that is not theirs lands in account settings,
+     * where a connection has always landed.
+     *
+     * @return array{0: string, 1: ?string}
+     */
+    private function returnTarget(): array
+    {
+        $return = session()->pull('google_oauth_return');
+        $settings = [route('profile.edit').'#section-google-calendar', null];
+
+        if (! is_array($return) || ($return['at'] ?? 0) < now()->subMinutes(30)->getTimestamp()) {
+            return $settings;
+        }
+
+        $role = Role::find($return['role_id'] ?? 0);
+        if (! $role || (int) $role->user_id !== (int) Auth::id()) {
+            return $settings;
+        }
+
+        return match ($return['from'] ?? null) {
+            'import' => [route('event.show_import_ai', ['subdomain' => $role->subdomain, 'source' => 'google']), 'import'],
+            'settings' => [route('role.edit', ['subdomain' => $role->subdomain]).'#section-integrations', 'settings'],
+            default => $settings,
+        };
+    }
+
+    /**
+     * Back to where the connection was started, with what happened. The import page shows a
+     * failure in place, beside the button that failed, so it gets its own flash key and no toast.
+     */
+    private function backWith(array $target, string $key, string $message): RedirectResponse
+    {
+        [$url, $from] = $target;
+
+        if ($from === 'import') {
+            return $key === 'error'
+                ? redirect()->to($url)->with('google_import_error', $message)
+                : redirect()->to($url);
+        }
+
+        return redirect()->to($url)->with($key, $message);
+    }
+
     /**
      * Handle Google OAuth callback
      */
     public function callback(Request $request): RedirectResponse
     {
+        $target = $this->returnTarget();
+
         try {
             $code = $request->get('code');
 
             if (! $code) {
-                return redirect()->to(route('profile.edit').'#section-google-calendar')
-                    ->with('error', 'Google authorization failed. Please try again.');
+                // No code is the person pressing Cancel on Google's screen, or Google refusing.
+                return $this->backWith($target, 'error', __('messages.google_connect_cancelled'));
             }
 
             $expectedState = session()->pull('google_oauth_state');
@@ -73,32 +160,41 @@ class GoogleCalendarController extends Controller
             if (! $expectedState || ! hash_equals($expectedState, $providedState)) {
                 Log::warning('Google OAuth state mismatch', ['user_id' => Auth::id()]);
 
-                return redirect()->to(route('profile.edit').'#section-google-calendar')
-                    ->with('error', 'Google authorization failed. Please try again.');
+                return $this->backWith($target, 'error', __('messages.google_connect_failed'));
             }
 
             $token = $this->googleCalendarService->getAccessToken($code);
 
             if (isset($token['error'])) {
-                Log::error('Google OAuth error', ['error' => $token['error']]);
+                // Google's own description stays in the log: it is written for a developer.
+                Log::error('Google OAuth error', ['error' => $token['error'], 'description' => $token['error_description'] ?? null]);
 
-                return redirect()->to(route('profile.edit').'#section-google-calendar')
-                    ->with('error', 'Google authorization failed: '.$token['error_description']);
+                return $this->backWith($target, 'error', __('messages.google_connect_failed'));
+            }
+
+            // Google lets a person untick a permission on its screen. Without one for the
+            // calendar there is nothing this connection can do, and nothing to replace a
+            // working one with.
+            $granted = isset($token['scope']) ? (string) $token['scope'] : null;
+            if ($granted !== null && ! str_contains($granted, '/auth/calendar')) {
+                return $this->backWith($target, 'error', __('messages.google_connect_no_calendar_access'));
             }
 
             // Store tokens in user record
             $user = Auth::user();
             $user->update([
-                'google_id' => $token['id_token'] ? $this->extractGoogleId($token['id_token']) : null,
+                'google_id' => ! empty($token['id_token']) ? $this->extractGoogleId($token['id_token']) : null,
                 'google_token' => $token['access_token'],
                 'google_refresh_token' => $token['refresh_token'] ?? null,
                 'google_token_expires_at' => now()->addSeconds($token['expires_in']),
             ]);
+            // What was granted, so the app knows whether it may write to the calendar
+            // (User::googleCanWrite()). Not mass-assignable.
+            $user->forceFill(['google_token_scopes' => $granted])->save();
 
             AuditService::log(AuditService::GOOGLE_CALENDAR_CONNECT, $user->id, 'User', $user->id);
 
-            return redirect()->to(route('profile.edit').'#section-google-calendar')
-                ->with('message', 'Google Calendar connected successfully!');
+            return $this->backWith($target, 'message', __('messages.google_connect_done'));
 
         } catch (\Exception $e) {
             Log::error('Google Calendar OAuth callback error', [
@@ -106,8 +202,7 @@ class GoogleCalendarController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            return redirect()->to(route('profile.edit').'#section-google-calendar')
-                ->with('error', 'Failed to connect Google Calendar. Please try again.');
+            return $this->backWith($target, 'error', __('messages.google_connect_failed'));
         }
     }
 
@@ -161,6 +256,109 @@ class GoogleCalendarController extends Controller
     }
 
     /**
+     * The schedule an import is for, when the person asking owns it. A schedule's Google
+     * connection is its owner's, and the demo's shared account must not connect anything.
+     */
+    private function importSchedule(string $subdomain): ?Role
+    {
+        $role = Role::subdomain($subdomain)->first();
+
+        if (! $role || (int) $role->user_id !== (int) Auth::id() || is_demo_mode()) {
+            return null;
+        }
+
+        return $role;
+    }
+
+    /**
+     * The calendars to choose from on the import page, and whose they are. A connection that is
+     * missing or no longer works answers "not connected" so the page offers the button; Google
+     * failing answers with an error, so it is never mistaken for "you have no calendars".
+     */
+    public function importCalendars(Request $request, string $subdomain)
+    {
+        if (! $this->importSchedule($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $user = Auth::user();
+
+        if (! $user->google_token) {
+            return response()->json(['connected' => false]);
+        }
+
+        try {
+            if (! $this->googleCalendarService->ensureValidToken($user)) {
+                return response()->json(['connected' => false, 'error' => __('messages.google_import_reconnect')]);
+            }
+
+            $calendars = $this->googleCalendarService->listImportCalendars();
+
+            return response()->json([
+                'connected' => true,
+                'account' => GoogleImportUtils::accountOf($calendars),
+                'calendars' => GoogleImportUtils::calendarChoices($calendars),
+                'can_switch_account' => ! $this->hasSyncedSchedule($user),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['connected' => true, 'error' => __('messages.google_import_load_failed')], 422);
+        }
+    }
+
+    /**
+     * One calendar's upcoming events, as the same preview a pasted calendar link gives. Read
+     * with the owner's own token, so the calendar is one Google lets them see; nothing is
+     * changed there, and nothing is added here until they choose.
+     */
+    public function importEvents(Request $request, string $subdomain)
+    {
+        $role = $this->importSchedule($subdomain);
+        if (! $role) {
+            return response()->json(['error' => __('messages.not_authorized'), 'reason' => 'forbidden'], 403);
+        }
+
+        $request->validate(['calendar_id' => ['required', 'string', 'max:255']]);
+        $user = Auth::user();
+
+        // The same allowance as reading a link: both are a preview that costs a round trip.
+        $limiter = 'link-import:'.$user->id;
+        if (RateLimiter::tooManyAttempts($limiter, 10)) {
+            return response()->json(['error' => __('messages.link_import_too_many'), 'reason' => 'too_many'], 429);
+        }
+        RateLimiter::hit($limiter, 60);
+
+        if (! $user->google_token || ! $this->googleCalendarService->ensureValidToken($user)) {
+            return response()->json(['error' => __('messages.google_import_reconnect'), 'reason' => 'reconnect'], 422);
+        }
+
+        try {
+            $from = now($role->captureTimezone())->startOfDay();
+            $listed = $this->googleCalendarService->listUpcomingEvents(
+                (string) $request->input('calendar_id'),
+                $from,
+                $from->copy()->addDays(IcsImportUtils::WINDOW_DAYS)
+            );
+
+            $preview = app(LinkImportService::class)->previewCalendar(
+                $role,
+                GoogleImportUtils::toCalendarText($listed['events'], $listed['timezone']),
+                Event::IMPORT_GOOGLE,
+                (string) ($listed['name'] ?? '')
+            );
+
+            return response()->json($preview);
+        } catch (LinkImportException $e) {
+            return response()->json(['error' => $e->getMessage(), 'reason' => $e->reason()], 422);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed'], 422);
+        }
+    }
+
+    /**
      * Get user's Google Calendars
      */
     public function getCalendars(Request $request)
@@ -200,6 +398,12 @@ class GoogleCalendarController extends Controller
 
         if (! $user->google_token) {
             return response()->json(['error' => 'Google Calendar not connected'], 400);
+        }
+
+        // A read-only connection cannot add anything to a Google calendar: say so rather than
+        // answer "synced" for an event the job behind this will not send.
+        if (! $user->googleCanWrite()) {
+            return response()->json(['error' => __('messages.google_needs_edit_access')], 422);
         }
 
         try {
@@ -352,6 +556,11 @@ class GoogleCalendarController extends Controller
             // Validate sync direction
             if (! in_array($syncDirection, ['to', 'from', 'both'])) {
                 return response()->json(['error' => 'Invalid sync direction. Must be "to", "from", or "both"'], 400);
+            }
+
+            // Sending events to Google needs more than a read-only connection holds.
+            if (in_array($syncDirection, ['to', 'both'], true) && ! $user->googleCanWrite()) {
+                return response()->json(['error' => __('messages.google_needs_edit_access')], 422);
             }
 
             // Update the role's sync_direction if provided
@@ -508,6 +717,12 @@ class GoogleCalendarController extends Controller
             $googleCalendarId = $request->input('google_calendar_id');
 
             if ($googleCalendarId) {
+                // Their calendar is written to from here on, which a read-only connection
+                // cannot do. Turning it off (below) stays possible either way.
+                if (! $user->googleCanWrite()) {
+                    return response()->json(['error' => __('messages.google_needs_edit_access')], 422);
+                }
+
                 // Enable sync
                 $roleUser->update(['google_calendar_id' => $googleCalendarId]);
 

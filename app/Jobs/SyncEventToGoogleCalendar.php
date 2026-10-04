@@ -88,6 +88,13 @@ class SyncEventToGoogleCalendar implements ShouldQueue
                 return;
             }
 
+            // A connection made from the import page may read calendars and nothing else.
+            // Writing with it fails at Google on every save, so it is not attempted; the
+            // schedule's settings say how to allow it.
+            if (! $user->googleCanWrite()) {
+                return;
+            }
+
             // Ensure user has valid token before syncing
             if (! $googleCalendarService->ensureValidToken($user)) {
                 Log::error('Failed to refresh Google token for event sync', [

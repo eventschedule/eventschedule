@@ -32,19 +32,34 @@ class GoogleCalendarService
 
     protected $eventRepo;
 
+    /** What the standing sync needs: read the calendars, and write events to one of them. */
+    public const FULL_SCOPES = [
+        Calendar::CALENDAR_EVENTS,
+        Calendar::CALENDAR_READONLY,
+        'openid',
+        'email',
+        'profile',
+    ];
+
+    /**
+     * What bringing events in needs: read, and nothing else. The permission screen then says
+     * "View events on all your calendars" to someone who only wants to copy theirs, instead of
+     * "View and edit".
+     */
+    public const READ_SCOPES = [
+        Calendar::CALENDAR_READONLY,
+        'openid',
+        'email',
+        'profile',
+    ];
+
     public function __construct(EventRepo $eventRepo)
     {
         $this->client = new Client;
         $this->client->setClientId(config('services.google.client_id'));
         $this->client->setClientSecret(config('services.google.client_secret'));
         $this->client->setRedirectUri(config('services.google.redirect'));
-        $this->client->setScopes([
-            Calendar::CALENDAR_EVENTS,
-            Calendar::CALENDAR_READONLY,
-            'openid',
-            'email',
-            'profile',
-        ]);
+        $this->client->setScopes(self::FULL_SCOPES);
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
         $this->client->setPrompt('consent'); // This is the newer way to force consent
@@ -56,8 +71,14 @@ class GoogleCalendarService
     /**
      * Get the authorization URL for Google OAuth
      */
-    public function getAuthUrl(): string
+    public function getAuthUrl(bool $readOnly = false, bool $chooseAccount = false): string
     {
+        // include_granted_scopes is on, so asking for less never takes away what an account
+        // already granted: a schedule that sends events to Google keeps doing so.
+        $this->client->setScopes($readOnly ? self::READ_SCOPES : self::FULL_SCOPES);
+        // Set both ways every time: the client keeps what it was last told, and one instance
+        // can outlive a request.
+        $this->client->setPrompt($chooseAccount ? 'select_account consent' : 'consent');
         $this->client->setState($this->generateAndStoreState());
 
         return $this->client->createAuthUrl();
@@ -238,6 +259,7 @@ class GoogleCalendarService
             'google_token' => null,
             'google_refresh_token' => null,
             'google_token_expires_at' => null,
+            'google_token_scopes' => null,
         ])->save();
     }
 
@@ -466,6 +488,110 @@ class GoogleCalendarService
 
             return [];
         }
+    }
+
+    /**
+     * The calendars an import can read, as Google lists them. Unlike getCalendars() this throws:
+     * "could not load your calendars" and "you have no calendars" are different things to say.
+     *
+     * @return list<array{id: string, name: string, color: ?string, primary: bool, access: string}>
+     */
+    public function listImportCalendars(): array
+    {
+        if (! $this->calendarService) {
+            throw new \RuntimeException('Calendar service not initialized');
+        }
+
+        $calendars = [];
+        $pageToken = null;
+
+        do {
+            $list = $this->calendarService->calendarList->listCalendarList(array_filter([
+                'minAccessRole' => 'reader',
+                'pageToken' => $pageToken,
+            ]));
+
+            foreach ($list->getItems() as $calendar) {
+                $calendars[] = [
+                    'id' => (string) $calendar->getId(),
+                    'name' => (string) ($calendar->getSummaryOverride() ?: $calendar->getSummary()),
+                    'color' => $calendar->getBackgroundColor(),
+                    'primary' => (bool) $calendar->getPrimary(),
+                    'access' => (string) $calendar->getAccessRole(),
+                ];
+            }
+
+            $pageToken = $list->getNextPageToken();
+        } while ($pageToken);
+
+        return $calendars;
+    }
+
+    /**
+     * A calendar's entries between two moments, as plain arrays (GoogleImportUtils reads them).
+     * Repeating entries come as their rule, not as one row per date: the import turns a rule
+     * into one repeating event.
+     *
+     * @return array{events: list<array>, timezone: ?string, name: ?string}
+     */
+    public function listUpcomingEvents(string $calendarId, \DateTimeInterface $from, \DateTimeInterface $to, int $limit = 1000): array
+    {
+        if (! $this->calendarService) {
+            throw new \RuntimeException('Calendar service not initialized');
+        }
+
+        $events = [];
+        $timezone = null;
+        $name = null;
+        $pageToken = null;
+
+        do {
+            $options = [
+                'timeMin' => $from->format(\DateTimeInterface::RFC3339),
+                'timeMax' => $to->format(\DateTimeInterface::RFC3339),
+                'singleEvents' => false,
+                'showDeleted' => false,
+                'maxResults' => 250,
+            ];
+            if ($pageToken) {
+                $options['pageToken'] = $pageToken;
+            }
+
+            $page = $this->calendarService->events->listEvents($calendarId, $options);
+            $timezone = $page->getTimeZone() ?: $timezone;
+            $name = $page->getSummary() ?: $name;
+
+            foreach ($page->getItems() as $event) {
+                $events[] = [
+                    'id' => $event->getId(),
+                    'status' => $event->getStatus(),
+                    'summary' => $event->getSummary(),
+                    'description' => $event->getDescription(),
+                    'location' => $event->getLocation(),
+                    'visibility' => $event->getVisibility(),
+                    'eventType' => $event->getEventType(),
+                    'start' => self::importMoment($event->getStart()),
+                    'end' => self::importMoment($event->getEnd()),
+                    'recurrence' => $event->getRecurrence() ?: [],
+                    'recurringEventId' => $event->getRecurringEventId(),
+                    'originalStartTime' => self::importMoment($event->getOriginalStartTime()),
+                ];
+            }
+
+            $pageToken = $page->getNextPageToken();
+        } while ($pageToken && count($events) < $limit);
+
+        return ['events' => $events, 'timezone' => $timezone, 'name' => $name];
+    }
+
+    /** @return array{date: ?string, dateTime: ?string, timeZone: ?string}|null */
+    private static function importMoment($moment): ?array
+    {
+        if (! $moment) {
+            return null;
+        }
+
+        return ['date' => $moment->getDate(), 'dateTime' => $moment->getDateTime(), 'timeZone' => $moment->getTimeZone()];
     }
 
     /**

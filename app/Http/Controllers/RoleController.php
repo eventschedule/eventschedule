@@ -4687,6 +4687,8 @@ class RoleController extends Controller
 
         $role = new Role;
         $role->fill($request->all());
+        // sync_direction is fillable: hold it to what the person's Google connection may do.
+        $role->sync_direction = self::googleDirectionFor($request->user(), $request->input('sync_direction'));
 
         // The "offer a second language" toggle maps onto the target column: when it is off (or the
         // submitted target is blank), the target equals the authored language = "no translation".
@@ -4783,7 +4785,7 @@ class RoleController extends Controller
         }
 
         // Handle sync direction and calendar setup for new role
-        $syncDirection = $request->input('sync_direction');
+        $syncDirection = self::googleDirectionFor($request->user(), $request->input('sync_direction'));
         $calendarId = $request->input('google_calendar_id');
         if ($syncDirection || $calendarId) {
             $this->handleSyncAndCalendarChanges($role, $syncDirection, null, $calendarId, null);
@@ -5321,7 +5323,9 @@ class RoleController extends Controller
         $googleSubmitted = $request->has('google_integration_submitted')
             && (int) auth()->id() === (int) $role->user_id;
         $oldSyncDirection = $role->sync_direction;
-        $newSyncDirection = $googleSubmitted ? $request->input('sync_direction') : $oldSyncDirection;
+        $newSyncDirection = $googleSubmitted
+            ? self::googleDirectionFor($request->user(), $request->input('sync_direction'))
+            : $oldSyncDirection;
         $ownerPivot = RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first();
         $oldCalendarId = $ownerPivot?->google_calendar_id;
         // An empty select is its placeholder or a list that had not loaded yet (the options
@@ -5346,10 +5350,9 @@ class RoleController extends Controller
 
         $role->fill($request->all());
 
-        // sync_direction is fillable, so undo it when the Google controls were not submitted.
-        if (! $googleSubmitted) {
-            $role->sync_direction = $oldSyncDirection;
-        }
+        // sync_direction is fillable, so undo it when the Google controls were not submitted,
+        // and hold it to what the connection may do when they were.
+        $role->sync_direction = $googleSubmitted ? $newSyncDirection : $oldSyncDirection;
 
         // The "offer a second language" toggle maps onto the target column: when it is off (or the
         // submitted target is blank), the target equals the authored language = "no translation".
@@ -8486,6 +8489,25 @@ class RoleController extends Controller
         );
 
         return redirect()->back()->with('message', __('messages.video_removed'));
+    }
+
+    /**
+     * The sync direction a Google connection can actually carry. One made from the import page
+     * may only read, so "to Google" is dropped and "both ways" becomes "from Google". The
+     * settings page disables those two choices and says how to allow them; this is what holds
+     * when a request arrives anyway.
+     */
+    private static function googleDirectionFor($user, $direction): ?string
+    {
+        if (! in_array($direction, ['to', 'from', 'both'], true)) {
+            return null;
+        }
+
+        if ($direction !== 'from' && ! $user?->googleCanWrite()) {
+            return $direction === 'both' ? 'from' : null;
+        }
+
+        return $direction;
     }
 
     /**

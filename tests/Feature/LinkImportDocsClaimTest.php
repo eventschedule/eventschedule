@@ -124,7 +124,7 @@ class LinkImportDocsClaimTest extends TestCase
 
         // The guide: where it is, what it reads without AI, and the same limits.
         $guide = $this->source(self::GUIDE);
-        foreach (['id="link-import"', 'id="choosing-events"', 'id="undo-import"'] as $anchor) {
+        foreach (['id="link-import"', 'id="google-import"', 'id="choosing-events"', 'id="undo-import"'] as $anchor) {
             $this->assertStringContainsString($anchor, $guide);
         }
         foreach (['A link is a one-time copy', 'Facebook and Instagram', 'not on the public request form', 'involves no AI', 'uses none of the allowance', 'someone already holds a ticket or a booking for is kept'] as $limit) {
@@ -148,6 +148,10 @@ class LinkImportDocsClaimTest extends TestCase
             'import_row_incomplete', 'import_already_listed', 'import_start_over', 'import_all_day',
             'eventbrite_select_all', 'add_image', 'get_api_key',
             'import_panel_undo', 'import_panel_embed', 'import_panel_view_schedule', 'import_panel_import_more',
+            // Google Calendar as a source.
+            'google_calendar_integration', 'connect_google_calendar', 'import_google_read_only',
+            'import_google_choose_calendar', 'import_google_main_calendar', 'import_google_show_events',
+            'import_google_different_account', 'google_allow_edit_access',
         ];
         foreach ($labels as $key) {
             $label = trans('messages.'.$key, [], 'en');

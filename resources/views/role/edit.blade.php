@@ -5160,13 +5160,33 @@
                                 </div>
 
                                 <!-- Sync Direction Selection -->
+                                @php
+                                    // A connection made from the import page can read the calendar and
+                                    // nothing else, so the two choices that write to it are off until
+                                    // the person allows it at Google.
+                                    $googleReadOnly = ! auth()->user()->googleCanWrite();
+                                @endphp
                                 <div>
                                     <x-input-label :value="__('messages.sync_direction')" />
+                                    @if ($googleReadOnly)
+                                    <div class="mt-2 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                                        <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <div class="text-sm text-amber-800 dark:text-amber-200">
+                                            <p>{{ __('messages.google_needs_edit_access') }}</p>
+                                            <p class="mt-1">
+                                                <x-link :href="route('google.calendar.redirect', ['from' => 'settings', 'subdomain' => $role->subdomain])">{{ __('messages.google_allow_edit_access') }}</x-link>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    @endif
                                     <div class="mt-2 space-y-2">
-                                        <label class="flex items-center">
+                                        <label class="flex items-center {{ $googleReadOnly ? 'opacity-50' : '' }}">
                                             <input type="radio"
                                                    name="sync_direction"
                                                    value="to"
+                                                   @disabled($googleReadOnly)
                                                    {{ $role->sync_direction === 'to' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
@@ -5185,10 +5205,11 @@
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_google_calendar_description') }}</div>
                                             </div>
                                         </label>
-                                        <label class="flex items-center">
+                                        <label class="flex items-center {{ $googleReadOnly ? 'opacity-50' : '' }}">
                                             <input type="radio"
                                                    name="sync_direction"
                                                    value="both"
+                                                   @disabled($googleReadOnly)
                                                    {{ $role->sync_direction === 'both' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
                                             <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">

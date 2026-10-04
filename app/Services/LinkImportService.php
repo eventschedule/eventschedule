@@ -108,6 +108,24 @@ class LinkImportService
         return $this->readWithAi($role, $fetched, $host, $timezone);
     }
 
+    /**
+     * The same preview for a calendar the person connected rather than linked. Its entries
+     * arrive as calendar text (GoogleImportUtils) and are read, matched against the schedule,
+     * capped and labelled exactly as a feed is.
+     */
+    public function previewCalendar(Role $role, string $calendarText, string $source, string $name): array
+    {
+        $timezone = $role->captureTimezone();
+
+        try {
+            $read = IcsImportUtils::read($calendarText, $timezone, ! $role->isVenue());
+        } catch (\InvalidArgumentException $e) {
+            throw $this->refusal('failed');
+        }
+
+        return $this->finish($role, $read, $source, $name, $timezone, [], 'calendar_empty');
+    }
+
     /** Decide which import made a row, from the token preview() handed the page. */
     public static function sourceFromToken(?string $token, Role $role, int $userId): string
     {
@@ -313,12 +331,12 @@ class LinkImportService
      * named, what the schedule already has dropped, the count capped, pictures fetched, and the
      * same matching a parsed flyer gets.
      */
-    private function finish(Role $role, array $read, string $source, string $host, string $timezone, array $extra = []): array
+    private function finish(Role $role, array $read, string $source, string $host, string $timezone, array $extra = [], string $emptyReason = 'no_events'): array
     {
         $rows = $read['rows'];
 
         if (! $rows) {
-            throw $this->refusal('no_events');
+            throw $this->refusal($emptyReason);
         }
 
         foreach ($rows as $index => $row) {
