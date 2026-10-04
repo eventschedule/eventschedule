@@ -83,6 +83,11 @@ return [
     'event_parse' => [
         'base' => "Act as a precise data extraction API. Parse the event details from this :source message into the exact fields below.\n",
         'footer' => "\nThe date today is :today.\nThe event date is either :this_month or :next_month.\nIf no specific time is mentioned, default to 20:00 (8pm).\nIf multiple distinct performers are listed, separate them into multiple events.\nCRITICAL: Return ONLY raw JSON. Do not use markdown blocks. Your entire response must start exactly with { or [ and end exactly with } or ].",
+        // For a source that can hold a whole season (a tour poster, a programme): no "this month
+        // or next" hint, which pulls every date into the next few weeks.
+        'footer_open' => "\nThe date today is :today.\nEvents are upcoming: when a date has no year, or names only a weekday, use the nearest date on or after today that fits.\nIf no specific time is mentioned, default to 20:00 (8pm).\nIf multiple distinct performers are listed, separate them into multiple events.\nCRITICAL: Return ONLY raw JSON. Do not use markdown blocks. Your entire response must start exactly with { or [ and end exactly with } or ].",
+        // For the text of a web page, which lists events among navigation and everything else.
+        'footer_page' => "\nThe date today is :today.\nThis is the text of a web page. Return one object for each upcoming event it lists, in the order they appear, and ignore navigation, past events and anything that is not an event. If it lists no events, return [].\nEvents are upcoming: when a date has no year, or names only a weekday, use the nearest date on or after today that fits.\nIf no specific time is mentioned, default to 20:00 (8pm).\nCRITICAL: Return ONLY raw JSON. Do not use markdown blocks. Your entire response must start exactly with { or [ and end exactly with } or ].",
     ],
 
     'event_parts' => [

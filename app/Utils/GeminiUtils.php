@@ -325,7 +325,13 @@ class GeminiUtils
         return self::sendRequest($prompt, null, $purpose, $options);
     }
 
-    public static function parseEvent($role, $details, $file = null)
+    /**
+     * Options: 'prompt_footer' (a key of ai_prompts.event_parse, default 'footer'), 'timezone'
+     * (the zone the parsed times are in, for the already-on-the-schedule hints),
+     * 'default_registration_url' (used when the answer is a single event that names no link) and
+     * 'drop_empty_rows' (discard rows with no event name instead of returning a blank event).
+     */
+    public static function parseEvent($role, $details, $file = null, array $options = [])
     {
         $imageData = null;
         $filename = null;
@@ -425,7 +431,7 @@ class GeminiUtils
         $prompt .= str_replace(
             [':today', ':this_month', ':next_month'],
             [$now->format('M d, Y'), $thisMonth, $nextMonth],
-            $config['footer']
+            $config[$options['prompt_footer'] ?? 'footer'] ?? $config['footer']
         );
 
         // Model is resolved from config (services.google.gemini_content_model)
@@ -438,9 +444,29 @@ class GeminiUtils
 
         UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_EVENT, $role->id ?? 0);
 
+        // A page read is told to answer [] when it lists no events, which reaches here as one
+        // empty row. The request was made and is counted above; there is just nothing to show.
+        if (! empty($options['drop_empty_rows'])) {
+            $data = array_values(array_filter(
+                $data,
+                fn ($row) => is_array($row) && trim((string) ($row['event_name'] ?? '')) !== ''
+            ));
+
+            if (empty($data)) {
+                return [];
+            }
+        }
+
+        // A page that describes one event is that event's own link.
+        if (! empty($options['default_registration_url']) && count($data) === 1
+            && is_array($data[0]) && empty($data[0]['registration_url'])) {
+            $data[0]['registration_url'] = $options['default_registration_url'];
+        }
+
         return self::enrichParsedEvents($role, $data, [
             'schema' => $schema,
             'uploaded_image' => $imageData ? ['path' => $filename] : null,
+            'timezone' => $options['timezone'] ?? null,
         ]);
     }
 
@@ -535,8 +561,15 @@ class GeminiUtils
      * category and custom-field matching, the same-time merge, clamps, the registration link,
      * venue and talent matching, the date window and the already-on-the-schedule hints.
      *
-     * Options: 'schema' (parseSchema()'s result, to save recomputing it) and 'uploaded_image'
-     * (['path' => ...] when a flyer came with the request).
+     * Options:
+     *  - 'source': 'ai' (the default) for rows the model wrote. Anything else ('ics', 'page',
+     *    'google') marks rows read from a feed, a page's event data or a calendar. Those are
+     *    already exact, so they skip the model's clean-up: no "**" stripping or ALL CAPS
+     *    recasing, no same-time merge, no page fetch per link, and no date window (the reader
+     *    has windowed them in the schedule's own zone).
+     *  - 'timezone': the zone the rows' times are in. Defaults to the owner's, as it always has.
+     *  - 'schema': parseSchema()'s result, to save recomputing it.
+     *  - 'uploaded_image': ['path' => ...] when a flyer came with the request.
      */
     public static function enrichParsedEvents($role, array $data, array $options = []): array
     {
@@ -546,6 +579,7 @@ class GeminiUtils
         $customFieldKeys = $schema['custom_field_keys'];
         $eventCustomFields = $schema['event_custom_fields'];
         $uploadedImage = $options['uploaded_image'] ?? null;
+        $fromModel = ($options['source'] ?? 'ai') === 'ai';
 
         foreach ($data as $key => $item) {
 
@@ -553,11 +587,12 @@ class GeminiUtils
                 // Ensure all fields exist
                 if (! isset($item[$field])) {
                     $data[$key][$field] = '';
-                } elseif (is_string($item[$field])) {
+                } elseif ($fromModel && is_string($item[$field])) {
                     $data[$key][$field] = trim($item[$field], '*');
                 }
 
-                if (is_string($data[$key][$field]) && $data[$key][$field] == strtoupper($data[$key][$field])) {
+                // The model shouts; a feed that says "CA" or "DJ" means it.
+                if ($fromModel && is_string($data[$key][$field]) && $data[$key][$field] == strtoupper($data[$key][$field])) {
                     $data[$key][$field] = $item[$field] = ucwords(strtolower($data[$key][$field]));
                 }
             }
@@ -790,8 +825,10 @@ class GeminiUtils
 
         // Combine events with same time and address
         $combinedData = [];
-        foreach ($data as $event) {
-            $key = $event['event_date_time'].'|'.$event['event_address'];
+        foreach ($data as $index => $event) {
+            // The model is told to split a bill into one row per performer, so its rows at one
+            // time and place are one event. Two entries in a feed at the same time are two events.
+            $key = $fromModel ? $event['event_date_time'].'|'.$event['event_address'] : 'row-'.$index;
 
             if (isset($combinedData[$key])) {
                 // Add performer to existing event if not already present
@@ -853,9 +890,14 @@ class GeminiUtils
                 // campaign attribution and stripping it would lose them the source of the sale.
                 $item['registration_url'] = UrlUtils::unwrapRedirect($item['registration_url']);
 
-                $links = UrlUtils::getUrlMetadata($item['registration_url']);
-                $data[$key]['registration_url'] = $links['redirect_url'];
-                $data[$key]['social_image'] = $links['image_path'];
+                if ($fromModel) {
+                    $links = UrlUtils::getUrlMetadata($item['registration_url']);
+                    $data[$key]['registration_url'] = $links['redirect_url'];
+                    $data[$key]['social_image'] = $links['image_path'];
+                } else {
+                    // One page fetch per row suits a flyer, not a hundred-event feed.
+                    $data[$key]['registration_url'] = $item['registration_url'];
+                }
             }
         }
 
@@ -1046,17 +1088,27 @@ class GeminiUtils
 
                     continue;
                 }
-                if ($eventDate->lt(now()->subDays(3)) || $eventDate->diffInMonths(now()) > 2) {
+                if ($fromModel && ($eventDate->lt(now()->subDays(3)) || $eventDate->diffInMonths(now()) > 2)) {
                     $data[$key]['event_date_time'] = null;
                 }
             }
 
             // Check if the event is already imported
             $eventUrl = null;
-            $event = Event::where('registration_url', $item['registration_url'])
-                ->upcomingOrOngoing()
-                ->where('creator_role_id', $role->id)
-                ->first();
+            $event = null;
+            if ($fromModel) {
+                $event = Event::where('registration_url', $item['registration_url'])
+                    ->upcomingOrOngoing()
+                    ->where('creator_role_id', $role->id)
+                    ->first();
+            } elseif (! empty($item['registration_url']) && ! empty($item['event_date_time'])) {
+                // Every date of a series in a feed carries the same link, so the link alone
+                // would point each of them at the first.
+                $event = Event::where('registration_url', $item['registration_url'])
+                    ->where('starts_at', Carbon::parse($item['event_date_time'], $options['timezone'] ?? $role->user->timezone)->setTimezone('UTC'))
+                    ->where('creator_role_id', $role->id)
+                    ->first();
+            }
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();
                 $data[$key]['event_id'] = UrlUtils::encodeId($event->id);
@@ -1065,7 +1117,7 @@ class GeminiUtils
 
             // Check for similar events at the same time
             if (! $event && ! empty($item['event_date_time'])) {
-                $timezone = $role->user->timezone;
+                $timezone = $options['timezone'] ?? $role->user->timezone;
                 $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
                 $query = Event::where('starts_at', $eventDate)
                     ->upcomingOrOngoing()
