@@ -250,6 +250,17 @@ class GrowthDataEndpointTest extends TestCase
         $ticket = $this->createTicket($event, ['price' => 20]);
         $this->createSale($event, $role, ['status' => 'paid', 'payment_amount' => 20, 'email' => 'buyer@gmail.com', 'name' => 'Pat Buyer'], $ticket, 1);
 
+        // Organizer-typed registration links: counted by platform (schema 10), never by host. One
+        // on a host nobody else uses, one on a platform whose path names the show, and one under
+        // the parent of the schedule's own custom domain.
+        foreach ([
+            'https://boxoffice.marinas-loft-tickets.fr/buy?code=PRESALE-7Q2',
+            'https://www.eventbrite.co.uk/e/marinas-secret-show-991',
+            'https://www.marinadelacroix.fr/box-office',
+        ] as $link) {
+            $this->createEvent($role, ['creator_role_id' => $role->id, 'ticket_price' => 15, 'registration_url' => $link]);
+        }
+
         // A tenant event slug one person landed on. (Three landing on it would be exported by
         // design: a page three signups share describes no one of them.)
         $this->signup(['landing_page' => 'summa-30th-anniversary-party']);
@@ -279,6 +290,13 @@ class GrowthDataEndpointTest extends TestCase
 
         $body = $this->pull()->assertOk()->getContent();
 
+        // The links were read: without this the checks below would hold just as well for a
+        // fixture the export had stopped counting.
+        $schedules = json_decode($body, true)['schedules'];
+        $sid = 's:'.substr(hash_hmac('sha256', (string) $role->id, (string) config('app.key')), 0, 12);
+        $row = collect($schedules['rows'])->firstWhere(array_search('sid', $schedules['columns'], true), $sid);
+        $this->assertSame(3, $row[array_search('external_tickets_90d', $schedules['columns'], true)]['events'] ?? null);
+
         foreach ([
             'Marina', 'Delacroix', 'marina.delacroix@gmail.com', 'boxoffice@gmail.com', 'buyer@gmail.com',
             'Pat Buyer', 'leak@gmail.com', '19 Rue Lepic', 'cus_TESTCUSTOMER', $role->subdomain,
@@ -286,6 +304,7 @@ class GrowthDataEndpointTest extends TestCase
             'k3Jd9sLq2mZx8vB1nC4tY6wR0pE5hG7a', 'Summa', 'summa-30th',
             'hiddeninstall', 'Hidden Install', 'Gideon', 'Rhea', 'GIFTCODE1234', 'Wanda', 'Rory',
             'marinas-hidden-loft', 'hidden-loft',
+            'marinas-loft-tickets', 'PRESALE-7Q2', 'secret-show',
         ] as $secret) {
             $this->assertStringNotContainsStringIgnoringCase($secret, $body, "the payload leaked: {$secret}");
         }

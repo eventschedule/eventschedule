@@ -45,6 +45,7 @@ class GrowthSummary
             // which would print as "60" beside "62.50".
             ['label' => 'MRR', 'value' => isset($money['mrr']) ? (float) $money['mrr'] : null],
             ['label' => 'Schedules selling (paid ticket in 90 days)', 'value' => self::sellers($data)],
+            ['label' => 'Owners linking events to a self-serve ticketing platform (any / 2+ events)', 'value' => self::linkingToSelfServe($data)],
             ['label' => 'Admin-granted plans', 'value' => $money['by_plan_source']['admin'] ?? null],
             ['label' => 'Selling trials started / converted', 'value' => isset($money['ticket_trials'])
                 ? ($money['ticket_trials']['started'] ?? 0).' / '.($money['ticket_trials']['converted'] ?? 0)
@@ -167,6 +168,49 @@ class GrowthSummary
         }
 
         return count(array_filter($data['schedules']['rows'] ?? [], fn ($row) => ($row[$i] ?? 0) > 0));
+    }
+
+    /**
+     * Owners with an event that links to a self-serve ticketing platform
+     * (external_tickets_90d.self_serve, schema 10+), as "any / with two or more such events".
+     *
+     * A ceiling on the sellers who could sell here instead, not a count of them: the link says
+     * where tickets are sold, not who sells them. Owners rather than schedules, because one person
+     * can hold a dozen. And not the owners whose account was made by submitting an event to
+     * someone else's schedule (signups.signup_intent "request"): that flow mints them a schedule
+     * they never chose to list with. Null on a pull without the column, so the row reads as not
+     * measured rather than as zero.
+     */
+    private static function linkingToSelfServe(array $data): ?string
+    {
+        $columns = $data['schedules']['columns'] ?? [];
+        $i = array_search('external_tickets_90d', $columns, true);
+        $uid = array_search('uid', $columns, true);
+        if ($i === false || $uid === false) {
+            return null;
+        }
+
+        $signups = $data['signups']['columns'] ?? [];
+        $signupUid = array_search('uid', $signups, true);
+        $intent = array_search('signup_intent', $signups, true);
+        $submitters = [];
+        if ($signupUid !== false && $intent !== false) {
+            foreach ($data['signups']['rows'] ?? [] as $row) {
+                if (($row[$intent] ?? null) === 'request') {
+                    $submitters[$row[$signupUid]] = true;
+                }
+            }
+        }
+
+        $events = [];
+        foreach ($data['schedules']['rows'] ?? [] as $row) {
+            $count = $row[$i]['self_serve'] ?? 0;
+            if ($count > 0 && ! isset($submitters[$row[$uid]])) {
+                $events[$row[$uid]] = ($events[$row[$uid]] ?? 0) + $count;
+            }
+        }
+
+        return count($events).' / '.count(array_filter($events, fn ($n) => $n >= 2));
     }
 
     /** @return array<string, float> */

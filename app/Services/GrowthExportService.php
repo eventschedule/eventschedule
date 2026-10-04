@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Utils\HeroExperiment;
 use App\Utils\RealtimeTracker;
 use App\Utils\ReleaseHistory;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 9;
+    public const SCHEMA_VERSION = 10;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -518,6 +519,9 @@ class GrowthExportService
 
     private ?\Illuminate\Support\Collection $subscriptionsByRole = null;
 
+    /** Per-build memo of customDomainHosts(): attribution and the ticket links both read it. */
+    private ?array $customDomainHosts = null;
+
     /**
      * The whole payload. Aggregates are derived from the two row tables rather than
      * queried separately, so a section can never disagree with the rows beneath it.
@@ -531,6 +535,7 @@ class GrowthExportService
     {
         $this->billingIds = null;
         $this->subscriptionsByRole = null;
+        $this->customDomainHosts = null;
         $months = $this->recentMonths();
         $signups = $this->signupRows();
         $schedules = $this->scheduleRows($months);
@@ -636,6 +641,23 @@ class GrowthExportService
                 .'schedule; reach is weekly guest traffic; usage is feature use by operation. Activity '
                 .'(signups.logins_90d, event_edits_90d) comes from audit rows: a lower bound, because a '
                 .'remember-me login writes none. country is k-anonymised like attribution, at 5.',
+            'Since schema_version 10 (additive: nothing earlier changed meaning): schedules.external_tickets_90d '
+                .'counts published events a schedule created in the last 90 days that carry a registration '
+                .'link instead of our tickets or RSVP. self_serve is the ones linking to a platform an '
+                .'organizer sells through alone, box_office the ones linking to a system venues contract '
+                .'with. Read self_serve as a CEILING on sellers who could sell here: the link says where '
+                .'tickets are sold, not who sells them, and one event is enough to count. priced is only an '
+                .'admission price. Left out: anonymous guest submissions and schedules that import events '
+                .'on a timer. Platforms come from a fixed list, never the host, and a name fewer than 5 '
+                .'schedules carry is folded. claims.claimable_with_contact is the placeholders the claim '
+                .'page and invitations can still reach.',
+            'From the release committed on 2026-10-04 the first-touch cookie is written only with marketing '
+                .'consent, and no answer counts as no. It is the only carrier off an edge-cached marketing '
+                .'page, so a visitor who did not allow it and first touched one signs up with landing_path '
+                .'/sign_up or /login and no utm or referrer; hero_variant has no other carrier at all. A '
+                .'first touch on a page that has a session (a schedule\'s page, /sign_up reached from '
+                .'off-site) is still recorded. Compare marketing-page channels and landing pages as shares '
+                .'of attributed signups, never as counts across that release.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.
@@ -1173,11 +1195,7 @@ class GrowthExportService
     private function customDomainRoots(): array
     {
         $roots = [];
-        foreach (DB::table('roles')->whereNotNull('custom_domain')->where('custom_domain', '!=', '')->pluck('custom_domain') as $url) {
-            $host = $this->hostOf((string) $url);
-            if ($host === null) {
-                continue;
-            }
+        foreach (array_keys($this->customDomainHosts()) as $host) {
             $roots[$host] = true;
 
             $labels = explode('.', $host);
@@ -1193,6 +1211,28 @@ class GrowthExportService
     }
 
     /**
+     * The host of every schedule's custom domain, exactly as configured.
+     *
+     * @return array<string, true>
+     */
+    private function customDomainHosts(): array
+    {
+        if ($this->customDomainHosts !== null) {
+            return $this->customDomainHosts;
+        }
+
+        $hosts = [];
+        foreach (DB::table('roles')->whereNotNull('custom_domain')->where('custom_domain', '!=', '')->pluck('custom_domain') as $url) {
+            $host = $this->hostOf((string) $url);
+            if ($host !== null) {
+                $hosts[$host] = true;
+            }
+        }
+
+        return $this->customDomainHosts = $hosts;
+    }
+
+    /**
      * Strip a referrer down to its host. The raw column can carry query strings holding
      * tokens or email addresses, so the full value must never reach the export.
      */
@@ -1204,6 +1244,195 @@ class GrowthExportService
         $host = parse_url($url, PHP_URL_HOST);
 
         return $host ? preg_replace('/^www\./', '', strtolower($host)) : null;
+    }
+
+    /**
+     * The platforms an organizer's registration link can point at: [pattern, name, kind].
+     *
+     * The link is organizer-typed, so its host never reaches the export. It is reduced to one of
+     * these names, and everything else (their own site, a venue's box office page) reads "other".
+     *
+     * The kind is what the name is for. `self_serve` is a platform an organizer signs up to and
+     * sells through alone, so a link there may be this schedule's own sale - the only kind worth
+     * asking to sell here instead. `box_office` is a system a venue or promoter contracts with: a
+     * link there is nearly always somebody else's sale (a band's gig at a club), so those share
+     * one bucket with no brand names. Null sells nothing: a Facebook event, a sign-up form.
+     *
+     * A brand that runs a domain per country is matched as brand.tld or brand.co(m).tld, the shape
+     * REFERRER_PLATFORMS uses for Google - never brand.anything, which read eventbrite.myvenue.com
+     * as Eventbrite.
+     */
+    private const TICKET_PLATFORMS = [
+        ['/(^|\.)eventbrite\.(com?\.)?[a-z]{2,3}$|(^|\.)evbrite\.com$/', 'eventbrite', 'self_serve'],
+        ['/(^|\.)(tickettailor\.com|buytickets\.at)$/', 'ticket_tailor', 'self_serve'],
+        ['/(^|\.)(lu\.ma|luma\.com)$/', 'luma', 'self_serve'],
+        ['/(^|\.)humanitix\.com$/', 'humanitix', 'self_serve'],
+        ['/^buy\.stripe\.com$|(^|\.)(paypal\.com|paypal\.me|square\.link|square\.site|venmo\.com|cash\.app)$/', 'payment_link', 'self_serve'],
+        ['/(^|\.)(ticketsource|billetto)\.(com?\.)?[a-z]{2,3}$/', 'other_ticketing', 'self_serve'],
+        ['/(^|\.)(skiddle\.com|fatsoma\.com|universe\.com|ticketleap\.(com|events)|showclix\.com|brownpapertickets\.com|simpletix\.com|ticketspice\.com)$/', 'other_ticketing', 'self_serve'],
+        ['/(^|\.)(zeffy\.com|trybooking\.com|weezevent\.com|pretix\.eu|ti\.to|posh\.vip|shotgun\.live|ra\.co|givebutter\.com|showpass\.com|eventzilla\.net|ticketbud\.com)$/', 'other_ticketing', 'self_serve'],
+        ['/(^|\.)(eventer\.co\.il|tickchak\.co\.il|go-out\.co)$/', 'other_ticketing', 'self_serve'],
+        ['/(^|\.)(ticketmaster|livenation|ticketweb|eventim|seetickets)\.(com?\.)?[a-z]{2,3}$/', 'box_office', 'box_office'],
+        ['/(^|\.)(dice\.fm|axs\.com|etix\.com|tixr\.com|smarticket\.co\.il|leaan\.co\.il)$/', 'box_office', 'box_office'],
+        ['/(^|\.)meetup\.com$/', 'meetup', null],
+        ['/(^|\.)(facebook\.com|fb\.me|fb\.com)$/', 'facebook', null],
+        ['/^forms\.gle$|^docs\.google\.com$|(^|\.)(typeform\.com|jotform\.com|tally\.so)$/', 'form', null],
+    ];
+
+    /** Names that are already a bucket, so suppressRarePlatforms() has nothing to fold them into. */
+    private const GENERIC_PLATFORMS = ['other', 'other_ticketing', 'box_office', 'event_schedule'];
+
+    /**
+     * Events a schedule lists with a link to somewhere else instead of our tickets or RSVP:
+     * published, created by it in the window, with tickets and RSVP both off - the only state in
+     * which the editor shows the registration link and the price beside it.
+     *
+     * Most live schedules have no ticket type, and nothing said whether they have nothing to sell
+     * or sell it on another platform. `self_serve` is the nearest the export gets: events whose
+     * link is a platform an organizer sells through alone. It is a CEILING on sellers who could
+     * sell here instead, never a count of them - the link says where tickets are sold, not who
+     * sells them, and a talent's link is often its venue's or promoter's page. `priced` is no
+     * signal of it at all: it is the admission price, set just as readily beside a Facebook link
+     * or a link to the venue's own page here.
+     *
+     * Whose choice the link was decides what is counted:
+     *  - Keyed on events.creator_role_id alone, without the listed-schedule fallback the ticket
+     *    columns use: a talent listed on a venue's event did not choose that venue's ticketing.
+     *  - An ANONYMOUS guest submission is left out (is_guest_submission): its link is the
+     *    submitter's and it is filed under the schedule that received it. A signed-in submitter's
+     *    event carries no such flag - it saves onto a talent schedule minted for them - so those
+     *    owners are told apart by signups.signup_intent "request", which GrowthSummary drops.
+     *  - A schedule that imports events on a timer is left out, by the test ImportCuratorEvents
+     *    itself applies (import URLs or cities are set): it stores the page each event was read
+     *    from as its registration link, so the links are its sources'. A curator that enters its
+     *    own events is a promoter, and most schedules that sell are curators, so those are counted
+     *    like anyone else.
+     *
+     * @return array<int, array{events: int, priced: int, self_serve: int, box_office: int, platforms: array<string, array{events: int, priced: int}>}>
+     */
+    private function externalTicketsByRole(string $since): array
+    {
+        $own = [
+            'hosts' => $this->customDomainHosts(),
+            'baseDomain' => strtolower((string) _base_domain()),
+        ];
+
+        $importers = Role::query()->whereNotNull('import_config')->get(['id', 'import_config'])
+            ->filter(fn (Role $role) => ! empty($role->import_config['urls']) || ! empty($role->import_config['cities']))
+            ->pluck('id')->flip();
+
+        // The one query here that returns a row per event rather than per schedule, so it is kept
+        // small: only the head of the link is read (it is a TEXT column and only the host is
+        // wanted), and a schedule that lists a season reuses a handful of hosts.
+        $events = DB::table('events')
+            ->whereNotNull('creator_role_id')
+            ->where('created_at', '>=', $since)
+            ->where('tickets_enabled', false)
+            ->where('rsvp_enabled', false)
+            ->where('is_draft', false)
+            ->where('is_guest_submission', false)
+            ->whereNotNull('registration_url')
+            ->where('registration_url', '!=', '')
+            ->selectRaw('creator_role_id, LEFT(registration_url, 300) as link, ticket_price');
+
+        $classified = [];
+        $out = [];
+        foreach ($events->cursor() as $event) {
+            if (isset($importers[$event->creator_role_id])) {
+                continue;
+            }
+
+            // The event page's own test (Event::registrationHref()): a value it shows no button
+            // for is no link here either, and a scheme-less one it opens with https:// is one.
+            if (UrlUtils::safeHref($event->link) === null) {
+                continue;
+            }
+
+            $host = (string) preg_replace('/^www\./', '', UrlUtils::linkHost($event->link));
+            [$platform, $kind] = $classified[$host] ??= $this->ticketPlatformOf($host, $own);
+            $priced = (float) $event->ticket_price > 0 ? 1 : 0;
+
+            $row = $out[$event->creator_role_id] ?? ['events' => 0, 'priced' => 0, 'self_serve' => 0, 'box_office' => 0, 'platforms' => []];
+            $row['events']++;
+            $row['priced'] += $priced;
+            $row['self_serve'] += $kind === 'self_serve' ? 1 : 0;
+            $row['box_office'] += $kind === 'box_office' ? 1 : 0;
+            $row['platforms'][$platform]['events'] = ($row['platforms'][$platform]['events'] ?? 0) + 1;
+            $row['platforms'][$platform]['priced'] = ($row['platforms'][$platform]['priced'] ?? 0) + $priced;
+            $out[$event->creator_role_id] = $row;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Where a registration link points: one of TICKET_PLATFORMS' names, "event_schedule" for a
+     * page on this install, else "other" - and that platform's kind.
+     *
+     * @return array{0: string, 1: ?string}
+     */
+    private function ticketPlatformOf(string $host, array $own): array
+    {
+        // A link with no public host (an IP address, localhost) is still a link the page shows.
+        if ($host === '') {
+            return ['other', null];
+        }
+
+        // Another schedule's page here: listed elsewhere, but not on someone else's platform. A
+        // custom domain counts only as the exact host a schedule is served from. Its parent is the
+        // customer's OWN site - tickets.venue.com beside events.venue.com is their box office.
+        $base = $own['baseDomain'];
+        if (($base !== '' && ($host === $base || str_ends_with($host, '.'.$base))) || isset($own['hosts'][$host])) {
+            return ['event_schedule', null];
+        }
+
+        foreach (self::TICKET_PLATFORMS as [$pattern, $name, $kind]) {
+            if (preg_match($pattern, $host) === 1) {
+                return [$name, $kind];
+            }
+        }
+
+        return ['other', null];
+    }
+
+    /**
+     * Fold a platform name fewer than five SCHEDULES carry into the bucket of its kind.
+     *
+     * A name sits beside the schedule's type, month and plan, and some platforms are used in one
+     * country only - which says where a schedule is, the thing suppressRareCountries() withholds
+     * below the same five. The counts are untouched: events, priced, self_serve and box_office do
+     * not move, so the kinds stay readable however few schedules link out.
+     */
+    private function suppressRarePlatforms(array $rows, int $i): array
+    {
+        $selfServe = array_column(array_filter(self::TICKET_PLATFORMS, fn ($platform) => $platform[2] === 'self_serve'), 1);
+
+        $carriedBy = [];
+        foreach ($rows as $row) {
+            foreach (array_keys($row[$i]['platforms'] ?? []) as $name) {
+                $carriedBy[$name] = ($carriedBy[$name] ?? 0) + 1;
+            }
+        }
+
+        foreach ($rows as &$row) {
+            if ($row[$i] === null) {
+                continue;
+            }
+
+            $platforms = [];
+            foreach ($row[$i]['platforms'] as $name => $tally) {
+                if (! in_array($name, self::GENERIC_PLATFORMS, true) && $carriedBy[$name] < 5) {
+                    $name = in_array($name, $selfServe, true) ? 'other_ticketing' : 'other';
+                }
+                $platforms[$name]['events'] = ($platforms[$name]['events'] ?? 0) + $tally['events'];
+                $platforms[$name]['priced'] = ($platforms[$name]['priced'] ?? 0) + $tally['priced'];
+            }
+            ksort($platforms);
+            $row[$i]['platforms'] = $platforms;
+        }
+        unset($row);
+
+        return $rows;
     }
 
     /**
@@ -1247,6 +1476,8 @@ class GrowthExportService
                 .'SUM(CASE WHEN event_role.is_auto_sourced = 1 THEN 1 ELSE 0 END) as src_auto_sourced', [$recentCutoff])
             ->groupBy('event_role.role_id')
             ->get()->keyBy('role_id');
+
+        $externalTickets = $this->externalTicketsByRole($recentCutoff);
 
         // The owner's payment gateways. Selling needs one, so this is the step between "made a
         // paid ticket type" and "sold" - which the payload could not see. Read off the owner's
@@ -1453,6 +1684,9 @@ class GrowthExportService
                     'caldav' => (int) ($events[$r->id]->src_caldav ?? 0),
                     'auto_sourced' => (int) ($events[$r->id]->src_auto_sourced ?? 0),
                 ],
+                // Null, not an empty shape, when there are none: an empty `platforms` would encode
+                // as a JSON list here and an object everywhere it has an entry.
+                $externalTickets[$r->id] ?? null,
             ];
         }
 
@@ -1465,7 +1699,10 @@ class GrowthExportService
             'views_90d', 'followers', 'subscribers', 'interests_90d', 'interests_total',
             'appointment_types',
             'photos', 'newsletter_emails_this_month', 'features', 'days_to_upgrade',
-            'country', 'gateways', 'stripe_connected_month', 'dismissed_steps', 'events_by_source'];
+            'country', 'gateways', 'stripe_connected_month', 'dismissed_steps', 'events_by_source',
+            'external_tickets_90d'];
+
+        $rows = $this->suppressRarePlatforms($rows, array_search('external_tickets_90d', $columns, true));
 
         return [
             'columns' => $columns,
@@ -2327,6 +2564,15 @@ class GrowthExportService
             'unclaimed_total' => $ownerless()->count(),
             'unclaimed_with_event' => $ownerless()
                 ->whereHas('events', fn ($q) => $q->where('event_role.is_accepted', true))
+                ->count(),
+            // The placeholders the claim page will hand to somebody: Role::scopeClaimable() - not
+            // ownerless() alone, which also holds rows a verified stamp has closed - with an address
+            // or a number, which the "Claim this page" button and the invitation both need. A STOCK:
+            // a claimed row leaves it, so it is the pool still open, not what `claimed` came out of.
+            'claimable_with_contact' => Role::query()->claimable()
+                ->where(fn ($q) => $q
+                    ->where(fn ($q) => $q->whereNotNull('roles.email')->where('roles.email', '!=', ''))
+                    ->orWhere(fn ($q) => $q->whereNotNull('roles.phone')->where('roles.phone', '!=', '')))
                 ->count(),
             'auto_created' => collect($months)->mapWithKeys(fn ($m) => [$m => (int) ($created[$m] ?? 0)])->all(),
             'claimed' => collect($months)

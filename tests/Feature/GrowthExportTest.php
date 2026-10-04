@@ -124,9 +124,10 @@ class GrowthExportTest extends TestCase
         // 3 since the claims section landed, 6 since gmv_recent_by_currency and the demo-free
         // gmv_by_currency, 7 since mrr came from RecurringRevenue, 8 since paying meant billing,
         // sales went to the seller and attribution was anonymised, 9 since the daily, nudge
-        // outcome, audience, reach and adoption data. Bumping this is deliberate: a reader diffing
-        // two pulls needs to know the shape (or the meaning) moved.
-        $this->assertSame(9, $data['meta']['schema_version']);
+        // outcome, audience, reach and adoption data, 10 since outside ticket links and the
+        // reachable placeholders. Bumping this is deliberate: a reader diffing two pulls needs to
+        // know the shape (or the meaning) moved.
+        $this->assertSame(10, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
@@ -1660,6 +1661,212 @@ class GrowthExportTest extends TestCase
 
         $this->assertSame(['tickets' => ['total' => 1, 'by_month' => [now()->format('Y-m') => 1]]], $data['dismissed_steps']);
         $this->assertSame(['count' => 2, 'schedules' => 1], $data['usage']['gemini_parse_event'][now()->format('Y-m')]);
+    }
+
+    /**
+     * Most live schedules have no ticket type, and the export could not say whether they have
+     * nothing to sell or sell it on someone else's platform.
+     */
+    public function test_schedule_rows_count_events_linked_somewhere_else(): void
+    {
+        $venue = $this->freeRole(null, 'venue');
+        $talent = $this->freeRole(null, 'talent');
+
+        $elsewhere = ['creator_role_id' => $venue->id, 'tickets_enabled' => false, 'rsvp_enabled' => false];
+        $sold = $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://www.eventbrite.co.uk/e/a-night-out-123', 'ticket_price' => 12]);
+        // On the venue's event, but where it is sold was the venue's choice.
+        $sold->roles()->attach($talent->id, ['is_accepted' => true]);
+        $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://lu.ma/abc123']);
+        // A price says what admission costs, not that the link sells it: neither of these two does.
+        $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://tickets.smalltownhall.org/buy', 'ticket_price' => 5]);
+        $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://someact.'._base_domain().'/a-gig', 'ticket_price' => 15]);
+        // "Enter 0 for free" is a price, and not a priced event.
+        $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://www.facebook.com/events/123', 'ticket_price' => 0]);
+        // Stored before the saving hook normalised links: the event page opens it with https://.
+        $schemeless = $this->createEvent($venue, $elsewhere);
+        DB::table('events')->where('id', $schemeless->id)->update(['registration_url' => 'www.dice.fm/event/an-old-row']);
+
+        // None of these counts.
+        // Our tickets or RSVP are on. (Where the plan blocks selling, the page does fall back to
+        // this link; that event is left out on purpose, it is a seller who chose us.)
+        $this->createEvent($venue, ['creator_role_id' => $venue->id, 'tickets_enabled' => true, 'registration_url' => 'https://www.eventbrite.com/e/sold-here-now']);
+        $this->createEvent($venue, ['creator_role_id' => $venue->id, 'rsvp_enabled' => true, 'registration_url' => 'https://www.eventbrite.com/e/rsvp-here']);
+        $this->createEvent($venue, $elsewhere);
+        $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://www.eventbrite.com/e/not-published', 'is_draft' => true]);
+        // The submitter's link and price, not the venue's.
+        $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://www.eventbrite.com/e/from-a-guest', 'ticket_price' => 20, 'is_guest_submission' => true]);
+        $old = $this->createEvent($venue, $elsewhere + ['registration_url' => 'https://dice.fm/event/last-spring']);
+        DB::table('events')->where('id', $old->id)->update(['created_at' => now()->subDays(120)]);
+        // Values the event page shows no button for. Priced, so that counting one of them cannot
+        // be cancelled out by missing the scheme-less link above, which is not.
+        foreach (['call the venue', 'javascript://eventbrite.com/%0aalert(1)'] as $notALink) {
+            $event = $this->createEvent($venue, $elsewhere + ['ticket_price' => 9]);
+            DB::table('events')->where('id', $event->id)->update(['registration_url' => $notALink]);
+        }
+
+        $data = $this->build();
+
+        // One schedule carries each name, so every one of them folds into the bucket of its kind.
+        // Eventbrite and Luma are sold through by the organizer alone; Dice is a box office.
+        $this->assertSame([
+            'events' => 6,
+            'priced' => 3,
+            'self_serve' => 2,
+            'box_office' => 1,
+            'platforms' => [
+                'box_office' => ['events' => 1, 'priced' => 0],
+                'event_schedule' => ['events' => 1, 'priced' => 1],
+                'other' => ['events' => 2, 'priced' => 1],
+                'other_ticketing' => ['events' => 2, 'priced' => 1],
+            ],
+        ], $this->scheduleRow($data, $venue)['external_tickets_90d']);
+        $this->assertNull($this->scheduleRow($data, $talent)['external_tickets_90d'], 'listed on the event, but it did not choose the link');
+        $this->assertStringNotContainsString('smalltownhall', json_encode($data), 'a host off the list is "other", never itself');
+    }
+
+    /**
+     * The host is organizer-typed, so it leaves only as a name from the fixed list - and a name is
+     * itself withheld until five schedules carry it, like a country.
+     */
+    public function test_registration_links_are_named_from_a_fixed_list_and_rare_names_fold(): void
+    {
+        $venues = collect(range(1, 5))->map(fn () => $this->freeRole(null, 'venue'));
+        DB::table('roles')->where('id', $venues[0]->id)->update(['custom_domain' => 'https://events.bluenote.com']);
+
+        $everyVenue = [
+            'https://www.eventbrite.com.au/e/1',
+            'https://buytickets.at/thehall/123',
+            'https://lu.ma/abc',
+            'https://fb.me/e/abc',
+            'https://forms.gle/abc',
+            // Box offices share one name, whichever they are.
+            'https://www.ticketmaster.de/event/1',
+            'https://link.dice.fm/abc',
+            // Self-serve platforms too small to name.
+            'https://ra.co/events/1',
+            'https://eventer.co.il/abc',
+        ];
+        // Four schedules, one short of the threshold.
+        $fourVenues = ['https://events.humanitix.com/a-show', 'https://www.meetup.com/a-group/events/1'];
+        $firstVenueOnly = [
+            // Five EVENTS on one schedule is still one schedule carrying the name.
+            'https://buy.stripe.com/test_1', 'https://buy.stripe.com/test_2', 'https://buy.stripe.com/test_3',
+            'https://buy.stripe.com/test_4', 'https://buy.stripe.com/test_5',
+            // A brand name as somebody else's subdomain, or inside another name, is not the brand.
+            'https://eventbrite.myvenue.com/tickets',
+            'https://noteventbrite.com/e/1',
+            // The exact host a schedule is served from is a page here. Its sibling is the
+            // customer's own box office, which the parent-domain rule for referrers would hide.
+            'https://events.bluenote.com/a-gig',
+            'https://tickets.bluenote.com/buy',
+        ];
+
+        foreach ($venues as $n => $venue) {
+            $links = array_merge($everyVenue, $n < 4 ? $fourVenues : [], $n === 0 ? $firstVenueOnly : []);
+            foreach ($links as $link) {
+                $this->createEvent($venue, ['creator_role_id' => $venue->id, 'registration_url' => $link]);
+            }
+        }
+
+        $data = $this->build();
+        $one = ['events' => 1, 'priced' => 0];
+
+        $this->assertSame([
+            'events' => 20,
+            'priced' => 0,
+            // The folded names still count as what they are.
+            'self_serve' => 11,
+            'box_office' => 2,
+            'platforms' => [
+                'box_office' => ['events' => 2, 'priced' => 0],
+                'event_schedule' => $one,
+                'eventbrite' => $one,
+                'facebook' => $one,
+                'form' => $one,
+                'luma' => $one,
+                // meetup (rare, sells nothing), the two near-misses and the customer's box office.
+                'other' => ['events' => 4, 'priced' => 0],
+                // ra.co and Eventer, humanitix (rare) and the five payment links (rare).
+                'other_ticketing' => ['events' => 8, 'priced' => 0],
+                'ticket_tailor' => $one,
+            ],
+        ], $this->scheduleRow($data, $venues[0])['external_tickets_90d']);
+
+        $fifth = $this->scheduleRow($data, $venues[4])['external_tickets_90d'];
+        $this->assertSame(9, $fifth['events']);
+        $this->assertSame(5, $fifth['self_serve']);
+        $this->assertSame(2, $fifth['box_office']);
+        $this->assertSame(['events' => 2, 'priced' => 0], $fifth['platforms']['other_ticketing']);
+
+        $payload = json_encode($data);
+        foreach (['bluenote', 'myvenue', 'humanitix', 'meetup', 'payment_link', 'ticketmaster', 'dice'] as $withheld) {
+            $this->assertStringNotContainsString('"'.$withheld, $payload);
+            $this->assertStringNotContainsString($withheld.'.', $payload);
+        }
+    }
+
+    /**
+     * An imported event keeps the page it was read from as its link, so a schedule that imports
+     * says nothing about where it sells. A curator that enters its own events is a promoter - the
+     * type most schedules that sell have - and is counted like anyone else.
+     */
+    public function test_a_schedule_that_imports_events_is_left_out_and_other_curators_are_counted(): void
+    {
+        $promoter = $this->freeRole(null, 'curator');
+        $importer = $this->freeRole(null, 'curator');
+        $importer->import_config = ['urls' => ['https://whatson.cityguide.org/listings'], 'cities' => []];
+        $importer->save();
+        // The same column also holds a venue's request-form fields: that is not importing.
+        $venue = $this->freeRole(null, 'venue');
+        $venue->import_config = ['fields' => ['name'], 'urls' => [], 'cities' => []];
+        $venue->save();
+
+        foreach ([$promoter, $importer, $venue] as $role) {
+            $this->createEvent($role, ['creator_role_id' => $role->id, 'registration_url' => 'https://www.eventbrite.com/e/a-show']);
+        }
+
+        $data = $this->build();
+
+        $this->assertSame(1, $this->scheduleRow($data, $promoter)['external_tickets_90d']['self_serve']);
+        $this->assertSame(1, $this->scheduleRow($data, $venue)['external_tickets_90d']['self_serve']);
+        $this->assertNull($this->scheduleRow($data, $importer)['external_tickets_90d']);
+    }
+
+    /** "0 claimed" needs a pool to be read against: what the claim page can still hand over. */
+    public function test_claims_count_the_placeholders_the_claim_page_can_still_reach(): void
+    {
+        $placeholder = function (array $attrs): Role {
+            $role = new Role;
+            $role->subdomain = 'act'.strtolower(Str::random(10));
+            $role->type = 'talent';
+            $role->name = 'The Wandering Few';
+            $role->timezone = 'America/New_York';
+            $role->plan_type = 'free';
+            foreach ($attrs as $key => $value) {
+                $role->{$key} = $value;
+            }
+            $role->save();
+
+            return $role;
+        };
+
+        $placeholder(['email' => 'booking@gmail.com']);
+        $placeholder(['phone' => '+15551230000']);
+        // One placeholder, however many ways there are to reach it.
+        $placeholder(['email' => 'both@gmail.com', 'phone' => '+15551230001']);
+        $placeholder([]);
+        $placeholder(['email' => '', 'phone' => '']);
+        // Ownerless, with an address and a number - and closed: a verified stamp means
+        // claimTarget() refuses it.
+        $placeholder(['email' => 'verified@gmail.com', 'phone' => '+15551230002', 'email_verified_at' => now()]);
+        // Owned, so not a placeholder however reachable it is. Both carry a phone so that the
+        // either-contact group has to stay inside the claimable scope to keep them out.
+        DB::table('roles')->where('id', $this->freeRole()->id)->update(['phone' => '+15551230003']);
+
+        $claims = $this->build()['claims'];
+
+        $this->assertSame(6, $claims['unclaimed_total']);
+        $this->assertSame(3, $claims['claimable_with_contact']);
     }
 
     /** With type, month and plan beside it, a country few schedules share would name them. */

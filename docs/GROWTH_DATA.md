@@ -70,6 +70,12 @@ identifier, subdomain, custom domain or token appears in it.
   - Residual risk: a personal website that refers 3 or more signups appears by name.
 - **Country** (`schedules.country`): a country shared by fewer than 5 schedules reads `(other)`.
   The threshold is higher than attribution's 3 because a schedule row carries more beside it.
+- **Registration links** (`schedules.external_tickets_90d`): the link is organizer-typed, so only
+  its host is read and only as one name from a fixed list in the code
+  (`GrowthExportService::TICKET_PLATFORMS`); any other host reads `other`. A name carried by fewer
+  than 5 schedules is folded into `other_ticketing` or `other`, the same threshold as `country`,
+  because a platform one country uses says where a schedule is. Contracted box offices share one
+  `box_office` name for the same reason.
 - **Activity** (`logins_90d`, `event_edits_90d`): exported as buckets (`0`, `1`, `2-5`, `6+`),
   never exact counts.
 - **The audience** (`buyers`): computed in SQL and exported only as monthly counts. No buyer
@@ -182,8 +188,19 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `verified_signups`.
 
   A null is "not tracked yet", never zero.
-- `claims`: `unclaimed_total`, `unclaimed_with_event`, `auto_created{month}`,
-  `claimed{month}` (null before 2026-09).
+- `claims`: `unclaimed_total`, `unclaimed_with_event`, `claimable_with_contact`,
+  `auto_created{month}`, `claimed{month}` (null before 2026-09).
+  - `claimable_with_contact` is the placeholders the claim page will hand to somebody
+    (`Role::scopeClaimable()`: ownerless, and no verified email or phone stamp) that also carry an
+    email or a phone number, which the "Claim this page" button and the invitation both need. It is
+    the pool still open, a stock: a claimed placeholder leaves it. `unclaimed_total` is wider, and
+    includes placeholders nobody can be invited to.
+  - An invitation is narrower still. It is sent only when the organizer ticks the box on the event
+    form, and only for a venue or talent that has not unsubscribed.
+  - `claimed` is a floor. Two paths take ownership without writing the `schedule.claim` audit row
+    it counts: signing up or in from an SMS invitation link (`User::claimRolesByPhone()`), and the
+    "I manage this venue" box on an import, which needs no contact on the placeholder at all.
+  - `auto_created` counts placeholders that are STILL ownerless, so a claimed one leaves its month.
 - `meta.releases`: `[{version, first_seen_at}]`, when each version first ran here. It is stamped by
   the scheduler heartbeat (`App\Utils\ReleaseHistory`), so it is empty before 2026-10-01. Use it to
   date a change in `daily` to its release.
@@ -331,6 +348,50 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `stripe_connected_month` | Month the owner completed Stripe Connect (the only gateway that records when) |
 | `dismissed_steps` | Dashboard next steps dismissed for this schedule (`tickets`, `payments`, ...) |
 | `events_by_source` | Of its listed events: `created` by it, from `other_schedules`, `guest` submissions, synced from `google` or `caldav`, `auto_sourced` (curator rules). These overlap; they do not sum to `events_total` |
+| `external_tickets_90d` | Events it lists with a registration link instead of our tickets or RSVP: `{events, priced, self_serve, box_office, platforms}`, or null when it has none. See below |
+
+#### Reading `external_tickets_90d`
+
+Most live schedules have no ticket type of ours. This says which of them send people somewhere
+else, and to what kind of place.
+
+- **Counted:** published events the schedule created in the last 90 days, with our tickets and
+  RSVP both off, whose registration link the event page shows as a link.
+- **`self_serve`:** the events whose link is a platform an organizer signs up to and sells through
+  alone: `eventbrite`, `ticket_tailor`, `luma`, `humanitix`, `payment_link`, and the smaller ones
+  under `other_ticketing`.
+- **`box_office`:** the events whose link is a system a venue or promoter contracts with, such as
+  Ticketmaster, AXS or Dice. A link there is nearly always somebody else's sale. They share one
+  `box_office` name.
+- **`priced`:** the events with a price above zero, typed or read by AI import. It is the admission
+  price, set beside any kind of link, so it does not say the tickets are sold there.
+- **`platforms`:** `{name: {events, priced}}`. A name is one of the above, or `meetup`, `facebook`,
+  `form`, `event_schedule` (a page on this install) or `other`. The host is never exported, and a
+  name fewer than 5 schedules carry is folded into `other_ticketing` or `other`. The four counts
+  beside it are never folded.
+
+`self_serve` is a ceiling on the sellers who could sell here instead, never a count of them:
+
+- The link says where tickets are sold, not who sells them. A talent's link is often its venue's
+  or promoter's page, so read it by schedule type.
+- One event is enough to count. Read it against `events_recent_90d`, and prefer schedules with two
+  or more.
+- A schedule is not a person. Count distinct `uid`.
+- An owner whose `signups.signup_intent` is `request` got their schedule by submitting an event to
+  someone else's. Leave them out.
+
+Left out on purpose:
+
+- anonymous guest submissions (the link is the submitter's);
+- every event of a schedule that imports events on a timer, because an imported event keeps the
+  page it was read from as its link;
+- drafts;
+- an event with our tickets on that the plan blocks from selling, though its page falls back to
+  the link;
+- anything created more than 90 days ago, a long-running recurring series included.
+
+Also not seen: an Eventbrite import that brought ticket types becomes in-app tickets, and an event
+created over the API or WhatsApp cannot carry a price.
 
 ## Caveats that outlast any one pull
 
@@ -338,6 +399,15 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
   pages. They fell about 4x across that line, and whether that is bots removed or the beacon
   under-counting is not established. Never compare visit counts across `visitors_basis` values;
   check Cloudflare's numbers before trusting one.
+- **A first touch on an edge-cached marketing page needs marketing consent, from the release
+  committed on 2026-10-04.** The first-touch cookie is written only once a visitor allows marketing cookies, and
+  no answer counts as no. It is the only carrier off an edge-cached marketing page, so a visitor
+  who did not allow it and first touched one signs up with `landing_path` `/sign_up` or `/login`
+  and no UTM or referrer. `hero_variant` has no other carrier at all. A first touch on a page that
+  has a session is still recorded without consent: a schedule's page, `/sign_up` reached straight
+  from another site, or the few marketing pages that are not cached (contact, search, `?lang=`). The stored values stay with the signup, so every pull keeps full
+  attribution for signups made before that release. Compare marketing-page channels and landing
+  pages as shares of attributed signups, never as counts across it.
 - **History lost before 2026-10-01.** `audit_logs` was pruned at 90 days, so anything read from it
   is missing before roughly early July 2026: checkout `source`, trial `started_from`, claims. The
   growth-relevant actions are kept forever from this release on (`PruneAuditLogs::KEEP_ACTIONS`).
@@ -353,6 +423,11 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 
 ## Changelog (`meta.schema_version`)
 
+- **10** (2026-10-04)
+  - **Additive.** Nothing in schema 9 changed meaning, so a schema 9 pull compares with a
+    schema 10 one on every field they share.
+  - **New schedule column:** `external_tickets_90d`.
+  - **New field:** `claims.claimable_with_contact`.
 - **9** (2026-10-01)
   - **New sections:** `daily`, `nudge_outcomes`, `onboarding_nudges`, `dismissed_steps`,
     `buyers`, `reach`, `usage`, `geography`, `boost`, `referrals`, `federation`, `hero_test`, and

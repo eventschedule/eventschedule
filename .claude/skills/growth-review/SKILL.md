@@ -72,7 +72,7 @@ def seg(s):
     if s['paid_ticket_types'] > 0: return '3 paid ticket type, never sold'
     if s['ticket_types'] > 0: return '4 free ticket types only'
     return '5 no ticket type'
-from collections import Counter
+from collections import Counter, defaultdict
 n, pay = Counter(seg(s) for s in S), Counter(seg(s) for s in S if s['billing'])
 for k in sorted(n): print(k, n[k], pay[k], f"{pay[k]/n[k]:.1%}")
 
@@ -100,6 +100,25 @@ Schema 9 also answers these directly:
 - `dismissed_steps`: owners saying "not for me" to tickets or payments.
 - `usage`: which features get used, e.g. AI import as `gemini_parse_event`.
 - Activity: `logins_90d` and `event_edits_90d` on the signup rows.
+- `external_tickets_90d` on the schedule rows (schema 10): who lists events that link out instead
+  of using our tickets, and to what kind of place. `self_serve` is links to a platform an organizer
+  sells through alone; `box_office` is links to a system a venue contracts with, which is nearly
+  always somebody else's sale. `self_serve` is a ceiling on winnable sellers, not a count: read
+  "Reading `external_tickets_90d`" in `docs/GROWTH_DATA.md` first. Count owners, drop the ones the
+  submit-an-event flow minted, and look at type and at two or more events:
+
+  ```python
+  minted = {u['uid'] for u in U if u['signup_intent'] == 'request'}
+  ext = defaultdict(lambda: Counter())
+  for s in S:
+      n = (s['external_tickets_90d'] or {}).get('self_serve', 0)
+      if n and s['uid'] not in minted:
+          ext[s['uid']][s['type']] += n
+  print(len(ext), 'owners;', sum(sum(c.values()) >= 2 for c in ext.values()), 'with 2+ events;',
+        Counter(t for c in ext.values() for t in c))
+  ```
+- `claims.claimable_with_contact` (schema 10): the placeholders the claim page and invitations can
+  still reach. A stock, not what `claimed` came out of.
 - `hero_test`: the homepage headline A/B test, per variant. `app:pull-growth` prints it under the
   KPI table; the full rows are:
 
@@ -123,8 +142,9 @@ Schema 9 also answers these directly:
   up only in the rows, and consent changed what is counted on 2026-10-04: read the `hero_test`
   entry in `docs/GROWTH_DATA.md` before quoting a rate.
 
-To compare two pulls, keep the same `schema_version`; ids changed length at 8. Join on `sid` to
-find sellers who stopped, comps that started paying, and schedules that newly sold.
+To compare two pulls, keep the same `schema_version`; ids changed length at 8. Schema 10 only added
+fields, so it compares with 9. Join on `sid` to find sellers who stopped, comps that started
+paying, and schedules that newly sold.
 
 ## 4. Put the numbers next to what shipped
 
@@ -149,6 +169,12 @@ find sellers who stopped, comps that started paying, and schedules that newly so
   previous month, or not at all.
 - **Visitor basis.** Never compare visit counts across `visitors_basis` values; the 2026-09-07 beacon
   rebase is unexplained.
+- **Attribution off an edge-cached marketing page needs consent.** From the release committed on
+  2026-10-04 a first touch on one is carried to sign-up only if the visitor allowed
+  marketing cookies; otherwise the signup reads `landing_path` `/sign_up` or `/login` with no UTM,
+  referrer or headline variant. A first touch on a schedule's page is still recorded. Signups made
+  before that release keep their attribution in every pull. Compare marketing-page channels as
+  shares of attributed signups, never as counts across it.
 - **Instrumentation age.** A counter that is null, or recently zero, may simply be young. Check
   `meta.notes` and the column's tracked-from date before calling it a broken feature.
 - **Verify in code before calling something a bug.** Read the code path. Two "obvious bugs" in past

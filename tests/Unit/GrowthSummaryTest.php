@@ -110,6 +110,45 @@ class GrowthSummaryTest extends TestCase
 
         $this->assertNull($this->value($kpis, 'Schedules selling (paid ticket in 90 days)'));
         $this->assertNull($this->value($kpis, 'Selling trials started / converted'));
+
+        // A real schema 9 pull: it has the schedule's owner and type, and not the column schema 10 added.
+        $nine = $this->pull();
+        $nine['schedules'] = ['columns' => ['sid', 'uid', 'type', 'paid_tickets_90d'], 'rows' => [['s:1', 'u:a', 'venue', 3]]];
+        $this->assertNull($this->value(GrowthSummary::kpis($nine), 'Owners linking events to a self-serve ticketing platform (any / 2+ events)'));
+    }
+
+    /**
+     * A ceiling on sellers who could sell here, so it must not count what plainly is not one: a
+     * person twice, a link to a box office, or an account the submit-an-event flow minted.
+     */
+    public function test_linking_to_self_serve_counts_owners_not_schedules_box_offices_or_minted_accounts(): void
+    {
+        $cell = fn (int $selfServe, int $boxOffice = 0) => [
+            'events' => $selfServe + $boxOffice, 'priced' => 0, 'self_serve' => $selfServe, 'box_office' => $boxOffice, 'platforms' => [],
+        ];
+
+        $pull = $this->pull();
+        $pull['schedules'] = [
+            'columns' => ['sid', 'uid', 'type', 'external_tickets_90d'],
+            'rows' => [
+                // One owner, two schedules, one event each: one owner, with two events.
+                ['s:1', 'u:a', 'venue', $cell(1)],
+                ['s:2', 'u:a', 'curator', $cell(1)],
+                // One event only.
+                ['s:3', 'u:b', 'talent', $cell(1)],
+                // A box office link is somebody else's sale.
+                ['s:4', 'u:c', 'venue', $cell(0, 6)],
+                // Minted by submitting an event to someone else's schedule.
+                ['s:5', 'u:d', 'talent', $cell(3)],
+                ['s:6', 'u:e', 'venue', null],
+            ],
+        ];
+        $pull['signups'] = [
+            'columns' => ['uid', 'signup_intent'],
+            'rows' => [['u:a', 'organizer'], ['u:b', null], ['u:c', 'organizer'], ['u:d', 'request'], ['u:e', 'organizer']],
+        ];
+
+        $this->assertSame('2 / 1', $this->value(GrowthSummary::kpis($pull), 'Owners linking events to a self-serve ticketing platform (any / 2+ events)'));
     }
 
     /**

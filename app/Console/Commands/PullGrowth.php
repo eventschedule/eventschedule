@@ -170,7 +170,7 @@ class PullGrowth extends Command
         if ($previous) {
             $this->line('Compared with the pull generated '.($previous['meta']['generated_at'] ?? '?')
                 .(($previous['meta']['schema_version'] ?? null) !== $meta['schema_version']
-                    ? ' (schema '.($previous['meta']['schema_version'] ?? '?').': definitions differ, read the notes)'
+                    ? ' (schema '.($previous['meta']['schema_version'] ?? '?').': check the changelog before comparing)'
                     : ''));
             if ($this->windowOf($previous) !== $this->windowOf($current)) {
                 $this->line('<comment>Its funnel window differs</comment> ('.($this->windowOf($previous) ?? '?').' vs '
