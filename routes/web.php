@@ -52,6 +52,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoleSubscriberController;
 use App\Http\Controllers\SeatingPickerController;
 use App\Http\Controllers\SeatingPlanController;
+use App\Http\Controllers\SetupGuideController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
@@ -573,6 +574,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/dashboard/federation/list/dismiss', [HomeController::class, 'dismissFederationListing'])->name('home.federation_list_dismiss');
     Route::post('/dashboard/next-steps/dismiss', [HomeController::class, 'dismissNextStep'])->name('home.next_steps_dismiss');
     Route::post('/dashboard/next-steps/dismiss-all', [HomeController::class, 'dismissAllNextSteps'])->name('home.next_steps_dismiss_all');
+    Route::post('/dashboard/next-steps/restore', [HomeController::class, 'restoreNextSteps'])->name('home.next_steps_restore');
+    Route::post('/dashboard/suggestions', [HomeController::class, 'setSuggestions'])->name('home.suggestions')->middleware('throttle:60,1');
+    Route::post('/dashboard/setup-guide', [SetupGuideController::class, 'update'])->name('home.setup_guide')->middleware('throttle:60,1');
     Route::get('/getting-started', [HomeController::class, 'gettingStarted'])->name('getting-started');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new')->where('type', 'talent|venue|curator');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');

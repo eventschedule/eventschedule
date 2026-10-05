@@ -112,6 +112,14 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        // The "Suggestions" toggle. Read only when the form posted it (other forms post to this
+        // action without it), and written through the switch's one writer, which is what marks
+        // a guide that went live in the meantime as already celebrated. Here, before the photo
+        // upload below, which can return early.
+        if ($request->has('show_suggestions')) {
+            \App\Utils\SetupGuide::suggest($request->user(), $request->boolean('show_suggestions'));
+        }
+
         if ($request->hasFile('profile_image')) {
             $user = $request->user();
             $file = $request->file('profile_image');

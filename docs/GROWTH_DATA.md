@@ -336,6 +336,9 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `referred` | Signed up through a referral link |
 | `logins_90d` | Sign-ins in the last 90 days, bucketed `0`/`1`/`2-5`/`6+`. A lower bound: a remember-me session writes no row |
 | `event_edits_90d` | Events they created or edited in the last 90 days, bucketed; system edits (imports, syncs) excluded |
+| `setup_guide` | How far through the setup guide they got (schema 13): `started`, `live` (their schedule went live with the guide watching), `shared` (copied the schedule's address), `embedded` (copied the embed code), `finished`. The furthest one reached. Null for anyone who never had a guide: everyone who signed up before it shipped, and anyone whose first schedule was not saved through the wizard (guest-submit, a claim, the API, a restore, a transfer) |
+| `setup_guide_hidden` | They hid the guide and have not brought it back. False when `setup_guide` is null |
+| `suggestions_off` | They turned suggestions off for the whole account (schema 13) and have not turned them back on: no setup guide, no next steps on the dashboard, no "List on the network" prompt, and none of the reminder emails that ask the same things. Independent of `setup_guide_hidden`, and possible for an account that never had a guide |
 
 ### `schedules` (one row per owned, non-deleted, non-demo schedule)
 
@@ -467,6 +470,22 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **13** (2026-10-05)
+  - **New `signups` columns:** `setup_guide`, `setup_guide_hidden` and `suggestions_off`. The
+    setup guide replaced the three-circle step band on a new organizer's first screens; it
+    starts when a first own schedule is saved through the wizard. Use `setup_guide IS NOT NULL`
+    as the cohort of people who had it: `created_month` cannot separate them, because it did
+    not start on the 1st. `suggestions_off` is the account-wide switch that shipped with it.
+  - **Activation nudges reach fewer people.** An owner with `suggestions_off` gets none of the
+    nudges that ask for something (every key but `first_sale`), and one who answered "No tickets
+    needed" in the guide gets neither ticket nudge for that schedule. Neither writes a
+    `dismissed_steps` row.
+  - **`next_step_tickets` is offered to fewer schedules.** A free schedule that already takes
+    registrations is no longer told to add them, which is the rule its email always had.
+  - **`dismissed_steps` can read lower for that cohort.** While a guide is showing, the dashboard
+    hides the Next steps rows the guide is asking for itself, so those rows are neither shown nor
+    dismissed until the guide ends.
+  - Everything else compares with schema 12.
 - **12** (2026-10-04)
   - **New in `events_by_source`:** `imported` and one `imported_{source}` per import source
     (`ai`, `ics`, `page`, `page_ai`, `eventbrite`, `google`, `microsoft`, `caldav`). Zero for every

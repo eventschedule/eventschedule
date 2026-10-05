@@ -332,6 +332,47 @@ function openEmbedModal(widget) {
 function closeEmbedModal() {
     document.getElementById('embed-modal').classList.add('hidden');
     document.body.style.overflow = 'auto';
+
+    // Opened by the #embed link (see openEmbedFromHash below): drop the hash, or pressing the
+    // same link again changes nothing and so opens nothing.
+    if (window.location.hash === '#embed') {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+}
+
+// "Add to your website", from the setup guide and from anywhere else that links to #embed on
+// this page. Opened on load and on hashchange, never inside a click handler: the dialog closes
+// on any click that reaches the document from outside it, so a click that opened it would
+// also shut it.
+function openEmbedFromHash() {
+    if (window.location.hash !== '#embed') {
+        return;
+    }
+
+    openEmbedModal('calendar');
+
+    // Reached this way it is named for what the person came to do, and the code's button says
+    // what it copies rather than showing an icon alone.
+    var title = document.querySelector('#modal-title [data-embed-for="calendar"]');
+    if (title) {
+        title.textContent = @json(__('messages.import_panel_embed'), JSON_UNESCAPED_UNICODE);
+    }
+
+    var copy = document.getElementById('iframe-code-btn');
+    if (copy && ! copy.querySelector('[data-embed-copy-label]')) {
+        var label = document.createElement('span');
+        label.setAttribute('data-embed-copy-label', '');
+        label.className = 'ms-1.5';
+        label.textContent = @json(__('messages.setup_guide_copy_code'), JSON_UNESCAPED_UNICODE);
+        copy.appendChild(label);
+    }
+}
+
+window.addEventListener('hashchange', openEmbedFromHash);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', openEmbedFromHash);
+} else {
+    openEmbedFromHash();
 }
 
 function copyEmbedUrl() {

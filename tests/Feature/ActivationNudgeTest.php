@@ -1614,4 +1614,120 @@ class ActivationNudgeTest extends TestCase
             $this->assertStringNotContainsString('Hello sam@', $html);
         }
     }
+
+    // ---- "Turn off suggestions", and an answer given in the setup guide ------------------------
+
+    /**
+     * The account-wide switch is every dismissal at once: none of the mails that ask what the
+     * dashboard asks goes to somebody who turned suggestions off. first_sale asks for nothing
+     * and still goes.
+     */
+    public function test_the_suggestions_switch_holds_every_asking_nudge_and_not_the_congratulation(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        \App\Utils\SetupGuide::suggest($owner, false);
+
+        $this->nudge('no_ticket_type');
+        $this->assertNothingSent();
+
+        \App\Utils\SetupGuide::suggest($owner->fresh(), true);
+
+        $this->nudge('no_ticket_type');
+        $this->assertSent('no_ticket_type');
+    }
+
+    public function test_the_switch_does_not_hold_the_first_sale_congratulation(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 20]);
+        $this->createSale($event, $role, ['payment_amount' => 20, 'paid_at' => now()->subDay()], $ticket);
+
+        \App\Utils\SetupGuide::suggest($owner, false);
+
+        $this->nudge('first_sale');
+
+        $this->assertSent('first_sale');
+    }
+
+    /** Only the RECIPIENT's own switch counts, as with a dismissal: the mail goes to the owner. */
+    public function test_a_co_admins_switch_does_not_silence_the_owners_mail(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $admin = $this->owner();
+        $admin->roles()->attach($role->id, ['level' => 'admin', 'created_at' => now()]);
+        \App\Utils\SetupGuide::suggest($admin, false);
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertSent('no_ticket_type');
+        $this->assertQueuedTo($owner->email);
+    }
+
+    /**
+     * "No tickets needed", answered in the setup guide, is an answer here too - for THAT schedule,
+     * and only for an owner who gave it. The condition is a NOT EXISTS over positive tests: a
+     * negated test on the owner would be NULL for one with no guide (or with a guide and no
+     * answers) and would silently drop them, which is everybody this mail exists for.
+     */
+    public function test_tickets_declined_in_the_setup_guide_holds_the_ticket_nudges_for_that_schedule_only(): void
+    {
+        $when = now()->addDays(10)->format('Y-m-d H:i:s');
+
+        $declined = $this->owner();
+        $theirs = $this->createRole($declined);
+        $this->createEvent($theirs, ['starts_at' => $when]);
+        $alsoTheirs = $this->createRole($declined);
+        $this->createEvent($alsoTheirs, ['starts_at' => $when]);
+        DB::table('users')->where('id', $declined->id)->update(['setup_guide' => json_encode([
+            'role_id' => $theirs->id, 'started_at' => now()->toIso8601String(), 'skipped' => ['events', 'tickets'],
+        ])]);
+
+        // A guide with no answers, and (the default everywhere else in this file) no guide at all.
+        $undecided = $this->owner();
+        $open = $this->createRole($undecided);
+        $this->createEvent($open, ['starts_at' => $when]);
+        DB::table('users')->where('id', $undecided->id)->update(['setup_guide' => json_encode([
+            'role_id' => $open->id, 'started_at' => now()->toIso8601String(),
+        ])]);
+
+        $this->nudge('no_ticket_type');
+
+        $nudged = DB::table('schedule_nudges')->where('nudge_key', 'no_ticket_type')->pluck('role_id')->all();
+
+        $this->assertNotContains($theirs->id, $nudged, 'the schedule the answer was about');
+        $this->assertContains($open->id, $nudged, 'a guide with no answers changes nothing');
+        // One mail a week per owner, so $declined's other schedule is checked by itself.
+        DB::table('schedule_nudges')->delete();
+        DB::table('roles')->where('id', $open->id)->update(['is_deleted' => true]);
+
+        $this->nudge('no_ticket_type');
+
+        $this->assertSame(
+            [$alsoTheirs->id],
+            DB::table('schedule_nudges')->where('nudge_key', 'no_ticket_type')->pluck('role_id')->all(),
+            'the answer was about one schedule, not the account'
+        );
+    }
+
+    public function test_tickets_declined_in_the_setup_guide_holds_the_free_copy_too(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createFreeRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        DB::table('users')->where('id', $owner->id)->update(['setup_guide' => json_encode([
+            'role_id' => $role->id, 'started_at' => now()->toIso8601String(), 'skipped' => ['tickets'],
+        ])]);
+
+        $this->nudge('no_ticket_type_free');
+
+        $this->assertNothingSent();
+    }
 }

@@ -31,6 +31,8 @@
                     </a>
                 </li>
 
+                @include('partials.setup-guide-nav')
+
                 @if ($singleSchedule)
                 <li>
                     <div class="dark-nav-hover group flex items-center rounded-lg p-2 text-lg font-semibold leading-6 hover:text-white {{ $singleScheduleActive ? 'dark-nav-active text-white' : 'text-gray-400' }}">

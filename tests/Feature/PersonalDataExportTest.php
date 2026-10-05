@@ -27,6 +27,7 @@ class PersonalDataExportTest extends TestCase
         Mail::fake();
 
         $user = User::factory()->create(['email' => 'person@example.com']);
+        \App\Utils\SetupGuide::suggest($user, false);
         $role = $this->createRole($this->createOwner());
         $event = $this->createEvent($role, ['name' => 'Night Market']);
         // Bought as a guest, before the account existed: found by the address.
@@ -46,6 +47,8 @@ class PersonalDataExportTest extends TestCase
         $data = json_decode($json, true);
 
         $this->assertSame('person@example.com', $data['account']['email']);
+        // A preference they set, beside is_subscribed: the suggestions switch.
+        $this->assertNotEmpty($data['account']['suggestions_off_at']);
         $this->assertSame('Night Market', $data['purchases'][0]['event']);
         $this->assertSame('203.0.113.9', $data['email_signups'][0]['ip_address']);
         $this->assertStringNotContainsString('sale-secret-value', $json);

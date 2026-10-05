@@ -459,4 +459,25 @@ class FederationListingPromptTest extends TestCase
 
         $this->assertDatabaseCount('dismissed_next_steps', 0);
     }
+
+    /**
+     * "Turn off suggestions" means all of them, and home.blade.php files this prompt under "a
+     * suggestion". On the dashboard and on the schedule's own page. The operator's "join the
+     * network" prompt is a different thing (how the feature is found at all) and is not gated.
+     */
+    public function test_the_suggestions_switch_quiets_the_prompt_on_both_pages(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->shareableSchedule($owner);
+
+        $this->actingAs($owner)->dashboard()->assertSee($this->listUrl(), false);
+        $this->schedulePage($role)->assertSee($this->listUrl(), false);
+
+        \App\Utils\SetupGuide::suggest($owner, false);
+        $this->actingAs($owner->fresh());
+
+        $this->dashboard()->assertDontSee($this->listUrl(), false);
+        $this->schedulePage($role)->assertDontSee($this->listUrl(), false);
+        $this->assertTrue($this->service()->listingPromptSchedules($owner->fresh())->isEmpty());
+    }
 }

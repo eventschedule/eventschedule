@@ -508,10 +508,12 @@
             }
         });
 
-        // Highlight phone field if redirected from boost
+        // Highlight a field the visitor was sent here for: the phone (from boost) or the
+        // suggestions toggle (from the dashboard's "Suggestions are off" row).
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('highlight') === 'phone') {
-            const phoneField = document.getElementById('phone-field');
+        const highlightIds = { phone: 'phone-field', suggestions: 'suggestions-field' };
+        if (highlightIds[urlParams.get('highlight')]) {
+            const phoneField = document.getElementById(highlightIds[urlParams.get('highlight')]);
             if (phoneField) {
                 phoneField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 phoneField.classList.add('ring-2', 'ring-[var(--brand-blue)]', 'rounded-lg', 'p-2', '-m-2');

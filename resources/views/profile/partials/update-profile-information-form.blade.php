@@ -87,6 +87,19 @@
                     checked="{{ old('is_subscribed', $user->is_subscribed) }}" />
             </div>
 
+            {{-- users.suggestions_off_at: the dashboard's "Turn off suggestions", and the way
+                 back on. Beside "Email updates" because it also stops the reminder emails that
+                 ask the same things. Only for somebody who edits a schedule: nobody else is
+                 ever suggested anything. The wrapper carries the id (the toggle component puts
+                 its attributes on a hidden checkbox) for the page's highlight script. --}}
+            @if (isset($editorRoles) && $editorRoles->isNotEmpty())
+            <div id="suggestions-field">
+                <x-toggle name="show_suggestions" label="{{ __('messages.suggestions_toggle') }}"
+                    help="{{ __('messages.suggestions_toggle_help') }}"
+                    checked="{{ old('show_suggestions', $user->wantsSuggestions()) }}" />
+            </div>
+            @endif
+
             <div id="phone-field">
                 <x-input-label for="phone" :value="__('messages.phone_number')" />
                 <x-phone-input name="phone" :value="old('phone', $user->phone)" :disabled="is_demo_mode()" />

@@ -214,6 +214,10 @@
                     </div>
                     @endif
 
+                    {{-- The setup guide's floating shapes (partials/setup-guide). Here, never in
+                         layouts/app.blade.php: that shell is also the guest portal. --}}
+                    @include('partials.setup-guide', ['place' => 'layout'])
+
                     {{ $slot }}
 
                 </div>

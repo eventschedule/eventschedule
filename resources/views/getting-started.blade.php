@@ -12,21 +12,31 @@
         {{-- Deliberately not a link: the dashboard would forward zero-schedule users straight back here --}}
         <x-application-logo />
 
+        {{-- The step band, for the guest-submit flow only. Everyone else gets the setup guide's
+             ring in the welcome line below, which adds no height above the cards. --}}
+        @if (session('pending_request'))
         <div class="w-full max-w-2xl mt-2 rounded-2xl overflow-hidden">
             <x-step-indicator :currentStep="2" />
         </div>
+        @endif
 
         {{-- isolate: the glow sits at -z-10, behind the heading and cards but still above the
-             body's background. It starts below the step indicator, whose own panel background
-             would otherwise cut a hard rectangle out of it. Never move it onto html/body (see
-             CLAUDE.md on containing blocks). --}}
+             body's background. It starts below the step band when that is shown, whose own panel
+             background would otherwise cut a hard rectangle out of it. Never move it onto
+             html/body (see CLAUDE.md on containing blocks). --}}
         <div class="relative isolate w-full max-w-6xl mt-8">
             <div class="getting-started-glow" aria-hidden="true"></div>
 
             <div class="text-center mb-8">
+                {{-- The plain welcome also for somebody who turned suggestions off: the ring and
+                     its "two steps" line are the setup guide's, and off means all of it. --}}
+                @if (session('pending_request') || ! auth()->user()->wantsSuggestions())
                 <p class="text-sm sm:text-base font-semibold text-[var(--brand-blue)]">
                     {{ __('messages.getting_started_welcome', ['name' => auth()->user()->firstName()]) }}
                 </p>
+                @else
+                @include('partials.setup-guide-eyebrow', ['line' => __('messages.setup_guide_welcome_two_steps', ['name' => auth()->user()->firstName()])])
+                @endif
                 <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {{ __('messages.schedule_type_question') }}
                 </h1>

@@ -269,7 +269,22 @@ class User extends Authenticatable implements MustVerifyEmail
             'ticket_paywall_viewed_at' => 'datetime',
             'ticket_trial_used_at' => 'datetime',
             'onboarding_nudge_sent_at' => 'datetime',
+            // App\Utils\SetupGuide. Deliberately NOT fillable: it is written only by that class.
+            'setup_guide' => 'array',
+            // The "Turn off suggestions" switch. Not fillable either: SetupGuide::suggest() is
+            // its one writer.
+            'suggestions_off_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Whether this person still wants to be suggested things: the setup guide, the dashboard's
+     * next steps, a schedule's "List on the network" prompt, and the reminder emails that ask
+     * the same (SendActivationNudges). Off only by their own choice (SetupGuide::suggest()).
+     */
+    public function wantsSuggestions(): bool
+    {
+        return empty($this->suggestions_off_at);
     }
 
     public function roles()

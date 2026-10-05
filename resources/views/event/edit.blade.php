@@ -5,6 +5,11 @@
   // indicator, no Boost or locked upgrade controls, and the rarely used sections folded away.
   $isFirstEventRun = $isFirstEventRun ?? false;
 
+  // The setup guide (App\Utils\SetupGuide) is docked beside this form for someone on their way to
+  // a first live event. For them the line under the save button says what saving does, in place
+  // of the general note that events are public.
+  $setupGuidePromise = $isFirstEventRun && \App\Utils\SetupGuide::surface() === 'dock';
+
   // Participants, Agenda and Engagement fold behind "More options" on a first event: seven
   // sections is a lot to face before anything is saved, and none of these three is needed to
   // publish. Vue shows them again on request (showMoreSections), and showSection() opens the
@@ -30,8 +35,9 @@
   ])->values();
 @endphp
 
-<!-- Step Indicator for Add Event Flow -->
-@if(session('pending_request') || $isFirstEventRun)
+{{-- The step band, for the guest-submit flow only. A first event of one's own is walked by the
+     setup guide instead, which the admin layout includes (partials/setup-guide). --}}
+@if(session('pending_request'))
     <div class="my-6">
         <x-step-indicator :currentStep="3" />
     </div>
@@ -1572,7 +1578,12 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-4.247m0 0A8.959 8.959 0 0 1 3 12c0-1.178.227-2.304.638-3.335" />
                                 </svg>
+                                {{-- v-pre: the schedule's name is its owner's text, inside the Vue mount. --}}
+                                @if ($setupGuidePromise)
+                                <span v-pre>{{ __('messages.setup_guide_then_live', ['name' => $role->name]) }}</span>
+                                @else
                                 {{ __('messages.note_all_events_are_publicly_listed') }}
+                                @endif
                             </p>
                             <p v-show="event.is_draft && !event.is_internal" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
@@ -5522,7 +5533,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-4.247m0 0A8.959 8.959 0 0 1 3 12c0-1.178.227-2.304.638-3.335" />
                 </svg>
+                {{-- v-pre: the schedule's name is its owner's text, inside the Vue mount. --}}
+                @if ($setupGuidePromise)
+                <span v-pre>{{ __('messages.setup_guide_then_live', ['name' => $role->name]) }}</span>
+                @else
                 {{ __('messages.note_all_events_are_publicly_listed') }}
+                @endif
             </p>
             <p v-show="event.is_draft && !event.is_internal" class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">

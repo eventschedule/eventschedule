@@ -1137,7 +1137,10 @@ class FederationService
      */
     public function listingPromptSchedules(?User $user, ?Role $only = null): Collection
     {
-        if (! $user || ! $this->listingAvailable()) {
+        // home.blade.php files this prompt under "a suggestion", and "Turn off suggestions"
+        // means all of them. shouldPromptAdoption() is deliberately NOT gated the same way: it
+        // is the operator's "join the network" prompt and how that feature is found at all.
+        if (! $user || ! $user->wantsSuggestions() || ! $this->listingAvailable()) {
             return collect();
         }
 

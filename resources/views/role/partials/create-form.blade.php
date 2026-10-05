@@ -5,6 +5,18 @@
     $isFirstRun = ! is_demo_mode()
         && auth()->user()->member()->doesntExist()
         && auth()->user()->tickets()->count() === 0;
+
+    // Whether saving this form starts a setup guide: a first OWN schedule, outside the guest-submit
+    // flow. The same test RoleController::store() pins the guide on, so the line above the heading
+    // and the guide that follows cannot disagree. Wider than $isFirstRun on purpose: a ticket
+    // holder or a team member making their first own schedule is starting out too.
+    $ownsNoSchedule = auth()->user()->owner()->doesntExist();
+    $startsGuide = ! is_demo_mode() && ! session('pending_request') && $ownsNoSchedule
+        && auth()->user()?->wantsSuggestions();
+
+    // store() sends a first own schedule, and every guest-submit one, on to the event form. The
+    // button says so, because nothing else on this page does.
+    $leadsToEventForm = session('pending_request') || $ownsNoSchedule;
 @endphp
 
     <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
@@ -14,7 +26,9 @@
              bought a ticket and later came back to run their own schedule was being shown the
              onboarding bar and a "choose a different type" link that silently redirected them to
              the dashboard. Resolved once, here, and passed down. --}}
-        @if ($isFirstRun)
+        {{-- The band is now the guest-submit flow's alone. Everyone else starting out gets the
+             setup guide's ring and line above the heading (partials/setup-guide-eyebrow). --}}
+        @if ($isFirstRun && session('pending_request'))
         <div class="w-full max-w-2xl rounded-2xl overflow-hidden">
             <x-step-indicator :currentStep="2" />
         </div>
@@ -22,6 +36,11 @@
 
         <div class="w-full max-w-xl mt-8">
             <div class="text-center mb-6">
+                @if ($startsGuide)
+                <div class="mb-3">
+                    @include('partials.setup-guide-eyebrow', ['line' => __('messages.setup_guide_two_steps'), 'initialFrom' => 'name'])
+                </div>
+                @endif
                 <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
                     {{ __('messages.' . $role->type) }}
                 </h1>
@@ -185,7 +204,7 @@
                         </a>
                         @endif
                         <x-brand-button type="submit">
-                            {{ __('messages.save') }}
+                            {{ $leadsToEventForm ? __('messages.setup_guide_save_continue') : __('messages.save') }}
                         </x-brand-button>
                     </div>
                 </form>

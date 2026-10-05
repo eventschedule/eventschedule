@@ -217,12 +217,27 @@ window.initTinyMDE = function(element, onChange) {
     return easyMDE;
 };
 
+// The setup guide is only ever on a new organizer's admin pages, and this bundle is also the
+// guest portal's: its code is fetched when its host is on the page, and not before. A chunk that
+// fails to load (a deploy in between, a flaky connection) leaves the still version the server
+// printed, which is a working link, so the failure is swallowed rather than surfaced.
+const mountSetupGuide = () => {
+    if (! document.querySelector('[data-setup-guide]')) {
+        return;
+    }
+
+    import('./setup-guide-boot.js')
+        .then((module) => module.mountSetupGuide())
+        .catch(() => {});
+};
+
 const mountVueWidgets = () => {
     mountAccessibilityWidget();
     // Each bails out immediately when its host element is absent, so this stays cheap on
     // the pages that render none.
     mountStay22Map();
     mountConsentEmbeds();
+    mountSetupGuide();
 };
 
 if (document.readyState === 'loading') {

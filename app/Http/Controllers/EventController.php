@@ -57,6 +57,7 @@ use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
 use App\Utils\ImportRun;
 use App\Utils\MoneyUtils;
+use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
 use App\Utils\VenueUtils;
 use Carbon\Carbon;
@@ -1577,6 +1578,23 @@ class EventController extends Controller
 
         AuditService::log(AuditService::EVENT_PUBLISH, $user->id, 'Event', $event->id, null, null, $event->name);
 
+        // The publish that takes a setup guide's schedule live lands on its Schedule tab, in the
+        // event's month, where the "Your page" panel answers it. This action is reached from the
+        // guest page, the guide and the draft panel; sent back to any of those, the one moment
+        // the guide celebrates would be spent on a page that cannot show it.
+        if (SetupGuide::shouldCelebrate($user, $role)) {
+            $date = $event->starts_at ? Carbon::parse($event->saleEventDateFromStartsAt()) : Carbon::now();
+
+            return redirect(route('role.view_admin', [
+                'subdomain' => $subdomain,
+                'tab' => 'schedule',
+                'month' => $date->month,
+                'year' => $date->year,
+            ]))->with('message', __('messages.event_published'))
+                // The panel says it; SetupGuide::speaksForToast() reads this to know the toast is its own.
+                ->with('setup_guide_saved', true);
+        }
+
         return redirect()->back()->with('message', __('messages.event_published'));
     }
 
@@ -1841,7 +1859,19 @@ class EventController extends Controller
                 'is_draft' => (bool) $event->is_draft,
                 'url' => $event->is_draft ? null : $event->getUndatedGuestUrl($subdomain),
                 'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+                // A draft's panel can publish it in place rather than only say "when you are ready".
+                'publish_url' => $event->is_draft
+                    ? route('event.publish', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)])
+                    : null,
             ]);
+        }
+
+        // An event landing on the schedule a setup guide belongs to: the Schedule tab answers it
+        // with the guide's "Your page" panel (SetupGuide::surface()). Only an event that is ON
+        // the page: answering a draft with "is on your page" would name the last public event
+        // instead, and take the toast that says the draft was saved.
+        if (SetupGuide::belongsTo($request->user(), $role) && SetupGuide::onPage($event)) {
+            $redirect->with('setup_guide_saved', true);
         }
 
         if ($galleryError = GalleryUtils::errorMessage($gallery)) {

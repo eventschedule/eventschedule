@@ -58,7 +58,12 @@
      do next, instead of a three-second toast. A draft has no public page until it is published,
      so it gets no link. The name is the user's own text, hence x-user-text. --}}
 @php $firstEventCreated = session('first_event_created'); @endphp
-@if (is_array($firstEventCreated))
+{{-- Someone with a setup guide gets its "Your page" panel here instead, after every event save
+     until their page has a few events on it (App\Utils\SetupGuide::surface()). One panel, one
+     forward button. Everyone else keeps the panel below. --}}
+@if (\App\Utils\SetupGuide::surface() === 'panel')
+@include('partials.setup-guide', ['place' => 'panel'])
+@elseif (is_array($firstEventCreated))
 <div class="pb-4">
     <div class="ap-card rounded-xl p-6" role="status">
         <div class="flex items-start gap-3">
@@ -100,6 +105,16 @@
             <x-brand-link href="{{ $firstEventCreated['url'] }}" target="_blank">
                 {{ __('messages.view_event') }}
             </x-brand-link>
+            @elseif (! empty($firstEventCreated['publish_url']))
+            {{-- A draft can be published from here: "when you are ready" with no button was a
+                 dead end on the page that had just said the event exists. --}}
+            <x-secondary-link href="{{ $firstEventCreated['edit_url'] }}">
+                {{ __('messages.edit_event') }}
+            </x-secondary-link>
+            <form method="POST" action="{{ $firstEventCreated['publish_url'] }}">
+                @csrf
+                <x-brand-button type="submit">{{ __('messages.publish') }}</x-brand-button>
+            </form>
             @else
             <x-brand-link href="{{ $firstEventCreated['edit_url'] }}">
                 {{ __('messages.edit_event') }}

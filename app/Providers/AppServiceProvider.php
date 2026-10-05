@@ -159,6 +159,15 @@ class AppServiceProvider extends ServiceProvider
                 'upgradeSubdomain' => $upgradeRole?->subdomain,
                 'githubStars' => \App\Utils\GitHubUtils::getStars(),
             ]);
+
+            // Where the setup guide is about to say "that worked" itself (arriving at the first
+            // event form from the wizard, and the page a schedule goes live on), the success
+            // toast would say it a second time, in the opposite corner. The flash is dropped
+            // here, after the controller and the page body have run and before the shell that
+            // renders toasts does, so anything asserting on the redirect still sees it.
+            if (session()->has('message') && \App\Utils\SetupGuide::speaksForToast()) {
+                session()->forget('message');
+            }
         });
 
         // Badge counts for every /admin queue waiting on an admin. The service gates

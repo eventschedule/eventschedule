@@ -18,9 +18,18 @@
                  puts a single-item line at flex-START, which would flip them from end-aligned to
                  start-aligned at narrow widths. --}}
             <div class="flex items-center gap-3 ms-auto">
+                @php
+                    $secondaryAction = 'inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-white/[0.06] rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800';
+
+                    // While a setup guide is showing on this page, the next thing to do is in it,
+                    // and a second schedule is the wrong turn in someone's first hour. "New
+                    // Schedule" stays, as a secondary button, until the guide ends.
+                    $setupGuideHere = \App\Utils\SetupGuide::surface() === 'section';
+                @endphp
+
                 {{-- Customize Button --}}
                 <button type="button" x-data x-on:click="$dispatch('open-modal', 'customize-dashboard')"
-                    class="inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-white/[0.06] rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    class="{{ $secondaryAction }}">
                     <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     {{ __('messages.customize_dashboard') }}
                 </button>
@@ -31,12 +40,21 @@
                      handler in layouts/app.blade.php still matches. --}}
                 @if(!is_demo_mode() && $canCreateSchedule)
                 <div class="relative inline-block text-left">
+                    @if ($setupGuideHere)
+                    <button type="button" class="popup-toggle {{ $secondaryAction }}" data-popup-target="dashboard-new-schedule-menu" aria-expanded="false">
+                        {{ __('messages.new_schedule') }}
+                        <svg class="ms-1.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    @else
                     <x-brand-button class="popup-toggle" data-popup-target="dashboard-new-schedule-menu" aria-expanded="false">
                         {{ __('messages.new_schedule') }}
                         <svg class="ms-1.5 h-4 w-4 text-white/80" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </x-brand-button>
+                    @endif
                     {{-- Deliberately NOT role="menu"/role="menuitem": that pattern obliges arrow-key
                          navigation, and the shared popup JS only handles Escape, so every item
                          carrying tabindex="-1" made the whole menu unreachable by keyboard. As a
@@ -77,6 +95,13 @@
             </div>
         </div>
 
+        {{-- The setup guide's home (partials/setup-guide): its steps, the open one, and a picture
+             of the person's own page. Under the title, unless something is owed: then the
+             "Needs attention" queue keeps first place and the guide follows it, below. --}}
+        @if ($pendingActionItems->isEmpty())
+            @include('partials.setup-guide', ['place' => 'section', 'rows' => $nextStepItems, 'dismissedBefore' => $nextStepsDismissedBefore])
+        @endif
+
         <!-- Get Started Panel -->
         @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0 && !is_demo_mode())
         <div>
@@ -97,42 +122,16 @@
             @include('partials.federation-prompt', ['padded' => false])
         @endif
 
-        @php
-            $hasPendingActions = $pendingActionItems->isNotEmpty();
-            $hasNextSteps = ! empty($nextStepItems) && $nextStepItems->isNotEmpty();
-        @endphp
+        {{-- Needs attention: pending items to handle across all editable schedules. Always the
+             full width now. It used to share a two-column grid with a "Next steps" panel of
+             suggestions; those moved into the setup guide's card (partials/setup-guide), which
+             takes the guide's place on the page whether or not there is a guide, so the to-do
+             queue is no longer set beside a card in a different look. --}}
+        @if ($pendingActionItems->isNotEmpty())
+            <x-needs-attention :items="$pendingActionItems" />
 
-        @if ($hasPendingActions || $hasNextSteps)
-            {{-- The two queues sit side by side once the pane can hold them. The AP pane is the
-                 viewport minus the 288px sidebar and 64px of gutters, so xl (1280) is the first
-                 breakpoint where a 452px column still fits a row title without truncating it; at
-                 lg the pane is 672px and a column would be 328px.
-
-                 Two columns only when BOTH are present. That does mean dismissing every next step
-                 reflows the survivor back to full width - but that is a one-off, on an explicit
-                 action that already reloads the page, whereas an unconditional two-column grid
-                 would leave a permanently half-empty row in the much more common case of having
-                 only one queue.
-
-                 items-start so the shorter card ends where its rows end instead of stretching to
-                 match the taller one. --}}
-            <div class="grid grid-cols-1 gap-4 items-start {{ $hasPendingActions && $hasNextSteps ? 'xl:grid-cols-2' : '' }}">
-                {{-- Needs attention: pending items to handle across all editable schedules. --}}
-                @if ($hasPendingActions)
-                    <x-needs-attention :items="$pendingActionItems" />
-                @endif
-
-                {{-- Next steps: suggestions, deliberately a separate list from the one above so the
-                     to-do queue stays a queue. Same component, its own heading, and a muted badge -
-                     adjacent to the real queue the chrome is otherwise identical, and the badge is
-                     the only thing left carrying which of the two is actually owed. --}}
-                @if ($hasNextSteps)
-                    <x-needs-attention :items="$nextStepItems" :title="__('messages.next_steps')"
-                        badge-tone="muted"
-                        :dismiss-route="route('home.next_steps_dismiss')"
-                        :dismiss-all-route="route('home.next_steps_dismiss_all')" />
-                @endif
-            </div>
+            {{-- Something is owed: the queue keeps first place and the card follows it. --}}
+            @include('partials.setup-guide', ['place' => 'section', 'rows' => $nextStepItems, 'dismissedBefore' => $nextStepsDismissedBefore])
         @endif
 
         {{-- Below the task lists on purpose: listing on the network is a suggestion, and the

@@ -344,6 +344,29 @@ class SendActivationNudges extends Command
             });
         }
 
+        if ($steps) {
+            // "Turn off suggestions" (SetupGuide::suggest()) is every one of those dismissals at
+            // once, for every schedule this person has or will have. Keyed on $steps, so
+            // first_sale, which asks for nothing, is exempt without being named.
+            $query->whereHas('user', fn ($q) => $q->whereNull('suggestions_off_at'));
+        }
+
+        if (in_array('next_step_tickets', $steps, true)) {
+            // "No tickets needed", answered in the setup guide, is an answer here too
+            // (SetupGuide::declinedTicketsFor() is the same question in PHP).
+            //
+            // NOT EXISTS over three POSITIVE conditions, never a negated test inside
+            // whereHas('user'): for an owner with no guide the column is NULL, and for one who
+            // answered nothing there is no `skipped`, and NOT over either is NULL - which drops
+            // exactly the owners this mail is for (the trap dueForNoTicketTypeFree() describes).
+            // The candidate is a quoted JSON string; unquoted, MySQL rejects it and the run dies.
+            $query->whereNotExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('users')
+                ->whereColumn('users.id', 'roles.user_id')
+                ->whereRaw('JSON_EXTRACT(users.setup_guide, \'$.role_id\') = roles.id')
+                ->whereRaw('JSON_CONTAINS(users.setup_guide, \'"tickets"\', \'$.skipped\')'));
+        }
+
         return $query->orderBy('id');
     }
 

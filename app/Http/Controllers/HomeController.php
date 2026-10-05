@@ -17,6 +17,7 @@ use App\Services\AnalyticsService;
 use App\Services\FederationService;
 use App\Utils\DateUtils;
 use App\Utils\LegacyRedirects;
+use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -28,6 +29,12 @@ use Illuminate\Validation\Rule;
 class HomeController extends Controller
 {
     use Traits\CalendarDataTrait;
+
+    /**
+     * Whether getNextStepItems() found a suggestion this person turned down before. Set as a
+     * side effect of that method, which already loads the dismissals, rather than queried twice.
+     */
+    private bool $nextStepsDismissedBefore = false;
 
     /**
      * The catch-all at the bottom of routes/web.php, for single-segment paths nothing else claims.
@@ -362,7 +369,11 @@ class HomeController extends Controller
         // reactive - "a to-do list is for things that need doing" - and mixing growth
         // suggestions into it would make a real queue impossible to trust. Same component,
         // different heading, the way AdminAlertService reuses it.
-        $nextStepItems = $this->getNextStepItems($roleIds);
+        //
+        // Minus the rows a new organizer's setup guide is already asking for itself, so the
+        // dashboard does not say "add your first event" twice (SetupGuide::withoutCoveredSteps()).
+        $nextStepItems = SetupGuide::withoutCoveredSteps($this->getNextStepItems($roleIds));
+        $nextStepsDismissedBefore = $this->nextStepsDismissedBefore;
 
         // Nudge admins to turn federation on once there is something worth sharing.
         $federation = app(FederationService::class);
@@ -403,7 +414,7 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
-            'pendingActionItems', 'nextStepItems', 'showFederationPrompt', 'federationListingSchedules',
+            'pendingActionItems', 'nextStepItems', 'nextStepsDismissedBefore', 'showFederationPrompt', 'federationListingSchedules',
         ));
     }
 
@@ -703,8 +714,11 @@ class HomeController extends Controller
     private function getNextStepItems($roleIds)
     {
         $items = collect();
+        $this->nextStepsDismissedBefore = false;
 
-        if ($roleIds->isEmpty()) {
+        // "Turn off suggestions" (SetupGuide::suggest()): nothing is offered, on any schedule,
+        // until the person turns it back on. Before any query.
+        if ($roleIds->isEmpty() || ! auth()->user()?->wantsSuggestions()) {
             return $items;
         }
 
@@ -792,6 +806,16 @@ class HomeController extends Controller
         $withTicketType = $ticketTypes(false);
         $withPaidTicketType = $ticketTypes(true);
 
+        // Schedules with an event that takes registrations. Undated, like the ticket types
+        // above: "they know how" is about the schedule, not about its next date. This is the
+        // rule SendActivationNudges::dueForNoTicketTypeFree() already has, and branch 1 did not:
+        // a free schedule that took sign-ups was still told to add free registration.
+        $withRegistration = $owned(DB::table('event_role')
+            ->join('events', 'events.id', '=', 'event_role.event_id')
+            ->whereIn('event_role.role_id', $ids)
+            ->where('events.rsvp_enabled', true))
+            ->distinct()->pluck('event_role.role_id')->flip();
+
         // Schedules with a grandfathered event (events.tickets_grandfathered_at) that is itself
         // still selling: not cancelled, a date to come, and a priced row. Any old stamp was not
         // enough - a free schedule with one grandfathered 2025 event and a NEW priced event that
@@ -872,9 +896,20 @@ class HomeController extends Controller
         $dismissed = $dismissedRows->map(fn ($row) => $row->role_id.':'.$row->step_type)->flip();
         $paymentsDismissed = $dismissedRows->contains(fn ($row) => $row->step_type === 'next_step_payments');
 
+        // Read by the dashboard's card (SetupGuide::suggestions()): somebody who has turned a
+        // suggestion down before and is being suggested to again is offered the off switch
+        // outright. Only this panel's own step types: the network prompt's dismissals share the
+        // table and are a different question.
+        $this->nextStepsDismissedBefore = $dismissedRows
+            ->contains(fn ($row) => in_array($row->step_type, DismissedNextStep::STEP_TYPES, true));
+
         foreach ($roles as $role) {
-            // 1) Something upcoming and no way to buy: the step that matters most.
-            if (isset($publicUpcoming[$role->id]) && ! isset($withTicketType[$role->id])) {
+            // 1) Something upcoming and no way to buy: the step that matters most. On a schedule
+            // that cannot sell a priced ticket the ask is registration, and one that already
+            // takes registrations has answered it (see $withRegistration); a schedule that can
+            // sell is still asked for a ticket type, as its email is.
+            if (isset($publicUpcoming[$role->id]) && ! isset($withTicketType[$role->id])
+                && ! (isset($withRegistration[$role->id]) && ! $role->canSellPaidTickets())) {
                 // A dismissal suppresses the row and the schedule keeps its slot: the continue
                 // below still runs. Falling through would replace a dismissed suggestion with
                 // the next-best one on the same schedule, which reads as the button not working.
@@ -898,6 +933,9 @@ class HomeController extends Controller
                         // partial. getPendingActionItems() and AdminAlertService never set it,
                         // so their rows render no control.
                         'dismiss_schedule' => UrlUtils::encodeId($role->id),
+                        // Read by SetupGuide::withoutCoveredSteps(): a row saying people are
+                        // waiting to buy is never hidden behind the guide's own tickets step.
+                        'waiting' => $waiting,
                     ]);
                 }
 
@@ -1004,7 +1042,13 @@ class HomeController extends Controller
             'next_step_gallery' => 3,
         ];
 
-        return $items->sortBy(fn ($item) => $priority[$item['type']] ?? 9)->values();
+        // Each row carries its schedule's face (photo or initial) for the dashboard's card.
+        $faces = $roles->mapWithKeys(fn (Role $role) => [UrlUtils::encodeId($role->id) => SetupGuide::face($role)]);
+
+        return $items
+            ->sortBy(fn ($item) => $priority[$item['type']] ?? 9)
+            ->map(fn ($item) => $item + ($faces[$item['dismiss_schedule']] ?? []))
+            ->values();
     }
 
     /**
@@ -1592,10 +1636,10 @@ class HomeController extends Controller
      * its own table rather than mutating users, so nothing touches users.updated_at or the
      * updating hook in User::boot().
      */
-    public function dismissNextStep(Request $request): RedirectResponse
+    public function dismissNextStep(Request $request): JsonResponse|RedirectResponse
     {
         if (is_demo_mode()) {
-            return redirect()->back();
+            return $this->nextStepsAnswer($request);
         }
 
         $validated = $request->validate([
@@ -1614,7 +1658,9 @@ class HomeController extends Controller
         // row. decodeId() returns null on a malformed hash, which would otherwise fall through
         // to an unkeyed write.
         if (! $roleId || ! $user->editor()->where('roles.id', $roleId)->exists()) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
+            return $request->expectsJson()
+                ? response()->json(['ok' => false], 403)
+                : redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         DismissedNextStep::firstOrCreate([
@@ -1623,40 +1669,90 @@ class HomeController extends Controller
             'step_type' => $validated['type'],
         ]);
 
-        return redirect()->back();
+        return $this->nextStepsAnswer($request);
     }
 
     /**
-     * Turn down every suggestion currently on the panel.
-     *
-     * Still one row per suggestion rather than a flag on the user, so this clears what is on the
-     * panel today without silencing a schedule created tomorrow.
+     * JSON to the dashboard's card, which folds the row in place; a redirect to the plain form
+     * its still version posts. Without the JSON branch a fetch follows the redirect into a full
+     * dashboard render to learn that one row was written.
      */
-    public function dismissAllNextSteps(Request $request): RedirectResponse
+    private function nextStepsAnswer(Request $request, array $rows = []): JsonResponse|RedirectResponse
+    {
+        return $request->expectsJson()
+            ? response()->json(['ok' => true, 'rows' => $rows])
+            : redirect()->back();
+    }
+
+    /** The posted shape of a list of suggestions: what "Dismiss all" was looking at, and what Undo takes back. */
+    private function nextStepRowRules(bool $required): array
+    {
+        return [
+            // 200 is far above the owner with 37 schedules on this install, and a bound at all.
+            'rows' => [$required ? 'required' : 'sometimes', 'array', 'max:200'],
+            'rows.*.schedule' => ['required', 'string'],
+            'rows.*.type' => ['required', Rule::in(DismissedNextStep::STEP_TYPES)],
+        ];
+    }
+
+    /**
+     * Turn down every suggestion currently in the list.
+     *
+     * Still one row per suggestion rather than a flag on the user, so this clears what is listed
+     * today without silencing a schedule created tomorrow. (The flag exists too, and is its own
+     * control: setSuggestions().)
+     *
+     * WHAT IT WRITES. The dashboard's card posts the rows its list holds, and this writes those
+     * of them that are in the offer: withoutCoveredSteps(getNextStepItems()), the same set
+     * home() renders. So what goes is what was on screen. The line inside an open guide is not
+     * in the list and is not written; the quiet guide's own row is in it and is; and a finished
+     * guide dismissed a moment ago cannot have its schedule's row dismissed unseen, which a
+     * plain recompute would do, because that guide no longer holds anything back.
+     *
+     * The intersection is also the authorization: getNextStepItems() is only ever fed
+     * $user->editor(), so the offer cannot name a schedule this user does not edit, and a posted
+     * pair that is not in it writes nothing.
+     *
+     * It branches on whether `rows` was posted AT ALL: an empty list writes nothing rather than
+     * falling back. Only the still panel's form posts none, and it alone gets the recompute -
+     * needed there because that panel folds everything past the eighth row behind "show more" -
+     * minus any row about a schedule whose guide is showing, which belongs to the guide and is
+     * not in that panel either (partials/setup-guide).
+     */
+    public function dismissAllNextSteps(Request $request): JsonResponse|RedirectResponse
     {
         if (is_demo_mode()) {
-            return redirect()->back();
+            return $this->nextStepsAnswer($request);
         }
 
+        $validated = $request->validate($this->nextStepRowRules(false));
         $user = $request->user();
 
-        // Recomputed rather than read from hidden inputs. The panel only renders the first
-        // $limit rows and folds the rest into a "show more" details, so a form built from what
-        // is on screen would leave everything past the eighth schedule behind. It also means
-        // there is no per-item authorization to do: getNextStepItems() is only ever fed
-        // $user->editor(), so the list cannot name a schedule this user does not edit.
-        $rows = $this->getNextStepItems($user->editor()->pluck('roles.id'))
+        $offer = SetupGuide::withoutCoveredSteps($this->getNextStepItems($user->editor()->pluck('roles.id')))
             // Every branch sets dismiss_schedule today. This is so that one added later without
             // it skips the row, rather than writing a null into a NOT NULL role_id - which is an
             // unhandled 500 on this action, not a missing dismissal.
-            ->filter(fn ($item) => ! empty($item['dismiss_schedule']))
-            ->map(fn ($item) => [
-                'user_id' => $user->id,
-                'role_id' => UrlUtils::decodeId($item['dismiss_schedule']),
-                'step_type' => $item['type'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ])->all();
+            ->filter(fn ($item) => ! empty($item['dismiss_schedule']));
+
+        if ($request->has('rows')) {
+            $listed = collect($validated['rows'] ?? [])
+                ->map(fn ($row) => $row['schedule'].':'.$row['type'])
+                ->flip();
+
+            $offer = $offer->filter(fn ($item) => isset($listed[$item['dismiss_schedule'].':'.$item['type']]));
+        } elseif (($state = SetupGuide::state()) && empty($state['hidden'])) {
+            $own = UrlUtils::encodeId($state['role_id']);
+
+            $offer = $offer->reject(fn ($item) => $item['dismiss_schedule'] === $own);
+        }
+
+        $rows = $offer->map(fn ($item) => [
+            'user_id' => $user->id,
+            'role_id' => UrlUtils::decodeId($item['dismiss_schedule']),
+            'step_type' => $item['type'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->values()->all();
 
         if ($rows) {
             // One statement, not one per schedule: an owner on this install has 37 of them.
@@ -1666,6 +1762,56 @@ class HomeController extends Controller
             DB::table('dismissed_next_steps')->insertOrIgnore($rows);
         }
 
-        return redirect()->back();
+        // What it wrote, so the card's Undo can take back exactly that.
+        return $this->nextStepsAnswer($request, $offer
+            ->map(fn ($item) => ['schedule' => $item['dismiss_schedule'], 'type' => $item['type']])
+            ->values()->all());
+    }
+
+    /**
+     * Undo: take back dismissals this person has just made.
+     *
+     * Their OWN rows, which is the whole authorization: a dismissal is per user, so the user_id
+     * in the query is what stops one editor undoing another's answer about a schedule they
+     * share. Whether the caller still edits the schedule is deliberately not asked - it would
+     * be a second query that changes no outcome, since the most this can do is show somebody a
+     * suggestion they turned down themselves. Only this panel's step types: the "List on the
+     * network" prompt shares the table and is not in STEP_TYPES, so this cannot touch it.
+     */
+    public function restoreNextSteps(Request $request): JsonResponse|RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return $this->nextStepsAnswer($request);
+        }
+
+        $validated = $request->validate($this->nextStepRowRules(true));
+        $user = $request->user();
+
+        foreach ($validated['rows'] as $row) {
+            if ($roleId = UrlUtils::decodeId($row['schedule'])) {
+                DismissedNextStep::where('user_id', $user->id)
+                    ->where('role_id', $roleId)
+                    ->where('step_type', $row['type'])
+                    ->delete();
+            }
+        }
+
+        return $this->nextStepsAnswer($request);
+    }
+
+    /**
+     * "Turn off suggestions", and back on: the dashboard's card. The same switch is a toggle
+     * in Account settings (ProfileController::update()); SetupGuide::suggest() is the one
+     * writer behind both.
+     */
+    public function setSuggestions(Request $request): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate(['on' => ['required', 'boolean']]);
+
+        if (! is_demo_mode()) {
+            SetupGuide::suggest($request->user(), (bool) $validated['on']);
+        }
+
+        return $this->nextStepsAnswer($request);
     }
 }

@@ -58,7 +58,10 @@ class FirstEventFlowTest extends TestCase
 
         $html = $this->createHtml($owner, $role);
 
-        $this->assertStringContainsString('class="step-indicator', $html, 'step 3 of 3 is shown');
+        // The three-circle band is the guest-submit flow's alone now. A first event of one's own
+        // is walked by the setup guide (SetupGuideTest), which this fixture, a schedule written
+        // straight to the database rather than saved through the wizard, does not have.
+        $this->assertStringNotContainsString('class="step-indicator', $html);
         $this->assertStringContainsString(__('messages.next_step_add_first_event'), $html);
         $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html);
         $this->assertStringContainsString(__('messages.more_options'), $html);
@@ -134,8 +137,23 @@ class FirstEventFlowTest extends TestCase
 
         $html = $this->createHtml($owner, $role);
 
-        $this->assertStringContainsString('class="step-indicator', $html);
+        $this->assertStringNotContainsString('class="step-indicator', $html);
         $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html);
+    }
+
+    /** The band survives in exactly one place: someone adding an event to another schedule. */
+    public function test_the_guest_submit_flow_keeps_the_step_band(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->freeTalent($owner);
+
+        $html = $this->actingAs($owner)
+            ->withSession(['pending_request' => $role->subdomain])
+            ->get(route('event.create', ['subdomain' => $role->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('class="step-indicator', $html);
     }
 
     /** Both date/time checks show inline instead of in an alert(). */

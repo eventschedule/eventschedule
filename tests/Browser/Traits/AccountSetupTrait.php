@@ -181,6 +181,18 @@ trait AccountSetupTrait
             ));
         }
 
+        // The wizard's first save starts the setup guide (App\Utils\SetupGuide), which then keeps
+        // a pill in the bottom corner of the schedule's pages for a month. These journeys are not
+        // about it and click things that sit in that corner, so it ends here, for this schedule's
+        // owner only. Written straight to the database, as upgradeToEnterprise() does.
+        $scheduleId = \App\Models\Role::where('subdomain', $slug)->value('id');
+
+        if ($scheduleId) {
+            \Illuminate\Support\Facades\DB::table('users')
+                ->whereRaw("JSON_EXTRACT(setup_guide, '$.role_id') = ?", [$scheduleId])
+                ->update(['setup_guide' => null]);
+        }
+
         $browser->visit('/'.$slug.'/schedule');
         $browser->assertPathIs('/'.$slug.'/schedule');
     }

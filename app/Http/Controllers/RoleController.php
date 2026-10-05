@@ -60,6 +60,7 @@ use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
 use App\Utils\PhoneUtils;
 use App\Utils\QrCodeUtils;
+use App\Utils\SetupGuide;
 use App\Utils\SlugPatternUtils;
 use App\Utils\SponsorUtils;
 use App\Utils\UrlUtils;
@@ -4783,6 +4784,13 @@ class RoleController extends Controller
                 'pending_schedule_type' => null,
                 'pending_schedule_name' => null,
             ]);
+        }
+
+        // A first own schedule saved here is what starts the setup guide, and the only thing
+        // that does. Not in the guest-submit flow: that visitor came to send an event to
+        // somebody else's schedule, and keeps the step band that flow has always shown.
+        if ($firstSchedule && ! session('pending_request')) {
+            SetupGuide::start($user, $role);
         }
 
         // Handle sync direction and calendar setup for new role

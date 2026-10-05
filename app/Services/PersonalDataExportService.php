@@ -139,7 +139,7 @@ class PersonalDataExportService
     {
         $row = (array) DB::table('users')->where('id', $user->id)->first([
             'name', 'email', 'phone', 'phone_verified_at', 'email_verified_at', 'terms_accepted_at',
-            'timezone', 'language_code', 'is_subscribed', 'utm_source', 'utm_medium', 'utm_campaign',
+            'timezone', 'language_code', 'is_subscribed', 'suggestions_off_at', 'utm_source', 'utm_medium', 'utm_campaign',
             'utm_content', 'utm_term', 'referrer_url', 'landing_page', 'referral_code',
             'profile_image_url', 'created_at', 'updated_at',
         ]);

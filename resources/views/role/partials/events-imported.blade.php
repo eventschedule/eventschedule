@@ -33,8 +33,13 @@
             </div>
         </div>
 
+        {{-- For someone with a setup guide this panel is also where their page first fills up:
+             the guide adds its "Your page" strip here rather than showing a second panel. --}}
+        @include('partials.setup-guide', ['place' => 'strip'])
+
         @if ($guestUrl)
-        <x-copy-link id="imported-schedule-url" :value="$guestUrl" class="mt-4" :label="__('messages.schedule_link')" />
+        {{-- data-setup-share: copying the schedule's own address is the guide's "share" step. --}}
+        <x-copy-link id="imported-schedule-url" :value="$guestUrl" class="mt-4" :label="__('messages.schedule_link')" data-setup-share="link" />
         @endif
 
         {{-- The way back is quiet and at the start; the way on is at the end. --}}

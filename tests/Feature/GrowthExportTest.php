@@ -129,7 +129,7 @@ class GrowthExportTest extends TestCase
         // as in the consented cookie, 12 since imports are counted by source and the two Google
         // fields read where the ids live. Bumping this is deliberate: a reader diffing two pulls
         // needs to know the shape (or the meaning) moved.
-        $this->assertSame(12, $data['meta']['schema_version']);
+        $this->assertSame(13, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
@@ -1976,6 +1976,58 @@ class GrowthExportTest extends TestCase
         $this->assertTrue($row[$i['referred']]);
         $this->assertSame('2-5', $row[$i['logins_90d']], 'three recent sign-ins; the one 120 days ago is outside');
         $this->assertSame('0', $row[$i['event_edits_90d']], 'a system edit is not the owner doing anything');
+    }
+
+    /**
+     * The setup guide's cohort. It began mid-month, so created_month cannot say who had one: the
+     * row has to. The furthest stage reached, from a fixed vocabulary, and whether it was hidden.
+     */
+    public function test_a_signup_row_says_how_far_through_the_setup_guide_they_got(): void
+    {
+        $guides = [
+            'none' => null,
+            'started' => ['role_id' => 1, 'started_at' => now()->toIso8601String()],
+            'live' => ['role_id' => 1, 'started_at' => now()->toIso8601String(), 'celebrated_at' => now()->toIso8601String()],
+            'embedded' => ['role_id' => 1, 'started_at' => now()->toIso8601String(), 'celebrated_at' => now()->toIso8601String(),
+                'shared_at' => now()->toIso8601String(), 'embedded_at' => now()->toIso8601String(), 'dismissed_at' => now()->toIso8601String()],
+            'finished' => ['role_id' => 1, 'started_at' => now()->toIso8601String(), 'completed_at' => now()->toIso8601String()],
+        ];
+
+        $users = [];
+        foreach ($guides as $label => $guide) {
+            $users[$label] = User::factory()->create(['email_verified_at' => now()]);
+            DB::table('users')->where('id', $users[$label]->id)
+                ->update(['setup_guide' => $guide === null ? null : json_encode($guide)]);
+        }
+
+        $data = $this->build();
+        $i = array_flip($data['signups']['columns']);
+        $rows = collect($data['signups']['rows']);
+        $rowOf = fn (User $user) => $rows->firstWhere(
+            $i['uid'],
+            'u:'.substr(hash_hmac('sha256', (string) $user->id, (string) config('app.key')), 0, 12)
+        );
+
+        $this->assertNull($rowOf($users['none'])[$i['setup_guide']]);
+        $this->assertFalse($rowOf($users['none'])[$i['setup_guide_hidden']]);
+        $this->assertSame('started', $rowOf($users['started'])[$i['setup_guide']]);
+        $this->assertSame('live', $rowOf($users['live'])[$i['setup_guide']]);
+        $this->assertSame('embedded', $rowOf($users['embedded'])[$i['setup_guide']], 'the furthest stage, not the first');
+        $this->assertTrue($rowOf($users['embedded'])[$i['setup_guide_hidden']]);
+        $this->assertSame('finished', $rowOf($users['finished'])[$i['setup_guide']]);
+
+        // The account-wide "Turn off suggestions" switch, which is not the guide being hidden.
+        $this->assertFalse($rowOf($users['embedded'])[$i['suggestions_off']]);
+
+        \App\Utils\SetupGuide::suggest($users['started'], false);
+        $data = $this->build();
+        $off = collect($data['signups']['rows'])->firstWhere(
+            $i['uid'],
+            'u:'.substr(hash_hmac('sha256', (string) $users['started']->id, (string) config('app.key')), 0, 12)
+        );
+
+        $this->assertTrue($off[$i['suggestions_off']]);
+        $this->assertFalse($off[$i['setup_guide_hidden']]);
     }
 
     /** Deploy dates, from the first scheduler tick after each release. */

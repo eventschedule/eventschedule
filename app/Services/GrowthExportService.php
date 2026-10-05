@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Utils\HeroExperiment;
 use App\Utils\RealtimeTracker;
 use App\Utils\ReleaseHistory;
+use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -32,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 12;
+    public const SCHEMA_VERSION = 13;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -891,13 +892,22 @@ class GrowthExportService
                 $u->referred_by_user_id !== null,
                 $this->bucket((int) ($logins[$u->id] ?? 0)),
                 $this->bucket((int) ($edits[$u->id] ?? 0)),
+                // How far through the setup guide they got, from our own fixed vocabulary, and
+                // whether they hid it. Null for anyone who never had one: created_month alone
+                // cannot say who that is, since the guide started mid-month.
+                SetupGuide::stage($u->setup_guide),
+                is_array($u->setup_guide) && ! empty($u->setup_guide['dismissed_at']),
+                // The account-wide "Turn off suggestions" switch: no guide, no next steps and
+                // none of the reminder emails that ask the same things.
+                $u->suggestions_off_at !== null,
             ];
         }
 
         $columns = ['uid', 'created_month', 'signup_intent', 'utm_source', 'utm_medium',
             'referrer_domain', 'referrer_channel', 'landing_path', 'auth', 'reached_schedule_form',
             'saved_schedule', 'saved_event', 'saved_ticket', 'saved_paid_ticket', 'schedules_count',
-            'days_to_first_schedule', 'hero_variant', 'referred', 'logins_90d', 'event_edits_90d'];
+            'days_to_first_schedule', 'hero_variant', 'referred', 'logins_90d', 'event_edits_90d',
+            'setup_guide', 'setup_guide_hidden', 'suggestions_off'];
 
         // In place: by value, every row it rewrote would be copied while the caller's array was
         // still alive, doubling the row table's memory on a 128MB worker.

@@ -967,4 +967,159 @@ class DashboardNextStepsTest extends TestCase
 
         $this->assertSame([], $this->types($user));
     }
+
+    // ---- The card: listed dismissals, Undo, the switch -----------------------------------------
+
+    private function pair(Role $role, string $type): array
+    {
+        return ['schedule' => UrlUtils::encodeId($role->id), 'type' => $type];
+    }
+
+    private function dismissedIds(User $user): array
+    {
+        return DismissedNextStep::where('user_id', $user->id)->orderBy('role_id')->pluck('role_id')->all();
+    }
+
+    /**
+     * The card posts the rows its list holds and "Dismiss all" writes those of them that are in
+     * the offer, so what goes is what was on screen. A plain recompute dismisses rows the list
+     * never showed (the line inside an open setup guide; a schedule whose finished guide was
+     * dismissed a moment earlier).
+     */
+    public function test_dismiss_all_writes_only_the_rows_the_card_listed(): void
+    {
+        $user = $this->createOwner();
+        $first = $this->createRole($user);
+        $second = $this->createRole($user);
+        $stranger = $this->createRole($this->createOwner());
+
+        $answer = $this->actingAs($user)->postJson(route('home.next_steps_dismiss_all'), ['rows' => [
+            $this->pair($first, 'next_step_first_event'),
+            // In the list's shape, and not in the offer: the wrong step for this schedule, and a
+            // schedule this person does not edit. Neither is written.
+            $this->pair($second, 'next_step_tickets'),
+            $this->pair($stranger, 'next_step_first_event'),
+        ]])->assertOk();
+
+        $this->assertSame([$first->id], $this->dismissedIds($user));
+        $this->assertSame([$this->pair($first, 'next_step_first_event')], $answer->json('rows'), 'it reports what it wrote, for Undo');
+
+        // An EMPTY list writes nothing. Falling back to "everything" here would turn a card
+        // with nothing left in it into a dismissal of rows it was not showing.
+        $this->actingAs($user)->postJson(route('home.next_steps_dismiss_all'), ['rows' => []])->assertOk();
+
+        $this->assertSame([$first->id], $this->dismissedIds($user));
+        $this->assertSame(['next_step_first_event'], $this->types($user), 'the second schedule is still asked');
+    }
+
+    public function test_an_undo_takes_back_only_the_callers_own_dismissals(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        // A co-admin of the same schedule, who turned the same suggestion down for themselves.
+        $admin = $this->createOwner();
+        $admin->roles()->attach($role->id, ['level' => 'admin', 'created_at' => now()]);
+        $stranger = $this->createOwner();
+        $theirs = $this->createRole($stranger);
+
+        $this->dismiss($user, $role, 'next_step_first_event');
+        $this->dismiss($admin, $role, 'next_step_first_event');
+        $this->dismiss($stranger, $theirs, 'next_step_first_event');
+        $this->assertSame([], $this->types($user));
+
+        // A schedule the caller does not edit, and a type that is not this panel's: nothing.
+        $this->actingAs($user)->postJson(route('home.next_steps_restore'), ['rows' => [$this->pair($theirs, 'next_step_first_event')]])->assertOk();
+        $this->actingAs($user)->postJson(route('home.next_steps_restore'), ['rows' => [$this->pair($role, DismissedNextStep::FEDERATION_LISTING)]])->assertStatus(422);
+        $this->assertSame(3, DismissedNextStep::count());
+
+        $this->actingAs($user)->postJson(route('home.next_steps_restore'), ['rows' => [$this->pair($role, 'next_step_first_event')]])->assertOk();
+
+        $this->assertSame(['next_step_first_event'], $this->types($user));
+        // Their own row and no other: the co-admin's answer about the same schedule stands.
+        $this->assertEqualsCanonicalizing(
+            [$admin->id, $stranger->id],
+            DismissedNextStep::pluck('user_id')->all()
+        );
+    }
+
+    /** A fetch that got a redirect would follow it into a whole dashboard render. */
+    public function test_the_card_is_answered_in_json(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $stranger = $this->createRole($this->createOwner());
+
+        $this->actingAs($user)->postJson(route('home.next_steps_dismiss'), $this->pair($role, 'next_step_first_event'))
+            ->assertOk()->assertJson(['ok' => true]);
+        $this->actingAs($user)->postJson(route('home.next_steps_dismiss'), $this->pair($stranger, 'next_step_first_event'))
+            ->assertStatus(403);
+
+        $this->assertSame([$role->id], DismissedNextStep::pluck('role_id')->all());
+    }
+
+    /**
+     * The free plan's reminder email already stands down for a schedule that takes sign-ups
+     * (SendActivationNudges::dueForNoTicketTypeFree()). The panel did not, and told it to "add
+     * free registration". A schedule that can sell is still asked for a ticket type.
+     */
+    public function test_a_free_schedule_taking_registrations_is_not_asked_for_them(): void
+    {
+        $user = $this->createOwner();
+        $free = $this->createFreeRole($user);
+        // On ANY of its events, not only the next one: "they know how" is about the schedule.
+        $this->createEvent($free, ['starts_at' => now()->subDays(40)->format('Y-m-d H:i:s'), 'rsvp_enabled' => true]);
+        $this->createEvent($free, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->assertSame([], $this->types($user));
+
+        $paid = $this->createRole($user);
+        $this->createEvent($paid, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s'), 'rsvp_enabled' => true]);
+
+        $steps = $this->nextSteps($user);
+
+        $this->assertSame(['next_step_tickets'], array_column($steps, 'type'));
+        $this->assertSame(UrlUtils::encodeId($paid->id), $steps[0]['dismiss_schedule']);
+    }
+
+    /**
+     * The list offers "Turn off suggestions" outright to somebody who has dismissed one before:
+     * the person for whom they came back. The "List on the network" prompt's dismissals share
+     * the table and are a different question.
+     */
+    public function test_only_this_panels_dismissals_count_as_dismissed_before(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user);
+        $second = $this->createRole($user);
+        $before = fn () => $this->actingAs($user)->get(route('home'))->assertOk()->viewData('nextStepsDismissedBefore');
+
+        $this->assertFalse($before());
+
+        DismissedNextStep::create(['user_id' => $user->id, 'role_id' => $role->id, 'step_type' => DismissedNextStep::FEDERATION_LISTING]);
+        $this->assertFalse($before());
+
+        $this->dismiss($user, $second, 'next_step_first_event');
+        $this->assertTrue($before());
+    }
+
+    /** "Dismiss all" clears today's rows; the switch is what ends them for a schedule made later. */
+    public function test_the_switch_ends_suggestions_for_schedules_created_later_too(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user);
+
+        $this->dismissAll($user);
+        $this->createRole($user);
+        $this->assertSame(['next_step_first_event'], $this->types($user), 'a new schedule is still suggested to');
+
+        $this->actingAs($user)->postJson(route('home.suggestions'), ['on' => false])->assertOk();
+        $this->createRole($user);
+
+        $this->assertSame([], $this->types($user->fresh()));
+        $this->actingAs($user->fresh())->get(route('home'))->assertDontSee(__('messages.next_steps'));
+
+        $this->actingAs($user->fresh())->postJson(route('home.suggestions'), ['on' => true])->assertOk();
+
+        $this->assertCount(2, $this->types($user->fresh()), 'back on: the two that were never dismissed');
+    }
 }

@@ -143,6 +143,9 @@
             },
             watch: {
                 panelOpen(open) {
+                    // The setup guide's floating shapes share this corner and step aside while
+                    // the chat is open (resources/js/components/SetupGuide.vue).
+                    document.body.toggleAttribute('data-support-open', open);
                     this.setupPolling();
                     if (open) {
                         this.fetchMessages();
