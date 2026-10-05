@@ -150,10 +150,19 @@ class ReleaseReviewFixesTest extends TestCase
     {
         config(['app.hosted' => false]);
         $owner = $this->createOwner();
+        // Named after every guest ON PURPOSE. The admin header prints the signed-in user's name on
+        // each of these pages, and the factory draws that name from Faker, whose list has Ada, Adam,
+        // Adams, Grace and Marie: about one run in 170 the owner was called after a guest, and a
+        // bare first name was "seen" on a tab its booking is not on. That failed CI once. With the
+        // collision on every run instead, the assertions below have to be about the booking rows.
+        $owner->name = 'Ada Grace Hedy Marie';
+        $owner->save();
         $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
         $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays()]);
 
-        // Distinctive guest names: the filter pills themselves render words like "Past".
+        // Each guest is looked for by the address bookingAt() gives them, which the list prints
+        // beside the name. Nothing else on the page can spell one: not the owner's name, not a
+        // CSRF token or an encoded id, not the filter pills (which render words like "Past").
         $this->bookingAt($role, $type, now('UTC')->addDays(3)->format('Y-m-d H:i:s'), 'Ada');
         $this->bookingAt($role, $type, now('UTC')->subDays(3)->format('Y-m-d H:i:s'), 'Grace');
         [$cancelledEvent, $cancelledSale] = $this->bookingAt($role, $type, now('UTC')->addDays(4)->format('Y-m-d H:i:s'), 'Hedy');
@@ -168,16 +177,16 @@ class ReleaseReviewFixesTest extends TestCase
         // as well, which double-counts it against the pending badge and buries the one row that still
         // needs a decision among the settled ones - and contradicts this test's own name.
         $upcoming = $this->actingAs($owner)->get($url.'upcoming');
-        $upcoming->assertSee('Ada')->assertDontSee('Marie')->assertDontSee('Grace')->assertDontSee('Hedy');
+        $upcoming->assertSee('ada@gmail.com')->assertDontSee('marie@gmail.com')->assertDontSee('grace@gmail.com')->assertDontSee('hedy@gmail.com');
 
         $past = $this->actingAs($owner)->get($url.'past');
-        $past->assertSee('Grace')->assertDontSee('Ada')->assertDontSee('Hedy');
+        $past->assertSee('grace@gmail.com')->assertDontSee('ada@gmail.com')->assertDontSee('hedy@gmail.com');
 
         $pending = $this->actingAs($owner)->get($url.'pending');
-        $pending->assertSee('Marie')->assertDontSee('Ada')->assertDontSee('Grace');
+        $pending->assertSee('marie@gmail.com')->assertDontSee('ada@gmail.com')->assertDontSee('grace@gmail.com');
 
         $cancelled = $this->actingAs($owner)->get($url.'cancelled');
-        $cancelled->assertSee('Hedy')->assertDontSee('Ada')->assertDontSee('Grace');
+        $cancelled->assertSee('hedy@gmail.com')->assertDontSee('ada@gmail.com')->assertDontSee('grace@gmail.com');
 
         $this->assertTrue($cancelledEvent->fresh()->is_cancelled);
     }
