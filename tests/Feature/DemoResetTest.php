@@ -12,7 +12,9 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Services\DemoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -31,15 +33,6 @@ class DemoResetTest extends TestCase
 {
     use CreatesScheduleData;
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Every demo schedule has a city, and the Role saving hook geocodes an address whenever a
-        // backend key is configured.
-        config(['services.google.backend' => null]);
-    }
 
     private function demoService(): DemoService
     {
@@ -473,5 +466,44 @@ class DemoResetTest extends TestCase
 
         $this->assertSame(0, Sale::whereIn('event_id', $realEvents->pluck('id'))->count(),
             'the demo user bought tickets on a real event attached to a demo schedule');
+    }
+
+    /**
+     * A reset drops and recreates every demo-* schedule, each with a city, and Role's saving hook
+     * geocodes a new address. That was one billed request per schedule per hour - 384 a day, the
+     * whole of Google's monthly free tier - for what is three cities. GeocodingService answers a
+     * repeated address from the cache.
+     *
+     * On the database cache store, as hosted runs it: the reset is one transaction, and the
+     * shared cache is only written once that commits, so within a reset it is the service's own
+     * per-process memory that has to answer the second schedule in a city.
+     */
+    public function test_a_reset_geocodes_each_city_once_not_each_schedule(): void
+    {
+        config(['services.google.backend' => 'test-key', 'cache.default' => 'database']);
+        Cache::flush();
+        Http::fake(['maps.googleapis.com/*' => Http::response(['status' => 'OK', 'results' => [[
+            'formatted_address' => 'Springfield, USA',
+            'place_id' => 'ChIJ-demo',
+            'geometry' => ['location' => ['lat' => 39.7817, 'lng' => -89.6501]],
+        ]]])]);
+
+        [$svc] = $this->seedDemo();
+
+        // The reset as a later hourly run meets it: a new process, and the month-old answers
+        // expired from the shared cache.
+        Cache::flush();
+        Cache::store('array')->flush();
+        $before = count(Http::recorded());
+
+        $this->reset($svc);
+
+        $recreated = Role::where('subdomain', 'like', 'demo-%')->get();
+        $addresses = $recreated->map->fullAddressRaw()->filter();
+        $this->assertGreaterThan(10, $addresses->count(), 'fixture: the demo schedules must have addresses');
+        $this->assertSame($addresses->count(), $recreated->whereNotNull('geo_lat')->count(), 'every one of them is still geocoded');
+
+        $this->assertSame($addresses->unique()->count(), count(Http::recorded()) - $before,
+            'the reset geocoded per schedule, not per distinct address');
     }
 }

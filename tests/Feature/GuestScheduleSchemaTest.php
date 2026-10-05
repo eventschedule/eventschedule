@@ -22,15 +22,6 @@ class GuestScheduleSchemaTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Role's saving hook geocodes a new address whenever a Google key is configured, which a
-        // developer's .env may carry: the coordinates below are the fixture's own.
-        config(['services.google.backend' => null]);
-    }
-
     public function test_a_venue_is_an_event_venue_with_its_address_coordinates_logo_and_image(): void
     {
         $venue = $this->createVenueWithAddress($this->createOwner(), [

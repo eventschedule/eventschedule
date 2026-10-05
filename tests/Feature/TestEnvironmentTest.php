@@ -83,6 +83,30 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * No fixture may reach Google's Geocoding API, which bills per request.
+     *
+     * Role's saving hook geocodes any schedule that has an address whenever a backend key is
+     * configured, and the suite loads the developer's .env - where the operator's real key
+     * lives. With nothing pinning it, every fixture that set a city or a street made a real,
+     * billed request: a few hundred per run, on a machine that runs the suite all day, which
+     * showed up as a Geocoding bill rather than as a failing test. CI never had a key, so it
+     * could not see this either.
+     *
+     * Nothing is set here on purpose: this asserts the default every other test inherits, so
+     * removing phpunit.xml's BACKEND_GOOGLE_KEY entry fails it on any machine that has one. A
+     * test that needs the geocode branch sets its own key together with Http::fake().
+     */
+    public function test_no_fixture_can_reach_the_geocoding_api(): void
+    {
+        $this->assertSame(
+            '',
+            (string) config('services.google.backend'),
+            'phpunit.xml must pin BACKEND_GOOGLE_KEY empty: with a real key in .env, every schedule '
+            .'fixture that has an address is a billed request to Google.'
+        );
+    }
+
+    /**
      * The other half of the harness that only CI can disprove.
      *
      * public/build is gitignored and .github/workflows/test.yml never builds assets, so the real

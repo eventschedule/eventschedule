@@ -29,7 +29,7 @@ class Stay22SettingsTest extends TestCase
 
         Cache::flush();
 
-        config(['stay22.enabled' => true, 'stay22.aid' => null, 'services.google.backend' => null]);
+        config(['stay22.enabled' => true, 'stay22.aid' => null]);
     }
 
     private function adminActing(): User

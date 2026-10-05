@@ -28,10 +28,6 @@ class GuestImagePerformanceTest extends TestCase
     {
         parent::setUp();
 
-        // Role's saving hook geocodes a new address whenever a Google key is configured, which a
-        // developer's .env may carry.
-        config(['services.google.backend' => null]);
-
         // The created hooks queue a generation job per upload; on the `sync` queue they would run
         // against fixture files that do not exist and record a `missing` skip.
         Queue::fake();

@@ -31,12 +31,6 @@ class Stay22ServiceTest extends TestCase
         config([
             'stay22.enabled' => true,
             'stay22.aid' => null,
-            // Role::saving() geocodes through the Google API whenever this key is set and the
-            // address changed, which would overwrite the fixture coordinates with whatever
-            // Google returns - and make these tests pass locally (where a key exists) while
-            // behaving differently in CI, where it does not. Pinned off so the coordinates
-            // under test are the ones written, and no real HTTP request is made.
-            'services.google.backend' => null,
         ]);
     }
 

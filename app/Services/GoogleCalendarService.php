@@ -1078,19 +1078,19 @@ class GoogleCalendarService
     }
 
     /**
-     * Persist Google's incremental sync cursor. Direct assignment + save() (not update()) because
-     * google_sync_token is not mass-assignable; mirrors how microsoft_sync_token is stored.
+     * Persist Google's incremental sync cursor. A targeted write, not save(): this runs once per
+     * synced schedule on every poll and every webhook, and a save() runs the schedule's whole
+     * saving hook and moves updated_at for the sake of one column. Mirrors how
+     * microsoft_sync_token is stored.
      */
     protected function storeGoogleSyncToken(Role $role, string $token): void
     {
-        $role->google_sync_token = $token;
-        $role->save();
+        $role->writeOperationalColumns(['google_sync_token' => $token]);
     }
 
     protected function clearGoogleSyncToken(Role $role): void
     {
-        $role->google_sync_token = null;
-        $role->save();
+        $role->writeOperationalColumns(['google_sync_token' => null]);
     }
 
     /**

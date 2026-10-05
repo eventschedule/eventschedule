@@ -50,13 +50,6 @@ class GoogleWalletPassTest extends TestCase
         $this->publicKey = openssl_pkey_get_details($resource)['key'];
 
         $this->pinAppUrl('https://eventschedule.test');
-
-        // Role::saving() geocodes any address against the live Maps API whenever
-        // BACKEND_GOOGLE_KEY is set, and phpunit.xml does not pin it - so on a developer
-        // machine that has a key the venue fixture below came back with Google's real
-        // coordinates instead of the ones this test set. Off, so the test says the same
-        // thing everywhere.
-        config(['services.google.backend' => null]);
     }
 
     /*

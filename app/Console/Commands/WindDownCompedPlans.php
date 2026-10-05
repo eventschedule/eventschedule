@@ -144,21 +144,17 @@ class WindDownCompedPlans extends Command
                 $role->trial_ends_at = $target;
             }
 
-            // saveQuietly(), and it is load-bearing. compedRoles() hydrates five columns, and
-            // Role::saving() recomputes description_html, description_html_en,
-            // banner_message_html and banner_message_html_en UNCONDITIONALLY - unlike the
-            // isDirty()-guarded blocks above them. On a partial hydrate the source columns read
-            // null, MarkdownUtils::convertToHtml(null) returns null, and assigning null ADDS the
-            // key to $attributes while it is absent from $original - which Eloquent's
-            // originalIsEquivalent() reports as dirty for exactly that reason. All four nulls
-            // then land in the UPDATE and every comped schedule's guest page loses its
-            // description and banner.
+            // saveQuietly(). compedRoles() hydrates five columns, and nothing in the hooks is
+            // wanted here: Role::updating() and ::updated() key on email, phone, name,
+            // description, federation_enabled and translation_language_code, none of which this
+            // command touches, and Role::saving() exists to derive columns this loop does not
+            // change.
             //
-            // Nothing in the hooks is wanted here: Role::updating() and ::updated() key on
-            // email, phone, name, description, federation_enabled and translation_language_code,
-            // none of which this command touches. Quiet is also what keeps the loop off the
-            // network - a full hydrate would instead run Role::saving()'s 10-second Google
-            // geocoding call once per role.
+            // It used to be load-bearing too. Role::saving() re-derived description_html and the
+            // banner HTML from sources a partial hydrate does not carry, read them as null, and
+            // every comped schedule's guest page lost its description and banner. The hook now
+            // skips a column whose source was never loaded (Role::columnsLoaded()), so a plain
+            // save() here would no longer do damage - but it would still be the wrong tool.
             $role->saveQuietly();
 
             AuditService::log(

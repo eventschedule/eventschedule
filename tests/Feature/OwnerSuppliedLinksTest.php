@@ -27,13 +27,6 @@ class OwnerSuppliedLinksTest extends TestCase
     /** An href whose value is javascript:, in any case and behind any leading whitespace. */
     private const SCRIPT_HREF = '/href\s*=\s*["\']\s*javascript:/i';
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        config(['services.google.backend' => null]);
-    }
-
     private function scheduleWithScriptLinks(array $attrs = []): Role
     {
         return $this->createRole($this->createOwner(), 'venue', array_merge([

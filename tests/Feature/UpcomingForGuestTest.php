@@ -22,14 +22,6 @@ class UpcomingForGuestTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Role's saving hook geocodes a new address whenever a Google key is configured.
-        config(['services.google.backend' => null]);
-    }
-
     /**
      * A password gate hides an event's details on the calendar, and the JSON-LD this list feeds
      * prints the venue's address and the flyer. is_private normally travels with a password, but a

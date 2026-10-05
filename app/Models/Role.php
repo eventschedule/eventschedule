@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Http\Controllers\MarketingController;
 use App\Jobs\GenerateRoleImageVariants;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Services\GeocodingService;
 use App\Traits\HasImageVariants;
 use App\Traits\RoleBillable;
 use App\Utils\CssUtils;
@@ -83,11 +84,15 @@ class Role extends Model implements MustVerifyEmail
         'require_account',
         'use_24_hour_time',
         'timezone',
-        'formatted_address',
-        'google_place_id',
-        'geo_address',
-        'geo_lat',
-        'geo_lon',
+        // formatted_address, google_place_id, geo_address, geo_lat and geo_lon are deliberately
+        // NOT fillable. They are what Google answered for this schedule's address, written by the
+        // saving hook - and RoleController::store() and update() fill from $request->all(). With
+        // them here, posting geo_address equal to the real address plus any coordinates made the
+        // hook read the row as already geocoded and keep the forgery: on the map, in the JSON-LD,
+        // on a wallet pass. The one other writer is BackupService::importRole(), which restores
+        // them from the archive by direct assignment like every other column: a keyless install
+        // has no other way to get coordinates, and an owner who edits their own backup can do no
+        // more than type a false address would.
         'show_email',
         'show_phone',
         'require_approval',
@@ -321,6 +326,12 @@ class Role extends Model implements MustVerifyEmail
     {
         return requested_event_layout() ?? $this->eventLayout();
     }
+
+    /**
+     * The columns fullAddressRaw() composes, in order, ahead of the country. One list, so the
+     * saving hook's "were these loaded?" check cannot fall behind the address it guards.
+     */
+    private const ADDRESS_PARTS = ['address1', 'address2', 'city', 'state', 'postal_code'];
 
     /**
      * Columns whose change makes this schedule's federated listings stale: the name
@@ -661,11 +672,21 @@ class Role extends Model implements MustVerifyEmail
                 }
             }
 
-            $model->description_html = MarkdownUtils::convertToHtml($model->description);
-            $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
-
-            $model->banner_message_html = MarkdownUtils::convertToHtml($model->banner_message);
-            $model->banner_message_html_en = MarkdownUtils::convertToHtml($model->banner_message_en);
+            // Rendered on every save, not only when the source is dirty, so a row heals after the
+            // renderer changes - but only from a source this instance actually carries. On a
+            // narrowed select the source reads null, convertToHtml(null) is null, and assigning
+            // that marks the column dirty: the save used to replace the stored HTML with nothing
+            // and the guest page lost its description.
+            foreach ([
+                'description' => 'description_html',
+                'description_en' => 'description_html_en',
+                'banner_message' => 'banner_message_html',
+                'banner_message_en' => 'banner_message_html_en',
+            ] as $source => $rendered) {
+                if (self::columnsLoaded($model, [$source])) {
+                    $model->{$rendered} = MarkdownUtils::convertToHtml($model->{$source});
+                }
+            }
 
             if (isset($model->custom_css)) {
                 $model->custom_css = CssUtils::sanitizeCss($model->custom_css);
@@ -681,51 +702,65 @@ class Role extends Model implements MustVerifyEmail
                 $model->sponsor_background_color = null;
             }
 
-            $address = $model->fullAddressRaw();
+            // geo_address is the address the stored geocode belongs to: the one Google last
+            // resolved, or the one it last said it could not find. Recording the misses is what
+            // makes this converge. It used to be written only on a hit, so a schedule whose
+            // address Google cannot resolve was sent back to the (billed) Geocoding API on every
+            // save for ever - and `saving` fires before Eloquent's dirty check, so a sync cursor
+            // or a no-op save paid for it too.
+            //
+            // Skipped on a narrowed hydrate: with the address columns absent the composed address
+            // reads as empty (which would wipe the stored geocode) or as partial (which would
+            // geocode the wrong place and store it), and with geo_lat absent a resolved schedule
+            // reads as one Google could not place (which would ask again on every save).
+            $address = self::columnsLoaded($model, [...self::ADDRESS_PARTS, 'country_code', 'geo_address', 'geo_lat'])
+                ? $model->fullAddressRaw()
+                : null;
 
-            if (! $address && $model->geo_address) {
+            if ($address === '' && $model->geo_address) {
                 $model->geo_address = null;
                 $model->geo_lat = null;
                 $model->geo_lon = null;
                 $model->formatted_address = null;
                 $model->google_place_id = null;
 
-                // Clear cached map images when address is removed
-                $cachePattern = storage_path('app/map_cache/'.$model->id.'_*');
-                foreach (glob($cachePattern) as $file) {
-                    @unlink($file);
-                }
+                self::forgetMapImages($model);
             }
 
-            if (config('services.google.backend') && $address && $address != $model->geo_address) {
-                try {
-                    $response = \Illuminate\Support\Facades\Http::timeout(10)
-                        ->get('https://maps.googleapis.com/maps/api/geocode/json', [
-                            'address' => $address,
-                            'key' => config('services.google.backend'),
-                        ]);
+            if (config('services.google.backend') && $address) {
+                $watermark = self::geocodeWatermark($address);
 
-                    if ($response->successful()) {
-                        $responseData = $response->json();
+                // Asked when the address is not the one the stored result belongs to - and again
+                // for one Google could not place, so that an address it learns later resolves
+                // without anyone having to retype it. GeocodingService answers that second kind
+                // from its cache for 30 days, so it costs one request a month per address, not
+                // one per save.
+                if ($watermark !== $model->geo_address || blank($model->geo_lat)) {
+                    $geocode = GeocodingService::lookup($address);
 
-                        if (($responseData['status'] ?? '') == 'OK') {
-                            $latitude = $responseData['results'][0]['geometry']['location']['lat'];
-                            $longitude = $responseData['results'][0]['geometry']['location']['lng'];
+                    if (GeocodingService::isResolved($geocode) || GeocodingService::isDefinitiveMiss($geocode)) {
+                        // All five together, on a miss as well: coordinates left over from the
+                        // previous address would otherwise be published as this one's - on the
+                        // map, in the JSON-LD, on a wallet pass and in an ad's geo-targeting.
+                        $model->geo_address = $watermark;
+                        $model->geo_lat = $geocode['lat'];
+                        $model->geo_lon = $geocode['lng'];
+                        // Both are varchar(255) on a strict connection. A formatted address can
+                        // be clamped; a place ID cannot - Google sets no maximum length on one,
+                        // and a truncated ID is an invalid one - so an over-long ID is dropped
+                        // and the guest map falls back to the address.
+                        $model->formatted_address = \App\Utils\TextUtils::clamp($geocode['formatted_address'], 255);
+                        $model->google_place_id = mb_strlen((string) $geocode['place_id']) <= 255
+                            ? $geocode['place_id']
+                            : null;
 
-                            $model->formatted_address = $responseData['results'][0]['formatted_address'];
-                            $model->google_place_id = $responseData['results'][0]['place_id'];
-                            $model->geo_address = $address;
-                            $model->geo_lat = $latitude;
-                            $model->geo_lon = $longitude;
+                        if ($model->isDirty(['geo_lat', 'geo_lon'])) {
+                            self::forgetMapImages($model);
                         }
                     }
-                    // Clear cached map images when coordinates change
-                    $cachePattern = storage_path('app/map_cache/'.$model->id.'_*');
-                    foreach (glob($cachePattern) as $file) {
-                        @unlink($file);
-                    }
-                } catch (\Exception $e) {
-                    \Log::warning('Geocoding failed: '.$e->getMessage());
+                    // Anything else is a failure of the request, not a verdict on the address, so
+                    // the row is left as it was and the next save asks again (GeocodingService
+                    // holds the failure for a few minutes, which is what bounds that).
                 }
             }
         });
@@ -1597,24 +1632,10 @@ class Role extends Model implements MustVerifyEmail
     {
         $str = '';
 
-        if ($this->address1) {
-            $str .= $this->address1.', ';
-        }
-
-        if ($this->address2) {
-            $str .= $this->address2.', ';
-        }
-
-        if ($this->city) {
-            $str .= $this->city.', ';
-        }
-
-        if ($this->state) {
-            $str .= $this->state.', ';
-        }
-
-        if ($this->postal_code) {
-            $str .= $this->postal_code.', ';
+        foreach (self::ADDRESS_PARTS as $part) {
+            if ($this->{$part}) {
+                $str .= $this->{$part}.', ';
+            }
         }
 
         if ($str && $this->country_code) {
@@ -1622,6 +1643,64 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $str;
+    }
+
+    /**
+     * Whether this instance actually carries the given columns, as opposed to reading them as
+     * null because they were never loaded. The saving hook derives columns from other columns,
+     * and must not derive anything from one it cannot see.
+     *
+     * A model that is new, or was created by this instance, always does: a key it lacks was
+     * never assigned and is NULL in the database. Only a model hydrated from a narrowed select
+     * lacks a key whose value it does not know.
+     */
+    private static function columnsLoaded(self $model, array $columns): bool
+    {
+        if (! $model->exists || $model->wasRecentlyCreated) {
+            return true;
+        }
+
+        $loaded = $model->getAttributes();
+
+        foreach ($columns as $column) {
+            if (! array_key_exists($column, $loaded)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * What geo_address stores for a composed address: the address itself, unless that would not
+     * fit the column.
+     *
+     * geo_address is a varchar(255) on a strict connection and the composed address has no such
+     * limit (address1 alone may be 255, before the city and the country), so writing it raw is a
+     * MySQL 1406 that fails the whole save. The long ones are mostly calendar imports whose
+     * "location" is a meeting link. A plain clamp would not do: two addresses that differ only
+     * past the cut would compare equal, and a move between them would never be geocoded.
+     */
+    private static function geocodeWatermark(string $address): string
+    {
+        if (mb_strlen($address) <= 255) {
+            return $address;
+        }
+
+        return mb_substr($address, 0, 214).'#'.sha1($address);
+    }
+
+    /** The cached static-map images for this schedule, which are drawn from its coordinates. */
+    private static function forgetMapImages(self $model): void
+    {
+        if (! $model->exists) {
+            return;
+        }
+
+        // glob() answers false, not an empty list, when it cannot read the directory.
+        foreach (glob(storage_path('app/map_cache/'.$model->id.'_*')) ?: [] as $file) {
+            @unlink($file);
+        }
     }
 
     public function isVenue()
@@ -3072,8 +3151,9 @@ class Role extends Model implements MustVerifyEmail
                 // ScheduleDeletionService::markDeleted()'s transaction, holding a row lock, and
                 // Role's `saving` hook geocodes through a 10-second Http::get() whenever a row's
                 // stored geo_address does not match its composed address - which is any row whose
-                // address never geocoded successfully. Network I/O under a lock is the shape that
-                // already caused a live 1213 on this table. It also avoids re-rendering
+                // address has not been asked about yet, or whose last ask failed in transit - and
+                // once a month for one Google could not place. Network I/O under a lock is the
+                // shape that already caused a live 1213 on this table. It also avoids re-rendering
                 // description_html, sanitising custom_css and recomputing the *_normalized columns
                 // on somebody else's row to change one column. Same reasoning as the federation
                 // fan-out in boot(): a query-builder update fires no model events.
@@ -3084,8 +3164,9 @@ class Role extends Model implements MustVerifyEmail
                 // updated_at is deliberately left alone. SitemapController uses roles.updated_at
                 // as the <lastmod> for that schedule's guest page, and dropping a name from an
                 // approve list changes nothing it publishes - only whether a FUTURE submission
-                // from a name it no longer trusts would auto-accept.
-                self::whereKey($role->id)->update([
+                // from a name it no longer trusts would auto-accept. That takes the BASE query
+                // builder: self::whereKey()->update() stamps updated_at on every call.
+                DB::table('roles')->where('id', $role->id)->update([
                     'approved_subdomains' => $updated ? json_encode($updated) : null,
                 ]);
                 $changed++;
@@ -5630,12 +5711,7 @@ class Role extends Model implements MustVerifyEmail
         $now = now();
         $truncated = $message ? mb_substr($message, 0, 1000) : null;
 
-        static::query()->whereKey($this->id)->update([
-            'email_settings_failed_at' => $now,
-            'email_settings_failed_message' => $truncated,
-        ]);
-
-        $this->setRawColumns([
+        $this->writeOperationalColumns([
             'email_settings_failed_at' => $now,
             'email_settings_failed_message' => $truncated,
         ]);
@@ -5649,11 +5725,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $now = now();
 
-        static::query()->whereKey($this->id)->update([
-            'email_settings_failure_notified_at' => $now,
-        ]);
-
-        $this->setRawColumns([
+        $this->writeOperationalColumns([
             'email_settings_failure_notified_at' => $now,
         ]);
     }
@@ -5673,13 +5745,7 @@ class Role extends Model implements MustVerifyEmail
             return;
         }
 
-        static::query()->whereKey($this->id)->update([
-            'email_settings_failed_at' => null,
-            'email_settings_failed_message' => null,
-            'email_settings_failure_notified_at' => null,
-        ]);
-
-        $this->setRawColumns([
+        $this->writeOperationalColumns([
             'email_settings_failed_at' => null,
             'email_settings_failed_message' => null,
             'email_settings_failure_notified_at' => null,
@@ -5696,6 +5762,26 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->email_settings_failed_at !== null
             && $this->email_settings_failed_at->gt(now()->subDay());
+    }
+
+    /**
+     * Store operational state - a calendar-sync cursor, a last-run timestamp - with a targeted
+     * UPDATE instead of a save().
+     *
+     * A save() runs the whole saving hook for the sake of one column: every rendered HTML column
+     * re-derived, the address checked against its geocode, and updated_at moved - which
+     * SitemapController publishes as the guest page's <lastmod>, so a synced schedule claimed
+     * to have changed every fifteen minutes. The base query builder, not static::query(): the
+     * Eloquent builder stamps updated_at on every update.
+     *
+     * The array, json and encrypted casts are NOT applied to what reaches the database; pass
+     * scalars and dates only.
+     */
+    public function writeOperationalColumns(array $values): void
+    {
+        DB::table($this->getTable())->where('id', $this->id)->update($values);
+
+        $this->setRawColumns($values);
     }
 
     /**

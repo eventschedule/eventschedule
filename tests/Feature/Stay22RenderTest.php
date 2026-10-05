@@ -29,9 +29,6 @@ class Stay22RenderTest extends TestCase
         config([
             'stay22.enabled' => true,
             'stay22.aid' => 'operator-aid',
-            // See Stay22ServiceTest: leaving the geocoder live would overwrite the fixture
-            // coordinates locally and behave differently in CI, which has no key.
-            'services.google.backend' => null,
         ]);
     }
 

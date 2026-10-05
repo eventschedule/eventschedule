@@ -708,8 +708,7 @@ class MicrosoftCalendarService
                         break;
                     }
                     $restarted = true;
-                    $role->microsoft_sync_token = null;
-                    $role->save();
+                    $role->writeOperationalColumns(['microsoft_sync_token' => null]);
                     $nextUrl = $this->initialDeltaUrl($calendarId);
 
                     continue;
@@ -757,15 +756,19 @@ class MicrosoftCalendarService
                 }
             }
 
+            // Targeted writes, not save(): a cursor is not a reason to run the schedule's saving
+            // hook or to move its updated_at every fifteen minutes.
             if ($deltaLink) {
-                $role->microsoft_sync_token = $deltaLink;
-                $role->microsoft_last_sync_at = now();
-                $role->save();
+                $role->writeOperationalColumns([
+                    'microsoft_sync_token' => $deltaLink,
+                    'microsoft_last_sync_at' => now(),
+                ]);
             } elseif ($checkpoint && $this->isGraphUrl($checkpoint)) {
                 // Page cap hit before the deltaLink: store the mid-cycle nextLink so we resume here.
-                $role->microsoft_sync_token = $checkpoint;
-                $role->microsoft_last_sync_at = now();
-                $role->save();
+                $role->writeOperationalColumns([
+                    'microsoft_sync_token' => $checkpoint,
+                    'microsoft_last_sync_at' => now(),
+                ]);
             }
         } catch (\Throwable $e) {
             Log::error('Failed to sync from Microsoft Calendar', [

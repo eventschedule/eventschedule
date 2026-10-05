@@ -30,6 +30,34 @@ class RoleUpdateCharacterizationTest extends TestCase
         ], $overrides);
     }
 
+    /**
+     * update() fills from $request->all(), and the geocode columns used to be mass-assignable:
+     * posting geo_address equal to the schedule's real address, plus any coordinates, made the
+     * saving hook treat the row as already geocoded and keep them. No request may set them: the
+     * hook writes them from Google's answer (and a backup restore carries them over).
+     */
+    public function test_posted_geocode_fields_are_ignored(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createVenueWithAddress($owner);
+
+        $this->actingAs($owner)->put(
+            route('role.update', ['subdomain' => $role->subdomain]),
+            $this->updatePayload($role, [
+                'geo_address' => $role->fullAddressRaw(),
+                'geo_lat' => '1.5',
+                'geo_lon' => '2.5',
+                'formatted_address' => 'Anywhere I Like',
+                'google_place_id' => 'ChIJ-forged',
+            ])
+        )->assertRedirect();
+
+        $fresh = $role->fresh();
+        foreach (['geo_address', 'geo_lat', 'geo_lon', 'formatted_address', 'google_place_id'] as $column) {
+            $this->assertNull($fresh->{$column}, "{$column} was taken from the request");
+        }
+    }
+
     public function test_full_settings_round_trip_pins_roles_row(): void
     {
         $owner = $this->createOwner();

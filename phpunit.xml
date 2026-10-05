@@ -116,6 +116,13 @@
              there), and tests load .env. Pinned empty so it can never back a test request: the
              endpoint tests set their own. -->
         <env name="GROWTH_DATA_TOKEN" value="" force="true"/>
+        <!-- The operator's real Google backend key lives in their .env, and Role's saving hook
+             geocodes any schedule that has an address whenever one is configured. With it live,
+             every fixture that sets a city or a street made a real, BILLED request to the
+             Geocoding API - a few hundred per run of the suite, on a machine that runs it all
+             day. CI never had a key, so this only makes a local run match it. A test that needs
+             the geocode branch sets its own key AND Http::fake(). -->
+        <env name="BACKEND_GOOGLE_KEY" value="" force="true"/>
         <!-- Hosted admins must use two-factor authentication (auth.admin_requires_two_factor).
              Off here so admin tests need no 2FA fixture; AdminTwoFactorRequiredTest turns it on. -->
         <env name="ADMIN_REQUIRE_2FA" value="false" force="true"/>

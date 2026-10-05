@@ -25,6 +25,7 @@ foreach ([
     'MARKETING_WALL_CACHE_SECONDS',
     'SESSION_LIFETIME',
     'GROWTH_DATA_TOKEN',
+    'BACKEND_GOOGLE_KEY',
     'ADMIN_REQUIRE_2FA',
 ] as $pinned) {
     if (array_key_exists($pinned, $_ENV)) {

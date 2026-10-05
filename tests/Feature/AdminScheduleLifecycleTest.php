@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Services\DemoService;
 use App\Services\ScheduleDeletionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -560,7 +561,10 @@ class AdminScheduleLifecycleTest extends TestCase
         ]);
 
         // Only requests made by the release itself count; building the fixtures above legitimately
-        // geocodes through the same hook.
+        // geocodes through the same hook. And it must not be able to answer from memory:
+        // GeocodingService holds the fixture's own failed attempt for a few minutes, so without
+        // this a release that did save the curator would send nothing and pass.
+        Cache::flush();
         $before = count(Http::recorded());
 
         app(ScheduleDeletionService::class)->markDeleted($junk->fresh());

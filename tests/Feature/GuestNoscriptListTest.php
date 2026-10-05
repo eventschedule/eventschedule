@@ -30,10 +30,6 @@ class GuestNoscriptListTest extends TestCase
     {
         parent::setUp();
 
-        // Role's saving hook geocodes a new address whenever a Google key is configured, which a
-        // developer's .env may carry.
-        config(['services.google.backend' => null]);
-
         // A Thursday, late in the month, so "earlier this month" exists for the graphic test.
         $this->travelTo(Carbon::parse('2026-09-24 09:00:00', 'UTC'));
     }

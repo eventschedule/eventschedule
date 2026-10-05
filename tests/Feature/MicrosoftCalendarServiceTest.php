@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\MicrosoftCalendarService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -271,6 +272,34 @@ class MicrosoftCalendarServiceTest extends TestCase
         $role->refresh();
         $this->assertStringContainsString('$deltatoken=xyz', $role->microsoft_sync_token);
         $this->assertNotNull($role->microsoft_last_sync_at);
+    }
+
+    /**
+     * The cursor used to be stored with $role->save(), every fifteen minutes: the whole saving
+     * hook ran for it, and updated_at moved - which the sitemap publishes as the guest page's
+     * <lastmod>, so a synced schedule claimed to have changed four times an hour.
+     */
+    public function test_storing_the_delta_cursor_does_not_resave_the_schedule(): void
+    {
+        $user = $this->connectedOwner();
+        $role = $this->createRole($user, 'venue', ['timezone' => 'America/New_York', 'description' => 'A **bold** claim']);
+        DB::table('roles')->where('id', $role->id)->update([
+            'description_html' => '<!--stale-->',
+            'updated_at' => '2020-01-01 00:00:00',
+        ]);
+
+        Http::fake(['graph.microsoft.com/*' => Http::response([
+            'value' => [],
+            '@odata.deltaLink' => 'https://graph.microsoft.com/v1.0/me/calendarView/delta?$deltatoken=xyz',
+        ], 200)]);
+
+        $this->service()->syncFromMicrosoftCalendar($user, $role->fresh(), null);
+
+        $stored = DB::table('roles')->where('id', $role->id)->first();
+        $this->assertStringContainsString('$deltatoken=xyz', $stored->microsoft_sync_token);
+        $this->assertNotNull($stored->microsoft_last_sync_at);
+        $this->assertSame('<!--stale-->', $stored->description_html, 'the saving hook ran to store a cursor');
+        $this->assertSame('2020-01-01 00:00:00', $stored->updated_at);
     }
 
     public function test_delta_removed_item_deletes_mapping_not_event(): void

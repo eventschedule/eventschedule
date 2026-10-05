@@ -41,6 +41,7 @@ use App\Services\CuratorSourceService;
 use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\EmailService;
+use App\Services\GeocodingService;
 use App\Services\MetaAdsService;
 use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
@@ -7364,46 +7365,25 @@ class RoleController extends Controller
         $role->fill($request->all());
 
         if ($address = $role->fullAddress()) {
-            $urlAddress = urlencode($address);
+            // Through the shared cache, like the saving hook, so an address already resolved is
+            // not paid for twice. Anything but a hit is asked again: someone is waiting on this.
+            $geocode = GeocodingService::lookup($address, fresh: true);
 
-            // Validate Google API configuration
-            $apiKey = config('services.google.backend');
-            if (! $apiKey) {
+            if ($geocode['status'] === GeocodingService::NOT_CONFIGURED) {
                 return response()->json(['error' => 'Geocoding service not configured'], 500);
             }
 
-            $url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.$apiKey."&address={$urlAddress}";
-
-            // Use secure cURL instead of file_get_contents
-            $ch = curl_init();
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 10,
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_USERAGENT => 'EventSchedule/1.0',
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, // Only HTTPS for Google API
-                CURLOPT_MAXFILESIZE => 1048576, // 1MB limit
-            ]);
-
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            if ($response === false || $httpCode !== 200) {
-                return response()->json(['error' => 'Failed to validate address'], 500);
-            }
-
-            $responseData = json_decode($response, true);
-
-            if (! $responseData || $responseData['status'] !== 'OK') {
+            // Only Google saying "no such address" is a verdict on what was typed. A timeout, an
+            // exhausted quota or a rejected key is ours, and must not read as a wrong address.
+            if (GeocodingService::isDefinitiveMiss($geocode)) {
                 return response()->json(['error' => 'Address validation failed'], 400);
             }
 
-            $result = $responseData['results'][0];
-            $addressComponents = $result['address_components'];
+            if (! GeocodingService::isResolved($geocode)) {
+                return response()->json(['error' => 'Failed to validate address'], 500);
+            }
+
+            $addressComponents = $geocode['address_components'];
 
             $addressParts = [
                 'street_number' => '',
@@ -7440,8 +7420,8 @@ class RoleController extends Controller
                     'postal_code' => $postal_code,
                     'country' => $country,
                     'formatted_address' => $address1.' '.$city.' '.$state.' '.$postal_code,
-                    'lat' => $result['geometry']['location']['lat'],
-                    'lng' => $result['geometry']['location']['lng'],
+                    'lat' => $geocode['lat'],
+                    'lng' => $geocode['lng'],
                 ],
             ]);
         }

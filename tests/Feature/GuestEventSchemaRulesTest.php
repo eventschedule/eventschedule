@@ -39,15 +39,6 @@ class GuestEventSchemaRulesTest extends TestCase
 
     private const SOLD_OUT = 'https://schema.org/SoldOut';
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Role's saving hook geocodes a new address whenever a Google key is configured, which a
-        // developer's .env may carry: the coordinates and addresses below are the fixture's own.
-        config(['services.google.backend' => null]);
-    }
-
     // ---------------------------------------------------------------------------------------
     // location
     // ---------------------------------------------------------------------------------------

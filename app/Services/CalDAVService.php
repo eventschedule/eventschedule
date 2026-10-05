@@ -450,9 +450,9 @@ class CalDAVService
                 }
             }
 
-            // Update last sync timestamp
-            $role->caldav_last_sync_at = now();
-            $role->save();
+            // Update last sync timestamp. A targeted write, not save(): see
+            // Role::writeOperationalColumns().
+            $role->writeOperationalColumns(['caldav_last_sync_at' => now()]);
         } catch (\Exception $e) {
             Log::error('CalDAV sync from calendar failed', [
                 'role_id' => $role->id,
@@ -510,8 +510,7 @@ class CalDAVService
             }
 
             if ($role->caldav_sync_token !== $currentToken) {
-                $role->caldav_sync_token = $currentToken;
-                $role->save();
+                $role->writeOperationalColumns(['caldav_sync_token' => $currentToken]);
 
                 return true;
             }

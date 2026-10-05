@@ -37,7 +37,6 @@ class OnlineJoinLinkTest extends TestCase
     {
         parent::setUp();
 
-        config(['services.google.backend' => null]);
         $this->travelTo(Carbon::parse('2026-09-24 09:00:00', 'UTC'));
 
         $this->talent = $this->createRole($this->createOwner(), 'talent', ['name' => 'Stream Talent']);
