@@ -165,7 +165,7 @@
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">What comes over</strong> - The calendar's events for the next 12 months, up to 100 at a time, read the way a <a href="#link-import" class="doc-link">calendar link</a> is: a repeating event as one repeating event, an all-day entry as all day, times in your schedule's time zone</li>
-            <li><strong class="text-gray-900 dark:text-white">What is left out</strong> - Entries marked private, cancelled entries, events already on your schedule, and things that are not events: birthdays, working locations, out-of-office and focus-time blocks, and entries Google made from your mail</li>
+            <li><strong class="text-gray-900 dark:text-white">What is left out</strong> - Entries marked private, cancelled entries, invitations you declined, events already on your schedule, and things that are not events: birthdays, working locations, out-of-office and focus-time blocks, and entries Google made from your mail. A very long calendar is read in part, and the list says so</li>
             <li><strong class="text-gray-900 dark:text-white">Use a different account</strong> - Offered beside the connected address while none of your schedules is synced with Google Calendar, since a sync runs on the same connection</li>
             <li><strong class="text-gray-900 dark:text-white">A one-time copy</strong> - Events added to that calendar later do not arrive by themselves: choose the calendar again to add them, or turn on a sync under <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Integrations</a></li>
         </ul>

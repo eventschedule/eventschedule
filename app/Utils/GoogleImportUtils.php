@@ -101,17 +101,26 @@ class GoogleImportUtils
      * repeat rule; it is written as an excluded date on the series instead. A date that was
      * moved or edited stays an entry of its own, as it is in a feed.
      *
+     * An invitation the calendar's owner declined is still on their calendar and is left out:
+     * one date of a series they declined like a date that was removed, a series they declined
+     * with every date of it.
+     *
      * @param  list<array>  $events
      */
     public static function toCalendarText(array $events, ?string $calendarTimezone = null): string
     {
         $calendarTimezone = self::zone($calendarTimezone) ?: 'UTC';
 
-        // Dates removed from a series, by the series they were removed from.
+        // Dates removed from a series, by the series they were removed from; and the series
+        // that are left out whole.
         $removed = [];
+        $declinedSeries = [];
         foreach ($events as $event) {
-            if (! empty($event['recurringEventId']) && ($event['status'] ?? null) === 'cancelled' && ! empty($event['originalStartTime'])) {
+            $gone = ($event['status'] ?? null) === 'cancelled' || ! empty($event['declined']);
+            if (! empty($event['recurringEventId']) && $gone && ! empty($event['originalStartTime'])) {
                 $removed[$event['recurringEventId']][] = $event['originalStartTime'];
+            } elseif (empty($event['recurringEventId']) && ! empty($event['declined']) && ! empty($event['id'])) {
+                $declinedSeries[$event['id']] = true;
             }
         }
 
@@ -121,7 +130,10 @@ class GoogleImportUtils
             $instanceOf = $event['recurringEventId'] ?? null;
             $cancelled = ($event['status'] ?? null) === 'cancelled';
 
-            if ($instanceOf && $cancelled) {
+            if ($instanceOf && ($cancelled || isset($declinedSeries[$instanceOf]))) {
+                continue;
+            }
+            if (! empty($event['declined'])) {
                 continue;
             }
             if (! in_array($event['eventType'] ?? 'default', self::EVENT_TYPES, true)) {
@@ -211,18 +223,19 @@ class GoogleImportUtils
             : $name.';TZID='.$zone.':'.$at->format('Ymd\THis');
     }
 
-    /** A zone name PHP knows, or null. Goes into a calendar line, so nothing else is let through. */
+    /**
+     * A zone PHP lists by name, or null. It goes into a calendar line, so nothing else is let
+     * through, and "whatever DateTimeZone accepts" is too much: it takes an offset ("+02:00",
+     * "GMT+02:00") and names it "+02:00", which is not a zone the calendar reader knows, and
+     * the entry was lost. A name that is not listed falls back to the calendar's own zone; the
+     * moment itself carries its offset, so it is the same moment either way.
+     */
     private static function zone($name): ?string
     {
-        if (! is_string($name) || $name === '') {
-            return null;
-        }
+        static $listed = null;
+        $listed ??= array_flip(\DateTimeZone::listIdentifiers(\DateTimeZone::ALL_WITH_BC));
 
-        try {
-            return (new \DateTimeZone($name))->getName();
-        } catch (\Throwable $e) {
-            return null;
-        }
+        return is_string($name) && isset($listed[$name]) ? $name : null;
     }
 
     /** A value escaped as calendar text: one line, with its commas and semicolons kept literal. */

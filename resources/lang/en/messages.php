@@ -5969,4 +5969,6 @@ return [
     'import_one_time_copy_google' => 'This is a one-time copy. Events added to that calendar later will not appear here: choose it again to add them.',
     'import_all_on_schedule_google' => 'Everything upcoming in that calendar is already on your schedule.',
     'import_unreadable_left_out' => 'Entries that could not be read and were left out: :count',
+    'google_import_calendar_gone' => 'Google no longer has that calendar, or this account can no longer see it. Choose another calendar.',
+    'import_calendar_truncated' => 'This calendar is long. Some of its events may be missing.',
 ];

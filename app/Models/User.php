@@ -1033,6 +1033,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Whether users.google_token_scopes is there yet. A deploy serves new code for a moment
+     * before its migration has run, and an UPDATE naming a column that does not exist fails as
+     * a whole, taking the token it was written with along. Asked each time: it is one small
+     * query on a connect or a disconnect, and an answer remembered from too early would be
+     * wrong for as long as the process lives.
+     */
+    public static function googleScopesColumnReady(): bool
+    {
+        return \Illuminate\Support\Facades\Schema::hasColumn('users', 'google_token_scopes');
+    }
+
+    /**
      * Whether the Google connection may add, change and remove events in the person's calendar.
      * A connection made from the import page is read-only; one made before the grant was
      * recorded (NULL) asked for everything, as every connection then did.

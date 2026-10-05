@@ -111,9 +111,10 @@ class LinkImportService
     /**
      * The same preview for a calendar the person connected rather than linked. Its entries
      * arrive as calendar text (GoogleImportUtils) and are read, matched against the schedule,
-     * capped and labelled exactly as a feed is.
+     * capped and labelled exactly as a feed is. `$truncated` says the calendar had more entries
+     * than were read, which the page passes on.
      */
-    public function previewCalendar(Role $role, string $calendarText, string $source, string $name): array
+    public function previewCalendar(Role $role, string $calendarText, string $source, string $name, bool $truncated = false): array
     {
         $timezone = $role->captureTimezone();
 
@@ -123,7 +124,7 @@ class LinkImportService
             throw $this->refusal('failed');
         }
 
-        return $this->finish($role, $read, $source, $name, $timezone, [], 'calendar_empty');
+        return $this->finish($role, $read, $source, $name, $timezone, ['calendar_truncated' => $truncated], 'calendar_empty');
     }
 
     /** Decide which import made a row, from the token preview() handed the page. */
@@ -363,6 +364,7 @@ class LinkImportService
                 'already_on_schedule' => $alreadyOnSchedule,
                 'skipped' => $read['skipped'],
                 'text_truncated' => false,
+                'calendar_truncated' => false,
                 'can_read_whole_page' => false,
                 'timezone' => $timezone,
                 'import_token' => self::token($source, $role, (int) auth()->id()),

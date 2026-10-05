@@ -5898,4 +5898,6 @@ return [
     'import_one_time_copy_google' => 'See on ühekordne koopia. Hiljem sellesse kalendrisse lisatud sündmused siia ei ilmu: nende lisamiseks vali kalender uuesti.',
     'import_all_on_schedule_google' => 'Kõik selle kalendri eelseisvad sündmused on juba sinu ajakavas.',
     'import_unreadable_left_out' => 'Kirjeid, mida ei õnnestunud lugeda ja mis jäeti välja: :count',
+    'google_import_calendar_gone' => 'Google\'il pole seda kalendrit enam või see konto ei näe seda enam. Vali teine kalender.',
+    'import_calendar_truncated' => 'See kalender on pikk. Mõned selle sündmused võivad puududa.',
 ];

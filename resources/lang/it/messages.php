@@ -5896,4 +5896,6 @@ return [
     'import_one_time_copy_google' => 'Questa è una copia una tantum. Gli eventi aggiunti in seguito a quel calendario non compariranno qui: sceglilo di nuovo per aggiungerli.',
     'import_all_on_schedule_google' => 'Tutto ciò che è in programma in quel calendario è già nel tuo programma.',
     'import_unreadable_left_out' => 'Voci che non è stato possibile leggere e sono state escluse: :count',
+    'google_import_calendar_gone' => 'Google non ha più quel calendario, oppure questo account non può più vederlo. Scegli un altro calendario.',
+    'import_calendar_truncated' => 'Questo calendario è lungo. Alcuni dei suoi eventi potrebbero mancare.',
 ];

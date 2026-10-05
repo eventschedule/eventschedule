@@ -5917,4 +5917,6 @@ return [
     'import_one_time_copy_google' => 'Aceasta este o copie unică. Evenimentele adăugate ulterior în acel calendar nu vor apărea aici: alege-l din nou pentru a le adăuga.',
     'import_all_on_schedule_google' => 'Tot ce urmează în acel calendar se află deja în programul tău.',
     'import_unreadable_left_out' => 'Intrări care nu au putut fi citite și au fost omise: :count',
+    'google_import_calendar_gone' => 'Google nu mai are acel calendar sau acest cont nu îl mai poate vedea. Alege alt calendar.',
+    'import_calendar_truncated' => 'Calendarul este lung. Este posibil ca unele dintre evenimentele lui să lipsească.',
 ];

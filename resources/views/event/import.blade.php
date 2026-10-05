@@ -1710,6 +1710,9 @@
                 if (meta.text_truncated) {
                     notes.push(@json(__('messages.import_text_truncated'), JSON_UNESCAPED_UNICODE));
                 }
+                if (meta.calendar_truncated) {
+                    notes.push(@json(__('messages.import_calendar_truncated'), JSON_UNESCAPED_UNICODE));
+                }
                 if (meta.skipped && meta.skipped.unreadable > 0) {
                     notes.push(@json(__('messages.import_unreadable_left_out', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', meta.skipped.unreadable));
                 }
@@ -2579,6 +2582,15 @@
                     }
 
                     if (!response.ok) {
+                        // The Google connection stopped working between listing the calendars
+                        // and reading one: the button comes back, with why, where it was.
+                        if (calendar && data && data.reason === 'reconnect') {
+                            this.google.connected = false;
+                            this.google.loaded = false;
+                            this.google.error = data.error;
+
+                            return;
+                        }
                         if (data && data.errors) {
                             throw new Error(Object.values(data.errors).flat().join('\n'));
                         }

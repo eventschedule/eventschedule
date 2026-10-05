@@ -12,6 +12,8 @@ use App\Services\LinkImportService;
 use App\Utils\GoogleImportUtils;
 use App\Utils\IcsImportUtils;
 use App\Utils\UrlUtils;
+use Google\Service\Calendar as GoogleCalendar;
+use Google\Service\Exception as GoogleServiceException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,19 +73,23 @@ class GoogleCalendarController extends Controller
             }
         }
 
+        // The Google account already connected, if there is one. Google is told which it is, so
+        // that with several accounts signed in it does not offer another by default.
+        $account = $user->google_token && $user->google_id ? (string) $user->google_id : null;
+
         if ($from === 'import') {
             // Another account would take over the token every synced schedule of this person
             // runs on, so the choice is only offered while nothing is synced.
             $chooseAccount = $request->boolean('choose') && ! $this->hasSyncedSchedule($user);
 
-            return redirect($this->googleCalendarService->getAuthUrl(true, $chooseAccount));
+            return redirect($this->googleCalendarService->getAuthUrl(true, $chooseAccount, $account));
         }
 
         // If user has tokens but no refresh token, force re-authorization
         if ($user->google_token && ! $user->google_refresh_token) {
             $authUrl = $this->googleCalendarService->getAuthUrlWithForce();
         } else {
-            $authUrl = $this->googleCalendarService->getAuthUrl();
+            $authUrl = $this->googleCalendarService->getAuthUrl(false, false, $account);
         }
 
         return redirect($authUrl);
@@ -172,11 +178,11 @@ class GoogleCalendarController extends Controller
                 return $this->backWith($target, 'error', __('messages.google_connect_failed'));
             }
 
-            // Google lets a person untick a permission on its screen. Without one for the
-            // calendar there is nothing this connection can do, and nothing to replace a
+            // Google lets a person untick a permission on its screen. Without the one this
+            // connection was started for there is nothing it can do, and nothing to replace a
             // working one with.
             $granted = isset($token['scope']) ? (string) $token['scope'] : null;
-            if ($granted !== null && ! str_contains($granted, '/auth/calendar')) {
+            if ($granted !== null && ! $this->grantCovers($granted, $target[1])) {
                 return $this->backWith($target, 'error', __('messages.google_connect_no_calendar_access'));
             }
 
@@ -189,8 +195,12 @@ class GoogleCalendarController extends Controller
                 'google_token_expires_at' => now()->addSeconds($token['expires_in']),
             ]);
             // What was granted, so the app knows whether it may write to the calendar
-            // (User::googleCanWrite()). Not mass-assignable.
-            $user->forceFill(['google_token_scopes' => $granted])->save();
+            // (User::googleCanWrite()). Not mass-assignable. Skipped for the moment of a deploy
+            // in which the column is not there yet: the connection then reads as one made
+            // before grants were recorded, which is how every existing one reads.
+            if (User::googleScopesColumnReady()) {
+                $user->forceFill(['google_token_scopes' => $granted])->save();
+            }
 
             AuditService::log(AuditService::GOOGLE_CALENDAR_CONNECT, $user->id, 'User', $user->id);
 
@@ -256,6 +266,50 @@ class GoogleCalendarController extends Controller
     }
 
     /**
+     * Whether what Google granted is enough for where the connection was started. Whole scope
+     * names are compared: "calendar.events" contains "calendar" and is a different permission.
+     *
+     * The import page starts by listing the person's calendars, which takes calendar.readonly
+     * (or the whole calendar scope). The full request asks for that and for "edit events", and
+     * Google lets a person tick either one alone: with only "edit events" the list answers 403.
+     * Anywhere else a connection that can do one of the two is kept, as it always was.
+     */
+    private function grantCovers(string $granted, ?string $from): bool
+    {
+        $scopes = preg_split('/\s+/', trim($granted)) ?: [];
+        $listsCalendars = [GoogleCalendar::CALENDAR_READONLY, GoogleCalendar::CALENDAR];
+
+        return (bool) array_intersect($scopes, $from === 'import'
+            ? $listsCalendars
+            : array_merge($listsCalendars, [GoogleCalendar::CALENDAR_EVENTS]));
+    }
+
+    /**
+     * What a refusal from Google's API means to the person, as [reason, message]. Three of them
+     * are not "try again in a moment": a grant that was withdrawn (401), one that does not
+     * cover what was asked (403, insufficientPermissions), and a calendar that is gone or no
+     * longer shared with this account (404, 410, or 403 for the calendar itself).
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function googleRefusal(GoogleServiceException $e): array
+    {
+        $reasons = array_column($e->getErrors() ?: [], 'reason');
+
+        if ($e->getCode() === 401) {
+            return ['reconnect', __('messages.google_import_reconnect')];
+        }
+        if ($e->getCode() === 403 && in_array('insufficientPermissions', $reasons, true)) {
+            return ['reconnect', __('messages.google_connect_no_calendar_access')];
+        }
+        if (in_array($e->getCode(), [404, 410], true) || ($e->getCode() === 403 && in_array('forbidden', $reasons, true))) {
+            return ['calendar_gone', __('messages.google_import_calendar_gone')];
+        }
+
+        return ['failed', __('messages.google_import_load_failed')];
+    }
+
+    /**
      * The schedule an import is for, when the person asking owns it. A schedule's Google
      * connection is its owner's, and the demo's shared account must not connect anything.
      */
@@ -300,6 +354,15 @@ class GoogleCalendarController extends Controller
                 'calendars' => GoogleImportUtils::calendarChoices($calendars),
                 'can_switch_account' => ! $this->hasSyncedSchedule($user),
             ]);
+        } catch (GoogleServiceException $e) {
+            [$reason, $message] = $this->googleRefusal($e);
+            // A grant that is gone, or never covered the calendars, gets the button back.
+            if ($reason === 'reconnect') {
+                return response()->json(['connected' => false, 'error' => $message]);
+            }
+            report($e);
+
+            return response()->json(['connected' => true, 'error' => __('messages.google_import_load_failed')], 422);
         } catch (\Throwable $e) {
             report($e);
 
@@ -345,12 +408,20 @@ class GoogleCalendarController extends Controller
                 $role,
                 GoogleImportUtils::toCalendarText($listed['events'], $listed['timezone']),
                 Event::IMPORT_GOOGLE,
-                (string) ($listed['name'] ?? '')
+                (string) ($listed['name'] ?? ''),
+                ! empty($listed['truncated'])
             );
 
             return response()->json($preview);
         } catch (LinkImportException $e) {
             return response()->json(['error' => $e->getMessage(), 'reason' => $e->reason()], 422);
+        } catch (GoogleServiceException $e) {
+            [$reason, $message] = $this->googleRefusal($e);
+            if ($reason === 'failed') {
+                report($e);
+            }
+
+            return response()->json(['error' => $message, 'reason' => $reason], 422);
         } catch (\Throwable $e) {
             report($e);
 

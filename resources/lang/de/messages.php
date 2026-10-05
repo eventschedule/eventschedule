@@ -5897,4 +5897,6 @@ return [
     'import_one_time_copy_google' => 'Dies ist eine einmalige Kopie. Später in diesem Kalender hinzugefügte Termine erscheinen hier nicht: Wählen Sie ihn erneut aus, um sie hinzuzufügen.',
     'import_all_on_schedule_google' => 'Alle bevorstehenden Termine in diesem Kalender sind bereits in Ihrem Zeitplan.',
     'import_unreadable_left_out' => 'Einträge, die nicht gelesen werden konnten und ausgelassen wurden: :count',
+    'google_import_calendar_gone' => 'Google hat diesen Kalender nicht mehr, oder dieses Konto kann ihn nicht mehr sehen. Wählen Sie einen anderen Kalender.',
+    'import_calendar_truncated' => 'Dieser Kalender ist lang. Einige seiner Veranstaltungen fehlen möglicherweise.',
 ];

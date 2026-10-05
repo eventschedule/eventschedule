@@ -126,6 +126,108 @@ class GoogleImportUtilsTest extends TestCase
         $this->assertSame('America/Los_Angeles', $touring[0]['local_time_zone']);
     }
 
+    public function test_a_zone_given_as_an_offset_does_not_cost_the_entry(): void
+    {
+        // PHP accepts "GMT+02:00" as a zone and names it "+02:00", which is no zone the calendar
+        // reader knows: written into the text, the entry was dropped. Names PHP lists are
+        // used, old ones included; anything else falls back to the calendar's zone, and the
+        // moment is the same one either way because it carries its own offset.
+        $at = fn (?string $zone) => $this->entry(['id' => 'z-'.md5((string) $zone), 'summary' => (string) $zone,
+            'start' => ['date' => null, 'dateTime' => '2026-10-28T19:00:00+01:00', 'timeZone' => $zone],
+            'end' => ['date' => null, 'dateTime' => '2026-10-28T21:00:00+01:00', 'timeZone' => $zone]]);
+
+        $zones = ['GMT+02:00', '+02:00', 'Not/AZone', 'Europe/Berlin', 'Asia/Calcutta', 'EST5EDT', 'Etc/GMT-2', 'UTC'];
+        $rows = $this->read(array_map($at, $zones))['rows'];
+
+        $this->assertCount(count($zones), $rows, 'no entry is lost to its zone name');
+        // 19:00 in Berlin on the 28th is 14:00 in New York, whatever the entry called its zone.
+        $this->assertSame(['2026-10-28 14:00'], array_values(array_unique(array_column($rows, 'event_date_time'))));
+
+        $text = GoogleImportUtils::toCalendarText(array_map($at, ['GMT+02:00', '+02:00', 'EST5EDT']), 'Europe/Berlin');
+        $this->assertStringNotContainsString('TZID=+02:00', $text);
+        $this->assertSame(2, substr_count($text, 'DTSTART;TZID=Europe/Berlin:20261028T190000'));
+        $this->assertStringContainsString('DTSTART;TZID=EST5EDT:20261028T140000', $text);
+    }
+
+    public function test_an_invitation_the_calendars_owner_declined_is_left_out(): void
+    {
+        $accepted = $this->entry(['id' => 'yes', 'summary' => 'Open mic']);
+        $declined = $this->entry(['id' => 'no', 'summary' => 'Board meeting', 'declined' => true,
+            'start' => ['date' => null, 'dateTime' => '2026-10-21T15:00:00-04:00', 'timeZone' => null],
+            'end' => ['date' => null, 'dateTime' => '2026-10-21T16:00:00-04:00', 'timeZone' => null]]);
+
+        $read = $this->read([$accepted, $declined]);
+        $this->assertSame(['Open mic'], array_column($read['rows'], 'event_name'));
+        // Not one of the calendar's events at all, so not counted as one left out either.
+        $this->assertSame(0, array_sum($read['skipped']));
+    }
+
+    public function test_one_declined_date_of_a_series_is_an_exclusion_and_a_declined_series_goes_whole(): void
+    {
+        $weekly = fn (string $id, string $name, array $extra = []) => $this->entry($extra + [
+            'id' => $id, 'summary' => $name,
+            'start' => ['date' => null, 'dateTime' => '2026-10-05T18:00:00-04:00', 'timeZone' => 'America/New_York'],
+            'end' => ['date' => null, 'dateTime' => '2026-10-05T19:00:00-04:00', 'timeZone' => 'America/New_York'],
+            'recurrence' => ['RRULE:FREQ=WEEKLY;BYDAY=MO'],
+        ]);
+        // Declining one date makes it an entry of its own, still "confirmed", with the reply.
+        $oneDate = fn (string $series, string $day, array $extra = []) => $this->entry($extra + [
+            'id' => $series.'_'.str_replace('-', '', $day).'T220000Z', 'summary' => 'One date',
+            'start' => ['date' => null, 'dateTime' => $day.'T18:00:00-04:00', 'timeZone' => 'America/New_York'],
+            'end' => ['date' => null, 'dateTime' => $day.'T19:00:00-04:00', 'timeZone' => 'America/New_York'],
+            'recurringEventId' => $series,
+            'originalStartTime' => ['date' => null, 'dateTime' => $day.'T18:00:00-04:00', 'timeZone' => 'America/New_York'],
+        ]);
+
+        $read = $this->read([
+            $weekly('class', 'Monday class'),
+            $oneDate('class', '2026-10-19', ['declined' => true]),
+            $weekly('standup', 'Declined standup', ['declined' => true]),
+            // A date of the declined series that was moved: it goes with its series.
+            $oneDate('standup', '2026-10-26'),
+        ]);
+
+        $this->assertCount(1, $read['rows']);
+        $row = $read['rows'][0];
+        $this->assertSame('Monday class', $row['event_name']);
+        $this->assertSame('weekly', $row['recurrence']['frequency'], 'a declined date must not cost the series its rule');
+        $this->assertSame(['2026-10-19'], $row['recurrence']['fields']['recurring_exclude_dates']);
+        $this->assertSame(0, array_sum($read['skipped']));
+    }
+
+    public function test_googles_own_models_become_the_arrays_this_reads(): void
+    {
+        // An answer in the shape events.list gives, through the library's own classes.
+        $page = new \Google\Service\Calendar\Events(['items' => [
+            ['id' => 'invited', 'status' => 'confirmed', 'summary' => 'Board meeting', 'eventType' => 'default',
+                'start' => ['dateTime' => '2026-10-21T15:00:00-04:00', 'timeZone' => 'America/New_York'],
+                'end' => ['dateTime' => '2026-10-21T16:00:00-04:00', 'timeZone' => 'America/New_York'],
+                'attendees' => [['email' => 'owner@example.com', 'self' => true, 'responseStatus' => 'declined']]],
+            ['id' => 'going', 'status' => 'confirmed', 'summary' => 'Open mic', 'eventType' => 'default',
+                'start' => ['dateTime' => '2026-10-22T19:00:00-04:00'], 'end' => ['dateTime' => '2026-10-22T21:00:00-04:00'],
+                'attendees' => [['email' => 'owner@example.com', 'self' => true, 'responseStatus' => 'accepted']]],
+            // Somebody else's "no" on an entry of one's own is not one's own.
+            ['id' => 'hosting', 'status' => 'confirmed', 'summary' => 'Workshop', 'eventType' => 'default',
+                'start' => ['dateTime' => '2026-10-23T10:00:00-04:00'], 'end' => ['dateTime' => '2026-10-23T12:00:00-04:00'],
+                'attendees' => [['email' => 'guest@example.com', 'responseStatus' => 'declined']]],
+            ['id' => 'allday', 'status' => 'confirmed', 'summary' => 'Fair', 'start' => ['date' => '2026-10-24'], 'end' => ['date' => '2026-10-25']],
+            // A date deleted from a series: no start, no end, no summary.
+            ['id' => 'class_20261019T220000Z', 'status' => 'cancelled', 'recurringEventId' => 'class',
+                'originalStartTime' => ['dateTime' => '2026-10-19T18:00:00-04:00', 'timeZone' => 'America/New_York']],
+        ]]);
+
+        $entries = array_map([\App\Services\GoogleCalendarService::class, 'importEntry'], $page->getItems());
+
+        $this->assertSame([true, false, false, false, false], array_column($entries, 'declined'));
+        $this->assertSame(['date' => null, 'dateTime' => '2026-10-21T15:00:00-04:00', 'timeZone' => 'America/New_York'], $entries[0]['start']);
+        $this->assertSame(['date' => '2026-10-24', 'dateTime' => null, 'timeZone' => null], $entries[3]['start']);
+        $this->assertNull($entries[4]['start']);
+        $this->assertSame('class', $entries[4]['recurringEventId']);
+        $this->assertSame([], $entries[1]['recurrence']);
+
+        $this->assertSame(['Open mic', 'Workshop', 'Fair'], array_column($this->read($entries)['rows'], 'event_name'));
+    }
+
     public function test_a_weekly_entry_is_one_repeating_row_and_a_removed_date_is_an_exclusion(): void
     {
         $weekly = $this->entry([

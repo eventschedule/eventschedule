@@ -25,7 +25,15 @@ class GoogleCalendarConnectTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    private const READ = Calendar::CALENDAR_READONLY.' openid email profile';
+    /**
+     * The identity scopes as Google's token endpoint names them. "email" and "profile" are what
+     * is asked for; what comes back is their long forms.
+     */
+    private const IDENTITY = 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid';
+
+    private const READ = Calendar::CALENDAR_READONLY.' '.self::IDENTITY;
+
+    private const ACCOUNT = '110169484474386276334';
 
     private User $owner;
 
@@ -111,7 +119,15 @@ class GoogleCalendarConnectTest extends TestCase
 
     private function token(string $scope): array
     {
-        return ['access_token' => 'fresh-access', 'refresh_token' => 'fresh-refresh', 'expires_in' => 3600, 'scope' => $scope, 'id_token' => null];
+        return [
+            'access_token' => 'fresh-access',
+            'refresh_token' => 'fresh-refresh',
+            'expires_in' => 3600,
+            'scope' => $scope,
+            'token_type' => 'Bearer',
+            'id_token' => $this->idToken(['sub' => self::ACCOUNT, 'email' => 'owner@example.com', 'name' => 'Owner']),
+            'created' => time(),
+        ];
     }
 
     /** An id token as Google signs one: three base64url parts. Only the middle one is read. */
@@ -120,6 +136,30 @@ class GoogleCalendarConnectTest extends TestCase
         $part = fn (array $data) => rtrim(strtr(base64_encode(json_encode($data, JSON_UNESCAPED_UNICODE)), '+/', '-_'), '=');
 
         return $part(['alg' => 'RS256', 'typ' => 'JWT']).'.'.$part($claims).'.signature';
+    }
+
+    /** A refusal as Google's API client raises one. */
+    private function googleError(int $code, string $reason, string $message): \Google\Service\Exception
+    {
+        $errors = [['domain' => 'global', 'reason' => $reason, 'message' => $message]];
+
+        return new \Google\Service\Exception(json_encode(['error' => ['code' => $code, 'message' => $message, 'errors' => $errors]]), $code, null, $errors);
+    }
+
+    /** The real service, with "Google" answering from a list of pages. Returns what was asked. */
+    private function serviceReadingPages(array $pages, array &$asked): GoogleCalendarService
+    {
+        $service = new GoogleCalendarService(app(\App\Repos\EventRepo::class));
+        $handler = function (\Psr\Http\Message\RequestInterface $request) use (&$pages, &$asked) {
+            parse_str($request->getUri()->getQuery(), $query);
+            $asked[] = $query;
+
+            return \GuzzleHttp\Promise\Create::promiseFor(new \GuzzleHttp\Psr7\Response(200, ['Content-Type' => 'application/json'], json_encode(array_shift($pages) ?? ['items' => []])));
+        };
+        (fn () => $this->client->setHttpClient(new \GuzzleHttp\Client(['handler' => \GuzzleHttp\HandlerStack::create($handler)])))->call($service);
+        $service->setAccessToken(['access_token' => 'token', 'refresh_token' => 'refresh', 'expires_in' => 3000]);
+
+        return $service;
     }
 
     private function entry(array $overrides = []): array
@@ -189,6 +229,35 @@ class GoogleCalendarConnectTest extends TestCase
 
         // Nor does a read-only request leave the next one read-only.
         $this->assertContains(Calendar::CALENDAR_EVENTS, $this->scopesAskedFor($service->getAuthUrl()));
+
+        // Nor does naming an account name it for whoever is next.
+        $this->assertStringContainsString('login_hint='.self::ACCOUNT, $service->getAuthUrl(true, false, self::ACCOUNT));
+        $this->assertStringNotContainsString('login_hint', $service->getAuthUrl(true, false));
+    }
+
+    public function test_google_is_told_which_account_is_already_connected(): void
+    {
+        $hint = function (array $query): ?string {
+            $this->freshControllers();
+            parse_str((string) parse_url($this->get(route('google.calendar.redirect', $query))->headers->get('Location'), PHP_URL_QUERY), $asked);
+
+            return $asked['login_hint'] ?? null;
+        };
+        $import = ['from' => 'import', 'subdomain' => $this->role->subdomain];
+
+        // Nothing connected: nobody to name, and Google asks which account as it always did.
+        $this->assertNull($hint($import));
+
+        // With two accounts signed in Google offers both. Picking the other one would put its
+        // token where every synced schedule of this person reads from.
+        $this->connect($this->owner, self::READ);
+        $this->owner->forceFill(['google_id' => self::ACCOUNT])->save();
+        $this->assertSame(self::ACCOUNT, $hint($import));
+        $this->assertSame(self::ACCOUNT, $hint(['from' => 'settings', 'subdomain' => $this->role->subdomain]));
+        $this->assertSame(self::ACCOUNT, $hint([]));
+
+        // Asking for another account is asking not to be steered to this one.
+        $this->assertNull($hint($import + ['choose' => 1]));
     }
 
     public function test_the_way_back_is_remembered_only_for_the_persons_own_schedule(): void
@@ -250,6 +319,60 @@ class GoogleCalendarConnectTest extends TestCase
         $this->assertSame('110169484474386276334', $this->owner->fresh()->google_id);
     }
 
+    public function test_a_grant_that_cannot_list_calendars_is_not_a_connection_for_the_import_page(): void
+    {
+        $working = $this->connect($this->owner, null);
+        $callback = route('google.calendar.callback', ['code' => 'c', 'state' => 'state-1']);
+
+        // The full request asks for two calendar permissions and Google lets a person tick
+        // either alone. "Edit events" by itself cannot list calendars (403), which is the first
+        // thing the import page does. Compared as a substring it passed: it contains "calendar".
+        $editOnly = Calendar::CALENDAR_EVENTS.' '.self::IDENTITY;
+        foreach ([$editOnly, 'https://www.googleapis.com/auth/calendar.events.readonly '.self::IDENTITY] as $granted) {
+            $this->googleAnswers($this->token($granted));
+            $this->withSession($this->returning())->get($callback)
+                ->assertRedirect($this->importPage())
+                ->assertSessionHas('google_import_error', __('messages.google_connect_no_calendar_access'));
+            $this->assertSame($working->google_token, $this->owner->fresh()->google_token, 'a working connection is not replaced by one that cannot be used here');
+        }
+
+        // The whole calendar scope lists calendars too.
+        $this->googleAnswers($this->token(Calendar::CALENDAR.' '.self::IDENTITY));
+        $this->withSession($this->returning())->get($callback)
+            ->assertRedirect($this->importPage())->assertSessionMissing('google_import_error');
+        $this->assertSame('fresh-access', $this->owner->fresh()->google_token);
+
+        // Started from a schedule's settings, a connection that can send events is kept, as it
+        // always was.
+        $this->owner->forceFill(['google_token' => 'older'])->save();
+        $this->googleAnswers($this->token($editOnly));
+        $this->withSession($this->returning('settings'))->get($callback)->assertSessionMissing('error');
+        $this->assertSame('fresh-access', $this->owner->fresh()->google_token);
+        $this->assertTrue($this->owner->fresh()->googleCanWrite());
+    }
+
+    public function test_a_connection_is_made_and_forgotten_before_the_scopes_column_exists(): void
+    {
+        // A deploy serves this code for a moment before its migration has run. An UPDATE that
+        // names a column not there yet fails as a whole.
+        \Illuminate\Support\Facades\Schema::partialMock()->shouldReceive('hasColumn')->with('users', 'google_token_scopes')->andReturnFalse();
+
+        // A grant withdrawn at Google is forgotten all the same. (The column does exist here,
+        // so "not named in the UPDATE" shows as its value being left alone.)
+        $this->connect($this->owner, self::READ);
+        app(GoogleCalendarService::class)->forgetAuthorization($this->owner, false);
+        $this->assertNull($this->owner->fresh()->google_token);
+        $this->assertSame(self::READ, $this->owner->fresh()->google_token_scopes);
+
+        // And a connection made in that moment is made.
+        $this->googleAnswers($this->token(self::READ.' '.Calendar::CALENDAR_EVENTS));
+        $this->withSession($this->returning())
+            ->get(route('google.calendar.callback', ['code' => 'c', 'state' => 'state-1']))
+            ->assertRedirect($this->importPage())->assertSessionMissing('google_import_error');
+        $this->assertSame('fresh-access', $this->owner->fresh()->google_token);
+        $this->assertSame(self::READ, $this->owner->fresh()->google_token_scopes);
+    }
+
     public function test_what_a_connection_may_do_follows_what_google_granted(): void
     {
         $this->assertFalse($this->owner->googleCanWrite(), 'not connected');
@@ -274,7 +397,7 @@ class GoogleCalendarConnectTest extends TestCase
 
         // The calendar permission unticked on Google's screen: nothing a connection could do.
         $working = $this->connect($this->owner, null);
-        $this->googleAnswers($this->token('openid email profile'));
+        $this->googleAnswers($this->token(self::IDENTITY));
         $this->withSession($this->returning())
             ->get(route('google.calendar.callback', ['code' => 'c', 'state' => 'state-1']))
             ->assertRedirect($this->importPage())
@@ -400,6 +523,114 @@ class GoogleCalendarConnectTest extends TestCase
             $mock->shouldNotReceive('listImportCalendars');
         });
         $this->getJson($url)->assertOk()->assertJson(['connected' => false, 'error' => __('messages.google_import_reconnect')]);
+    }
+
+    public function test_googles_own_refusals_are_told_apart(): void
+    {
+        $this->connect($this->owner, self::READ);
+        $calendars = route('google.calendar.import_calendars', ['subdomain' => $this->role->subdomain]);
+        $events = route('google.calendar.import_events', ['subdomain' => $this->role->subdomain]);
+        $refuse = fn (\Throwable $with) => $this->fakeGoogle(function ($mock) use ($with) {
+            $mock->shouldReceive('ensureValidToken')->andReturn(true);
+            $mock->shouldReceive('listImportCalendars')->andThrow($with);
+            $mock->shouldReceive('listUpcomingEvents')->andThrow($with);
+        });
+
+        // A grant withdrawn in the Google account, while our copy of the token still looks
+        // good: the button comes back. "Try again in a moment" would never work.
+        $refuse($this->googleError(401, 'authError', 'Invalid Credentials'));
+        $this->getJson($calendars)->assertOk()->assertExactJson(['connected' => false, 'error' => __('messages.google_import_reconnect')]);
+        $this->postJson($events, ['calendar_id' => 'x'])->assertStatus(422)
+            ->assertExactJson(['error' => __('messages.google_import_reconnect'), 'reason' => 'reconnect']);
+
+        // A grant that does not cover calendars.
+        $refuse($this->googleError(403, 'insufficientPermissions', 'Request had insufficient authentication scopes.'));
+        $this->getJson($calendars)->assertOk()->assertExactJson(['connected' => false, 'error' => __('messages.google_connect_no_calendar_access')]);
+        $this->postJson($events, ['calendar_id' => 'x'])->assertStatus(422)
+            ->assertExactJson(['error' => __('messages.google_connect_no_calendar_access'), 'reason' => 'reconnect']);
+
+        // A calendar deleted, or no longer shared with this account, since it was listed.
+        foreach ([$this->googleError(404, 'notFound', 'Not Found'), $this->googleError(403, 'forbidden', 'Forbidden')] as $gone) {
+            $refuse($gone);
+            $this->postJson($events, ['calendar_id' => 'x'])->assertStatus(422)
+                ->assertExactJson(['error' => __('messages.google_import_calendar_gone'), 'reason' => 'calendar_gone']);
+        }
+
+        // Anything else is Google having a bad moment, and none of its words are shown.
+        foreach ([$this->googleError(403, 'rateLimitExceeded', 'Rate Limit Exceeded: quota internals'), $this->googleError(500, 'backendError', 'Backend Error: quota internals')] as $moment) {
+            $refuse($moment);
+            $response = $this->getJson($calendars)->assertStatus(422)->assertExactJson(['connected' => true, 'error' => __('messages.google_import_load_failed')]);
+            $this->assertStringNotContainsString('internals', $response->getContent());
+            $response = $this->postJson($events, ['calendar_id' => 'x'])->assertStatus(422)
+                ->assertExactJson(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed']);
+            $this->assertStringNotContainsString('internals', $response->getContent());
+        }
+    }
+
+    public function test_a_calendar_is_read_a_page_at_a_time_and_says_when_it_stopped_early(): void
+    {
+        $from = now('America/New_York')->startOfDay();
+        $item = fn (string $id) => ['id' => $id, 'status' => 'confirmed', 'summary' => $id,
+            'start' => ['dateTime' => $from->copy()->addDays(3)->setTime(19, 0)->toRfc3339String()],
+            'end' => ['dateTime' => $from->copy()->addDays(3)->setTime(21, 0)->toRfc3339String()]];
+
+        // Two pages and no more: read whole.
+        $asked = [];
+        $service = $this->serviceReadingPages([
+            ['summary' => 'Studio classes', 'timeZone' => 'America/New_York', 'items' => [$item('a')], 'nextPageToken' => 'second'],
+            ['items' => [$item('b')]],
+        ], $asked);
+        $read = $service->listUpcomingEvents('classes', $from, $from->copy()->addDays(365));
+
+        $this->assertSame(['a', 'b'], array_column($read['events'], 'id'));
+        $this->assertFalse($read['truncated']);
+        $this->assertSame('Studio classes', $read['name']);
+        $this->assertSame('America/New_York', $read['timezone']);
+        // As many as Google gives on a page, the rule and not its dates, and only the
+        // calendar's own reply out of a guest list.
+        $this->assertSame(['2500', 'false', '1'], [$asked[0]['maxResults'], $asked[0]['singleEvents'], $asked[0]['maxAttendees']]);
+        $this->assertArrayNotHasKey('pageToken', $asked[0]);
+        $this->assertSame('second', $asked[1]['pageToken']);
+
+        // A calendar that keeps answering "there is more", with pages that come back short:
+        // the read stops, and says it did.
+        $asked = [];
+        $endless = array_map(fn ($n) => ['items' => [$item('e'.$n)], 'nextPageToken' => 'page-'.$n], range(1, 40));
+        $read = $this->serviceReadingPages($endless, $asked)->listUpcomingEvents('classes', $from, $from->copy()->addDays(365));
+
+        $this->assertTrue($read['truncated']);
+        $this->assertCount(count($asked), $read['events']);
+        $this->assertLessThan(10, count($asked));
+    }
+
+    public function test_a_long_calendar_says_it_was_cut_short(): void
+    {
+        $this->connect($this->owner, self::READ);
+        $listed = fn (bool $truncated) => $this->fakeGoogle(function ($mock) use ($truncated) {
+            $mock->shouldReceive('ensureValidToken')->andReturn(true);
+            $mock->shouldReceive('listUpcomingEvents')->andReturn([
+                'name' => 'Studio classes', 'timezone' => 'America/New_York', 'truncated' => $truncated,
+                'events' => [$this->entry(['id' => 'show', 'summary' => 'Friday show']), $this->entry(['id' => 'no', 'summary' => 'Declined', 'declined' => true])],
+            ]);
+        });
+        $url = route('google.calendar.import_events', ['subdomain' => $this->role->subdomain]);
+
+        $listed(true);
+        $this->postJson($url, ['calendar_id' => 'classes'])->assertOk()
+            ->assertJsonPath('meta.calendar_truncated', true)
+            // An invitation the owner declined is not one of their events.
+            ->assertJsonCount(1, 'parsed')->assertJsonPath('parsed.0.event_name', 'Friday show');
+
+        $listed(false);
+        $this->postJson($url, ['calendar_id' => 'classes'])->assertOk()->assertJsonPath('meta.calendar_truncated', false);
+
+        // The page says so in the list's notes.
+        $page = $this->get(route('event.show_import_ai', ['subdomain' => $this->role->subdomain]))->assertOk()->getContent();
+        $this->assertStringContainsString('meta.calendar_truncated', $page);
+        $this->assertStringContainsString(json_encode(__('messages.import_calendar_truncated')), $page);
+        // And a connection that stopped working while a calendar was being read gets the
+        // button back, where the calendars were.
+        $this->assertStringContainsString("data.reason === 'reconnect'", $page);
     }
 
     public function test_a_calendars_events_are_previewed_like_a_feed_and_saved_as_google(): void

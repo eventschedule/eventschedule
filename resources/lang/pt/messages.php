@@ -5898,4 +5898,6 @@ return [
     'import_one_time_copy_google' => 'Esta é uma cópia única. Eventos adicionados depois a essa agenda não aparecerão aqui: escolha-a novamente para adicioná-los.',
     'import_all_on_schedule_google' => 'Tudo o que está por vir nessa agenda já está na sua agenda de eventos.',
     'import_unreadable_left_out' => 'Entradas que não puderam ser lidas e foram deixadas de fora: :count',
+    'google_import_calendar_gone' => 'O Google não tem mais essa agenda, ou esta conta não pode mais vê-la. Escolha outra agenda.',
+    'import_calendar_truncated' => 'Esta agenda é longa. Alguns dos eventos dela podem estar faltando.',
 ];

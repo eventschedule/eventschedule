@@ -72,7 +72,7 @@ class GoogleCalendarService
     /**
      * Get the authorization URL for Google OAuth
      */
-    public function getAuthUrl(bool $readOnly = false, bool $chooseAccount = false): string
+    public function getAuthUrl(bool $readOnly = false, bool $chooseAccount = false, ?string $account = null): string
     {
         // include_granted_scopes is on, so asking for less never takes away what an account
         // already granted: a schedule that sends events to Google keeps doing so.
@@ -80,6 +80,10 @@ class GoogleCalendarService
         // Set both ways every time: the client keeps what it was last told, and one instance
         // can outlive a request.
         $this->client->setPrompt($chooseAccount ? 'select_account consent' : 'consent');
+        // With more than one account signed in, Google asks which. Naming the one already
+        // connected keeps a second permission from landing on another account, which would
+        // replace the token every synced schedule of this person runs on. Empty leaves it out.
+        $this->client->setLoginHint($chooseAccount ? '' : (string) $account);
         $this->client->setState($this->generateAndStoreState());
 
         return $this->client->createAuthUrl();
@@ -271,12 +275,17 @@ class GoogleCalendarService
             ->whereNotNull('google_calendar_id')
             ->update(['google_calendar_id' => null]);
 
-        $user->forceFill([
+        $forgotten = [
             'google_token' => null,
             'google_refresh_token' => null,
             'google_token_expires_at' => null,
-            'google_token_scopes' => null,
-        ])->save();
+        ];
+        // A deploy serves this code before its migration has run, and a revoked grant has to be
+        // forgotten then too: a write that names a column not there yet fails as a whole.
+        if (User::googleScopesColumnReady()) {
+            $forgotten['google_token_scopes'] = null;
+        }
+        $user->forceFill($forgotten)->save();
     }
 
     /**
@@ -543,14 +552,23 @@ class GoogleCalendarService
         return $calendars;
     }
 
+    /** As many entries as Google will put on one page of a calendar's events. */
+    private const IMPORT_PAGE_SIZE = 2500;
+
+    /** Pages read for one import. Google may send a page short, or empty, with more to follow. */
+    private const IMPORT_MAX_PAGES = 6;
+
     /**
      * A calendar's entries between two moments, as plain arrays (GoogleImportUtils reads them).
      * Repeating entries come as their rule, not as one row per date: the import turns a rule
      * into one repeating event.
      *
-     * @return array{events: list<array>, timezone: ?string, name: ?string}
+     * Entries arrive in no order (Google sorts only when a rule is expanded into its dates), so
+     * a calendar that is cut short is cut anywhere: `truncated` says so and the page shows it.
+     *
+     * @return array{events: list<array>, timezone: ?string, name: ?string, truncated: bool}
      */
-    public function listUpcomingEvents(string $calendarId, \DateTimeInterface $from, \DateTimeInterface $to, int $limit = 1000): array
+    public function listUpcomingEvents(string $calendarId, \DateTimeInterface $from, \DateTimeInterface $to, int $limit = self::IMPORT_PAGE_SIZE): array
     {
         if (! $this->calendarService) {
             throw new \RuntimeException('Calendar service not initialized');
@@ -560,6 +578,7 @@ class GoogleCalendarService
         $timezone = null;
         $name = null;
         $pageToken = null;
+        $pages = 0;
 
         do {
             $options = [
@@ -567,7 +586,10 @@ class GoogleCalendarService
                 'timeMax' => $to->format(\DateTimeInterface::RFC3339),
                 'singleEvents' => false,
                 'showDeleted' => false,
-                'maxResults' => 250,
+                'maxResults' => max(1, min($limit, self::IMPORT_PAGE_SIZE)),
+                // Past one guest Google sends only the calendar's own reply to an invitation,
+                // which is all that is read here (importEntry()), and not the guest list.
+                'maxAttendees' => 1,
             ];
             if ($pageToken) {
                 $options['pageToken'] = $pageToken;
@@ -578,26 +600,46 @@ class GoogleCalendarService
             $name = $page->getSummary() ?: $name;
 
             foreach ($page->getItems() as $event) {
-                $events[] = [
-                    'id' => $event->getId(),
-                    'status' => $event->getStatus(),
-                    'summary' => $event->getSummary(),
-                    'description' => $event->getDescription(),
-                    'location' => $event->getLocation(),
-                    'visibility' => $event->getVisibility(),
-                    'eventType' => $event->getEventType(),
-                    'start' => self::importMoment($event->getStart()),
-                    'end' => self::importMoment($event->getEnd()),
-                    'recurrence' => $event->getRecurrence() ?: [],
-                    'recurringEventId' => $event->getRecurringEventId(),
-                    'originalStartTime' => self::importMoment($event->getOriginalStartTime()),
-                ];
+                $events[] = self::importEntry($event);
             }
 
             $pageToken = $page->getNextPageToken();
-        } while ($pageToken && count($events) < $limit);
+            $pages++;
+        } while ($pageToken && count($events) < $limit && $pages < self::IMPORT_MAX_PAGES);
 
-        return ['events' => $events, 'timezone' => $timezone, 'name' => $name];
+        return ['events' => $events, 'timezone' => $timezone, 'name' => $name, 'truncated' => (bool) $pageToken];
+    }
+
+    /**
+     * One of Google's entries as the plain array the import reads. Public so a test can hand it
+     * the library's own model, built from an answer in Google's shape.
+     */
+    public static function importEntry(GoogleEvent $event): array
+    {
+        // An invitation the calendar's owner said no to is still on the calendar. `self` marks
+        // the reply that is theirs.
+        $declined = false;
+        foreach ($event->getAttendees() ?: [] as $attendee) {
+            if ($attendee->getSelf() && $attendee->getResponseStatus() === 'declined') {
+                $declined = true;
+            }
+        }
+
+        return [
+            'id' => $event->getId(),
+            'status' => $event->getStatus(),
+            'summary' => $event->getSummary(),
+            'description' => $event->getDescription(),
+            'location' => $event->getLocation(),
+            'visibility' => $event->getVisibility(),
+            'eventType' => $event->getEventType(),
+            'start' => self::importMoment($event->getStart()),
+            'end' => self::importMoment($event->getEnd()),
+            'recurrence' => $event->getRecurrence() ?: [],
+            'recurringEventId' => $event->getRecurringEventId(),
+            'originalStartTime' => self::importMoment($event->getOriginalStartTime()),
+            'declined' => $declined,
+        ];
     }
 
     /** @return array{date: ?string, dateTime: ?string, timeZone: ?string}|null */
