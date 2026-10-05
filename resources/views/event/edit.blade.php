@@ -33,6 +33,16 @@
       'url' => $photo->photo_url,
       'name' => $photo->submitterName(),
   ])->values();
+
+  // The Tickets panel is shown only to someone who may see the event's ticket setup, and the
+  // page's Vue data has to hold to the same rule: it used to carry every ticket type, promo code,
+  // add-on and the coupon and payment text regardless, so a curator's staff who were refused the
+  // panel could read all of it in the page source. $eventForPage is what data() spreads; the
+  // model itself is untouched, because the rest of this view still reads it.
+  $canSeeTicketData = ! $event->exists || $user->canViewEventData($event);
+  $eventForPage = $canSeeTicketData ? $event : (clone $event)
+      ->unsetRelation('tickets')->unsetRelation('promoCodes')->unsetRelation('addons')
+      ->makeHidden(array_merge(\App\Repos\EventRepo::TICKET_PANEL_FIELDS, ['payment_instructions_html', 'ticket_notes_html']));
 @endphp
 
 {{-- The step band, for the guest-submit flow only. A first event of one's own is walked by the
@@ -5741,18 +5751,18 @@
     data() {
       return {
         event: {
-          ...@json($event),
+          ...@json($eventForPage),
           event_password: @json($event->event_password ?? ''),
           tickets_enabled: {{ $event->tickets_enabled ? 'true' : 'false' }},
           rsvp_enabled: {{ $event->rsvp_enabled ? 'true' : 'false' }},
-          rsvp_limit: @json($event->rsvp_limit),
+          rsvp_limit: @json($canSeeTicketData ? $event->rsvp_limit : null),
           total_tickets_mode: @json($event->total_tickets_mode ?? 'individual'),
           // A select bound to null renders blank, and decimal(13,3) serializes as the
           // string "15.000" which is not what a number input should start life holding.
           // A row that predates the column has no type, so it opens on the model's default
           // rather than on whichever option happens to be listed first.
           coupon_discount_type: @json($event->coupon_discount_type ?: \App\Models\Event::DEFAULT_COUPON_DISCOUNT_TYPE),
-          coupon_discount: @json($event->coupon_discount !== null ? (float) $event->coupon_discount : null),
+          coupon_discount: @json($canSeeTicketData && $event->coupon_discount !== null ? (float) $event->coupon_discount : null),
           recurring_end_type: @json($event->recurring_end_type ?? 'never'),
           recurring_end_value: @json($event->recurring_end_value ?? null),
           recurring_frequency: @json($event->recurring_frequency ?? 'weekly'),
@@ -5768,7 +5778,7 @@
           installments_enabled: {{ $event->installments_enabled ? 'true' : 'false' }},
           installment_count: {{ (int) ($event->installment_count ?: 4) }},
           installment_final_days_before: {{ (int) ($event->installment_final_days_before ?? 14) }},
-          installment_min_order_amount: @json($event->installment_min_order_amount),
+          installment_min_order_amount: @json($canSeeTicketData ? $event->installment_min_order_amount : null),
         },
         // What each gateway can do, keyed by payment_method, so the Payment tab gates on capability
         // instead of naming gateways. Bound through data() and read with Vue's own interpolation
@@ -5825,7 +5835,7 @@
         @php
         // Encoded coverage (group / event ids) per existing ticket, so the
         // subscription selectors round-trip encoded ids (decoded in EventRepo).
-        $ticketPassCoverage = collect($event->tickets ?? [])->mapWithKeys(fn ($t) => [$t->id => [
+        $ticketPassCoverage = collect($canSeeTicketData ? ($event->tickets ?? []) : [])->mapWithKeys(fn ($t) => [$t->id => [
             'group' => $t->pass_scope_group_id ? \App\Utils\UrlUtils::encodeId($t->pass_scope_group_id) : '',
             'events' => collect($t->pass_event_ids ?? [])->map(fn ($id) => \App\Utils\UrlUtils::encodeId($id))->values()->all(),
         ]])->all();
@@ -5845,7 +5855,7 @@
         ticketTrialStarting: false,
         ticketTrialMessage: '',
         ticketTrialError: '',
-        tickets: @json($event->tickets ?? [new Ticket()]).map((ticket, i) => ({
+        tickets: @json($canSeeTicketData ? ($event->tickets ?? []) : []).map((ticket, i) => ({
           uid: i,
           ...ticket,
           volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
@@ -5876,10 +5886,10 @@
           // zeros MySQL returns. Same shape as the add-on prices further down.
           price: (ticket.price === null || ticket.price === '') ? null : parseFloat(ticket.price)
         })),
-        ticketUidCounter: @json(max(1, ($event->tickets ?? collect())->count())),
-        eventCustomFields: @json($event->custom_fields ?? []),
+        ticketUidCounter: @json($canSeeTicketData ? max(1, ($event->tickets ?? collect())->count()) : 1),
+        eventCustomFields: @json($canSeeTicketData ? ($event->custom_fields ?? []) : []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
-        showSalesDates: @json(($event->tickets ?? collect())->contains(fn($t) => $t->sales_start_at || $t->sales_end_at)),
+        showSalesDates: @json($canSeeTicketData && ($event->tickets ?? collect())->contains(fn($t) => $t->sales_start_at || $t->sales_end_at)),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: @json('sponsors'),
@@ -5902,7 +5912,7 @@
         // to the same POST. Warn well before that so uploads can't be silently dropped.
         maxPendingSponsorUploads: 15,
         promoCodes: (() => {
-          var pcs = @json($event->promoCodes ?? []).map(pc => ({
+          var pcs = @json($canSeeTicketData ? ($event->promoCodes ?? []) : []).map(pc => ({
             ...pc,
             value: pc.value ? parseFloat(pc.value) : pc.value,
             ticket_ids: pc.ticket_ids || [],
@@ -5924,7 +5934,7 @@
           }
           return pcs;
         })(),
-        addons: @json($event->addons ?? []).map((addon, i) => ({
+        addons: @json($canSeeTicketData ? ($event->addons ?? []) : []).map((addon, i) => ({
           id: addon.id || null,
           _key: addon.id ? ('existing_' + addon.id) : ('init_' + i),
           type: addon.type || '',

@@ -49,6 +49,29 @@ class EventRepo
     public bool $aiImageRejected = false;
 
     /**
+     * Every field the event form's Tickets panel posts, by top-level name.
+     *
+     * The panel is shown only to someone who may see the event's ticket setup
+     * (User::canViewEventData()), so a save by anyone else carries none of these and must not be
+     * allowed to supply them either. saveEvent() drops them from such a request, and
+     * EventTicketSetupProtectionTest fails the build if the panel gains a field this list lacks.
+     */
+    public const TICKET_PANEL_FIELDS = [
+        'tickets_enabled', 'rsvp_enabled', 'rsvp_limit',
+        'registration_url', 'ticket_currency_code', 'ticket_price',
+        'coupon_code', 'coupon_discount_type', 'coupon_discount',
+        'payment_method', 'payment_instructions',
+        'installments_enabled', 'installment_count', 'installment_final_days_before', 'installment_min_order_amount',
+        'ask_phone', 'require_phone', 'country_code_phone',
+        'individual_tickets', 'individual_ticket_fields',
+        'sell_after_start', 'show_unavailable_tickets',
+        'expire_unpaid_tickets', 'expire_unpaid_tickets_checkbox',
+        'custom_fields', 'seating_plan_id', 'total_tickets_mode',
+        'ticket_notes', 'terms_url', 'save_default_tickets',
+        'tickets', 'promo_codes', 'addons', 'addon_image_data',
+    ];
+
+    /**
      * Resolve the default category id to apply to a new event on this schedule.
      * Returns the role's default_category_id only if it's still in the schedule's
      * effective enabled list; otherwise null. Use this everywhere we auto-tag
@@ -273,6 +296,25 @@ class EventRepo
     }
 
     /**
+     * Remove everything the Tickets panel posts from a request, wherever the client put it.
+     *
+     * input() reads the body (form or JSON) merged with the query string, and all() adds uploads,
+     * so each of those bags is cleared: a field left in any one of them would still reach fill().
+     */
+    private function dropTicketPanelInput($request): void
+    {
+        foreach (self::TICKET_PANEL_FIELDS as $field) {
+            $request->request->remove($field);
+            $request->query->remove($field);
+            $request->files->remove($field);
+
+            if ($request->isJson()) {
+                $request->json()->remove($field);
+            }
+        }
+    }
+
+    /**
      * Reject pass tickets that are configured but missing required fields, before
      * any DB writes - otherwise a misconfigured pass saves silently (e.g. a "visit
      * pass" with no limit behaves as unlimited; a sub-schedule / specific-events
@@ -393,6 +435,20 @@ class EventRepo
     public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false, ?string $importSource = null, ?string $importBatch = null)
     {
         $this->aiImageRejected = false;
+
+        // Someone who may not see an event's ticket setup is not shown the Tickets panel, so their
+        // save carries none of its fields. Reading that absence as "remove every ticket" is how a
+        // curator editing an event it merely lists wiped the creator's ticket types and promo
+        // codes. Their save leaves the whole ticket setup exactly as stored: the three blocks
+        // below are skipped, and the panel's fields are dropped first so nothing hand-posted
+        // reaches fill() either. Same predicate as the panel itself (event/edit.blade.php).
+        //
+        // A new event, and a caller with no signed-in user (imports, calendar sync, the console),
+        // are not affected: there is nothing stored to protect, or nobody to refuse.
+        $mayEditTickets = ! $event || ! $request->user() || $request->user()->canViewEventData($event);
+        if (! $mayEditTickets) {
+            $this->dropTicketPanelInput($request);
+        }
 
         $this->validatePassConfiguration($request);
 
@@ -1712,7 +1768,9 @@ class EventRepo
             }
         }
 
-        if ($event->tickets_enabled) {
+        if (! $mayEditTickets) {
+            // Not theirs to change: see $mayEditTickets at the top.
+        } elseif ($event->tickets_enabled) {
             $ticketData = $request->input('tickets', []);
             $ticketIds = [];
             $hasPassTicket = false;
@@ -2048,7 +2106,9 @@ class EventRepo
         }
 
         // Save add-ons (Pro; see $ticketExtrasAllowed)
-        if ($event->tickets_enabled && $ticketExtrasAllowed) {
+        if (! $mayEditTickets) {
+            // Not theirs to change: see $mayEditTickets at the top.
+        } elseif ($event->tickets_enabled && $ticketExtrasAllowed) {
             $addonData = $request->input('addons', []);
             $addonImageData = $request->input('addon_image_data', []);
             $addonIds = [];
@@ -2184,7 +2244,9 @@ class EventRepo
         }
 
         // Save promo codes (Pro; see $ticketExtrasAllowed)
-        if ($event->tickets_enabled && $ticketExtrasAllowed) {
+        if (! $mayEditTickets) {
+            // Not theirs to change: see $mayEditTickets at the top.
+        } elseif ($event->tickets_enabled && $ticketExtrasAllowed) {
             $promoData = $request->input('promo_codes', []);
             $promoIds = [];
 
