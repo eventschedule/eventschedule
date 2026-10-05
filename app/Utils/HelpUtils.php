@@ -85,6 +85,10 @@ class HelpUtils
                 'engagement-tab-feedback' => '/docs/tickets#feedback',
                 'engagement-tab-fan_content' => '/docs/creating-events#fan-content',
                 'engagement-tab-carpool' => '/docs/creating-schedules#engagement-carpool',
+                // Fragments that open a tab inside Engagement (window.eventSectionAliases in event/edit.blade.php).
+                'section-fan-content' => '/docs/creating-events#fan-content',
+                'section-polls' => '/docs/creating-events#polls',
+                'section-carpool' => '/docs/creating-schedules#engagement-carpool',
             ],
         ],
         '{subdomain}/add-event' => [
@@ -115,6 +119,10 @@ class HelpUtils
                 'engagement-tab-feedback' => '/docs/tickets#feedback',
                 'engagement-tab-fan_content' => '/docs/creating-events#fan-content',
                 'engagement-tab-carpool' => '/docs/creating-schedules#engagement-carpool',
+                // Fragments that open a tab inside Engagement (window.eventSectionAliases in event/edit.blade.php).
+                'section-fan-content' => '/docs/creating-events#fan-content',
+                'section-polls' => '/docs/creating-events#polls',
+                'section-carpool' => '/docs/creating-schedules#engagement-carpool',
             ],
         ],
         'settings' => [

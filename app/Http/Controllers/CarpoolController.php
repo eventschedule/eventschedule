@@ -868,7 +868,8 @@ class CarpoolController extends Controller
             }
         }
 
-        return redirect()->back()->with('message', __('messages.carpool_offer_removed'));
+        // The event form's own fragment for this tab: back() alone lands on the form's first section.
+        return redirect()->to(url()->previous().'#section-carpool')->with('message', __('messages.carpool_offer_removed'));
     }
 
     public function adminDismissReport(Request $request, $subdomain, $report_hash)
@@ -881,7 +882,7 @@ class CarpoolController extends Controller
 
         $report->delete();
 
-        return redirect()->back()->with('message', __('messages.carpool_report_dismissed'));
+        return redirect()->to(url()->previous().'#section-carpool')->with('message', __('messages.carpool_report_dismissed'));
     }
 
     public function myCarpools(Request $request)

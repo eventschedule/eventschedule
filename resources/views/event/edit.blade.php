@@ -5468,12 +5468,6 @@
                             $carpoolReports = \App\Models\CarpoolReport::whereIn('carpool_offer_id', $carpoolOffers->pluck('id'))->with(['reporter', 'reported', 'offer'])->get();
                         @endphp
 
-                        @if (session('message'))
-                        <div class="mb-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400 text-sm">
-                            {{ session('message') }}
-                        </div>
-                        @endif
-
                         @if ($carpoolOffers->count() > 0)
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.carpool_active_offers') }}: {{ $carpoolOffers->count() }}</p>
                         <div class="space-y-3 mb-4">
@@ -5485,11 +5479,10 @@
                                         <span v-pre class="text-xs text-gray-500 dark:text-gray-400 ms-2">{{ $carpoolOffer->city }} &middot; {{ $carpoolOffer->directionLabel() }}</span>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $carpoolOffer->approvedRequests->count() }}/{{ $carpoolOffer->total_spots }} {{ __('messages.carpool_spots') }}</p>
                                     </div>
-                                    <form method="POST" action="{{ route('carpool.admin_remove_offer', ['subdomain' => $role->subdomain, 'offer_hash' => \App\Utils\UrlUtils::encodeId($carpoolOffer->id)]) }}" data-confirm="{{ __('messages.are_you_sure') }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">{{ __('messages.carpool_remove_offer') }}</button>
-                                    </form>
+                                    {{-- A button for a form that lives after the main one (see "External forms"): a
+                                         form written here is nested, the browser drops the first such tag, and its
+                                         _method=DELETE then posts with the event itself. --}}
+                                    <button type="submit" form="form-remove-carpool-offer-{{ $carpoolOffer->id }}" class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">{{ __('messages.carpool_remove_offer') }}</button>
                                 </div>
                                 @php $offerReports = $carpoolReports->where('carpool_offer_id', $carpoolOffer->id); @endphp
                                 @if ($offerReports->count() > 0)
@@ -5498,11 +5491,7 @@
                                     @foreach ($offerReports as $report)
                                     <div class="flex items-start justify-between">
                                         <p v-pre class="text-xs text-red-600 dark:text-red-300">{{ $report->reporter->name }}: {{ $report->reason }}</p>
-                                        <form method="POST" action="{{ route('carpool.admin_dismiss_report', ['subdomain' => $role->subdomain, 'report_hash' => \App\Utils\UrlUtils::encodeId($report->id)]) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 ms-2 whitespace-nowrap">{{ __('messages.carpool_dismiss_report') }}</button>
-                                        </form>
+                                        <button type="submit" form="form-dismiss-carpool-report-{{ $report->id }}" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 ms-2 whitespace-nowrap">{{ __('messages.carpool_dismiss_report') }}</button>
                                     </div>
                                     @endforeach
                                 </div>
@@ -5577,6 +5566,14 @@
 
     {{-- External forms for fan content approve/reject buttons (outside main form to avoid nesting) --}}
     @if ($event->exists)
+        {{-- The carpool tab's two actions, for the same reason. $carpoolOffers is set where that tab
+             renders, which is only on a schedule with carpooling on. --}}
+        @foreach ($carpoolOffers ?? [] as $carpoolOffer)
+        <form id="form-remove-carpool-offer-{{ $carpoolOffer->id }}" method="POST" action="{{ route('carpool.admin_remove_offer', ['subdomain' => $role->subdomain, 'offer_hash' => \App\Utils\UrlUtils::encodeId($carpoolOffer->id)]) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
+        @foreach ($carpoolReports ?? [] as $report)
+        <form id="form-dismiss-carpool-report-{{ $report->id }}" method="POST" action="{{ route('carpool.admin_dismiss_report', ['subdomain' => $role->subdomain, 'report_hash' => \App\Utils\UrlUtils::encodeId($report->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
+        @endforeach
         @foreach ($pendingVideos as $video)
         <form id="form-approve-video-{{ $video->id }}" method="POST" action="{{ route('event.approve_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}" class="hidden">@csrf</form>
         <form id="form-reject-video-{{ $video->id }}" method="POST" action="{{ route('event.reject_video', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($video->id)]) }}" class="hidden">@csrf @method('DELETE')</form>
@@ -5719,6 +5716,30 @@
 
 <script {!! nonce_attr() !!}>
   const { createApp, ref } = Vue
+
+  // event-section-aliases:start
+  // Fragments that name a tab INSIDE Engagement, not a section of this form. Notification emails,
+  // push messages and the redirects after approving fan content have always linked to
+  // #section-fan-content, and the poll actions to #section-polls, and neither id exists here, so
+  // every one of those links opened the first section instead. The fragment wins over
+  // ?engagement=: approving fan content from a page opened with ?engagement=polls comes back with
+  // both, and it is the fan content that was just acted on.
+  window.eventSectionAliases = {
+    'section-fan-content': ['section-engagement', 'fan_content'],
+    'section-polls': ['section-engagement', 'polls'],
+    'section-carpool': ['section-engagement', 'carpool'],
+  };
+  window.resolveEventSectionHash = function (hash, search) {
+    var name = String(hash || '').replace('#', '');
+    var alias = window.eventSectionAliases[name];
+    var requested = new URLSearchParams(search || '').get('engagement');
+    var tabs = ['fan_content', 'polls', 'feedback', 'carpool'];
+    return {
+      section: alias ? alias[0] : name,
+      engagementTab: alias ? alias[1] : (tabs.includes(requested) ? requested : 'fan_content'),
+    };
+  };
+  // event-section-aliases:end
 
   // The gallery's store lives outside the component so the Gallery section, the strip under the
   // flyer, the Save buttons and validateForm() all read the same uploads.
@@ -5897,8 +5918,8 @@
           // Deep-link support: the dashboard "Needs attention" list links here with
           // ?engagement=<tab> (plus #section-engagement, which the section nav already
           // opens on load) to land on the right Engagement sub-tab.
-          var requested = new URLSearchParams(window.location.search).get('engagement');
-          return ['fan_content', 'polls', 'feedback', 'carpool'].includes(requested) ? requested : 'fan_content';
+          // Read here, in data(), because the section script below strips the hash on load.
+          return window.resolveEventSectionHash(window.location.hash, window.location.search).engagementTab;
         })(),
         sponsorForm: { name: '', url: '', tier: '' },
         sponsorLogoPreview: null,
@@ -8833,7 +8854,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sections = document.querySelectorAll('.section-content');
 
     // Save the initial hash before anti-scroll logic strips it
-    const initialHash = window.location.hash ? window.location.hash.replace('#', '') : '';
+    const initialHash = window.resolveEventSectionHash(window.location.hash, window.location.search).section;
 
     // Prevent browser from scrolling to hash on page load
     if (window.location.hash) {
@@ -8993,9 +9014,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle hash changes
     window.addEventListener('hashchange', function() {
-        const hash = window.location.hash.replace('#', '');
-        if (hash && document.getElementById(hash)) {
-            showSection(hash);
+        const target = window.resolveEventSectionHash(window.location.hash, window.location.search);
+        if (target.section && document.getElementById(target.section)) {
+            if (window.eventSectionAliases[window.location.hash.replace('#', '')] && window.vueApp) {
+                window.vueApp.activeEngagementTab = target.engagementTab;
+            }
+            showSection(target.section);
         }
     });
     
