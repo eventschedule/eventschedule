@@ -233,20 +233,61 @@ class ImportPageRenderTest extends TestCase
         $this->assertNotContains($hidesWithAPreview, $inside['@click="handleSaveAll"']);
     }
 
-    public function test_the_card_above_a_single_result_is_there_only_when_it_holds_something(): void
+    public function test_the_card_above_the_results_is_there_only_when_it_holds_something(): void
     {
         // It holds a checkbox for the installation's admin and Save All for an automated run.
         // Since it stopped being hidden by accident it was an empty card for everybody else.
-        $card = 'preview.parsed.length > 0 && !listMode" class="ap-card';
+        $card = 'preview.parsed.length > 0 && (!listMode || ';
 
         $this->assertStringNotContainsString($card, $this->importPage());
         $this->assertStringNotContainsString($card, $this->guestPage());
 
-        $this->assertStringContainsString('@click="handleSaveAll"', $this->importPage(null, ['automate' => 1]));
+        // Save All is for one event. With a list the card would hold nothing for an automated
+        // run, so it is not drawn then.
+        $automated = $this->importPage(null, ['automate' => 1]);
+        $this->assertStringContainsString($card.'false)"', $automated);
+        $this->assertStringContainsString('@click="handleSaveAll" v-if="!listMode && (', $automated);
 
+        // The admin's checkbox is theirs with a list too: it was out of reach there.
         $admin = $this->createOwner();
         $admin->forceFill(['is_admin' => true])->save();
         $this->followRole($admin, $this->role, 'admin');
-        $this->assertStringContainsString('id="show_all_fields"', $this->importPage($admin));
+        $adminPage = $this->importPage($admin);
+        $this->assertStringContainsString($card.'true)"', $adminPage);
+        $this->assertStringContainsString('id="show_all_fields"', $adminPage);
+    }
+
+    public function test_a_list_is_saved_through_one_queue_and_a_series_keeps_what_is_its_own(): void
+    {
+        // What these lines do is checked in a browser; this holds them where they are. Each was
+        // a defect when it read otherwise.
+        $html = $this->importPage();
+
+        // A card's Save in a list goes through the queue "Add" uses, under its lock.
+        $this->assertStringContainsString('await this.runQueue(this.rowIndexes(idx).filter(i => ! this.savedEvents[i]), false);', $html);
+        $this->assertStringContainsString('await this.runQueue(this.preview.parsed.map((event, i) => i).filter(i => this.isQueued(i)), true);', $html);
+        $this->assertSame(2, substr_count($html, 'await this.handleSave(idx, true);'), 'one loop sends rows: a send, and its one retry');
+        // A series with a date still to add keeps its Save.
+        $this->assertStringContainsString('<template v-if="listMode ? rowState(idx) === \'saved\' : savedEvents[idx]">', $html);
+
+        // A date of a series is saved at its own venue when the source put it somewhere else,
+        // and a row is ticked, counted and sent whole.
+        $this->assertStringContainsString('const venueIdx = this.venueIndex(idx);', $html);
+        $this->assertStringContainsString('return !! this.selectedRows[idx] && ! this.savedEvents[idx] && this.rowComplete(idx);', $html);
+        $this->assertStringContainsString('this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && ! event.event_url);', $html);
+
+        // A list with nothing left to add finishes, however it got there.
+        $this->assertSame(2, substr_count($html, 'this.finishList();'));
+        $this->assertStringContainsString(json_encode(route('event.import_done', ['subdomain' => $this->role->subdomain])), $html);
+
+        // One event from a link: its header is announced, and "Start over" is not beside a
+        // "Clear" that does the same.
+        $this->assertStringContainsString('if (this.showsReadSummary) {', $html);
+        $this->assertStringContainsString('<button v-if="listMode" type="button" @click="handleClear"', $html);
+
+        // Back, after something was added and the page cleared, still goes to see it.
+        $this->assertStringContainsString('this.addedAny = true;', $html);
+        $this->assertStringContainsString('if (app && app.addedAny) {', $html);
+        $this->assertStringNotContainsString('app.savedEvents.some(Boolean)', $html);
     }
 }

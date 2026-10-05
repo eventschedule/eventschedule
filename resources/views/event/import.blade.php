@@ -448,7 +448,8 @@
         {{-- Only when it has something in it: the checkbox is the installation admin's, and Save
              All is for an automated run. For everyone else, guests included, it was an empty card. --}}
         @if ((auth()->user() && auth()->user()->isAdmin()) || (request()->has('automate') && ! $isGuestPage))
-        <div v-if="preview && preview.parsed && preview.parsed.length > 0 && !listMode" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
+        {{-- With a list the card holds only the admin's checkbox, so only the admin gets it. --}}
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0 && (!listMode || {{ auth()->user() && auth()->user()->isAdmin() ? 'true' : 'false' }})" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 @if (auth()->user() && auth()->user()->isAdmin())
                 <div class="flex items-center mb-3 sm:mb-0">
@@ -467,7 +468,7 @@
 
                 <!-- Action buttons - now includes Save All -->
                 <div class="flex gap-2 self-end sm:self-auto">
-                    <button @click="handleSaveAll" v-if="({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[var(--brand-button-bg)] text-white rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 hover:scale-105 hover:shadow-md">
+                    <button @click="handleSaveAll" v-if="!listMode && ({{ request()->has('automate') ? 'true' : 'false' }} || preview.parsed.length > 1) && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" type="button" class="px-4 py-2 bg-[var(--brand-button-bg)] text-white rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 hover:scale-105 hover:shadow-md">
                         {{ __('messages.save_all') }}
                     </button>
                 </div>
@@ -503,7 +504,8 @@
                     </p>
                 </div>
                 <div class="flex flex-shrink-0 items-center gap-2">
-                    <button type="button" @click="handleClear" :disabled="isAddingAll" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                    {{-- Only above a list. One event has "Clear" on its card, which does the same. --}}
+                    <button v-if="listMode" type="button" @click="handleClear" :disabled="isAddingAll" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
                         {{ __('messages.import_start_over') }}
                     </button>
                     {{-- Once anything is added there is somewhere to go and see it. --}}
@@ -1147,7 +1149,9 @@
 
                         <!-- Add buttons at the bottom of the left column -->
                         <div class="mt-12 flex justify-end gap-2">
-                            <template v-if="savedEvents[idx]">
+                            {{-- In a list a row is done when all of it is: a series whose first
+                                 date went in and whose third did not still needs its Save. --}}
+                            <template v-if="listMode ? rowState(idx) === 'saved' : savedEvents[idx]">
                                 <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.edit') }}
                                 </button>
@@ -1427,6 +1431,28 @@
 
     const { createApp } = Vue
 
+    // A listed series has one card, which edits its first date. These say what each later date
+    // takes from it (effectiveRow()).
+    // What is a date's own whatever the card says: when it is, and which entry it is.
+    const IMPORT_SERIES_OWN_FIELDS = ['event_date', 'event_date_time', 'sort_at', 'series', 'event_url', 'event_id', 'source_uid'];
+    // A venue is one thing: all of these follow the first date, or none does.
+    const IMPORT_SERIES_VENUE_FIELDS = ['venue_id', 'venue_name', 'venue_name_en', 'event_address', 'venue_address1_en', 'event_city', 'event_city_en',
+        'event_state', 'event_state_en', 'event_postal_code', 'event_country_code', 'matched_venue_name', 'venue_subdomain', 'venue_is_claimable'];
+    // The ones that say which place it is.
+    const IMPORT_SERIES_VENUE_IDENTITY = ['venue_id', 'venue_name', 'event_address', 'event_city'];
+    // A field a schedule can require, by the key of the row that holds it.
+    const IMPORT_REQUIRED_ROW_FIELDS = { short_description: 'short_description', description: 'event_details', ticket_price: 'ticket_price',
+        coupon_code: 'coupon_code', registration_url: 'registration_url', category_id: 'category_id', group_id: 'group_id' };
+
+    function importIsBlank(value) {
+        return value === undefined || value === null || value === '' || (Array.isArray(value) && ! value.length);
+    }
+
+    // The same, with nothing being nothing however it is written (null, '', a list of none).
+    function importSameValue(a, b) {
+        return JSON.stringify(importIsBlank(a) ? null : a) === JSON.stringify(importIsBlank(b) ? null : b);
+    }
+
     var app = createApp({
         data() {
             return {
@@ -1485,6 +1511,9 @@
                 allDone: false,
                 // Each listed series as it arrived, to tell what was edited on its first row.
                 seriesOriginals: {},
+                // Something was added on this visit. Outlives "Clear" and "Start over", which
+                // empty the lists the Back button used to look in.
+                addedAny: false,
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
                 userName: '',
@@ -1601,6 +1630,47 @@
             // was left out, that it is a one-time copy, "Read the whole page").
             showsReadSummary() {
                 return this.listMode || (! this.isGuestPage && !! (this.preview && this.preview.meta && this.preview.parsed && this.preview.parsed.length === 1));
+            },
+
+            // The rows of each listed series, by its id. Asked for by every row on every
+            // render, so it is worked out once per list and not once per question.
+            seriesIndex() {
+                const index = {};
+                if (this.preview && this.preview.parsed) {
+                    this.preview.parsed.forEach((event, i) => {
+                        if (event.series) {
+                            (index[event.series.id] = index[event.series.id] || []).push(i);
+                        }
+                    });
+                }
+
+                return index;
+            },
+
+            // Whether each row could be added as it stands, by index. A listed series is one
+            // row: it is complete when every one of its dates is, and each date says the same.
+            completeRows() {
+                const complete = [];
+                if (! this.preview || ! this.preview.parsed) {
+                    return complete;
+                }
+                this.preview.parsed.forEach((event, i) => {
+                    if (complete[i] !== undefined) {
+                        return;
+                    }
+                    const indexes = this.rowIndexes(i);
+                    const whole = indexes.every(date => this.isEventComplete(this.effectiveRow(date)));
+                    indexes.forEach(date => {
+                        complete[date] = whole;
+                    });
+                });
+
+                return complete;
+            },
+
+            // Nothing in the list is left to add.
+            everythingAdded() {
+                return this.listMode && this.visibleRows.length > 0 && this.visibleRows.every(i => this.rowState(i) === 'saved');
             },
 
             // The rows on screen. A listed series is one row, under the first of its dates.
@@ -2135,11 +2205,8 @@
             // rows sharing series.id. The list shows the first and treats them as one.
             rowIndexes(idx) {
                 const series = this.preview.parsed[idx] && this.preview.parsed[idx].series;
-                if (! series) {
-                    return [idx];
-                }
 
-                return this.preview.parsed.map((event, i) => i).filter(i => this.preview.parsed[i].series && this.preview.parsed[i].series.id === series.id);
+                return series ? (this.seriesIndex[series.id] || [idx]) : [idx];
             },
 
             // The first of its series that is in the list. Not "the first date of the series":
@@ -2149,10 +2216,38 @@
                 return this.rowIndexes(idx)[0] === idx;
             },
 
-            // One date of a listed series as it will be saved: its own date, and whatever was
-            // changed on the series' card. The card edits the first date's row, and only what
-            // was actually changed there is carried over, so a date the source itself names
-            // differently keeps its own name.
+            // Whether this date of a listed series is somewhere other than its first date was
+            // when the list arrived. Its venue is then its own, as a whole: the name of one
+            // place with the address of another is no place.
+            ownVenue(idx) {
+                const row = this.preview.parsed[idx];
+                const original = (row.series && this.seriesOriginals[row.series.id]) || {};
+
+                return ! IMPORT_SERIES_VENUE_IDENTITY.every(key => importSameValue(row[key], original[key]));
+            },
+
+            // Whose venue choice a date is saved with (the existing venue picked on a card, and
+            // whether it is being claimed): the first date's, unless this date is elsewhere.
+            venueIndex(idx) {
+                const row = this.preview.parsed[idx];
+                if (! row || ! row.series) {
+                    return idx;
+                }
+                const lead = this.rowIndexes(idx)[0];
+
+                return lead === idx || this.ownVenue(idx) ? idx : lead;
+            },
+
+            // One date of a listed series as it will be saved. The series has one card, which
+            // edits its first date, so each later date is its own row with two things taken
+            // from the first:
+            //  - a field in which it arrived with the same value as the first date takes what
+            //    the first date has now. An edit on the card reaches every date that shared
+            //    the value, and none that the source itself made different: a date moved to
+            //    another hour, another room or another name keeps it.
+            //  - a name, or a field this schedule requires, that it arrived without takes the
+            //    first date's. Otherwise one empty date would make the row impossible to add,
+            //    with nothing on its card to fill in. So a series is complete when its card is.
             effectiveRow(idx) {
                 const row = this.preview.parsed[idx];
                 const lead = row && row.series ? this.rowIndexes(idx)[0] : idx;
@@ -2162,12 +2257,14 @@
 
                 const edited = this.preview.parsed[lead];
                 const original = this.seriesOriginals[row.series.id] || {};
+                const ownVenue = this.ownVenue(idx);
+                const needed = ['event_name'].concat(Object.keys(IMPORT_REQUIRED_ROW_FIELDS).filter(key => this.requiredFields[key]).map(key => IMPORT_REQUIRED_ROW_FIELDS[key]));
                 const merged = Object.assign({}, row);
                 Object.keys(edited).forEach(key => {
-                    if (['event_date', 'event_date_time', 'sort_at', 'series', 'event_url', 'event_id', 'source_uid'].includes(key)) {
+                    if (IMPORT_SERIES_OWN_FIELDS.includes(key) || (ownVenue && IMPORT_SERIES_VENUE_FIELDS.includes(key))) {
                         return;
                     }
-                    if (JSON.stringify(edited[key]) !== JSON.stringify(original[key])) {
+                    if (importSameValue(row[key], original[key]) || (needed.includes(key) && importIsBlank(row[key]))) {
                         merged[key] = edited[key];
                     }
                 });
@@ -2176,13 +2273,15 @@
             },
 
             rowComplete(idx) {
-                return this.rowIndexes(idx).every(i => this.isEventComplete(this.effectiveRow(i)));
+                return !! this.completeRows[idx];
             },
 
             // Ticked, and still able to be added: a row emptied of its name after it was ticked
-            // is neither counted nor sent.
+            // is neither counted nor sent. A listed series goes whole or not at all: with one
+            // date that could not be added its box was ticked, disabled, and the other dates
+            // were sent all the same.
             isQueued(idx) {
-                return !! this.selectedRows[idx] && ! this.savedEvents[idx] && this.isEventComplete(this.effectiveRow(idx));
+                return !! this.selectedRows[idx] && ! this.savedEvents[idx] && this.rowComplete(idx);
             },
 
             rowSelected(idx) {
@@ -2199,42 +2298,42 @@
             },
 
             toggleRow(idx) {
-                const on = ! this.rowSelected(idx);
+                const on = ! this.rowSelected(idx) && this.rowComplete(idx);
                 this.rowIndexes(idx).forEach(i => {
-                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(this.effectiveRow(i));
+                    this.selectedRows[i] = on && ! this.savedEvents[i];
                 });
             },
 
             toggleAll() {
                 const on = ! this.allSelected;
                 this.preview.parsed.forEach((event, i) => {
-                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.isEventComplete(this.effectiveRow(i));
+                    this.selectedRows[i] = on && ! this.savedEvents[i] && this.rowComplete(i);
                 });
             },
 
-            // A card's Save. For a listed series that is every one of its dates, said once.
+            // A card's Save. In a list it goes through the same queue as "Add", under the same
+            // lock: for a series that is every date still to add, one request after another,
+            // and until the last one is back nothing else on the page can send a row. Left to
+            // itself it let "Add" be pressed half way, which sent a date a second time.
             async saveRow(idx) {
-                if (this.isAddingAll) {
-                    return;
+                if (! this.listMode) {
+                    return this.handleSave(idx);
                 }
 
-                for (const i of this.rowIndexes(idx)) {
-                    if (! this.savedEvents[i]) {
-                        await this.handleSave(i, i !== idx);
-                    }
-                }
+                await this.runQueue(this.rowIndexes(idx).filter(i => ! this.savedEvents[i]), false);
             },
 
             // What is ticked when a preview arrives: everything that could be added as it stands
             // and does not look like something the schedule already has.
             resetSelection() {
-                this.selectedRows = this.preview.parsed.map(event => this.isEventComplete(event) && ! event.event_url);
+                // First, because whether a series' row is complete is read through them.
                 this.seriesOriginals = {};
                 this.preview.parsed.forEach((event, i) => {
                     if (event.series && this.rowIndexes(i)[0] === i) {
                         this.seriesOriginals[event.series.id] = JSON.parse(JSON.stringify(event));
                     }
                 });
+                this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && ! event.event_url);
                 this.expandedRow = null;
                 this.addSummary = null;
                 this.stoppedByLimit = false;
@@ -2370,16 +2469,21 @@
 
             // Add every ticked row, one after another, saying how far along it is.
             async addSelected() {
-                if (this.isAddingAll) {
-                    return;
-                }
-                const queue = this.preview.parsed.map((event, i) => i).filter(i => this.isQueued(i));
-                if (! queue.length) {
+                await this.runQueue(this.preview.parsed.map((event, i) => i).filter(i => this.isQueued(i)), true);
+            },
+
+            // Every save from a list: one at a time, under one lock. `fromList` is "Add N
+            // events": the open card closes and the page moves on when all of it went in. A
+            // card's own Save keeps its card open and stays, unless it was the last row.
+            async runQueue(queue, fromList) {
+                if (this.isAddingAll || ! queue.length) {
                     return;
                 }
 
-                this.destroyDescriptionEditors();
-                this.expandedRow = null;
+                if (fromList) {
+                    this.destroyDescriptionEditors();
+                    this.expandedRow = null;
+                }
                 this.errorMessage = null;
                 this.isAddingAll = true;
                 this.addSummary = null;
@@ -2421,13 +2525,23 @@
                 this.isAddingAll = false;
                 this.addSummary = { added, failed };
 
-                // Everything asked for is on the schedule: show that for a beat, then go and see it.
-                if (failed === 0 && ! this.stoppedByLimit) {
-                    this.allDone = true;
-                    setTimeout(() => {
-                        window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
-                    }, 900);
+                if (failed === 0 && ! this.stoppedByLimit && (fromList || this.everythingAdded)) {
+                    this.finishList();
                 }
+            },
+
+            // Everything asked for is on the schedule: show that for a beat, then go and see it.
+            // Also where a list ends up when its last row was saved from its card, or its last
+            // unsaved row was removed: there used to be "0 of 0 selected" beside a dead button.
+            finishList() {
+                if (this.allDone) {
+                    return;
+                }
+                this.allDone = true;
+                this.addSummary = { added: this.savedEvents.filter(Boolean).length, failed: 0 };
+                setTimeout(() => {
+                    window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
+                }, 900);
             },
 
             // Google Calendar in place of the box.
@@ -2643,8 +2757,22 @@
                             // Read as written. Going through a Date put the browser's own clock
                             // changes into it: midnight on a day the browser's zone skips midnight
                             // came out as 1 AM, whatever zone the schedule is in.
-                            var written = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/.exec(event.event_date_time || '');
-                            if (written) {
+                            // The time may be missing, and none of it is trusted to be a real date
+                            // or hour: what is not is left to the reading below, which blanks it.
+                            var written = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/.exec(event.event_date_time || '');
+                            if (written && (+written[2] < 1 || +written[2] > 12 || +written[3] < 1 || +written[3] > 31
+                                || (written[4] !== undefined && (+written[4] > 23 || +written[5] > 59)))) {
+                                written = null;
+                            }
+                            if (written && written[4] === undefined) {
+                                // A day with no time. Handed to the browser it is midnight UTC,
+                                // which west of there is the evening before: the wrong day, at
+                                // an hour nobody gave. The day is kept and the time is asked for.
+                                event.event_date = written[1] + '-' + written[2] + '-' + written[3];
+                                event.event_start_time = '';
+                                event.event_end_time = '';
+                                delete event.event_date_time;
+                            } else if (written) {
                                 event.event_date = written[1] + '-' + written[2] + '-' + written[3];
                                 var writtenMinutes = parseInt(written[4]) * 60 + parseInt(written[5]);
                                 event.event_start_time = this.formatMinutesToTime(writtenMinutes);
@@ -2812,7 +2940,7 @@
 
                     // Initialize datepickers after preview is loaded
                     this.$nextTick(() => {
-                        if (this.listMode) {
+                        if (this.showsReadSummary) {
                             // Say what arrived to whoever cannot see it arrive.
                             const heading = document.getElementById('import-list-heading');
                             if (heading) {
@@ -2958,10 +3086,10 @@
                         throw new Error('Event data not found');
                     }
                     
-                    // What was edited on a listed series' card goes with each of its dates, and so
-                    // does the venue chosen there.
+                    // A date of a listed series is saved as effectiveRow() has it, with the
+                    // venue chosen on the series' card unless the date is somewhere else.
                     const parsed = this.effectiveRow(idx);
-                    const venueIdx = this.preview.parsed[idx].series ? this.rowIndexes(idx)[0] : idx;
+                    const venueIdx = this.venueIndex(idx);
                     
                     // Build starts_at from split date/time fields
                     var eventDate = parsed.event_date;
@@ -3125,6 +3253,7 @@
 
                     const data = await response.json();
                     result.ok = true;
+                    this.addedAny = true;
 
                     // Store the response data in savedEventData array
                     this.savedEvents[idx] = true;
@@ -3390,10 +3519,15 @@
                         lists.forEach(list => list.splice(i, 1));
                     });
                     this.expandedRow = null;
+                    // What the last "Add" said counted a row that is no longer here.
+                    this.addSummary = null;
                     
                     // If no events left, clear the preview
                     if (this.preview.parsed.length === 0) {
                         this.preview = null;
+                    } else if (this.everythingAdded) {
+                        // The row taken out was the last one not added.
+                        this.finishList();
                     }
                     
                     // What is left on screen needs its date pickers, and when one event is left

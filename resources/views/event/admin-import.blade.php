@@ -62,9 +62,10 @@
                 if (hasUnsavedImportChanges() && !confirm(@json(__('messages.unsaved_changes_warning')))) return;
                 // With events added, Back means "show me": through the route that counts them
                 // and shows the panel. history.back() would land on whatever was open before,
-                // and after a trip to Google that is Google.
+                // and after a trip to Google that is Google. `addedAny` and not the list of
+                // saved rows: "Clear" empties that list, and what was added is still added.
                 var app = window.__importApp;
-                if (app && app.savedEvents && app.savedEvents.some(Boolean)) {
+                if (app && app.addedAny) {
                     window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
                     return;
                 }
