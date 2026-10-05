@@ -309,6 +309,8 @@ third parties no longer mentions analytics either way.
 - **With no AI key, the editor's import page renders** (links only) instead of the setup panel.
   Hosted has a key, so this is a selfhost change.
 - `event.import` allows 120 requests a minute per user, up from 60.
+- **The scheduled Google sync uses each owner's own token.** It did not before: see "A fix to
+  the scheduled Google sync" below, which has a check to run.
 
 **Migrations**, both quick, each waits at most 10 seconds for its lock and can be re-run:
 
@@ -335,6 +337,34 @@ the column is there.
 3. **Check a schedule that already syncs to Google still does:** edit one of its events and see
    the change arrive. Then search the log for `Failed to sync individual Google Calendar event`
    for the minutes around the deploy.
+
+**A fix to the scheduled Google sync, and what to look for.** `google:sync` and
+`google:refresh-webhooks` walk every syncing owner with one `GoogleCalendarService`. The token it
+gave Google's client had no `created` time, which the library reads as expired, so the library
+renewed it by itself through a cache keyed by client id and scopes, not by person. In a run with
+two or more syncing owners, every owner after the first was read with the first owner's token.
+This is older than the import work and was found while reviewing it. Two outcomes:
+
+- The schedule has a calendar chosen that the first owner cannot see: Google answers 404 and the
+  pull does nothing. Look for `Failed to list Google Calendar events` with code 404 in the
+  scheduler worker's log. These start working with this release.
+- The schedule has no calendar chosen, so it pulls `primary`, which under the first owner's
+  token is the first owner's own calendar. Those events may be on the wrong schedule. Run this
+  on the server, and for each row compare the schedule's synced events with its owner's
+  calendar:
+
+  ```sql
+  SELECT r.id, r.subdomain
+  FROM roles r
+  LEFT JOIN role_user ru ON ru.role_id = r.id AND ru.user_id = r.user_id
+  WHERE r.sync_direction IN ('from', 'both') AND r.is_deleted = 0
+    AND (ru.google_calendar_id IS NULL OR ru.google_calendar_id = '');
+  ```
+
+  No rows, or only one syncing owner on the install, means nothing to clean up.
+
+The webhook, the save-triggered push and the import page each serve one owner per request and
+were not affected. `tests/Feature/GoogleTokenUseTest.php` holds the fix.
 
 **Watch:** `storage/app/temp` on the web container. A link read can fetch up to 25 preview
 pictures; each read now removes `event_*` files older than a day, which is the first thing that

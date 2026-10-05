@@ -114,6 +114,14 @@ class GoogleCalendarConnectTest extends TestCase
         return ['access_token' => 'fresh-access', 'refresh_token' => 'fresh-refresh', 'expires_in' => 3600, 'scope' => $scope, 'id_token' => null];
     }
 
+    /** An id token as Google signs one: three base64url parts. Only the middle one is read. */
+    private function idToken(array $claims): string
+    {
+        $part = fn (array $data) => rtrim(strtr(base64_encode(json_encode($data, JSON_UNESCAPED_UNICODE)), '+/', '-_'), '=');
+
+        return $part(['alg' => 'RS256', 'typ' => 'JWT']).'.'.$part($claims).'.signature';
+    }
+
     private function entry(array $overrides = []): array
     {
         return array_merge([
@@ -224,6 +232,22 @@ class GoogleCalendarConnectTest extends TestCase
 
         // The way back is used once.
         $response->assertSessionMissing('google_oauth_return');
+    }
+
+    public function test_the_google_account_is_read_from_its_id_token_whatever_its_name(): void
+    {
+        // A token's payload is base64url. A name with a letter outside ASCII is enough to put
+        // a "-" or "_" in it, and read as plain base64 the payload stopped being JSON: the
+        // account was stored with no id.
+        $idToken = $this->idToken(['sub' => '110169484474386276334', 'email' => 'owner@example.com', 'name' => 'Олег Петров ???>>>']);
+        $this->assertMatchesRegularExpression('/[-_]/', explode('.', $idToken)[1]);
+
+        $this->googleAnswers(['id_token' => $idToken] + $this->token(self::READ));
+        $this->withSession($this->returning())
+            ->get(route('google.calendar.callback', ['code' => 'c', 'state' => 'state-1']))
+            ->assertRedirect($this->importPage());
+
+        $this->assertSame('110169484474386276334', $this->owner->fresh()->google_id);
     }
 
     public function test_what_a_connection_may_do_follows_what_google_granted(): void

@@ -871,9 +871,12 @@ class GoogleCalendarController extends Controller
                 return null;
             }
 
-            $payload = json_decode(base64_decode($parts[1]), true);
+            // A token's parts are base64url: "-" and "_" where base64 has "+" and "/". Read as
+            // plain base64 those two are skipped, everything after them shifts, and the payload
+            // is no longer JSON. A name with a letter outside ASCII is enough to put one there.
+            $payload = json_decode((string) base64_decode(strtr($parts[1], '-_', '+/')), true);
 
-            return $payload['sub'] ?? null;
+            return is_array($payload) && isset($payload['sub']) ? (string) $payload['sub'] : null;
         } catch (\Exception $e) {
             return null;
         }

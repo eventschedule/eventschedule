@@ -11,6 +11,7 @@ use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
 use App\Utils\SlugPatternUtils;
 use Carbon\Carbon;
+use Google\Auth\Cache\MemoryCacheItemPool;
 use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event as GoogleEvent;
@@ -116,10 +117,25 @@ class GoogleCalendarService
     }
 
     /**
-     * Set access token for API calls
+     * Set access token for API calls.
+     *
+     * One service is walked across every syncing owner by google:sync and
+     * google:refresh-webhooks, so what is set here has to stay that one owner's:
+     *
+     *  - `created` is when the token's `expires_in` was counted from. Google's client reads a
+     *    token without it as expired already, and then renews it by itself on every request.
+     *  - Such a renewal goes through the client's cache, which is keyed by client id and scopes
+     *    and not by person. Left shared, the first owner's renewed token was served to every
+     *    owner after them. A token that is good now can still run out part way through a long
+     *    sync, so each token gets a cache of its own.
+     *
+     * tests/Feature/GoogleTokenUseTest.php fails with either half removed.
      */
     public function setAccessToken(array $token): void
     {
+        $token['created'] ??= time();
+
+        $this->client->setCache(new MemoryCacheItemPool);
         $this->client->setAccessToken($token);
         $this->calendarService = new Calendar($this->client);
     }
