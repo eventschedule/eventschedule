@@ -567,7 +567,8 @@ class GoogleCalendarService
      *
      * Entries arrive in no order (Google sorts only when a rule is expanded into its dates), so
      * a calendar that is cut short is cut anywhere: `truncated` says so, and the page says it
-     * above the list (a read that is cut short with nothing in it is answered as a failure).
+     * above the list (a read that is cut short and has no events in it is answered as a
+     * failure, by the controller).
      *
      * @return array{events: list<array>, timezone: ?string, name: ?string, truncated: bool}
      */

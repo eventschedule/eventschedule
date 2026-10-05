@@ -354,6 +354,8 @@ class LinkImportParseTest extends TestCase
         // By the rules browsers use now. Under the older ones "ß" is "ss", and straße.de is
         // strasse.de: a different address, which may be somebody else's.
         $this->assertSame('https://xn--strae-oqa.de/kalender.ics', $normalise('https://straße.de/kalender.ics'));
+        // An underscore in a name is unusual and real, and is kept.
+        $this->assertSame('https://my_site.xn--mnchen-3ya.example/x', $normalise('https://my_site.münchen.example/x'));
         // Only the name: a user name in front of it is not part of it.
         $this->assertSame('https://user:geheim@xn--mnchen-3ya.example/feed.ics', $normalise('https://user:geheim@münchen.example/feed.ics'));
 

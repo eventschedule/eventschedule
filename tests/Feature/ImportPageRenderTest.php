@@ -276,6 +276,9 @@ class ImportPageRenderTest extends TestCase
         $this->assertStringContainsString('<div v-if="rowListedIndex(idx) !== null"', $html);
         $this->assertStringContainsString(':href="preview.parsed[rowListedIndex(idx)].event_url"', $html);
         $this->assertStringContainsString('@click="handleSelect(rowListedIndex(idx))"', $html);
+        // The button is busy, and off, for the date it acts on, and off while a queue is sending.
+        $this->assertStringContainsString(':disabled="savingEvents[rowListedIndex(idx)] || isAddingAll"', $html);
+        $this->assertStringContainsString('<span v-if="savingEvents[rowListedIndex(idx)]" class="inline-flex items-center">', $html);
 
         // Back, after something was added and the page cleared, still goes to see it: it asks
         // the flag the save sets, not the list "Clear" empties.

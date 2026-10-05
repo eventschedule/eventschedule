@@ -636,6 +636,15 @@ class GoogleCalendarConnectTest extends TestCase
         $this->postJson($url, ['calendar_id' => 'huge'])->assertStatus(422)
             ->assertExactJson(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed']);
 
+        // Nor is it when what was read holds only what is never offered: a declined invitation.
+        $this->fakeGoogle(function ($mock) {
+            $mock->shouldReceive('ensureValidToken')->andReturn(true);
+            $mock->shouldReceive('listUpcomingEvents')->andReturn(['name' => 'Huge', 'timezone' => 'UTC', 'truncated' => true,
+                'events' => [$this->entry(['id' => 'no', 'summary' => 'Declined', 'declined' => true])]]);
+        });
+        $this->postJson($url, ['calendar_id' => 'huge'])->assertStatus(422)
+            ->assertExactJson(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed']);
+
         // What the page does with either (the note in the list, the Connect button coming back
         // when a read answers "reconnect") is ImportPageBehaviourTest's, which runs its script.
     }

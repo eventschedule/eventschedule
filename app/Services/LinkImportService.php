@@ -182,7 +182,7 @@ class LinkImportService
                 : false;
             // A conversion that brings in an "@" or a slash (their full-width forms map to
             // them) has made another address of it, not another spelling of this one.
-            if (! is_string($ascii) || ! preg_match('/^[a-z0-9.\-]+$/i', $ascii)) {
+            if (! is_string($ascii) || ! preg_match('/^[a-z0-9._\-]+$/i', $ascii)) {
                 throw $this->refusal('invalid_url');
             }
             $url = $parts[1].$ascii.$parts[3];

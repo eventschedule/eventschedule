@@ -626,12 +626,12 @@
                                     <button v-if="isCurator && !preview.parsed[rowListedIndex(idx)].is_curated" 
                                             @click="handleSelect(rowListedIndex(idx))" 
                                             type="button" 
-                                            :disabled="savingEvents[idx]"
+                                            :disabled="savingEvents[rowListedIndex(idx)] || isAddingAll"
                                             :class="['px-4 py-2 rounded-lg transition-all duration-200',
-                                                savingEvents[idx]
+                                                (savingEvents[rowListedIndex(idx)] || isAddingAll)
                                                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                                     : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105']">
-                                        <span v-if="savingEvents[idx]" class="inline-flex items-center">
+                                        <span v-if="savingEvents[rowListedIndex(idx)]" class="inline-flex items-center">
                                             <svg class="animate-spin -ms-1 me-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -1443,7 +1443,7 @@
     // The ones that say which place it is.
     const IMPORT_SERIES_VENUE_IDENTITY = ['venue_id', 'venue_name', 'event_address', 'event_city'];
     // So is when it starts and ends: a start from one date with an end from another is no time.
-    const IMPORT_SERIES_TIME_FIELDS = ['event_start_time', 'event_end_time', 'event_duration', 'is_all_day'];
+    const IMPORT_SERIES_TIME_FIELDS = ['event_start_time', 'event_end_time', 'event_duration'];
     // A field a schedule can require, by the key of the row that holds it.
     const IMPORT_REQUIRED_ROW_FIELDS = { short_description: 'short_description', description: 'event_details', ticket_price: 'ticket_price',
         coupon_code: 'coupon_code', registration_url: 'registration_url', category_id: 'category_id', group_id: 'group_id' };
@@ -1518,8 +1518,9 @@
                 // Something was added on this visit. Outlives "Clear" and "Start over", which
                 // empty the lists the Back button used to look in.
                 addedAny: false,
-                // How many events this visit created. Not the saved rows on screen: removing
-                // a row that was added takes it off the screen, not off the schedule.
+                // How many events this visit put on the schedule, which is what the schedule
+                // announces on arrival. Not the saved rows on screen: removing a row that was
+                // added takes it off the screen, not off the schedule, and so does "Clear".
                 addedCount: 0,
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
@@ -2098,11 +2099,9 @@
                 const minute = parts[5] === undefined ? 0 : +parts[5];
 
                 // "7:30 PM" is half past seven in the evening, not in the morning. (As a word of
-                // its own: the "Am" of "19:30 America/New_York" is not one.)
-                if (hour !== null && parts[6]) {
-                    if (hour < 1 || hour > 12) {
-                        return false;
-                    }
+                // its own: the "Am" of "19:30 America/New_York" is not one.) Beside an hour that
+                // is already on the 24-hour clock ("19:30 PM") it says nothing and is passed over.
+                if (hour !== null && parts[6] && hour >= 1 && hour <= 12) {
                     hour = (hour % 12) + (parts[6].toLowerCase() === 'p' ? 12 : 0);
                 }
                 // "24:00" is the midnight that ends the day.
@@ -2255,7 +2254,11 @@
                     return this.canCreateAccount;
                 }
 
-                return ! this.isAddingAll && (this.listMode ? this.rowComplete(idx) : this.isEventComplete(this.preview.parsed[idx]));
+                // In a list, not while any date of the row is on the wire: a "Select" on one of a
+                // series' dates is, and a Save beside it would send that date as well.
+                return ! this.isAddingAll && (this.listMode
+                    ? this.rowState(idx) !== 'saving' && this.rowComplete(idx)
+                    : this.isEventComplete(this.preview.parsed[idx]));
             },
 
             // The dates of a series that could not be one repeating event arrive as separate
@@ -2297,8 +2300,10 @@
             // The date of this row that looks like an event the schedule already has, or null.
             // A listed series is one row, so a look-alike among its dates is the row's to say:
             // it starts unticked with the note, and its card shows which event it resembles.
+            // One that was dealt with (saved anyway, or taken with "Select") makes way for the
+            // next, so a series with two of them is not stuck on its first.
             rowListedIndex(idx) {
-                const found = this.rowIndexes(idx).find(i => this.preview.parsed[i] && this.preview.parsed[i].event_url);
+                const found = this.rowIndexes(idx).find(i => this.preview.parsed[i] && this.preview.parsed[i].event_url && ! this.savedEvents[i]);
 
                 return found === undefined ? null : found;
             },
@@ -2576,7 +2581,8 @@
                 let added = 0;
                 let failed = 0;
                 for (const idx of queue) {
-                    if (this.savedEvents[idx]) {
+                    // Already in, or on the wire by another road (a "Select" not yet answered).
+                    if (this.savedEvents[idx] || this.savingEvents[idx]) {
                         this.addProgress.done++;
 
                         continue;
@@ -3606,9 +3612,10 @@
                     return;
                 }
 
-                // Not while the list is being added: every row after this one would move under
-                // the queue.
-                if (this.isAddingAll) {
+                // Not while the list is being added, or while any single request is out: every
+                // row after this one would move, and the answer would mark whichever row had
+                // moved into its place.
+                if (this.isAddingAll || this.savingEvents.some(Boolean)) {
                     return;
                 }
 
@@ -3695,9 +3702,15 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        this.savedEvents[idx] = true;
-                        // On the schedule now, like a row that was saved: Back goes to see it.
+                        // On the schedule now, like a row that was saved: Back goes to see it,
+                        // and a list that ends this way counts it.
                         this.addedAny = true;
+                        this.addedCount++;
+                        // "Start over" while the answer was on its way: no row is left to mark.
+                        if (! this.preview || ! this.preview.parsed || ! this.preview.parsed[idx]) {
+                            return;
+                        }
+                        this.savedEvents[idx] = true;
                         this.savedEventData[idx] = {
                             view_url: data.event_url || this.preview.parsed[idx].event_url,
                             is_curated: true

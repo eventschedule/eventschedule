@@ -57,7 +57,7 @@ class ImportPageBehaviourTest extends TestCase
 
         // One page per scenario: its own data, its own record of what was sent.
         function page() {
-            const box = { options: null, saves: [], nav: [], focused: [], failNames: [], limitNames: [], preview: null, refuse: null, waiting: [], manual: false, timers: 0, inflight: 0, editors: 0 };
+            const box = { options: null, saves: [], nav: [], focused: [], failNames: [], limitNames: [], preview: null, refuse: null, selects: 0, selecting: [], waiting: [], manual: false, timers: 0, inflight: 0, editors: 0 };
             const live = new Set();
             const element = (id) => ({ focus() { box.focused.push(id); }, scrollIntoView() {}, value: '', style: {}, dataset: {}, classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
                 addEventListener() {}, removeEventListener() {}, setAttribute() {}, removeAttribute() {}, querySelector: () => null, querySelectorAll: () => [], getBoundingClientRect: () => ({ top: 0, left: 0, width: 0, height: 0 }), click() {}, closest: () => null });
@@ -92,6 +92,8 @@ class ImportPageBehaviourTest extends TestCase
                         }
                         // Anything that is not a POST is the curator's "Select".
                         if ((options.method || 'GET') === 'GET') {
+                            box.selects++;
+                            if (box.manual) { await new Promise(resolve => box.selecting.push(resolve)); }
                             return new Response(JSON.stringify({ success: true, event_url: '#' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
                         }
                         if (box.refuse) {
@@ -128,10 +130,11 @@ class ImportPageBehaviourTest extends TestCase
             box.quiet = async () => {
                 for (let calm = 0; calm < 3;) {
                     await new Promise(resolve => realTimeout(resolve, 1));
-                    calm = box.timers === 0 && box.inflight === box.waiting.length ? calm + 1 : 0;
+                    calm = box.timers === 0 && box.inflight === box.waiting.length + box.selecting.length ? calm + 1 : 0;
                 }
             };
             box.release = (count = Infinity) => { while (box.waiting.length && count-- > 0) { box.waiting.shift()(); } };
+            box.answerSelects = () => { while (box.selecting.length) { box.selecting.shift()(); } };
             box.read = async (rows, meta = {}, wholePage = false) => {
                 box.preview = { parsed: JSON.parse(JSON.stringify(rows)), meta: Object.assign({ source: 'ics', host: 'example.org', found: rows.length, shown: rows.length, already_on_schedule: 0,
                     skipped: { past: 0, cancelled: 0, private: 0, unreadable: 0 }, text_truncated: false, calendar_truncated: false, can_read_whole_page: false, timezone: 'America/New_York', import_token: null }, meta) };
@@ -228,6 +231,18 @@ class ImportPageBehaviourTest extends TestCase
                 await app.addSelected(); await box.quiet();
                 out.hours = box.saves.slice(0, 3).map(body => body.starts_at.slice(11, 16) + ' x' + body.duration);
 
+                // The same clock times, but one date runs on into the next day.
+                [box, app] = page();
+                await box.read([
+                    row('Jam', '2026-11-06 20:00', { series: series(1, 2), event_duration: 2 }),
+                    row('Jam', '2026-12-04 20:00', { series: series(2, 2), event_duration: 26 }),
+                    row('One-off', '2027-02-01 19:00'),
+                ]);
+                app.preview.parsed[0].event_start_time = app.formatMinutesToTime(18 * 60);
+                app.preview.parsed[0].event_end_time = app.formatMinutesToTime(20 * 60);
+                await app.addSelected(); await box.quiet();
+                out.longer_date = box.saves.slice(0, 2).map(body => body.starts_at.slice(11, 16) + ' x' + body.duration);
+
                 return out;
             },
 
@@ -243,6 +258,13 @@ class ImportPageBehaviourTest extends TestCase
                 out.after_one_card = { footer: footer(app), button: app.addLabel, left: box.nav.length, toasts: box.toasts || [] };
                 await app.saveRow(1); await app.saveRow(2); await box.quiet();
                 out.after_every_card = { footer: footer(app), button: app.addLabel, left: box.nav };
+
+                // One row from its card, then "Add" for the rest: one count, said once.
+                [box, app] = page();
+                await box.read([row('Alpha', '2026-11-02 19:00'), row('Beta', '2026-12-10 19:00'), row('Gamma', '2026-12-11 19:00')]);
+                await app.saveRow(0); await box.quiet();
+                await app.addSelected(); await box.quiet();
+                out.card_then_add = { footer: footer(app), button: app.addLabel, left: box.nav.length, toasts: (box.toasts || []).length };
 
                 // A row fails and is removed, and that was the last one not added.
                 [box, app] = page(); box.failNames = ['Bad'];
@@ -359,6 +381,76 @@ class ImportPageBehaviourTest extends TestCase
                 await box.read([row('Alpha', '2026-11-02 19:00', { event_url: 'https://app.test/e/3', event_id: 'pqr' }), row('Beta', '2026-12-10 19:00'), row('Gamma', '2026-12-11 19:00')]);
                 await app.handleSelect(0); await box.quiet();
                 out.select_only = { added_any: app.addedAny, left: box.nav.length, sent: box.saves.length };
+
+                // Two look-alikes and nothing else: both taken with "Select".
+                [box, app] = page();
+                app.isCurator = true;
+                await box.read([row('Alpha', '2026-11-02 19:00', { event_url: 'https://app.test/e/3', event_id: 'pqr' }), row('Beta', '2026-12-10 19:00', { event_url: 'https://app.test/e/4', event_id: 'stu' })]);
+                await app.handleSelect(0); await app.handleSelect(1); await box.quiet();
+                out.two_selected = { footer: footer(app), button: app.addLabel, left: box.nav.length };
+
+                // A series with two look-alike dates: its card shows one, then the other.
+                [box, app] = page();
+                app.isCurator = true;
+                await box.read([row('Jam', '2026-11-06 20:00', { series: series(1, 3), event_url: 'https://app.test/e/5', event_id: 'a1' }), row('Jam', '2026-12-04 20:00', { series: series(2, 3) }),
+                    row('Jam', '2027-01-02 20:00', { series: series(3, 3), event_url: 'https://app.test/e/6', event_id: 'a3' }), row('One-off', '2027-02-01 19:00')]);
+                const shown = [app.rowListedIndex(0)];
+                await app.handleSelect(app.rowListedIndex(0)); await box.quiet(); shown.push(app.rowListedIndex(0));
+                await app.handleSelect(app.rowListedIndex(0)); await box.quiet(); shown.push(app.rowListedIndex(0));
+                out.two_in_a_series = { shown, note: app.rowProblem(0), can_save: app.canSaveRow(0) };
+                await app.saveRow(0); await box.quiet();
+                out.two_in_a_series.sent = box.saves.map(sent);
+
+                // "Select" pressed while a card's queue is sending the same series.
+                [box, app] = page();
+                app.isCurator = true;
+                await box.read([row('Jam', '2026-11-06 20:00', { series: series(1, 3) }), row('Jam', '2026-12-04 20:00', { series: series(2, 3), event_url: 'https://app.test/e/7', event_id: 'b2' }),
+                    row('Jam', '2027-01-02 20:00', { series: series(3, 3) }), row('One-off', '2027-02-01 19:00')]);
+                box.manual = true;
+                const queue = app.saveRow(0); await box.quiet();
+                await app.handleSelect(1);
+                box.manual = false; box.release(); await queue; await box.quiet();
+                out.select_during_a_queue = { selects: box.selects, sent: box.saves.map(sent) };
+
+                // The other way round: a "Select" not yet answered, then Save, "Add" and Remove.
+                [box, app] = page();
+                app.isCurator = true;
+                await box.read([row('Jam', '2026-11-06 20:00', { series: series(1, 3) }), row('Jam', '2026-12-04 20:00', { series: series(2, 3), event_url: 'https://app.test/e/8', event_id: 'c2' }),
+                    row('Jam', '2027-01-02 20:00', { series: series(3, 3) }), row('One-off', '2027-02-01 19:00')]);
+                app.toggleRow(0);
+                box.manual = true;
+                const selecting = app.handleSelect(1); await box.quiet();
+                const held = { save_live: app.canSaveRow(0) };
+                app.handleRemoveEvent(3);
+                held.rows = app.preview.parsed.length;
+                // "Add" runs to its end with the "Select" still unanswered: each save is let
+                // through as it comes, and the date being taken is not among them.
+                const adding = app.addSelected(); await box.quiet();
+                while (app.isAddingAll) { box.release(); await box.quiet(); }
+                await adding;
+                held.sent_before_the_answer = box.saves.map(sent);
+                box.manual = false; box.answerSelects();
+                await selecting; await box.quiet();
+                out.select_in_flight = Object.assign(held, { selects: box.selects, sent: box.saves.map(sent), twice: twice(box.saves), row: app.rowState(0) });
+
+                // The day's allowance stops an "Add" at a look-alike the person had ticked. "Select" on it ends the list.
+                [box, app] = page();
+                app.isCurator = true; box.limitNames = ['Beta'];
+                await box.read([row('Alpha', '2026-11-02 19:00'), row('Beta', '2026-12-10 19:00', { event_url: 'https://app.test/e/9', event_id: 'd2' })]);
+                app.toggleRow(1);
+                await app.addSelected(); await box.quiet();
+                await app.handleSelect(1); await box.quiet();
+                out.select_after_the_limit = { footer: footer(app), left: box.nav.length };
+
+                // "Start over" while a "Select" is on its way.
+                [box, app] = page();
+                app.isCurator = true;
+                await box.read([row('Alpha', '2026-11-02 19:00', { event_url: 'https://app.test/e/10', event_id: 'e1' }), row('Beta', '2026-12-10 19:00')]);
+                box.manual = true;
+                const late = app.handleSelect(0); await box.quiet();
+                app.handleClear();
+                box.manual = false; box.answerSelects(); await late; await box.quiet();
+                out.select_then_start_over = { error: app.errorMessage || null, added_any: app.addedAny };
 
                 [box, app] = page();
                 out.nothing_yet = app.addedAny;
@@ -519,6 +611,8 @@ class ImportPageBehaviourTest extends TestCase
         // So are a date's hours. The date that started late was saved as starting at 21:00
         // and ending at the card's 20:00: twenty-three hours.
         $this->assertSame(['18:00 x2', '21:00 x1', '20:00 x3'], $result['hours']);
+        // A date that runs a day longer has other hours too, though its clock times agree.
+        $this->assertSame(['18:00 x2', '20:00 x26'], $result['longer_date']);
     }
 
     public function test_a_list_with_nothing_left_to_add_finishes_however_it_got_there(): void
@@ -538,6 +632,9 @@ class ImportPageBehaviourTest extends TestCase
         $this->assertSame($this->added(3), $result['after_every_card']['button']);
         $this->assertCount(1, $result['after_every_card']['left']);
         $this->assertStringEndsWith('/import/done', parse_url($result['after_every_card']['left'][0], PHP_URL_PATH));
+
+        // One from its card and two with "Add": three were added, and it is said once.
+        $this->assertSame(['footer' => $this->added(3), 'button' => $this->added(3), 'left' => 1, 'toasts' => 1], $result['card_then_add']);
 
         // A row that failed is removed and was the last one not added: the same.
         $this->assertSame(__('messages.import_added_summary', ['added' => 2, 'failed' => 1]), $result['after_a_failure']['footer']);
@@ -616,6 +713,40 @@ class ImportPageBehaviourTest extends TestCase
         $this->assertSame(1, $result['select']['left']);
         // By itself, with rows still to add, it stays on the page and is remembered for Back.
         $this->assertSame(['added_any' => true, 'left' => 0, 'sent' => 0], $result['select_only']);
+        // A list that ends with nothing but "Select" says two were added, not none.
+        $this->assertSame(['footer' => $this->added(2), 'button' => $this->added(2), 'left' => 1], $result['two_selected']);
+        // Stopped by the day's limit and then ended with "Select": it no longer says it stopped.
+        $this->assertSame(['footer' => $this->added(2), 'left' => 1], $result['select_after_the_limit']);
+    }
+
+    public function test_select_and_the_queue_keep_out_of_each_others_way(): void
+    {
+        $result = $this->results()['back_goes_to_what_was_added'];
+
+        // A series with two look-alikes: the card shows the first, then the third, then none.
+        // It was stuck on the first, and the other could never be looked at or taken.
+        $this->assertSame([0, 2, null], $result['two_in_a_series']['shown']);
+        $this->assertSame('', $result['two_in_a_series']['note']);
+        $this->assertTrue($result['two_in_a_series']['can_save']);
+        $this->assertSame(['Jam 12-04 20:00'], $result['two_in_a_series']['sent'], 'what is left of the series is the one date not taken');
+
+        // Pressed while a queue is sending the series, "Select" does nothing: the queue is
+        // about to send that date, and both would have put it on the schedule.
+        $this->assertSame(0, $result['select_during_a_queue']['selects']);
+        $this->assertSame(['Jam 11-06 20:00', 'Jam 12-04 20:00', 'Jam 01-02 20:00'], $result['select_during_a_queue']['sent']);
+
+        // A "Select" not yet answered: the card's Save waits, no row is removed from under
+        // it, and "Add" sends the rest of the series without the date being taken.
+        $this->assertFalse($result['select_in_flight']['save_live']);
+        $this->assertSame(4, $result['select_in_flight']['rows']);
+        $this->assertSame(1, $result['select_in_flight']['selects']);
+        $this->assertSame(['Jam 11-06 20:00', 'Jam 01-02 20:00', 'One-off 02-01 19:00'], $result['select_in_flight']['sent_before_the_answer']);
+        $this->assertSame($result['select_in_flight']['sent_before_the_answer'], $result['select_in_flight']['sent']);
+        $this->assertSame([], $result['select_in_flight']['twice']);
+        $this->assertSame('saved', $result['select_in_flight']['row'], 'two dates added and one taken: the series is all there');
+
+        // "Start over" before the answer: nothing breaks, and what was taken is remembered.
+        $this->assertSame(['error' => null, 'added_any' => true], $result['select_then_start_over']);
     }
 
     public function test_one_event_from_a_link_is_announced_and_saved_with_its_own_text(): void
@@ -666,7 +797,8 @@ class ImportPageBehaviourTest extends TestCase
             '2026-13-45 99:99' => '- -',
             '2026-02-30 19:00' => '- -',
             '2026-11-02 24:30' => '- -',
-            '2026-11-02 13:00 PM' => '- -',
+            // "PM" beside an hour already on the 24-hour clock says nothing new.
+            '2026-11-02 13:00 PM' => '2026-11-02 13:00',
             '2026-11-02 12:60' => '- -',
             '2026-00-10 10:00' => '- -',
         ], $result['read']);

@@ -396,6 +396,8 @@ class GoogleCalendarController extends Controller
             return response()->json(['error' => __('messages.google_import_reconnect'), 'reason' => 'reconnect'], 422);
         }
 
+        $listed = [];
+
         try {
             $from = now($role->captureTimezone())->startOfDay();
             $listed = $this->googleCalendarService->listUpcomingEvents(
@@ -403,11 +405,6 @@ class GoogleCalendarController extends Controller
                 $from,
                 $from->copy()->addDays(IcsImportUtils::WINDOW_DAYS)
             );
-
-            // Cut short with nothing read is not "no upcoming events": it is not known.
-            if (empty($listed['events']) && ! empty($listed['truncated'])) {
-                return response()->json(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed'], 422);
-            }
 
             $preview = app(LinkImportService::class)->previewCalendar(
                 $role,
@@ -419,6 +416,12 @@ class GoogleCalendarController extends Controller
 
             return response()->json($preview);
         } catch (LinkImportException $e) {
+            // A read that was cut short and has no events in it (none at all, or none but
+            // declined invitations and the like) is not "no upcoming events": it is not known.
+            if ($e->reason() === 'calendar_empty' && ! empty($listed['truncated'])) {
+                return response()->json(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed'], 422);
+            }
+
             return response()->json(['error' => $e->getMessage(), 'reason' => $e->reason()], 422);
         } catch (GoogleServiceException $e) {
             [$reason, $message] = $this->googleRefusal($e);

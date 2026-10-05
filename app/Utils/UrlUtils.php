@@ -1012,13 +1012,7 @@ class UrlUtils
             return null;
         }
 
-        // Looked for in the address as given. parse_url() turns a control character in a host
-        // into "_" (and on macOS some bytes above ASCII too), which a host may contain: the
-        // checks below would then pass a tidy name that is not the one in the address. A
-        // control character has no place anywhere in one; a space or a byte above ASCII has
-        // none before the path.
-        if (preg_match('/[\x00-\x1F\x7F]/', $url)
-            || (preg_match('#^[a-z][a-z0-9+.\-]*://([^/?\#]*)#i', $url, $authority) && preg_match('/[\x20\x80-\xFF]/', $authority[1]))) {
+        if (! self::writtenCleanly($url)) {
             return null;
         }
 
@@ -1090,6 +1084,31 @@ class UrlUtils
      * %zone-id, then lowercase. parse_url() returns "[::1]" for IPv6 literals and
      * may percent-encode the zone separator as "%25".
      */
+    /**
+     * Whether an address can be judged by what parse_url() makes of it. Looked for in the
+     * address as given, because parse_url() turns a control character in a host into "_" (and
+     * on macOS some bytes above ASCII too), which a host may contain: the checks that follow
+     * would then pass a tidy name that is not the one in the address.
+     *
+     * A control character has no place anywhere in an address. A space or a byte above ASCII
+     * has none in the host. A user name or password before the last "@" may hold them: the
+     * client encodes those, and they are not where the request goes.
+     */
+    private static function writtenCleanly(string $url): bool
+    {
+        if (preg_match('/[\x00-\x1F\x7F]/', $url)) {
+            return false;
+        }
+
+        if (preg_match('#^[a-z][a-z0-9+.\-]*://([^/?\#]*)#i', $url, $authority)) {
+            $at = strrpos($authority[1], '@');
+
+            return ! preg_match('/[\x20\x80-\xFF]/', $at === false ? $authority[1] : substr($authority[1], $at + 1));
+        }
+
+        return true;
+    }
+
     private static function normalizeHost(string $host): string
     {
         $host = trim($host);

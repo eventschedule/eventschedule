@@ -162,13 +162,20 @@ class GoogleImportUtilsTest extends TestCase
             GoogleImportUtils::toCalendarText([$entry], $calendar), $schedule, false, Carbon::parse('2026-10-10 12:00', $schedule)
         )['rows'];
 
+        // Google writes every time in the CALENDAR's zone and names the entry's own beside it:
+        // Monday 08:00 at +10:00 arrives from a Los Angeles calendar as Sunday 15:00 -07:00.
+        // So the entry's clock is read off the zone it names, not off how the time is written.
+        $asGoogleWritesIt = $weekly('2026-10-11T15:00:00-07:00', 'GMT+10:00');
+
         // A whole number of hours has a zone of its own, whose sign runs backwards.
-        $text = GoogleImportUtils::toCalendarText([$weekly('2026-10-12T08:00:00+10:00', 'GMT+10:00')], 'America/Los_Angeles');
+        $text = GoogleImportUtils::toCalendarText([$asGoogleWritesIt], 'America/Los_Angeles');
         $this->assertStringContainsString('DTSTART;TZID=Etc/GMT-10:20261012T080000', $text);
-        $rows = $readIn('Australia/Brisbane', $weekly('2026-10-12T08:00:00+10:00', 'GMT+10:00'), 'America/Los_Angeles');
+        $rows = $readIn('Australia/Brisbane', $asGoogleWritesIt, 'America/Los_Angeles');
         $this->assertCount(1, $rows);
         $this->assertSame('2026-10-12 08:00', $rows[0]['event_date_time']);
         $this->assertSame(['weekly', [1]], [$rows[0]['recurrence']['frequency'], $rows[0]['recurrence']['days']]);
+        // The same moment written with its own offset comes to the same thing.
+        $this->assertSame($text, GoogleImportUtils::toCalendarText([$weekly('2026-10-12T08:00:00+10:00', 'GMT+10:00')], 'America/Los_Angeles'));
 
         // The calendar's own zone, when it is at that offset then: it is the better answer,
         // because it goes on to change its clocks as the calendar does.
@@ -176,14 +183,22 @@ class GoogleImportUtilsTest extends TestCase
             'DTSTART;TZID=America/Los_Angeles:20261012T080000',
             GoogleImportUtils::toCalendarText([$weekly('2026-10-12T08:00:00-07:00', 'GMT-07:00')], 'America/Los_Angeles')
         );
-        $this->assertStringContainsString('DTSTART:20261012T080000Z', GoogleImportUtils::toCalendarText([$weekly('2026-10-12T08:00:00+00:00', 'GMT+00:00')], 'America/Los_Angeles'));
+        $this->assertStringContainsString('DTSTART:20261012T080000Z', GoogleImportUtils::toCalendarText([$weekly('2026-10-12T01:00:00-07:00', 'GMT+00:00')], 'America/Los_Angeles'));
 
         // An offset no listed zone keeps, on a calendar somewhere else: there is no clock to
         // repeat it on, and on the wrong one it would repeat on the wrong days. Left out.
-        $this->assertSame([], $readIn('Asia/Kolkata', $weekly('2026-10-12T08:00:00+05:30', 'GMT+05:30'), 'America/Los_Angeles'));
+        // (08:00 at +05:30 is 19:30 the evening before in Los Angeles.)
+        $this->assertSame([], $readIn('Asia/Kolkata', $weekly('2026-10-11T19:30:00-07:00', 'GMT+05:30'), 'America/Los_Angeles'));
         // The same entry on a calendar that is at that offset is that calendar's.
         $rows = $readIn('Asia/Kolkata', $weekly('2026-10-12T08:00:00+05:30', 'GMT+05:30'), 'Asia/Kolkata');
         $this->assertSame(['2026-10-12 08:00', 'weekly'], [$rows[0]['event_date_time'], $rows[0]['recurrence']['frequency']]);
+
+        // A name that is no zone at all says nothing about a clock: the calendar's stands in,
+        // as it does for an entry that happens once.
+        $this->assertStringContainsString(
+            'DTSTART;TZID=America/Los_Angeles:20261011T150000',
+            GoogleImportUtils::toCalendarText([$weekly('2026-10-11T15:00:00-07:00', 'Not/AZone')], 'America/Los_Angeles')
+        );
 
         // And a zone Google names properly is used as it always was.
         $rows = $readIn('Australia/Brisbane', $weekly('2026-10-12T08:00:00+10:00', 'Australia/Brisbane'), 'America/Los_Angeles');

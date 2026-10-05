@@ -82,13 +82,44 @@ class UrlFetchGuardTest extends TestCase
             "http://exa\x9fmple.test/",
             "http://93.184.216.34/poster\0.jpg",
             "http://93.184.216.34/a\r\nHost: inside",
-            'http://user name@93.184.216.34/',
+            // After the last "@" is the host, whatever came before it.
+            'http://user@exa mple.test/',
+            "http://user@exa\x85mple.test/",
+            "http://a@b@exa\u{00E9}mple.test/",
         ] as $url) {
             $this->assertNull(UrlUtils::validatedTarget($url), json_encode($url, JSON_INVALID_UTF8_SUBSTITUTE));
         }
 
+        // The same asked of the check itself, which needs no name to resolve: here the tidied
+        // names above fail to resolve and would be refused for that alone.
+        $clean = new \ReflectionMethod(UrlUtils::class, 'writtenCleanly');
+        foreach ([
+            "http://a\tb.example.test/" => false,
+            "http://exa\x85mple.test/" => false,
+            'http://user@exa mple.test/' => false,
+            "http://a@b@exa\u{00E9}mple.test/" => false,
+            "http://example.test/poster\0.jpg" => false,
+            'http://example.test/a b' => true,
+            "http://j\u{00FC}rgen:ge heim@example.test/" => true,
+            // The host is what follows the LAST "@", as PHP and curl both read it.
+            "http://a@b\u{00E9}@example.test/" => true,
+            "http://example.test/caf\u{00E9}" => true,
+            'http://[2606:2800:220:1::1]:8080/x' => true,
+        ] as $url => $expected) {
+            $this->assertSame($expected, $clean->invoke(null, $url), json_encode($url, JSON_INVALID_UTF8_SUBSTITUTE));
+        }
+
         // A space or a letter outside ASCII after the host is a path's business, as before.
-        foreach (['https://93.184.216.34/a b', "https://93.184.216.34/caf\u{00E9}/\u{00E9}v\u{00E9}nements?q=\u{00E9}", 'https://user:secret@93.184.216.34/feed.ics'] as $url) {
+        // So is one in a user name or password: the client encodes those, and they are not
+        // where the request goes. A calendar address with "jürgen:geheim@" in it was fetched
+        // before and still is.
+        foreach ([
+            'https://93.184.216.34/a b',
+            "https://93.184.216.34/caf\u{00E9}/\u{00E9}v\u{00E9}nements?q=\u{00E9}",
+            'https://user:secret@93.184.216.34/feed.ics',
+            "https://j\u{00FC}rgen:geheim@93.184.216.34/kalender.ics",
+            'https://team kalender:geheim@93.184.216.34/kalender.ics',
+        ] as $url) {
             $this->assertSame('93.184.216.34', UrlUtils::validatedTarget($url)['host'] ?? null, $url);
         }
     }

@@ -219,7 +219,7 @@ class GoogleImportUtils
             $zone = self::zone($moment['timeZone'] ?? null);
 
             if ($zone === null && $repeats && ! empty($moment['timeZone'])) {
-                $zone = self::clockOf($written, $calendarTimezone);
+                $zone = self::clockOf((string) $moment['timeZone'], $written, $calendarTimezone);
                 // No zone it can be expanded on: left out, as an entry with no start is. Put on
                 // the calendar's clock it would repeat on the wrong days.
                 if ($zone === null) {
@@ -239,17 +239,26 @@ class GoogleImportUtils
     }
 
     /**
-     * A listed zone whose clock reads what this moment's own offset says, for a repeating entry
-     * that names a zone PHP does not list (an offset, say). The moment is the same on any
-     * clock; a rule is not: "every Monday" at 08:00 +10:00 is Sunday afternoon in Los Angeles,
-     * and expanded there it repeats on the wrong day.
+     * A listed zone whose clock reads what the zone an entry names reads, for a repeating entry
+     * that names one PHP does not list (an offset such as "GMT+10:00"). The moment is the same
+     * on any clock; a rule is not: "every Monday" at 08:00 +10:00 is Sunday afternoon in Los
+     * Angeles, and expanded there it repeats on the wrong day.
+     *
+     * The offset is the named zone's, not the one the moment is written with: Google writes
+     * every time in the calendar's zone and says the entry's own zone beside it.
      *
      * The calendar's zone when it is at that offset at that moment, else the fixed zone for a
-     * whole number of hours (their signs run backwards: +10:00 is Etc/GMT-10), else none.
+     * whole number of hours (their signs run backwards: +10:00 is Etc/GMT-10), else none. A
+     * name that is no zone at all says nothing, and the calendar's zone stands in as it does
+     * for an entry that happens once.
      */
-    private static function clockOf(\DateTimeImmutable $written, string $calendarTimezone): ?string
+    private static function clockOf(string $named, \DateTimeImmutable $written, string $calendarTimezone): ?string
     {
-        $offset = $written->getOffset();
+        try {
+            $offset = (new \DateTimeZone($named))->getOffset($written);
+        } catch (\Throwable $e) {
+            return $calendarTimezone;
+        }
 
         if ((new \DateTimeZone($calendarTimezone))->getOffset($written) === $offset) {
             return $calendarTimezone;
