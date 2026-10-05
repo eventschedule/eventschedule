@@ -372,6 +372,8 @@ class IcsImportUtilsTest extends TestCase
             ['Asia/Tokyo', "UID:d\nSUMMARY:Daily\nDTSTART:20260104T230000Z\nRRULE:FREQ=DAILY", 'Mon 2026-01-05 08:00 daily[]'],
             // The 15th at 02:00 UTC is the 14th in Phoenix, every month.
             ['America/Phoenix', "UID:m\nSUMMARY:Monthly\nDTSTART:20260115T020000Z\nRRULE:FREQ=MONTHLY", 'Wed 2026-01-14 19:00 monthly_date[]'],
+            // The 27th seen as the 28th is the last pair every month has.
+            ['Asia/Tokyo', "UID:m27\nSUMMARY:Monthly\nDTSTART:20260127T230000Z\nRRULE:FREQ=MONTHLY", 'Wed 2026-01-28 08:00 monthly_date[]'],
             // New Year's Eve at 23:30 UTC is half past midnight on the 1st in Berlin, every year.
             ['Europe/Berlin', "UID:y\nSUMMARY:Yearly\nDTSTART:20201231T233000Z\nRRULE:FREQ=YEARLY", 'Fri 2021-01-01 00:30 yearly[]'],
             // Beside the leap day but not across it: 27 February is always the 28th in Tokyo,

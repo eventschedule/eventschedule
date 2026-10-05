@@ -404,6 +404,11 @@ class GoogleCalendarController extends Controller
                 $from->copy()->addDays(IcsImportUtils::WINDOW_DAYS)
             );
 
+            // Cut short with nothing read is not "no upcoming events": it is not known.
+            if (empty($listed['events']) && ! empty($listed['truncated'])) {
+                return response()->json(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed'], 422);
+            }
+
             $preview = app(LinkImportService::class)->previewCalendar(
                 $role,
                 GoogleImportUtils::toCalendarText($listed['events'], $listed['timezone']),

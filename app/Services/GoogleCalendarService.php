@@ -130,8 +130,10 @@ class GoogleCalendarService
      *    token without it as expired already, and then renews it by itself on every request.
      *  - Such a renewal goes through the client's cache, which is keyed by client id and scopes
      *    and not by person. Left shared, the first owner's renewed token was served to every
-     *    owner after them. A token that is good now can still run out part way through a long
-     *    sync, so each token gets a cache of its own.
+     *    owner after them whose own stored token was still good (one whose token had run out
+     *    is renewed by refreshTokenIfNeeded() and was read as themselves). A token that is
+     *    good now can still run out part way through a long sync, so each token gets a cache
+     *    of its own.
      *
      * tests/Feature/GoogleTokenUseTest.php fails with either half removed.
      */
@@ -564,7 +566,8 @@ class GoogleCalendarService
      * into one repeating event.
      *
      * Entries arrive in no order (Google sorts only when a rule is expanded into its dates), so
-     * a calendar that is cut short is cut anywhere: `truncated` says so and the page shows it.
+     * a calendar that is cut short is cut anywhere: `truncated` says so, and the page says it
+     * above the list (a read that is cut short with nothing in it is answered as a failure).
      *
      * @return array{events: list<array>, timezone: ?string, name: ?string, truncated: bool}
      */

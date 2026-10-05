@@ -1012,6 +1012,16 @@ class UrlUtils
             return null;
         }
 
+        // Looked for in the address as given. parse_url() turns a control character in a host
+        // into "_" (and on macOS some bytes above ASCII too), which a host may contain: the
+        // checks below would then pass a tidy name that is not the one in the address. A
+        // control character has no place anywhere in one; a space or a byte above ASCII has
+        // none before the path.
+        if (preg_match('/[\x00-\x1F\x7F]/', $url)
+            || (preg_match('#^[a-z][a-z0-9+.\-]*://([^/?\#]*)#i', $url, $authority) && preg_match('/[\x20\x80-\xFF]/', $authority[1]))) {
+            return null;
+        }
+
         $parsedUrl = parse_url($url);
 
         if (! $parsedUrl || ! isset($parsedUrl['scheme']) || ! isset($parsedUrl['host'])) {
@@ -1366,8 +1376,8 @@ class UrlUtils
      * nothing else, so a body sent in chunks with no length ran until the timeout, as large as
      * the server cared to make it. A write that is not taken whole stops the transfer on any
      * curl (error 23), which is what this stream does past the cap. A progress callback would
-     * do the same, but Guzzle 8 refuses that option passed raw and its own "progress" option
-     * ignores what the callback answers.
+     * do the same, but Guzzle 7.15 deprecates that option passed raw (8.0 is to reject it) and
+     * its own "progress" option ignores what the callback answers.
      */
     public static function cappedSink(int $bytes): \Psr\Http\Message\StreamInterface
     {

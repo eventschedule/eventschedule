@@ -68,6 +68,31 @@ class UrlFetchGuardTest extends TestCase
         }
     }
 
+    public function test_an_address_is_judged_as_given_not_as_php_tidies_it(): void
+    {
+        // parse_url() turns a control character in a host into "_", which a host may contain,
+        // and on macOS does the same to some bytes above ASCII: the name vetted and pinned was
+        // then a tidy one that is not in the address. And a NUL in the path reached curl,
+        // which throws something the caller does not catch.
+        foreach ([
+            "http://a\tb.example.test/",
+            "http://a\x01b.example.test/",
+            "http://93.184.216.34\x7f/",
+            "http://exa\x85mple.test/",
+            "http://exa\x9fmple.test/",
+            "http://93.184.216.34/poster\0.jpg",
+            "http://93.184.216.34/a\r\nHost: inside",
+            'http://user name@93.184.216.34/',
+        ] as $url) {
+            $this->assertNull(UrlUtils::validatedTarget($url), json_encode($url, JSON_INVALID_UTF8_SUBSTITUTE));
+        }
+
+        // A space or a letter outside ASCII after the host is a path's business, as before.
+        foreach (['https://93.184.216.34/a b', "https://93.184.216.34/caf\u{00E9}/\u{00E9}v\u{00E9}nements?q=\u{00E9}", 'https://user:secret@93.184.216.34/feed.ics'] as $url) {
+            $this->assertSame('93.184.216.34', UrlUtils::validatedTarget($url)['host'] ?? null, $url);
+        }
+    }
+
     public function test_addresses_inside_the_network_are_refused(): void
     {
         foreach ([

@@ -170,12 +170,19 @@ class LinkImportService
             throw $this->refusal('invalid_url');
         }
 
-        // A name with letters outside ASCII (münchen.example) is fetched by its ASCII form, as
-        // a browser does. The fetch guard refuses the other: the name it vets has to be the
-        // name that is looked up, letter for letter.
-        if (preg_match('#^(https?://)([^/?\#\s]+)(.*)$#is', $url, $parts) && preg_match('/[^\x00-\x7F]/', $parts[2])) {
-            $ascii = idn_to_ascii($parts[2], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
-            if (! is_string($ascii) || $ascii === '') {
+        // A name with letters outside ASCII (münchen.example) is fetched by its ASCII form. The
+        // fetch guard refuses the other: the name it vets has to be the name that is looked
+        // up, letter for letter. Only the name is converted (not a user name before it or a
+        // port after it), and by the rules browsers use now: under the older, "transitional"
+        // ones straße.de is strasse.de, which is somebody else's address.
+        if (preg_match('#^(https?://(?:[^/?\#\s@]*@)?)([^/?\#\s@:\[\]]+)((?::\d*)?(?:[/?\#].*)?)$#is', $url, $parts)
+            && preg_match('/[^\x00-\x7F]/', $parts[2])) {
+            $ascii = function_exists('idn_to_ascii')
+                ? idn_to_ascii($parts[2], IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46)
+                : false;
+            // A conversion that brings in an "@" or a slash (their full-width forms map to
+            // them) has made another address of it, not another spelling of this one.
+            if (! is_string($ascii) || ! preg_match('/^[a-z0-9.\-]+$/i', $ascii)) {
                 throw $this->refusal('invalid_url');
             }
             $url = $parts[1].$ascii.$parts[3];

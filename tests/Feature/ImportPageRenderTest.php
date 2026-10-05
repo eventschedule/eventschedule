@@ -257,36 +257,28 @@ class ImportPageRenderTest extends TestCase
         $this->assertStringContainsString('id="show_all_fields"', $adminPage);
     }
 
-    public function test_a_list_is_saved_through_one_queue_and_a_series_keeps_what_is_its_own(): void
+    public function test_the_markup_a_lists_behaviour_hangs_on(): void
     {
-        // What these lines do is checked in a browser; this holds them where they are. Each was
-        // a defect when it read otherwise.
+        // What the page DOES with a list is ImportPageBehaviourTest's, which runs its script.
+        // These are the template's part, which that test does not see.
         $html = $this->importPage();
 
-        // A card's Save in a list goes through the queue "Add" uses, under its lock.
-        $this->assertStringContainsString('await this.runQueue(this.rowIndexes(idx).filter(i => ! this.savedEvents[i]), false);', $html);
-        $this->assertStringContainsString('await this.runQueue(this.preview.parsed.map((event, i) => i).filter(i => this.isQueued(i)), true);', $html);
-        $this->assertSame(2, substr_count($html, 'await this.handleSave(idx, true);'), 'one loop sends rows: a send, and its one retry');
-        // A series with a date still to add keeps its Save.
+        // A card's Save in a list is saveRow(), which goes through the queue; and a series with
+        // a date still to add is not shown as saved because its first date is.
+        $this->assertStringContainsString('@click="saveRow(idx)"', $html);
         $this->assertStringContainsString('<template v-if="listMode ? rowState(idx) === \'saved\' : savedEvents[idx]">', $html);
 
-        // A date of a series is saved at its own venue when the source put it somewhere else,
-        // and a row is ticked, counted and sent whole.
-        $this->assertStringContainsString('const venueIdx = this.venueIndex(idx);', $html);
-        $this->assertStringContainsString('return !! this.selectedRows[idx] && ! this.savedEvents[idx] && this.rowComplete(idx);', $html);
-        $this->assertStringContainsString('this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && ! event.event_url);', $html);
-
-        // A list with nothing left to add finishes, however it got there.
-        $this->assertSame(2, substr_count($html, 'this.finishList();'));
-        $this->assertStringContainsString(json_encode(route('event.import_done', ['subdomain' => $this->role->subdomain])), $html);
-
-        // One event from a link: its header is announced, and "Start over" is not beside a
-        // "Clear" that does the same.
-        $this->assertStringContainsString('if (this.showsReadSummary) {', $html);
+        // One event from a link: "Start over" is not beside a "Clear" that does the same.
         $this->assertStringContainsString('<button v-if="listMode" type="button" @click="handleClear"', $html);
 
-        // Back, after something was added and the page cleared, still goes to see it.
-        $this->assertStringContainsString('this.addedAny = true;', $html);
+        // A look-alike among a series' dates is shown on the series' one card, with its link
+        // and the curator's "Select" pointing at that date.
+        $this->assertStringContainsString('<div v-if="rowListedIndex(idx) !== null"', $html);
+        $this->assertStringContainsString(':href="preview.parsed[rowListedIndex(idx)].event_url"', $html);
+        $this->assertStringContainsString('@click="handleSelect(rowListedIndex(idx))"', $html);
+
+        // Back, after something was added and the page cleared, still goes to see it: it asks
+        // the flag the save sets, not the list "Clear" empties.
         $this->assertStringContainsString('if (app && app.addedAny) {', $html);
         $this->assertStringNotContainsString('app.savedEvents.some(Boolean)', $html);
     }

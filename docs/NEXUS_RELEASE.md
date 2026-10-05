@@ -342,8 +342,10 @@ the column is there.
 `google:refresh-webhooks` walk every syncing owner with one `GoogleCalendarService`. The token it
 gave Google's client had no `created` time, which the library reads as expired, so the library
 renewed it by itself through a cache keyed by client id and scopes, not by person. In a run with
-two or more syncing owners, every owner after the first was read with the first owner's token.
-This is older than the import work and was found while reviewing it. Two outcomes:
+two or more syncing owners, every owner after the first whose own stored token was still good
+was read with the first owner's token. (One whose token had already run out was renewed by our
+own code and read as themselves, which is why this did not show on every run.) It is older than
+the import work and was found while reviewing it. Two outcomes:
 
 - The schedule has a calendar chosen that the first owner cannot see: Google answers 404 and the
   pull does nothing. Look for `Failed to list Google Calendar events` with code 404 in the
@@ -363,8 +365,8 @@ This is older than the import work and was found while reviewing it. Two outcome
 
   No rows, or only one syncing owner on the install, means nothing to clean up.
 
-The webhook, the save-triggered push and the import page each serve one owner per request and
-were not affected. `tests/Feature/GoogleTokenUseTest.php` holds the fix.
+The webhook and the import page serve one owner per request, and the save-triggered push builds a
+service of its own for each person it sends to: none of them was affected. `tests/Feature/GoogleTokenUseTest.php` holds the fix.
 
 **Watch:** `storage/app/temp` on the web container. A link read can fetch up to 25 preview
 pictures; each read now removes `event_*` files older than a day, which is the first thing that

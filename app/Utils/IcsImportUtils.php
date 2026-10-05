@@ -112,9 +112,10 @@ class IcsImportUtils
         }
 
         // A moved or cancelled date names the id it was written with, which several entries
-        // may share. It belongs to the one that repeats: left with whichever came first, a
-        // one-off, the series kept the date as it was and lost the change. (An id made of
-        // digits comes back from an array key as an integer, so the two are compared as text.)
+        // may share. It belongs to one that repeats: left with whichever came first, a one-off,
+        // the series kept the date as it was and lost the change. With two series under one id
+        // there is no telling whose it is, and the first of them gets it. (An id made of digits
+        // comes back from an array key as an integer, so the two are compared as text.)
         foreach ($families as $shared => $ids) {
             if (count($ids) < 2 || empty($entries[$shared]['overrides'])) {
                 continue;

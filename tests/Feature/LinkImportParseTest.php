@@ -350,6 +350,23 @@ class LinkImportParseTest extends TestCase
         // What comes after the name is not the name: left exactly as written.
         $this->assertSame('https://93.184.216.34/café/événements', $normalise('https://93.184.216.34/café/événements'));
         $this->assertSame(self::FEED, $normalise(self::FEED));
+
+        // By the rules browsers use now. Under the older ones "ß" is "ss", and straße.de is
+        // strasse.de: a different address, which may be somebody else's.
+        $this->assertSame('https://xn--strae-oqa.de/kalender.ics', $normalise('https://straße.de/kalender.ics'));
+        // Only the name: a user name in front of it is not part of it.
+        $this->assertSame('https://user:geheim@xn--mnchen-3ya.example/feed.ics', $normalise('https://user:geheim@münchen.example/feed.ics'));
+
+        // A full-width "@" or "/" becomes the real one when converted, which would make another
+        // address of it. Refused, as a browser refuses it.
+        foreach (["https://good.example\u{FF20}other.example/feed.ics", "https://good.example\u{FF0F}path.example/feed.ics"] as $link) {
+            try {
+                $normalise($link);
+                $this->fail("Accepted: {$link}");
+            } catch (\App\Exceptions\LinkImportException $e) {
+                $this->assertSame('invalid_url', $e->reason());
+            }
+        }
     }
 
     public function test_a_google_calendar_share_link_is_read_from_the_calendars_public_feed(): void

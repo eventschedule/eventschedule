@@ -608,21 +608,23 @@
                     <!-- Left column: Form fields -->
                     <div class="space-y-4">
                         <!-- Show matching event if found for this specific event -->
-                        <div v-if="preview.parsed[idx].event_url" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-lg">
+                        {{-- For a listed series this is whichever of its dates resembles one: the
+                             card is the whole row's. --}}
+                        <div v-if="rowListedIndex(idx) !== null" class="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 rounded-lg">
                             <div class="flex items-center justify-between">
                                 <div>
                                     {{ __('messages.similar_event_found') }}
                                 </div>
                                 <div class="flex gap-2">
                                     <!-- View button -->
-                                    <a :href="preview.parsed[idx].event_url"
+                                    <a :href="preview.parsed[rowListedIndex(idx)].event_url"
                                         target="_blank"
                                         class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                         {{ __('messages.view') }}
                                     </a>
                                     <!-- Show Select button if event hasn't been added to curator schedule -->
-                                    <button v-if="isCurator && !preview.parsed[idx].is_curated" 
-                                            @click="handleSelect(idx)" 
+                                    <button v-if="isCurator && !preview.parsed[rowListedIndex(idx)].is_curated" 
+                                            @click="handleSelect(rowListedIndex(idx))" 
                                             type="button" 
                                             :disabled="savingEvents[idx]"
                                             :class="['px-4 py-2 rounded-lg transition-all duration-200',
@@ -1440,6 +1442,8 @@
         'event_state', 'event_state_en', 'event_postal_code', 'event_country_code', 'matched_venue_name', 'venue_subdomain', 'venue_is_claimable'];
     // The ones that say which place it is.
     const IMPORT_SERIES_VENUE_IDENTITY = ['venue_id', 'venue_name', 'event_address', 'event_city'];
+    // So is when it starts and ends: a start from one date with an end from another is no time.
+    const IMPORT_SERIES_TIME_FIELDS = ['event_start_time', 'event_end_time', 'event_duration', 'is_all_day'];
     // A field a schedule can require, by the key of the row that holds it.
     const IMPORT_REQUIRED_ROW_FIELDS = { short_description: 'short_description', description: 'event_details', ticket_price: 'ticket_price',
         coupon_code: 'coupon_code', registration_url: 'registration_url', category_id: 'category_id', group_id: 'group_id' };
@@ -1514,6 +1518,9 @@
                 // Something was added on this visit. Outlives "Clear" and "Start over", which
                 // empty the lists the Back button used to look in.
                 addedAny: false,
+                // How many events this visit created. Not the saved rows on screen: removing
+                // a row that was added takes it off the screen, not off the schedule.
+                addedCount: 0,
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
                 userName: '',
@@ -1705,12 +1712,13 @@
 
             addLabel() {
                 if (this.allDone) {
-                    return @json(__('messages.import_added_all', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', this.savedEvents.filter(Boolean).length);
+                    return @json(__('messages.import_added_all', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', this.addedCount);
                 }
 
                 // While it works the button keeps the number it was pressed with; the bar beside
-                // it is what counts down.
-                const count = this.isAddingAll ? this.addProgress.total : this.selectedCount;
+                // it is what counts down. A card's own Save is not this button's work: it goes
+                // on saying what is ticked.
+                const count = this.isAddingAll && ! this.addProgress.card ? this.addProgress.total : this.selectedCount;
 
                 return count === 1
                     ? @json(__('messages.import_add_one'), JSON_UNESCAPED_UNICODE)
@@ -2074,6 +2082,55 @@
                 return null;
             },
 
+            // A date and time as text, read as it is written and never through the browser's
+            // clock: { date: 'Y-m-d', minutes: since midnight, or null when no time is given },
+            // false for the shape of a date that is not one, null for any other shape.
+            readWrittenMoment(value) {
+                const parts = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::\d{2})?(?:\s*([ap])\.?m\b\.?)?)?/i.exec(value || '');
+                if (! parts) {
+                    return null;
+                }
+
+                const year = +parts[1];
+                const month = +parts[2];
+                const day = +parts[3];
+                let hour = parts[4] === undefined ? null : +parts[4];
+                const minute = parts[5] === undefined ? 0 : +parts[5];
+
+                // "7:30 PM" is half past seven in the evening, not in the morning. (As a word of
+                // its own: the "Am" of "19:30 America/New_York" is not one.)
+                if (hour !== null && parts[6]) {
+                    if (hour < 1 || hour > 12) {
+                        return false;
+                    }
+                    hour = (hour % 12) + (parts[6].toLowerCase() === 'p' ? 12 : 0);
+                }
+                // "24:00" is the midnight that ends the day.
+                const nextDay = hour === 24 && minute === 0;
+                if (nextDay) {
+                    hour = 0;
+                }
+                if ((hour !== null && hour > 23) || minute > 59) {
+                    return false;
+                }
+
+                // Built from its numbers, so no zone is involved. A day the month does not have
+                // comes back as another day, which is how it is told.
+                const at = new Date(year, month - 1, day);
+                if (at.getFullYear() !== year || at.getMonth() !== month - 1 || at.getDate() !== day) {
+                    return false;
+                }
+                if (nextDay) {
+                    at.setDate(at.getDate() + 1);
+                }
+                const two = number => (number < 10 ? '0' : '') + number;
+
+                return {
+                    date: at.getFullYear() + '-' + two(at.getMonth() + 1) + '-' + two(at.getDate()),
+                    minutes: hour === null ? null : hour * 60 + minute,
+                };
+            },
+
             formatMinutesToTime(minutes) {
                 var use24hr = {{ $use24hr ? 'true' : 'false' }};
                 var h = Math.floor(minutes / 60) % 24;
@@ -2226,6 +2283,26 @@
                 return ! IMPORT_SERIES_VENUE_IDENTITY.every(key => importSameValue(row[key], original[key]));
             },
 
+            // The same for its hours: a date that started late or ran long keeps its own start
+            // and end together. Taken one by one, a date that arrived as 21:00 to 22:00 beside a
+            // first date of 20:00 to 22:00 took the card's new end and kept its own start, and
+            // was saved as running twenty-three hours.
+            ownTime(idx) {
+                const row = this.preview.parsed[idx];
+                const original = (row.series && this.seriesOriginals[row.series.id]) || {};
+
+                return ! IMPORT_SERIES_TIME_FIELDS.every(key => importSameValue(row[key], original[key]));
+            },
+
+            // The date of this row that looks like an event the schedule already has, or null.
+            // A listed series is one row, so a look-alike among its dates is the row's to say:
+            // it starts unticked with the note, and its card shows which event it resembles.
+            rowListedIndex(idx) {
+                const found = this.rowIndexes(idx).find(i => this.preview.parsed[i] && this.preview.parsed[i].event_url);
+
+                return found === undefined ? null : found;
+            },
+
             // Whose venue choice a date is saved with (the existing venue picked on a card, and
             // whether it is being claimed): the first date's, unless this date is elsewhere.
             venueIndex(idx) {
@@ -2244,7 +2321,8 @@
             //  - a field in which it arrived with the same value as the first date takes what
             //    the first date has now. An edit on the card reaches every date that shared
             //    the value, and none that the source itself made different: a date moved to
-            //    another hour, another room or another name keeps it.
+            //    another hour, another room or another name keeps it. Its hours and its venue
+            //    are each one thing: different in any part, they are its own in every part.
             //  - a name, or a field this schedule requires, that it arrived without takes the
             //    first date's. Otherwise one empty date would make the row impossible to add,
             //    with nothing on its card to fill in. So a series is complete when its card is.
@@ -2258,10 +2336,13 @@
                 const edited = this.preview.parsed[lead];
                 const original = this.seriesOriginals[row.series.id] || {};
                 const ownVenue = this.ownVenue(idx);
+                const ownTime = this.ownTime(idx);
                 const needed = ['event_name'].concat(Object.keys(IMPORT_REQUIRED_ROW_FIELDS).filter(key => this.requiredFields[key]).map(key => IMPORT_REQUIRED_ROW_FIELDS[key]));
                 const merged = Object.assign({}, row);
                 Object.keys(edited).forEach(key => {
-                    if (IMPORT_SERIES_OWN_FIELDS.includes(key) || (ownVenue && IMPORT_SERIES_VENUE_FIELDS.includes(key))) {
+                    if (IMPORT_SERIES_OWN_FIELDS.includes(key)
+                        || (ownVenue && IMPORT_SERIES_VENUE_FIELDS.includes(key))
+                        || (ownTime && IMPORT_SERIES_TIME_FIELDS.includes(key))) {
                         return;
                     }
                     if (importSameValue(row[key], original[key]) || (needed.includes(key) && importIsBlank(row[key]))) {
@@ -2333,7 +2414,7 @@
                         this.seriesOriginals[event.series.id] = JSON.parse(JSON.stringify(event));
                     }
                 });
-                this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && ! event.event_url);
+                this.selectedRows = this.preview.parsed.map((event, i) => this.rowComplete(i) && this.rowListedIndex(i) === null);
                 this.expandedRow = null;
                 this.addSummary = null;
                 this.stoppedByLimit = false;
@@ -2429,7 +2510,7 @@
                 if (! this.rowComplete(idx)) {
                     return @json(__('messages.import_row_incomplete'), JSON_UNESCAPED_UNICODE);
                 }
-                if (this.preview.parsed[idx].event_url) {
+                if (this.rowListedIndex(idx) !== null) {
                     return @json(__('messages.import_already_listed'), JSON_UNESCAPED_UNICODE);
                 }
 
@@ -2440,8 +2521,9 @@
             // pickers and editor exist only while it is open.
             expandRow(idx) {
                 // Not while the list is being added: a Save or a Remove from an open card would
-                // send a row twice, or move every row after it under the queue.
-                if (this.isAddingAll) {
+                // send a row twice, or move every row after it under the queue. Nor in the
+                // moment between "all added" and leaving for the schedule.
+                if (this.isAddingAll || this.allDone) {
                     return;
                 }
                 this.destroyDescriptionEditors();
@@ -2476,7 +2558,7 @@
             // events": the open card closes and the page moves on when all of it went in. A
             // card's own Save keeps its card open and stays, unless it was the last row.
             async runQueue(queue, fromList) {
-                if (this.isAddingAll || ! queue.length) {
+                if (this.isAddingAll || this.allDone || ! queue.length) {
                     return;
                 }
 
@@ -2488,7 +2570,7 @@
                 this.isAddingAll = true;
                 this.addSummary = null;
                 this.stoppedByLimit = false;
-                this.addProgress = { done: 0, total: queue.length };
+                this.addProgress = { done: 0, total: queue.length, card: ! fromList };
                 window.onbeforeunload = () => true;
 
                 let added = 0;
@@ -2523,10 +2605,29 @@
 
                 window.onbeforeunload = null;
                 this.isAddingAll = false;
-                this.addSummary = { added, failed };
 
                 if (failed === 0 && ! this.stoppedByLimit && (fromList || this.everythingAdded)) {
                     this.finishList();
+
+                    return;
+                }
+
+                if (fromList || failed || this.stoppedByLimit) {
+                    this.addSummary = { added, failed };
+                } else {
+                    // A card's Save that went in says so the way it always has, and leaves the
+                    // foot of the list to what is still ticked.
+                    Toastify({
+                        text: added === 1
+                            ? @json(__("messages.event_created"))
+                            : @json(__('messages.import_added_all', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', added),
+                        duration: 3000,
+                        position: 'center',
+                        stopOnFocus: true,
+                        style: {
+                            background: '#4BB543',
+                        }
+                    }).showToast();
                 }
             },
 
@@ -2538,7 +2639,8 @@
                     return;
                 }
                 this.allDone = true;
-                this.addSummary = { added: this.savedEvents.filter(Boolean).length, failed: 0 };
+                this.stoppedByLimit = false;
+                this.addSummary = { added: this.addedCount, failed: 0 };
                 setTimeout(() => {
                     window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
                 }, 900);
@@ -2737,6 +2839,11 @@
                         data.parsed = [data.parsed[0]];
                     }
 
+                    // The card that was open belongs to the preview being replaced. Its editor was
+                    // kept ("Read the whole page" over one event), and since an index that has an
+                    // editor is not given another, the new event was saved with the old text.
+                    this.destroyDescriptionEditors();
+
                     // Now that we have valid data and this is still the latest request, update the preview
                     this.preview = data;
                     
@@ -2757,28 +2864,28 @@
                             // Read as written. Going through a Date put the browser's own clock
                             // changes into it: midnight on a day the browser's zone skips midnight
                             // came out as 1 AM, whatever zone the schedule is in.
-                            // The time may be missing, and none of it is trusted to be a real date
-                            // or hour: what is not is left to the reading below, which blanks it.
-                            var written = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/.exec(event.event_date_time || '');
-                            if (written && (+written[2] < 1 || +written[2] > 12 || +written[3] < 1 || +written[3] > 31
-                                || (written[4] !== undefined && (+written[4] > 23 || +written[5] > 59)))) {
-                                written = null;
-                            }
-                            if (written && written[4] === undefined) {
-                                // A day with no time. Handed to the browser it is midnight UTC,
-                                // which west of there is the evening before: the wrong day, at
-                                // an hour nobody gave. The day is kept and the time is asked for.
-                                event.event_date = written[1] + '-' + written[2] + '-' + written[3];
+                            var moment = this.readWrittenMoment(event.event_date_time);
+                            if (moment) {
+                                event.event_date = moment.date;
+                                if (moment.minutes === null) {
+                                    // A day with no time. Handed to the browser it is midnight UTC,
+                                    // which west of there is the evening before: the wrong day, at
+                                    // an hour nobody gave. The day is kept and the time is asked for.
+                                    event.event_start_time = '';
+                                    event.event_end_time = '';
+                                } else {
+                                    event.event_start_time = this.formatMinutesToTime(moment.minutes);
+                                    event.event_end_time = event.event_duration
+                                        ? this.formatMinutesToTime((moment.minutes + Math.round(event.event_duration * 60)) % 1440)
+                                        : '';
+                                }
+                                delete event.event_date_time;
+                            } else if (moment === false) {
+                                // The shape of a date and not one. Blank, to be filled in: the
+                                // browser makes 2 March of "30 February".
+                                event.event_date = '';
                                 event.event_start_time = '';
                                 event.event_end_time = '';
-                                delete event.event_date_time;
-                            } else if (written) {
-                                event.event_date = written[1] + '-' + written[2] + '-' + written[3];
-                                var writtenMinutes = parseInt(written[4]) * 60 + parseInt(written[5]);
-                                event.event_start_time = this.formatMinutesToTime(writtenMinutes);
-                                event.event_end_time = event.event_duration
-                                    ? this.formatMinutesToTime((writtenMinutes + Math.round(event.event_duration * 60)) % 1440)
-                                    : '';
                                 delete event.event_date_time;
                             } else if (event.event_date_time) {
                                 try {
@@ -3254,6 +3361,7 @@
                     const data = await response.json();
                     result.ok = true;
                     this.addedAny = true;
+                    this.addedCount++;
 
                     // Store the response data in savedEventData array
                     this.savedEvents[idx] = true;
@@ -3521,6 +3629,7 @@
                     this.expandedRow = null;
                     // What the last "Add" said counted a row that is no longer here.
                     this.addSummary = null;
+                    this.stoppedByLimit = false;
                     
                     // If no events left, clear the preview
                     if (this.preview.parsed.length === 0) {
@@ -3557,6 +3666,10 @@
             },
 
             async handleSelect(idx) {
+                // One thing at a time: not beside a queue that is sending rows.
+                if (this.isAddingAll || this.allDone) {
+                    return;
+                }
                 // Reset error state for this event
                 this.saveErrors[idx] = false;
                 // Set saving state for this event
@@ -3583,6 +3696,8 @@
 
                     if (data.success) {
                         this.savedEvents[idx] = true;
+                        // On the schedule now, like a row that was saved: Back goes to see it.
+                        this.addedAny = true;
                         this.savedEventData[idx] = {
                             view_url: data.event_url || this.preview.parsed[idx].event_url,
                             is_curated: true
@@ -3621,6 +3736,11 @@
                 } finally {
                     // Clear saving state for this event
                     this.savingEvents[idx] = false;
+                }
+
+                // The last row of a list, taken this way, ends the list like any other.
+                if (this.preview && this.everythingAdded) {
+                    this.finishList();
                 }
             },
 

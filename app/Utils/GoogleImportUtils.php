@@ -140,7 +140,10 @@ class GoogleImportUtils
                 continue;
             }
 
-            $start = self::moment('DTSTART', $event['start'] ?? null, $calendarTimezone);
+            // A rule is expanded on the clock its start is written on, so for an entry that
+            // repeats that clock has to be the entry's own (see moment()).
+            $repeats = ! $instanceOf && ! empty($event['recurrence']);
+            $start = self::moment('DTSTART', $event['start'] ?? null, $calendarTimezone, $repeats);
             if ($start === null || empty($event['id'])) {
                 continue;
             }
@@ -148,7 +151,7 @@ class GoogleImportUtils
             $lines[] = 'BEGIN:VEVENT';
             $lines[] = 'UID:'.self::text((string) ($instanceOf ?: $event['id']));
             $lines[] = $start;
-            if ($end = self::moment('DTEND', $event['end'] ?? null, $calendarTimezone)) {
+            if ($end = self::moment('DTEND', $event['end'] ?? null, $calendarTimezone, $repeats)) {
                 $lines[] = $end;
             }
             if ($instanceOf && ($original = self::moment('RECURRENCE-ID', $event['originalStartTime'] ?? null, $calendarTimezone))) {
@@ -197,7 +200,7 @@ class GoogleImportUtils
      * names one on repeating entries, and the calendar's zone stands in otherwise), so "6 PM
      * every Monday" stays 6 PM across a clock change.
      */
-    private static function moment(string $name, ?array $moment, string $calendarTimezone): ?string
+    private static function moment(string $name, ?array $moment, string $calendarTimezone, bool $repeats = false): ?string
     {
         if (! $moment) {
             return null;
@@ -212,8 +215,20 @@ class GoogleImportUtils
         }
 
         try {
-            $zone = self::zone($moment['timeZone'] ?? null) ?: $calendarTimezone;
-            $at = (new \DateTimeImmutable((string) $moment['dateTime']))->setTimezone(new \DateTimeZone($zone));
+            $written = new \DateTimeImmutable((string) $moment['dateTime']);
+            $zone = self::zone($moment['timeZone'] ?? null);
+
+            if ($zone === null && $repeats && ! empty($moment['timeZone'])) {
+                $zone = self::clockOf($written, $calendarTimezone);
+                // No zone it can be expanded on: left out, as an entry with no start is. Put on
+                // the calendar's clock it would repeat on the wrong days.
+                if ($zone === null) {
+                    return null;
+                }
+            }
+
+            $zone ??= $calendarTimezone;
+            $at = $written->setTimezone(new \DateTimeZone($zone));
         } catch (\Throwable $e) {
             return null;
         }
@@ -224,11 +239,37 @@ class GoogleImportUtils
     }
 
     /**
+     * A listed zone whose clock reads what this moment's own offset says, for a repeating entry
+     * that names a zone PHP does not list (an offset, say). The moment is the same on any
+     * clock; a rule is not: "every Monday" at 08:00 +10:00 is Sunday afternoon in Los Angeles,
+     * and expanded there it repeats on the wrong day.
+     *
+     * The calendar's zone when it is at that offset at that moment, else the fixed zone for a
+     * whole number of hours (their signs run backwards: +10:00 is Etc/GMT-10), else none.
+     */
+    private static function clockOf(\DateTimeImmutable $written, string $calendarTimezone): ?string
+    {
+        $offset = $written->getOffset();
+
+        if ((new \DateTimeZone($calendarTimezone))->getOffset($written) === $offset) {
+            return $calendarTimezone;
+        }
+        if ($offset === 0) {
+            return 'UTC';
+        }
+
+        return $offset % 3600 === 0
+            ? self::zone('Etc/GMT'.($offset > 0 ? '-' : '+').abs(intdiv($offset, 3600)))
+            : null;
+    }
+
+    /**
      * A zone PHP lists by name, or null. It goes into a calendar line, so nothing else is let
      * through, and "whatever DateTimeZone accepts" is too much: it takes an offset ("+02:00",
      * "GMT+02:00") and names it "+02:00", which is not a zone the calendar reader knows, and
-     * the entry was lost. A name that is not listed falls back to the calendar's own zone; the
-     * moment itself carries its offset, so it is the same moment either way.
+     * the entry was lost. For an entry that happens once a name that is not listed falls back
+     * to the calendar's own zone: the moment carries its offset, so it is the same moment
+     * either way. One that repeats needs more care (clockOf()).
      */
     private static function zone($name): ?string
     {

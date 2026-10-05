@@ -258,6 +258,10 @@ class GoogleCalendarConnectTest extends TestCase
 
         // Asking for another account is asking not to be steered to this one.
         $this->assertNull($hint($import + ['choose' => 1]));
+
+        // A grant that was withdrawn leaves the id behind and no connection: nobody to name.
+        $this->owner->forceFill(['google_token' => null, 'google_refresh_token' => null])->save();
+        $this->assertNull($hint($import));
     }
 
     public function test_the_way_back_is_remembered_only_for_the_persons_own_schedule(): void
@@ -550,7 +554,7 @@ class GoogleCalendarConnectTest extends TestCase
             ->assertExactJson(['error' => __('messages.google_connect_no_calendar_access'), 'reason' => 'reconnect']);
 
         // A calendar deleted, or no longer shared with this account, since it was listed.
-        foreach ([$this->googleError(404, 'notFound', 'Not Found'), $this->googleError(403, 'forbidden', 'Forbidden')] as $gone) {
+        foreach ([$this->googleError(404, 'notFound', 'Not Found'), $this->googleError(410, 'deleted', 'Resource has been deleted'), $this->googleError(403, 'forbidden', 'Forbidden')] as $gone) {
             $refuse($gone);
             $this->postJson($events, ['calendar_id' => 'x'])->assertStatus(422)
                 ->assertExactJson(['error' => __('messages.google_import_calendar_gone'), 'reason' => 'calendar_gone']);
@@ -624,13 +628,16 @@ class GoogleCalendarConnectTest extends TestCase
         $listed(false);
         $this->postJson($url, ['calendar_id' => 'classes'])->assertOk()->assertJsonPath('meta.calendar_truncated', false);
 
-        // The page says so in the list's notes.
-        $page = $this->get(route('event.show_import_ai', ['subdomain' => $this->role->subdomain]))->assertOk()->getContent();
-        $this->assertStringContainsString('meta.calendar_truncated', $page);
-        $this->assertStringContainsString(json_encode(__('messages.import_calendar_truncated')), $page);
-        // And a connection that stopped working while a calendar was being read gets the
-        // button back, where the calendars were.
-        $this->assertStringContainsString("data.reason === 'reconnect'", $page);
+        // Cut short with nothing in what was read is not "no upcoming events": it is not known.
+        $this->fakeGoogle(function ($mock) {
+            $mock->shouldReceive('ensureValidToken')->andReturn(true);
+            $mock->shouldReceive('listUpcomingEvents')->andReturn(['name' => 'Huge', 'timezone' => 'UTC', 'truncated' => true, 'events' => []]);
+        });
+        $this->postJson($url, ['calendar_id' => 'huge'])->assertStatus(422)
+            ->assertExactJson(['error' => __('messages.google_import_load_failed'), 'reason' => 'failed']);
+
+        // What the page does with either (the note in the list, the Connect button coming back
+        // when a read answers "reconnect") is ImportPageBehaviourTest's, which runs its script.
     }
 
     public function test_a_calendars_events_are_previewed_like_a_feed_and_saved_as_google(): void
