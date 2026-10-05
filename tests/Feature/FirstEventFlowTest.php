@@ -65,7 +65,6 @@ class FirstEventFlowTest extends TestCase
         $this->assertStringContainsString('v-show="showMoreSections"', $html);
         $this->assertStringContainsString('showMoreSections: false', $html);
         $this->assertStringContainsString(__('messages.create_event'), $html);
-        $this->assertStringContainsString(__('messages.where_is_it'), $html);
 
         $this->assertStringNotContainsString($this->saveFirstNotice(), $html, 'no Boost button that can only say "save first"');
         $this->assertStringNotContainsString(
@@ -104,7 +103,6 @@ class FirstEventFlowTest extends TestCase
         $this->assertStringNotContainsString(__('messages.first_event_form_subtitle'), $html);
         $this->assertStringNotContainsString('v-show="showMoreSections"', $html);
         $this->assertStringContainsString('showMoreSections: true', $html);
-        $this->assertStringNotContainsString(__('messages.where_is_it'), $html);
         $this->assertStringContainsString($this->saveFirstNotice(), $html);
         $this->assertStringContainsString(__('messages.internal').' ('.__('messages.enterprise').')', $html);
     }
@@ -138,42 +136,6 @@ class FirstEventFlowTest extends TestCase
 
         $this->assertStringContainsString('class="step-indicator', $html);
         $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html);
-    }
-
-    /** A venue's first event IS at the venue, so it is not asked where. */
-    public function test_a_venue_is_not_asked_where_its_first_event_is(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createFreeRole($owner, 'venue');
-
-        $html = $this->createHtml($owner, $role);
-
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html);
-        $this->assertStringNotContainsString(__('messages.where_is_it'), $html);
-    }
-
-    /**
-     * The "where" row has no inputs of its own to post: it writes the same Vue models the hidden
-     * venue_* inputs post from. A named input there would send a second venue_name that wins or
-     * loses depending on its position in the form.
-     */
-    public function test_the_where_row_posts_nothing_of_its_own(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->freeTalent($owner);
-
-        $html = $this->createHtml($owner, $role);
-
-        $start = strpos($html, __('messages.where_is_it'));
-        $end = strpos($html, '</fieldset>', $start);
-        $row = substr($html, $start, $end - $start);
-
-        $this->assertStringContainsString('v-model="venueName"', $row);
-        $this->assertStringContainsString('v-model="venueAddress1"', $row);
-        $this->assertStringNotContainsString('name="', $row);
-        // ...and those models are what the hidden inputs at the top of the form post.
-        $this->assertMatchesRegularExpression('/<input[^>]*name="venue_name"[^>]*type="hidden"[^>]*v-model="venueName"/', $html);
-        $this->assertMatchesRegularExpression('/<input[^>]*name="venue_address1"[^>]*type="hidden"[^>]*v-model="venueAddress1"/', $html);
     }
 
     /** Both date/time checks show inline instead of in an alert(). */

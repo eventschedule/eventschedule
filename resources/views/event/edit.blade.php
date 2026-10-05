@@ -1890,32 +1890,6 @@
                             </div>
                         </div>
 
-                        @if ($isFirstEventRun && ! $role->isVenue())
-                        {{-- Where the event happens, asked on Details for a first event. The Venue
-                             section has the full form, but someone who never opens that tab publishes
-                             an event with no location at all. These inputs carry no name: they share
-                             the Vue models that the hidden venue_* inputs at the top of the form and
-                             the Venue section's own fields post from, so there is one value, not two. --}}
-                        <fieldset class="mb-6" v-cloak>
-                            <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.where_is_it') }}</legend>
-                            <div v-if="isInPerson && ! selectedVenue && venueType === 'create_new'" class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <x-text-input type="text" class="block w-full" v-model="venueName"
-                                    :placeholder="__('messages.venue_name')" :aria-label="__('messages.venue_name')" />
-                                <x-text-input type="text" class="block w-full" v-model="venueAddress1"
-                                    :placeholder="__('messages.address')" :aria-label="__('messages.address')" />
-                            </div>
-                            <p v-else-if="isInPerson && selectedVenue" class="mt-1 text-sm text-gray-900 dark:text-gray-100">@{{ selectedVenue.name || selectedVenue.address1 }}</p>
-                            <label class="mt-3 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" v-model="isOnline"
-                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                {{ __('messages.online_event_add_link') }}
-                            </label>
-                            <x-text-input v-if="isOnline" type="url" class="mt-2 block w-full" v-model="event.event_url"
-                                placeholder="https://" :aria-label="__('messages.event_url')" />
-                            <a href="#section-venue" class="mt-3 inline-block text-sm text-[var(--brand-blue)] hover:underline">{{ __('messages.more_venue_details') }}</a>
-                        </fieldset>
-                        @endif
-
                         </div>
                         {{-- End Panel 1 --}}
 

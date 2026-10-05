@@ -170,6 +170,92 @@ class SignupCodeStepTest extends TestCase
         $this->assertMatchesRegularExpression("/function changeEmail\\(\\)[\\s\\S]*?termsField\\.style\\.display = ''/", $html);
     }
 
+    /**
+     * "Don't email me product news" is a step-one question.
+     *
+     * It used to sit under the password in step two as well. It folds away inside the same
+     * address guard as Google - it applies to the social buttons too, so it is on screen wherever
+     * they are - and changeEmail() puts it back. Only Continue reports it: Resend on a page
+     * restored into step two would report a box the visitor never saw.
+     */
+    public function test_the_product_email_box_is_shown_in_step_one_only(): void
+    {
+        $html = $this->signupPage()->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="product-updates-field"', $html);
+        $this->assertSame(2, substr_count($html, "getElementById('product-updates-field')"),
+            'the product-email box is reached from somewhere other than the step-two fold and changeEmail()');
+        $this->assertMatchesRegularExpression(
+            "/function showCodeSentState\\(email\\) \\{[\\s\\S]*?if \\(email\\) \\{[^}]*?if \\(productUpdatesField\\) productUpdatesField\\.style\\.display = 'none';/",
+            $html,
+            'the product-email box is not folded away in step two, or is folded outside the address guard'
+        );
+        $this->assertMatchesRegularExpression("/function changeEmail\\(\\)[\\s\\S]*?productUpdatesField\\.style\\.display = ''/", $html);
+        $this->assertStringContainsString("if (productUpdatesBox && sendCodeBtn && sendCodeBtn.id === 'send-code-btn') {", $html);
+    }
+
+    /**
+     * The answer given in step one survives a step two that no longer shows the box.
+     *
+     * Step two is often a fresh page (a reload, the mail's ?step=code link) whose hidden copy of
+     * the box is unticked, so the final submit carries nothing. Continue posted the answer with
+     * the code request; a Resend, which sends no field, must not clear it.
+     */
+    public function test_a_step_one_objection_to_product_email_reaches_the_account(): void
+    {
+        config(['app.hosted' => true]);
+        Notification::fake();
+
+        $this->postJson(route('sign_up.send_code'), [
+            'email' => 'organizer@eventschedule-test.org',
+            'no_product_updates' => true,
+        ])->assertOk();
+
+        $this->postJson(route('sign_up.send_code'), ['email' => 'organizer@eventschedule-test.org'])
+            ->assertOk();
+
+        $this->post(route('sign_up'), [
+            'name' => 'Test Person',
+            'email' => 'organizer@eventschedule-test.org',
+            'password' => 'correct-horse-battery',
+            'terms' => '1',
+        ]);
+
+        $user = User::where('email', 'organizer@eventschedule-test.org')->first();
+
+        $this->assertNotNull($user, 'the account was not created');
+        $this->assertFalse((bool) $user->is_subscribed, 'the step-one objection was dropped on the way to the account');
+    }
+
+    /** Going back to step one and unticking the box takes the objection back. */
+    public function test_unticking_the_product_email_box_at_continue_clears_the_objection(): void
+    {
+        config(['app.hosted' => true]);
+        Notification::fake();
+
+        $this->postJson(route('sign_up.send_code'), [
+            'email' => 'organizer@eventschedule-test.org',
+            'no_product_updates' => true,
+        ])->assertOk();
+
+        $this->postJson(route('sign_up.send_code'), [
+            'email' => 'organizer@eventschedule-test.org',
+            'no_product_updates' => false,
+        ])->assertOk();
+
+        $this->post(route('sign_up'), [
+            'name' => 'Test Person',
+            'email' => 'organizer@eventschedule-test.org',
+            'password' => 'correct-horse-battery',
+            'terms' => '1',
+        ]);
+
+        $user = User::where('email', 'organizer@eventschedule-test.org')->first();
+
+        $this->assertNotNull($user, 'the account was not created');
+        $this->assertTrue((bool) $user->is_subscribed);
+    }
+
     /** Resend, change-email and the address echo are the three things a stuck visitor needs. */
     public function test_the_code_panel_offers_a_resend_and_a_way_to_fix_the_address(): void
     {

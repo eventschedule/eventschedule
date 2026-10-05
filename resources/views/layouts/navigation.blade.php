@@ -5,6 +5,7 @@
     $singleSchedule = $allNavSchedules->count() === 1 ? $allNavSchedules->first() : null;
     $singleScheduleActive = $singleSchedule
         && (request()->is($singleSchedule->subdomain) || request()->is($singleSchedule->subdomain . '/*'));
+    $hasScheduleSections = $allNavSchedules->count() > 1;
 @endphp
 <a href="{{ marketing_url() }}">
     <div class="flex h-16 pt-2 shrink-0 items-center">
@@ -55,10 +56,12 @@
                 </li>
                 @endif
 
+            {{-- The list is only split in two when the per-type sections sit between the halves.
+                 With one schedule or none there is nothing in between, so Dashboard and Following
+                 stay in ONE list: closing it here would put the outer gap-y-7 above Following. --}}
+            @if ($hasScheduleSections)
             </ul>
         </li>
-
-        @if (! $singleSchedule)
 
         @if ($schedules->isNotEmpty())
         <li>
@@ -159,10 +162,9 @@
         </li>
         @endif
 
-        @endif
-
         <li>
             <ul role="list" class="-mx-2 space-y-1">
+            @endif
 
                 <li>
                     <a href="{{ route('following') }}"

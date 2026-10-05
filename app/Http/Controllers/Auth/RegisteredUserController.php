@@ -208,6 +208,18 @@ class RegisteredUserController extends Controller
         // Increment attempts counter (expires in 1 hour)
         Cache::put($attemptsKey, $attempts + 1, now()->addHour());
 
+        // The sign-up page asks "Don't email me product news" in step one only, and step two is
+        // often a fresh page (a reload, the mail's ?step=code link) whose copy of the box is
+        // unticked. So Continue posts the answer here and store() reads it back. Only when the
+        // field is present: Resend and the guest-add flow never send it, and must not clear it.
+        if ($request->has('no_product_updates')) {
+            if ($request->boolean('no_product_updates')) {
+                Cache::put('signup_no_product_updates_'.$email, true, now()->addDay());
+            } else {
+                Cache::forget('signup_no_product_updates_'.$email);
+            }
+        }
+
         // A new code starts a new allowance of checks (see checkSignupCode()). Bounded all the
         // same: this method sends at most five codes an hour per address.
         Cache::forget('signup_code_checks_'.$email);
@@ -631,8 +643,12 @@ class RegisteredUserController extends Controller
         }
 
         // The sign-up form's "Don't email me news, tips or digests" box: the objection product
-        // email needs the chance of at the moment the address is collected.
-        if (config('app.hosted') && $request->boolean('no_product_updates')) {
+        // email needs the chance of at the moment the address is collected. The box is only shown
+        // in step one, so the answer normally arrives from sendVerificationCode(), which kept it
+        // against the address; the posted field covers a submit with no code request before it.
+        $objectedAtStepOne = (bool) Cache::pull('signup_no_product_updates_'.strtolower((string) $request->email));
+
+        if (config('app.hosted') && ($request->boolean('no_product_updates') || $objectedAtStepOne)) {
             $user->is_subscribed = false;
         }
 

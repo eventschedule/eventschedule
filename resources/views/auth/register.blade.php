@@ -152,6 +152,11 @@
                 var termsField = document.getElementById('terms-field');
                 if (termsField && termsBox && termsBox.checked) termsField.style.display = 'none';
 
+                // The product-email box is a step-one question. Ticked or not it still posts while
+                // hidden, and what was answered at Continue is already with the server.
+                var productUpdatesField = document.getElementById('product-updates-field');
+                if (productUpdatesField) productUpdatesField.style.display = 'none';
+
                 // The panel states the address and offers "use a different email", so the locked
                 // field above it only repeated it. Same guard as the panel: with no address (an
                 // error reload) the field must stay, or there is nothing left to type into.
@@ -275,11 +280,14 @@
             var sendCodeBtn = document.getElementById('send-code-btn');
             if (sendCodeBtn) sendCodeBtn.style.display = '';
 
-            // And what showCodeSentState() folded away: the social buttons, and a ticked consent box.
+            // And what showCodeSentState() folded away: the social buttons, a ticked consent box and
+            // the product-email box.
             var googleSection = document.getElementById('google-signup-section');
             if (googleSection) googleSection.style.display = '';
             var termsField = document.getElementById('terms-field');
             if (termsField) termsField.style.display = '';
+            var productUpdatesField = document.getElementById('product-updates-field');
+            if (productUpdatesField) productUpdatesField.style.display = '';
 
             // Supersede anything still in flight. Without this the page looked live and was dead:
             // a slow Resend left sendInFlight true, changeEmail() un-hid #send-code-btn - which was
@@ -810,6 +818,21 @@
                     honeypotValue = honeypotInput.value;
                 }
 
+                var payload = {
+                    email: email,
+                    'cf-turnstile-response': turnstileToken,
+                    website: honeypotValue
+                };
+
+                // The product-email box is only on screen in step one, so its answer goes with
+                // Continue and the server keeps it for store(). Resend leaves it out: on a page
+                // restored into step two the box is unticked and was never shown, and reporting
+                // that would overwrite what the visitor actually chose.
+                var productUpdatesBox = document.getElementById('no_product_updates');
+                if (productUpdatesBox && sendCodeBtn && sendCodeBtn.id === 'send-code-btn') {
+                    payload.no_product_updates = productUpdatesBox.checked;
+                }
+
                 fetch('{{ route('sign_up.send_code') }}', {
                     method: 'POST',
                     headers: {
@@ -817,11 +840,7 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        email: email,
-                        'cf-turnstile-response': turnstileToken,
-                        website: honeypotValue
-                    })
+                    body: JSON.stringify(payload)
                 })
                 .then(response => {
                     // Superseded by a changeEmail() while this was in flight: touch nothing. The
@@ -2150,8 +2169,14 @@
              platform newsletters, onboarding tips, owner digests) needs. Unticked means "send them";
              every one of those emails also carries a one-click unsubscribe. Applies to Google and
              Facebook sign-up too: the script below copies it onto their links, and
-             SocialAuthController::redirectToProvider() keeps it in the session for the callback. --}}
-        <div class="mt-3 relative flex items-start">
+             SocialAuthController::redirectToProvider() keeps it in the session for the callback.
+
+             Step one only: showCodeSentState() folds it away with the social buttons and
+             changeEmail() brings it back. Step two is often a fresh page (a reload, the mail's
+             ?step=code link) where this box is unticked again, so the answer does not ride on the
+             page: Continue posts it with the code request, sendVerificationCode() keeps it against
+             the address, and store() reads it back. --}}
+        <div id="product-updates-field" class="mt-3 relative flex items-start">
             <div class="flex h-6 items-center">
                 <input id="no_product_updates" name="no_product_updates" type="checkbox" value="1" {{ old('no_product_updates') ? 'checked' : '' }}
                     class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
