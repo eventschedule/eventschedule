@@ -33,6 +33,41 @@ class UrlFetchGuardTest extends TestCase
         $this->assertSame('93.184.216.34', $target['host']);
     }
 
+    public function test_a_host_with_a_letter_outside_ascii_is_refused(): void
+    {
+        // A client built to convert international names looks such a host up under another
+        // name than the one vetted: PHP's own conversion makes "example.com" of the first of
+        // these. The pin on the vetted address is keyed by the name as written, so it would
+        // not apply to the name that is really fetched. Refused before anything is resolved.
+        $this->assertSame('example.com', idn_to_ascii("\u{24D4}xample.com", IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46));
+
+        foreach ([
+            "https://\u{24D4}xample.com/feed.ics",
+            "https://exa\u{FF4D}ple.com/",
+            "https://m\u{00FC}nchen.example/",
+            // A full-width dot between the numbers of an address.
+            "http://93.184.216\u{FF0E}34/",
+            'http://exam ple.test/',
+            // A backslash in the name itself, which curl turns away too ("Bad hostname").
+            'http://example.test\\.93.184.216.34/',
+        ] as $url) {
+            $this->assertNull(UrlUtils::validatedTarget($url), $url);
+        }
+
+        // A backslash before an "@" is part of a user name to PHP and to curl alike (checked
+        // against curl 8.8): both read the host after it, so the host vetted is the one fetched.
+        $this->assertSame('93.184.216.34', UrlUtils::validatedTarget('http://example.test\\@93.184.216.34/')['host']);
+
+        // What a host is really written with is untouched, the ASCII form of such a name too.
+        foreach (['https://93.184.216.34/a', 'https://[2606:2800:220:1:248:1893:25c8:1946]/a'] as $url) {
+            $this->assertNotNull(UrlUtils::validatedTarget($url), $url);
+        }
+        $normalise = new \ReflectionMethod(UrlUtils::class, 'normalizeHost');
+        foreach (['xn--mnchen-3ya.example' => 'xn--mnchen-3ya.example', 'My_Host.Example.COM' => 'my_host.example.com', '[::1]' => '::1', "m\u{00FC}nchen.example" => ''] as $host => $expected) {
+            $this->assertSame($expected, $normalise->invoke(null, $host), $host);
+        }
+    }
+
     public function test_addresses_inside_the_network_are_refused(): void
     {
         foreach ([
@@ -69,6 +104,7 @@ class UrlFetchGuardTest extends TestCase
             '93.184.216.34/lies' => \Illuminate\Support\Facades\Http::response('not gzip at all', 200, ['Content-Encoding' => 'gzip']),
             '93.184.216.34/brotli' => \Illuminate\Support\Facades\Http::response('xx', 200, ['Content-Encoding' => 'br']),
             '93.184.216.34/plain' => \Illuminate\Support\Facades\Http::response('plain', 200, ['Content-Type' => 'text/plain']),
+            '93.184.216.34/none' => \Illuminate\Support\Facades\Http::response('as it is', 200, ['Content-Encoding' => 'none']),
         ]);
 
         $before = memory_get_peak_usage();
@@ -82,6 +118,8 @@ class UrlFetchGuardTest extends TestCase
         $this->assertSame('', $response->header('Content-Encoding'));
         $this->assertSame('deflated', UrlUtils::safeFetch('https://93.184.216.34/deflate'));
         $this->assertSame('plain', UrlUtils::safeFetch('https://93.184.216.34/plain'));
+        // Not a registered encoding, but one servers send to say there is none.
+        $this->assertSame('as it is', UrlUtils::safeFetch('https://93.184.216.34/none'));
 
         // What is not what it says, or is something nobody asked for, is not fetched.
         $this->assertNull(UrlUtils::safeHttpGet('https://93.184.216.34/lies'));
@@ -107,6 +145,54 @@ class UrlFetchGuardTest extends TestCase
         $this->assertCount(1, $seen);
         $this->assertFalse($seen[0]['decode_content']);
         $this->assertFalse($seen[0]['allow_redirects']);
+    }
+
+    public function test_a_body_is_written_to_a_stream_that_stops_at_the_cap(): void
+    {
+        // The size cap given to curl is read off the length a server states, and before curl
+        // 8.4 off nothing else: a body sent in chunks with no length ran until the timeout.
+        // A write that is not taken whole stops the transfer on any curl. (Run against a
+        // loopback server, an 8 MB chunked body stopped with curl error 23 at a 1 MB cap.)
+        $sink = null;
+        \Illuminate\Support\Facades\Http::fake(function ($request, array $options) use (&$sink) {
+            $sink = $options['sink'] ?? null;
+
+            return \Illuminate\Support\Facades\Http::response('ok');
+        });
+        UrlUtils::safeFetch('https://93.184.216.34/page');
+
+        $this->assertInstanceOf(\Psr\Http\Message\StreamInterface::class, $sink);
+        $megabyte = str_repeat('x', 1024 * 1024);
+        $taken = 0;
+        for ($n = 0; $n < 12; $n++) {
+            $taken += $sink->write($megabyte);
+        }
+        $this->assertSame(10 * 1024 * 1024, $taken, 'ten megabytes are taken and not a byte more');
+        $this->assertSame(0, $sink->write('x'));
+
+        // The stream itself, at any size: all of a body under the cap, and the cap of one over.
+        $small = UrlUtils::cappedSink(10);
+        $this->assertSame(4, $small->write('body'));
+        $this->assertSame(6, $small->write('and more than fits'));
+        $this->assertSame(0, $small->write('x'));
+        $this->assertSame('bodyand mo', (string) $small);
+    }
+
+    public function test_a_preview_image_is_stopped_at_its_cap_whether_or_not_a_length_is_stated(): void
+    {
+        $options = (new \ReflectionMethod(UrlUtils::class, 'imageCurlOptions'))
+            ->invoke(null, 'https://93.184.216.34/poster.jpg', ['host' => '93.184.216.34', 'port' => 443, 'ip' => '93.184.216.34']);
+
+        // A stated length over the cap is refused up front.
+        $this->assertSame(5 * 1024 * 1024, $options[CURLOPT_MAXFILESIZE]);
+        // A body that states none is stopped as it arrives: answering non-zero is "stop".
+        $this->assertFalse($options[CURLOPT_NOPROGRESS]);
+        $progress = $options[CURLOPT_PROGRESSFUNCTION];
+        $this->assertSame(0, $progress(null, 0, 5 * 1024 * 1024));
+        $this->assertSame(1, $progress(null, 0, 5 * 1024 * 1024 + 1));
+        // And it still goes nowhere it was not sent.
+        $this->assertFalse($options[CURLOPT_FOLLOWLOCATION]);
+        $this->assertSame(CURLPROTO_HTTP | CURLPROTO_HTTPS, $options[CURLOPT_PROTOCOLS]);
     }
 
     public function test_redirects_share_one_time_budget(): void

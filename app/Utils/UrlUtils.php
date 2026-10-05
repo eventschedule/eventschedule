@@ -1101,7 +1101,19 @@ class UrlUtils
             $host = substr($host, 0, $pos);
         }
 
-        return strtolower($host);
+        $host = strtolower($host);
+
+        // Letters, digits, dots, hyphens and underscores, and the colons of an IPv6 literal:
+        // that is what a host is written with. One holding anything else is refused, a letter
+        // outside ASCII above all. A client built to convert such names looks up a different
+        // name from the one vetted here ("ⓔxample.com" becomes "example.com"), and the pin
+        // on the vetted address is keyed by the name as written, so it would not apply.
+        // Whoever means a name like that passes its ASCII form (LinkImportService does).
+        if (preg_match('/[^a-z0-9._:\-]/', $host)) {
+            return '';
+        }
+
+        return $host;
     }
 
     /**
@@ -1299,7 +1311,7 @@ class UrlUtils
 
             $curlOptions = [
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-                CURLOPT_MAXFILESIZE => 10485760, // 10MB - cap SSRF'd response size
+                CURLOPT_MAXFILESIZE => self::MAX_WIRE_BYTES, // refuses a stated length over the cap up front
             ];
 
             // Pin the hostname to the address we validated (defeats DNS rebinding).
@@ -1318,6 +1330,7 @@ class UrlUtils
                     'allow_redirects' => false,
                     'decode_content' => false,
                     'curl' => $curlOptions,
+                    'sink' => self::cappedSink(self::MAX_WIRE_BYTES),
                 ])
                 ->get($currentUrl);
 
@@ -1341,6 +1354,26 @@ class UrlUtils
     /** The most a fetched body may come to once it is no longer compressed. */
     private const MAX_INFLATED_BYTES = 10485760;
 
+    /** The most a guarded fetch takes off the wire, and the most a preview image may be. */
+    private const MAX_WIRE_BYTES = 10485760;
+
+    private const MAX_IMAGE_BYTES = 5242880;
+
+    /**
+     * Where a guarded fetch writes its body: a stream that takes the cap and no more.
+     *
+     * CURLOPT_MAXFILESIZE is read off the length a server states, and before curl 8.4 off
+     * nothing else, so a body sent in chunks with no length ran until the timeout, as large as
+     * the server cared to make it. A write that is not taken whole stops the transfer on any
+     * curl (error 23), which is what this stream does past the cap. A progress callback would
+     * do the same, but Guzzle 8 refuses that option passed raw and its own "progress" option
+     * ignores what the callback answers.
+     */
+    public static function cappedSink(int $bytes): \Psr\Http\Message\StreamInterface
+    {
+        return new \GuzzleHttp\Psr7\DroppingStream(\GuzzleHttp\Psr7\Utils::streamFor(fopen('php://temp', 'w+')), $bytes);
+    }
+
     /**
      * A response whose body is as the server meant it: unchanged when it was sent plain, inflated
      * up to MAX_INFLATED_BYTES when the server compressed it without being asked. Null (which
@@ -1351,7 +1384,8 @@ class UrlUtils
     {
         $encoding = strtolower(trim((string) $response->header('Content-Encoding')));
 
-        if ($encoding === '' || $encoding === 'identity') {
+        // "none" is not a registered encoding, but servers send it to mean "as it is".
+        if (in_array($encoding, ['', 'identity', 'none'], true)) {
             return $response;
         }
 
@@ -1638,6 +1672,34 @@ class UrlUtils
     }
 
     /**
+     * How a preview image is fetched: no redirects, pinned to the vetted address, and no larger
+     * than MAX_IMAGE_BYTES. The size is held two ways. CURLOPT_MAXFILESIZE refuses a stated
+     * length up front; the progress callback stops a body that states none (before curl 8.4
+     * the first did nothing for one sent in chunks). Answering non-zero is how it says stop.
+     *
+     * @param  array{host:string,port:int,ip:string}  $target
+     * @return array<int, mixed>
+     */
+    private static function imageCurlOptions(string $imageUrl, array $target): array
+    {
+        return [
+            CURLOPT_URL => $imageUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'EventSchedule/1.0',
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_RESOLVE => self::pinnedCurlResolve($target),
+            CURLOPT_MAXFILESIZE => self::MAX_IMAGE_BYTES,
+            CURLOPT_NOPROGRESS => false,
+            CURLOPT_PROGRESSFUNCTION => static fn ($handle, $expected, $received) => $received > self::MAX_IMAGE_BYTES ? 1 : 0,
+        ];
+    }
+
+    /**
      * Securely download image with size and type validation
      */
     private static function downloadImageSecurely($imageUrl)
@@ -1649,19 +1711,7 @@ class UrlUtils
         }
 
         $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $imageUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_USERAGENT => 'EventSchedule/1.0',
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-            CURLOPT_RESOLVE => self::pinnedCurlResolve($target),
-            CURLOPT_MAXFILESIZE => 5242880, // 5MB limit for images
-        ]);
+        curl_setopt_array($ch, self::imageCurlOptions($imageUrl, $target));
 
         $imageData = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

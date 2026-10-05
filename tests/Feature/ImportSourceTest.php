@@ -231,6 +231,26 @@ class ImportSourceTest extends TestCase
         $this->assertNull($google->import_batch);
     }
 
+    public function test_whether_the_import_columns_exist_is_remembered_only_once_they_do(): void
+    {
+        // The scheduler worker asks during the minute of a deploy in which the columns are not
+        // there yet, and is the same process for hours after. A "no" kept for its lifetime left
+        // every event it synced unlabelled long after the migration had run.
+        $remembered = new \ReflectionProperty(Event::class, 'importColumnsReady');
+        $remembered->setValue(null, false);
+
+        try {
+            \Illuminate\Support\Facades\Schema::partialMock()->shouldReceive('hasColumn')
+                ->with('events', 'import_source')->twice()->andReturn(false, true);
+
+            $this->assertFalse(Event::importColumnsReady());
+            $this->assertTrue(Event::importColumnsReady(), 'asked again, because the first answer was no');
+            $this->assertTrue(Event::importColumnsReady(), 'and not asked a third time');
+        } finally {
+            $remembered->setValue(null, true);
+        }
+    }
+
     public function test_every_source_written_is_in_the_vocabulary_and_none_is_exported(): void
     {
         $this->assertSame(

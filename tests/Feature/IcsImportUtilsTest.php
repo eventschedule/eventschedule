@@ -31,6 +31,22 @@ class IcsImportUtilsTest extends TestCase
         return $this->read($feed, $keepLocalClock)['rows'];
     }
 
+    /** A feed read for a schedule somewhere else, as of the same noon there. */
+    private function rowsIn(string $zone, string $event, bool $keepLocalClock = false): array
+    {
+        return IcsImportUtils::read($this->feed($event), $zone, $keepLocalClock, Carbon::parse('2026-10-10 12:00', $zone))['rows'];
+    }
+
+    /** One row per line: the date, its weekday, and how the row repeats. */
+    private function shape(array $rows, int $first = 3): array
+    {
+        $days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+        return array_map(fn ($row) => Carbon::parse($row['event_date_time'])->format('D Y-m-d H:i').' '.($row['recurrence']
+            ? $row['recurrence']['frequency'].'['.implode('', array_map(fn ($day) => $days[$day], $row['recurrence']['days'])).']'
+            : ($row['series'] ? 'listed' : 'once')), array_slice($rows, 0, $first));
+    }
+
     public function test_a_time_lands_in_the_schedules_zone_however_the_feed_states_it(): void
     {
         $rows = $this->rows($this->feed(
@@ -313,6 +329,70 @@ class IcsImportUtilsTest extends TestCase
         }
     }
 
+    public function test_a_rule_whose_days_are_named_on_another_clock_is_not_repeated_on_the_wrong_days(): void
+    {
+        // Monday to Friday at 08:00 in Tokyo, written in UTC: the start is Sunday 23:00 and the
+        // days named are Sunday to Thursday. Read onto Tokyo's clock the start is a Monday,
+        // which is one of the days named, so nothing looked wrong and it was saved as one
+        // repeating event on Sunday to Thursday.
+        $rows = $this->rowsIn('Asia/Tokyo', "UID:class\nSUMMARY:Morning class\nDTSTART:20260104T230000Z\nRRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH");
+        $this->assertSame(['Mon 2026-10-12 08:00 listed', 'Tue 2026-10-13 08:00 listed', 'Wed 2026-10-14 08:00 listed'], $this->shape($rows));
+        $this->assertSame(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], array_values(array_unique(array_map(fn ($row) => Carbon::parse($row['event_date_time'])->format('D'), $rows))));
+
+        // The other way round: Thursday to Saturday at 21:00 in Mexico City is 03:00 the next
+        // day in UTC, and a feed whose first show was a Friday starts on its Saturday.
+        $rows = $this->rowsIn('America/Mexico_City', "UID:shows\nSUMMARY:Show\nDTSTART:20260905T030000Z\nRRULE:FREQ=WEEKLY;BYDAY=FR,SA,SU");
+        $this->assertSame(['Sat 2026-10-10 21:00 listed', 'Thu 2026-10-15 21:00 listed', 'Fri 2026-10-16 21:00 listed'], $this->shape($rows));
+
+        // "The 1st of the month" at 02:00 UTC is the last day of the month before in Phoenix,
+        // which is the 31st, the 30th or the 28th: not a date a monthly event can be given.
+        $rows = $this->rowsIn('America/Phoenix', "UID:first\nSUMMARY:Monthly\nDTSTART:20260101T020000Z\nRRULE:FREQ=MONTHLY");
+        $this->assertSame(['Sat 2026-10-31 19:00 listed', 'Mon 2026-11-30 19:00 listed', 'Thu 2026-12-31 19:00 listed'], $this->shape($rows));
+        // The 28th seen from the east is the 29th, which February does not always have; and
+        // the 31st is the 1st of months that follow a month of 31 days only.
+        $this->assertStringEndsWith('listed', $this->shape($this->rowsIn('Asia/Tokyo', "UID:m28\nSUMMARY:Monthly\nDTSTART:20260128T230000Z\nRRULE:FREQ=MONTHLY"))[0]);
+        $this->assertStringEndsWith('listed', $this->shape($this->rowsIn('Asia/Tokyo', "UID:m31\nSUMMARY:Monthly\nDTSTART:20260131T230000Z\nRRULE:FREQ=MONTHLY"))[0]);
+        // 1 March seen from the west is 28 February this year and the 29th in a leap year. Both
+        // days are "up to the 28th", so it is the month that gives this one away.
+        $this->assertSame(
+            ['Sat 2026-10-31 19:00 listed', 'Mon 2026-11-30 19:00 listed', 'Thu 2026-12-31 19:00 listed'],
+            $this->shape($this->rowsIn('America/Phoenix', "UID:m1\nSUMMARY:Monthly\nDTSTART:20260301T020000Z\nRRULE:FREQ=MONTHLY"))
+        );
+        // A yearly date beside the end of February is a different date in a leap year.
+        $this->assertSame(['Mon 2027-03-01 08:00 once'], $this->shape($this->rowsIn('Asia/Tokyo', "UID:y\nSUMMARY:Yearly\nDTSTART:20200228T230000Z\nRRULE:FREQ=YEARLY")));
+        $this->assertSame(['Sun 2027-02-28 19:00 once'], $this->shape($this->rowsIn('America/Phoenix', "UID:y\nSUMMARY:Yearly\nDTSTART:20210301T020000Z\nRRULE:FREQ=YEARLY")));
+    }
+
+    public function test_a_rule_that_moves_whole_onto_another_day_is_still_one_repeating_event(): void
+    {
+        // Nothing here names a day, so the whole rule is simply a day over, and stays a rule.
+        foreach ([
+            ['America/Phoenix', "UID:w\nSUMMARY:Weekly\nDTSTART:20260107T020000Z\nRRULE:FREQ=WEEKLY", 'Tue 2026-01-06 19:00 weekly[Tu]'],
+            ['America/Phoenix', "UID:f\nSUMMARY:Fortnightly\nDTSTART:20260107T020000Z\nRRULE:FREQ=WEEKLY;INTERVAL=2", 'Tue 2026-01-06 19:00 every_n_weeks[Tu]'],
+            ['Asia/Tokyo', "UID:d\nSUMMARY:Daily\nDTSTART:20260104T230000Z\nRRULE:FREQ=DAILY", 'Mon 2026-01-05 08:00 daily[]'],
+            // The 15th at 02:00 UTC is the 14th in Phoenix, every month.
+            ['America/Phoenix', "UID:m\nSUMMARY:Monthly\nDTSTART:20260115T020000Z\nRRULE:FREQ=MONTHLY", 'Wed 2026-01-14 19:00 monthly_date[]'],
+            // New Year's Eve at 23:30 UTC is half past midnight on the 1st in Berlin, every year.
+            ['Europe/Berlin', "UID:y\nSUMMARY:Yearly\nDTSTART:20201231T233000Z\nRRULE:FREQ=YEARLY", 'Fri 2021-01-01 00:30 yearly[]'],
+            // Beside the leap day but not across it: 27 February is always the 28th in Tokyo,
+            // and 1 March always the 2nd.
+            ['Asia/Tokyo', "UID:y27\nSUMMARY:Yearly\nDTSTART:20200227T230000Z\nRRULE:FREQ=YEARLY", 'Fri 2020-02-28 08:00 yearly[]'],
+            ['Asia/Tokyo', "UID:y01\nSUMMARY:Yearly\nDTSTART:20210301T230000Z\nRRULE:FREQ=YEARLY", 'Tue 2021-03-02 08:00 yearly[]'],
+        ] as [$zone, $event, $expected]) {
+            $this->assertSame([$expected], $this->shape($this->rowsIn($zone, $event)), $event);
+        }
+
+        // And a rule that names its days is still one when the day does not move: on the
+        // schedule's own clock, on a kept local clock, and across zones that share a day.
+        foreach ([
+            ['Asia/Tokyo', "UID:own\nSUMMARY:Own\nDTSTART;TZID=Asia/Tokyo:20260105T080000\nRRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR", false, 'Mon 2026-01-05 08:00 weekly[MoTuWeThFr]'],
+            ['America/New_York', "UID:kept\nSUMMARY:Kept\nDTSTART;TZID=America/Los_Angeles:20260906T220000\nRRULE:FREQ=WEEKLY;BYDAY=SU", true, 'Sun 2026-09-06 22:00 weekly[Su]'],
+            ['America/Phoenix', "UID:same\nSUMMARY:Same day\nDTSTART:20260105T200000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE", false, 'Mon 2026-01-05 13:00 weekly[MoWe]'],
+        ] as [$zone, $event, $keepLocalClock, $expected]) {
+            $this->assertSame([$expected], $this->shape($this->rowsIn($zone, $event, $keepLocalClock)), $event);
+        }
+    }
+
     public function test_a_removed_or_moved_date_written_in_utc_is_read_on_the_series_own_clock(): void
     {
         // On a touring schedule the series keeps its own clock. A removed date written in UTC
@@ -343,6 +423,50 @@ class IcsImportUtilsTest extends TestCase
         ));
 
         $this->assertSame(['Show A', 'Show B', 'Show C', 'Once'], array_column($read['rows'], 'event_name'));
+    }
+
+    public function test_two_events_with_one_id_at_one_time_are_two_events(): void
+    {
+        // Two stages, one export that numbers nothing. By start alone the second was dropped,
+        // and not counted as left out either.
+        $read = $this->read($this->feed(
+            "UID:event\nSUMMARY:Main stage: Band A\nDTSTART;TZID=America/New_York:20261101T200000",
+            "UID:event\nSUMMARY:Room 2: DJ B\nDTSTART;TZID=America/New_York:20261101T200000",
+            "UID:event\nSUMMARY:Main stage: Band A\nDTSTART;TZID=America/New_York:20261101T200000",
+        ));
+
+        $this->assertSame(['Main stage: Band A', 'Room 2: DJ B'], array_column($read['rows'], 'event_name'));
+    }
+
+    public function test_a_moved_date_finds_its_series_among_entries_that_share_an_id(): void
+    {
+        $oneOff = "SUMMARY:Quiz\nDTSTART;TZID=America/New_York:20261015T190000";
+        $series = "SUMMARY:Jam night\nDTSTART;TZID=America/New_York:20261005T190000\nRRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=4";
+        $moved = "SUMMARY:Jam night\nRECURRENCE-ID;TZID=America/New_York:20261012T190000\nDTSTART;TZID=America/New_York:20261013T200000";
+        $cancelled = "SUMMARY:Jam night\nRECURRENCE-ID;TZID=America/New_York:20261012T190000\nDTSTART;TZID=America/New_York:20261012T190000\nSTATUS:CANCELLED";
+
+        // The change belongs to the entry that repeats. Left with the first entry of that id,
+        // a one-off, the series stayed one repeating event with the date as it was.
+        // An id of digits and one of letters: PHP keeps the first as an integer array key.
+        foreach (['1', 'jam@example.com'] as $id) {
+            foreach ([[$oneOff, $series], [$series, $oneOff]] as $order) {
+                $with = fn (string $change) => array_map(fn ($event) => "UID:{$id}\n".$event, [...$order, $change]);
+
+                $rows = $this->rows($this->feed(...$with($moved)));
+                $this->assertSame(
+                    ['2026-10-13 20:00 Jam night', '2026-10-15 19:00 Quiz', '2026-10-19 19:00 Jam night', '2026-10-26 19:00 Jam night'],
+                    array_map(fn ($row) => $row['event_date_time'].' '.$row['event_name'], $rows),
+                    "id {$id}"
+                );
+
+                $rows = $this->rows($this->feed(...$with($cancelled)));
+                $this->assertSame(
+                    ['2026-10-15 19:00 Quiz', '2026-10-19 19:00 Jam night', '2026-10-26 19:00 Jam night'],
+                    array_map(fn ($row) => $row['event_date_time'].' '.$row['event_name'], $rows),
+                    "id {$id}"
+                );
+            }
+        }
     }
 
     public function test_a_zone_nobody_knows_is_read_as_the_schedules_own_clock(): void

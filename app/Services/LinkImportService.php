@@ -170,6 +170,17 @@ class LinkImportService
             throw $this->refusal('invalid_url');
         }
 
+        // A name with letters outside ASCII (münchen.example) is fetched by its ASCII form, as
+        // a browser does. The fetch guard refuses the other: the name it vets has to be the
+        // name that is looked up, letter for letter.
+        if (preg_match('#^(https?://)([^/?\#\s]+)(.*)$#is', $url, $parts) && preg_match('/[^\x00-\x7F]/', $parts[2])) {
+            $ascii = idn_to_ascii($parts[2], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+            if (! is_string($ascii) || $ascii === '') {
+                throw $this->refusal('invalid_url');
+            }
+            $url = $parts[1].$ascii.$parts[3];
+        }
+
         return $url;
     }
 
@@ -233,6 +244,14 @@ class LinkImportService
             ], self::FETCH_TIMEOUT, 4);
         } catch (ConnectionException $e) {
             throw $this->refusal('unreachable');
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            // Stopped by the guard's size cap: a stated length over it, or a body that ran past
+            // it. Anything else is not ours to explain here.
+            if (in_array($e->getHandlerContext()['errno'] ?? null, [CURLE_WRITE_ERROR, CURLE_FILESIZE_EXCEEDED], true)) {
+                throw $this->refusal('too_large');
+            }
+
+            throw $e;
         }
 
         $response = $followed['response'];

@@ -76,6 +76,7 @@ class IcsImportUtils
         // A repeating entry and its moved or edited dates share a UID.
         $entries = [];
         $starts = [];
+        $families = [];
         $zones = [];
         foreach ($calendar->select('VEVENT') as $index => $vevent) {
             self::normalise($vevent, $calendar, $zones);
@@ -91,19 +92,44 @@ class IcsImportUtils
                 continue;
             }
 
-            // Some feeds give every entry the same id. The same start is the same entry said
-            // twice; another start is another event, and gets an id of its own.
-            $start = isset($vevent->DTSTART) ? $vevent->DTSTART->serialize() : '';
+            // Some feeds give every entry the same id. The same start and the same title is the
+            // same entry said twice; anything else is another event, and gets an id of its own.
+            // By start alone, two acts on two stages at eight o'clock were one event, and the
+            // second was dropped without being counted.
+            $start = (isset($vevent->DTSTART) ? $vevent->DTSTART->serialize() : '').'|'.trim((string) ($vevent->SUMMARY ?? ''));
             if (isset($starts[$uid][$start])) {
                 continue;
             }
             $starts[$uid][$start] = true;
+            $shared = $uid;
             if (count($starts[$uid]) > 1) {
                 $uid .= '#'.count($starts[$uid]);
                 $vevent->UID = $uid;
             }
+            $families[$shared][] = $uid;
 
             $entries[$uid]['masters'][] = $vevent;
+        }
+
+        // A moved or cancelled date names the id it was written with, which several entries
+        // may share. It belongs to the one that repeats: left with whichever came first, a
+        // one-off, the series kept the date as it was and lost the change. (An id made of
+        // digits comes back from an array key as an integer, so the two are compared as text.)
+        foreach ($families as $shared => $ids) {
+            if (count($ids) < 2 || empty($entries[$shared]['overrides'])) {
+                continue;
+            }
+            foreach ($ids as $id) {
+                $master = $entries[$id]['masters'][0];
+                if (isset($master->RRULE) || isset($master->RDATE)) {
+                    if ((string) $id !== (string) $shared) {
+                        $entries[$id]['overrides'] = $entries[$shared]['overrides'];
+                        unset($entries[$shared]['overrides']);
+                    }
+
+                    break;
+                }
+            }
         }
 
         $rows = [];
@@ -306,7 +332,7 @@ class IcsImportUtils
                 $included[] = $placed->format('Y-m-d');
             }
 
-            $recurrence = $sameTime
+            $recurrence = $sameTime && ! self::daysMoved($master->RRULE->getParts(), $masterStart, $placedStart)
                 ? RecurrenceMapper::fromRule($master->RRULE->getParts(), $placedStart, $excluded, $included)
                 : null;
 
@@ -377,6 +403,51 @@ class IcsImportUtils
         }
 
         return $rows;
+    }
+
+    /**
+     * Whether putting a rule's start on the schedule's clock moved it to another calendar day
+     * in a way the rule cannot follow. The time keeping still is clockHolds()'s question; this
+     * one is about the day.
+     *
+     * A rule names its days on the clock it was written on. Monday to Friday at 08:00 in Tokyo,
+     * written in UTC, is `DTSTART:...T230000Z` with `BYDAY=SU,MO,TU,WE,TH`: read onto Tokyo's
+     * clock the start is a Monday, Monday is one of the days named, and it became one repeating
+     * event on Sunday to Thursday. The rule mapper catches a start that is not one of the
+     * rule's days; it cannot catch one that still is.
+     *
+     * So when the day moves:
+     *  - a rule that names days or dates (BYDAY, BYMONTHDAY, BYMONTH, BYSETPOS) is listed by
+     *    date. Rewriting the names onto the shifted days would be right for a plain weekly rule
+     *    and wrong for "the second Monday", so none is rewritten;
+     *  - a monthly rule is one only while both days are in the same month and up to the 28th:
+     *    "the 1st" seen from the west is the last day of the month before, which is not a date;
+     *  - a yearly rule is one unless both days are among 28 and 29 February and 1 March:
+     *    across the leap day, which date one of them is depends on the year. (27 February
+     *    seen as the 28th, or 1 March seen as the 2nd, is the same pair every year.)
+     * A plain weekly, fortnightly or daily rule moves whole and is still one repeating event.
+     */
+    private static function daysMoved(array $parts, \DateTimeInterface $written, \DateTimeInterface $placed): bool
+    {
+        if ($written->format('Y-m-d') === $placed->format('Y-m-d')) {
+            return false;
+        }
+
+        $parts = array_change_key_case($parts, CASE_UPPER);
+        foreach (['BYDAY', 'BYMONTHDAY', 'BYMONTH', 'BYSETPOS'] as $named) {
+            if (! empty($parts[$named])) {
+                return true;
+            }
+        }
+
+        $leapEdge = ['02-28', '02-29', '03-01'];
+
+        return match (strtoupper((string) ($parts['FREQ'] ?? ''))) {
+            'MONTHLY' => $written->format('Y-m') !== $placed->format('Y-m')
+                || max((int) $written->format('j'), (int) $placed->format('j')) > 28,
+            'YEARLY' => in_array($written->format('m-d'), $leapEdge, true) && in_array($placed->format('m-d'), $leapEdge, true),
+            default => false,
+        };
     }
 
     /**

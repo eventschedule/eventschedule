@@ -266,6 +266,36 @@ class JsonLdEventUtilsTest extends TestCase
         $this->assertSame(['Well formed'], array_column($read['rows'], 'event_name'));
     }
 
+    public function test_a_script_block_is_found_in_the_shapes_pages_write_the_tag(): void
+    {
+        $block = fn (string $open, string $name) => $open.json_encode($this->event(['name' => $name])).'</script>';
+
+        foreach ([
+            'plain' => '<script type="application/ld+json">',
+            'upper case' => '<SCRIPT TYPE="application/ld+json">',
+            'no quotes' => '<script type=application/ld+json>',
+            'single quotes' => "<script type='application/ld+json'>",
+            'other attributes first' => '<script id="events" data-rh="true" type="application/ld+json" class="x">',
+            'over several lines' => "<script\n    type=\"application/ld+json\"\n>",
+            // A type may carry a parameter. The block was passed over.
+            'with a charset' => '<script type="application/ld+json; charset=utf-8">',
+            'with a charset, no space' => '<script type="application/ld+json;charset=UTF-8">',
+        ] as $shape => $open) {
+            $this->assertSame([$shape], array_column($this->rows('<html><head>'.$block($open, $shape).'</head></html>'), 'event_name'), $shape);
+        }
+
+        // A tag that only begins like one is not one. "<script-loader/>" was read as a script
+        // tag, and everything up to the next "</script>" (the block itself) as what it held.
+        $this->assertSame(['After a custom tag'], array_column($this->rows(
+            '<script-loader src="/a.js"/><p>Hello</p>'.$block('<script type="application/ld+json">', 'After a custom tag')
+        ), 'event_name'));
+        $this->assertSame(['After two scripts'], array_column($this->rows(
+            '<script>var a = 1;</script><script src="/b.js"></script>'.$block('<script type="application/ld+json">', 'After two scripts')
+        ), 'event_name'));
+        // Another type that only begins like this one is not it.
+        $this->assertSame([], $this->rows($block('<script type="application/ld+jsonp">', 'Not this')));
+    }
+
     public function test_a_page_of_script_tags_that_never_end_is_read_in_one_pass(): void
     {
         // One pattern over the whole page retried from every opening tag: 160 KB took 12 seconds.
@@ -276,6 +306,10 @@ class JsonLdEventUtilsTest extends TestCase
             $real.str_repeat('<script ', 60000),
             $real.str_repeat('<script type="application/ld+json">', 20000),
             str_repeat('<script x="', 40000).'">'.$real,
+            // Opening tags with one ">" at the very end: looking for each tag's end as far as
+            // the page goes scanned to that ">" from every one of them, 13 seconds at the size
+            // a page is cut to. An opening tag's end is looked for within a tag's length.
+            str_repeat('<script ', 300000).'>'.$real,
         ] as $index => $html) {
             $started = microtime(true);
             $read = JsonLdEventUtils::read($html, 'https://example.com/events', 'America/New_York', false);

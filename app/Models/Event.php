@@ -292,14 +292,19 @@ class Event extends Model
      * code while the web container is still running that release's migrations, and for that
      * minute a calendar sync that names its source fails on an unknown column: the event is
      * skipped, the sync moves its cursor on, and it is never pulled again. The syncs ask this
-     * before stamping. One query per process, and removable a release after 2026-10.
+     * before stamping. Removable a release after 2026-10.
+     *
+     * Only "yes" is remembered. The worker that asks during that minute is the same process an
+     * hour later, and a "no" kept for its lifetime left every event it synced unlabelled long
+     * after the columns were there. Until the answer is yes it is one small query per ask.
      */
     public static function importColumnsReady(): bool
     {
-        static $ready = null;
-
-        return $ready ??= \Illuminate\Support\Facades\Schema::hasColumn('events', 'import_source');
+        return self::$importColumnsReady = self::$importColumnsReady
+            || \Illuminate\Support\Facades\Schema::hasColumn('events', 'import_source');
     }
+
+    private static bool $importColumnsReady = false;
 
     /** How long an event stays in the sitemaps after it ends. See constrainSitemapWindow(). */
     public const SITEMAP_GRACE_DAYS = 30;

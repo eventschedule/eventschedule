@@ -54,12 +54,20 @@ class JsonLdEventUtils
 
     private const MAX_PERFORMERS = 10;
 
+    /** Longer than any opening script tag worth reading. */
+    private const MAX_TAG = 2000;
+
     /**
      * The contents of a page's JSON-LD script blocks, found by walking the text once.
      *
      * Not one pattern over the whole page: "a script tag, then anything, then its end" is
      * retried from every opening tag when the end never comes, and a page made of opening tags
      * took most of a minute. The page is somebody else's, so that is theirs to choose.
+     *
+     * Nor a search to the end of the page for each tag's ">": with one ">" at the very end,
+     * every opening tag before it was scanned to the end again, which is the same cost by
+     * another road (13 seconds at the size a page is cut to). An opening tag is short, so its
+     * end is looked for within the length one can have, and no further.
      *
      * @return list<string>
      */
@@ -68,26 +76,28 @@ class JsonLdEventUtils
         $blocks = [];
         $offset = 0;
 
-        while (($open = stripos($html, '<script', $offset)) !== false) {
-            $tagEnd = strpos($html, '>', $open);
-            if ($tagEnd === false) {
-                break;
-            }
+        $length = strlen($html);
 
-            // An opening tag is short. One that is not is not one worth reading.
-            $tag = substr($html, $open, min($tagEnd - $open + 1, 2000));
-            if ($tagEnd - $open >= 2000 || ! preg_match('#^<script\b#i', $tag)) {
+        while (($open = stripos($html, '<script', $offset)) !== false) {
+            $span = strcspn($html, '>', $open, self::MAX_TAG);
+            $tagEnd = $open + $span;
+
+            // No end within reach, or not a script tag at all ("<script-loader>", "<scripts>"):
+            // carry on from just past it. A tag name ends at a space, a slash or the ">".
+            if ($span >= self::MAX_TAG || $tagEnd >= $length || ! preg_match('#^<script[\s/>]#i', substr($html, $open, 8))) {
                 $offset = $open + 7;
 
                 continue;
             }
 
+            $tag = substr($html, $open, $span + 1);
             $close = stripos($html, '</script', $tagEnd + 1);
             if ($close === false) {
                 break;
             }
 
-            if (preg_match('#\btype\s*=\s*(["\']?)application/ld\+json\1#i', $tag)) {
+            // The type may carry a parameter: application/ld+json; charset=utf-8.
+            if (preg_match('#\btype\s*=\s*(["\']?)application/ld\+json(?:\s*;[^"\'>]*)?\1#i', $tag)) {
                 $blocks[] = substr($html, $tagEnd + 1, $close - $tagEnd - 1);
             }
 

@@ -323,6 +323,35 @@ class LinkImportParseTest extends TestCase
         $this->parse('https://93.184.216.34/nothing.ics')->assertStatus(422)->assertJsonPath('reason', 'no_events');
     }
 
+    public function test_a_body_stopped_at_the_size_cap_says_it_is_too_large(): void
+    {
+        // The fetch guard stops a transfer at its cap: curl error 63 for a stated length over
+        // it, 23 for a body that ran past it. Both reached the person as a general failure.
+        $stopped = fn (int $errno) => fn ($request) => throw new \GuzzleHttp\Exception\RequestException(
+            "cURL error {$errno}", $request->toPsrRequest(), null, null, ['errno' => $errno]
+        );
+
+        foreach ([CURLE_WRITE_ERROR, CURLE_FILESIZE_EXCEEDED] as $errno) {
+            Http::fake(['93.184.216.34/endless' => $stopped($errno)]);
+            $this->parse('https://93.184.216.34/endless')->assertStatus(422)
+                ->assertJsonPath('reason', 'too_large')
+                ->assertJsonPath('error', __('messages.link_import_too_large'));
+        }
+    }
+
+    public function test_an_international_name_is_fetched_by_its_ascii_form(): void
+    {
+        // The guard vets the name that is looked up, letter for letter, and refuses one with
+        // letters outside ASCII. So such a link is turned into the form a browser would send.
+        $normalise = fn (string $link) => (fn () => $this->normalise($link))->call(app(LinkImportService::class));
+
+        $this->assertSame('https://xn--mnchen-3ya.example/whats-on?tag=jazz#top', $normalise('https://münchen.example/whats-on?tag=jazz#top'));
+        $this->assertSame('https://xn--mnchen-3ya.example:8443/feed.ics', $normalise('webcal://münchen.example:8443/feed.ics'));
+        // What comes after the name is not the name: left exactly as written.
+        $this->assertSame('https://93.184.216.34/café/événements', $normalise('https://93.184.216.34/café/événements'));
+        $this->assertSame(self::FEED, $normalise(self::FEED));
+    }
+
     public function test_a_google_calendar_share_link_is_read_from_the_calendars_public_feed(): void
     {
         $service = new class extends LinkImportService
