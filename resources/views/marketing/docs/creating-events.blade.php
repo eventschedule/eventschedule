@@ -46,56 +46,46 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong></li>
             <li>Click <strong class="text-gray-900 dark:text-white">"Add Event"</strong></li>
-            <li>Fill in the <strong class="text-gray-900 dark:text-white">Details</strong> section:
+            <li>Fill in the first tab, <strong class="text-gray-900 dark:text-white">Event</strong>. Its first section says what and when:
                 <ul class="doc-list mt-2 mb-2">
                     <li>Event name (required)</li>
-                    <li>Visibility (Public or Draft, plus Internal and Unlisted on Enterprise)</li>
-                    <li>Category, and a sub-schedule if your schedule has any</li>
-                    <li>Date &amp; time (start and end time, in your schedule's timezone)</li>
-                    <li>Flyer image, short description, and description</li>
+                    <li>Date &amp; time (start and end time, in your schedule's timezone), and whether the event is one-time or recurring</li>
+                    <li>A flyer image, and a sub-schedule if your schedule has any</li>
                 </ul>
             </li>
-            <li>Open the <strong class="text-gray-900 dark:text-white">Venue</strong> section and pick or enter where the event takes place, or mark it as online</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">"Save"</strong>. If you saved it as a draft, a green <strong class="text-gray-900 dark:text-white">Publish</strong> button appears next to Save for when you are ready.</li>
+            <li>Its second section, <strong class="text-gray-900 dark:text-white">Location</strong>, says where: pick one of your saved venues, enter a new one, or mark the event as online. <strong class="text-gray-900 dark:text-white">About</strong>, under it, opens the description.</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab to choose how people sign up: free registration, tickets you sell, or a link to tickets elsewhere.</li>
+            <li>Open any other tab you need. Each tab shows a one-line summary of what it holds, so you can see what is set without opening it.</li>
+            <li>Click the button in the bar at the bottom of the form. On a new event that will be public it reads <strong class="text-gray-900 dark:text-white">Publish</strong>, because that first save is what puts the event in front of people; with Draft chosen on the Listing tab it reads <strong class="text-gray-900 dark:text-white">Save draft</strong>. Once an event exists the button reads <strong class="text-gray-900 dark:text-white">Save</strong>, and a draft gets a green <strong class="text-gray-900 dark:text-white">Publish</strong> button next to it for when you are ready.</li>
         </ol>
 
         <x-doc-screenshot id="creating-events--add-event" alt="Add event form" />
 
-        <h3 class="doc-subheading">Sections of the Event Form</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The event form is split into sections, listed in a sidebar on desktop and as collapsible headers on mobile. Some sections only appear once they apply to your schedule:</p>
+        <h3 class="doc-subheading">Tabs of the Event Form</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The event form is split into tabs, listed in a sidebar on desktop and as collapsible headers on mobile. Under each tab's name is a one-line summary of what it holds, and a dot marks a tab with changes you have not saved yet. Some tabs only appear once they apply to your schedule:</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Section</th>
+                        <th>Tab</th>
                         <th>What it covers</th>
                         <th>When it appears</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Details</span></td>
-                        <td>Name, visibility, category, date and time, images, descriptions</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Event</span></td>
+                        <td>Name, date and time (one-time or recurring), flyer and sub-schedule in one section; the location in a second; then the description</td>
                         <td>Always, except on a Venue schedule looking at an event it did not create and cannot edit</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
-                        <td>In-person location or online link</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Gallery</span> <x-doc-badge plan="pro" /></td>
-                        <td>A photo gallery shown on the event page</td>
-                        <td>When you can edit the event. On a free schedule it explains the Pro plan, and it stays out of the way on your first event</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Tickets</span></td>
+                        <td>Free registration, tickets you sell, or a link to tickets elsewhere</td>
+                        <td>For the account that created the event</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Participants</span></td>
                         <td>Performers, speakers, and other people on the bill</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Recurring</span></td>
-                        <td>One-time or repeating dates</td>
                         <td>Always</td>
                     </tr>
                     <tr>
@@ -104,33 +94,42 @@
                         <td>Always</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Schedules</span></td>
-                        <td>Adding the event to other schedules</td>
-                        <td>When another schedule is available to you</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Gallery</span> <x-doc-badge plan="pro" /></td>
+                        <td>A photo gallery shown on the event page</td>
+                        <td>When you can edit the event. On a free schedule it explains the Pro plan</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Google Calendar</span> and <span class="font-semibold text-gray-900 dark:text-white">Outlook Calendar</span></td>
-                        <td>Syncing this one event to a connected calendar</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Listing</span></td>
+                        <td>Visibility, the event's link, its category, and the other schedules it appears on</td>
+                        <td>Whenever the Event tab does</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Calendar sync</span></td>
+                        <td>Syncing this one event to a connected Google or Outlook calendar</td>
                         <td>Saved events on a schedule with that calendar connected</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Tickets</span></td>
-                        <td>External ticket link, free registration, or built-in ticketing</td>
-                        <td>For the account that created the event</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Settings</span></td>
-                        <td>Per-event sponsor overrides</td>
-                        <td>Pro schedules, for editors</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Engagement</span></td>
                         <td>Fan content, polls, feedback, and carpool</td>
                         <td>Always (carpool only when enabled on the schedule)</td>
                     </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Sponsors</span></td>
+                        <td>Per-event sponsor overrides</td>
+                        <td>Pro schedules, for editors</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On your first event, the tabs after Tickets wait behind <strong class="text-gray-900 dark:text-white">More options</strong> so the form starts with only what an event needs.</p>
+
+        <h3 class="doc-subheading">Saving, and Coming Back to an Event</h3>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">The bar at the bottom</strong> holds Cancel and Save and says what Save will do: which tabs have unsaved changes, that saving will hide a public event or publish a draft, or which tab a refused save needs you to check. On a new event it shows the visibility the event will be saved with, as a link to the Listing tab where you can change it. With nothing changed it says so. It also says, before you save, when saving will remove something: an event's ticket types and add-ons, the times of its agenda, or its own sponsors. After a save the form refused, everything you typed is still there, ticket types, promo codes and add-ons included, and the tab named in the bar clears as soon as you change something on it.</li>
+            <li><strong class="text-gray-900 dark:text-white">An event that already exists</strong> opens straight on its fields. The page is titled with the event's name, with a badge for its saved visibility that opens the Listing tab, and the event's public link sits under the title with <strong class="text-gray-900 dark:text-white">Copy</strong> and <strong class="text-gray-900 dark:text-white">View</strong>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Cancel</strong> asks before discarding changes. Actions that reload the page, such as approving fan content or syncing to a calendar, wait until you have saved.</li>
+            <li><strong class="text-gray-900 dark:text-white">Shortcuts:</strong> Ctrl+S (Cmd+S on a Mac) saves, and Enter in the name of a new event moves on to the date.</li>
+        </ul>
 
         <h3 class="doc-subheading">Actions on a Saved Event</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Once an event is saved, an <strong class="text-gray-900 dark:text-white">Actions</strong> menu appears at the top of the form:</p>
@@ -168,9 +167,9 @@
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
-            Details
+            The Event Tab
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Details section contains the core information for your event, in the order the fields appear on the form:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Event tab holds what nearly every event needs, in two sections. The first has the name, the date and time, the flyer and the sub-schedule. The second is the <a href="#venue" class="doc-link">location</a>. <strong class="text-gray-900 dark:text-white">About</strong>, under them, opens the descriptions. How people sign up is on the <a href="#tickets" class="doc-link">Tickets</a> tab, and visibility, the event's link and its category are on the <a href="#listing" class="doc-link">Listing</a> tab.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -186,49 +185,33 @@
                         <td>The event title (required)</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Event URL / Slug</span></td>
-                        <td>For saved events the event URL is shown under the name with a copy button. Click <strong>Edit</strong> to change the slug.</td>
-                    </tr>
-                    <tr>
-                        <td id="draft"><span class="font-semibold text-gray-900 dark:text-white">Visibility</span></td>
-                        <td>Choose who can see the event. <strong>Public</strong> lists it for everyone. <strong>Draft</strong> keeps it visible to schedule members only while you finish editing. <strong>Internal</strong> (Enterprise) keeps it members-only permanently. <strong>Unlisted</strong> (Enterprise) hides it from your schedule but lets anyone with the direct link view it, optionally behind a password. New events start at your schedule's default visibility, and switching a hidden event to Public warns you first. See <a href="#privacy" class="doc-link">Internal &amp; Unlisted Events</a> for exactly what each state hides.</td>
-                    </tr>
-                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Sub-schedule</span></td>
-                        <td>Groups events by type (for example "Live Music" or "Comedy"). The field is labelled <strong>Schedule</strong> on the form and only appears when your schedule has sub-schedules. See <a href="{{ route('marketing.docs.creating_schedules') }}#customize-subschedules" class="doc-link">Sub-schedules</a></td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Category</span></td>
-                        <td>Select an event category from the dropdown (for example Concert, Workshop, or Conference). You can edit the list under <a href="{{ route('marketing.docs.creating_schedules') }}#customize-categories" class="doc-link">Custom Categories</a>.</td>
+                        <td>Groups events by type (for example "Live Music" or "Comedy"). It is optional: leave it on <strong class="text-gray-900 dark:text-white">None</strong> for an event that belongs to no sub-schedule. The field only appears when your schedule has sub-schedules. See <a href="{{ route('marketing.docs.creating_schedules') }}#customize-subschedules" class="doc-link">Sub-schedules</a></td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Date &amp; Time</span></td>
-                        <td>The date, start time, and end time. Times are entered in your schedule's timezone, which is shown under the field along with a preview of how the start will read; if the schedule has no timezone set yet, a warning says so. An event has no stored end date: what is saved is the start plus a duration worked out from the two times. Turn on <strong>Multi-day event</strong> and the field becomes <strong>Start Date</strong>, with a separate <strong>End Date</strong> row (and its own end time) below. The toggle is hidden on a recurring event.</td>
+                        <td>The date, start time, and end time. Times are entered in your schedule's timezone, which is shown under the field along with a preview of how the start will read; if the schedule has no timezone set yet, a warning says so. An event has no stored end date: what is saved is the start plus a duration worked out from the two times. Choose <strong>Recurring</strong> beside the label to <a href="#recurring" class="doc-link">repeat the event</a>. Turn on <strong>Multi-day event</strong> and the field becomes <strong>Start Date</strong>, with a separate <strong>End Date</strong> row (and its own end time) below. The toggle is hidden on a recurring event.</td>
                     </tr>
                     <tr>
                         <td id="ai-flyer"><span class="font-semibold text-gray-900 dark:text-white">Flyer Image</span></td>
-                        <td>A flyer or photo for the event. Click <strong>Choose File</strong> and pick a JPG or PNG under 2.5MB. Enterprise schedules can instead have one drawn from the event details by selecting <strong>Flyer Image</strong> in the <a href="#ai-details-generator" class="doc-link">AI Generator</a>, where you can also describe a style (for example "minimalist, blue and white").</td>
+                        <td>A flyer or photo for the event. Click <strong>Choose File</strong>, drop an image onto the card, or paste one from the clipboard: a JPG or PNG under 2.5MB. Enterprise schedules can instead have one drawn from the event details by selecting <strong>Flyer Image</strong> in the <a href="#ai-details-generator" class="doc-link">AI Generator</a>, where you can also describe a style (for example "minimalist, blue and white").</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Short Description</span></td>
-                        <td>A brief summary of the event (up to 200 characters). Appears as a subtitle on the event page and in schedule listings.</td>
+                        <td>A brief summary of the event (up to 200 characters). Appears as a subtitle on the event page and in schedule listings. Under <strong>About</strong>.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Description</span></td>
-                        <td>Details about the event (supports markdown formatting)</td>
+                        <td>Details about the event (supports markdown formatting). Under <strong>About</strong>.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Custom Fields</span> <x-doc-badge plan="pro" /></td>
-                        <td>Any <a href="#custom-fields" class="doc-link">custom fields</a> you defined on the schedule appear at the bottom of the Details section. The block is absent until you have defined at least one.</td>
+                        <td>Any <a href="#custom-fields" class="doc-link">custom fields</a> you defined on the schedule appear at the bottom of <strong>About</strong>. The block is absent until you have defined at least one.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Default visibility</div>
-            <p>To choose the visibility that all new events start with, use <strong>Default visibility for new events</strong> in your schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>.</p>
-        </div>
     </section>
 
     <!-- AI Details Generator -->
@@ -239,7 +222,7 @@
             </svg>
             AI Details Generator <x-doc-badge plan="enterprise" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Let AI fill in an event's category, flyer image, and descriptions from its name and your schedule's context. Click the <strong class="text-gray-900 dark:text-white">AI Generator</strong> button in the Details header. The event needs a name before you generate.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Let AI fill in an event's category, flyer image, and descriptions from its name and your schedule's context. Open <strong class="text-gray-900 dark:text-white">About</strong> on the Event tab and click the <strong class="text-gray-900 dark:text-white">AI Generator</strong> button. The event needs a name before you generate.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Under <strong class="text-gray-900 dark:text-white">Select elements to generate</strong>, tick the fields you want: <strong class="text-gray-900 dark:text-white">Category</strong>, <strong class="text-gray-900 dark:text-white">Flyer Image</strong>, <strong class="text-gray-900 dark:text-white">Short Description</strong>, or <strong class="text-gray-900 dark:text-white">Description</strong>. Fields that already have a value are marked with a dot and left unticked, so nothing is overwritten by accident.</li>
@@ -261,9 +244,10 @@
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-1.5-1.5v18m7.5-18v18" />
             </svg>
-            Venue
+            Location
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Venue section says where your event takes place. Tick <strong class="text-gray-900 dark:text-white">In-person</strong>, <strong class="text-gray-900 dark:text-white">Online</strong>, or both.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Location</strong> is the second section of the Event tab and says where your event takes place. Turn on <strong class="text-gray-900 dark:text-white">In-person</strong>, <strong class="text-gray-900 dark:text-white">Online</strong>, or both.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If you have saved venues, pick one from <strong class="text-gray-900 dark:text-white">All your venues</strong>; the ones your schedule was last at are offered above the list as <strong class="text-gray-900 dark:text-white">Recent venues</strong>. Choose <strong class="text-gray-900 dark:text-white">New Venue</strong> to type a venue name, street address and city instead. Typing the name of a venue you already have offers it, so the same place is not created twice. <strong class="text-gray-900 dark:text-white">Find or invite the venue by email or phone</strong> opens the venue's contact fields, and <strong class="text-gray-900 dark:text-white">State, postal code, website</strong> opens the rest of the address. A chosen venue is shown on one line with <strong class="text-gray-900 dark:text-white">Change</strong> beside it.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -337,7 +321,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Participants</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Add</strong>, then either <strong class="text-gray-900 dark:text-white">Use Existing</strong> to choose someone who has appeared on your schedule before, or <strong class="text-gray-900 dark:text-white">Create New</strong> and fill in a name (required) plus an optional email, phone number, and <strong class="text-gray-900 dark:text-white">YouTube Video URL</strong>. The email matters beyond your own records: it is what lets that person claim the page created for them. Click <strong class="text-gray-900 dark:text-white">Done</strong> to add them to the list, where each entry can be edited or removed.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">+ Add Participant</strong>, then either pick one of <strong class="text-gray-900 dark:text-white">Your schedules</strong> from the list, or choose <strong class="text-gray-900 dark:text-white">Someone New</strong> and fill in a name (required) and an optional email. A phone number and a <strong class="text-gray-900 dark:text-white">YouTube Video URL</strong> wait behind <strong class="text-gray-900 dark:text-white">+ Phone or video link</strong>. The email matters beyond your own records: it is what lets that person claim the page created for them. Click <strong class="text-gray-900 dark:text-white">Add</strong> to put them on the list, where each entry can be edited or removed. A participant you typed and did not add is still saved with the event, as long as it has a name.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify Participants</h4>
@@ -345,7 +329,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When to Use</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Participants are most useful for Talent and Curator schedules, where events feature specific performers, speakers, or artists. On a Venue schedule the section is marked optional.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Participants are most useful for Talent and Curator schedules, where events feature specific performers, speakers, or artists. On a Venue schedule the section is marked optional. A line under the tab's title says the same thing on the form: participants are the people performing, speaking or hosting, not the people attending.</p>
             </div>
         </div>
     </section>
@@ -402,7 +386,7 @@
             </svg>
             Recurring
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Recurring section turns one event into a series that repeats on a pattern, so you do not have to add each date by hand. Choose <strong class="text-gray-900 dark:text-white">One-time</strong> or <strong class="text-gray-900 dark:text-white">Recurring</strong> at the top of the section.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A recurring event is one event that repeats on a pattern, so you do not have to add each date by hand. On the Event tab, choose <strong class="text-gray-900 dark:text-white">One-time</strong> or <strong class="text-gray-900 dark:text-white">Recurring</strong> beside <strong class="text-gray-900 dark:text-white">Date &amp; Time</strong>; the repeat settings open under the date.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">A recurring event is still a single event. It keeps one start time and one duration, and the pattern decides which days it lands on. Pick a <strong class="text-gray-900 dark:text-white">Frequency</strong>:</p>
 
@@ -488,31 +472,76 @@
         </ul>
 
         <h3 class="doc-subheading">Display Options</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Two toggles control what the agenda shows, on the form and on the event page:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each part is one line: its start, its end and its name. A description opens from <strong class="text-gray-900 dark:text-white">+ Add Description</strong> under the line, and stays showing once it has text. One switch sits beside the tab's title:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Show times</strong> - include each part's start and end time.</li>
-            <li><strong class="text-gray-900 dark:text-white">Show description</strong> - include each part's description.</li>
+            <li><strong class="text-gray-900 dark:text-white">Show times</strong> - off means an agenda without times, for a set list for example. The time fields are hidden, a line under the title says the agenda is shown without times, and the times already entered are kept until you save. The save bar then says <em>Saving removes the times from this agenda</em>, and switching it back on before you save brings them back. The choice is remembered for the schedule's next event.</li>
         </ul>
 
         <h3 class="doc-subheading">Reordering</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">With both display options off, parts collapse to a compact list you can drag into order by the handle. With times or descriptions shown, each part has up and down buttons instead. The order on the form is the order on the event page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Drag a part by the handle at the start of its line, or use the up and down arrows at its end. The order on the form is the order on the event page.</p>
 
         <h3 class="doc-subheading">AI Import <x-doc-badge plan="enterprise" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Enterprise schedules can build the agenda from something you already have:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Import from Image</strong> - upload a photo of a printed agenda, lineup, or setlist and AI extracts each part.</li>
-            <li><strong class="text-gray-900 dark:text-white">Import from Text</strong> - paste agenda text and AI parses it into parts.</li>
+            <li><strong class="text-gray-900 dark:text-white">Read This Text</strong> - paste agenda text into the box and AI parses it into parts.</li>
+            <li><strong class="text-gray-900 dark:text-white">Or Choose a Photo</strong> - upload a photo of a printed agenda, lineup, or setlist and AI extracts each part.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Either way the results land in a <strong class="text-gray-900 dark:text-white">Preview</strong> first, where <strong class="text-gray-900 dark:text-white">Accept</strong> adds them to the agenda and <strong class="text-gray-900 dark:text-white">Discard</strong> drops them. Three extra controls sit alongside:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Both are in the <strong class="text-gray-900 dark:text-white">Import</strong> row under the parts. Either way the results land in a <strong class="text-gray-900 dark:text-white">Preview</strong> first, where <strong class="text-gray-900 dark:text-white">Accept</strong> adds them to the parts already there (nothing is replaced) and <strong class="text-gray-900 dark:text-white">Discard</strong> drops them. If an import fails, the row says why. Three extra controls sit in the same row:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">AI Prompt</strong> - custom instructions to help AI read your agenda format (up to 500 characters).</li>
-            <li><strong class="text-gray-900 dark:text-white">Save agenda image</strong> - keep the uploaded image with the event. A saved image can be removed again from the same place.</li>
-            <li><strong class="text-gray-900 dark:text-white">Save as default</strong> - reuse the AI prompt on future events on this schedule.</li>
+            <li><strong class="text-gray-900 dark:text-white">Instructions for the AI</strong> - custom instructions to help AI read your agenda format (up to 500 characters).</li>
+            <li><strong class="text-gray-900 dark:text-white">Keep the photo</strong> - keep the uploaded image with the event, where guests see it with the agenda. A saved image can be removed again from the same place.</li>
+            <li><strong class="text-gray-900 dark:text-white">Use these instructions for every event</strong> - reuse the instructions on future events on this schedule.</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
             <p>The import buttons only appear when an AI key is configured, and the parsing itself requires an Enterprise schedule and a <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">Gemini API key</a>. Requests are capped per day per schedule.</p>
+        </div>
+    </section>
+
+    <!-- Listing -->
+    <section id="listing" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Listing
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Listing tab decides where and how the event is shown: who can see it, the link it lives at, its category, and the other schedules it appears on. Its summary in the sidebar reads, for example, "Public &middot; Concert".</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Event URL / Slug</span></td>
+                        <td>The event's link sits under the page title on every tab, with Copy and View. On the Listing tab, click <strong>Edit</strong> beside it to change its ending. An ending the server refuses comes back open, with the reason.</td>
+                    </tr>
+                    <tr>
+                        <td id="draft"><span class="font-semibold text-gray-900 dark:text-white">Visibility</span></td>
+                        <td>Choose who can see the event. <strong>Public</strong> lists it for everyone. <strong>Draft</strong> keeps it visible to schedule members only while you finish editing. <strong>Internal</strong> (Enterprise) keeps it members-only permanently. <strong>Unlisted</strong> (Enterprise) hides it from your schedule but lets anyone with the direct link view it, optionally behind a password. All four are spelled out under the control, with the one you have chosen in darker text. New events start at your schedule's default visibility, and switching a hidden event to Public warns you first. See <a href="#privacy" class="doc-link">Internal &amp; Unlisted Events</a> for exactly what each state hides.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Category</span></td>
+                        <td>Select an event category from the dropdown (for example Concert, Workshop, or Conference). You can edit the list under <a href="{{ route('marketing.docs.creating_schedules') }}#customize-categories" class="doc-link">Custom Categories</a>.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Also list on</span></td>
+                        <td>The other schedules this event can appear on. See <a href="#schedules" class="doc-link">Schedules</a> below.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Default visibility</div>
+            <p>To choose the visibility that all new events start with, use <strong>Default visibility for new events</strong> in your schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>.</p>
         </div>
     </section>
 
@@ -524,7 +553,7 @@
             </svg>
             Schedules
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Schedules section, headed <strong class="text-gray-900 dark:text-white">Add to Schedules</strong>, lists the other schedules this event can appear on. Tick as many as you like and the event shows up on each of them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Also list on</strong>, on the <a href="#listing" class="doc-link">Listing</a> tab, lists your other schedules and the ones you follow that take requests. Tick as many as you like and the event shows up on each of them; a schedule that reviews what it lists is marked <strong class="text-gray-900 dark:text-white">Needs approval</strong>. The event's own venue and participants are not in the list: they are decided by the Event and <a href="#participants" class="doc-link">Participants</a> tabs, and a line above the list names them.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule in the list has a verified email address or phone number, and one of these is true:</p>
         <ul class="doc-list mb-6">
@@ -537,8 +566,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">When a ticked schedule is a Curator schedule with sub-schedules, a dropdown appears beneath it so you can choose which <strong class="text-gray-900 dark:text-white">sub-schedule</strong> the event belongs to there.</p>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Conditional Section</div>
-            <p>This section only appears when at least one schedule other than the one you are editing in is available to you. With a single schedule you will not see it.</p>
+            <div class="doc-callout-title">Only with more than one schedule</div>
+            <p>The list only appears when at least one schedule other than the one you are editing in is available to you. With a single schedule you will not see it.</p>
         </div>
     </section>
 
@@ -550,11 +579,11 @@
             </svg>
             Google Calendar
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Google Calendar section syncs this one event to your calendar. It shows whether the event is synced, with a <strong class="text-gray-900 dark:text-white">Sync to Google Calendar</strong> or <strong class="text-gray-900 dark:text-white">Remove from Google Calendar</strong> button.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A published event is copied to your calendar each time you save it. The <strong class="text-gray-900 dark:text-white">Calendar sync</strong> tab shows whether this one is synced, with a <strong class="text-gray-900 dark:text-white">Sync Now</strong> button to do it at once, or <strong class="text-gray-900 dark:text-white">Remove</strong> to take it off the calendar. Both act immediately, not with Save, and anything that goes wrong is said in the calendar's own row. An event that is not synced says why: a Draft or Internal event is not copied because only an event guests can see is, and any other event is copied the next time you save it.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The section only appears on a saved event, and only when the schedule already has Google Calendar sync connected and set to push events to Google. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Calendar Integrations</a> for setup instructions.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The tab only appears on a saved event, and only when the schedule already has Google Calendar sync connected and set to push events to Google. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-google" class="doc-link">Calendar Integrations</a> for setup instructions.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Schedules connected to Outlook get a matching <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> section directly below, with the same sync and remove buttons. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Outlook Calendar</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Schedules connected to Outlook get a matching <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> block on the same tab, with the same sync and remove buttons. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="doc-link">Outlook Calendar</a>.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What gets synced</div>
@@ -619,27 +648,27 @@
             Tickets
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The Tickets section offers three modes for an event:
+            The Tickets tab opens on three choices. Pressing one turns it on and shows what it needs right under it; <strong class="text-gray-900 dark:text-white">Not needed</strong>, under the three, switches it off again and carries a tick while nothing is switched on. If people have already signed up it asks first, and the save bar warns that saving with tickets off removes the event's ticket types and its add-ons.
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">External</strong> - link out to wherever you already sell.</li>
-            <li><strong class="text-gray-900 dark:text-white">Registration</strong> - free sign-up on your own event page, with an optional capacity limit. Unlimited on every plan.</li>
-            <li><strong class="text-gray-900 dark:text-white">Tickets</strong> - sell tickets from your own event page, taking payment through the <strong class="text-gray-900 dark:text-white">Payment Method</strong> you pick for the event: Stripe, PayPal, Payfast, Invoice Ninja, a payment link, or cash. The list offers what you have set up under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Manage payment methods</a> that can take the event's <strong class="text-gray-900 dark:text-white">Currency</strong>. A ticket that carries a price needs <x-doc-badge plan="pro" />, which also adds the live check-in dashboard; a zero-price ticket tier sells on any plan. Scanning tickets at the door is free on every plan, and the money goes to your own account with no platform fee. See the full <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> guide for setup, sales management, refunds and check-in.</li>
+            <li><strong class="text-gray-900 dark:text-white">Tickets elsewhere</strong> - link out to wherever you already sell.</li>
+            <li><strong class="text-gray-900 dark:text-white">Free registration</strong> - free sign-up on your own event page. The limit is the first field, and the rest waits under <strong class="text-gray-900 dark:text-white">More options</strong>. Unlimited on every plan.</li>
+            <li><strong class="text-gray-900 dark:text-white">Sell tickets</strong> - sell tickets from your own event page. Each ticket type is one line (price, quantity, type), and Payment, Options, Promo codes and Add-ons are rows under them that show what they hold and open in place. You take payment through the <strong class="text-gray-900 dark:text-white">Payment Method</strong> you pick for the event: Stripe, PayPal, Payfast, Invoice Ninja, a payment link, or cash. The list offers what you have set up under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Manage payment methods</a> that can take the event's <strong class="text-gray-900 dark:text-white">Currency</strong>. A ticket that carries a price needs <x-doc-badge plan="pro" />, which also adds the live check-in dashboard; a zero-price ticket tier sells on any plan. Scanning tickets at the door is free on every plan, and the money goes to your own account with no platform fee. See the full <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> guide for setup, sales management, refunds and check-in.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Free registrations and zero-price ticket tiers are unlimited on every plan, so an event that mixes a free tier with priced ones keeps its buy button on a free schedule: the free tier stays on sale while the priced rows wait for Pro. While a schedule is on the free plan the Tickets section carries a one-line note saying so.
+            Free registrations and zero-price ticket tiers are unlimited on every plan, so an event that mixes a free tier with priced ones keeps its buy button on a free schedule: the free tier stays on sale while the priced rows wait for Pro. While a schedule is on the free plan the Tickets tab carries a one-line note saying so.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            If visitors have asked to hear about the event, the Tickets section says how many above your ticket types, as in "3 people asked to be told when tickets go on sale." The number is never shown publicly. See <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">Interest List</a>.
+            If visitors have asked to hear about the event, the Tickets tab says how many above your ticket types, as in "3 people asked to be told when tickets go on sale." The number is never shown publicly. See <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">Interest List</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            In <strong class="text-gray-900 dark:text-white">External</strong> mode you get a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (the link guests are sent to), a <strong class="text-gray-900 dark:text-white">Price</strong> with a currency selector (used in <a href="{{ route('marketing.docs.event_graphics') }}#text-template" class="doc-link">event graphics text templates</a>), an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>, and a <strong class="text-gray-900 dark:text-white">Discount</strong> saying what that code is worth. These fields are hidden once registration or ticketing is switched on.
+            With <strong class="text-gray-900 dark:text-white">Tickets elsewhere</strong> on you get a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (the link guests are sent to), a <strong class="text-gray-900 dark:text-white">Price</strong> with a currency selector (used in <a href="{{ route('marketing.docs.event_graphics') }}#text-template" class="doc-link">event graphics text templates</a>), an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>, and a <strong class="text-gray-900 dark:text-white">Discount</strong> saying what that code is worth. These fields are hidden once registration or ticketing is switched on.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Once an event has taken money, its <strong class="text-gray-900 dark:text-white">Currency</strong> is locked in both modes and the selector is greyed out, because a sale records no currency of its own. See <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Refunds</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            The section appears only for the account that created the event. Once tickets or registration are on, a Pro schedule can also embed the purchase or sign-up form on another website from the <strong class="text-gray-900 dark:text-white">Embed tickets</strong> link (it reads <strong class="text-gray-900 dark:text-white">Embed registration</strong> when the event is registration-only). Unlisted events do not offer the embed.
+            The tab appears only for the account that created the event. Once anything has sold, the tab's title line shows the count and a link to its sales. Once tickets or registration are on, a Pro schedule can also embed the purchase or sign-up form on another website from the <strong class="text-gray-900 dark:text-white">Embed tickets</strong> link (it reads <strong class="text-gray-900 dark:text-white">Embed registration</strong> when the event is registration-only). Unlisted events do not offer the embed.
         </p>
     </section>
 
@@ -652,8 +681,8 @@
             </svg>
             Event Settings
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Settings</strong> section of the event form holds per-event <a href="#sponsors" class="doc-link">sponsor overrides</a>. It appears for editors on Pro schedules.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The other two per-event settings covered below live in the <a href="#details" class="doc-link">Details</a> section: <a href="#custom-fields" class="doc-link">custom fields</a> at the bottom of it, and <a href="#privacy" class="doc-link">visibility</a> near the top.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Sponsors</strong> tab of the event form holds per-event <a href="#sponsors" class="doc-link">sponsor overrides</a>. It appears for editors on Pro schedules.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The other two per-event settings covered below live elsewhere: <a href="#custom-fields" class="doc-link">custom fields</a> at the bottom of <strong class="text-gray-900 dark:text-white">About</strong> on the <a href="#details" class="doc-link">Event tab</a>, and <a href="#privacy" class="doc-link">visibility</a> on the <a href="#listing" class="doc-link">Listing</a> tab.</p>
     </section>
 
     <!-- Custom Fields -->
@@ -748,7 +777,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
             Internal &amp; Unlisted Events <x-doc-badge plan="enterprise" /></h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Every event has a <strong class="text-gray-900 dark:text-white">Visibility</strong> setting in its Details section. <strong class="text-gray-900 dark:text-white">Public</strong> and <strong class="text-gray-900 dark:text-white">Draft</strong> are available on all plans; Enterprise schedules unlock two more states for events that should stay out of public view.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Every event has a <strong class="text-gray-900 dark:text-white">Visibility</strong> setting on its <a href="#listing" class="doc-link">Listing</a> tab. <strong class="text-gray-900 dark:text-white">Public</strong> and <strong class="text-gray-900 dark:text-white">Draft</strong> are available on all plans; Enterprise schedules unlock two more states for events that should stay out of public view.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -851,20 +880,20 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Override sponsor display for a single event. By default, events show whatever sponsors are configured on the schedule.</p>
 
         <h3 class="doc-subheading">Sponsor Mode</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">In the <strong class="text-gray-900 dark:text-white">Settings</strong> section of the event form, choose one of three modes:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On the <strong class="text-gray-900 dark:text-white">Sponsors</strong> tab of the event form, press one of three choices:</p>
 
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Use schedule default</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Same as schedule</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default. The choice names them on the form, or says the schedule has none.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show no sponsors</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No sponsors</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Hide sponsors entirely on this event's page.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Customize</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Define event-specific sponsors. Each one needs a logo, plus an optional name, URL, and tier of Gold, Silver, or Bronze. Up to {{ config('app.max_sponsors') }} sponsors per event.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">This event's own</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Define event-specific sponsors. Each one needs a logo, plus an optional name, URL, and tier of Gold, Silver, or Bronze. Up to {{ config('app.max_sponsors') }} sponsors per event. They are shown on this event only, and the schedule's own sponsors are not changed. Leaving this choice deletes the event's list when you save, and the save bar says so first.</p>
             </div>
         </div>
 
@@ -887,7 +916,7 @@
             </svg>
             Engagement
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The Engagement section is split into tabs: <strong class="text-gray-900 dark:text-white">Fan Content</strong>, <strong class="text-gray-900 dark:text-white">Polls</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, and <strong class="text-gray-900 dark:text-white">Carpool</strong> when carpooling is enabled on the schedule. Tabs with something waiting for you, such as pending fan content or suggested poll options, carry a count badge.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Engagement tab is a row for each of <strong class="text-gray-900 dark:text-white">Polls</strong>, <strong class="text-gray-900 dark:text-white">Fan Content</strong>, <strong class="text-gray-900 dark:text-white">Feedback</strong>, and <strong class="text-gray-900 dark:text-white">Carpool</strong> when carpooling is enabled on the schedule. Each row says what is set and opens in place. Rows with something waiting for you, such as pending fan content or suggested poll options, carry a count badge.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Most of these settings decide whether an event follows the schedule-wide setting or overrides it. For the schedule-wide versions see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement" class="doc-link">Engagement settings</a>, and for carpooling see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-carpool" class="doc-link">Carpool</a>.</p>
     </section>
 
@@ -914,7 +943,7 @@
 
         <h3 class="doc-subheading">Per-Event Overrides <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            On a Pro schedule, the <strong class="text-gray-900 dark:text-white">Fan Content</strong> tab of an event's Engagement section has a dropdown per type: <strong class="text-gray-900 dark:text-white">Use schedule default</strong>, <strong class="text-gray-900 dark:text-white">Enabled</strong>, or <strong class="text-gray-900 dark:text-white">Disabled</strong>. That lets you open one event up while the rest of the schedule stays closed, or the other way round.
+            On a Pro schedule, the <strong class="text-gray-900 dark:text-white">Fan Content</strong> row of an event's Engagement tab has three choices per type: <strong class="text-gray-900 dark:text-white">Same as schedule</strong>, <strong class="text-gray-900 dark:text-white">Enabled</strong>, or <strong class="text-gray-900 dark:text-white">Disabled</strong>. Under each type's name the form says what the schedule's own setting is, for example <em>Schedule: enabled</em>. The row itself says what is in force, for example <em>Comments, Photos</em>, followed by <em>Same as schedule</em> while none of the three has been changed for this event. That lets you open one event up while the rest of the schedule stays closed, or the other way round.
         </p>
 
         <h3 class="doc-subheading">Moderation</h3>
@@ -995,7 +1024,7 @@
             <li><strong class="text-gray-900 dark:text-white">Closed polls</strong> - results are still visible, but no new votes are accepted.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The badge itself is a label, not a switch. Use the <strong class="text-gray-900 dark:text-white">Close Poll</strong> button below the poll to stop accepting votes, and <strong class="text-gray-900 dark:text-white">Reopen Poll</strong> in the same place to start again. A <strong class="text-gray-900 dark:text-white">Delete</strong> button sits next to it. All three take effect straight away, without saving the event.
+            The badge itself is a label, not a switch. Use the <strong class="text-gray-900 dark:text-white">Close Poll</strong> link below the poll to stop accepting votes, and <strong class="text-gray-900 dark:text-white">Reopen Poll</strong> in the same place to start again. A <strong class="text-gray-900 dark:text-white">Delete</strong> link sits next to it. All three take effect straight away, without saving the event.
         </p>
     </section>
 
@@ -1012,10 +1041,10 @@
 
         <h3 class="doc-subheading">Per-Event Override</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Feedback</strong> tab of an event's Engagement section offers three options:
+            The <strong class="text-gray-900 dark:text-white">Feedback</strong> row of an event's Engagement tab offers three options:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Use schedule default</strong> - follows whatever you set at the schedule level.</li>
+            <li><strong class="text-gray-900 dark:text-white">Same as schedule</strong> - follows whatever you set at the schedule level.</li>
             <li><strong class="text-gray-900 dark:text-white">Enabled</strong> - feedback emails go out for this event whatever the schedule setting is.</li>
             <li><strong class="text-gray-900 dark:text-white">Disabled</strong> - no feedback emails for this event whatever the schedule setting is.</li>
         </ul>

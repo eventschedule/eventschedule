@@ -83,8 +83,8 @@ class InvoiceNinjaConnectTest extends TestCase
         // Plain language cause, then the raw detail the owner can paste into a bug report.
         $page->assertSee(__('messages.invoiceninja_error_unreachable'), false);
         $page->assertSee('Invoice Ninja API connection failed', false);
-        // And the tab is force-opened so the panel is not stranded behind "hidden".
-        $page->assertSee("switchPaymentTab('invoiceninja')", false);
+        // And its row is opened so the panel is not stranded inside a closed one.
+        $page->assertSee("FormKit.openRow('payment', 'invoiceninja')", false);
     }
 
     public function test_non_http_api_url_is_rejected(): void

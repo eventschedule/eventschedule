@@ -56,7 +56,8 @@
                 <div class="relative" id="event-selector-dropdown">
                     <select @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
-                        <option>{{ $event ? $event->translatedName() : __('messages.select_event_to_begin') }}</option>
+                        {{-- The event's name is its owner's text, inside a Vue mount: v-pre keeps Vue from compiling it. --}}
+                        <option v-pre>{{ $event ? $event->translatedName() : __('messages.select_event_to_begin') }}</option>
                     </select>
                     <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
                         <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
@@ -267,7 +268,7 @@
                                 <span>
                                     @if (config('app.hosted'))
                                     {{ __('messages.notification_requires_email_settings') }}
-                                    <a href="{{ route('role.edit', ['subdomain' => $emailSettingsRole->subdomain]) }}#section-integrations"
+                                    <a href="{{ route('role.edit', ['subdomain' => $emailSettingsRole->subdomain]) }}#integration-tab-email"
                                         target="_blank" rel="noopener"
                                         class="text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
                                     @else

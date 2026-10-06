@@ -181,9 +181,17 @@ class EventFormStructureTest extends TestCase
             ['#section-polls', '', 'section-engagement', 'polls'],
             ['#section-carpool', '?engagement=feedback', 'section-engagement', 'carpool'],
             ['#section-engagement', '?engagement=carpool', 'section-engagement', 'carpool'],
-            ['#section-engagement', '?engagement=nonsense', 'section-engagement', 'fan_content'],
-            ['#section-tickets', '', 'section-tickets', 'fan_content'],
-            ['', '', '', 'fan_content'],
+            // Nothing named, or nonsense: the tab opens with every row closed.
+            ['#section-engagement', '?engagement=nonsense', 'section-engagement', ''],
+            ['#section-engagement', '', 'section-engagement', ''],
+            ['#section-tickets', '', 'section-tickets', ''],
+            ['', '', '', ''],
+            // Tabs that were folded into others. Links to them are in sent email and in bookmarks.
+            ['#section-venue', '', 'section-details', ''],
+            ['#section-recurring', '', 'section-details', ''],
+            ['#section-schedules', '', 'section-listing', ''],
+            ['#section-google-calendar', '', 'section-calendar-sync', ''],
+            ['#section-microsoft-calendar', '?engagement=polls', 'section-calendar-sync', 'polls'],
         ];
 
         $script = 'const window = {};'.$block[1]

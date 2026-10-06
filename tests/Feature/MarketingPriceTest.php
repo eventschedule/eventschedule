@@ -146,6 +146,8 @@ class MarketingPriceTest extends TestCase
         'admin/dashboard.blade.php',
         'admin/settings.blade.php',
         'role/show-admin-plan.blade.php',
+        // The owner's actions on that page (subscribe, change term, cancel) and their prices.
+        'role/partials/plan-actions.blade.php',
         'subscription/show.blade.php',
         'referral/index.blade.php',
         'components/plan-gate.blade.php',

@@ -63,7 +63,7 @@
     </div>
     <div v-if="event.can_edit" class="mt-auto pt-3">
         <a :href="event.edit_url"
-           class="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200"
+           class="text-sm {{ ($route ?? '') == 'admin' ? 'font-medium text-[var(--brand-blue)] hover:underline' : 'text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200' }}"
            @click.stop>
             {{ __('messages.edit_event') }}
         </a>

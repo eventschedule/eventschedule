@@ -74,9 +74,13 @@ class AuthExtraTest extends TestCase
             'email' => $role->email,
             'new_subdomain' => $role->subdomain,
             'timezone' => $role->timezone,
+            // As the form posts them: the marker that says the list was on the page, and each
+            // label under the key of the wording it replaces. Posted without the marker, or under
+            // a key that names no wording, they used to be stored exactly as they came.
+            'custom_labels_submitted' => 1,
             'custom_labels' => [
-                ['value' => 'Performers', 'value_en' => 'Performers'],
-                ['value' => 'Stages', 'value_en' => 'Stages'],
+                'about' => ['value' => 'Performers', 'value_en' => 'Performers'],
+                'add_comment' => ['value' => 'Stages', 'value_en' => 'Stages'],
             ],
         ]);
 

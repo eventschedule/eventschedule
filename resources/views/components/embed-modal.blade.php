@@ -112,7 +112,7 @@
                                             <p class="font-medium">{{ __('messages.embed_subscribe_verification_title', ['limit' => $embedAudienceLimit]) }}</p>
                                             <p class="mt-1">
                                                 {!! __('messages.newsletter_verification_required_body', [
-                                                    'smtp_link' => route('role.edit', ['subdomain' => $role->subdomain]) . '?tab=email#section-integrations',
+                                                    'smtp_link' => route('role.edit', ['subdomain' => $role->subdomain]) . '#integration-tab-email',
                                                     'phone_link' => route('profile.edit') . '?highlight=phone#section-profile',
                                                     'limit' => $embedAudienceLimit,
                                                 ]) !!}

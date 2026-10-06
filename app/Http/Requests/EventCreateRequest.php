@@ -5,7 +5,9 @@ namespace App\Http\Requests;
 use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\Concerns\ValidatesEventCustomFields;
 use App\Http\Requests\Concerns\ValidatesVenueFields;
+use App\Utils\MoneyUtils;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class EventCreateRequest extends FormRequest
 {
@@ -37,9 +39,18 @@ class EventCreateRequest extends FormRequest
             // NOT validated here - a stored method can legitimately outlive a currency change, and
             // the checkout-time guards are the authority on whether it can actually charge.
             'payment_method' => ['nullable', 'string', 'in:'.implode(',', payment_gateways()->selectableKeys())],
+            // One of the currencies the pickers offer. The column takes any string and the value is
+            // printed back on this form and on every price, so a made-up one is refused, not stored.
+            // A select locked after a sale posts nothing, and the API has its own rule.
+            'ticket_currency_code' => ['nullable', 'string', Rule::in(MoneyUtils::currencyCodes())],
             'name' => ['required', 'string', 'max:255'],
 
             'flyer_image_url' => ['image', 'max:2500'],
+            // The flyer, under the name its input has. The rule above never ran for it, so the only
+            // check was EventRepo::saveEvent()'s own, made after the event had been written: a new
+            // event was created and then reported as refused, and Save pressed again made a second.
+            // The same two questions it asks, and no size limit: a large photo is resized, not refused.
+            'flyer_image' => ['nullable', 'file', 'extensions:jpg,jpeg,png,gif,webp', 'mimetypes:image/jpeg,image/png,image/gif,image/webp'],
 
             'addons.*.url' => ['nullable', 'url', 'max:2000'],
             'addon_image_data.*' => ['nullable', 'string', 'max:3500000'],

@@ -49,6 +49,22 @@ class EventRepo
     public bool $aiImageRejected = false;
 
     /**
+     * Columns only the server writes: which schedule an event belongs to, its sold counter and its
+     * bookkeeping. They are fillable for the code that sets them by hand, and saveEvent() fills
+     * the event from the whole request, so without this list whoever could save an event could
+     * post them. A curator that merely listed an event posted its own id as creator_role_id and
+     * became the event's owner - the schedule that sells its tickets and sees its sales
+     * (Event::ticketingRole()). EventOwnershipTest holds the list to the fillable columns.
+     */
+    public const SERVER_OWNED_FIELDS = [
+        'creator_role_id',
+        'rsvp_sold',
+        'translation_attempts',
+        'last_translated_at',
+        'last_notified_fan_content_count',
+    ];
+
+    /**
      * Every field the event form's Tickets panel posts, by top-level name.
      *
      * The panel is shown only to someone who may see the event's ticket setup
@@ -123,6 +139,10 @@ class EventRepo
         // Reset fields that shouldn't be carried to a new event
         $clonedEventData['flyer_image_url'] = null;
         $clonedEventData['sponsor_logos'] = null;
+        // "This event's own" without the logos is a copy that shows no sponsors at all.
+        if (($clonedEventData['sponsor_mode'] ?? null) === 'custom') {
+            $clonedEventData['sponsor_mode'] = 'default';
+        }
         $clonedEventData['rsvp_sold'] = 0;
         // The photo gallery (GalleryImage) is deliberately not carried either: its photos are of
         // the event being copied, and a clone's form starts with an empty gallery to fill.
@@ -955,7 +975,8 @@ class EventRepo
             ]);
         }
 
-        $event->fill($request->all());
+        // Not the columns only the server writes: see SERVER_OWNED_FIELDS.
+        $event->fill($request->except(self::SERVER_OWNED_FIELDS));
 
         // Record whose field definitions key those values: this form showed $currentRole's fields,
         // and it need not be the creator (a venue editing a talent's event). Not fillable, so set
@@ -1079,7 +1100,15 @@ class EventRepo
         // Appointment bookings are always is_private (Pro-gated, not Enterprise). Skip the
         // Enterprise strip so editing/saving one never demotes it to a Draft (which would stop
         // calendar sync and break the accept flow).
-        if ($currentRole && ! $currentRole->isEnterprise() && ! $event->appointment_type_id) {
+        //
+        // The event's own schedule counts too. Gated on $currentRole alone, an Enterprise schedule's
+        // Unlisted event saved from a schedule without Enterprise (the same owner's other schedule,
+        // or a curator that lists it) became a Draft and lost its password - from a form that has
+        // no Unlisted choice to show, so nothing warned. EventVisibilityAcrossSchedulesTest.
+        $visibilityOwnRole = $event->exists ? $event->ticketingRole() : null;
+        $enterpriseVisibility = ($currentRole && $currentRole->isEnterprise()) || ($visibilityOwnRole && $visibilityOwnRole->isEnterprise());
+
+        if ($currentRole && ! $enterpriseVisibility && ! $event->appointment_type_id) {
             // Losing Enterprise strips the Enterprise-only is_private/is_internal states. An event that
             // was Unlisted must NOT silently become fully Public on the next edit - keep it hidden as a
             // Draft instead (mirrors how Internal degrades to Draft in the block above).
@@ -1256,8 +1285,23 @@ class EventRepo
             }
         }
 
-        // Handle event sponsor logos (Pro feature)
-        if ($currentRole && $currentRole->isPro() && ! is_demo_mode()) {
+        // An event's own sponsors (a Pro feature), changed by the Sponsors tab and by nothing else.
+        //
+        // The plan that counts is the event's OWN schedule's as well as the one the form was opened
+        // from: gated on $currentRole alone, the same owner saving from their Free venue schedule,
+        // and a Free curator that listed the event, each wiped its sponsors. And only a request
+        // that carries sponsor_mode had the tab on the page: read with a default, every update
+        // through the API (which never sends it) switched the event back to the schedule's
+        // sponsors and deleted its logo files. EventSponsorProtectionTest holds each of these.
+        $ownRole = $event->exists ? $event->ticketingRole() : null;
+        $sponsorsOnPlan = ($currentRole && $currentRole->isPro()) || ($ownRole && $ownRole->isPro());
+
+        if (is_demo_mode() || ($sponsorsOnPlan && ! $request->has('sponsor_mode'))) {
+            // Nothing here was asked to change. Put back what is stored: both columns are fillable,
+            // so the fill() above has already taken whatever the request posted for them.
+            $event->sponsor_mode = $event->getOriginal('sponsor_mode');
+            $event->sponsor_logos = $event->getOriginal('sponsor_logos');
+        } elseif ($sponsorsOnPlan) {
             $sponsorMode = $request->input('sponsor_mode', 'default');
             $event->sponsor_mode = in_array($sponsorMode, ['default', 'none', 'custom']) ? $sponsorMode : 'default';
 
@@ -1334,6 +1378,7 @@ class EventRepo
                 $event->sponsor_logos = null;
             }
         } else {
+            // Neither schedule is on a plan with sponsors: cleared, as it always was.
             $event->sponsor_mode = null;
             $event->sponsor_logos = null;
         }
@@ -1489,11 +1534,24 @@ class EventRepo
             }
         }
 
-        // Schedules tab is authoritative for previously-attached schedules: if a
-        // schedule was attached before this save and is visible in the tab but
-        // not in curators[], detach it even if a parallel section (talent
-        // members, venue field) still has it selected. New attachments added via
-        // those parallel sections are NOT affected.
+        // "Also list on" is authoritative for the schedules it lists: one that was attached before
+        // this save, is visible to the user and is not in curators[] is detached.
+        //
+        // But not the event's own venue or participants. Those are decided by the venue field and
+        // the participants section, and the list no longer offers them: it used to, as ticked
+        // boxes, and to win - unticking the venue there took it off the event while the Event tab
+        // still showed it picked. So what those two sections posted on THIS request is exempt.
+        // Only when they were actually submitted, as everywhere else in this method.
+        $ownVenueIds = ($venueSubmitted && $venue) ? [$venue->id] : [];
+        $ownMemberIds = [];
+        if ($membersSubmitted) {
+            foreach ((array) ($request->members ?? []) as $memberId => $member) {
+                if ($memberId && strpos($memberId, 'new_') !== 0) {
+                    $ownMemberIds[] = UrlUtils::decodeId($memberId);
+                }
+            }
+        }
+
         if ($currentRole && ! empty($existingAttachedIds)) {
             foreach ($availableSchedules as $schedule) {
                 if ($schedule->subdomain === $currentRole->subdomain) {
@@ -1503,6 +1561,9 @@ class EventRepo
                     continue;
                 }
                 if (in_array($schedule->id, $selectedCurators)) {
+                    continue;
+                }
+                if (in_array($schedule->id, $ownVenueIds) || in_array($schedule->id, $ownMemberIds)) {
                     continue;
                 }
                 $key = array_search($schedule->id, $roleIds);
@@ -2306,13 +2367,17 @@ class EventRepo
             if (! empty($partData['id'])) {
                 $part = EventPart::find($partData['id']);
                 if ($part && $part->event_id == $event->id) {
-                    $part->update([
-                        'name' => $partData['name'],
-                        'description' => $partData['description'] ?? null,
-                        'start_time' => $partData['start_time'] ?? null,
-                        'end_time' => $partData['end_time'] ?? null,
-                        'sort_order' => $index,
-                    ]);
+                    $partFields = ['name' => $partData['name'], 'sort_order' => $index];
+                    // Only what was sent. Read with "?? null", a field the form did not post was
+                    // deleted - and the form left a part's times off the page whenever "Show times"
+                    // was unticked, so hiding a column deleted its contents. A field sent empty is
+                    // still cleared. AgendaSettingsTest.
+                    foreach (['description', 'start_time', 'end_time'] as $optional) {
+                        if (array_key_exists($optional, $partData)) {
+                            $partFields[$optional] = $partData[$optional];
+                        }
+                    }
+                    $part->update($partFields);
                     $partIds[] = $part->id;
                 }
             } else {

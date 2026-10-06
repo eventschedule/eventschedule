@@ -106,7 +106,9 @@ class FirstEventFlowTest extends TestCase
         $this->assertStringNotContainsString(__('messages.first_event_form_subtitle'), $html);
         $this->assertStringNotContainsString('v-show="showMoreSections"', $html);
         $this->assertStringContainsString('showMoreSections: true', $html);
-        $this->assertStringContainsString($this->saveFirstNotice(), $html);
+        // Not this, though: there is nothing to boost until the event is saved, on any new event.
+        $this->assertStringNotContainsString($this->saveFirstNotice(), $html);
+        $this->assertStringNotContainsString(__('messages.boost_event'), $html);
         $this->assertStringContainsString(__('messages.internal').' ('.__('messages.enterprise').')', $html);
     }
 

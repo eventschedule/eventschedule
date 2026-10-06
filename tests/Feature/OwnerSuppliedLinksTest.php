@@ -140,7 +140,9 @@ class OwnerSuppliedLinksTest extends TestCase
 
     /**
      * The admin portal shows websites other people typed too: a followed schedule's on the
-     * Following list, and a schedule's own to every one of its members. That is the app's origin.
+     * Following list. That is the app's origin. A schedule's own pages printed its website under
+     * the name, to every member, until the 2026-10 redesign put the public address there; the
+     * check on that page stays, so that bringing the line back brings its guard with it.
      */
     public function test_the_admin_portal_links_no_scripted_website(): void
     {
@@ -154,7 +156,6 @@ class OwnerSuppliedLinksTest extends TestCase
 
         $schedule = $this->actingAs($followed->user)->get(route('role.view_admin', ['subdomain' => $followed->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
         $this->assertDoesNotMatchRegularExpression(self::SCRIPT_HREF, $schedule);
-        $this->assertStringContainsString('javascript:alert(1)', $schedule, 'the website still reads as typed');
     }
 
     /** The newsletter's sponsor block, which the builder also previews inside the app. */

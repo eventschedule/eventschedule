@@ -1,35 +1,27 @@
-<div class="sm:flex sm:items-center">
-    <div class="sm:flex-auto">
-        <h1 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">{{ __('messages.event_templates') }}</h1>
-        <p class="mt-2 text-sm text-gray-700 dark:text-gray-400">{{ __('messages.templates_description') }}</p>
-    </div>
+<div class="page-head">
+    <p class="page-lead">{{ __('messages.templates_description') }}</p>
 </div>
 
 @if (! $role->isPro())
-    {{-- Free-tier teaser: discoverable, with an upgrade path --}}
-    <div class="mt-8 ap-card rounded-xl p-8 text-center">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-500/10 mb-4">
-            <svg class="h-6 w-6 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
-            </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.upgrade_to_pro_plan') }}</h3>
-        <p class="mx-auto max-w-md text-sm text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.templates_pro_description') }}</p>
-        <x-brand-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}">
-            {{ __('messages.upgrade_to_pro_plan') }}
-        </x-brand-link>
-    </div>
+    {{-- Locked on this plan: the same panel every other tab shows, which knows the price and
+         the trial, where this one had a panel of its own. --}}
+    <x-plan-gate tier="pro" :role="$role" :subdomain="$role->subdomain" :title="__('messages.event_templates')"
+        :canUpgrade="auth()->user()->id == $role->user_id">
+        {{ __('messages.templates_pro_description') }}
+    </x-plan-gate>
 @elseif ($eventTemplates->isEmpty())
-    {{-- Empty state --}}
-    <div class="mt-8 ap-card rounded-xl p-8 text-center">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.no_templates_yet') }}</h3>
-        <p class="mx-auto max-w-md text-sm text-gray-600 dark:text-gray-400">{{ __('messages.no_templates_yet_description') }}</p>
+    <div class="ap-card rounded-xl page-empty">
+        <svg class="page-empty-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+        </svg>
+        <h3>{{ __('messages.no_templates_yet') }}</h3>
+        <p>{{ __('messages.no_templates_yet_description') }}</p>
     </div>
 @else
-    <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($eventTemplates as $template)
             <div class="ap-card rounded-xl p-5 flex flex-col">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 break-words">{{ $template->name }}</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 break-words" v-pre><bdi>{{ $template->name }}</bdi></h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $template->created_at->format('M j, Y') }}</p>
 
                 <div class="mt-auto pt-5 flex items-center gap-2">

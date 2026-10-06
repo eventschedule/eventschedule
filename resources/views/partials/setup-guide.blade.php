@@ -173,7 +173,7 @@
     @if ($sgSurface !== 'dock')
     {{-- 1280px and wider: the corner ring. Positioned by this wrapper, never by an ap-card: that
          class sets position: relative, which beats `fixed`. --}}
-    <div class="fixed bottom-4 end-4 z-[45] hidden xl:block">
+    <div class="fixed end-4 z-[45] hidden xl:block" style="bottom: calc(1rem + var(--sg-bar, 0px))">
         <a href="{{ $sgHome }}" aria-label="{{ $sgWords['title'] }}"
             class="ap-card flex h-12 w-12 items-center justify-center rounded-full no-underline">
             @include('partials.setup-guide-ring', ['size' => 36, 'total' => $sgSegments, 'done' => $sgFilled])

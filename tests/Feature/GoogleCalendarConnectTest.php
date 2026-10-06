@@ -438,7 +438,8 @@ class GoogleCalendarConnectTest extends TestCase
         // From a schedule's settings, back to its integrations.
         $this->withSession($this->returning('settings'))
             ->get(route('google.calendar.callback', ['code' => 'c', 'state' => 'state-1']))
-            ->assertRedirect(route('role.edit', ['subdomain' => $this->role->subdomain]).'#section-integrations')
+            // The Google row of the Integrations tab, opened: a link to the tab alone lands on closed rows.
+            ->assertRedirect(route('role.edit', ['subdomain' => $this->role->subdomain]).'#integration-tab-google')
             ->assertSessionHas('message', __('messages.google_connect_done'));
         $this->assertTrue($this->owner->fresh()->googleCanWrite());
     }

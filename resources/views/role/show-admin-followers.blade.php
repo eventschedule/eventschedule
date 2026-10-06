@@ -1,102 +1,86 @@
-<div class="sm:flex sm:items-center">
-    <div class="sm:flex-auto">
-    </div>
-    <div class="mt-6 sm:ms-16 sm:mt-0 sm:flex-none flex flex-wrap gap-3">
-        {{-- Opens the Embed dialog (included by role/show-admin) on its signup-form widget. A real
-             href for no-JS and middle-click: the guest form itself. --}}
-        <x-secondary-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}"
-            class="js-open-subscribe-embed">
-            <svg class="-ms-0.5 me-1.5 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
-            </svg>
-            {{ __('messages.embed_subscribe_form') }}
-        </x-secondary-link>
-        <x-brand-link href="{{ route('role.qr_code', ['subdomain' => $role->subdomain]) }}">
-            <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path
-                    d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
-            </svg>
-            {{ __('messages.qr_code') }}
-        </x-brand-link>
-    </div>
-</div>
-
-
 @php
     $hasSubscribers = $subscribers && $subscribers->total() > 0;
+    $followerSortBy = $sortBy ?? '';
+    $followerSortDir = $sortDir ?? 'desc';
+    $sortMark = fn (string $column) => $followerSortBy === $column ? ($followerSortDir === 'asc' ? ' ↑' : ' ↓') : '';
+    $initialOf = fn ($name, $email) => mb_strtoupper(mb_substr(trim((string) ($name ?: $email)), 0, 1));
 @endphp
 
 @if($followers->isEmpty() && ! $hasSubscribers)
 
-<div class="text-center pt-20">
-    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        aria-hidden="true">
-        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
+{{-- Nobody yet: what to share to get the first one. A link the organizer can copy, deep-linked
+     straight to the subscribe form; the QR code points at the same place. --}}
+@php
+    $subscribeShareUrl = ($role->getGuestUrl(true) ?: $role->getGuestUrl());
+    $subscribeShareUrl .= (str_contains($subscribeShareUrl, '?') ? '&' : '?').'subscribe=1';
+@endphp
+<div class="ap-card rounded-xl page-empty">
+    <svg class="page-empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
     </svg>
-    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_followers') }}</h3>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.share_your_event_schedule_link') }}</p>
-
-    {{-- A link the organizer can actually copy. Until now the only thing this page offered was a
-         QR code DOWNLOAD, with nowhere to copy the URL as text - so the one action the empty state
-         asks for had no affordance. Deep-links straight to the subscribe form. --}}
-    @php
-        $subscribeShareUrl = ($role->getGuestUrl(true) ?: $role->getGuestUrl());
-        $subscribeShareUrl .= (str_contains($subscribeShareUrl, '?') ? '&' : '?').'subscribe=1';
-    @endphp
-    <div class="mx-auto mt-6 max-w-xl text-start">
+    <h3>{{ __('messages.no_followers') }}</h3>
+    <p>{{ __('messages.share_your_event_schedule_link') }}</p>
+    <div class="page-actions">
+        <x-secondary-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}"
+            class="js-open-subscribe-embed">
+            {{ __('messages.embed_subscribe_form') }}
+        </x-secondary-link>
+        <x-secondary-link href="{{ route('role.qr_code', ['subdomain' => $role->subdomain]) }}">
+            {{ __('messages.qr_code') }}
+        </x-secondary-link>
+    </div>
+    <div class="page-empty-link">
         <label for="subscribe-share-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {{ __('messages.audience_share_link') }}
         </label>
         <x-copy-link id="subscribe-share-url" :value="$subscribeShareUrl" />
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.audience_share_link_help') }}</p>
-        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            <x-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}" class="js-open-subscribe-embed">{{ __('messages.embed_subscribe_empty_state') }}</x-link>
-        </p>
-    </div>
-    <div class="mt-3">
-        @if ($role->custom_domain)
-        <x-link href="{{ $role->custom_domain }}" target="_blank">
-            {{ \App\Utils\UrlUtils::clean($role->custom_domain) }}
-        </x-link>
-        @else
-        <x-link href="{{ $role->getGuestUrl() }}" target="_blank">
-            @if (config('app.hosted'))
-                {{ $role->subdomain . '.eventschedule.com' }}
-            @else
-                {{ config('app.url') . '/' . $role->subdomain }}
-            @endif
-        </x-link>
-        @endif
     </div>
 </div>
 
 @else
 
-{{-- One deduped statement of the audience, above both tables.
+{{-- One deduped statement of the audience, above both lists.
      Necessary rather than decorative: a confirmed subscriber now also holds a follower pivot, so
-     accountOnlyFollowers() excludes them from the Followers table - and an owner watching this ship
-     would otherwise see that count drop with no explanation while a table called "Email
-     subscribers" quietly became the main list. Adding the two table totals by hand is exactly the
+     accountOnlyFollowers() excludes them from the Followers list - and an owner watching this ship
+     would otherwise see that count drop with no explanation while a list called "Email
+     subscribers" quietly became the main one. Adding the two totals by hand is exactly the
      arithmetic this saves them. --}}
 @php
-    // The two panels beside it, summed - not a headcount of the tables below. The tab strip
-    // already counts rows (count($followers) + $subscribersCount), so a second "total" that
-    // disagreed with it by the number of pending rows was the confusing thing; this one is
-    // labelled for what it measures, and reconciles exactly with the two panels next to it.
-    // NOT followers + every subscriber row: accountOnlyFollowers() excludes a follower only when
-    // the subscription created their pivot, so an account follower who also has a pending row is
-    // in both paginators - and that state is reachable by a stranger typing a known follower's
-    // address into the public panel. It also kept people who had pressed Unsubscribe inside a
-    // number labelled "Total audience", while the breakdown line below broke them out as a
-    // separate state.
+    // The two figures beside it, summed - not a headcount of the lists below. NOT followers +
+    // every subscriber row: accountOnlyFollowers() excludes a follower only when the subscription
+    // created their pivot, so an account follower who also has a pending row is in both
+    // paginators, and people who pressed Unsubscribe would be inside a number called "can be
+    // emailed".
     $audienceMailable = $subscriberStats['confirmed'] ?? 0;
     $audienceFollowers = $followersWithRoles->total();
 @endphp
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-    <x-stat-panel :label="__('messages.audience_reachable')" size="lg">{{ number_format($audienceMailable + $audienceFollowers) }}</x-stat-panel>
-    <x-stat-panel :label="__('messages.audience_get_new_event_emails')" size="lg" color="green">{{ number_format($audienceMailable) }}</x-stat-panel>
-    <x-stat-panel :label="__('messages.audience_newsletter_only')" size="lg">{{ number_format($audienceFollowers) }}</x-stat-panel>
+<div class="page-head">
+    <div class="ap-card rounded-xl page-stats">
+        <div class="page-stat">
+            <div class="page-stat-value">{{ number_format($audienceMailable + $audienceFollowers) }}</div>
+            <div class="page-stat-label">{{ __('messages.audience_reachable') }}</div>
+        </div>
+        <div class="page-stat">
+            <div class="page-stat-value">{{ number_format($audienceMailable) }}</div>
+            <div class="page-stat-label">{{ __('messages.audience_get_new_event_emails') }}</div>
+        </div>
+        <div class="page-stat">
+            <div class="page-stat-value">{{ number_format($audienceFollowers) }}</div>
+            <div class="page-stat-label">{{ __('messages.audience_newsletter_only') }}</div>
+        </div>
+    </div>
+    <div class="page-actions">
+        {{-- Opens the Embed dialog (included by role/show-admin) on its signup-form widget. A real
+             href for no-JS and middle-click: the guest form itself. --}}
+        <x-secondary-link href="{{ route('role.view_guest', ['subdomain' => $role->subdomain, 'embed' => 'true', 'form' => 'subscribe']) }}"
+            class="js-open-subscribe-embed">
+            {{ __('messages.embed_subscribe_form') }}
+        </x-secondary-link>
+        <x-secondary-link href="{{ route('role.qr_code', ['subdomain' => $role->subdomain]) }}">
+            {{ __('messages.qr_code') }}
+        </x-secondary-link>
+    </div>
 </div>
 
 @if ($hasSubscribers)
@@ -109,20 +93,10 @@
     $canManageSubscribers = auth()->user() && auth()->user()->isEditor($role->subdomain);
     $subscriberPending = $subscriberStats['pending'] ?? 0;
 @endphp
-<div class="mt-10">
-    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-        {{ __('messages.all_subscribers') }} ({{ number_format($subscribers->total()) }})
-    </h3>
-    {{-- Says how a person GETS into this list, which is the question the two-table split raises and
-         never used to answer. --}}
-    @if (public_registration_enabled())
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ __('messages.subscribers_help') }}
-    </p>
-    @endif
-
+<div class="page-subhead">
+    <h2>{{ __('messages.all_subscribers') }} ({{ number_format($subscribers->total()) }})</h2>
     @if ($subscriberStats)
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+    <p>
         {{ __('messages.subscriber_breakdown', [
             'confirmed' => number_format($subscriberStats['confirmed']),
             'pending' => number_format($subscriberStats['pending']),
@@ -130,224 +104,157 @@
         ]) }}
     </p>
     @endif
-
-    @if ($subscriberPending)
-    {{-- The pending count and the recipient count on a send legitimately differ, because an
-         unconfirmed row is never resolved as a recipient. That was documented only in a source
-         comment, which is no help to the owner staring at the discrepancy. --}}
-    <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-        </svg>
-        <p class="text-sm text-amber-700 dark:text-amber-300">
-            {{ __('messages.subscriber_pending_warning', ['count' => number_format($subscriberPending)]) }}
-        </p>
-    </div>
-    @endif
-
-    <div class="mt-4 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black/5 dark:ring-gray-700 md:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col" class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">{{ __('messages.name') }}</th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.email') }}</th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.status') }}</th>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.date') }}</th>
-                                @if ($canManageSubscribers)
-                                <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6"><span class="sr-only">{{ __('messages.delete') }}</span></th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                            @foreach ($subscribers as $subscriber)
-                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    @if ($subscriber->name)
-                                        <x-user-text>{{ $subscriber->name }}</x-user-text>
-                                    @else
-                                        <span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>
-                                    @endif
-                                    {{-- Neutral outline chip, not a second coloured pill in the
-                                         Status cell: that cell already carries one, and two
-                                         coloured pills side by side compete for the same "what
-                                         state is this person in?" read. Icon plus text, never
-                                         colour alone, and no title= - invisible on touch and
-                                         unreliable with a screen reader. The section caption above
-                                         explains it once. --}}
-                                    {{-- Same neutral chip, for the rows the embedded signup form
-                                         brought in: the owner's one way to see it is working. --}}
-                                    @if ($subscriber->source === 'embed')
-                                    <span data-subscriber-source="embed" class="ms-2 inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 align-middle">
-                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
-                                        </svg>
-                                        {{ __('messages.subscriber_source_website') }}
-                                    </span>
-                                    @endif
-                                    @if ($subscriber->confirmed_at && in_array(strtolower($subscriber->email), $subscriberAccountEmails ?? [], true))
-                                    <span class="ms-2 inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 align-middle">
-                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0" />
-                                        </svg>
-                                        {{ __('messages.subscriber_has_account') }}
-                                    </span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $subscriber->email }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                                    @if ($subscriber->has_unsubscribed)
-                                        <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300">{{ __('messages.subscriber_unsubscribed') }}</span>
-                                    @elseif ($subscriber->confirmed_at)
-                                        <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400">{{ __('messages.subscriber_confirmed') }}</span>
-                                    @else
-                                        {{-- Never mailed. The amber panel above the table explains
-                                             the resulting discrepancy to the owner. --}}
-                                        <span class="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">{{ __('messages.subscriber_pending') }}</span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $subscriber->created_at->format(get_use_24_hour_time($role) ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
-                                </td>
-                                @if ($canManageSubscribers)
-                                {{-- isEditor, matching RoleSubscriberController::remove(). viewAdmin
-                                     admits isMember, which includes viewers - who used to see this
-                                     button on every row and get a bare 403 on click. --}}
-                                <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                    <form method="POST" action="{{ route('role.subscribers.remove', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($subscriber->id)]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" data-confirm="{{ __('messages.are_you_sure') }}"
-                                            class="text-sm text-red-600 dark:text-red-400 hover:underline">
-                                            {{ __('messages.delete') }}
-                                        </button>
-                                    </form>
-                                </td>
-                                @endif
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-4">
-        {{ $subscribers->links() }}
-    </div>
 </div>
+{{-- Says how a person GETS into this list, which is the question the two-list split raises. --}}
+@if (public_registration_enabled())
+<p class="event-hint">{{ __('messages.subscribers_help') }}</p>
+@endif
+
+@if ($subscriberPending)
+{{-- The pending count and the recipient count on a send legitimately differ, because an
+     unconfirmed row is never resolved as a recipient. --}}
+<p class="event-hint">{{ trans_choice('messages.subscriber_pending_notice', $subscriberPending, ['count' => number_format($subscriberPending)]) }}</p>
+@endif
+
+<div class="ap-card rounded-xl overflow-hidden">
+    <table role="table" class="page-table">
+        <colgroup><col><col class="col-status"><col class="col-date"><col class="col-act"></colgroup>
+        <thead role="rowgroup">
+            <tr role="row">
+                <th scope="col" role="columnheader">{{ __('messages.name') }}</th>
+                <th scope="col" role="columnheader">{{ __('messages.status') }}</th>
+                <th scope="col" role="columnheader">{{ __('messages.date') }}</th>
+                <th scope="col" role="columnheader"><span class="sr-only">{{ __('messages.delete') }}</span></th>
+            </tr>
+        </thead>
+        <tbody role="rowgroup">
+            @foreach ($subscribers as $subscriber)
+            <tr role="row">
+                <td role="cell" class="c-main">
+                    <div class="page-person">
+                        <span class="event-avatar" aria-hidden="true">{{ $initialOf($subscriber->name, $subscriber->email) }}</span>
+                        <div class="page-person-text">
+                            <div class="event-list-name">
+                                @if ($subscriber->name)
+                                    <x-user-text>{{ $subscriber->name }}</x-user-text>
+                                @else
+                                    <span dir="ltr" v-pre>{{ $subscriber->email }}</span>
+                                @endif
+                                {{-- Neutral chips, never a second coloured mark beside the status:
+                                     where the row came from, and whether the person has an account. --}}
+                                @if ($subscriber->source === 'embed')
+                                <span data-subscriber-source="embed" class="event-chip">{{ __('messages.subscriber_source_website') }}</span>
+                                @endif
+                                @if ($subscriber->confirmed_at && in_array(strtolower($subscriber->email), $subscriberAccountEmails ?? [], true))
+                                <span class="event-chip">{{ __('messages.subscriber_has_account') }}</span>
+                                @endif
+                            </div>
+                            @if ($subscriber->name)
+                            <div class="event-list-sub" dir="ltr" v-pre>{{ $subscriber->email }}</div>
+                            @endif
+                        </div>
+                    </div>
+                </td>
+                <td role="cell">
+                    @if ($subscriber->has_unsubscribed)
+                        <span class="event-status">{{ __('messages.subscriber_unsubscribed') }}</span>
+                    @elseif ($subscriber->confirmed_at)
+                        <span class="event-status is-on">{{ __('messages.subscriber_confirmed') }}</span>
+                    @else
+                        {{-- Never mailed. The amber panel above the list explains the resulting
+                             discrepancy to the owner. --}}
+                        <span class="event-status is-warn">{{ __('messages.subscriber_pending') }}</span>
+                    @endif
+                </td>
+                <td role="cell" class="c-date">{{ $subscriber->created_at->translatedFormat('M j, Y') }}</td>
+                {{-- isEditor, matching RoleSubscriberController::remove(). viewAdmin admits
+                     isMember, which includes viewers - who used to see this button on every row
+                     and get a bare 403 on click. --}}
+                <td role="cell" class="c-actions">@if ($canManageSubscribers)
+                    <form method="POST" action="{{ route('role.subscribers.remove', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($subscriber->id)]) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" data-confirm="{{ __('messages.are_you_sure') }}" class="event-link is-danger">{{ __('messages.delete') }}</button>
+                    </form>
+                @endif</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
+@if ($subscribers->hasPages())
+<div class="mt-4">
+    {{ $subscribers->links() }}
+</div>
+@endif
 @endif
 
 
 {{--
     Account followers. Guarded on isNotEmpty() because the branch above only takes the empty-state
     branch when BOTH lists are empty - so a schedule whose whole audience is account-less (the
-    likeliest state for any schedule using the subscribe panel) used to render this table with its
-    four column headers and no rows, unlabelled, directly above "Email subscribers".
+    likeliest state for any schedule using the subscribe panel) used to render this list with its
+    column headers and no rows, unlabelled, directly above "Email subscribers".
 --}}
 @if ($followersWithRoles->isNotEmpty())
-<div class="mt-8">
-    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-        {{ __('messages.followers') }} ({{ number_format($followersWithRoles->total()) }})
-    </h3>
-    {{-- The same reframing the marketing pages carry, next to the table it describes: following on
-         its own does not sign anybody up for automatic email. --}}
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ __('messages.followers_account_only_help') }}
-    </p>
+@php
+    // The schedule a follower runs is worth a column only when someone on this page has one: it
+    // was an empty column on most pages.
+    $anyFollowerSchedule = $followersWithRoles->contains(fn ($follower) => $follower->roles->isNotEmpty() && $follower->roles->first()->isClaimed());
+@endphp
+<div class="page-subhead">
+    <h2>{{ __('messages.followers') }} ({{ number_format($followersWithRoles->total()) }})</h2>
+</div>
+{{-- The same reframing the marketing pages carry, next to the list it describes: following on
+     its own does not sign anybody up for automatic email. --}}
+<p class="event-hint">{{ __('messages.followers_account_only_help') }}</p>
 
-<div class="mt-4 flow-root">
-    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black/5 dark:ring-gray-700 md:rounded-lg">
-                <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
-                                <x-sortable-header column="email" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.email') }}</x-sortable-header>
-                                <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.schedule') }}
-                                </th>
-                                <x-sortable-header column="pivot_created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-sortable-header>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                            @foreach ($followersWithRoles as $follower)
-                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    @if($follower->name)
-                                        {{ $follower->name }}
-                                    @else
-                                        <span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $follower->email }}
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @if($follower->roles->isNotEmpty())
-                                        @php
-                                            $firstRole = $follower->roles->first();
-                                        @endphp                 
-                                        @if ($firstRole->isClaimed())
-                                            <x-link href="{{ $firstRole->getGuestUrl() }}" target="_blank">
-                                                {{ $firstRole->name }}
-                                            </x-link>
-                                        @endif
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $follower->pivot->created_at->format(get_use_24_hour_time($role) ? 'M jS, Y • H:i' : 'M jS, Y • g:i A') }}
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="ap-card rounded-xl overflow-hidden">
+    <table role="table" class="page-table is-compact">
+        <colgroup><col><col class="col-status"><col class="col-date"><col class="col-act"></colgroup>
+        <thead role="rowgroup">
+            <tr role="row">
+                <th scope="col" role="columnheader" @if ($followerSortBy === 'name') aria-sort="{{ $followerSortDir === 'asc' ? 'ascending' : 'descending' }}" @endif><button type="button" class="page-sort" data-sort="name">{{ __('messages.name') }}{{ $sortMark('name') }}</button></th>
+                <th scope="col" role="columnheader">@if ($anyFollowerSchedule){{ __('messages.schedule') }}@else<span class="sr-only">{{ __('messages.schedule') }}</span>@endif</th>
+                <th scope="col" role="columnheader" @if ($followerSortBy === 'pivot_created_at') aria-sort="{{ $followerSortDir === 'asc' ? 'ascending' : 'descending' }}" @endif><button type="button" class="page-sort" data-sort="pivot_created_at">{{ __('messages.date') }}{{ $sortMark('pivot_created_at') }}</button></th>
+                <th scope="col" role="columnheader"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+            </tr>
+        </thead>
+        <tbody role="rowgroup">
+            @foreach ($followersWithRoles as $follower)
+            @php $followerSchedule = $follower->roles->isNotEmpty() && $follower->roles->first()->isClaimed() ? $follower->roles->first() : null; @endphp
+            <tr role="row">
+                <td role="cell" class="c-main">
+                    <div class="page-person">
+                        <span class="event-avatar" aria-hidden="true">{{ $initialOf($follower->name, $follower->email) }}</span>
+                        <div class="page-person-text">
+                            <div class="event-list-name">
+                                @if ($follower->name)
+                                    <x-user-text>{{ $follower->name }}</x-user-text>
+                                @else
+                                    <span dir="ltr" v-pre>{{ $follower->email }}</span>
+                                @endif
+                            </div>
+                            @if ($follower->name)
+                            <div class="event-list-sub" dir="ltr" v-pre>{{ $follower->email }}</div>
+                            @endif
+                        </div>
+                    </div>
+                </td>
+                <td role="cell">@if ($followerSchedule)<x-link href="{{ $followerSchedule->getGuestUrl() }}" target="_blank"><span dir="auto" v-pre>{{ $followerSchedule->name }}</span></x-link>@endif</td>
+                <td role="cell" class="c-date">{{ $follower->pivot->created_at->translatedFormat('M j, Y') }}</td>
+                <td role="cell"></td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>
 
-@if($followersWithRoles->hasPages())
-<div class="mt-6 flex items-center justify-between">
-    <div class="flex-1 flex justify-between sm:hidden">
-        @if ($followersWithRoles->onFirstPage())
-            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 cursor-default leading-5 rounded-lg">
-                {{ __('messages.previous') }}
-            </span>
-        @else
-            <a href="{{ $followersWithRoles->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 leading-5 rounded-lg hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring ring-gray-300 dark:ring-gray-600 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] active:bg-gray-100 dark:active:bg-gray-700 active:text-gray-700 dark:active:text-gray-300 transition ease-in-out duration-150">
-                {{ __('messages.previous') }}
-            </a>
-        @endif
-
-        @if ($followersWithRoles->hasMorePages())
-            <a href="{{ $followersWithRoles->nextPageUrl() }}" class="ms-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 leading-5 rounded-lg hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring ring-gray-300 dark:ring-gray-600 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] active:bg-gray-100 dark:active:bg-gray-700 active:text-gray-700 dark:active:text-gray-300 transition ease-in-out duration-150">
-                {{ __('messages.next') }}
-            </a>
-        @else
-            <span class="ms-3 relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 cursor-default leading-5 rounded-lg">
-                {{ __('messages.next') }}
-            </span>
-        @endif
-    </div>
-
-    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-        <div>
-        </div>
-        <div>
-            {{ $followersWithRoles->links() }}
-        </div>
-    </div>
+@if ($followersWithRoles->hasPages())
+<div class="mt-4">
+    {{ $followersWithRoles->links() }}
 </div>
 @endif
-</div>
 @endif
 @endif

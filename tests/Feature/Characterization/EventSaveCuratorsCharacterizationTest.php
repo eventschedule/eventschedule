@@ -181,4 +181,99 @@ class EventSaveCuratorsCharacterizationTest extends TestCase
             'group_id' => $group->id,
         ]);
     }
+
+    /**
+     * The venue is decided by the Event tab and the participants by the Participants tab. "Also
+     * list on" used to list them too, as ticked boxes, and to win: unticking the venue there took
+     * it off the event while the Event tab still showed it picked. The list no longer offers them,
+     * so a save that leaves them out of curators[] must not read that as an untick.
+     */
+    public function test_the_events_own_venue_and_participants_are_not_also_list_on_ticks(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $venue = $this->createRole($owner, 'venue');
+        $act = $this->createRole($owner, 'talent');
+        $curator = $this->createCurator($owner, ['require_approval' => false]);
+
+        $posted = fn (array $curators) => [
+            'venue_id' => UrlUtils::encodeId($venue->id),
+            'venue_submitted' => 1,
+            'members' => [
+                UrlUtils::encodeId($talent->id) => ['name' => $talent->name, 'email' => ''],
+                UrlUtils::encodeId($act->id) => ['name' => $act->name, 'email' => ''],
+            ],
+            'members_submitted' => 1,
+            'curators_submitted' => 1,
+            'curators' => $curators,
+        ];
+
+        $this->postCreateEvent($owner, $talent, $posted([UrlUtils::encodeId($curator->id)]))->assertRedirect();
+        $event = $this->latestEvent();
+        $attached = fn () => $event->roles()->pluck('roles.id')->sort()->values()->all();
+        $everyone = collect([$talent->id, $venue->id, $act->id, $curator->id])->sort()->values()->all();
+        $this->assertSame($everyone, $attached(), 'sanity check: made with a venue, a second act and a curator');
+
+        // The form as it is now: only the curator has a box.
+        $this->putUpdateEvent($owner, $talent, $event, $posted([UrlUtils::encodeId($curator->id)]))->assertRedirect();
+        $this->assertSame($everyone, $attached(), 'the venue and the second act stay');
+        $this->assertDatabaseHas('event_role', ['event_id' => $event->id, 'role_id' => $venue->id, 'is_accepted' => 1]);
+        $this->assertDatabaseHas('event_role', ['event_id' => $event->id, 'role_id' => $act->id, 'is_accepted' => 1]);
+
+        // And the list still decides what it does hold: the curator's box unticked.
+        $this->putUpdateEvent($owner, $talent, $event, $posted([]))->assertRedirect();
+        $this->assertSame(collect([$talent->id, $venue->id, $act->id])->sort()->values()->all(), $attached());
+    }
+
+    /** Their own tabs still remove them: a participant dropped there, a venue cleared there. */
+    public function test_a_participant_removed_on_its_own_tab_is_still_removed(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $act = $this->createRole($owner, 'talent');
+
+        $this->postCreateEvent($owner, $talent, [
+            'members' => [
+                UrlUtils::encodeId($talent->id) => ['name' => $talent->name, 'email' => ''],
+                UrlUtils::encodeId($act->id) => ['name' => $act->name, 'email' => ''],
+            ],
+            'members_submitted' => 1,
+            'curators_submitted' => 1,
+        ])->assertRedirect();
+        $event = $this->latestEvent();
+        $this->assertContains($act->id, $event->roles()->pluck('roles.id')->all());
+
+        $this->putUpdateEvent($owner, $talent, $event, [
+            'members' => [UrlUtils::encodeId($talent->id) => ['name' => $talent->name, 'email' => '']],
+            'members_submitted' => 1,
+            'curators_submitted' => 1,
+        ])->assertRedirect();
+
+        $this->assertNotContains($act->id, $event->roles()->pluck('roles.id')->all());
+    }
+
+    /** The other half of that sentence: the venue cleared on the Event tab is taken off the event. */
+    public function test_a_venue_cleared_on_its_own_tab_is_still_removed(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $venue = $this->createRole($owner, 'venue');
+
+        $this->postCreateEvent($owner, $talent, [
+            'venue_id' => UrlUtils::encodeId($venue->id),
+            'venue_submitted' => 1,
+            'curators_submitted' => 1,
+        ])->assertRedirect();
+        $event = $this->latestEvent();
+        $this->assertContains($venue->id, $event->roles()->pluck('roles.id')->all(), 'sanity check: made at the venue');
+
+        // The section on the page, with no venue in it (an online event keeps the save valid).
+        $this->putUpdateEvent($owner, $talent, $event, [
+            'venue_submitted' => 1,
+            'event_url' => 'https://meet.example.org/room',
+            'curators_submitted' => 1,
+        ])->assertRedirect();
+
+        $this->assertNotContains($venue->id, $event->roles()->pluck('roles.id')->all());
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Browser;
 
+use App\Models\Role;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Traits\AccountSetupTrait;
@@ -44,8 +45,8 @@ class GeneralTest extends DuskTestCase
             $browser->waitFor('#website', 5)
                 ->script("document.getElementById('website').value = 'https://google.com'");
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
-            $browser->waitForLocation('/venue/schedule', 15)
-                ->assertSee('google.com');
+            $browser->waitForLocation('/venue/schedule', 15);
+            $this->assertSame('https://google.com', Role::where('subdomain', 'venue')->value('website'));
 
             // Create/edit talent using the trait
             $this->createTestTalent($browser);
@@ -59,14 +60,14 @@ class GeneralTest extends DuskTestCase
             $browser->waitFor('#website', 5)
                 ->script("document.getElementById('website').value = 'https://google.com'");
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit()");
-            $browser->waitForLocation('/talent/schedule', 15)
-                ->assertSee('google.com');
+            $browser->waitForLocation('/talent/schedule', 15);
+            $this->assertSame('https://google.com', Role::where('subdomain', 'talent')->value('website'));
 
             // Create/edit event
             $browser->visit('/talent/add-event?date='.date('Y-m-d'))
                 ->waitFor('#event_name', 10)
                 ->pause(500);
-            $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+            // The venue is on the Event tab, which is the one the form opens on.
             $browser->waitFor('#in_person', 5);
             $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)

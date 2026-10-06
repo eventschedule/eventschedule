@@ -354,31 +354,14 @@
 
         // Set initial state based on URL hash
         resolveUrl();
+        // ...and again once the page is parsed. The Help links are in the sidebar's footer, which
+        // comes after this script, so the call above finds none to set: Help opened the top of the
+        // guide's page whatever the address named, until something was pressed.
+        document.addEventListener('DOMContentLoaded', resolveUrl);
 
-        // On page load, check localStorage for active tabs to restore the correct help URL
-        document.addEventListener('DOMContentLoaded', function() {
-            var tabSources = [
-                { key: 'detailsActiveTab', prefix: 'details-tab-' },
-                { key: 'customizeActiveTab', prefix: 'customize-tab-' },
-                { key: 'settingsActiveTab', prefix: 'settings-tab-' },
-                { key: 'engagementActiveTab', prefix: 'engagement-tab-' },
-                { key: 'styleActiveTab', prefix: 'style-tab-' },
-                { key: 'integrationActiveTab', prefix: 'integration-tab-' },
-                { key: 'paymentActiveTab', prefix: 'payment-tab-' },
-            ];
-            for (var i = 0; i < tabSources.length; i++) {
-                try {
-                    var value = localStorage.getItem(tabSources[i].key);
-                    if (value) {
-                        var tabKey = tabSources[i].prefix + value;
-                        if (anchorMap[tabKey]) {
-                            updateHelpLinks(anchorMap[tabKey]);
-                            return;
-                        }
-                    }
-                } catch (e) {}
-            }
-        });
+        // The tabbed forms used to remember an inner tab per browser, and this read the same
+        // keys to pick the Help page. Their inner tabs are rows now, which start closed and are
+        // remembered nowhere, so there is nothing to restore: a row tells Help when it is pressed.
 
         // Listen for section nav clicks (pushState doesn't fire hashchange)
         document.addEventListener('click', function(e) {
@@ -402,11 +385,31 @@
                 return;
             }
 
+            // A section that shares its tab with others (the settings page's Security, Integrations,
+            // Developers and Data): Help follows the one that was pressed in. Not a return: a row
+            // inside it, handled below, is more exact still.
+            var block = e.target.closest('.settings-block[id]');
+            if (block && anchorMap[block.id]) {
+                updateHelpLinks(anchorMap[block.id]);
+            }
+
             var tab = e.target.closest('.payment-tab');
             if (tab) {
                 var tabKey = 'payment-tab-' + tab.getAttribute('data-tab');
                 if (anchorMap[tabKey]) {
                     updateHelpLinks(anchorMap[tabKey]);
+                }
+            }
+
+            // A row that opens in place (x-form-row): Help follows the pane it opens, or the row's
+            // own id, whichever the anchor map names. This is what covers the rows that never
+            // had a branch of their own below (the Style rows, the profile's rows).
+            var row = e.target.closest('button[data-row-group]');
+            if (row) {
+                var rowKey = anchorMap[row.getAttribute('aria-controls')] ? row.getAttribute('aria-controls') : row.id;
+                if (rowKey && anchorMap[rowKey]) {
+                    updateHelpLinks(anchorMap[rowKey]);
+                    return;
                 }
             }
 
@@ -464,6 +467,12 @@
                 if (anchorMap[modeKey]) {
                     updateHelpLinks(anchorMap[modeKey]);
                 }
+            }
+
+            // The event form's "Not needed" has no page of its own: with tickets off, Help goes
+            // back to the Tickets tab's page instead of staying on the choice that was just left.
+            if (e.target.closest('#ticket_choice_none') && anchorMap['section-tickets']) {
+                updateHelpLinks(anchorMap['section-tickets']);
             }
 
             var ticketTab = e.target.closest('.ticket-tab');

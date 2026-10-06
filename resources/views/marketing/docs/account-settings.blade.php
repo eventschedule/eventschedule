@@ -5,8 +5,12 @@
     lede="Everything on the Settings page: your profile, how the admin portal looks, the payment method your tickets are sold through, API and webhook access, connected calendars, backups and account security."
 >
     <x-slot:toc>
-        <x-doc-nav-link href="#profile">Profile Information</x-doc-nav-link>
-        <x-doc-nav-link href="#appearance">Appearance</x-doc-nav-link>
+        <x-doc-nav-group label="Profile Information" href="#profile">
+            <x-doc-nav-link href="#preferences">Preferences</x-doc-nav-link>
+            <x-doc-nav-link href="#localization">Localization</x-doc-nav-link>
+            <x-doc-nav-link href="#accessibility">Accessibility</x-doc-nav-link>
+            <x-doc-nav-link href="#appearance">Appearance</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-group label="Payment Methods" href="#payments">
             <x-doc-nav-link href="#stripe">Stripe</x-doc-nav-link>
             <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
@@ -14,17 +18,20 @@
             <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
             <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
         </x-doc-nav-group>
-        <x-doc-nav-link href="#api">API Settings</x-doc-nav-link>
-        <x-doc-nav-link href="#webhooks">Webhooks</x-doc-nav-link>
+        <x-doc-nav-link href="#password">Password</x-doc-nav-link>
+        <x-doc-nav-link href="#two-factor">Two-Factor Authentication</x-doc-nav-link>
         <x-doc-nav-link href="#google">Google Settings</x-doc-nav-link>
         <x-doc-nav-link href="#microsoft">Outlook Calendar</x-doc-nav-link>
         <x-doc-nav-link href="#facebook">Facebook Settings</x-doc-nav-link>
-        <x-doc-nav-link href="#backup">Backup & Restore</x-doc-nav-link>
-        <x-doc-nav-link href="#app-update">App Update</x-doc-nav-link>
-        <x-doc-nav-link href="#password">Update Password</x-doc-nav-link>
-        <x-doc-nav-link href="#two-factor">Two-Factor Authentication</x-doc-nav-link>
+        <x-doc-nav-link href="#api">API Settings</x-doc-nav-link>
+        <x-doc-nav-link href="#webhooks">Webhooks</x-doc-nav-link>
+        <x-doc-nav-group label="Backup & Restore" href="#backup">
+            <x-doc-nav-link href="#backup-export">Exporting</x-doc-nav-link>
+            <x-doc-nav-link href="#backup-import">Importing</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-link href="#your-data">Your Data</x-doc-nav-link>
         <x-doc-nav-link href="#delete-account">Delete Account</x-doc-nav-link>
+        <x-doc-nav-link href="#app-update">App Update</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
 
@@ -37,10 +44,10 @@
             Profile Information
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Open <strong class="text-gray-900 dark:text-white">Settings</strong> from the main navigation. Every settings section is listed down the left side of the page (an accordion on small screens), and this guide follows them in that order. These settings belong to <em>you</em>, not to a schedule: anything that differs per schedule, such as calendar sync or a schedule's own sending address, lives in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">the schedule's settings</a> instead. That includes the notification emails you get about a schedule, such as a new ticket sale or a new event request, which are chosen on its <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Notifications</a> tab.
+            Open <strong class="text-gray-900 dark:text-white">Settings</strong> from the main navigation. Six entries are listed down the left side of the page (an accordion on small screens): Profile Information, Payment Methods, Security, Integrations, Developers and Data. A selfhosted site that can update itself lists a seventh, App Update. The last four each hold a few sections, one under the other: <strong class="text-gray-900 dark:text-white">Security</strong> has your password and two-factor authentication, <strong class="text-gray-900 dark:text-white">Integrations</strong> has Google, Outlook and Facebook, <strong class="text-gray-900 dark:text-white">Developers</strong> has the API and webhooks, and <strong class="text-gray-900 dark:text-white">Data</strong> has backup and restore, your data and deleting your account. Under each entry's name is a line saying what is set there, so most questions (is two-factor on? which payment methods are connected?) are answered without opening anything. Each section carries its full name as its title, which is the name this guide uses, and this guide follows the sections in the order they come on the page. Each section has its own <strong class="text-gray-900 dark:text-white">Save</strong>, at the end of the section, and saving one does not save another: a dot beside an entry's name marks one with changes you have not saved. These settings belong to <em>you</em>, not to a schedule: anything that differs per schedule, such as calendar sync or a schedule's own sending address, lives in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="doc-link">the schedule's settings</a> instead. That includes the notification emails you get about a schedule, such as a new ticket sale or a new event request, which are chosen on its <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Notifications</a> tab.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Profile Information itself is split into two tabs, <strong class="text-gray-900 dark:text-white">General</strong> and <strong class="text-gray-900 dark:text-white">Localization</strong>. A third tab, <strong class="text-gray-900 dark:text-white">Accessibility</strong>, appears only after you have hidden the accessibility widget, and its single button brings the widget back.
+            Profile Information opens on your general details and your preferences, described first below. Under them are rows that open in place, each showing what it holds beside its name: <strong class="text-gray-900 dark:text-white">Localization</strong> and <strong class="text-gray-900 dark:text-white">Appearance</strong>. A third row, <strong class="text-gray-900 dark:text-white">Accessibility</strong>, appears only after you have hidden the accessibility widget, and its single button brings the widget back. One <strong class="text-gray-900 dark:text-white">Save</strong> button at the bottom saves the general details and the Localization row together.
         </p>
 
         <x-doc-screenshot id="account-settings--settings" alt="Account settings page" loading="eager" />
@@ -64,10 +71,6 @@
                         <td>Required. The address you sign in with and where account email is sent. Editing it clears your verification: the field then shows an unverified notice with a link to re-send the verification email.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Email updates</span></td>
-                        <td>On by default. Covers newsletters, tips, the weekly summary and updates on events you asked other schedules to list. Turning it off (or using the Unsubscribe link at the bottom of one of those emails) stops them all. Receipts, password resets and the notifications you turned on for your own schedules are always sent.</td>
-                    </tr>
-                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Phone Number</span></td>
                         <td>Optional, in international format. On the hosted platform you can verify it by SMS. A verified number is required before you can buy <a href="{{ route('marketing.docs.boost') }}" class="doc-link">ad campaigns</a> and on-network promotions, and it lets a schedule without its own email settings send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> and automatic new-event emails to more than 50 people at once. If one of your schedules uses the same number, that schedule's number counts as verified too.</td>
                     </tr>
@@ -83,7 +86,34 @@
             </table>
         </div>
 
-        <h3 class="doc-subheading">Localization</h3>
+        <h3 id="preferences" class="doc-subheading">Preferences</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Three switches under your details, always on the page, about what the app sends you and asks you.</p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Email updates</span></td>
+                        <td>On by default. Covers newsletters, tips, the reminders about setting up your schedule, the weekly summary and updates on events you asked other schedules to list. Turning it off (or using the Unsubscribe link at the bottom of one of those emails) stops them all. Receipts, password resets and the notifications you turned on for your own schedules are always sent.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Suggestions</span></td>
+                        <td>Shown only if you edit a schedule. On by default: the setup guide and the next steps on your dashboard. It changes what the app shows and stops no email; the reminder emails about the same steps follow <strong class="text-gray-900 dark:text-white">Email updates</strong>. Requests waiting on you are always shown, whatever this is set to.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Ask me before I follow a new schedule</span></td>
+                        <td>On by default. Shows a short consent notice, explaining that the schedule will see your name and email, the first time you follow a schedule. Turn it off to follow in one click.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 id="localization" class="doc-subheading">Localization</h3>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -105,13 +135,12 @@
                         <td><span class="font-semibold text-gray-900 dark:text-white">Use 24-hour time format</span></td>
                         <td>Switches between 12-hour (AM/PM) and 24-hour clocks across the app.</td>
                     </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Ask me before I follow a new schedule</span></td>
-                        <td>On by default. Shows a short consent notice, explaining that the schedule will see your name and email, the first time you follow a schedule. Turn it off to follow in one click.</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
+
+        <h3 id="accessibility" class="doc-subheading">Accessibility</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">This row is only there after you have hidden the accessibility widget. Its one button, <strong class="text-gray-900 dark:text-white">Show widget</strong>, brings the widget back on every page. Nothing here is saved to your profile: the choice is remembered by the browser you made it in.</p>
     </section>
 
     <!-- Appearance -->
@@ -124,7 +153,7 @@
         </h2>
 
         <p class="doc-paragraph">
-            The <span class="font-semibold text-gray-900 dark:text-white">Appearance</span> tab in Settings controls how the
+            The <span class="font-semibold text-gray-900 dark:text-white">Appearance</span> row of Profile Information controls how the
             admin portal looks. You can also change it on any page from the
             <span class="font-semibold text-gray-900 dark:text-white">Theme</span> button in the row of icons pinned to the
             bottom of the sidebar, which opens the same Theme and Palette controls in a popup.
@@ -173,7 +202,7 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Cash needs nothing set up. To take payment any other way, connect a method here: there are five, each on its own tab - Stripe, Invoice Ninja, Payment Link, Payfast and PayPal. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. With nothing connected, an event can only take cash, unless the site you are on provides an account for everyone, as described below. Taking money for a ticket is the Pro plan, and it comes with all five; a free schedule sells nothing priced, so it needs none of them.
+            Cash needs nothing set up. To take payment any other way, connect a method here: there are five, each a row that opens in place and says beside its name whether it is connected, or what the method is while it is not - Stripe, Invoice Ninja, Payment Link, Payfast and PayPal. The line under Payment Methods in the list of sections names the ones that are. While nothing is connected the first row opens by itself, and a row's button reads <strong class="text-gray-900 dark:text-white">Connect</strong> until there is something to save over. Which one an event uses is decided per event, on the event's <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Payment</a> tab, so connecting more than one lets you route different events differently. With nothing connected, an event can only take cash, unless the site you are on provides an account for everyone, as described below. Taking money for a ticket is the Pro plan, and it comes with all five; a free schedule sells nothing priced, so it needs none of them.
         </p>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
@@ -183,15 +212,15 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hosted platform</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong> to start Stripe Connect onboarding, then complete the details on Stripe. Until Stripe finishes reviewing them the tab shows your account ID labelled <strong class="text-gray-900 dark:text-white">[Pending]</strong>. Buyers are charged on your own Stripe account, so payouts and Stripe's own processing fees are between you and Stripe. Event Schedule adds no platform fee of its own.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong> to start Stripe Connect onboarding, then complete the details on Stripe. Until Stripe finishes reviewing them the row shows your account ID and reads <strong class="text-gray-900 dark:text-white">Setup not finished</strong>, as does the line under Payment Methods. Buyers are charged on your own Stripe account, so payouts and Stripe's own processing fees are between you and Stripe. Event Schedule adds no platform fee of its own.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Selfhosted</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe is configured once at the server level with the <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> and <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> variables in your <code class="doc-inline-code">.env</code> file, not per account. The tab simply reports whether the server has Stripe configured. See the <x-link href="{{ route('marketing.docs.selfhost.stripe') }}">selfhosted Stripe setup guide</x-link>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Stripe is configured once at the server level with the <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> and <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> variables in your <code class="doc-inline-code">.env</code> file, not per account. The row simply reports whether the server has Stripe configured. See the <x-link href="{{ route('marketing.docs.selfhost.stripe') }}">selfhosted Stripe setup guide</x-link>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disconnecting</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> under the account name in the Stripe tab and confirm. This only removes the connection to Event Schedule; your Stripe account and its history are untouched.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disconnect</strong> beside the account name in the Stripe row and confirm. This only removes the connection to Event Schedule; your Stripe account and its history are untouched.</p>
             </div>
         </div>
 
@@ -210,25 +239,25 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Checkout modes</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">After connecting, the tab offers two checkout modes: invoice mode (buyers pick tickets in Event Schedule) and payment link mode (buyers pick tickets on Invoice Ninja's purchase page, with grouped invoices). See <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes">Invoice Ninja Modes</x-link> for a full comparison. If a payment link cannot be created for a sale, that checkout falls back to invoice mode automatically.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">After connecting, the row offers two checkout modes: invoice mode (buyers pick tickets in Event Schedule) and payment link mode (buyers pick tickets on Invoice Ninja's purchase page, with grouped invoices). See <x-link href="{{ route('marketing.docs.tickets') }}#invoiceninja-modes">Invoice Ninja Modes</x-link> for a full comparison. If a payment link cannot be created for a sale, that checkout falls back to invoice mode automatically.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Troubleshooting</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If the connection fails, a red panel at the top of the Invoice Ninja tab names the reason and shows the raw error, and the full detail is written to your application log. Common causes for selfhosted installations are a firewall, Cloudflare or other bot protection blocking API requests from your Event Schedule server, an <code class="doc-inline-code">http</code> URL that redirects to <code class="doc-inline-code">https</code>, and a self-signed TLS certificate the server does not trust.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If the connection fails, a red panel at the top of the Invoice Ninja row names the reason and shows the raw error, and the full detail is written to your application log. Common causes for selfhosted installations are a firewall, Cloudflare or other bot protection blocking API requests from your Event Schedule server, an <code class="doc-inline-code">http</code> URL that redirects to <code class="doc-inline-code">https</code>, and a self-signed TLS certificate the server does not trust.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disconnecting</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> next to the company name in the Invoice Ninja tab and confirm.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disconnect</strong> next to the company name in the Invoice Ninja row and confirm.</p>
             </div>
         </div>
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Tip</div>
-            <p>Before you connect, the tab shows a special offer link: first-time Invoice Ninja users may be eligible for a free 1-year upgrade to Invoice Ninja Pro.</p>
+            <p>Before you connect, the row shows a special offer link: first-time Invoice Ninja users may be eligible for a free 1-year upgrade to Invoice Ninja Pro.</p>
         </div>
 
         <h3 id="payment-url" class="doc-subheading">Payment Link</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The tab is labelled <strong class="text-gray-900 dark:text-white">Payment Link</strong>. It points buyers at any external payment page you already have: a bank transfer page, a donation page, your own shop's checkout, anything with a URL. To take PayPal payments that confirm themselves, connect <a href="#paypal" class="doc-link">PayPal</a> on its own tab instead.
+            The row is labelled <strong class="text-gray-900 dark:text-white">Payment Link</strong>. It points buyers at any external payment page you already have: a bank transfer page, a donation page, your own shop's checkout, anything with a URL. To take PayPal payments that confirm themselves, connect <a href="#paypal" class="doc-link">PayPal</a> in its own row instead.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
@@ -237,7 +266,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> under the saved URL and confirm. The field is then empty and ready for a new URL.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disconnect</strong> beside the saved URL and confirm. The field is then empty and ready for a new URL.</p>
             </div>
         </div>
 
@@ -260,11 +289,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. Any event still set to Payfast keeps the setting but shows it as no longer available, so you can see it and pick something else. The exception is a site that provides its own Payfast account (below): there, unlinking hands your events back to the site's account rather than stopping them selling, and the money goes there instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disconnect</strong> and confirm. Any event still set to Payfast keeps the setting but shows it as no longer available, so you can see it and pick something else. The exception is a site that provides its own Payfast account (below): there, unlinking hands your events back to the site's account rather than stopping them selling, and the money goes there instead.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one Payfast account for everyone. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own details to be paid into your own account instead, and unlink them again to go back.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one Payfast account for everyone. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own details to be paid into your own account instead, and disconnect them again to go back.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
@@ -286,15 +315,15 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Uses your PayPal sandbox credentials so nothing is really charged. While it is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and the Payment tab shows a warning. Turn it off before you sell real tickets - test tickets look exactly like real ones.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Uses your PayPal sandbox credentials so nothing is really charged. While it is on, the payment method reads <strong class="text-gray-900 dark:text-white">(Test mode)</strong> on the event form and the Tickets tab's Payment row shows a warning. Turn it off before you sell real tickets - test tickets look exactly like real ones.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Unlink Account</strong> and confirm. The listener we registered with PayPal is removed at the same time. Any event still set to PayPal keeps the setting but shows it as no longer available, so you can see it and pick something else. The exception is a site that provides its own PayPal account (below): there, unlinking hands your events back to the site's account rather than stopping them selling, and the money goes there instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disconnect</strong> and confirm. The listener we registered with PayPal is removed at the same time. Any event still set to PayPal keeps the setting but shows it as no longer available, so you can see it and pick something else. The exception is a site that provides its own PayPal account (below): there, unlinking hands your events back to the site's account rather than stopping them selling, and the money goes there instead.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one PayPal account for everyone, exactly as with Payfast. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own details to be paid into your own account instead, and unlink them again to go back.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one PayPal account for everyone, exactly as with Payfast. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own details to be paid into your own account instead, and disconnect them again to go back.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
@@ -308,72 +337,62 @@
         </div>
     </section>
 
-    <!-- API Settings -->
-    <section id="api" class="doc-section">
+    <!-- Update Password -->
+    <section id="password" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
-            API Settings
+            Update Password
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            This section issues the key that authenticates REST API requests for your account. The endpoints themselves are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: the key can be generated on any plan, but every call is checked against the schedule it touches and a schedule below Pro is refused. See the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API Reference</a> for the full endpoint list.
+            Enter your current password, choose a new one and click <strong class="text-gray-900 dark:text-white">Update Password</strong>. The eye in each field shows what you typed. A password must be at least 8 characters long.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            If your account was created by signing in with Google or Facebook it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with that account; after that you have a few minutes to choose a password, and only the new password field is shown.
+        </p>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Tip</div>
+            <p>Setting a password is also what makes it possible to disconnect Google later, and it gives you a way in if you ever lose access to your Google account.</p>
+        </div>
+    </section>
+
+    <!-- Two-Factor Authentication -->
+    <section id="two-factor" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+            Two-Factor Authentication
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Two-factor authentication (2FA) adds a second step to signing in, using a time-based one-time password from an authenticator app such as Google Authenticator, Authy or 1Password.
         </p>
 
+        <h3 class="doc-subheading">Turning it on</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>While two-factor is off, the section says so and lists what switching it on involves. Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google or Facebook, are not asked for one.</li>
+            <li>Scan the QR code with your authenticator app. If you cannot scan, type the key printed under the code into the app by hand.</li>
+            <li>Save the recovery codes shown on the same screen, somewhere other than the device holding the authenticator app.</li>
+            <li>Type the 6-digit code from the app and click <strong class="text-gray-900 dark:text-white">Confirm</strong>. Two-factor authentication is not active until this step succeeds.</li>
+        </ol>
+
+        <h3 class="doc-subheading">Afterwards</h3>
         <div class="doc-fields">
             <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Enable API Access</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A single toggle. Saving it on generates a key straight away. Saving it off deletes the key, so anything using it stops working immediately.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Recovery codes</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each code works once and lets you sign in without the authenticator app. <strong class="text-gray-900 dark:text-white">Regenerate recovery codes</strong> asks you to confirm, then issues a fresh set and displays it once; every earlier code stops working at that moment.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">API Key</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The full key is displayed exactly once, right after it is generated, next to a copy button. From then on the field shows dots and there is no way to reveal the key again, so store it somewhere safe the moment you create it. Send it as the <code class="doc-inline-code">X-API-Key</code> request header.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Expiry</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A key is valid for one year from the day it is issued. After that requests are rejected as expired, and you get a fresh key by turning the toggle off and on again.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Turning it off</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disable</strong> and type your password into the field that opens under it. An account with no password is asked to confirm instead. While a setup is waiting for its code, <strong class="text-gray-900 dark:text-white">Cancel</strong> backs out of it the same way. Disabling removes the authenticator secret and every remaining recovery code, so switching 2FA back on later starts from a new QR code.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Important</div>
-            <p>The key grants the same access to your account that you have. If you suspect it has leaked, turn the API off and on again: that deletes the old key and issues a new one, and the old key stops working at once.</p>
+            <p>Store your recovery codes securely. If you lose the authenticator app and no longer have the codes, you will not be able to sign in.</p>
         </div>
-    </section>
-
-    <!-- Webhooks -->
-    <section id="webhooks" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-            </svg>
-            Webhooks
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            A webhook POSTs a JSON payload to a URL of yours whenever something happens in your schedules, such as a sale, a refund, an event change or a check-in. Webhooks are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: if none of your schedules are on Pro the section shows an upgrade notice, and activity on a schedule below Pro is never delivered. See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhook documentation</a> for payload formats and signature verification.
-        </p>
-
-        <h3 class="doc-subheading">Adding a webhook</h3>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>Enter the endpoint <strong class="text-gray-900 dark:text-white">URL</strong> that should receive the requests.</li>
-            <li>Add an optional <strong class="text-gray-900 dark:text-white">Description</strong> so you can tell endpoints apart in the list.</li>
-            <li>Under <strong class="text-gray-900 dark:text-white">Event types</strong>, leave every type switched on or turn off the ones you do not want. All types are on by default.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Add Webhook</strong>. The signing secret appears once at the top of the section with a copy button, and is never shown again.</li>
-        </ol>
-
-        <h3 class="doc-subheading">Managing webhooks</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Each saved webhook is a row with its description, URL and subscribed event types, and a row of icon buttons:
-        </p>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Enable or disable</strong> the endpoint. A disabled webhook is dimmed and receives nothing.</li>
-            <li><strong class="text-gray-900 dark:text-white">Send a test ping</strong> to check the endpoint answers.</li>
-            <li><strong class="text-gray-900 dark:text-white">Edit</strong> opens a panel to change the URL, description and event types, and holds the <strong class="text-gray-900 dark:text-white">Regenerate secret</strong> link.</li>
-            <li><strong class="text-gray-900 dark:text-white">Delete</strong> the endpoint after a confirmation.</li>
-        </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong class="text-gray-900 dark:text-white">View recent deliveries</strong> under each webhook expands a log of the latest attempts, with the event type, the response status (or <code class="doc-inline-code">timeout</code>), how long the request took and when it ran. The row also shows when the endpoint last fired.
-        </p>
     </section>
 
     <!-- Google Settings -->
@@ -385,7 +404,7 @@
             Google Settings
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Two separate Google connections live here. Connecting one does not connect the other, and each can be disconnected on its own.
+            Two separate Google connections live here. Connecting one does not connect the other, and each can be disconnected on its own. <strong class="text-gray-900 dark:text-white">Disconnect</strong> asks you to confirm and says what stops: signing in with Google for the first, calendar sync for the second. Your events are kept either way.
         </p>
 
         <div class="doc-fields">
@@ -419,7 +438,7 @@
             Outlook Calendar
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The section is called <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> in the settings navigation. It connects your Outlook or Microsoft 365 account through the Microsoft Graph API.
+            The section is listed as <strong class="text-gray-900 dark:text-white">Outlook</strong> in the settings navigation and titled <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>. It connects your Outlook or Microsoft 365 account through the Microsoft Graph API. Once connected, <strong class="text-gray-900 dark:text-white">Disconnect</strong> asks you to confirm first: your events are kept, and sync stops.
         </p>
 
         <div class="doc-fields">
@@ -467,6 +486,74 @@
         </div>
     </section>
 
+    <!-- API Settings -->
+    <section id="api" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+            API Settings
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            This section issues the key that authenticates REST API requests for your account. The endpoints themselves are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: the key can be generated on any plan, but every call is checked against the schedule it touches and a schedule below Pro is refused. See the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API Reference</a> for the full endpoint list.
+        </p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Enable API Access</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A single toggle. Saving it on generates a key straight away. Saving it off deletes the key, so anything using it stops working immediately; the save asks you to confirm first.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">API Key</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The full key is displayed exactly once, right after it is generated, next to a copy button. From then on the field shows dots and there is no way to reveal the key again, so store it somewhere safe the moment you create it. Send it as the <code class="doc-inline-code">X-API-Key</code> request header.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Expiry</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A key is valid for one year from the day it is issued, and the date it runs out is shown under the key. Once it has passed, the section says so and the line under its name reads Expired. After that requests are rejected as expired, and you get a fresh key by turning the toggle off and on again.</p>
+            </div>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Important</div>
+            <p>The key grants the same access to your account that you have. If you suspect it has leaked, turn the API off and on again: that deletes the old key and issues a new one, and the old key stops working at once.</p>
+        </div>
+    </section>
+
+    <!-- Webhooks -->
+    <section id="webhooks" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+            </svg>
+            Webhooks
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A webhook POSTs a JSON payload to a URL of yours whenever something happens in your schedules, such as a sale, a refund, an event change or a check-in. Webhooks are a <strong class="text-gray-900 dark:text-white">Pro</strong> feature: if none of your schedules are on Pro the section shows an upgrade notice, and activity on a schedule below Pro is never delivered. See the <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">Webhook documentation</a> for payload formats and signature verification.
+        </p>
+
+        <h3 class="doc-subheading">Adding a webhook</h3>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Enter the endpoint <strong class="text-gray-900 dark:text-white">URL</strong> that should receive the requests.</li>
+            <li>Add an optional <strong class="text-gray-900 dark:text-white">Description</strong> so you can tell endpoints apart in the list.</li>
+            <li>Under <strong class="text-gray-900 dark:text-white">Event types</strong>, leave <strong class="text-gray-900 dark:text-white">All events</strong> switched on to receive everything, or switch it off and untick the types you do not want. Saving with none ticked also sends everything.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Add Webhook</strong>. The signing secret appears once at the top of the section with a copy button, and is never shown again.</li>
+        </ol>
+
+        <h3 class="doc-subheading">Managing webhooks</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Each saved webhook is one line with its description, URL and subscribed event types, and its actions beside it. With at least one webhook saved, the form for another is behind <strong class="text-gray-900 dark:text-white">+ Add Webhook</strong>.
+        </p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Disable</strong> or <strong class="text-gray-900 dark:text-white">Enable</strong> the endpoint. A webhook is marked Enabled or Disabled beside its name, and a disabled one receives nothing.</li>
+            <li><strong class="text-gray-900 dark:text-white">Test</strong> sends a test ping to check the endpoint answers.</li>
+            <li><strong class="text-gray-900 dark:text-white">Edit</strong> opens a panel to change the URL, description and event types, and holds the <strong class="text-gray-900 dark:text-white">Regenerate secret</strong> and <strong class="text-gray-900 dark:text-white">View recent deliveries</strong> links.</li>
+            <li><strong class="text-gray-900 dark:text-white">Delete</strong>, at the end of the Edit panel, removes the endpoint after a confirmation.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <strong class="text-gray-900 dark:text-white">View recent deliveries</strong>, in a webhook's Edit panel, expands a log of the latest attempts, with the event type, the response status (or <code class="doc-inline-code">timeout</code>), how long the request took and when it ran. The row also shows when the endpoint last fired.
+        </p>
+    </section>
+
     <!-- Backup & Restore -->
     <section id="backup" class="doc-section">
         <h2 class="doc-heading">
@@ -479,17 +566,17 @@
             Export your schedules as a portable <code class="doc-inline-code">.zip</code> file, or restore one you exported earlier. A backup carries the schedule itself and its sub-schedules, and every event with its ticket types, promo codes, sales (installment plans and refunds included), agenda, polls, fan content, feedback, waitlist and interest list. It also carries the schedule's gift cards, appointment types, seating plans and newsletters, and optionally the images. Curator event sources are not included: add them again on the restored schedule. The section has two tabs, <strong class="text-gray-900 dark:text-white">Export</strong> and <strong class="text-gray-900 dark:text-white">Import</strong>.
         </p>
 
-        <h3 class="doc-subheading">Exporting</h3>
+        <h3 id="backup-export" class="doc-subheading">Exporting</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>On the <strong class="text-gray-900 dark:text-white">Export</strong> tab, review the schedule list. Every schedule you can edit is listed and all are selected, so clear the ones you do not want.</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Export</strong> row and review the schedule list. Every schedule you can edit is listed and all are selected, so clear the ones you do not want.</li>
             <li>Turn on <strong class="text-gray-900 dark:text-white">Include images</strong> to bundle profile images, flyers and photos. It is off by default and makes the file considerably larger.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Export</strong>. Progress is reported in place, item by item, and you can cancel while it runs.</li>
             <li>When it finishes, a <strong class="text-gray-900 dark:text-white">Download</strong> link appears. The link expires after 7 days. On installations that run a queue worker you also get an email when the export is ready.</li>
         </ol>
 
-        <h3 class="doc-subheading">Importing</h3>
+        <h3 id="backup-import" class="doc-subheading">Importing</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>On the <strong class="text-gray-900 dark:text-white">Import</strong> tab, choose a <code class="doc-inline-code">.zip</code> export and click <strong class="text-gray-900 dark:text-white">Upload</strong>.</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Import</strong> row, choose a <code class="doc-inline-code">.zip</code> export and click <strong class="text-gray-900 dark:text-white">Upload</strong>.</li>
             <li>A preview lists each schedule in the file with its type, its event, ticket and sale counts and its date range. All are selected, so clear any you do not want.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Start Import</strong>. Imported schedules are always created as new schedules, so nothing you already have is overwritten.</li>
             <li>When it finishes you get a report per schedule, counting what was imported for each kind of record and listing any warnings, with a link to the new schedule. On installations that run a queue worker the detailed report is also emailed to you.</li>
@@ -503,86 +590,6 @@
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Important</div>
             <p>Every export contains personal data, such as your ticket buyers' names and email addresses and the addresses on each event's waitlist and interest list, so store the files securely. On a selfhosted installation it also carries your email subscribers and newsletter contacts. To move a whole installation to another server, <code class="doc-inline-code">mysqldump</code> is a better tool than export and import.</p>
-        </div>
-    </section>
-
-    <!-- App Update (Selfhosted) -->
-    <section id="app-update" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            App Update
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            On a selfhosted installation this section shows the <strong class="text-gray-900 dark:text-white">Installed Version</strong> next to the <strong class="text-gray-900 dark:text-white">Latest Version</strong> published on GitHub. If they match it simply says you are up to date. If they differ, an <strong class="text-gray-900 dark:text-white">Update</strong> button downloads and applies the new release in one click.
-        </p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            A large update can outrun PHP's execution limit. If it times out, run <code class="doc-inline-code">php artisan app:update</code> from the command line, raise <code class="doc-inline-code">max_execution_time</code> in <code class="doc-inline-code">php.ini</code>, or download the release zip linked under the button and extract it to <code class="doc-inline-code">/tmp/eventschedule/</code> before trying again.
-        </p>
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Note</div>
-            <p>This section never appears on eventschedule.com, where everyone is always on the latest version automatically. On a single-tenant selfhost any signed-in user sees it; on a selfhosted platform running in hosted mode it is limited to the instance administrator, so a customer cannot update the whole installation.</p>
-            <p class="mt-3">Instance admins have the same panel at <strong class="text-gray-900 dark:text-white">Admin &gt; System &gt; App Update</strong>, which adds a last-checked time, a manual check and a badge on the System menu when a release is waiting. Either way, <code class="doc-inline-code">php artisan app:update</code> does the same job from the command line and works even when neither screen is available.</p>
-        </div>
-    </section>
-
-    <!-- Update Password -->
-    <section id="password" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-            </svg>
-            Update Password
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Enter your current password, choose a new one and save. A password must be at least 8 characters long.
-        </p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            If your account was created by signing in with Google or Facebook it has no password yet, and the section is titled <strong class="text-gray-900 dark:text-white">Set Password</strong> instead. It first asks you to confirm who you are with that account; after that you have a few minutes to choose a password, and only the new password field is shown.
-        </p>
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Tip</div>
-            <p>Setting a password is also what makes it possible to disconnect Google later, and it gives you a way in if you ever lose access to your Google account.</p>
-        </div>
-    </section>
-
-    <!-- Two-Factor Authentication -->
-    <section id="two-factor" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-            Two-Factor Authentication
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Two-factor authentication (2FA) adds a second step to signing in, using a time-based one-time password from an authenticator app such as Google Authenticator, Authy or 1Password.
-        </p>
-
-        <h3 class="doc-subheading">Turning it on</h3>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>Enter your current password and click <strong class="text-gray-900 dark:text-white">Enable Two-Factor Authentication</strong>. Accounts with no password, created by signing in with Google or Facebook, are not asked for one.</li>
-            <li>Scan the QR code with your authenticator app. If you cannot scan, type the key printed under the code into the app by hand.</li>
-            <li>Save the recovery codes shown on the same screen, somewhere other than the device holding the authenticator app.</li>
-            <li>Type the 6-digit code from the app and click <strong class="text-gray-900 dark:text-white">Confirm</strong>. Two-factor authentication is not active until this step succeeds.</li>
-        </ol>
-
-        <h3 class="doc-subheading">Afterwards</h3>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Recovery codes</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Each code works once and lets you sign in without the authenticator app. <strong class="text-gray-900 dark:text-white">Regenerate Codes</strong> issues a fresh set and displays it once; every earlier code stops working at that moment.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Turning it off</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Disable</strong> and type your password into the prompt, which only appears if your account has one. Disabling removes the authenticator secret and every remaining recovery code, so switching 2FA back on later starts from a new QR code.</p>
-            </div>
-        </div>
-
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Important</div>
-            <p>Store your recovery codes securely. If you lose the authenticator app and no longer have the codes, you will not be able to sign in.</p>
         </div>
     </section>
 
@@ -618,7 +625,7 @@
             <li>Every schedule you own, with its events, tickets and sales</li>
             <li>Comments, photos and videos you posted while signed in (on ones you posted without signing in, your email address is removed), your follows and email sign-ups, and any waitlist entry or request for event updates under your address</li>
             <li>Connections to linked services such as Stripe and Google, including any calendar sync they were running; Event Schedule also asks Google to revoke its access</li>
-            <li>Any paid plan on those schedules, which is cancelled immediately rather than at the end of the billing period. The rest of the period is not refunded, and the confirmation dialog warns you when you have a paid plan</li>
+            <li>Any paid plan on those schedules, which is cancelled immediately rather than at the end of the billing period. The rest of the period is not refunded, and both the section and the confirmation dialog warn you when you have a paid plan</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -637,6 +644,28 @@
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
             <p>On a selfhosted installation, every user except an administrator can delete their own account here. The installation always keeps at least one administrator, so the last one cannot.</p>
+        </div>
+    </section>
+
+    <!-- App Update (Selfhosted) -->
+    <section id="app-update" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            App Update
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            On a selfhosted installation this section shows the <strong class="text-gray-900 dark:text-white">Installed Version</strong> next to the <strong class="text-gray-900 dark:text-white">Latest Version</strong> published on GitHub. If they match it simply says you are up to date. If they differ, an <strong class="text-gray-900 dark:text-white">Update</strong> button downloads and applies the new release in one click.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A large update can outrun PHP's execution limit. If it times out, run <code class="doc-inline-code">php artisan app:update</code> from the command line, raise <code class="doc-inline-code">max_execution_time</code> in <code class="doc-inline-code">php.ini</code>, or download the release zip linked under the button and extract it to <code class="doc-inline-code">/tmp/eventschedule/</code> before trying again.
+        </p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Note</div>
+            <p>This section never appears on eventschedule.com, where everyone is always on the latest version automatically. On a single-tenant selfhost any signed-in user sees it; on a selfhosted platform running in hosted mode it is limited to the instance administrator, so a customer cannot update the whole installation.</p>
+            <p class="mt-3">Instance admins have the same panel at <strong class="text-gray-900 dark:text-white">Admin &gt; System &gt; App Update</strong>, which adds a last-checked time, a manual check and a badge on the System menu when a release is waiting. Either way, <code class="doc-inline-code">php artisan app:update</code> does the same job from the command line and works even when neither screen is available.</p>
         </div>
     </section>
 

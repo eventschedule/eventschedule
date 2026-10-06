@@ -188,6 +188,30 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `verified_signups`.
 
   A null is "not tracked yet", never zero.
+- `event_form`: what events made by hand are saved with, by the month they were created. It is the
+  read on the 2026-10 event form redesign, which moved an event's location and its ticket choice
+  onto the first tab.
+  - `by_month{month}` is `{first, later}`, each `{events, with_location, with_signup, with_flyer}`.
+    - Population: non-demo events with no `import_source`, so typed into the form, by
+      `events.created_at`. `first` is an event that is the first its account ever made; `later` is
+      every other.
+    - `with_location`: a venue schedule is attached, or the event has an online link.
+    - `with_signup`: tickets or registration is on, or the event links to tickets elsewhere.
+    - `with_flyer`: the event has a flyer image.
+  - `new_venues{month}` is `{created, with_email}`: venue schedules made that month that a
+    hand-made event is at, and how many carry an email address. The venue's email moved behind a
+    link in the redesign, so this is where a drop would show.
+  - **It is the state when pulled, not when first saved.** An event given a venue a week later
+    counts as having one, so the newest month keeps filling in. Compare a month with the same
+    month in an earlier pull, or months that are both at least a few weeks old.
+  - **Months before `events.import_source` existed (it shipped in 2026-10) count imports too:** an
+    older import reads as made by hand. Use them as a loose baseline, not as the form's own rate.
+  - Use the SHARES (`with_location / events`), never the counts: the population changes with
+    signups.
+  - What the form asks, for reading the shares: location is the Event tab's second section, on
+    the first screen; sign-up is chosen on the Tickets tab (three tiles), whose name in the
+    sidebar reads "No tickets" under it until something is chosen. The save bar no longer points
+    to either (it did, with "Add location" and "Add tickets", for the first days of 2026-10).
 - `claims`: `unclaimed_total`, `unclaimed_with_event`, `claimable_with_contact`,
   `auto_created{month}`, `claimed{month}` (null before 2026-09).
   - `claimable_with_contact` is the placeholders the claim page will hand to somebody
@@ -470,6 +494,13 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **14** (2026-10-05)
+  - **New `event_form` section:** hand-made events by created month, first event against later
+    ones, with a location, with a way to sign up, with a flyer; and new venues with an email. It
+    exists to read the event form redesign (the essentials on the first tab, the rest behind tabs
+    with summaries). The section ships in the same release as the redesign, so no pull from before
+    it carries it: the baseline is the months before the deploy, read from the first pull after
+    it. Nothing else changed shape or meaning.
 - **13** (2026-10-05)
   - **New `signups` columns:** `setup_guide`, `setup_guide_hidden` and `suggestions_off`. The
     setup guide replaced the three-circle step band on a new organizer's first screens; it

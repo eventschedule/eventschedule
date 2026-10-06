@@ -39,7 +39,7 @@ class EmailSettingsFailedMail extends Mailable
 
     public function content(): Content
     {
-        $editUrl = route('role.edit', ['subdomain' => $this->role->subdomain]).'#section-integrations';
+        $editUrl = route('role.edit', ['subdomain' => $this->role->subdomain]).'#integration-tab-email';
 
         return new Content(
             view: 'emails.email_settings_failed',

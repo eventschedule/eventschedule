@@ -79,8 +79,7 @@ class TicketTest extends DuskTestCase
                 nameField.dispatchEvent(new Event('input', { bubbles: true }));
             ");
 
-            // Set venue via JS click on section link (more reliable than Dusk click)
-            $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+            // The venue is on the Event tab, which is the one the form opens on.
             $browser->waitFor('#in_person', 10);
             $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)
@@ -88,8 +87,8 @@ class TicketTest extends DuskTestCase
 
             // Enable tickets via JS click on section link
             $browser->script("document.querySelector('a[data-section=\"section-tickets\"]').click()");
-            $browser->waitFor('#ticket_mode_tickets', 10)
-                ->click('label[for="ticket_mode_tickets"]')
+            $browser->waitFor('#ticket_choice_tickets', 10)
+                ->click('#ticket_choice_tickets')
                 ->pause(1000);
 
             // Configure ticket 0: General Admission ($10, qty 50, description, dropdown custom field)

@@ -989,7 +989,19 @@ const fieldColumn = () => {
 
   for (let index = 0; index < sections.length; index++) {
     if (sections[index].getClientRects().length) {
-      return sections[index].querySelector('.max-w-xl');
+      // The first column that is actually on screen. A section can hold a max-w-xl inside
+      // something folded (the event form's About), which has no box: measured, it read as a
+      // column of zero width at the window's edge, the dock was placed under the navigation, and
+      // the ring was held back because the dock "fitted". So the guide vanished.
+      const columns = sections[index].querySelectorAll('.max-w-xl');
+
+      for (let at = 0; at < columns.length; at++) {
+        if (columns[at].getClientRects().length) {
+          return columns[at];
+        }
+      }
+
+      return null;
     }
   }
 
@@ -1574,9 +1586,12 @@ onBeforeUnmount(() => {
 
 /* ---- The pill, the chip, the line ---- */
 
+/* --sg-bar: the height of a bar the PAGE keeps along its bottom edge (the event form's save bar).
+   The page sets it; without it the corner would sit on that bar's last button, which on the event
+   form is Save. --sg-lift is the cookie banner, measured below. */
 .sg-corner {
   position: fixed;
-  bottom: calc(1rem + var(--sg-lift, 0px));
+  bottom: calc(1rem + var(--sg-lift, 0px) + var(--sg-bar, 0px));
   transition: bottom 320ms var(--sg-arrive);
   inset-inline-end: 1rem;
   z-index: 45;
@@ -1848,14 +1863,14 @@ onBeforeUnmount(() => {
 
 .sg-card {
   position: fixed;
-  bottom: calc(1rem + var(--sg-lift, 0px));
+  bottom: calc(1rem + var(--sg-lift, 0px) + var(--sg-bar, 0px));
   inset-inline-end: 1rem;
   z-index: 46;
   display: flex;
   flex-direction: column;
   width: 360px;
   max-width: calc(100vw - 2rem);
-  max-height: calc(100dvh - 5.5rem - var(--sg-lift, 0px));
+  max-height: calc(100dvh - 5.5rem - var(--sg-lift, 0px) - var(--sg-bar, 0px));
   overflow: hidden;
   border-radius: 16px;
 }
@@ -2848,7 +2863,7 @@ a.sg-slot-empty:hover {
 
 .sg-undo {
   position: fixed;
-  bottom: calc(1rem + var(--sg-lift, 0px));
+  bottom: calc(1rem + var(--sg-lift, 0px) + var(--sg-bar, 0px));
   inset-inline: 1rem;
   z-index: 46;
   display: flex;

@@ -1,30 +1,29 @@
-<section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-            </svg>
-            {{ __('messages.delete_account') }}
-        </h2>
+<section>
+    @include('profile.partials.heading')
+    <p class="form-kit-lead">{{ __('messages.once_your_account_is_deleted') }}</p>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.once_your_account_is_deleted') }}
-        </p>
-    </header>
+    @php
+        // roles.user_id, matching what ProfileController::destroy() cancels.
+        $hasPaidPlan = \App\Models\Role::where('user_id', auth()->id())
+            ->whereNotNull('stripe_id')
+            ->get()
+            ->contains(fn ($ownedRole) => $ownedRole->hasLiveBilling());
+    @endphp
 
     @if (is_demo_mode())
-    <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
-        {{ __('messages.demo_mode_settings_disabled') }}
-    </div>
+        @include('profile.partials.notice', ['noticeDemo' => true, 'noticeClass' => 'mb-0'])
     @else
-    <x-danger-button
-        x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('messages.delete_account') }}</x-danger-button>
+    {{-- Said before the dialog, not only inside it: that it is for good, and that a paid plan
+         goes with it. --}}
+    @include('profile.partials.notice', ['noticeText' => __('messages.settings_delete_account_what_goes').($hasPaidPlan ? ' '.__('messages.delete_account_subscription_warning') : '')])
+
+    {{-- data-modal-open is the layout's plain trigger for the modal below; this button was an
+         Alpine island of its own for the same click. --}}
+    <x-danger-button type="button" class="settings-danger" data-modal-open="confirm-user-deletion">{{ __('messages.delete_account') }}</x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable
         x-on:open-modal.window="if ($event.detail === 'confirm-user-deletion') { $el.querySelector('form')?.reset(); }">
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6" id="delete-account-form">
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-6" id="delete-account-form" data-no-dirty>
             @csrf
             @method('delete')
 
@@ -36,13 +35,6 @@
                 {{ __('messages.once_your_account_is_deleted') }}
             </p>
 
-            @php
-                // roles.user_id, matching what ProfileController::destroy() cancels.
-                $hasPaidPlan = \App\Models\Role::where('user_id', auth()->id())
-                    ->whereNotNull('stripe_id')
-                    ->get()
-                    ->contains(fn ($ownedRole) => $ownedRole->hasLiveBilling());
-            @endphp
             @if ($hasPaidPlan)
             <div class="mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex gap-3">
                 <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -83,11 +75,16 @@
             @endif
 
             <div class="mt-6 flex justify-end" x-data="{ submitting: false }">
-                <x-secondary-button x-on:click="$dispatch('close')">
+                {{-- A plain button in the secondary link's clothes: the shared secondary and danger
+                     buttons are capitals with wide tracking, which read as another product beside
+                     this page's Save buttons. The red one keeps its component and is recased by
+                     the page's styles (.settings-danger). --}}
+                <button type="button" x-on:click="$dispatch('close')"
+                    class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     {{ __('messages.cancel') }}
-                </x-secondary-button>
+                </button>
 
-                <x-danger-button class="ms-3" x-on:click="submitting = true; $el.closest('form').submit()" x-bind:disabled="submitting">
+                <x-danger-button class="ms-3 settings-danger" x-on:click="submitting = true; $el.closest('form').submit()" x-bind:disabled="submitting">
                     {{ __('messages.delete_account') }}
                 </x-danger-button>
             </div>

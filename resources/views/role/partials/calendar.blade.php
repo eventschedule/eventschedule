@@ -19,7 +19,11 @@
 <div class="flex h-full flex-col" id="calendar-app">
 @php
     $role = $role ?? null;
-    $label = fn($key) => $role ? $role->customLabel($key) : __('messages.' . $key);
+    // A custom label is the schedule owner's own text, and this whole partial is one Vue mount:
+    // Vue compiles a mustache it finds in a text node or an option's label, and would run one for
+    // every visitor of the public page. Some fifty places below print a label, so the pair of
+    // braces is broken once, here, where no new place can forget it.
+    $label = fn($key) => $role ? str_replace('{'.'{', '{ {', $role->customLabel($key)) : __('messages.' . $key);
     $isAdminRoute = $route == 'admin';
     $alwaysShowFilters = in_array($route ?? '', ['guest', 'admin']);
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
@@ -442,8 +446,8 @@
             @endif
 
             {{-- Mobile: Filters + Add Event buttons side-by-side (not shown on guest route - hero version used instead) --}}
-            @if ($route != 'guest')
-            <div class="md:hidden flex flex-row gap-2 w-full mb-3">
+            @if ($route != 'guest' && ($tab ?? '') != 'availability')
+            <div class="md:hidden flex flex-row gap-2 w-full mb-3 calendar-phone-actions">
                 {{-- Mobile Filters Button (always shown when filters exist) --}}
                 <template v-if="{!! $alwaysShowFilters ? 'true' : 'dynamicFilterCount > 0' !!}">
                     <button @click="showFiltersDrawer = true"
@@ -487,7 +491,7 @@
             @endif
 
             {{-- Desktop: Filters Button with label - AP only --}}
-            @if ($route == 'admin')
+            @if ($route == 'admin' && ($tab ?? '') != 'availability')
             <template v-if="{!! $alwaysShowFilters ? 'true' : 'dynamicFilterCount > 0' !!}">
                 <button @click="showDesktopFiltersModal = true"
                         :class="currentView === 'list' ? 'md:!inline-flex' : ''"
@@ -743,9 +747,9 @@
                 <div class="cursor-pointer relative calendar-day-navigate {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                     data-href="{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}">
                     @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
-                        <div class="{{ $tab == 'availability' && $currentDate->month != $month ? 'hidden md:block' : '' }} cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-1 py-1 md:px-3 md:py-2 min-h-[44px] md:min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
+                        <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-1 py-1 md:px-3 md:py-2 min-h-[44px] md:min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
-                            <div class="day-x"></div>
+                            <div class="day-x" data-label="{{ __('messages.unavailable') }}"></div>
                         @endif
                     @elseif ($route == 'home' && auth()->check())
                         @if ($firstRole)
@@ -784,26 +788,33 @@
                         <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
                             <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id"
                                 class="relative group"
-                                :class="event.can_edit ? 'hover:pe-8' : ''"
+                                @if ($route != 'admin') :class="event.can_edit ? 'hover:pe-8' : ''" @endif
                                 v-show="isEventVisible(event)">
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex event-link-popup"
                                     :data-event-id="event.id"
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
+                                    <p class="flex-auto min-w-0 font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} {{ $route == 'admin' ? '' : 'truncate' }}">
                                         <span class="flex items-start gap-1.5">
                                             <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                             <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
-                                              class="hover:underline truncate" :dir="getEventDisplayDir(event)" v-text="getEventDisplayName(event)">
+                                              class="hover:underline {{ $route == 'admin' ? 'whitespace-normal break-words min-w-0' : 'truncate' }}" :dir="getEventDisplayDir(event)" v-text="getEventDisplayName(event)">
                                             </span>
                                         </span>
+                                        {{-- The list says which events are not public; the month did not. On a
+                                             schedule's own pages only: the dashboard's month and the public
+                                             calendar share this partial and are left as they were. --}}
+                                        @if ($route == 'admin')
+                                        <span v-if="event.is_internal" data-month-mark="internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{{ __('messages.internal') }}</span>
+                                        <span v-else-if="event.is_draft" data-month-mark="draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">{{ __('messages.draft') }}</span>
+                                        @endif
                                         <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1"
-                                              class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
+                                              class="block text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
                                         </span>
                                     </p>
                                 </a>
                                 <a v-if="event.can_edit" :href="event.edit_url"
-                                    class="absolute end-0 top-0 hidden group-hover:inline-block text-gray-900 dark:text-white hover:underline"
+                                    class="absolute end-0 top-0 hidden group-hover:inline-block text-gray-900 dark:text-white hover:underline {{ $route == 'admin' ? 'ps-2 bg-gray-100 dark:bg-gray-700' : '' }}"
                                     @click.stop>
                                     {{ __('messages.edit') }}
                                 </a>
@@ -1340,7 +1351,7 @@
                                         </form>
 
                                         <a v-if="event.can_edit" :href="event.edit_url"
-                                           class="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200"
+                                           class="text-sm {{ $route == 'admin' ? 'font-medium text-[var(--brand-blue)] hover:underline' : 'text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200' }}"
                                            @click.stop>
                                             {{ __('messages.edit_event') }}
                                         </a>
@@ -1700,7 +1711,7 @@
                                     </form>
 
                                     <a v-if="event.can_edit" :href="event.edit_url"
-                                       class="text-sm text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200"
+                                       class="text-sm {{ $route == 'admin' ? 'font-medium text-[var(--brand-blue)] hover:underline' : 'text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200' }}"
                                        @click.stop>
                                         {{ __('messages.edit_event') }}
                                     </a>

@@ -59,7 +59,7 @@
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit</strong>.</li>
             <li>Open the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> section in the sidebar.</li>
             <li>Turn on <strong class="text-gray-900 dark:text-white">Enable gift cards</strong>.</li>
-            <li>Fill in the settings below, then <strong class="text-gray-900 dark:text-white">Save</strong>.</li>
+            <li>Fill in the settings that appear under the switch (they stay hidden while it is off), then <strong class="text-gray-900 dark:text-white">Save</strong>.</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-6">On a free schedule the section shows an upgrade prompt instead of the settings, because selling gift cards requires <strong class="text-gray-900 dark:text-white">Pro</strong>.</p>
 

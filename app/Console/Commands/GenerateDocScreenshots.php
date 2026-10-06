@@ -246,7 +246,7 @@ class GenerateDocScreenshots extends Command
             'creating-schedules' => [
                 ['id' => 'creating-schedules--section-details', 'route' => '/simpsons/edit', 'section' => 'section-details'],
                 ['id' => 'creating-schedules--section-address', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-address'],
-                ['id' => 'creating-schedules--section-contact-info', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-details\"]').click(); document.querySelector('.details-tab[data-tab=\"contact\"]').click()"],
+                ['id' => 'creating-schedules--section-contact-info', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-details\"]').click(); var row = document.querySelector('.details-tab[data-tab=\"contact\"]'); row.click(); row.scrollIntoView({ block: 'start' }); window.scrollBy(0, -90);"],
                 ['id' => 'creating-schedules--section-subschedules', 'route' => '/simpsons/edit', 'section' => 'section-subschedules'],
                 ['id' => 'creating-schedules--section-settings', 'route' => '/simpsons/edit', 'section' => 'section-settings'],
                 ['id' => 'creating-schedules--section-engagement', 'route' => '/simpsons/edit', 'section' => 'section-engagement'],
@@ -286,7 +286,11 @@ class GenerateDocScreenshots extends Command
             'managing-schedules' => [
                 ['id' => 'managing-schedules--schedule-tab', 'route' => '/simpsons/schedule'],
                 ['id' => 'managing-schedules--videos-tab', 'route' => '/simpsons/videos'],
-                ['id' => 'managing-schedules--availability', 'route' => '/simpsons/availability', 'pause' => 2000],
+                // Availability is a talent schedule's tab: on the curator the address redirects to
+                // the calendar, which is what this image showed until 2026-10.
+                ['id' => 'managing-schedules--availability', 'route' => '/demo-lisajazz/availability', 'pause' => 2000],
+                // Needs a request waiting on the schedule: with none the tab redirects to the
+                // calendar and this photographs that instead (it did, until 2026-10).
                 ['id' => 'managing-schedules--requests-tab', 'route' => '/simpsons/requests'],
                 ['id' => 'managing-schedules--team-tab', 'route' => '/simpsons/team'],
             ],
@@ -477,6 +481,13 @@ class GenerateDocScreenshots extends Command
                         $browser->script("document.querySelector('a[data-section=\"{$section}\"]').click()");
                         $browser->pause(800);
                     }
+
+                    // A schedule's or an event's address, wherever a page prints it (under the
+                    // title, and on the schedule form's Settings tab), is this command's own
+                    // temporary server: 127.0.0.1 and a port. The guide shows it as it reads on
+                    // eventschedule.com, the schedule's subdomain and then whatever follows it.
+                    // Only the text is replaced, so a link keeps its icon.
+                    $browser->script("document.querySelectorAll('.event-url-text, #url-display a').forEach(function (el) { var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); var parts = []; while (walker.nextNode()) { parts.push(walker.currentNode); } var m = parts.map(function (n) { return n.nodeValue; }).join('').trim().match(/^[^\\/]+\\/([^\\/]+)(\\/.*)?$/); if (m && parts.length) { parts[0].nodeValue = m[1] + '.eventschedule.com' + (m[2] || ''); parts.slice(1).forEach(function (n) { n.nodeValue = ''; }); } });");
 
                     // Take light screenshot (Browser stores as PNG in the storeScreenshotsAt dir)
                     $browser->screenshot($id);

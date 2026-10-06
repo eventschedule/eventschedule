@@ -1,47 +1,16 @@
 <section>
-    <header>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
-            {{ __('messages.profile_information') }}
-        </h2>
+    @include('profile.partials.heading')
+    <p class="form-kit-lead">{{ __('messages.update_your_accounts_profile_information_and_email_address') }}</p>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.update_your_accounts_profile_information_and_email_address') }}
-        </p>
-    </header>
+    @include('profile.partials.notice', ['noticeDemo' => true])
 
-    @if (is_demo_mode())
-    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
-        {{ __('messages.demo_mode_settings_disabled') }}
-    </div>
-    @endif
-
-    <!-- Tab Navigation -->
-    <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
-        <nav class="flex space-x-4 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-            <button type="button" class="profile-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
-                {{ __('messages.general') }}
-            </button>
-            <button type="button" class="profile-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="localization">
-                {{ __('messages.localization') }}
-            </button>
-            <button type="button" class="profile-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="appearance">
-                {{ __('messages.appearance') }}
-            </button>
-            <button type="button" id="profile-tab-nav-accessibility" class="profile-tab hidden text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="accessibility">
-                {{ __('accessibility.footer_link') }}
-            </button>
-        </nav>
-    </div>
-
-    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
-        <!-- General Tab -->
-        <div id="profile-tab-general" class="profile-tab-content space-y-6">
+        {{-- Always on the page: these used to be the General tab. A link that points at one of
+             them (the unsubscribe page, the boost form's "add a phone") needs no tab opened. --}}
+        <div id="profile-tab-general" class="form-kit-fields space-y-6">
             <div>
                 <x-input-label for="name" :value="__('messages.name') . ' *'" />
                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)"
@@ -55,50 +24,7 @@
                     :value="old('email', $user->email)" required autocomplete="username" :disabled="is_demo_mode()" />
                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-                @if (!is_demo_mode())
-                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                    <div>
-                        <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                            {{ __('messages.your_email_address_is_unverified') }}
-
-                            <button form="send-verification"
-                                class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
-                                {{ __('messages.click_here_to_re_send_the_verification_email') }}
-                            </button>
-                        </p>
-
-                        @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('messages.new_verification_link_has_been_sent') }}
-                        </p>
-                        @endif
-                    </div>
-                    @endif
-                @endif
             </div>
-
-            {{-- users.is_subscribed: the account-wide opt-out the signed unsubscribe link in our
-                 emails sets. Without this there was no way back once somebody clicked it. On the
-                 General tab, next to the address it governs, because the unsubscribe page's "turn
-                 emails back on" link lands on the profile's default tab. --}}
-            <div>
-                <x-toggle name="is_subscribed" label="{{ __('messages.email_updates') }}"
-                    help="{{ __('messages.email_updates_help') }}"
-                    checked="{{ old('is_subscribed', $user->is_subscribed) }}" />
-            </div>
-
-            {{-- users.suggestions_off_at: the dashboard's "Turn off suggestions", and the way
-                 back on. Beside "Email updates" because it also stops the reminder emails that
-                 ask the same things. Only for somebody who edits a schedule: nobody else is
-                 ever suggested anything. The wrapper carries the id (the toggle component puts
-                 its attributes on a hidden checkbox) for the page's highlight script. --}}
-            @if (isset($editorRoles) && $editorRoles->isNotEmpty())
-            <div id="suggestions-field">
-                <x-toggle name="show_suggestions" label="{{ __('messages.suggestions_toggle') }}"
-                    help="{{ __('messages.suggestions_toggle_help') }}"
-                    checked="{{ old('show_suggestions', $user->wantsSuggestions()) }}" />
-            </div>
-            @endif
 
             <div id="phone-field">
                 <x-input-label for="phone" :value="__('messages.phone_number')" />
@@ -107,28 +33,23 @@
 
                 @if (!is_demo_mode() && config('app.hosted'))
                     @if ($user->phone && !$user->hasVerifiedPhone())
-                    <div id="phone-verify-section">
-                        <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                            {{ __('messages.your_phone_is_unverified') }}
-                        </p>
+                    <div id="phone-verify-section" class="mt-3" data-no-dirty>
+                        @include('profile.partials.notice', ['noticeText' => __('messages.your_phone_is_unverified'), 'noticeClass' => 'mb-0'])
 
                         @if (\App\Services\SmsService::isConfigured())
                         <div id="phone-verify-ui" class="mt-2">
-                            <button type="button" id="phone-send-code-btn"
-                                class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                            <button type="button" id="phone-send-code-btn" class="event-link">
                                 {{ __('messages.click_here_to_verify_phone') }}
                             </button>
 
                             <div id="phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
-                                <input type="text" id="phone-verification-code" maxlength="6" placeholder="000000"
+                                <input type="text" id="phone-verification-code" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="one-time-code"
+                                    aria-label="{{ __('messages.verify') }}"
                                     class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-center tracking-widest" />
-                                <button type="button" id="phone-verify-code-btn"
-                                    class="inline-flex items-center px-3 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                                    {{ __('messages.verify') }}
-                                </button>
+                                <x-brand-button size="sm" id="phone-verify-code-btn">{{ __('messages.verify') }}</x-brand-button>
                             </div>
 
-                            <p id="phone-verify-message" class="mt-2 text-sm" style="display: none;"></p>
+                            <p id="phone-verify-message" class="mt-2 text-sm" style="display: none;" role="status"></p>
                         </div>
                         @endif
                     </div>
@@ -160,8 +81,8 @@
                 <div id="profile_image_choose" style="{{ $user->profile_image_url ? 'display:none' : '' }}">
                     <div class="mt-1 flex items-center gap-3">
                         <button type="button" data-trigger-file-input="profile_image"
-                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             {{ __('messages.choose_file') }}
@@ -169,128 +90,157 @@
                         <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
                     </div>
                     <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-                    <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;"></p>
+                    @include('profile.partials.notice', ['noticeId' => 'profile_image_size_warning', 'noticeClass' => 'mt-3 mb-0', 'noticeHidden' => true, 'noticeText' => ''])
                 </div>
 
                 <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600" />
-                    <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                </div>
-
-                @if ($user->profile_image_url)
-                <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
-                    <img src="{{ $user->profile_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
-                    <button type="button"
-                        data-delete-image-url="{{ route('profile.delete_image') }}"
-                        data-delete-image-token="{{ csrf_token() }}"
-                        data-delete-image-parent="true"
-                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
-                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <img id="profile_image_preview" src="#" alt="{{ __('messages.square_profile_image') }}" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                    <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute top-1 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center" aria-label="{{ __('messages.remove') }}">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
+
+                @if ($user->profile_image_url)
+                <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
+                    <img src="{{ $user->profile_image_url }}" alt="{{ __('messages.square_profile_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                    <button type="button"
+                        data-delete-image-url="{{ route('profile.delete_image') }}"
+                        data-delete-image-token="{{ csrf_token() }}"
+                        data-delete-image-parent="true"
+                        aria-label="{{ __('messages.remove') }}"
+                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                {{-- A delete that failed says so here; it used to raise an alert(). --}}
+                <p id="profile_image_error" class="mt-2 text-sm text-red-600 dark:text-red-400" role="alert" hidden></p>
                 @endif
             </div>
-        </div>
 
-        <!-- Localization Tab -->
-        <div id="profile-tab-localization" class="profile-tab-content hidden space-y-6">
+            {{-- The three switches about what the app sends you and asks you, together under one
+                 heading and after the fields that say who you are. Two of them used to sit between
+                 Email and Phone, and the third in Localization, which it has nothing to do with. --}}
+            <div id="profile-preferences" class="space-y-6">
+                <p class="event-group-label">{{ __('messages.settings_preferences') }}</p>
+            {{-- users.is_subscribed: the account-wide opt-out the signed unsubscribe link in our
+                 emails sets. Without this there was no way back once somebody clicked it. Always
+                 on the page, never inside a row, because the unsubscribe page's "turn emails back
+                 on" link lands here. --}}
             <div>
-                <x-input-label for="timezone" :value="__('messages.timezone')" />
-                <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                    <x-timezone-options :selected="old('timezone', $user->timezone)" />
-                </select>
-                <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+                <x-toggle name="is_subscribed" label="{{ __('messages.email_updates') }}"
+                    help="{{ __('messages.email_updates_help') }}"
+                    checked="{{ old('is_subscribed', $user->is_subscribed) }}" />
             </div>
 
-            <div>
-                <x-input-label for="language_code" :value="__('messages.language')" />
-                <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                    @foreach(config('app.supported_languages') as $key => $value)
-                    <option value="{{ $key }}" {{ $user->language_code == $key ? 'SELECTED' : '' }}>{{ __('messages.' . $value) }}
-                    </option>
-                    @endforeach
-                </select>
-                <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
+            {{-- users.suggestions_off_at: the dashboard's "Turn off suggestions", and the way
+                 back on. Beside "Email updates" because it also stops the reminder emails that
+                 ask the same things. Only for somebody who edits a schedule: nobody else is
+                 ever suggested anything. The wrapper carries the id (the toggle component puts
+                 its attributes on a hidden checkbox) for the page's highlight script. --}}
+            @if (isset($editorRoles) && $editorRoles->isNotEmpty())
+            <div id="suggestions-field">
+                <x-toggle name="show_suggestions" label="{{ __('messages.suggestions_toggle') }}"
+                    help="{{ __('messages.suggestions_toggle_help') }}"
+                    checked="{{ old('show_suggestions', $user->wantsSuggestions()) }}" />
             </div>
+            @endif
 
-            <div>
-                <x-toggle name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
-                    checked="{{ old('use_24_hour_time', $user->use_24_hour_time) }}" />
-            </div>
-
-            <div>
-                <x-toggle name="ask_before_following" label="{{ __('messages.ask_before_following') }}"
-                    checked="{{ old('ask_before_following', ! $user->follow_consent_dismissed) }}" />
-            </div>
-        </div>
-
-        {{-- Appearance Tab.
-             Deliberately holds no named inputs: the theme is stored in localStorage, per
-             device, so nothing here belongs in the profile POST.
-
-             The picker is the same component the sidebar footer's theme popover renders, in
-             its surface tone - markup, styling and the JS driver all ship with it, so this tab
-             no longer depends on an unrelated layout partial happening to be on the page. --}}
-        <div id="profile-tab-appearance" class="profile-tab-content hidden max-w-md">
-            <x-theme-picker tone="surface" headings="full" />
-        </div>
-
-        <!-- Accessibility Tab -->
-        <div id="profile-tab-accessibility" class="profile-tab-content hidden space-y-6">
-            <div>
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ __('accessibility.settings_widget_heading') }}
-                </h3>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('accessibility.settings_widget_hidden_note') }}
-                </p>
-                <div class="mt-4">
-                    <button type="button" id="accessibility-widget-show"
-                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
-                        {{ __('accessibility.settings_show_widget') }}
-                    </button>
+                <div>
+                    <x-toggle name="ask_before_following" label="{{ __('messages.ask_before_following') }}"
+                        help="{{ __('messages.settings_ask_before_following_help') }}"
+                        checked="{{ old('ask_before_following', ! $user->follow_consent_dismissed) }}" />
                 </div>
             </div>
         </div>
 
-        <div id="profile-save-row" class="flex items-center gap-4">
-            @if (is_demo_mode())
-                <button type="button"
-                    data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
-                    class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
-                    {{ __('messages.save') }}
-                </button>
-            @else
-                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-            @endif
+        {{-- Rows that open in place, where three more tabs used to be. Each says what it holds, so
+             the language or the time format can be read without opening anything. --}}
+        <div class="event-subrows">
+            <x-form-row group="profile" tab="localization" class="profile-tab" :title="__('messages.localization')" :summary="$settingsLocalization" />
+            <div id="profile-tab-localization" class="event-subrow-body" hidden>
+                <div class="form-kit-fields space-y-6">
+                    <div>
+                        <x-input-label for="timezone" :value="__('messages.timezone')" />
+                        <select name="timezone" id="timezone" required {{ is_demo_mode() ? 'disabled' : '' }} data-searchable
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            <x-timezone-options :selected="old('timezone', $user->timezone)" />
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+                    </div>
 
-            @if (session('status') === 'profile-updated')
-            <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.saved') }}</p>
-            @endif
+                    <div>
+                        <x-input-label for="language_code" :value="__('messages.language')" />
+                        {{-- old() first: a save refused over another field used to bring this back
+                             on the stored language, and the next save kept that. $settingsLanguage
+                             is the stored one, or the language the page is in when the stored one
+                             is not in the list: with nothing marked the browser offers the first
+                             of the list, and a save about something else would store it. --}}
+                        <select name="language_code" id="language_code" required {{ is_demo_mode() ? 'disabled' : '' }}
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            @foreach(config('app.supported_languages') as $key => $value)
+                            <option value="{{ $key }}" {{ old('language_code', $settingsLanguage) == $key ? 'selected' : '' }}>{{ __('messages.' . $value) }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
+                    </div>
+
+                    <div>
+                        <x-toggle name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
+                            checked="{{ old('use_24_hour_time', $user->use_24_hour_time) }}" />
+                    </div>
+
+                </div>
+            </div>
+
+            {{-- Appearance holds no named inputs: the theme is stored in localStorage, per device,
+                 so nothing here belongs in the profile POST, and its summary is written by the
+                 script below from the picker itself. The picker is the same component the sidebar
+                 footer's theme popover renders; markup, styling and its driver ship with it. --}}
+            <x-form-row group="profile" tab="appearance" class="profile-tab" :title="__('messages.appearance')" />
+            <div id="profile-tab-appearance" class="event-subrow-body" hidden data-no-dirty>
+                <div class="max-w-md">
+                    <x-theme-picker tone="surface" headings="full" />
+                </div>
+            </div>
+
+            {{-- Offered only while the accessibility widget is hidden on this device (the script
+                 below reads that from localStorage), since all it holds is the way to bring it back. --}}
+            <x-form-row group="profile" tab="accessibility" id="profile-tab-nav-accessibility" class="profile-tab" hidden
+                :title="__('accessibility.footer_link')" :summary="__('accessibility.settings_widget_hidden_note')" />
+            <div id="profile-tab-accessibility" class="event-subrow-body" hidden data-no-dirty>
+                <x-brand-button size="sm" id="accessibility-widget-show">{{ __('accessibility.settings_show_widget') }}</x-brand-button>
+            </div>
         </div>
+
+        @include('profile.partials.save', ['saveRowId' => 'profile-save-row', 'saveShown' => session('status') === 'profile-updated'])
     </form>
 </section>
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
+    // The warning about a picked image (too large, not square) is the page's amber panel.
+    function setImageWarning(text) {
+        var panel = document.getElementById('profile_image_size_warning');
+        if (! panel) {
+            return;
+        }
+        panel.querySelector('[data-notice-text]').textContent = text || '';
+        panel.hidden = ! text;
+    }
+
     function previewImage(input, previewId) {
         var preview = document.getElementById(previewId);
         var clearBtn = document.getElementById(previewId + '_clear');
-        var warningElement = document.getElementById('profile_image_size_warning');
 
         if (!input || !input.files || !input.files[0]) {
             if (preview) preview.src = '';
             if (clearBtn) clearBtn.style.display = 'none';
-            if (warningElement) {
-                warningElement.textContent = '';
-                warningElement.style.display = 'none';
-            }
+            setImageWarning('');
             return;
         }
 
@@ -322,15 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     warningMessage += @json(__('messages.image_not_square'), JSON_UNESCAPED_UNICODE);
                 }
 
-                if (warningElement) {
-                    if (warningMessage) {
-                        warningElement.textContent = warningMessage;
-                        warningElement.style.display = 'block';
-                    } else {
-                        warningElement.textContent = '';
-                        warningElement.style.display = 'none';
-                    }
-                }
+                setImageWarning(warningMessage);
             };
             img.src = reader.result;
         };
@@ -344,17 +286,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var preview = document.getElementById(previewId);
         var clearBtn = document.getElementById(previewId + '_clear');
         var filenameSpan = document.getElementById(filenameId);
-        var warningElement = document.getElementById('profile_image_size_warning');
         if (preview) {
             preview.src = '';
             preview.style.display = 'none';
         }
         if (clearBtn) clearBtn.style.display = 'none';
         if (filenameSpan) filenameSpan.textContent = '';
-        if (warningElement) {
-            warningElement.textContent = '';
-            warningElement.style.display = 'none';
-        }
+        setImageWarning('');
     }
 
     function deleteProfileImage(url, token, element) {
@@ -381,9 +319,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     location.reload();
                 }
             } else {
-                alert(@json(__('messages.failed_to_delete_image'), JSON_UNESCAPED_UNICODE));
+                showImageError();
             }
-        });
+        }).catch(showImageError);
+    }
+
+    function showImageError() {
+        var error = document.getElementById('profile_image_error');
+        if (error) {
+            error.textContent = @json(__('messages.failed_to_delete_image'), JSON_UNESCAPED_UNICODE);
+            error.hidden = false;
+        }
     }
 
     // Delegated click handler
@@ -412,13 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteProfileImage(deleteBtn.dataset.deleteImageUrl, deleteBtn.dataset.deleteImageToken, deleteBtn.parentElement);
             return;
         }
-
-        // Alert buttons for demo mode
-        var alertBtn = e.target.closest('[data-alert]');
-        if (alertBtn) {
-            alert(alertBtn.dataset.alert);
-            return;
-        }
     });
 
     // Phone verification
@@ -426,7 +365,24 @@ document.addEventListener('DOMContentLoaded', function() {
     var verifyCodeBtn = document.getElementById('phone-verify-code-btn');
 
     if (sendCodeBtn) {
+        var sendCodeLabel = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+        var showPhoneMessage = function(text, good) {
+            var msgEl = document.getElementById('phone-verify-message');
+            msgEl.textContent = text;
+            msgEl.className = good ? 'mt-2 event-status is-on' : 'mt-2 text-sm text-red-600 dark:text-red-400';
+            msgEl.style.display = '';
+        };
+
         sendCodeBtn.addEventListener('click', function() {
+            // The code goes to the number that is SAVED. With a different one typed in the field
+            // the server refused, and its answer read "code invalid" before any code was sent.
+            var savedPhone = @json((string) $user->phone);
+            var typedPhone = document.getElementById('phone_hidden') ? document.getElementById('phone_hidden').value : savedPhone;
+            if (typedPhone && typedPhone !== savedPhone) {
+                showPhoneMessage(@json(__('messages.settings_save_phone_first'), JSON_UNESCAPED_UNICODE), false);
+                return;
+            }
+
             sendCodeBtn.disabled = true;
             sendCodeBtn.textContent = '...';
 
@@ -439,23 +395,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ phone: document.getElementById('phone_hidden').value })
             }).then(function(r) { return r.json(); }).then(function(data) {
-                var msgEl = document.getElementById('phone-verify-message');
                 if (data.success) {
                     document.getElementById('phone-code-input').style.display = '';
                     sendCodeBtn.style.display = 'none';
-                    msgEl.textContent = data.message;
-                    msgEl.className = 'mt-2 text-sm text-green-600 dark:text-green-400';
-                    msgEl.style.display = '';
+                    showPhoneMessage(data.message, true);
+                    var codeField = document.getElementById('phone-verification-code');
+                    if (codeField) {
+                        codeField.focus();
+                    }
                 } else {
-                    msgEl.textContent = data.message;
-                    msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
-                    msgEl.style.display = '';
+                    showPhoneMessage(data.message, false);
                     sendCodeBtn.disabled = false;
-                    sendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+                    sendCodeBtn.textContent = sendCodeLabel;
                 }
             }).catch(function() {
+                // A request that never got an answer said nothing at all.
+                showPhoneMessage(@json(__('messages.an_error_occurred'), JSON_UNESCAPED_UNICODE), false);
                 sendCodeBtn.disabled = false;
-                sendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+                sendCodeBtn.textContent = sendCodeLabel;
             });
         });
     }
@@ -477,14 +434,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 var msgEl = document.getElementById('phone-verify-message');
                 if (data.success) {
                     msgEl.textContent = data.message;
-                    msgEl.className = 'mt-2 text-sm text-green-600 dark:text-green-400';
+                    msgEl.className = 'mt-2 event-status is-on';
                     msgEl.style.display = '';
                     document.getElementById('phone-code-input').style.display = 'none';
                     document.getElementById('phone-verify-ui').style.display = 'none';
                     var section = document.getElementById('phone-verify-section');
                     if (section) {
                         var p = document.createElement('p');
-                        p.className = 'text-sm mt-2 text-green-600 dark:text-green-400';
+                        p.className = 'event-status is-on';
                         p.textContent = data.message;
                         section.innerHTML = '';
                         section.appendChild(p);
@@ -520,83 +477,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Profile tab switching
-    var profileTabs = document.querySelectorAll('.profile-tab');
-    var profileTabContents = document.querySelectorAll('.profile-tab-content');
-    var profileTabWithError = @json($errors->hasAny(['timezone', 'language_code', 'use_24_hour_time']) ? 'localization' : null);
-
-    // ?tab= wins over the remembered tab, so a deep link (the unsubscribe page's "turn emails
-    // back on") lands on the tab that holds the setting it points at.
-    var requestedProfileTab = new URLSearchParams(window.location.search).get('tab');
-
-    if (profileTabWithError) {
-        switchProfileTab(profileTabWithError);
-    } else if (requestedProfileTab && document.getElementById('profile-tab-' + requestedProfileTab)) {
-        switchProfileTab(requestedProfileTab);
-    } else {
-        var savedProfileTab = localStorage.getItem('profileActiveTab');
-        if (savedProfileTab) {
-            switchProfileTab(savedProfileTab);
-        }
-    }
-
-    profileTabs.forEach(function(tab) {
-        tab.addEventListener('click', function() {
-            var tabName = this.dataset.tab;
-            switchProfileTab(tabName);
-            localStorage.setItem('profileActiveTab', tabName);
-        });
+    // The rows under the fields. Localization says what the form holds as it is edited; Appearance
+    // reads the picker, whose choice lives in this browser and is not part of the form.
+    FormKit.summary('profile:localization', function() {
+        return FormKit.join([
+            FormKit.chosen('#language_code'),
+            FormKit.value('#timezone'),
+            FormKit.on('use_24_hour_time') ? @json(__('messages.settings_24_hour'), JSON_UNESCAPED_UNICODE) : @json(__('messages.settings_12_hour'), JSON_UNESCAPED_UNICODE)
+        ]);
     });
-
-    function switchProfileTab(tabName) {
-        profileTabs.forEach(function(tab) {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            }
+    FormKit.summary('profile:appearance', function() {
+        var pane = document.getElementById('profile-tab-appearance');
+        var labels = [];
+        pane.querySelectorAll('.js-theme-mode-btn[aria-checked="true"] .tp-label, .js-theme-variant-btn[aria-checked="true"] .tp-label').forEach(function(label) {
+            labels.push(label.textContent.trim());
         });
-
-        profileTabContents.forEach(function(content) {
-            var contentId = content.id.replace('profile-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
-            }
-        });
-
-        var saveRow = document.getElementById('profile-save-row');
-        if (saveRow) {
-            if (tabName === 'accessibility') {
-                saveRow.classList.add('hidden');
-            } else {
-                saveRow.classList.remove('hidden');
-            }
-        }
-    }
+        return FormKit.join(labels);
+    });
+    FormKit.refresh();
+    document.getElementById('profile-tab-appearance').addEventListener('click', function() {
+        setTimeout(FormKit.refresh, 0);
+    });
 });
 </script>
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
-    var navBtn = document.getElementById('profile-tab-nav-accessibility');
+    var row = document.getElementById('profile-tab-nav-accessibility');
     var btn = document.getElementById('accessibility-widget-show');
     var widgetHidden = false;
     try {
         widgetHidden = localStorage.getItem('es_a11y_hide_widget') === '1';
     } catch (e) {}
 
-    if (widgetHidden && navBtn) {
-        navBtn.classList.remove('hidden');
-    } else if (!widgetHidden) {
-        try {
-            if (localStorage.getItem('profileActiveTab') === 'accessibility') {
-                localStorage.removeItem('profileActiveTab');
-            }
-        } catch (err) {}
+    if (widgetHidden && row) {
+        row.hidden = false;
     }
 
     if (btn) {
@@ -604,7 +519,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             try {
                 localStorage.removeItem('es_a11y_hide_widget');
-                localStorage.removeItem('profileActiveTab');
             } catch (err) {}
             window.location.reload();
         });

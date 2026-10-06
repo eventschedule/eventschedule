@@ -41,11 +41,8 @@ class AvailabilityTest extends DuskTestCase
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
             $this->assertTrue($isDisabled[0], 'Save button should be disabled initially');
 
-            // Wait for jQuery click handler to be attached to day elements
-            $browser->waitUntil(
-                "typeof jQuery !== 'undefined' && jQuery._data(document.querySelector('.day-element'), 'events') !== undefined",
-                10
-            );
+            // Nothing to wait for before the click: the page listens on the document, from the
+            // moment its script runs, where it used to put a jQuery handler on each day.
 
             // Click the 15th to mark it unavailable (use JS click to avoid sticky header overlay)
             $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");

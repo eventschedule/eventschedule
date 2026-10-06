@@ -116,7 +116,7 @@ class ProcessBackupImport implements ShouldQueue
             OneSignalService::pushToUser($job->user, [
                 'title_key' => 'messages.push_backup_import_title',
                 'body_key' => 'messages.push_backup_import_body',
-                'url' => app_url(route('profile.edit', [], false)).'#backup',
+                'url' => app_url(route('profile.edit', [], false)).'#section-backup',
             ], null);
 
         } catch (\Exception $e) {

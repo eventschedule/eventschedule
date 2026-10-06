@@ -599,6 +599,38 @@ class EventController extends Controller
         return [$venues, $duplicateGroupCount];
     }
 
+    /**
+     * The venues this schedule's newest events were at, newest first, as the ids the picker's own
+     * rows carry. The form offers them above the full list: someone who plays the same three
+     * rooms should not scroll an alphabetical list of forty for each event.
+     *
+     * Empty when the list is short enough to be its own shortcut, and for a venue schedule,
+     * whose venue is fixed.
+     *
+     * @param  array<int, array<string, mixed>>  $venues  what venueOptions() returned
+     * @return array<int, string>
+     */
+    private function recentVenueIds(Role $role, array $venues): array
+    {
+        $ids = collect($venues)->pluck('id')->map(fn ($id) => UrlUtils::decodeId($id))->filter()->values();
+
+        if ($role->isVenue() || $ids->count() < 4) {
+            return [];
+        }
+
+        return DB::table('event_role as venue_link')
+            ->join('event_role as own_link', 'own_link.event_id', '=', 'venue_link.event_id')
+            ->where('own_link.role_id', $role->id)
+            ->whereIn('venue_link.role_id', $ids)
+            ->groupBy('venue_link.role_id')
+            ->selectRaw('venue_link.role_id as venue_id, MAX(venue_link.event_id) as latest_event_id')
+            ->orderByDesc('latest_event_id')
+            ->limit(3)
+            ->pluck('venue_id')
+            ->map(fn ($id) => UrlUtils::encodeId($id))
+            ->all();
+    }
+
     public function create(Request $request, $subdomain)
     {
         restore_pending_action();
@@ -863,6 +895,7 @@ class EventController extends Controller
             'isFirstEventRun' => $isFirstEventRun,
             'selectedVenue' => $venue,
             'venues' => $venues,
+            'recentVenueIds' => $this->recentVenueIds($role, $venues),
             'duplicateVenueGroupCount' => $duplicateVenueGroupCount,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
@@ -1039,6 +1072,7 @@ class EventController extends Controller
             'title' => $title,
             'selectedVenue' => $venue,
             'venues' => $venues,
+            'recentVenueIds' => $this->recentVenueIds($role, $venues),
             'duplicateVenueGroupCount' => $duplicateVenueGroupCount,
             'selectedMembers' => $selectedMembers,
             'members' => $members,
@@ -1062,6 +1096,31 @@ class EventController extends Controller
             'scheduleHasEmailSettings' => EventChangeNotifier::canMailBuyers($event),
             'attendeesNotifiedAt' => optional($event->attendees_notified_at)->toIso8601String(),
         ]);
+    }
+
+    /**
+     * The agenda tab's settings belong to the schedule, remembered for its next event.
+     *
+     * Only a setting the form sent. Read with boolean(), a save from a page that did not render
+     * the inputs switched all three off for the whole schedule - which is every install with no
+     * AI key, where they sat inside the import block and no control existed to bring them back.
+     * And a targeted write, never a save(): these are an editor's preferences, and a save runs the
+     * schedule's geocode hook and moves the updated_at its guest page publishes as <lastmod>, on
+     * every event save. AgendaSettingsTest.
+     */
+    private function rememberAgendaSettings(Request $request, Role $role): void
+    {
+        $settings = [];
+
+        foreach (['agenda_show_times' => 'agenda_show_times', 'agenda_show_description' => 'agenda_show_description', 'agenda_save_image' => 'save_agenda_image'] as $column => $input) {
+            if ($request->has($input)) {
+                $settings[$column] = $request->boolean($input);
+            }
+        }
+
+        if ($settings) {
+            $role->writeOperationalColumns($settings);
+        }
     }
 
     public function update(EventUpdateRequest $request, $subdomain, $hash)
@@ -1194,10 +1253,7 @@ class EventController extends Controller
             $event->agenda_ai_prompt = $request->input('agenda_ai_prompt');
             $event->save();
         }
-        $role->agenda_show_times = $request->boolean('agenda_show_times');
-        $role->agenda_show_description = $request->boolean('agenda_show_description');
-        $role->agenda_save_image = $request->boolean('save_agenda_image');
-        $role->save();
+        $this->rememberAgendaSettings($request, $role);
 
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
@@ -1808,10 +1864,7 @@ class EventController extends Controller
                 $agendaImageRejected = true;
             }
         }
-        $role->agenda_show_times = $request->boolean('agenda_show_times');
-        $role->agenda_show_description = $request->boolean('agenda_show_description');
-        $role->agenda_save_image = $request->boolean('save_agenda_image');
-        $role->save();
+        $this->rememberAgendaSettings($request, $role);
 
         if ($request->input('save_ai_prompt_default')) {
             $role->agenda_ai_prompt = $request->input('agenda_ai_prompt');
@@ -1855,9 +1908,27 @@ class EventController extends Controller
         //
         // An internal event has no public page, so there is nothing for the panel to say. A draft
         // is a 404 for guests until published, so it gets the panel without a link.
+        // What the form most often leaves for later, so the page it lands on can offer it.
+        $hasLocation = (bool) $event->event_url || $event->roles()->where('roles.type', 'venue')->exists();
+        $hasTickets = $event->tickets_enabled || $event->rsvp_enabled || filled($event->registration_url);
+
+        if (! $isFirstEvent && ! $event->is_internal) {
+            // Every later event: one line with its link, instead of a toast that is gone before
+            // the link can be copied.
+            $redirect->with('event_created', [
+                'name' => $event->name,
+                'is_draft' => (bool) $event->is_draft,
+                'url' => $event->is_draft ? null : $event->getUndatedGuestUrl($subdomain),
+                'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+                'has_location' => $hasLocation,
+                'has_tickets' => $hasTickets,
+            ]);
+        }
+
         if ($isFirstEvent && ! $event->is_internal) {
             $redirect->with('first_event_created', [
                 'name' => $event->name,
+                'has_location' => $hasLocation,
                 'is_draft' => (bool) $event->is_draft,
                 'url' => $event->is_draft ? null : $event->getUndatedGuestUrl($subdomain),
                 'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),

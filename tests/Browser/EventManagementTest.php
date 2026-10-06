@@ -37,8 +37,7 @@ class EventManagementTest extends DuskTestCase
                 nameField.dispatchEvent(new Event('input', { bubbles: true }));
             ");
 
-            // Navigate to venue section via JS (more reliable than clicking the nav link)
-            $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+            // The venue is on the Event tab, which is the one the form opens on.
             $browser->waitFor('#in_person', 10);
             $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)

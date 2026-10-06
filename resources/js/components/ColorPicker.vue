@@ -1,8 +1,10 @@
 <template>
     <div class="color-picker-root relative">
-        <input type="hidden" :name="name" :value="selectedColor" />
+        <input ref="field" type="hidden" :name="name" :value="selectedColor" />
         <button
             type="button"
+            :title="label || null"
+            :aria-label="label || null"
             @click.stop="open = !open"
             class="w-11 h-11 rounded-full transition-all duration-150 flex items-center justify-center"
             :class="!selectedColor ? 'border-2 border-dashed border-gray-300 dark:border-gray-600' : ''"
@@ -23,7 +25,8 @@
             <div
                 v-if="open"
                 @click.stop
-                class="absolute start-0 top-12 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3"
+                class="absolute top-12 z-50 w-max bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3"
+                :class="align === 'end' ? 'end-0' : 'start-0'"
             >
                 <div class="grid grid-cols-7 gap-2">
                     <button
@@ -48,21 +51,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
     name: { type: String, required: true },
     initialColor: { type: String, default: '' },
     colors: { type: Array, required: true },
     clearLabel: { type: String, default: 'Clear' },
+    // What the swatch is, for a picker with no label of its own beside it.
+    label: { type: String, default: '' },
+    // Which edge the palette opens from: 'end' for a picker at the end of a row, where opening
+    // from the start runs it off the page.
+    align: { type: String, default: 'start' },
 });
+
+const field = ref(null);
 
 const open = ref(false);
 const selectedColor = ref(props.initialColor);
 
 function selectColor(color) {
+    const changed = selectedColor.value !== color;
     selectedColor.value = color;
     open.value = false;
+    // A hidden field changed by script fires nothing, so the form it sits in never learned that a
+    // colour was picked: no "unsaved changes", and Cancel left without asking.
+    if (changed) {
+        nextTick(() => field.value && field.value.dispatchEvent(new Event('change', { bubbles: true })));
+    }
 }
 
 function onClickOutside(e) {

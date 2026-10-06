@@ -196,7 +196,7 @@ return [
             'blurb' => 'Customize colors, fonts, and branding for your schedule.',
             'icon' => 'swatch',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-06',
         ],
 
         'creating-events' => [
@@ -208,7 +208,7 @@ return [
             'blurb' => 'Add events and configure event settings.',
             'icon' => 'plus',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-06',
         ],
 
         'ai-import' => [
@@ -247,7 +247,7 @@ return [
             'blurb' => 'Set up ticketing and manage sales.',
             'icon' => 'ticket',
             'published' => '2024-01-01',
-            'modified' => '2026-08-12',
+            'modified' => '2026-10-06',
         ],
 
         'subscriptions' => [
@@ -261,7 +261,7 @@ return [
             'blurb' => 'Sell one pass a guest reuses across many events.',
             'icon' => 'pass',
             'published' => '2026-06-11',
-            'modified' => '2026-06-11',
+            'modified' => '2026-10-06',
         ],
 
         'allocated-seating' => [
@@ -287,7 +287,7 @@ return [
             'blurb' => 'Sell prepaid gift cards buyers send to someone else.',
             'icon' => 'gift',
             'published' => '2026-07-16',
-            'modified' => '2026-07-16',
+            'modified' => '2026-10-06',
         ],
 
         'appointments' => [
@@ -391,7 +391,7 @@ return [
             'blurb' => 'Manage your profile, payments, and API access.',
             'icon' => 'account',
             'published' => '2024-01-01',
-            'modified' => '2026-08-09',
+            'modified' => '2026-10-06',
         ],
 
         'referral-program' => [
@@ -444,7 +444,7 @@ return [
             'blurb' => 'Set up Stripe payments for a selfhost or SaaS deployment.',
             'icon' => 'credit-card',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-06',
         ],
 
         'selfhost/google-calendar' => [
@@ -504,7 +504,7 @@ return [
             'blurb' => 'Configure Google Gemini or OpenAI for import, scanning and translation.',
             'icon' => 'sparkles',
             'published' => '2024-01-01',
-            'modified' => '2026-03-11',
+            'modified' => '2026-10-06',
         ],
 
         'selfhost/boost' => [

@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 13;
+    public const SCHEMA_VERSION = 14;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -732,6 +732,7 @@ class GrowthExportService
             'retention' => $this->retentionFrom($schedules),
             'traffic' => $this->traffic(),
             'claims' => $this->claims($months),
+            'event_form' => $this->eventForm($months),
             ...($full ? [
                 'daily' => $this->daily(),
                 'nudge_outcomes' => $this->nudgeOutcomes(),
@@ -2634,6 +2635,78 @@ class GrowthExportService
             'claimed' => collect($months)
                 ->mapWithKeys(fn ($m) => [$m => $m < self::CLAIMS_TRACKED_FROM ? null : (int) ($claimed[$m] ?? 0)])
                 ->all(),
+        ];
+    }
+
+    /**
+     * What events made by hand are saved WITH, by the month they were created.
+     *
+     * The event form used to keep an event's location and its tickets behind tabs most people
+     * never opened; the 2026-10 redesign put both on the first tab. This is the before and
+     * after: of the events people typed in, how many have somewhere to be, a way to sign up, and
+     * a flyer. Split by whether the event was its creator's first, because that form is shorter
+     * and is where a new organizer either gets it right or does not.
+     *
+     * Read as the state when PULLED, not when first saved: an event given a venue a week later
+     * counts as having one, so the newest month keeps filling in.
+     */
+    private function eventForm(array $months): array
+    {
+        $since = $months[0].'-01 00:00:00';
+        $month = "DATE_FORMAT(events.created_at, '%Y-%m')";
+        $filled = fn (string $column) => "({$column} IS NOT NULL AND {$column} != '')";
+        $hasVenue = 'EXISTS (SELECT 1 FROM event_role venue_link JOIN roles venue ON venue.id = venue_link.role_id '
+            ."WHERE venue_link.event_id = events.id AND venue.type = 'venue')";
+
+        // The first event each account ever made, whatever made it.
+        $firsts = DB::table('events')->whereNotNull('user_id')->groupBy('user_id')->selectRaw('MIN(id) as id');
+
+        $rows = DB::table('events')
+            ->leftJoinSub($firsts, 'firsts', 'firsts.id', '=', 'events.id')
+            ->whereNull('events.import_source')
+            ->where('events.created_at', '>=', $since)
+            ->whereNotIn('events.id', $this->demoEventIds())
+            ->groupBy(DB::raw($month), DB::raw('(firsts.id IS NOT NULL)'))
+            ->selectRaw("{$month} as ym, (firsts.id IS NOT NULL) as is_first, COUNT(*) as events, "
+                ."SUM(CASE WHEN {$hasVenue} OR {$filled('events.event_url')} THEN 1 ELSE 0 END) as with_location, "
+                ."SUM(CASE WHEN events.tickets_enabled = 1 OR events.rsvp_enabled = 1 OR {$filled('events.registration_url')} THEN 1 ELSE 0 END) as with_signup, "
+                ."SUM(CASE WHEN {$filled('events.flyer_image_url')} THEN 1 ELSE 0 END) as with_flyer")
+            ->get()
+            ->keyBy(fn ($row) => $row->ym.'|'.(int) $row->is_first);
+
+        $bucket = fn (?object $row) => [
+            'events' => (int) ($row->events ?? 0),
+            'with_location' => (int) ($row->with_location ?? 0),
+            'with_signup' => (int) ($row->with_signup ?? 0),
+            'with_flyer' => (int) ($row->with_flyer ?? 0),
+        ];
+
+        // Venue schedules made in the month that a hand-made event is at: the ones somebody typed
+        // into the form, as opposed to the one a calendar pull creates per location. with_email is
+        // the question the redesign raises: the venue's email now sits behind a link.
+        $venueMonth = "DATE_FORMAT(roles.created_at, '%Y-%m')";
+        $venues = $this->excludeDemoRoles(DB::table('roles'))
+            ->where('roles.type', 'venue')
+            ->where('roles.is_deleted', false)
+            ->where('roles.created_at', '>=', $since)
+            ->whereExists(fn ($q) => $q->selectRaw('1')->from('event_role')
+                ->join('events', 'events.id', '=', 'event_role.event_id')
+                ->whereColumn('event_role.role_id', 'roles.id')
+                ->whereNull('events.import_source'))
+            ->groupBy(DB::raw($venueMonth))
+            ->selectRaw("{$venueMonth} as ym, COUNT(*) as created, SUM(CASE WHEN {$filled('roles.email')} THEN 1 ELSE 0 END) as with_email")
+            ->get()
+            ->keyBy('ym');
+
+        return [
+            'by_month' => collect($months)->mapWithKeys(fn ($m) => [$m => [
+                'first' => $bucket($rows->get($m.'|1')),
+                'later' => $bucket($rows->get($m.'|0')),
+            ]])->all(),
+            'new_venues' => collect($months)->mapWithKeys(fn ($m) => [$m => [
+                'created' => (int) ($venues->get($m)->created ?? 0),
+                'with_email' => (int) ($venues->get($m)->with_email ?? 0),
+            ]])->all(),
         ];
     }
 

@@ -63,7 +63,7 @@ class ImageTest extends DuskTestCase
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
             $browser->waitFor('#section-style', 10);
-            $browser->script("document.getElementById('style-tab-branding').click();");
+            // Branding is always on the Style tab: there is no row to open for it.
             $browser->pause(500);
 
             // Upload
@@ -82,7 +82,7 @@ class ImageTest extends DuskTestCase
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
             $browser->waitFor('#section-style', 10);
-            $browser->script("document.getElementById('style-tab-branding').click();");
+            // Branding is always on the Style tab: there is no row to open for it.
             $browser->pause(500)
                 ->waitFor('#profile_image_existing', 5);
 
@@ -161,8 +161,11 @@ class ImageTest extends DuskTestCase
             $browser->script("document.getElementById('style-tab-background').click();");
             $browser->pause(500);
 
-            // Select "image" radio
-            $browser->radio('background', 'image')
+            // Choose "image". The choice is a pill now: the radio inside it has no size of its
+            // own, so the pill is what gets clicked, brought clear of the save bar first.
+            $browser->script("document.querySelector('label[for=\"background_type_image\"]').scrollIntoView({ block: 'center' });");
+            $browser->pause(200)
+                ->click('label[for="background_type_image"]')
                 ->pause(500)
                 ->waitFor('#style_background_image', 5);
 
@@ -188,8 +191,10 @@ class ImageTest extends DuskTestCase
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
             $browser->waitFor('#section-style', 10);
             $browser->script("document.getElementById('style-tab-background').click();");
-            $browser->pause(500)
-                ->radio('background', 'image')
+            $browser->pause(500);
+            $browser->script("document.querySelector('label[for=\"background_type_image\"]').scrollIntoView({ block: 'center' });");
+            $browser->pause(200)
+                ->click('label[for="background_type_image"]')
                 ->pause(500)
                 ->waitFor('#style_background_image', 5);
 

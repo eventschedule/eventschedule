@@ -20,30 +20,37 @@
     $secretPlaceholder = str_repeat('•', 10);
 @endphp
 
-@if ($platformProvided)
-    {{-- The install supplies this gateway for everyone. Say which account is actually taking the
-         money, because the form below stays open either way and an owner has no other way to tell. --}}
-    <div class="mt-4">
-        <div class="flex items-center">
-            <svg class="w-5 h-5 text-green-500 me-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $isConnected ? __('messages.gateway_own_account_in_use') : __('messages.gateway_provided_by_install') }}
-            </span>
+{{-- What is in force, on one line, before anything asks for details: the owner's own account
+     (with the way to unlink it), or the one the install supplies for everyone. On a hosted install
+     there was no sign of being connected at all beyond a row of bullets in the secret fields. --}}
+@if ($isConnected)
+    <div class="event-picked">
+        <div class="settings-picked-main">
+            <span class="settings-picked-name">{{ $gateway->label($user) }}</span>
+            <span class="event-status is-on">{{ $platformProvided ? __('messages.gateway_own_account_in_use') : __('messages.connected') }}</span>
         </div>
-        <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-            {{ $isConnected ? __('messages.gateway_own_account_in_use_help') : __('messages.gateway_provided_by_install_help') }}
-        </p>
+        @if (! is_demo_mode())
+        <div class="settings-picked-actions">
+            <form method="POST" action="{{ route('payments.disconnect', ['gateway' => $gatewayKey]) }}" class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
+                @csrf
+                <button type="submit" class="event-link is-danger">{{ __('messages.disconnect') }}</button>
+            </form>
+        </div>
+        @endif
     </div>
+    @if ($platformProvided)
+    <p class="event-hint">{{ __('messages.gateway_own_account_in_use_help') }}</p>
+    @endif
+@elseif ($platformProvided)
+    <p><span class="event-status is-on">{{ __('messages.gateway_provided_by_install') }}</span></p>
+    <p class="event-hint">{{ __('messages.gateway_provided_by_install_help') }}</p>
 @endif
 
-{{-- After the panel, not before it: with an install-supplied account in force, "enter your merchant
-     details" is an instruction the reader may not need, and leading with it contradicts the panel. --}}
+{{-- After the line above, not before it: with an install-supplied account in force, "enter your
+     merchant details" is an instruction the reader may not need, and leading with it contradicts
+     that line. --}}
 @if ($gateway->credentialHelp())
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-4 mb-4">
-        {{ $gateway->credentialHelp() }}
-    </p>
+    <p class="event-hint {{ ($isConnected || $platformProvided) ? 'mt-4' : '' }}">{{ $gateway->credentialHelp() }}</p>
 @endif
 
 <form method="post" action="{{ route('payments.connect', ['gateway' => $gatewayKey]) }}" class="mt-4">
@@ -70,7 +77,7 @@
                      that is absent - so without this the owner could never clear a restriction they
                      had set, and the help text promising otherwise would be a lie. --}}
                 <input type="hidden" name="{{ $field->name }}[]" value="">
-                <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div class="mt-2 event-check-grid">
                     @foreach ($field->options as $optionValue => $optionLabel)
                         <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                             <input type="checkbox" name="{{ $field->name }}[]" value="{{ $optionValue }}"
@@ -106,24 +113,6 @@
         </div>
     @endforeach
 
-    <div class="flex items-center gap-4 pt-4">
-        @if (is_demo_mode())
-            <button type="button"
-                data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
-                class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
-                {{ __('messages.save') }}
-            </button>
-        @else
-            <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-        @endif
-    </div>
+    {{-- Named by what it does: "Connect" until there is something to save over. --}}
+    @include('profile.partials.save', ['saveClass' => 'mt-2', 'saveLabel' => $isConnected ? __('messages.save') : __('messages.connect')])
 </form>
-
-@if ($isConnected && ! is_demo_mode())
-    <div class="text-xs pt-3">
-        <form method="POST" action="{{ route('payments.disconnect', ['gateway' => $gatewayKey]) }}" class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
-            @csrf
-            <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
-        </form>
-    </div>
-@endif

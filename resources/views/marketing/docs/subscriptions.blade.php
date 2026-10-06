@@ -102,8 +102,8 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A subscription is a normal ticket type with one switch turned on. To create one:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Edit the event you want to sell the pass on and open the <strong class="text-gray-900 dark:text-white">Tickets</strong> section.</li>
-            <li>Choose <strong class="text-gray-900 dark:text-white">Tickets</strong> (the third choice, after External and Registration), then stay on the <strong class="text-gray-900 dark:text-white">General</strong> tab.</li>
+            <li>Edit the event you want to sell the pass on and open the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab.</li>
+            <li>Press <strong class="text-gray-900 dark:text-white">Sell tickets</strong> (the middle choice, between Free registration and Tickets elsewhere). The ticket types are right under it.</li>
             <li>Add a ticket type and set its <strong class="text-gray-900 dark:text-white">Price</strong>. Leave <strong class="text-gray-900 dark:text-white">Quantity</strong> blank to sell an unlimited number of passes, or enter a number to cap the run. A ticket's name lives in the <strong class="text-gray-900 dark:text-white">Type</strong> field, which the form shows once the event carries more than one ticket type.</li>
             <li>Turn on <strong class="text-gray-900 dark:text-white">"This is a pass or subscription (multi-use)"</strong>. It opens on <strong class="text-gray-900 dark:text-white">Season pass</strong> if the event repeats and <strong class="text-gray-900 dark:text-white">Visit pass</strong> if it does not.</li>
             <li>Pick the <strong class="text-gray-900 dark:text-white">Subscription type</strong> you want, then fill in the fields below it: <strong class="text-gray-900 dark:text-white">Admissions per event</strong>, <strong class="text-gray-900 dark:text-white">Number of visits</strong>, <strong class="text-gray-900 dark:text-white">Valid for (days)</strong> and <strong class="text-gray-900 dark:text-white">Covered events</strong>.</li>

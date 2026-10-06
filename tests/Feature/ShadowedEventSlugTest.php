@@ -304,7 +304,8 @@ class ShadowedEventSlugTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertSame(1, preg_match('~<div id="event-url-display"[^>]*>\s*<a\s+href="([^"]+)"~', $html, $m), 'the editor shows the event link');
+        // Under the page title, with Copy and View: the Listing tab holds only its ending now.
+        $this->assertSame(1, preg_match('~<div class="event-url-strip">.*?<a href="([^"]+)"[^>]*class="event-link"~s', $html, $m), 'the editor shows the event link');
 
         return html_entity_decode($m[1]);
     }

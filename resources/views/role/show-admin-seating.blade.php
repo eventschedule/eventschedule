@@ -28,34 +28,29 @@
             :learnMoreUrl="marketing_url('/docs/allocated-seating')" />
     @else
 
-        <div class="ap-card rounded-xl p-6">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.seating_plans') }}</h2>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-2xl">{{ __('messages.seating_plans_help') }}</p>
-                </div>
-                @if ($canEdit)
-                {{-- No name field here on purpose. You do not know what to call a room until you
-                     have drawn it, and store() already names the row "Untitled plan" and drops you
-                     straight into the designer, whose toolbar carries the real name box. --}}
-                <form method="POST" action="{{ route('seating.store', ['subdomain' => $role->subdomain]) }}"
-                      class="shrink-0">
-                    @csrf
-                    <x-brand-button type="submit">{{ __('messages.seating_new_plan') }}</x-brand-button>
-                </form>
-                @endif
-            </div>
+        {{-- The head every tab has: what the page is for, and its one action. It was a card of
+             its own, with the page's name said a second time under the tab. --}}
+        <div class="page-head is-flush">
+            <p class="page-lead">{{ __('messages.seating_plans_help') }}</p>
+            @if ($canEdit)
+            {{-- No name field here on purpose. You do not know what to call a room until you
+                 have drawn it, and store() already names the row "Untitled plan" and drops you
+                 straight into the designer, whose toolbar carries the real name box. --}}
+            <form method="POST" action="{{ route('seating.store', ['subdomain' => $role->subdomain]) }}"
+                  class="page-actions">
+                @csrf
+                <x-brand-button type="submit">{{ __('messages.seating_new_plan') }}</x-brand-button>
+            </form>
+            @endif
         </div>
 
         @if ($plans->isEmpty())
-            <div class="ap-card rounded-xl p-10 text-center">
-                <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24"
-                     stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            <div class="ap-card rounded-xl page-empty">
+                <svg class="page-empty-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
-                <h3 class="mt-3 text-base font-medium text-gray-900 dark:text-gray-100">{{ __('messages.seating_no_plans') }}</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.seating_no_plans_help') }}</p>
+                <h3>{{ __('messages.seating_no_plans') }}</h3>
+                <p>{{ __('messages.seating_no_plans_help') }}</p>
             </div>
         @else
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

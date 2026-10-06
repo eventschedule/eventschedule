@@ -166,8 +166,30 @@ class EventFormGuardsTest extends DuskTestCase
             $browser->visit($this->editPath($venue, $event).'?engagement=carpool#section-engagement')
                 ->waitUntil('window.vueApp !== undefined && window.vueApp.activeEngagementTab === "carpool"', 15);
 
-            // The first button is the one that used to submit the event instead of its own form.
+            // While the form holds unsaved changes the button waits: removing an offer reloads the
+            // page, and the half-typed name would go with it. The save bar says why.
+            $held = $browser->script('
+                window.confirm = function () { window._confirmAsked = true; return true; };
+                var name = document.getElementById("event_name");
+                name.value = "Half-typed";
+                name.dispatchEvent(new Event("input", { bubbles: true }));
+                document.querySelector("button[form^=\'form-remove-carpool-offer-\']").click();
+                return { held: window.vueApp.heldNotice, asked: !! window._confirmAsked };
+            ')[0];
+            $browser->pause(400);
+
+            $this->assertTrue($held['held']);
+            $this->assertFalse($held['asked'], 'nobody is asked to confirm an action that is not going to happen');
+            $this->assertSame('Save your changes first', trim($browser->script('return document.querySelector(".event-save-status").innerText;')[0]));
+            $this->assertTrue($browser->script('return window.location.pathname.includes("edit-event") && window.location.hash === "#section-engagement";')[0]);
+            $this->assertSame(2, CarpoolOffer::where('event_id', $event->id)->where('status', 'active')->count());
+
+            // With nothing unsaved it goes through. The first button is the one that used to
+            // submit the event instead of its own form.
             $browser->script('
+                window.vueApp.isDirty = false;
+                window.vueApp.sectionDirty = {};
+                window.vueApp.heldNotice = false;
                 window.confirm = function () { return true; };
                 window._skipUnsavedWarning = true;
                 document.querySelector("button[form^=\'form-remove-carpool-offer-\']").click();

@@ -176,6 +176,56 @@ class EventFormTemplateInjectionTest extends TestCase
         $this->assertGuarded($mounted, self::PAYLOAD, 'guest cart error message');
     }
 
+    /**
+     * Text of the event itself and of the schedule that made it. The form is opened by every
+     * schedule the event is listed on, so a description, a category name or an agenda part's name
+     * typed on one schedule is read by another schedule's admin.
+     *
+     * The description was the worst of them: a <textarea> is not exempt (Vue compiles the
+     * mustaches inside one), the field takes any length, and it was run in a browser against this
+     * form before the guard went in: the payload executed and the description came back empty.
+     */
+    public function test_the_events_own_text_is_not_compiled_by_vue(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', [
+            'event_categories' => [['id' => 100, 'name' => 'cat '.self::PAYLOAD]],
+        ]);
+        \App\Models\SeatingPlan::create(['role_id' => $venue->id, 'name' => 'plan '.self::PAYLOAD]);
+        $event = $this->createEvent($venue, [
+            'creator_role_id' => $venue->id,
+            'description' => 'desc '.self::PAYLOAD,
+        ]);
+        $part = \App\Models\EventPart::create(['event_id' => $event->id, 'name' => 'part '.self::PAYLOAD, 'sort_order' => 0]);
+        foreach ([false, true] as $approved) {
+            \App\Models\EventComment::create([
+                'event_id' => $event->id, 'event_part_id' => $part->id, 'guest_name' => 'Guest', 'guest_email' => 'guest@gmail.com',
+                'comment' => 'Lovely', 'is_approved' => $approved,
+            ]);
+        }
+
+        $html = $this->actingAs($owner)
+            ->get(route('event.edit', ['subdomain' => $venue->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+            ->assertOk()
+            ->getContent();
+        $mounted = $this->mountedHtml($html);
+
+        $this->assertGuarded($mounted, 'desc '.self::PAYLOAD, 'event description');
+        $this->assertGuarded($mounted, 'cat '.self::PAYLOAD, 'category name');
+        $this->assertGuarded($mounted, 'plan '.self::PAYLOAD, 'seating plan name');
+        $this->assertGuarded($mounted, 'part '.self::PAYLOAD, 'agenda part name beside fan content');
+        // assertGuarded accepts a v-pre anywhere in the 400 characters before the text, and a
+        // comment's own guarded text sits that close: the part's name is held to its own element,
+        // once in the pending list and once in the approved one.
+        $this->assertSame(2, substr_count($mounted, '<span v-pre>'.e('part '.self::PAYLOAD).'</span>'));
+
+        // The same name stands beside a video and a photo, which this event has none of: every
+        // place the view prints it is the guarded one.
+        $view = file_get_contents(resource_path('views/event/edit.blade.php'));
+        $this->assertSame(6, substr_count($view, '->eventPart->name'));
+        $this->assertSame(6, preg_match_all('/<span v-pre>\{\{ \$(video|comment|photo)->eventPart \? \$\1->eventPart->name : /', $view));
+    }
+
     public function test_the_editing_schedules_own_sub_schedule_names_are_guarded_too(): void
     {
         $owner = $this->createOwner();
@@ -193,5 +243,90 @@ class EventFormTemplateInjectionTest extends TestCase
             ->getContent();
 
         $this->assertGuarded($this->mountedHtml($html), self::PAYLOAD, 'own sub-schedule name');
+    }
+
+    /**
+     * The ticket currency is a free string on the event (varchar 255; the form posted whatever it
+     * was given), and the Payment row prints it in a notice when no connected gateway can take it.
+     * That notice is read by every admin of every schedule the event is listed on.
+     */
+    public function test_the_ticket_currency_in_the_payment_notice_is_not_compiled_by_vue(): void
+    {
+        // Connected to something (an install-wide Payfast, which settles in rand only), and to
+        // nothing that takes this event's "currency".
+        config([
+            'app.hosted' => false,
+            'payments.payfast.merchant_id' => '20000200',
+            'payments.payfast.merchant_key' => 'platform-merchant-key',
+            'payments.payfast.passphrase' => 'platform-passphrase',
+            'payments.payfast.sandbox' => true,
+            // The suite forces a platform Stripe key, and Stripe is asked about no currency at all.
+            'services.stripe_platform.secret' => null,
+        ]);
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id, 'tickets_enabled' => true]);
+        \Illuminate\Support\Facades\DB::table('events')->where('id', $event->id)->update(['ticket_currency_code' => 'cur '.self::PAYLOAD]);
+
+        $html = $this->actingAs($owner)
+            ->get(route('event.edit', ['subdomain' => $venue->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+            ->assertOk()
+            ->getContent();
+        $mounted = $this->mountedHtml($html);
+
+        // Held to their own elements: assertGuarded's 400-character window would be satisfied by
+        // any v-pre nearby.
+        foreach (['no_payment_method_for_currency', 'no_payment_method_for_currency_body'] as $key) {
+            $sentence = e(__('messages.'.$key, ['currency' => 'cur '.self::PAYLOAD]));
+            $this->assertSame(1, preg_match('/<(div|p)\b([^>]*)>'.preg_quote($sentence, '/').'<\/\1>/', $mounted, $m), $key.' is on the page, alone in its element');
+            $this->assertStringContainsString('v-pre', $m[2], $key.' is printed outside v-pre, so Vue compiles the currency');
+        }
+    }
+
+    /**
+     * A message under a field. None of them carries anyone's text today, and the component they
+     * all go through must not depend on that staying true: it is used some thirty times inside
+     * this mount, and a rule that names what was typed is one edit away.
+     */
+    public function test_a_message_under_a_field_is_not_compiled_by_vue(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+
+        $html = $this->actingAs($owner)
+            ->withSession(['errors' => (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag(['name' => ['msg '.self::PAYLOAD]]))])
+            ->get(route('event.edit', ['subdomain' => $venue->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+            ->assertOk()
+            ->getContent();
+        $mounted = $this->mountedHtml($html);
+
+        $this->assertStringContainsString('<li v-pre>'.e('msg '.self::PAYLOAD).'</li>', $mounted);
+        $this->assertSame(0, preg_match('/<li>'.preg_quote(e('msg '.self::PAYLOAD), '/').'/', $mounted), 'and nowhere without it');
+    }
+
+    /** The currency is one the pickers offer, or the save is refused: nothing else is stored. */
+    public function test_a_made_up_ticket_currency_is_refused(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id, 'ticket_currency_code' => 'USD']);
+        $update = route('event.update', ['subdomain' => $venue->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]);
+        $save = fn (array $data) => $this->actingAs($owner)->put($update, array_merge(['name' => 'Named', 'starts_at' => $event->starts_at, 'duration' => 2], $data));
+
+        $save(['ticket_currency_code' => self::PAYLOAD])->assertSessionHasErrors('ticket_currency_code');
+        $this->assertSame('USD', $event->fresh()->ticket_currency_code);
+
+        $save(['ticket_currency_code' => 'EUR'])->assertSessionHasNoErrors();
+        $this->assertSame('EUR', $event->fresh()->ticket_currency_code, 'a real one still saves');
+
+        // Not posted at all (a locked select sends nothing), and posted blank: neither is refused.
+        $save([])->assertSessionHasNoErrors();
+        $save(['ticket_currency_code' => ''])->assertSessionHasNoErrors();
+
+        // And a new event.
+        $this->actingAs($owner)->post(route('event.store', ['subdomain' => $venue->subdomain]), [
+            'name' => 'New one', 'starts_at' => $event->starts_at, 'duration' => 2, 'ticket_currency_code' => self::PAYLOAD,
+        ])->assertSessionHasErrors('ticket_currency_code');
     }
 }

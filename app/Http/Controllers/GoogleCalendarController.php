@@ -123,7 +123,7 @@ class GoogleCalendarController extends Controller
 
         return match ($return['from'] ?? null) {
             'import' => [route('event.show_import_ai', ['subdomain' => $role->subdomain, 'source' => 'google']), 'import'],
-            'settings' => [route('role.edit', ['subdomain' => $role->subdomain]).'#section-integrations', 'settings'],
+            'settings' => [route('role.edit', ['subdomain' => $role->subdomain]).'#integration-tab-google', 'settings'],
             default => $settings,
         };
     }

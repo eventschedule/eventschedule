@@ -32,6 +32,7 @@
 
     <x-slot name="head">
 
+        @include('partials.form-kit-styles')
         <style {!! nonce_attr() !!}>
         /* Hide all sections except the first one by default */
         .section-content {
@@ -39,6 +40,21 @@
         }
         .section-content:first-of-type {
             display: block;
+        }
+
+        /* Videos and Links. "Add video" stays with its own list: under a tall empty state it sat
+           nearer the next list's name than anything of its own, and read as that list's. The next
+           list begins after a rule and a wider gap. */
+        .links-tab-content .link-empty-state .event-empty {
+            margin: 0;
+        }
+        .links-tab-content .btn-show-add-link {
+            margin-top: 0.75rem;
+        }
+        .links-tab-content + .event-group-label {
+            margin-top: 1.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgb(var(--ap-border));
         }
 
         #preview {
@@ -99,38 +115,118 @@
             background: linear-gradient(to bottom, rgb(var(--ap-border)), rgb(var(--ap-rail-active)));
         }
 
-        .section-nav-link.validation-error {
-            border-inline-start-color: #dc2626 !important;
+        /* A sub-schedule on one line: name, second name where there is one, colour. */
+        .sched-sub-line {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            align-items: center;
+            gap: 0.5rem;
         }
-
-        @media (prefers-color-scheme: dark) {
-            .section-nav-link.validation-error {
-                border-inline-start-color: #ef4444 !important;
+        /* With no second name the colour fits beside the name on a phone too. */
+        .sched-sub-line.no-second {
+            grid-template-columns: minmax(0, 1fr) auto;
+        }
+        @media (min-width: 640px) {
+            .sched-sub-line {
+                grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
+            }
+            .sched-sub-line.no-second {
+                grid-template-columns: minmax(0, 1fr) auto;
             }
         }
-
-        .dark .section-nav-link.validation-error {
-            border-inline-start-color: #ef4444 !important;
+        .sched-sub-url {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            min-width: 0;
+            margin-top: 0.375rem;
+            font-size: 0.8125rem;
         }
-
-        /* Mobile accordion styles */
-        .mobile-section-header.active .accordion-chevron {
-            transform: rotate(180deg);
+        .sched-sub-url.hidden {
+            display: none;
         }
-        .mobile-section-header.active {
+        .sched-sub-link {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: rgb(var(--ap-ink-3));
+        }
+        .sched-sub-link:hover {
             color: var(--brand-blue);
-            border-color: var(--brand-blue);
+            text-decoration: underline;
         }
-        .mobile-section-header.validation-error {
-            border-color: #dc2626 !important;
+        /* A custom label on one line: the word it replaces, then what it says instead. */
+        .sched-label-name {
+            flex: none;
+            width: 9rem;
+            padding-top: 0.8125rem;
+            overflow-wrap: anywhere;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgb(var(--ap-ink-2));
         }
-        @media (prefers-color-scheme: dark) {
-            .mobile-section-header.validation-error {
-                border-color: #ef4444 !important;
+        .sched-label-fields {
+            display: grid;
+            flex: 1;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.5rem;
+            min-width: 0;
+        }
+        @media (min-width: 640px) {
+            .sched-label-fields.has-second {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
-        .dark .mobile-section-header.validation-error {
-            border-color: #ef4444 !important;
+        @media (max-width: 639px) {
+            .custom-label-item {
+                flex-wrap: wrap;
+            }
+            .sched-label-name {
+                width: calc(100% - 2.5rem);
+                padding-top: 0;
+            }
+            .sched-label-fields {
+                order: 3;
+                flex-basis: 100%;
+            }
+        }
+        /* One Cancel at a time on the sponsor form: the edit's own, when a sponsor is being edited. */
+        #cancel-edit-sponsor-btn:not(.hidden) ~ #sponsor-form-close {
+            display: none;
+        }
+        /* Something a button could not do, said beside it. */
+        .sched-inline-error {
+            margin-top: 0.5rem;
+            font-size: 0.8125rem;
+            color: #dc2626;
+        }
+        .dark .sched-inline-error {
+            color: #f87171;
+        }
+        .sched-inline-error:empty {
+            display: none;
+        }
+        #group-items:empty,
+        .sched-list:empty {
+            border-top: 0;
+        }
+        /* The same for a list holding only the whitespace its loop left behind, which :empty
+           does not match: its rule showed as a second line under an empty row. */
+        .sched-list:not(:has(> *)) {
+            border-top: 0;
+        }
+        /* The setup guide keeps a ring in the bottom corner, which is where Save now lives. It
+           rides above a page's own bottom bar by this much (SetupGuide.vue, --sg-bar). */
+        @media (min-width: 1024px) {
+            :root {
+                --sg-bar: 4.75rem;
+            }
+        }
+        /* The remove button sits level with the name it removes, not with the top of the row. */
+        #group-items .event-icon-btn.is-remove,
+        .sched-list .event-icon-btn.is-remove {
+            margin-top: 0.8125rem;
         }
 
         </style>
@@ -778,7 +874,15 @@
                 var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
                 window.open(url, '_blank');
             } else {
-                alert(@json(__('messages.please_enter_address'), JSON_UNESCAPED_UNICODE));
+                // Said under the address, where the answer goes, and not in a dialog.
+                var note = document.getElementById('address_note');
+                if (note) {
+                    note.textContent = @json(__('messages.please_enter_address'), JSON_UNESCAPED_UNICODE);
+                }
+                var street = document.getElementById('address1');
+                if (street) {
+                    street.focus();
+                }
             }
         }
 
@@ -957,54 +1061,80 @@
 
     </x-slot>
 
-    <!-- Header with Cancel Button -->
-    <div class="flex justify-between items-center gap-6 pb-6">
-        @if (is_rtl())
-            <div class="hidden lg:flex items-center gap-3">
-                <a href="{{ $role->exists ? route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) : route('home') }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    {{ __('messages.cancel') }}
-                </a>
-            </div>
+    @php
+        $scheduleUrl = $role->custom_domain ?: $role->getGuestUrl();
+        // Split by hand: parse_url() mangles a non-ASCII host on macOS.
+        $scheduleLinkText = $scheduleUrl ? \App\Utils\UrlUtils::clean($scheduleUrl) : '';
+        $scheduleLinkSlash = strpos($scheduleLinkText, '/');
+        // An address with no path (a subdomain on hosted, a custom domain) is all host, and the kit
+        // hides the host on a phone: there the whole address is the part to keep.
+        $scheduleLinkHost = $scheduleLinkSlash === false ? '' : substr($scheduleLinkText, 0, $scheduleLinkSlash);
+        $scheduleLinkPath = $scheduleLinkSlash === false ? $scheduleLinkText : substr($scheduleLinkText, $scheduleLinkSlash);
 
-            <div class="text-end">
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ $title }}
-                </h2>
-                @if (! $role->exists)
-                <div class="mt-2 flex items-center justify-end gap-2">
-                    <span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">{{ __('messages.' . $role->type) }}</span>
-                    @if (auth()->user()->member()->doesntExist())
-                        <x-link href="{{ route('getting-started') }}" class="text-xs">{{ __('messages.choose_different_type') }}</x-link>
-                    @endif
-                </div>
-                @endif
-            </div>
-        @else
-            <div>
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ $title }}
-                </h2>
-                @if (! $role->exists)
-                <div class="mt-2 flex items-center gap-2">
-                    <span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">{{ __('messages.' . $role->type) }}</span>
-                    @if (auth()->user()->member()->doesntExist())
-                        <x-link href="{{ route('getting-started') }}" class="text-xs">{{ __('messages.choose_different_type') }}</x-link>
-                    @endif
-                </div>
-                @endif
-            </div>
+        // The tabs by name, for the save bar: "Unsaved: Details · Style".
+        $shellTabs = [
+            'section-details' => __('messages.details'),
+            'section-address' => __('messages.venue_address'),
+            'section-merge' => __('messages.merge_venue'),
+            'section-style' => __('messages.schedule_style'),
+            'section-gallery' => __('messages.gallery'),
+            'section-links' => __('messages.videos_and_links'),
+            'section-subschedules' => __('messages.customize'),
+            'section-settings' => __('messages.schedule_settings'),
+            'section-engagement' => __('messages.engagement'),
+            'section-gift-cards' => __('messages.gift_cards'),
+            'section-sources' => __('messages.event_sources'),
+            'section-auto-import' => __('messages.auto_import_settings'),
+            'section-integrations' => __('messages.integrations'),
+        ];
 
-            <div class="hidden lg:flex items-center gap-3">
-                <a href="{{ $role->exists ? route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) : route('home') }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    {{ __('messages.cancel') }}
-                </a>
-            </div>
+        // The words the tabs' and rows' one-line summaries are made of (see the page script).
+        $summaryWords = [
+            'enabled' => __('messages.enabled'),
+            'disabled' => __('messages.disabled'),
+            'none' => __('messages.none'),
+            'connected' => __('messages.connected'),
+            'comments' => __('messages.fan_comments_enabled'),
+            'photos' => __('messages.fan_photos_enabled'),
+            'videos_label' => __('messages.fan_videos_enabled'),
+            'requests' => __('messages.requests'),
+            'fan_content' => __('messages.fan_content'),
+            'feedback' => __('messages.feedback'),
+            'carpool' => __('messages.carpool'),
+            'sponsors' => __('messages.sponsors'),
+            'require_approval' => __('messages.require_approval'),
+            'custom_css' => __('messages.custom_css'),
+            'email' => __('messages.email'),
+            'not_connected' => __('messages.settings_not_connected'),
+            'gallery_prompt' => __('messages.gallery_add_first'),
+            'settings_holds' => implode(', ', [__('messages.schedule_url'), __('messages.notifications'), __('messages.advanced')]),
+            'gallery_count' => count($galleryState['images'] ?? []),
+            'email_failing' => $role->isEmailSettingsFailureActive() ? __('messages.email_settings_failed_warning_title') : '',
+            // "Connected" is said of a schedule that syncs, not of an account that could.
+            'google_connected' => (bool) $role->sync_direction,
+            'microsoft_connected' => (bool) $role->microsoft_sync_direction,
+            'caldav_connected' => $role->hasCalDAVSettings(),
+        ];
+    @endphp
+
+    {{-- The page's title with the schedule's public address under it, as on the event form. Cancel
+         lives in the save bar, beside Save. --}}
+    <div class="min-w-0 pb-6">
+        {{-- Which schedule this is, where the page only said "Edit Schedule": there are usually
+             several in the menu beside it. --}}
+        <p class="event-eyebrow">{{ $title }}</p>
+        <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+            {{ $role->name }}
+        </h2>
+        @if ($scheduleUrl)
+        <div class="event-url-strip">
+            <span class="event-url-text" dir="ltr">@if ($scheduleLinkHost !== '')<span class="event-url-host">{{ $scheduleLinkHost }}</span>@endif<span class="event-url-path">{{ $scheduleLinkPath }}</span></span>
+            <button type="button" class="event-link" id="copy-schedule-link-btn" data-copy-text="{{ $scheduleUrl }}" data-copied="{{ __('messages.copied') }}">{{ __('messages.copy') }}</button>
+            <a href="{{ $scheduleUrl }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view') }}</a>
+        </div>
         @endif
     </div>
 
-    @php $scheduleUrl = $role->custom_domain ?: $role->getGuestUrl(); @endphp
 
     @if (! $role->isClaimed() && isset($mergeCandidates) && $mergeCandidates->count() > 0)
     {{-- The merge section's form, kept outside #edit-form (see that section) and placed before it so
@@ -1043,77 +1173,131 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
-                                {{ __('messages.details') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.details') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-details"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-details" hidden></span>
                             </a>
+                            {{-- Second for a curator: pulling events in from other schedules is the curator's main
+                                 job, and this sat ninth. --}}
+                            @if ($role->exists && $role->isCurator())
+                            <a href="#section-sources" class="section-nav-link" data-section="section-sources">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
+                                </svg>
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.event_sources') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-sources"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-sources" hidden></span>
+                            </a>
+                            @endif
                             @if ($role->isVenue())
                             <a href="#section-address" class="section-nav-link" data-section="section-address">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                                 </svg>
-                                {{ __('messages.venue_address') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.venue_address') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-address"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-address" hidden></span>
+                            </a>
+                            @endif
+                            @if ($role->isVenue() && ! $role->isClaimed() && isset($mergeCandidates) && $mergeCandidates->count() > 0)
+                            {{-- This section had a header on a phone and no link here, so on a desktop it
+                                 could only be reached by typing its address. --}}
+                            <a href="#section-merge" class="section-nav-link" data-section="section-merge">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                </svg>
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.merge_venue') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-merge"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-merge" hidden></span>
                             </a>
                             @endif
                             <a href="#section-style" class="section-nav-link" data-section="section-style">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                                 </svg>
-                                {{ __('messages.schedule_style') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.schedule_style') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-style"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-style" hidden></span>
                             </a>
                             @if ($role->exists)
                             <a href="#section-gallery" class="section-nav-link" data-section="section-gallery">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                 </svg>
-                                {{ __('messages.gallery') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.gallery') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-gallery"><bdi></bdi></span>
+                                </span>
                                 @if ($galleryMode === 'locked')
                                 <x-lock-badge tier="pro" />
                                 @elseif (count($galleryState['images']))
                                 <span class="ms-auto inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 px-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ count($galleryState['images']) }}</span>
-                                @elseif (now()->lt(\App\Utils\GalleryUtils::NEW_UNTIL))
-                                <span class="ms-auto inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-[var(--brand-blue)]">{{ __('messages.new') }}</span>
                                 @endif
+                                <span class="section-nav-dot" data-dirty-dot="section-gallery" hidden></span>
                             </a>
                             <a href="#section-links" class="section-nav-link" data-section="section-links">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                                 </svg>
-                                {{ __('messages.videos_and_links') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.videos_and_links') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-links"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-links" hidden></span>
                             </a>
                             @endif
                             <a href="#section-subschedules" class="section-nav-link" data-section="section-subschedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                                 </svg>
-                                {{ __('messages.customize') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.customize') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-subschedules"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-subschedules" hidden></span>
                             </a>
                             <a href="#section-settings" class="section-nav-link" data-section="section-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                {{ __('messages.schedule_settings') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.schedule_settings') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-settings"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-settings" hidden></span>
                             </a>
                             <a href="#section-engagement" class="section-nav-link" data-section="section-engagement">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                 </svg>
-                                {{ __('messages.engagement') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.engagement') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-engagement"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
                             </a>
                             @if ($role->exists)
                             <a href="#section-gift-cards" class="section-nav-link" data-section="section-gift-cards">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                 </svg>
-                                {{ __('messages.gift_cards') }}
-                            </a>
-                            @endif
-                            @if ($role->exists && $role->isCurator())
-                            <a href="#section-sources" class="section-nav-link" data-section="section-sources">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                                </svg>
-                                {{ __('messages.event_sources') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.gift_cards') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-gift-cards"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-gift-cards" hidden></span>
                             </a>
                             @endif
                             @if (! config('app.hosted'))
@@ -1121,30 +1305,24 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                                 </svg>
-                                {{ __('messages.auto_import_settings') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.auto_import_settings') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-auto-import"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-auto-import" hidden></span>
                             </a>
                             @endif
                             <a href="#section-integrations" class="section-nav-link" data-section="section-integrations">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
                                 </svg>
-                                {{ __('messages.integrations') }}
+                                <span class="section-nav-text">
+                                    <span>{{ __('messages.integrations') }}</span>
+                                    <span class="section-nav-summary" data-summary="section-integrations"><bdi></bdi></span>
+                                </span>
+                                <span class="section-nav-dot" data-dirty-dot="section-integrations" hidden></span>
                             </a>
                         </nav>
-                        <!-- Sidebar Save Button -->
-                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <x-primary-button class="w-full justify-center">
-                                {{ __('messages.save') }}
-                            </x-primary-button>
-                            @if (! $role->exists)
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-4.247m0 0A8.959 8.959 0 0 1 3 12c0-1.178.227-2.304.638-3.335" />
-                                </svg>
-                                {{ __('messages.note_all_schedules_are_publicly_listed') }}
-                            </p>
-                            @endif
-                        </div>
                     </div>
                 </div>
 
@@ -1155,20 +1333,26 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>
-                        {{ __('messages.details') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.details') }}</span>
+                            <span class="section-nav-summary" data-summary="section-details"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-details" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-details" class="section-content">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                            </svg>
-                            {{ __('messages.details') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                {{ __('messages.details') }}
+                            </span>
                             @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                                 @if ($role->isEnterprise())
                                     <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-schedule-details')"
@@ -1196,20 +1380,6 @@
                         <input type="hidden" name="type" value="{{ $role->type }}"/>
                         @endif
 
-                        <!-- Tab Navigation -->
-                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
-                                    {{ __('messages.general') }}
-                                </button>
-                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="localization">
-                                    {{ __('messages.localization') }}
-                                </button>
-                                <button type="button" class="details-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="contact">
-                                    {{ __('messages.contact_info') }}
-                                </button>
-                            </nav>
-                        </div>
 
                         <!-- Tab Content: General -->
                         <div id="details-tab-general" class="details-tab-content">
@@ -1234,6 +1404,7 @@
                             <x-input-label for="short_description" :value="__('messages.short_description')" />
                             <x-text-input id="short_description" name="short_description" type="text" class="mt-1 block w-full"
                                 :value="old('short_description', $role->short_description)" maxlength="200" />
+                            <p class="event-hint mt-1">{{ __('messages.schedule_short_description_help', ['style' => __('messages.header_style_banner')]) }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('short_description')" />
                         </div>
 
@@ -1248,6 +1419,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
+                            <p class="event-hint">{{ __('messages.schedule_description_help') }}</p>
                             <textarea id="description" name="description" data-content-dir="{{ content_dir($role) }}"
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
@@ -1268,7 +1440,7 @@
 
                         <div class="mb-6">
                             <x-toggle name="banner_enabled"
-                                label="{{ __('messages.banner_enabled') }}"
+                                label="{{ __('messages.show_announcement_bar') }}"
                                 checked="{{ old('banner_enabled', $role->banner_enabled) }}"
                                 help="{{ __('messages.banner_enabled_help') }}"
                                 :disabled="$bannerDisabled" />
@@ -1304,8 +1476,10 @@
 
                         </div>
 
+                        <div class="event-subrows">
                         <!-- Tab Content: Localization -->
-                        <div id="details-tab-localization" class="details-tab-content hidden">
+                        <x-form-row group="details" tab="localization" :title="__('messages.language_and_time')" class="details-tab" />
+                        <div id="details-tab-localization" class="event-subrow-body details-tab-content" hidden>
 
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="language_code" :value="__('messages.language') " />
@@ -1422,7 +1596,8 @@
                         </div>
 
                         <!-- Tab Content: Contact Info -->
-                        <div id="details-tab-contact" class="details-tab-content hidden">
+                        <x-form-row group="details" tab="contact" :title="__('messages.contact_info')" class="details-tab" />
+                        <div id="details-tab-contact" class="event-subrow-body details-tab-content" hidden>
 
                         <div class="mb-6">
                             <x-input-label for="email" :value="__('messages.email') . ' *'" />
@@ -1450,10 +1625,7 @@
 
                                 @if (\App\Services\SmsService::isConfigured())
                                 <div id="role-phone-verify-ui" class="mt-2">
-                                    <button type="button" id="role-phone-send-code-btn"
-                                        class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
-                                        {{ __('messages.click_here_to_verify_phone') }}
-                                    </button>
+                                    <x-secondary-button type="button" id="role-phone-send-code-btn">{{ __('messages.verify') }}</x-secondary-button>
 
                                     <div id="role-phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
                                         <input type="text" id="role-phone-verification-code" maxlength="6" placeholder="000000"
@@ -1504,8 +1676,123 @@
                         @endif
 
                         </div>
+                        </div>
                     </div>
                 </div>
+
+                @if ($role->exists && $role->isCurator())
+                @php
+                    $sourceRows = old('source_schedules') !== null
+                        ? collect(old('source_schedules'))->map(fn ($subdomain, $i) => [
+                            'subdomain' => $subdomain,
+                            'group_id' => old('source_groups')[$i] ?? '',
+                        ])->filter(fn ($row) => filled($row['subdomain']))->values()->all()
+                        : ($sourceSchedules ?? collect())->map(fn ($source) => [
+                            'subdomain' => $source->sourceRole->subdomain,
+                            'group_id' => $source->group_id ? \App\Utils\UrlUtils::encodeId($source->group_id) : '',
+                        ])->all();
+                    $sourceNames = ($sourceSchedules ?? collect())->mapWithKeys(fn ($s) => [$s->sourceRole->subdomain => $s->sourceRole->name])->all();
+                    $curatorGroupOptions = $role->groups->mapWithKeys(fn ($g) => [\App\Utils\UrlUtils::encodeId($g->id) => $g->name])->all();
+                @endphp
+                <button type="button" class="mobile-section-header" data-section="section-sources">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
+                        </svg>
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.event_sources') }}</span>
+                            <span class="section-nav-summary" data-summary="section-sources"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-sources" hidden></span>
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-sources" class="section-content lg:mt-0">
+                    <div class="form-kit-col">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
+                                </svg>
+                                {{ __('messages.event_sources') }}
+                            </span>
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.event_sources_help') }}</p>
+
+                        <div class="mb-6">
+                            <div id="source-schedule-items"
+                                 data-groups="{{ json_encode($curatorGroupOptions) }}"
+                                 data-group-none="{{ __('messages.none') }}">
+                                @foreach($sourceRows as $row)
+                                    {{-- mb-4, not mb-2: the count line below sits mt-1 off its own
+                                         select, so the gap BETWEEN rows has to be clearly larger or
+                                         the count reads as a label on the next source. --}}
+                                    <div class="mb-4 relative" data-source-row>
+                                        <div class="flex items-center">
+                                            <input type="text" data-source-search
+                                                   value="{{ isset($sourceNames[$row['subdomain']]) ? $sourceNames[$row['subdomain']] . ' (' . $row['subdomain'] . ')' : $row['subdomain'] }}"
+                                                   placeholder="{{ __('messages.search_schedules_autocomplete') }}"
+                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800"
+                                                   readonly autocomplete="off" />
+                                            <button type="button" data-action="remove-parent-item" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}"
+                                                    class="ms-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                        </div>
+                                        <input type="hidden" name="source_schedules[]" value="{{ $row['subdomain'] }}" />
+                                        @if (count($curatorGroupOptions))
+                                        <select name="source_groups[]" aria-label="{{ __('messages.subschedule') }}" title="{{ __('messages.subschedule') }}"
+                                                class="mt-2 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                            <option value="">{{ __('messages.none') }}</option>
+                                            @foreach($curatorGroupOptions as $groupHash => $groupName)
+                                            <option value="{{ $groupHash }}" {{ $row['group_id'] === $groupHash ? 'selected' : '' }}>{{ $groupName }}</option>
+                                            @endforeach
+                                        </select>
+                                        @else
+                                        <input type="hidden" name="source_groups[]" value="" />
+                                        @endif
+                                        @php $sourceCount = ($sourceEventCounts ?? [])[$row['subdomain']] ?? null; @endphp
+                                        @if ($sourceCount !== null)
+                                        {{-- Saved sources only. A source already saved still shows its count when
+                                             the rows are rebuilt from old() after a failed save, since the map is
+                                             keyed by subdomain; only a genuinely new row falls through to null,
+                                             where "0" would read as a failure rather than as "not saved yet". --}}
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ trans_choice('messages.source_events_on_calendar', $sourceCount, ['count' => number_format($sourceCount)]) }}
+                                        </p>
+                                        @endif
+                                        <div data-source-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            {{-- Always submitted, so clearing the list to empty is distinguishable from a
+                                 save that never rendered this section. --}}
+                            <input type="hidden" name="source_schedules_submitted" value="1" />
+                            <button type="button" data-action="add-source-schedule" class="event-link">
+                                + {{ __('messages.add_source_schedule') }}
+                            </button>
+                            <x-input-error class="mt-2" :messages="$errors->get('source_schedules')" />
+                        </div>
+
+                        @if (isset($suggestedSources) && $suggestedSources->count())
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.suggested_sources')" />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.suggested_sources_help') }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($suggestedSources as $suggestion)
+                                <button type="button" data-action="add-suggested-source"
+                                        data-subdomain="{{ $suggestion->subdomain }}"
+                                        data-name="{{ $suggestion->name }}"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
+                                    + <span dir="auto">{{ $suggestion->name }}</span>
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
 
                 @if ($role->isVenue())
                 <button type="button" class="mobile-section-header" data-section="section-address">
@@ -1514,22 +1801,30 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                         </svg>
-                        {{ __('messages.venue_address') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.venue_address') }}</span>
+                            <span class="section-nav-summary" data-summary="section-address"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-address" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-address" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            {{ __('messages.venue_address') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                </svg>
+                                {{ __('messages.venue_address') }}
+                            </span>
                         </h2>
+
+                        <p class="event-hint mb-4">{{ __('messages.address_is_public') }}</p>
 
                         <div class="mb-6">
                             <x-input-label for="address1" :value="__('messages.street_address') . ' *'" />
@@ -1538,32 +1833,35 @@
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
                         </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="city" :value="__('messages.city')" />
-                            <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
-                                :value="old('city', $role->city)" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                        <div class="event-grid2 mb-6">
+                            <div>
+                                <x-input-label for="city" :value="__('messages.city')" />
+                                <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
+                                    :value="old('city', $role->city)" autocomplete="off" />
+                                <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                            </div>
+                            <div>
+                                <x-input-label for="state" :value="__('messages.state_province')" />
+                                <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
+                                    :value="old('state', $role->state)" autocomplete="off" />
+                                <x-input-error class="mt-2" :messages="$errors->get('state')" />
+                            </div>
                         </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="state" :value="__('messages.state_province')" />
-                            <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
-                                :value="old('state', $role->state)" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('state')" />
+                        <div class="event-grid2 mb-6">
+                            <div>
+                                <x-input-label for="postal_code" :value="__('messages.postal_code')" />
+                                <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
+                                    :value="old('postal_code', $role->postal_code)" autocomplete="off" />
+                                <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
+                            </div>
+                            <div>
+                                <x-input-label for="country_code" :value="__('messages.country')" />
+                                <x-country-input id="country_code" name="country_code" :value="old('country_code', $role->country_code)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
+                            </div>
                         </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="postal_code" :value="__('messages.postal_code')" />
-                            <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
-                                :value="old('postal_code', $role->postal_code)" autocomplete="off" />
-                            <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="country_code" :value="__('messages.country')" />
-                            <x-country-input id="country_code" name="country_code" :value="old('country_code', $role->country_code)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('country_code')" />
-                        </div>
 
                         <div class="mb-6">
                             <div class="flex items-center space-x-4">
@@ -1576,6 +1874,9 @@
                         </div>
 
                         <div id="address_response" class="mb-6 hidden text-gray-900 dark:text-gray-100"></div>
+                        {{-- What "View map" could not do, said here and not in a dialog. Emptied by the
+                             next press of either button (see the page script). --}}
+                        <p id="address_note" class="sched-inline-error" role="alert"></p>
 
                     </div>
                 </div>
@@ -1586,20 +1887,26 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                         </svg>
-                        {{ __('messages.merge_venue') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.merge_venue') }}</span>
+                            <span class="section-nav-summary" data-summary="section-merge"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-merge" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-merge" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                            </svg>
-                            {{ __('messages.merge_venue') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                </svg>
+                                {{ __('messages.merge_venue') }}
+                            </span>
                         </h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.merge_venue_help') }}</p>
 
@@ -1692,7 +1999,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
                         </svg>
-                        {{ __('messages.schedule_style') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.schedule_style') }}</span>
+                            <span class="section-nav-summary" data-summary="section-style"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-style" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -1705,10 +2016,12 @@
                         <div class="w-full xl:w-1/2">
 
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                        </svg>
-                        {{ __('messages.schedule_style') }}
+                        <span class="section-heading-name inline-flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                            </svg>
+                            {{ __('messages.schedule_style') }}
+                        </span>
                         @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                             @if ($role->isEnterprise())
                                 <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-style-generator')"
@@ -1732,23 +2045,6 @@
                         @endif
                     </h2>
 
-                    <!-- Sub-Tab Navigation -->
-                    <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                        <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                            <button type="button" data-style-tab="branding" id="style-tab-branding"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-[var(--brand-blue)] text-[var(--brand-blue)]">
-                                {{ __('messages.branding') }}
-                            </button>
-                            <button type="button" data-style-tab="background" id="style-tab-background"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
-                                {{ __('messages.background') }}
-                            </button>
-                            <button type="button" data-style-tab="advanced" id="style-tab-advanced"
-                                class="style-tab-button text-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
-                                {{ __('messages.advanced') }}
-                            </button>
-                        </nav>
-                    </div>
 
 
                     <!-- Branding Tab Content -->
@@ -1838,114 +2134,116 @@
                                     {{ $role->name }}
                                 </div>
                             </div>
-
-                            {{-- Event animation: how event cards arrive as visitors scroll the schedule
-                                 (resources/css/list-reveal.css). The radios are plain Blade so the form
-                                 posts without JS; the island above them plays the chosen design on the
-                                 owner's own events, and keeps the preview link and notes in step. --}}
-                            @php
-                                $listAnimationIcons = [
-                                    'none' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636',
-                                    'rise' => 'M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18',
-                                    'focus' => 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
-                                    'slide' => 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3',
-                                    'deal' => 'M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122',
-                                    'shine' => 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z',
-                                    'curtain' => 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
-                                ];
-                                $listAnimationSelected = old('list_animation', $role->listAnimation());
-                                $listAnimationDesigns = collect(\App\Models\Role::LIST_ANIMATIONS)
-                                    ->reject(fn ($v) => $v === 'none')
-                                    ->mapWithKeys(fn ($v) => [$v => [
-                                        'name' => __('messages.list_animation_'.$v),
-                                        'desc' => __('messages.list_animation_'.$v.'_desc'),
-                                    ]])->all();
-                                $listAnimationGuestUrl = $role->exists ? $role->getGuestUrl() : '';
-                            @endphp
-                            <fieldset class="mb-6">
-                                <legend class="flex items-center gap-2 font-medium text-sm text-gray-700 dark:text-gray-300">
-                                    {{ __('messages.list_animation') }}
-                                    @if (is_null($role->list_animation))
-                                        <span class="inline-flex rounded-full bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-[var(--brand-blue)]">{{ __('messages.new') }}</span>
-                                    @endif
-                                </legend>
-                                <p class="mt-1 mb-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_help') }}</p>
-
-                                <div class="vue-list-animation-picker mb-4" data-props="{{ json_encode([
-                                    'saved' => $role->listAnimation(),
-                                    'accentColor' => $role->accent_color ?: '#4E81FA',
-                                    'font' => $role->font_family ?: '',
-                                    'rtl' => in_array($role->language_code, ['ar', 'he'], true),
-                                    'guestUrl' => $listAnimationGuestUrl,
-                                    'layout' => $role->eventLayout(),
-                                    'events' => $listAnimationPreviewEvents ?? [],
-                                    'designs' => $listAnimationDesigns,
-                                    'labels' => [
-                                        'pick' => __('messages.list_animation_pick'),
-                                        'replay' => __('messages.list_animation_replay'),
-                                        'deviceOff' => __('messages.list_animation_device_off'),
-                                        'calendarNote' => __('messages.list_animation_calendar_note'),
-                                        'useList' => __('messages.list_animation_use_list'),
-                                        'nowList' => __('messages.list_animation_now_list'),
-                                    ],
-                                ], JSON_INVALID_UTF8_SUBSTITUTE) }}"></div>
-
-                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                    @foreach (\App\Models\Role::LIST_ANIMATIONS as $listAnimationValue)
-                                        <div class="relative {{ $listAnimationValue === 'none' ? 'col-span-2 sm:col-span-3' : '' }}">
-                                            <input type="radio"
-                                                id="list_animation_{{ $listAnimationValue }}"
-                                                name="list_animation"
-                                                value="{{ $listAnimationValue }}"
-                                                @checked($listAnimationSelected === $listAnimationValue)
-                                                class="peer sr-only">
-                                            <label for="list_animation_{{ $listAnimationValue }}"
-                                                class="ap-card rounded-xl flex h-full min-h-[3.5rem] items-center gap-3 p-3 text-start cursor-pointer transition-all duration-200 hover:shadow-md peer-checked:ring-2 peer-checked:ring-[var(--brand-blue)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)] peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-gray-800">
-                                                <svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 {{ $listAnimationValue === 'slide' ? 'rtl:-scale-x-100' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $listAnimationIcons[$listAnimationValue] }}" />
-                                                </svg>
-                                                <span class="min-w-0 pe-5">
-                                                    <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.list_animation_'.$listAnimationValue) }}</span>
-                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $listAnimationValue === 'none' ? __('messages.list_animation_none_desc') : __('messages.list_animation_'.$listAnimationValue.'_mood') }}</span>
-                                                </span>
-                                            </label>
-                                            <svg class="pointer-events-none absolute top-2 end-2 w-4 h-4 text-[var(--brand-blue)] opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                            </svg>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('list_animation')" />
-
-                                @if ($listAnimationGuestUrl)
-                                    <p id="list-animation-preview" class="mt-3 text-sm" {{ $listAnimationSelected === 'none' ? 'hidden' : '' }}>
-                                        <x-link id="list-animation-preview-link" href="{{ $listAnimationGuestUrl }}?layout=list&list_animation={{ $listAnimationSelected }}" target="_blank">{{ __('messages.list_animation_preview') }}</x-link>
-                                        <span id="list-animation-unsaved" class="ms-2 text-xs text-gray-500 dark:text-gray-400" hidden>{{ __('messages.list_animation_unsaved') }}</span>
-                                    </p>
-                                @endif
-                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_device_motion') }}</p>
-                            </fieldset>
                     </div>
 
+                    <div class="event-subrows">
+                    {{-- A row of its own: seven tiles used to stand between the branding fields and the
+                         two rows under them. --}}
+                    <x-form-row group="style" tab="animation" :title="__('messages.list_animation')" pane="style-content-animation" class="style-tab-button" id="style-tab-animation" />
+                    <div id="style-content-animation" class="event-subrow-body" hidden>
+                        {{-- Event animation: how event cards arrive as visitors scroll the schedule
+                             (resources/css/list-reveal.css). The radios are plain Blade so the form
+                             posts without JS; the island above them plays the chosen design on the
+                             owner's own events, and keeps the preview link and notes in step. --}}
+                        @php
+                            $listAnimationIcons = [
+                                'none' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636',
+                                'rise' => 'M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18',
+                                'focus' => 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
+                                'slide' => 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3',
+                                'deal' => 'M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122',
+                                'shine' => 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z',
+                                'curtain' => 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
+                            ];
+                            $listAnimationSelected = old('list_animation', $role->listAnimation());
+                            $listAnimationDesigns = collect(\App\Models\Role::LIST_ANIMATIONS)
+                                ->reject(fn ($v) => $v === 'none')
+                                ->mapWithKeys(fn ($v) => [$v => [
+                                    'name' => __('messages.list_animation_'.$v),
+                                    'desc' => __('messages.list_animation_'.$v.'_desc'),
+                                ]])->all();
+                            $listAnimationGuestUrl = $role->exists ? $role->getGuestUrl() : '';
+                        @endphp
+                        <fieldset class="mb-6">
+                            <legend class="flex items-center gap-2 font-medium text-sm text-gray-700 dark:text-gray-300">
+                                {{ __('messages.list_animation') }}
+                            </legend>
+                            <p class="mt-1 mb-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_help') }}</p>
+
+                            <div class="vue-list-animation-picker mb-4" data-props="{{ json_encode([
+                                'saved' => $role->listAnimation(),
+                                'accentColor' => $role->accent_color ?: '#4E81FA',
+                                'font' => $role->font_family ?: '',
+                                'rtl' => in_array($role->language_code, ['ar', 'he'], true),
+                                'guestUrl' => $listAnimationGuestUrl,
+                                'layout' => $role->eventLayout(),
+                                'events' => $listAnimationPreviewEvents ?? [],
+                                'designs' => $listAnimationDesigns,
+                                'labels' => [
+                                    'pick' => __('messages.list_animation_pick'),
+                                    'replay' => __('messages.list_animation_replay'),
+                                    'deviceOff' => __('messages.list_animation_device_off'),
+                                    'calendarNote' => __('messages.list_animation_calendar_note'),
+                                    'useList' => __('messages.list_animation_use_list'),
+                                    'nowList' => __('messages.list_animation_now_list'),
+                                ],
+                            ], JSON_INVALID_UTF8_SUBSTITUTE) }}"></div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                @foreach (\App\Models\Role::LIST_ANIMATIONS as $listAnimationValue)
+                                    <div class="relative {{ $listAnimationValue === 'none' ? 'col-span-2 sm:col-span-3' : '' }}">
+                                        <input type="radio"
+                                            id="list_animation_{{ $listAnimationValue }}"
+                                            name="list_animation"
+                                            value="{{ $listAnimationValue }}"
+                                            @checked($listAnimationSelected === $listAnimationValue)
+                                            class="peer sr-only">
+                                        <label for="list_animation_{{ $listAnimationValue }}"
+                                            class="ap-card rounded-xl flex h-full min-h-[3.5rem] items-center gap-3 p-3 text-start cursor-pointer transition-all duration-200 hover:shadow-md peer-checked:ring-2 peer-checked:ring-[var(--brand-blue)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)] peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-gray-800">
+                                            <svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400 {{ $listAnimationValue === 'slide' ? 'rtl:-scale-x-100' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $listAnimationIcons[$listAnimationValue] }}" />
+                                            </svg>
+                                            <span class="min-w-0 pe-5">
+                                                <span class="block text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.list_animation_'.$listAnimationValue) }}</span>
+                                                <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $listAnimationValue === 'none' ? __('messages.list_animation_none_desc') : __('messages.list_animation_'.$listAnimationValue.'_mood') }}</span>
+                                            </span>
+                                        </label>
+                                        <svg class="pointer-events-none absolute top-2 end-2 w-4 h-4 text-[var(--brand-blue)] opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('list_animation')" />
+
+                            @if ($listAnimationGuestUrl)
+                                <p id="list-animation-preview" class="mt-3 text-sm" {{ $listAnimationSelected === 'none' ? 'hidden' : '' }}>
+                                    <x-link id="list-animation-preview-link" href="{{ $listAnimationGuestUrl }}?layout=list&list_animation={{ $listAnimationSelected }}" target="_blank">{{ __('messages.list_animation_preview') }}</x-link>
+                                    <span id="list-animation-unsaved" class="ms-2 text-xs text-gray-500 dark:text-gray-400" hidden>{{ __('messages.list_animation_unsaved') }}</span>
+                                </p>
+                            @endif
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_device_motion') }}</p>
+                        </fieldset>
+                    </div>
                     <!-- Background Tab Content -->
-                    <div id="style-content-background" style="display: none;">
+                    <x-form-row group="style" tab="background" :title="__('messages.background')" pane="style-content-background" class="style-tab-button" id="style-tab-background" />
+                    <div id="style-content-background" class="event-subrow-body" hidden>
 
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.background_type')" />
-                                <div class="mt-2 space-y-2">
+                                {{-- old(): a refused save used to come back on the stored type. --}}
+                                <div class="mt-2 event-pills flex-wrap">
                                     @foreach(['gradient', 'solid', 'image'] as $background)
-                                    <div class="flex items-center">
-                                        <input type="radio" 
-                                            id="background_type_{{ $background }}" 
-                                            name="background" 
+                                    <label class="event-pill" for="background_type_{{ $background }}">
+                                        <input type="radio"
+                                            id="background_type_{{ $background }}"
+                                            name="background"
                                             value="{{ $background }}"
-                                            {{ $role->background == $background ? 'checked' : '' }}
-                                            class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4"
+                                            {{ old('background', $role->background) == $background ? 'checked' : '' }}
+                                            class="sr-only"
                                             data-action="background-type-change">
-                                        <label for="background_type_{{ $background }}" class="ms-2 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.' . $background) }}
-                                        </label>
-                                    </div>
+                                        <span>{{ __('messages.' . $background) }}</span>
+                                    </label>
                                     @endforeach
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('background')" />
@@ -2079,21 +2377,27 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
 
                                     <div id="custom_colors" style="display:none" class="mt-4">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-end gap-3">
+                                            <div class="flex-1 min-w-0">
+                                            <x-input-label for="custom_color1" :value="__('messages.color').' 1'" class="text-xs" />
                                             <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                                class="block flex-1 h-10"
+                                                class="mt-1 block w-full h-10"
                                                 :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
                                                 data-action="update-preview-on-input" />
+                                            </div>
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
-                                                class="w-5 h-5 text-gray-400 shrink-0">
+                                                class="w-5 h-5 text-gray-400 shrink-0 mb-2.5 rtl:-scale-x-100">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                                             </svg>
+                                            <div class="flex-1 min-w-0">
+                                            <x-input-label for="custom_color2" :value="__('messages.color').' 2'" class="text-xs" />
                                             <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                                class="block flex-1 h-10"
+                                                class="mt-1 block w-full h-10"
                                                 :value="old('custom_color2', $role->background_colors ? (explode(', ', $role->background_colors)[1] ?? '') : '')"
                                                 data-action="update-preview-on-input" />
+                                            </div>
                                         </div>
                                         <div id="custom_gradient_preview" class="mt-2 h-3 rounded-full"></div>
                                     </div>
@@ -2114,25 +2418,24 @@
                     </div>
 
                     <!-- Advanced Tab Content -->
-                    <div id="style-content-advanced" style="display: none;">
+                    <x-form-row group="style" tab="advanced" :title="__('messages.style_row_header_layout')" pane="style-content-advanced" class="style-tab-button" id="style-tab-advanced" />
+                    <div id="style-content-advanced" class="event-subrow-body" hidden>
                             <!-- Header Style -->
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.header_style')" />
                                 @php $currentHeaderStyle = old('header_style', $role->headerStyle()); @endphp
-                                <div class="mt-2 space-y-2">
+                                <div class="mt-2 event-pills flex-wrap">
                                     @foreach(['banner', 'compact'] as $hs)
-                                    <div class="flex items-center">
+                                    <label class="event-pill" for="header_style_{{ $hs }}">
                                         <input type="radio"
                                             id="header_style_{{ $hs }}"
                                             name="header_style"
                                             value="{{ $hs }}"
                                             data-action="header-style-change"
                                             {{ $currentHeaderStyle === $hs ? 'checked' : '' }}
-                                            class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
-                                        <label for="header_style_{{ $hs }}" class="ms-2 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.header_style_' . $hs) }}
-                                        </label>
-                                    </div>
+                                            class="sr-only">
+                                        <span>{{ __('messages.header_style_' . $hs) }}</span>
+                                    </label>
                                     @endforeach
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.header_style_help') }}</p>
@@ -2270,21 +2573,20 @@
 
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.default_layout')" />
-                                <div class="mt-2 space-y-2">
+                                <div class="mt-2 event-pills flex-wrap">
                                     @foreach(['calendar', 'list'] as $layout)
-                                    <div class="flex items-center">
+                                    <label class="event-pill" for="event_layout_{{ $layout }}">
                                         <input type="radio"
                                             id="event_layout_{{ $layout }}"
                                             name="event_layout"
                                             value="{{ $layout }}"
                                             {{-- eventLayout(), not the raw column: it normalises the dead
-                                                 'grid' enum value so a legacy row still shows a selection. --}}
-                                            {{ $role->eventLayout() == $layout ? 'checked' : '' }}
-                                            class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
-                                        <label for="event_layout_{{ $layout }}" class="ms-2 text-gray-900 dark:text-gray-100">
-                                            {{ __('messages.' . $layout) }}
-                                        </label>
-                                    </div>
+                                                 'grid' enum value so a legacy row still shows a selection.
+                                                 old(): a refused save used to come back on the stored one. --}}
+                                            {{ old('event_layout', $role->eventLayout()) == $layout ? 'checked' : '' }}
+                                            class="sr-only">
+                                        <span>{{ __('messages.' . $layout) }}</span>
+                                    </label>
                                     @endforeach
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.default_layout_help') }}</p>
@@ -2331,6 +2633,7 @@
                                 @endif
                             </div>
                     </div>
+                    </div>
 
 
                         </div>
@@ -2351,7 +2654,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                         </svg>
-                        {{ __('messages.gallery') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.gallery') }}</span>
+                            <span class="section-nav-summary" data-summary="section-gallery"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-gallery" hidden></span>
                         @if ($galleryMode === 'locked')
                         <x-lock-badge tier="pro" />
                         @endif
@@ -2375,37 +2682,30 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                         </svg>
-                        {{ __('messages.videos_and_links') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.videos_and_links') }}</span>
+                            <span class="section-nav-summary" data-summary="section-links"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-links" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-links" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                            </svg>
-                            {{ __('messages.videos_and_links') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                </svg>
+                                {{ __('messages.videos_and_links') }}
+                            </span>
                         </h2>
 
-                        <!-- Tab Navigation -->
-                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="youtube_videos">
-                                    {{ __('messages.youtube_videos') }}
-                                </button>
-                                <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="social_links">
-                                    {{ __('messages.social_links') }}
-                                </button>
-                                {{-- <button type="button" class="links-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="payment_links">
-                                    {{ __('messages.payment_links') }}
-                                </button> --}}
-                            </nav>
-                        </div>
 
                         {{-- YouTube Videos --}}
+                        <p class="event-group-label">{{ __('messages.youtube_videos') }}</p>
                         <div id="links-tab-youtube_videos" class="links-tab-content">
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                                 {!! (!$role->youtube_links || $role->youtube_links == '[]') ? 'style="display:none"' : '' !!}>
@@ -2434,22 +2734,20 @@
                                 @endforeach
                                 @endif
                             </ul>
-                            <div class="link-empty-state text-center py-8"
+                            <div class="link-empty-state"
                                 {!! ($role->youtube_links && $role->youtube_links != '[]') ? 'style="display:none"' : '' !!}>
-                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                                </svg>
-                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_youtube_videos') }}</p>
+                                <p class="event-empty">{{ __('messages.no_youtube_videos') }}</p>
                             </div>
                             <button type="button"
-                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] mt-4"
+                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]"
                                 data-link-type="youtube_links">
                                 + {{ __('messages.add_video') }}
                             </button>
                         </div>
 
                         {{-- Social Links --}}
-                        <div id="links-tab-social_links" class="links-tab-content hidden">
+                        <p class="event-group-label">{{ __('messages.social_links') }}</p>
+                        <div id="links-tab-social_links" class="links-tab-content">
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                                 {!! (!$role->social_links || $role->social_links == '[]') ? 'style="display:none"' : '' !!}>
                                 @if ($role->social_links && $role->social_links != '[]')
@@ -2554,15 +2852,12 @@
                                 @endforeach
                                 @endif
                             </ul>
-                            <div class="link-empty-state text-center py-8"
+                            <div class="link-empty-state"
                                 {!! ($role->social_links && $role->social_links != '[]') ? 'style="display:none"' : '' !!}>
-                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253" />
-                                </svg>
-                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_social_links') }}</p>
+                                <p class="event-empty">{{ __('messages.no_social_links') }}</p>
                             </div>
                             <button type="button"
-                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] mt-4"
+                                class="btn-show-add-link text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]"
                                 data-link-type="social_links">
                                 + {{ __('messages.add_link') }}
                             </button>
@@ -2630,7 +2925,7 @@
                 </div>
 
                 {{-- Add Link Modal --}}
-                <div id="add_link_modal" class="hidden relative z-10" aria-labelledby="add-link-modal-title" role="dialog" aria-modal="true">
+                <div id="add_link_modal" class="hidden relative z-50" aria-labelledby="add-link-modal-title" role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" aria-hidden="true"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -2668,112 +2963,99 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                         </svg>
-                        {{ __('messages.customize') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.customize') }}</span>
+                            <span class="section-nav-summary" data-summary="section-subschedules"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-subschedules" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-subschedules" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                            </svg>
-                            {{ __('messages.customize') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                                </svg>
+                                {{ __('messages.customize') }}
+                            </span>
                         </h2>
 
-                        <!-- Tab Navigation -->
-                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="subschedules">
-                                    {{ __('messages.subschedules') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
-                                    {{ __('messages.custom_fields') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="categories">
-                                    {{ __('messages.categories') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-labels">
-                                    {{ __('messages.custom_labels') }}
-                                </button>
-                            </nav>
-                        </div>
 
+                        <div class="event-subrows">
                         <!-- Tab Content: Sub-schedules -->
-                        <div id="customize-tab-subschedules" class="customize-tab-content">
+                        <x-form-row group="customize" tab="subschedules" :title="__('messages.subschedules')" class="customize-tab" />
+                        <div id="customize-tab-subschedules" class="event-subrow-body customize-tab-content" hidden>
 
-                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help') }}</p>
+                        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.subschedules_help_parts') }}</p>
                         <div class="mb-6">
+                            {{-- Says the list was on the page: without it a save deletes no sub-schedule
+                                 (RoleController::update), so a save that never showed them cannot. --}}
+                            <input type="hidden" name="groups_submitted" value="1">
                             <div id="groups-list">
                                 @php $groups = $role->groups ?? []; @endphp
-                                <div id="group-items">
+                                {{-- One line for each: its name, its colour, and under them its own address.
+                                     A row is a direct child of #group-items (the browser tests and the
+                                     script that watches the list for removals both count on that). --}}
+                                @php
+                                    $subscheduleSecondName = $role->language_code !== 'en' || app()->getLocale() !== 'en';
+                                    // What the second field of a row holds: the name in the language the
+                                    // schedule is translated into. It was labelled "English name" whatever
+                                    // that language was.
+                                    $secondNameLabel = __('messages.name').' ('.$role->translationLanguageName().')';
+                                @endphp
+                                <div id="group-items" class="event-list">
                                     @foreach(old('groups', $groups) as $i => $group)
-                                        <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.name') . ' *'" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''" />
-                                            </div>
-                                            @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
-                                            <div class="mb-4">
-                                                <x-input-label for="group_name_en_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.english_name')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][name_en]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''" />
-                                            </div>
-                                            @endif
-                                            <div class="mb-4">
-                                                <x-input-label :value="__('messages.color')" />
-                                                <div class="vue-color-picker" data-props="{{ json_encode([
-                                                    'name' => 'groups[' . (is_object($group) ? $group->id : $i) . '][color]',
-                                                    'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
-                                                    'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
-                                                    'clearLabel' => __('messages.clear'),
-                                                ]) }}"></div>
-                                            </div>
-                                            @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                            <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
-                                                <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $scheduleUrl }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
-                                                        {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
-                                                    </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $scheduleUrl }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                                        @php
+                                            $groupKey = is_object($group) ? $group->id : $i;
+                                            $groupSlug = is_object($group) ? $group->slug : ($group['slug'] ?? '');
+                                        @endphp
+                                        <div class="event-list-row" data-list-row>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="sched-sub-line {{ $subscheduleSecondName ? '' : 'no-second' }}">
+                                                    <x-text-input name="groups[{{ $groupKey }}][name]" type="text" class="block w-full" :value="is_object($group) ? $group->name : $group['name'] ?? ''"
+                                                        aria-label="{{ __('messages.name') }}" placeholder="{{ __('messages.name') }}" />
+                                                    @if ($subscheduleSecondName)
+                                                    <x-text-input name="groups[{{ $groupKey }}][name_en]" type="text" class="block w-full" :value="is_object($group) ? $group->name_en : $group['name_en'] ?? ''"
+                                                        aria-label="{{ $secondNameLabel }}" placeholder="{{ $secondNameLabel }}" />
+                                                    @endif
+                                                    <div class="vue-color-picker" title="{{ __('messages.color') }}" data-props="{{ json_encode([
+                                                        'name' => 'groups[' . $groupKey . '][color]',
+                                                        'initialColor' => is_object($group) ? $group->color : ($group['color'] ?? ''),
+                                                        'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
+                                                        'clearLabel' => __('messages.clear'),
+                                                        'label' => __('messages.color'),
+                                                        'align' => 'end',
+                                                    ]) }}"></div>
+                                                </div>
+                                                @if ($groupSlug)
+                                                <div class="sched-sub-url" id="group-url-display-{{ $groupKey }}">
+                                                    <a href="{{ $scheduleUrl }}/{{ $groupSlug }}" target="_blank" rel="noopener" class="sched-sub-link" dir="ltr">{{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/{{ $groupSlug }}</a>
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $scheduleUrl }}/{{ $groupSlug }}" class="event-icon-btn" title="{{ __('messages.copy') }}" aria-label="{{ __('messages.copy') }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
                                                         </svg>
                                                     </button>
-                                                </p>
-                                            </div>
-                                            <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
-                                                <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
-                                                <x-text-input id="group_slug_{{ is_object($group) ? $group->id : $i }}" name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
-                                            </div>
-                                            <div class="flex gap-4 items-center justify-between">
-                                                <div class="flex gap-4 items-center">
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" id="edit-button-{{ is_object($group) ? $group->id : $i }}" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                                        {{ __('messages.edit') }}
-                                                    </button>
-                                                    @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
-                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ is_object($group) ? $group->id : $i }}" class="hidden text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" id="cancel-button-{{ is_object($group) ? $group->id : $i }}">
-                                                        {{ __('messages.cancel') }}
-                                                    </button>
-                                                    @endif
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ $groupKey }}" id="edit-button-{{ $groupKey }}" class="event-link" title="{{ __('messages.edit') }}: {{ __('messages.slug') }}">{{ __('messages.edit') }}</button>
                                                 </div>
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
+                                                <div class="sched-sub-url hidden" id="group-slug-edit-{{ $groupKey }}">
+                                                    <span class="event-slug-prefix" dir="ltr">{{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/</span>
+                                                    <x-text-input id="group_slug_{{ $groupKey }}" name="groups[{{ $groupKey }}][slug]" type="text" class="block w-full" :value="$groupSlug" aria-label="{{ __('messages.slug') }}" />
+                                                    <button type="button" data-action="toggle-group-slug" data-group-id="{{ $groupKey }}" id="cancel-button-{{ $groupKey }}" class="event-link hidden">{{ __('messages.cancel') }}</button>
+                                                </div>
+                                                @endif
                                             </div>
-                                            @else
-                                            <div class="flex gap-4 items-center justify-end">
-                                                <button type="button" data-action="remove-parent-item" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                                    {{ __('messages.remove') }}
-                                                </button>
-                                            </div>
-                                            @endif
+                                            <button type="button" data-action="remove-list-row" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
                                         </div>
                                     @endforeach
                                 </div>
-                                <button type="button" data-action="add-group-field" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                <button type="button" data-action="add-group-field" class="event-link mt-3">
                                     + {{ __('messages.add_subschedule') }}
                                 </button>
                             </div>
@@ -2784,7 +3066,8 @@
                         <!-- End Tab Content: Sub-schedules -->
 
                         <!-- Tab Content: Custom Fields -->
-                        <div id="customize-tab-custom-fields" class="customize-tab-content hidden">
+                        <x-form-row group="customize" tab="custom-fields" :title="__('messages.custom_fields')" :locked="$role->isPro() ? null : 'pro'" class="customize-tab" />
+                        <div id="customize-tab-custom-fields" class="event-subrow-body customize-tab-content" hidden>
                         @if ($role->isPro())
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
@@ -2827,9 +3110,12 @@
                                         </select>
                                     </div>
                                 </div>
+                                {{-- sched-field-more: the parts of a field that are rarely touched (its name in the
+                                     second language, the pattern its answer must match, the note for the AI
+                                     import) fold behind "More options", so a saved field is two lines. --}}
                                 @if($role->language_code !== 'en')
-                                <div class="mt-3">
-                                    <x-input-label :value="__('messages.english_name')" class="text-sm" />
+                                <div class="mt-3 sched-field-more" hidden>
+                                    <x-input-label :value="$secondNameLabel" class="text-sm" />
                                     <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name_en]"
                                         value="{{ $field['name_en'] ?? '' }}"
                                         class="mt-1 block w-full"
@@ -2843,6 +3129,7 @@
                                         class="mt-1 block w-full"
                                         :placeholder="__('messages.options_placeholder')" />
                                 </div>
+                                <div class="sched-field-more" hidden>
                                 <div class="mt-3 event-field-regex-container" style="{{ in_array($field['type'] ?? 'string', ['string', 'multiline_string']) ? '' : 'display: none;' }}">
                                     <x-input-label :value="__('messages.field_regex')" class="text-sm" />
                                     <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -2882,6 +3169,7 @@
                                         rows="2"
                                         maxlength="500">{{ $field['ai_prompt'] ?? '' }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.ai_prompt_custom_field_help') }}</p>
+                                </div>
                                 </div>
                                 <div class="mt-3 flex items-center justify-between gap-4">
                                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -2938,9 +3226,12 @@
                                         <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
                                         @endif
                                     </div>
-                                    <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
+                                    <span class="flex flex-shrink-0 items-center gap-4">
+                                    <button type="button" data-action="toggle-field-more" class="event-link" aria-expanded="false">{{ __('messages.more_options') }}</button>
+                                    <button type="button" data-action="remove-custom-field" class="event-link is-danger">
                                         {{ __('messages.remove') }}
                                     </button>
+                                    </span>
                                 </div>
                                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 event-field-filter-help" style="display: none;"
                                     data-help="{{ __('messages.field_show_as_filter_help') }}"
@@ -2971,7 +3262,8 @@
                         <!-- End Tab Content: Custom Fields -->
 
                         <!-- Tab Content: Categories -->
-                        <div id="customize-tab-categories" class="customize-tab-content hidden">
+                        <x-form-row group="customize" tab="categories" :title="__('messages.categories')" class="customize-tab" />
+                        <div id="customize-tab-categories" class="event-subrow-body customize-tab-content" hidden>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                 {{ __('messages.categories_help') }}
                             </p>
@@ -3011,7 +3303,11 @@
                                 usort($defaultCategoriesForReset, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
                             @endphp
 
-                            <div id="event-categories-container"
+                            {{-- One line for each, as the sub-schedules are: its name, the name in the second
+                                 language where there is one, its colour. A row is a direct child of the
+                                 container and keeps the classes the page script and the browser test find it
+                                 by (event-category-item, event-category-name, event-category-id). --}}
+                            <div id="event-categories-container" class="event-list sched-list"
                                  data-next-id="{{ $role->nextCustomCategoryId() }}"
                                  data-default-categories="{{ json_encode($defaultCategoriesForReset, JSON_UNESCAPED_UNICODE) }}">
                                 @foreach($effectiveCategories as $i => $cat)
@@ -3021,57 +3317,54 @@
                                     $renamed = ! $isCustom && $systemName && $cat['name'] !== $systemName;
                                 @endphp
                                 {{-- Keep data-action="remove-event-category" (not the generic remove-parent-item) so the in-use confirmation dialog still runs via data-events-count. --}}
-                                <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item" data-category-id="{{ $cat['id'] }}" data-is-custom="{{ $isCustom ? '1' : '0' }}">
+                                <div class="event-list-row event-category-item" data-list-row data-category-id="{{ $cat['id'] }}" data-is-custom="{{ $isCustom ? '1' : '0' }}">
                                     <input type="hidden" name="event_categories[{{ $i }}][id]" value="{{ $cat['id'] }}" class="event-category-id">
-                                    <div class="mb-4">
-                                        <x-input-label :value="__('messages.name') . ' *'" />
-                                        <x-text-input
-                                            type="text"
-                                            name="event_categories[{{ $i }}][name]"
-                                            value="{{ $cat['name'] }}"
-                                            maxlength="80"
-                                            class="mt-1 block w-full event-category-name"
-                                            data-events-count="{{ ($event_category_counts ?? [])[$cat['id']] ?? 0 }}"
-                                        />
+                                    <div class="min-w-0 flex-1">
+                                        <div class="sched-sub-line {{ $subscheduleSecondName ? '' : 'no-second' }}">
+                                            <x-text-input
+                                                type="text"
+                                                name="event_categories[{{ $i }}][name]"
+                                                value="{{ $cat['name'] }}"
+                                                maxlength="80"
+                                                class="block w-full event-category-name"
+                                                data-events-count="{{ ($event_category_counts ?? [])[$cat['id']] ?? 0 }}"
+                                                aria-label="{{ __('messages.name') }}" placeholder="{{ __('messages.name') }}"
+                                            />
+                                            @if ($subscheduleSecondName)
+                                            <x-text-input
+                                                type="text"
+                                                name="event_categories[{{ $i }}][name_en]"
+                                                :value="$cat['name_en'] ?? ''"
+                                                maxlength="80"
+                                                class="block w-full"
+                                                aria-label="{{ $secondNameLabel }}" placeholder="{{ $secondNameLabel }}"
+                                            />
+                                            @endif
+                                            <div class="vue-color-picker" title="{{ __('messages.color') }}" data-props="{{ json_encode([
+                                                'name' => 'event_categories[' . $i . '][color]',
+                                                'initialColor' => $cat['color'] ?? '',
+                                                'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
+                                                'clearLabel' => __('messages.clear'),
+                                                'label' => __('messages.color'),
+                                                'align' => 'end',
+                                            ]) }}"></div>
+                                        </div>
+                                        @if($renamed)
+                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ __('messages.was_named', ['name' => $systemName]) }}</p>
+                                        @endif
                                     </div>
-                                    @if($renamed)
-                                    <p class="-mt-2 mb-3 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ __('messages.was_named', ['name' => $systemName]) }}</p>
-                                    @endif
-                                    @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
-                                    <div class="mb-4">
-                                        <x-input-label :value="__('messages.english_name')" />
-                                        <x-text-input
-                                            type="text"
-                                            name="event_categories[{{ $i }}][name_en]"
-                                            :value="$cat['name_en'] ?? ''"
-                                            maxlength="80"
-                                            class="mt-1 block w-full"
-                                        />
-                                    </div>
-                                    @endif
-                                    <div class="mb-4">
-                                        <x-input-label :value="__('messages.color')" />
-                                        <div class="vue-color-picker" data-props="{{ json_encode([
-                                            'name' => 'event_categories[' . $i . '][color]',
-                                            'initialColor' => $cat['color'] ?? '',
-                                            'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
-                                            'clearLabel' => __('messages.clear'),
-                                        ]) }}"></div>
-                                    </div>
-                                    <div class="flex gap-4 items-center justify-end">
-                                        <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                            {{ __('messages.remove') }}
-                                        </button>
-                                    </div>
+                                    <button type="button" data-action="remove-event-category" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
                                 </div>
                                 @endforeach
                             </div>
 
                             <div class="mt-4 flex items-center justify-between">
-                                <button type="button" id="add-event-category-btn" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                <button type="button" id="add-event-category-btn" class="event-link">
                                     + {{ __('messages.add_category') }}
                                 </button>
-                                <button type="button" id="reset-event-categories-btn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                                <button type="button" id="reset-event-categories-btn" class="event-link event-link-quiet">
                                     {{ __('messages.reset_to_defaults') }}
                                 </button>
                             </div>
@@ -3079,11 +3372,13 @@
                         <!-- End Tab Content: Categories -->
 
                         <!-- Tab Content: Custom Labels -->
-                        <div id="customize-tab-custom-labels" class="customize-tab-content hidden">
+                        <x-form-row group="customize" tab="custom-labels" :title="__('messages.custom_labels')" :locked="$role->isPro() ? null : 'pro'" class="customize-tab" />
+                        <div id="customize-tab-custom-labels" class="event-subrow-body customize-tab-content" hidden>
                         @if ($role->isPro())
                         <input type="hidden" name="custom_labels_submitted" value="1">
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.custom_labels_help') }}
+                            {{ __('messages.custom_labels_example', ['label' => __('messages.buy_tickets')]) }}
                         </p>
 
                         <div class="flex gap-2 mb-6">
@@ -3100,43 +3395,37 @@
                                     <option value="{{ $labelKey }}">{{ $labelTranslated }}</option>
                                 @endforeach
                             </select>
-                            <button type="button" data-action="add-custom-label" disabled
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors opacity-50 cursor-not-allowed">
-                                <svg class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
+                            <x-brand-button size="sm" type="button" data-action="add-custom-label" disabled class="opacity-50 cursor-not-allowed flex-shrink-0">
                                 {{ __('messages.add') }}
-                            </button>
+                            </x-brand-button>
                         </div>
 
-                        <div id="custom-labels-list" class="space-y-3">
+                        {{-- One line for each: which word it replaces, then what it says instead. The first
+                             span of a row is the word's own name: the page script sorts and restores
+                             options by it. --}}
+                        <div id="custom-labels-list" class="event-list sched-list">
                             @foreach(collect($role->custom_labels ?? [])->sortBy(fn($v, $k) => __('messages.' . $k), SORT_LOCALE_STRING) as $labelKey => $labelData)
-                            <div class="custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg" data-label-key="{{ $labelKey }}">
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.' . $labelKey) }}</span>
-                                    <button type="button" data-action="remove-custom-label" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                                        {{ __('messages.remove') }}
-                                    </button>
-                                </div>
-                                <div class="space-y-3">
-                                    <div>
-                                        <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value]"
-                                            value="{{ $labelData['value'] ?? '' }}"
-                                            class="mt-1 block w-full"
-                                            placeholder="{{ __('messages.' . $labelKey) }}"
-                                            maxlength="200" />
-                                    </div>
+                            <div class="event-list-row custom-label-item" data-list-row data-label-key="{{ $labelKey }}">
+                                <span class="sched-label-name" data-row-name>{{ __('messages.' . $labelKey) }}</span>
+                                <div class="sched-label-fields {{ $role->language_code !== 'en' ? 'has-second' : '' }}">
+                                    <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value]"
+                                        value="{{ $labelData['value'] ?? '' }}"
+                                        class="block w-full"
+                                        aria-label="{{ __('messages.' . $labelKey) }}"
+                                        placeholder="{{ __('messages.' . $labelKey) }}"
+                                        maxlength="200" />
                                     @if($role->language_code !== 'en')
-                                    <div>
-                                        <x-input-label :value="__('messages.english_name')" class="text-sm" />
-                                        <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value_en]"
-                                            value="{{ $labelData['value_en'] ?? '' }}"
-                                            class="mt-1 block w-full"
-                                            :placeholder="__('messages.auto_translated_placeholder')"
-                                            maxlength="200" />
-                                    </div>
+                                    <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value_en]"
+                                        value="{{ $labelData['value_en'] ?? '' }}"
+                                        class="block w-full"
+                                        aria-label="{{ $secondNameLabel }}"
+                                        :placeholder="__('messages.auto_translated_placeholder')"
+                                        maxlength="200" />
                                     @endif
                                 </div>
+                                <button type="button" data-action="remove-custom-label" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
                             </div>
                             @endforeach
                         </div>
@@ -3152,6 +3441,7 @@
                         </x-upgrade-prompt>
                         @endif
                         </div>
+                        </div>
                         <!-- End Tab Content: Custom Labels -->
 
                     </div>
@@ -3163,21 +3453,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        {{ __('messages.schedule_settings') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.schedule_settings') }}</span>
+                            <span class="section-nav-summary" data-summary="section-settings"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-settings" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-settings" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {{ __('messages.schedule_settings') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {{ __('messages.schedule_settings') }}
+                            </span>
                         </h2>
 
                         @if (is_demo_mode())
@@ -3186,20 +3482,6 @@
                         </div>
                         @endif
 
-                        <!-- Tab Navigation -->
-                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="general">
-                                    {{ __('messages.general') }}
-                                </button>
-                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="notifications">
-                                    {{ __('messages.notifications') }}
-                                </button>
-                                <button type="button" class="settings-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
-                                    {{ __('messages.advanced') }}
-                                </button>
-                            </nav>
-                        </div>
 
                         <!-- Tab Content: General -->
                         <div id="settings-tab-general" class="settings-tab-content">
@@ -3211,7 +3493,7 @@
                                 <x-link href="{{ $scheduleUrl }}" target="_blank" class="min-w-0 break-all">
                                     {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}
                                 </x-link>
-                                <button type="button" data-action="copy-role-url" data-setup-share="link" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                <button type="button" data-action="copy-role-url" data-setup-share="link" class="event-icon-btn flex-shrink-0" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
@@ -3229,10 +3511,12 @@
                                         </span>
                                     @endif
                                 @endif
+                                {{-- Not in demo mode: the editor below is not rendered there, and the button
+                                     used to throw on a missing element. --}}
+                                @if (! is_demo_mode())
+                                <button type="button" data-action="toggle-subdomain-edit" class="event-link flex-shrink-0">{{ __('messages.edit') }}</button>
+                                @endif
                             </p>
-                            <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3">
-                                {{ __('messages.edit') }}
-                            </x-secondary-button>
                         </div>
                         @if (!is_demo_mode())
                         <div class="hidden" id="subdomain-edit" x-data="{ domain: '{{ old('custom_domain', $role->custom_domain) }}', mode: '{{ old('custom_domain_mode', $role->custom_domain_mode) ?: 'subdomain' }}' }">
@@ -3377,33 +3661,14 @@
                         @endif
                         @endif
 
-                        <div class="mb-6">
-                            <x-input-label for="slug_pattern" :value="__('messages.slug_pattern')" />
-                            <x-text-input id="slug_pattern" name="slug_pattern" type="text" class="mt-1 block w-full"
-                                :value="old('slug_pattern', $role->slug_pattern)"
-                                placeholder="{event_name}" />
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
-
-                            <div class="mt-4 flex items-start justify-between">
-                                <x-link href="{{ marketing_url('/docs/creating-schedules#url-pattern-variables') }}" target="_blank" class="text-sm">
-                                    {{ __('messages.show_available_variables') }}
-                                </x-link>
-                                <div class="flex items-center gap-2">
-                                    <span id="update-all-slugs-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
-                                    <button type="button" id="update-all-slugs-btn" style="display: none;"
-                                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
-                                        {{ __('messages.update_all_events_slugs') }}
-                                    </button>
-                                </div>
-                            </div>
-                            <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
-                        </div>
 
                         </div>
                         <!-- End Tab Content: General -->
 
+                        <div class="event-subrows">
                         <!-- Tab Content: Notifications -->
-                        <div id="settings-tab-notifications" class="settings-tab-content hidden">
+                        <x-form-row group="settings" tab="notifications" :title="__('messages.notifications')" class="settings-tab" />
+                        <div id="settings-tab-notifications" class="event-subrow-body settings-tab-content" hidden>
 
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.notification_settings_help') }}</p>
 
@@ -3515,6 +3780,17 @@
                         <hr class="my-6 border-gray-200 dark:border-gray-700">
                         @endif
 
+                        {{-- Three groups, by who the email goes to. The warning about email settings sits with the
+                             switches it greys out, where it used to interrupt the list half way down. --}}
+                        @php
+                            $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings();
+                            // Sale and feedback alerts push before they look for a mail transport, so
+                            // where push can reach this schedule (configured, and on Pro) those two
+                            // toggles still do something without email settings.
+                            $notifyPushEnabled = \App\Services\OneSignalService::isEnabled($role);
+                        @endphp
+
+                        <p class="event-group-label">{{ __('messages.notify_group_you') }}</p>
                         <div class="mb-6" id="notification_new_request_section">
                             <x-toggle name="notification_new_request"
                                 label="{{ __('messages.notify_new_request') }}"
@@ -3529,29 +3805,7 @@
                                 help="{{ __('messages.notify_new_fan_content_help') }}" />
                         </div>
 
-                        {{-- Outbound, not inbound: every other toggle in this section decides
-                             what reaches the OWNER. This one decides whether the schedule's
-                             confirmed audience gets the email the subscribe panel promised them.
-                             Default on, because the guest opted in, not the owner. --}}
-                        <hr class="my-6 border-gray-200 dark:border-gray-700">
-
-                        <div class="mb-6">
-                            <x-toggle name="announce_new_events"
-                                label="{{ __('messages.announce_new_events') }}"
-                                checked="{{ old('announce_new_events', $role->announce_new_events) }}"
-                                help="{{ __('messages.announce_new_events_help') }}" />
-                        </div>
-
-                        @php
-                            $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings();
-                            // Sale and feedback alerts push before they look for a mail transport, so
-                            // where push can reach this schedule (configured, and on Pro) those two
-                            // toggles still do something without email settings.
-                            $notifyPushEnabled = \App\Services\OneSignalService::isEnabled($role);
-                        @endphp
-
                         @if ($emailDisabled)
-                            <hr class="my-6 border-gray-200 dark:border-gray-700">
                             <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
                                 <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
                                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3615,12 +3869,24 @@
                         </div>
                         @endif
 
+                        {{-- Outbound, not inbound: every other toggle in this section decides
+                             what reaches the OWNER. This one decides whether the schedule's
+                             confirmed audience gets the email the subscribe panel promised them.
+                             Default on, because the guest opted in, not the owner. --}}
+                        <p class="event-group-label mt-8">{{ __('messages.notify_group_followers') }}</p>
+                        <div class="mb-6">
+                            <x-toggle name="announce_new_events"
+                                label="{{ __('messages.announce_new_events') }}"
+                                checked="{{ old('announce_new_events', $role->announce_new_events) }}"
+                                help="{{ __('messages.announce_new_events_help') }}" />
+                        </div>
+
                         @if ($role->exists)
                         {{-- The shared notification address (issue #124): one for the whole schedule,
                              unlike every toggle above, which is the signed-in person's own. A copy,
                              never a redirect, and nothing reaches it until it is confirmed from the
                              mailbox itself. See NotificationEmailService. --}}
-                        <hr class="my-6 border-gray-200 dark:border-gray-700">
+                        <p class="event-group-label mt-8">{{ __('messages.notify_group_shared') }}</p>
 
                         <div class="mb-6 ap-card rounded-xl p-4" id="notification-email-section">
                             <div class="flex items-start gap-3">
@@ -3725,7 +3991,11 @@
                         <!-- End Tab Content: Notifications -->
 
                         <!-- Tab Content: Advanced -->
-                        <div id="settings-tab-advanced" class="settings-tab-content hidden">
+                        <x-form-row group="settings" tab="advanced" :title="__('messages.advanced')" class="settings-tab" />
+                        <div id="settings-tab-advanced" class="event-subrow-body settings-tab-content" hidden>
+                            {{-- Twelve settings that were one stack, in the three groups they fall into: what a new
+                                 event starts with, what the public page shows, and where the schedule is listed. --}}
+                            <p class="event-group-label">{{ __('messages.settings_group_new_events') }}</p>
                             <div class="mb-6">
                                 <x-input-label for="default_event_visibility" :value="__('messages.default_event_visibility')" />
                                 @php $currentDefaultVisibility = old('default_event_visibility', $role->default_event_visibility ?: 'public'); @endphp
@@ -3750,110 +4020,25 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-toggle name="hide_past_events"
-                                    label="{{ __('messages.hide_past_events') }}"
-                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
-                                    help="{{ __('messages.hide_past_events_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
-                            </div>
+                                <x-input-label for="slug_pattern" :value="__('messages.slug_pattern')" />
+                                <x-text-input id="slug_pattern" name="slug_pattern" type="text" class="mt-1 block w-full"
+                                    :value="old('slug_pattern', $role->slug_pattern)"
+                                    placeholder="{event_name}" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
 
-                            {{-- Free rather than Pro-gated on purpose: forcing a schedule to
-                                 carry a competitor's promotion with no way out is exactly the
-                                 abuse this feature has to avoid, and opting out only removes
-                                 that schedule's own inventory.
-                                 Shown when EITHER half is on: the toggle now suppresses AdSense
-                                 too, so gating it on the promotions network alone left an
-                                 AdSense-only instance with ads and no way to decline them. --}}
-                            @if (\App\Services\PromotionService::isEnabled() || \App\Services\AdsService::adSenseConfigured())
-                            <div class="mb-6">
-                                <x-toggle name="promotions_opt_out"
-                                    label="{{ __('messages.promotions_opt_out') }}"
-                                    checked="{{ old('promotions_opt_out', $role->promotions_opt_out) }}"
-                                    help="{{ __('messages.promotions_opt_out_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('promotions_opt_out')" />
-                            </div>
-                            @endif
-
-                            {{-- Only rendered once the operator has switched the network
-                                 on for the whole install. Without that gate a SaaS
-                                 operator's customers could opt into a network the
-                                 operator never joined. --}}
-                            @if (! config('app.is_nexus') && \App\Models\Setting::get('federation_enabled'))
-                            @php
-                                $federationChoice = old('federation_enabled', $role->federation_enabled);
-                                $federationChoice = $federationChoice === null || $federationChoice === '' ? '' : ($federationChoice ? '1' : '0');
-                            @endphp
-                            <div class="mb-6">
-                                {{-- A select rather than the usual x-toggle because the column is
-                                     genuinely tri-state: null means the owner has never answered and
-                                     does NOT suppress anything, while false is an explicit opt-out
-                                     that vetoes the whole event (see FederationService). A toggle
-                                     posts its hidden "0" companion whether or not the owner touched
-                                     it, so saving an unrelated setting silently turned "never asked"
-                                     into a veto that withdrew co-listed schedules' events. --}}
-                                <x-input-label for="federation_enabled" :value="__('messages.federation_schedule_toggle')" />
-                                <select name="federation_enabled" id="federation_enabled"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    <option value="" {{ $federationChoice === '' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_undecided') }}</option>
-                                    <option value="1" {{ $federationChoice === '1' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_listed') }}</option>
-                                    <option value="0" {{ $federationChoice === '0' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_hidden') }}</option>
-                                </select>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.federation_schedule_help') }}</p>
-                                <x-input-error class="mt-2" :messages="$errors->get('federation_enabled')" />
-                            </div>
-                            @endif
-
-                            @if (! $role->isTalent())
-                            <div class="mb-6">
-                                <x-toggle name="hide_videos"
-                                    label="{{ __('messages.hide_videos') }}"
-                                    checked="{{ old('hide_videos', $role->hide_videos) }}"
-                                    help="{{ __('messages.hide_videos_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('hide_videos')" />
-                            </div>
-                            @endif
-
-                            <div class="mb-6">
-                                <x-toggle name="show_accessibility_widget"
-                                    label="{{ __('messages.show_accessibility_widget') }}"
-                                    checked="{{ old('show_accessibility_widget', $role->show_accessibility_widget) }}"
-                                    help="{{ __('messages.show_accessibility_widget_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('show_accessibility_widget')" />
-                            </div>
-
-                            {{-- The two guest-page email sign-up surfaces. Free on every plan: turning a
-                                 capture surface off is a choice about the page, not a paid feature.
-                                 The panel defaults on and the "Notify me" card defaults off;
-                                 RoleController::create() sets the panel's default so this create page
-                                 paints it. The card follows the switch of the schedule that CREATED
-                                 an event, wherever the event is listed. --}}
-                            <div class="mb-6">
-                                <x-toggle name="show_subscribe_panel"
-                                    label="{{ __('messages.show_subscribe_panel') }}"
-                                    checked="{{ old('show_subscribe_panel', $role->show_subscribe_panel) }}"
-                                    help="{{ __('messages.show_subscribe_panel_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('show_subscribe_panel')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-toggle name="show_event_interest"
-                                    label="{{ __('messages.show_event_interest') }}"
-                                    checked="{{ old('show_event_interest', $role->show_event_interest) }}"
-                                    help="{{ __('messages.show_event_interest_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('show_event_interest')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
-                                <select name="first_day_of_week" id="first_day_of_week"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
-                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
-                                        {{ __('messages.' . $dayName) }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
+                                <div class="mt-4 flex items-start justify-between">
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#url-pattern-variables') }}" target="_blank" class="text-sm">
+                                        {{ __('messages.show_available_variables') }}
+                                    </x-link>
+                                    <div class="flex items-center gap-2">
+                                        <span id="update-all-slugs-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                        <button type="button" id="update-all-slugs-btn" style="display: none;"
+                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                            {{ __('messages.update_all_events_slugs') }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
                             </div>
 
                             <div class="mb-6">
@@ -3913,7 +4098,118 @@
                             </div>
                         @endif
 
+
+                            <p class="event-group-label mt-8">{{ __('messages.settings_group_public_page') }}</p>
+                            <div class="mb-6">
+                                <x-toggle name="hide_past_events"
+                                    label="{{ __('messages.hide_past_events') }}"
+                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
+                                    help="{{ __('messages.hide_past_events_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
+                            </div>
+
+                            @if (! $role->isTalent())
+                            <div class="mb-6">
+                                <x-toggle name="hide_videos"
+                                    label="{{ __('messages.hide_videos') }}"
+                                    checked="{{ old('hide_videos', $role->hide_videos) }}"
+                                    help="{{ __('messages.hide_videos_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_videos')" />
+                            </div>
+                            @endif
+
+                            <div class="mb-6">
+                                <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
+                                <select name="first_day_of_week" id="first_day_of_week"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach ([0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'] as $value => $dayName)
+                                    <option value="{{ $value }}" {{ old('first_day_of_week', $role->first_day_of_week ?? 0) == $value ? 'selected' : '' }}>
+                                        {{ __('messages.' . $dayName) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('first_day_of_week')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-toggle name="show_accessibility_widget"
+                                    label="{{ __('messages.show_accessibility_widget') }}"
+                                    checked="{{ old('show_accessibility_widget', $role->show_accessibility_widget) }}"
+                                    help="{{ __('messages.show_accessibility_widget_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_accessibility_widget')" />
+                            </div>
+
+                            {{-- The two guest-page email sign-up surfaces. Free on every plan: turning a
+                                 capture surface off is a choice about the page, not a paid feature.
+                                 The panel defaults on and the "Notify me" card defaults off;
+                                 RoleController::create() sets the panel's default so this create page
+                                 paints it. The card follows the switch of the schedule that CREATED
+                                 an event, wherever the event is listed. --}}
+                            <div class="mb-6">
+                                <x-toggle name="show_subscribe_panel"
+                                    label="{{ __('messages.show_subscribe_panel') }}"
+                                    checked="{{ old('show_subscribe_panel', $role->show_subscribe_panel) }}"
+                                    help="{{ __('messages.show_subscribe_panel_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_subscribe_panel')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-toggle name="show_event_interest"
+                                    label="{{ __('messages.show_event_interest') }}"
+                                    checked="{{ old('show_event_interest', $role->show_event_interest) }}"
+                                    help="{{ __('messages.show_event_interest_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_event_interest')" />
+                            </div>
+
+                            {{-- Free rather than Pro-gated on purpose: forcing a schedule to
+                                 carry a competitor's promotion with no way out is exactly the
+                                 abuse this feature has to avoid, and opting out only removes
+                                 that schedule's own inventory.
+                                 Shown when EITHER half is on: the toggle now suppresses AdSense
+                                 too, so gating it on the promotions network alone left an
+                                 AdSense-only instance with ads and no way to decline them. --}}
+                            @if (\App\Services\PromotionService::isEnabled() || \App\Services\AdsService::adSenseConfigured())
+                            <div class="mb-6">
+                                <x-toggle name="promotions_opt_out"
+                                    label="{{ __('messages.promotions_opt_out') }}"
+                                    checked="{{ old('promotions_opt_out', $role->promotions_opt_out) }}"
+                                    help="{{ __('messages.promotions_opt_out_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('promotions_opt_out')" />
+                            </div>
+                            @endif
+
+                            {{-- Only rendered once the operator has switched the network
+                                 on for the whole install. Without that gate a SaaS
+                                 operator's customers could opt into a network the
+                                 operator never joined. --}}
+                            @if (! config('app.is_nexus') && \App\Models\Setting::get('federation_enabled'))
+                            @php
+                                $federationChoice = old('federation_enabled', $role->federation_enabled);
+                                $federationChoice = $federationChoice === null || $federationChoice === '' ? '' : ($federationChoice ? '1' : '0');
+                            @endphp
+                            <div class="mb-6">
+                                {{-- A select rather than the usual x-toggle because the column is
+                                     genuinely tri-state: null means the owner has never answered and
+                                     does NOT suppress anything, while false is an explicit opt-out
+                                     that vetoes the whole event (see FederationService). A toggle
+                                     posts its hidden "0" companion whether or not the owner touched
+                                     it, so saving an unrelated setting silently turned "never asked"
+                                     into a veto that withdrew co-listed schedules' events. --}}
+                                <x-input-label for="federation_enabled" :value="__('messages.federation_schedule_toggle')" />
+                                <select name="federation_enabled" id="federation_enabled"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="" {{ $federationChoice === '' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_undecided') }}</option>
+                                    <option value="1" {{ $federationChoice === '1' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_listed') }}</option>
+                                    <option value="0" {{ $federationChoice === '0' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_hidden') }}</option>
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.federation_schedule_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('federation_enabled')" />
+                            </div>
+                            @endif
+
+
                         @if (config('app.hosted') || config('app.is_testing'))
+                        <p class="event-group-label mt-8">{{ __('messages.ai_import') }}</p>
                         <div class="mb-6" id="import_form_fields_section">
                             <x-input-label :value="__('messages.import_form_fields')" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.import_form_fields_help') }}</p>
@@ -3962,6 +4258,7 @@
                         @endif
 
                         </div>
+                        </div>
                         <!-- End Tab Content: Advanced -->
 
                     </div>
@@ -3972,64 +4269,35 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                         </svg>
-                        {{ __('messages.engagement') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.engagement') }}</span>
+                            <span class="section-nav-summary" data-summary="section-engagement"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-engagement" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-engagement" class="section-content lg:mt-0">
-                    <div class="max-w-2xl">
+                    <div class="form-kit-col">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                            </svg>
-                            {{ __('messages.engagement') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                </svg>
+                                {{ __('messages.engagement') }}
+                            </span>
                         </h2>
 
                         @php $showRequestsTab = $role->isCurator() || $role->isVenue() || $role->isTalent(); @endphp
 
-                        <!-- Tab Navigation -->
-                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                @if ($showRequestsTab)
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="requests">
-                                    {{ __('messages.requests') }}
-                                </button>
-                                @endif
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 {{ $showRequestsTab ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="fan_content">
-                                    {{ __('messages.fan_content') }}
-                                </button>
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="feedback">
-                                    {{ __('messages.feedback') }}
-                                </button>
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="carpool">
-                                    {{ __('messages.carpool') }}
-                                </button>
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
-                                    {{ __('messages.sponsors') }}
-                                </button>
-                                {{-- Only rendered once the operator has enabled the integration for the
-                                     whole install. Without that gate a schedule owner could opt into an
-                                     affiliate programme the operator never joined, and the map would then
-                                     be blocked by the Content-Security-Policy with no visible cause.
 
-                                     Kept LAST on purpose. Which tab paints as active is hand-rolled
-                                     above: $showRequestsTab decides both whether the requests button
-                                     renders and, via the ternary on the fan_content button, which tab
-                                     gets the active border. A conditionally-rendered tab inserted
-                                     anywhere but the end would disturb that. --}}
-                                @if (\App\Services\Stay22Service::isEnabled())
-                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="accommodation">
-                                    {{ __('messages.accommodation') }}
-                                </button>
-                                @endif
-                            </nav>
-                        </div>
-
+                        <div class="event-subrows">
                         <!-- Tab Content: Requests -->
                         @if ($showRequestsTab)
-                        <div id="engagement-tab-requests" class="engagement-tab-content">
+                        <x-form-row group="engagement" tab="requests" :title="__('messages.requests')" class="engagement-tab" />
+                        <div id="engagement-tab-requests" class="event-subrow-body engagement-tab-content" hidden>
 
                         <div class="mb-6">
                             <x-toggle name="accept_requests"
@@ -4194,7 +4462,8 @@
                         <!-- End Tab Content: Requests -->
 
                         <!-- Tab Content: Fan Content -->
-                        <div id="engagement-tab-fan_content" class="engagement-tab-content {{ $showRequestsTab ? 'hidden' : '' }}">
+                        <x-form-row group="engagement" tab="fan_content" :title="__('messages.fan_content')" class="engagement-tab" />
+                        <div id="engagement-tab-fan_content" class="event-subrow-body engagement-tab-content" hidden>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.fan_content_help') }}</p>
                             <div class="mb-4">
                                 <x-toggle name="fan_comments_enabled"
@@ -4221,7 +4490,8 @@
                         <!-- End Tab Content: Fan Content -->
 
                         <!-- Tab Content: Feedback -->
-                        <div id="engagement-tab-feedback" class="engagement-tab-content hidden">
+                        <x-form-row group="engagement" tab="feedback" :title="__('messages.feedback')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
+                        <div id="engagement-tab-feedback" class="event-subrow-body engagement-tab-content" hidden>
 
                         @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
 
@@ -4294,7 +4564,8 @@
                         <!-- End Tab Content: Feedback -->
 
                         <!-- Tab Content: Carpool -->
-                        <div id="engagement-tab-carpool" class="engagement-tab-content hidden">
+                        <x-form-row group="engagement" tab="carpool" :title="__('messages.carpool')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
+                        <div id="engagement-tab-carpool" class="event-subrow-body engagement-tab-content" hidden>
 
                         @if (! $role->isPro())
                             <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
@@ -4320,7 +4591,8 @@
                         <!-- End Tab Content: Carpool -->
 
                         <!-- Tab Content: Sponsors -->
-                        <div id="engagement-tab-sponsors" class="engagement-tab-content hidden">
+                        <x-form-row group="engagement" tab="sponsors" :title="__('messages.sponsors')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
+                        <div id="engagement-tab-sponsors" class="event-subrow-body engagement-tab-content" hidden>
                         @if ($role->isPro())
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
 
@@ -4339,7 +4611,8 @@
                                 }
                             @endphp
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                            {{-- The strip's background matters once there is a sponsor to put on it. --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" id="sponsor-background-controls" @if (! count($existingSponsors)) hidden @endif>
                                 <div>
                                     <x-input-label for="sponsor_background_mode" :value="__('messages.sponsor_background')" />
                                     <select id="sponsor_background_mode" data-action="sponsor-background-change"
@@ -4361,6 +4634,7 @@
                             <input type="hidden" name="sponsor_background_color" id="sponsor_background_color" value="{{ $sponsorBackgroundMode === 'default' ? '' : $sponsorBackground }}" />
                             <x-input-error class="mb-4" :messages="$errors->get('sponsor_background_color')" />
 
+                            <p class="event-empty" id="sponsors-empty" @if (count($existingSponsors)) hidden @endif>{{ __('messages.no_sponsors') }}</p>
                             <div id="sponsors-list" class="space-y-3 mb-6">
                                 @foreach ($existingSponsors as $index => $sponsor)
                                 @php
@@ -4389,7 +4663,7 @@
                                         @endif
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $sponsor['name'] ?? '' }}</div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" data-row-name>{{ $sponsor['name'] ?? '' }}</div>
                                         @if (!empty($sponsor['tier']))
                                             <span class="inline-block text-xs px-1.5 py-0.5 rounded
                                                 {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
@@ -4437,6 +4711,11 @@
                                 </div>
                             </div>
 
+                            {{-- The form is behind its link: always open, it read as a sponsor half filled in.
+                                 #add-sponsor-form keeps its own hidden class, which the page script uses for
+                                 "the list is full". --}}
+                            <button type="button" class="event-link" id="sponsor-form-open">+ {{ __('messages.add_sponsor') }}</button>
+                            <div id="sponsor-form-shell" hidden>
                             <div id="add-sponsor-form" class="{{ count($existingSponsors) >= $maxSponsors ? 'hidden' : '' }}">
                                 <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -4482,13 +4761,19 @@
                                             class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                             {{ __('messages.cancel') }}
                                         </button>
+                                        {{-- Closes the form when it was opened to add: the button above is for an edit. --}}
+                                        <button type="button" id="sponsor-form-close" class="event-link event-link-quiet">{{ __('messages.cancel') }}</button>
                                     </div>
+                                    {{-- Why Add did nothing (no logo chosen, or the list is full). --}}
+                                    <p id="sponsor-form-note" class="sched-inline-error" role="alert"></p>
                                 </div>
+                            </div>
+
                             </div>
 
                             <div id="new-sponsor-inputs-container"></div>
                         @else
-                            <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/custom-css')" :subdomain="$role->subdomain">
+                            <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/creating-schedules#engagement-sponsors')" :subdomain="$role->subdomain">
                                 <x-slot:icon>
                                     <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
@@ -4502,7 +4787,8 @@
 
                         <!-- Tab Content: Accommodation -->
                         @if (\App\Services\Stay22Service::isEnabled())
-                        <div id="engagement-tab-accommodation" class="engagement-tab-content hidden">
+                        <x-form-row group="engagement" tab="accommodation" :title="__('messages.accommodation')" class="engagement-tab" />
+                        <div id="engagement-tab-accommodation" class="event-subrow-body engagement-tab-content" hidden>
 
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.stay22_help') }}</p>
 
@@ -4542,6 +4828,7 @@
 
                         </div>
                         @endif
+                        </div>
                         <!-- End Tab Content: Accommodation -->
                     </div>
                 </div>
@@ -4552,19 +4839,25 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                         </svg>
-                        {{ __('messages.gift_cards') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.gift_cards') }}</span>
+                            <span class="section-nav-summary" data-summary="section-gift-cards"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-gift-cards" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-gift-cards" class="section-content lg:mt-0">
-                    <div class="max-w-2xl">
+                    <div class="form-kit-col">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                            </svg>
-                            {{ __('messages.gift_cards') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                </svg>
+                                {{ __('messages.gift_cards') }}
+                            </span>
                         </h2>
 
                         @if ($role->isPro())
@@ -4580,7 +4873,7 @@
                                 </svg>
                                 <div class="text-sm text-amber-800 dark:text-amber-400">
                                     {{ __('messages.gift_cards_email_required') }}
-                                    <a href="#section-settings" class="section-jump-link underline font-medium" data-section="section-settings">{{ __('messages.email_settings') }}</a>
+                                    <a href="#integration-tab-email" class="js-email-settings-link underline font-medium">{{ __('messages.email_settings') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -4594,9 +4887,15 @@
                             <x-input-error class="mt-2" :messages="$errors->get('gift_cards_enabled')" />
                         </div>
 
+                        {{-- Everything a gift card needs, shown once the switch is on: four live-looking
+                             settings used to sit under "Disabled". Hidden, not removed, so they are
+                             still posted and nothing stored is lost by switching off and on. --}}
+                        <div id="gift-card-details" @if (! old('gift_cards_enabled', $role->gift_cards_enabled)) hidden @endif>
                         <div class="mb-6">
                             <x-input-label :value="__('messages.gift_card_amounts')" />
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_amounts_help') }}</p>
+                            {{-- Says the list was on the page, so taking off the last amount is saved. --}}
+                            <input type="hidden" name="gift_card_amounts_submitted" value="1">
                             <div id="gift-card-amounts-items" class="space-y-2">
                                 @foreach (old('gift_card_amounts', $role->gift_card_amounts ?? []) as $amount)
                                 <div class="flex items-center gap-2" data-gift-card-amount-row>
@@ -4710,6 +5009,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_share_link_help') }}</p>
                         </div>
                         @endif
+                        </div>
 
                         @else
                         <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/gift-cards')" :subdomain="$role->subdomain">
@@ -4774,140 +5074,40 @@
                 </script>
                 @endif
 
-                @if ($role->exists && $role->isCurator())
-                @php
-                    $sourceRows = old('source_schedules') !== null
-                        ? collect(old('source_schedules'))->map(fn ($subdomain, $i) => [
-                            'subdomain' => $subdomain,
-                            'group_id' => old('source_groups')[$i] ?? '',
-                        ])->filter(fn ($row) => filled($row['subdomain']))->values()->all()
-                        : ($sourceSchedules ?? collect())->map(fn ($source) => [
-                            'subdomain' => $source->sourceRole->subdomain,
-                            'group_id' => $source->group_id ? \App\Utils\UrlUtils::encodeId($source->group_id) : '',
-                        ])->all();
-                    $sourceNames = ($sourceSchedules ?? collect())->mapWithKeys(fn ($s) => [$s->sourceRole->subdomain => $s->sourceRole->name])->all();
-                    $curatorGroupOptions = $role->groups->mapWithKeys(fn ($g) => [\App\Utils\UrlUtils::encodeId($g->id) => $g->name])->all();
-                @endphp
-                <button type="button" class="mobile-section-header" data-section="section-sources">
-                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                        </svg>
-                        {{ __('messages.event_sources') }}
-                    </span>
-                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div id="section-sources" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                            </svg>
-                            {{ __('messages.event_sources') }}
-                        </h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.event_sources_help') }}</p>
-
-                        <div class="mb-6">
-                            <div id="source-schedule-items"
-                                 data-groups="{{ json_encode($curatorGroupOptions) }}"
-                                 data-group-none="{{ __('messages.none') }}">
-                                @foreach($sourceRows as $row)
-                                    {{-- mb-4, not mb-2: the count line below sits mt-1 off its own
-                                         select, so the gap BETWEEN rows has to be clearly larger or
-                                         the count reads as a label on the next source. --}}
-                                    <div class="mb-4 relative" data-source-row>
-                                        <div class="flex items-center">
-                                            <input type="text" data-source-search
-                                                   value="{{ isset($sourceNames[$row['subdomain']]) ? $sourceNames[$row['subdomain']] . ' (' . $row['subdomain'] . ')' : $row['subdomain'] }}"
-                                                   placeholder="{{ __('messages.search_schedules_autocomplete') }}"
-                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800"
-                                                   readonly autocomplete="off" />
-                                            <button type="button" data-action="remove-parent-item"
-                                                    class="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
-                                        </div>
-                                        <input type="hidden" name="source_schedules[]" value="{{ $row['subdomain'] }}" />
-                                        @if (count($curatorGroupOptions))
-                                        <select name="source_groups[]"
-                                                class="mt-2 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                            <option value="">{{ __('messages.none') }}</option>
-                                            @foreach($curatorGroupOptions as $groupHash => $groupName)
-                                            <option value="{{ $groupHash }}" {{ $row['group_id'] === $groupHash ? 'selected' : '' }}>{{ $groupName }}</option>
-                                            @endforeach
-                                        </select>
-                                        @else
-                                        <input type="hidden" name="source_groups[]" value="" />
-                                        @endif
-                                        @php $sourceCount = ($sourceEventCounts ?? [])[$row['subdomain']] ?? null; @endphp
-                                        @if ($sourceCount !== null)
-                                        {{-- Saved sources only. A source already saved still shows its count when
-                                             the rows are rebuilt from old() after a failed save, since the map is
-                                             keyed by subdomain; only a genuinely new row falls through to null,
-                                             where "0" would read as a failure rather than as "not saved yet". --}}
-                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                            {{ trans_choice('messages.source_events_on_calendar', $sourceCount, ['count' => number_format($sourceCount)]) }}
-                                        </p>
-                                        @endif
-                                        <div data-source-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            {{-- Always submitted, so clearing the list to empty is distinguishable from a
-                                 save that never rendered this section. --}}
-                            <input type="hidden" name="source_schedules_submitted" value="1" />
-                            <button type="button" data-action="add-source-schedule" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                                + {{ __('messages.add_schedule') }}
-                            </button>
-                            <x-input-error class="mt-2" :messages="$errors->get('source_schedules')" />
-                        </div>
-
-                        @if (isset($suggestedSources) && $suggestedSources->count())
-                        <div class="mb-6">
-                            <x-input-label :value="__('messages.suggested_sources')" />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.suggested_sources_help') }}</p>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($suggestedSources as $suggestion)
-                                <button type="button" data-action="add-suggested-source"
-                                        data-subdomain="{{ $suggestion->subdomain }}"
-                                        data-name="{{ $suggestion->name }}"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
-                                    + <span dir="auto">{{ $suggestion->name }}</span>
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                @endif
-
                 @if (! config('app.hosted'))
                 <button type="button" class="mobile-section-header" data-section="section-auto-import">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                         </svg>
-                        {{ __('messages.auto_import_settings') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.auto_import_settings') }}</span>
+                            <span class="section-nav-summary" data-summary="section-auto-import"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-auto-import" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-auto-import" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                            </svg>
-                            {{ __('messages.auto_import_settings') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                </svg>
+                                {{ __('messages.auto_import_settings') }}
+                            </span>
                         </h2>
 
                         <div class="mb-6">
                             <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
                                 {{ __('messages.import_urls') }}
                             </h3>
+                            {{-- Says both lists were on the page, so removing the last address or city is saved. --}}
+                            <input type="hidden" name="import_lists_submitted" value="1">
                             <div id="import-urls-list">
                                 <div id="import-url-items">
                                     @php $urls = $role->import_config['urls'] ?? []; @endphp
@@ -4977,20 +5177,26 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
                         </svg>
-                        {{ __('messages.integrations') }}
+                        <span class="section-nav-text">
+                            <span>{{ __('messages.integrations') }}</span>
+                            <span class="section-nav-summary" data-summary="section-integrations"><bdi></bdi></span>
+                        </span>
+                        <span class="section-nav-dot" data-dirty-dot="section-integrations" hidden></span>
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
                 <div id="section-integrations" class="section-content lg:mt-0">
-                    <div class="max-w-xl">
+                    <div class="form-kit-col">
 
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
-                            </svg>
-                            {{ __('messages.integrations') }}
+                            <span class="section-heading-name inline-flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.959.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
+                                </svg>
+                                {{ __('messages.integrations') }}
+                            </span>
                         </h2>
 
                         @if (is_demo_mode())
@@ -5001,37 +5207,12 @@
 
                         <div>
 
-                        <!-- Tab Navigation -->
-                        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">
-                            <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                @if (config('app.hosted'))
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="email">
-                                    <span class="inline-flex items-center gap-1.5">
-                                        {{ __('messages.email_settings') }}
-                                        @if ($role->isEmailSettingsFailureActive())
-                                        <span class="inline-block w-2 h-2 rounded-full bg-amber-500" aria-label="{{ __('messages.email_settings_failed_warning_title') }}"></span>
-                                        @endif
-                                    </span>
-                                </button>
-                                @endif
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="google">
-                                    Google Calendar
-                                </button>
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="microsoft">
-                                    {{ __('messages.microsoft_calendar') }}
-                                </button>
-                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
-                                    {{ __('messages.caldav_calendar') }}
-                                </button>
-                                <button type="button" class="integration-tab advanced-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="advanced">
-                                    {{ __('messages.advanced') }}
-                                </button>
-                            </nav>
-                        </div>
 
+                        <div class="event-subrows">
                         @if (config('app.hosted'))
                         <!-- Tab Content: Email Settings -->
-                        <div id="integration-tab-email" class="integration-tab-content">
+                        <x-form-row group="integration" tab="email" :title="__('messages.email_settings')" class="integration-tab" />
+                        <div id="integration-tab-email" class="event-subrow-body integration-tab-content" hidden>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.email_settings_help') }}</p>
 
                             @if ($role->isEmailSettingsFailureActive())
@@ -5078,57 +5259,60 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('email_settings.host')" />
                             </div>
 
-                            <div class="mb-6">
-                                <x-input-label for="email_settings_port" :value="__('messages.smtp_port')" />
-                                <x-text-input id="email_settings_port" name="email_settings[port]" type="number" class="mt-1 block w-full"
-                                    :value="old('email_settings.port', $emailSettings['port'] ?? '')" />
-                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.port')" />
+                            <div class="event-grid2 mb-6">
+                                <div>
+                                    <x-input-label for="email_settings_port" :value="__('messages.smtp_port')" />
+                                    <x-text-input id="email_settings_port" name="email_settings[port]" type="number" class="mt-1 block w-full"
+                                        :value="old('email_settings.port', $emailSettings['port'] ?? '')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.port')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
+                                    <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        <option value="">{{ __('messages.none') }}</option>
+                                        <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                        <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.encryption')" />
+                                </div>
                             </div>
 
-                            <div class="mb-6">
-                                <x-input-label for="email_settings_encryption" :value="__('messages.encryption')" />
-                                <select id="email_settings_encryption" name="email_settings[encryption]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                    <option value="">{{ __('messages.none') }}</option>
-                                    <option value="tls" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
-                                    <option value="ssl" {{ old('email_settings.encryption', $emailSettings['encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.encryption')" />
+                            <div class="event-grid2 mb-6">
+                                <div>
+                                    <x-input-label for="email_settings_username" :value="__('messages.smtp_username')" />
+                                    <x-text-input id="email_settings_username" name="email_settings[username]" type="text" class="mt-1 block w-full"
+                                        :value="old('email_settings.username', $emailSettings['username'] ?? '')" autocomplete="off" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.username')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
+                                    <x-password-input id="email_settings_password" name="email_settings[password]" class="mt-1 block w-full"
+                                        :value="old('email_settings.password', !empty($emailSettings['password']) ? '••••••••••' : '')"
+                                        autocomplete="new-password" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
+                                </div>
                             </div>
 
-                            <div class="mb-6">
-                                <x-input-label for="email_settings_username" :value="__('messages.smtp_username')" />
-                                <x-text-input id="email_settings_username" name="email_settings[username]" type="text" class="mt-1 block w-full"
-                                    :value="old('email_settings.username', $emailSettings['username'] ?? '')" autocomplete="off" />
-                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.username')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="email_settings_password" :value="__('messages.smtp_password')" />
-                                <x-password-input id="email_settings_password" name="email_settings[password]" class="mt-1 block w-full"
-                                    :value="old('email_settings.password', !empty($emailSettings['password']) ? '••••••••••' : '')"
-                                    autocomplete="new-password" />
-                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.password')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="email_settings_from_address" :value="__('messages.from_address')" />
-                                <x-text-input id="email_settings_from_address" name="email_settings[from_address]" type="email" class="mt-1 block w-full"
-                                    :value="old('email_settings.from_address', $emailSettings['from_address'] ?? '')" />
-                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_address')" />
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label for="email_settings_from_name" :value="__('messages.from_name')" />
-                                <x-text-input id="email_settings_from_name" name="email_settings[from_name]" type="text" class="mt-1 block w-full"
-                                    :value="old('email_settings.from_name', $emailSettings['from_name'] ?? '')" />
-                                <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_name')" />
+                            <div class="event-grid2 mb-6">
+                                <div>
+                                    <x-input-label for="email_settings_from_address" :value="__('messages.from_address')" />
+                                    <x-text-input id="email_settings_from_address" name="email_settings[from_address]" type="email" class="mt-1 block w-full"
+                                        :value="old('email_settings.from_address', $emailSettings['from_address'] ?? '')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_address')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="email_settings_from_name" :value="__('messages.from_name')" />
+                                    <x-text-input id="email_settings_from_name" name="email_settings[from_name]" type="text" class="mt-1 block w-full"
+                                        :value="old('email_settings.from_name', $emailSettings['from_name'] ?? '')" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('email_settings.from_name')" />
+                                </div>
                             </div>
 
                             @if ($role->exists && $role->subdomain)
                             <div class="mb-6">
-                                <x-primary-button type="button" id="send-test-email-btn">
+                                <x-secondary-button type="button" id="send-test-email-btn">
                                     {{ __('messages.send_test_email') }}
-                                </x-primary-button>
+                                </x-secondary-button>
                                 <div id="test-email-result" class="mt-2 hidden"></div>
                             </div>
                             @endif
@@ -5138,7 +5322,8 @@
                         @endif
 
                         <!-- Tab Content: Google Calendar -->
-                        <div id="integration-tab-google" class="integration-tab-content {{ config('app.hosted') ? 'hidden' : '' }}">
+                        <x-form-row group="integration" tab="google" :title="'Google Calendar'" class="integration-tab" />
+                        <div id="integration-tab-google" class="event-subrow-body integration-tab-content" hidden>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                                 {{ __('messages.sync_events_between_schedules') }}
                             </p>
@@ -5285,9 +5470,9 @@
                                 @endif
                             </div>
                             @elseif (! auth()->user()->google_token)
-                            <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
+                            <x-secondary-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank" rel="noopener">
                                 {{ __('messages.connect_google_calendar') }}
-                            </x-link>
+                            </x-secondary-link>
                             @endif
 
                             @if (auth()->id() != $role->user_id)
@@ -5380,7 +5565,8 @@
                         </div>
 
                         <!-- Tab Content: Outlook / Microsoft Calendar -->
-                        <div id="integration-tab-microsoft" class="integration-tab-content hidden {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                        <x-form-row group="integration" tab="microsoft" :title="__('messages.microsoft_calendar')" class="integration-tab" />
+                        <div id="integration-tab-microsoft" class="event-subrow-body integration-tab-content {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" hidden>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                                 {{ __('messages.microsoft_sync_events_between_schedules') }}
                             </p>
@@ -5464,20 +5650,26 @@
                                 </div>
                             </div>
                             @else
-                            <x-link href="{{ route('profile.edit') }}#section-microsoft-calendar" target="_blank">
+                            <x-secondary-link href="{{ route('profile.edit') }}#section-microsoft-calendar" target="_blank" rel="noopener">
                                 {{ __('messages.connect_microsoft_calendar') }}
-                            </x-link>
+                            </x-secondary-link>
                             @endif
                         </div>
 
                         <!-- Tab Content: CalDAV -->
-                        <div id="integration-tab-caldav" class="integration-tab-content hidden {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                        <x-form-row group="integration" tab="caldav" :title="__('messages.caldav_calendar')" class="integration-tab" />
+                        <div id="integration-tab-caldav" class="event-subrow-body integration-tab-content {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" hidden>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                                 {{ __('messages.caldav_description') }}
                             </p>
 
                             @php
                                 $caldavSettings = $role->getCalDAVSettings();
+                                // The connection is the owner's: CalDAVController refuses everyone
+                                // else, and RoleController::update() puts the direction back. So
+                                // another member is shown how it is set, and that it is not theirs
+                                // to change: the radios used to take their choice and drop it.
+                                $caldavIsOwner = (int) auth()->id() === (int) $role->user_id;
                             @endphp
 
                             @if ($role->hasCalDAVSettings())
@@ -5498,10 +5690,14 @@
                                 <!-- Sync Direction Selection -->
                                 <div>
                                     <x-input-label :value="__('messages.sync_direction')" />
+                                    @if (! $caldavIsOwner)
+                                    <p class="event-hint" data-caldav-owner-note>{{ __('messages.calendar_connection_owner_only') }}</p>
+                                    @endif
                                     <div class="mt-2 space-y-2">
                                         <label class="flex items-center">
                                             <input type="radio"
                                                    name="caldav_sync_direction"
+                                                   @disabled(! $caldavIsOwner)
                                                    value="to"
                                                    {{ $role->caldav_sync_direction === 'to' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
@@ -5513,6 +5709,7 @@
                                         <label class="flex items-center">
                                             <input type="radio"
                                                    name="caldav_sync_direction"
+                                                   @disabled(! $caldavIsOwner)
                                                    value="from"
                                                    {{ $role->caldav_sync_direction === 'from' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
@@ -5524,6 +5721,7 @@
                                         <label class="flex items-center">
                                             <input type="radio"
                                                    name="caldav_sync_direction"
+                                                   @disabled(! $caldavIsOwner)
                                                    value="both"
                                                    {{ $role->caldav_sync_direction === 'both' ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
@@ -5535,6 +5733,7 @@
                                         <label class="flex items-center">
                                             <input type="radio"
                                                    name="caldav_sync_direction"
+                                                   @disabled(! $caldavIsOwner)
                                                    value=""
                                                    {{ !$role->caldav_sync_direction ? 'checked' : '' }}
                                                    class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
@@ -5547,12 +5746,16 @@
                                 </div>
 
                                 <!-- Disconnect Button -->
+                                @if ($caldavIsOwner)
                                 <div>
                                     <x-danger-button type="button" id="caldav-disconnect-btn">
                                         {{ __('messages.disconnect') }}
                                     </x-danger-button>
                                 </div>
+                                @endif
                             </div>
+                            @elseif (! $caldavIsOwner)
+                            <p class="event-hint" data-caldav-owner-note>{{ __('messages.calendar_connection_owner_only') }}</p>
                             @else
                             <!-- Connection Form -->
                             <div class="space-y-6" id="caldav-connection-form">
@@ -5620,16 +5823,17 @@
                                 </div>
 
                                 <div id="caldav-connect-container" class="hidden">
-                                    <x-primary-button type="button" id="caldav-connect-btn">
+                                    <x-brand-button size="sm" type="button" id="caldav-connect-btn">
                                         {{ __('messages.connect') }}
-                                    </x-primary-button>
+                                    </x-brand-button>
                                 </div>
                             </div>
                             @endif
                         </div>
 
                         <!-- Tab Content: Advanced -->
-                        <div id="integration-tab-advanced" class="integration-tab-content hidden">
+                        <x-form-row group="integration" tab="advanced" :title="__('messages.integration_row_feeds')" class="integration-tab" />
+                        <div id="integration-tab-advanced" class="event-subrow-body integration-tab-content" hidden>
                             <!-- Calendar Description Template -->
                             <div class="mb-8">
                                 <x-input-label for="calendar_description_template" :value="__('messages.calendar_description_template')" />
@@ -5685,6 +5889,7 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400 italic">{{ __('messages.save_schedule_first_for_feeds') }}</p>
                             @endif
                         </div>
+                        </div>
 
                         </div>
                     </div>
@@ -5693,51 +5898,13 @@
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
 
-        <!-- Spacer for mobile fixed buttons -->
-        <div class="lg:hidden h-24"></div>
-
-        <!-- Mobile Fixed Save Bar -->
-        <div class="lg:hidden fixed bottom-0 inset-x-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 z-40 shadow-lg"
-             style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
-            @if (! $role->exists)
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5a17.92 17.92 0 0 1-8.716-4.247m0 0A8.959 8.959 0 0 1 3 12c0-1.178.227-2.304.638-3.335" />
-                </svg>
-                {{ __('messages.note_all_schedules_are_publicly_listed') }}
-            </p>
-            @endif
-            <div class="flex gap-3 justify-center max-w-lg mx-auto">
-                <x-primary-button class="flex-1 justify-center">
-                    {{ __('messages.save') }}
-                </x-primary-button>
-                <x-cancel-button class="flex-1 justify-center" />
-            </div>
-        </div>
-
-        <script {!! nonce_attr() !!}>
-        (function() {
-            var isDirty = false;
-            var mainForm = document.currentScript.closest('form');
-
-            mainForm.addEventListener('input', function() { isDirty = true; });
-            mainForm.addEventListener('change', function() { isDirty = true; });
-            mainForm.addEventListener('submit', function(e) {
-                if (!e.defaultPrevented) { isDirty = false; }
-            });
-
-            window._markFormDirty = function() { isDirty = true; };
-
-            window.addEventListener('beforeunload', function(e) {
-                if (isDirty && !window._skipUnsavedWarning) { e.preventDefault(); e.returnValue = ''; }
-            });
-
-        })();
-        </script>
+        @include('partials.form-save-bar')
     </form>
 
 </x-app-admin-layout>
 
+@include('partials.form-kit-script')
+@include('partials.form-save-bar-script', ['tabs' => $shellTabs])
 <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
 
 @if ($role->exists && $galleryMode !== 'locked')
@@ -5767,7 +5934,10 @@
         maxBytes: @json(\App\Utils\GalleryUtils::maxUploadBytes()),
         initialImages: @json($galleryState['images']),
         knownIds: @json($galleryState['known']),
-        onChange: function () { if (window._markFormDirty) { window._markFormDirty(); } },
+        onChange: function () {
+            if (window._markFormDirty) { window._markFormDirty(); }
+            window.FormKit.markDirty('section-gallery');
+        },
     });
 
     Vue.createApp({
@@ -5794,27 +5964,18 @@
         }
 
         waiting = true;
-        var buttons = form.querySelectorAll('button[type="submit"]');
-        var labels = [];
-        buttons.forEach(function (button, i) {
-            labels[i] = button.innerHTML;
-            button.disabled = true;
-            button.textContent = finishing.replace(':count', store.pendingCount());
-        });
+        // The save bar's button is Vue's: it is told, never rewritten.
+        document.dispatchEvent(new CustomEvent('formkit:saving', { detail: { saving: true, waiting: finishing.replace(':count', store.pendingCount()) } }));
 
         store.whenIdle().then(function () {
             waiting = false;
-            buttons.forEach(function (button, i) {
-                button.disabled = false;
-                button.innerHTML = labels[i];
-            });
+            document.dispatchEvent(new CustomEvent('formkit:saving', { detail: { saving: false } }));
 
             // Some photos did not make it: saving now would leave them out without a word.
             if (store.failedCount() > 0) {
                 store.reportFailedBeforeSave();
                 var section = document.getElementById('section-gallery');
-                var link = document.querySelector('.section-nav-link[data-section="section-gallery"]');
-                if (link) { link.click(); }
+                window.FormKit.showSection('section-gallery');
                 if (section) { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
                 return;
             }
@@ -5888,80 +6049,68 @@ document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {
     });
 });
 
-// Style sub-tab navigation
+// The Style tab's rows. Branding is always on the page; Background and Advanced open in place.
 function showStyleTab(tabName) {
-    // Hide all style tab contents
-    const tabContents = ['branding', 'background', 'advanced'];
-    tabContents.forEach(function(tab) {
-        const content = document.getElementById('style-content-' + tab);
-        if (content) {
-            content.style.display = tab === tabName ? 'block' : 'none';
-        }
-    });
-
-    // Update tab button styles
-    const tabButtons = document.querySelectorAll('.style-tab-button');
-    tabButtons.forEach(function(button) {
-        const isActive = button.id === 'style-tab-' + tabName;
-        if (isActive) {
-            button.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-            button.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
-        } else {
-            button.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-            button.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
-        }
-    });
-
-    localStorage.setItem('styleActiveTab', tabName);
+    if (tabName === 'animation' || tabName === 'background' || tabName === 'advanced') {
+        window.FormKit.openRow('style', tabName);
+    } else {
+        window.FormKit.closeRows('style');
+    }
 }
 
-// Restore active style tab from localStorage on page load
-document.addEventListener('DOMContentLoaded', function() {
-    if (!isNewSchedule) {
-        var savedStyleTab = localStorage.getItem('styleActiveTab');
-        if (savedStyleTab) {
-            // Migrate old tab names to new names
-            if (savedStyleTab === 'images') savedStyleTab = 'branding';
-            if (savedStyleTab === 'settings') savedStyleTab = 'advanced';
-            if (savedStyleTab === 'sponsors') savedStyleTab = 'branding';
-            showStyleTab(savedStyleTab);
-        }
-    }
-});
-
+// A new sub-schedule row. Its key counts up and is never reused: the list's length was used, so
+// adding two, removing the first and adding a third gave the third the second one's key, and one
+// of the two was lost on save.
+//
+// It starts past the rows the page was drawn with: after a refused save the new rows come back
+// from old() under the keys they were posted with (new_0, new_1 ...), and starting from zero
+// again gave the next one a key that was already on the page.
+var newGroupIndex = null;
 function addGroupField() {
     const container = document.getElementById('group-items');
-    const idx = container.children.length;
+    if (newGroupIndex === null) {
+        newGroupIndex = 0;
+        container.querySelectorAll('input[name^="groups[new_"]').forEach(function(input) {
+            const match = input.name.match(/^groups\[new_(\d+)\]/);
+            if (match) {
+                newGroupIndex = Math.max(newGroupIndex, parseInt(match[1], 10) + 1);
+            }
+        });
+    }
+    const idx = newGroupIndex++;
     const div = document.createElement('div');
-    div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    div.className = 'event-list-row';
+    div.setAttribute('data-list-row', '');
+    const field = 'block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] dark:focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-[var(--brand-blue)] rounded-lg shadow-sm';
     div.innerHTML = `
-        <div class="mb-4">
-            <label for="group_name_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} *</label>
-            <input name="groups[new_${idx}][name]" type="text" id="group_name_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
+        <div class="min-w-0 flex-1">
+            <div class="sched-sub-line {{ $subscheduleSecondName ? '' : 'no-second' }}">
+                <input name="groups[new_${idx}][name]" type="text" class="${field}" aria-label="{{ __('messages.name') }}" placeholder="{{ __('messages.name') }}">
+                @if ($subscheduleSecondName)
+                <input name="groups[new_${idx}][name_en]" type="text" class="${field}" aria-label="{{ $secondNameLabel }}" placeholder="{{ $secondNameLabel }}">
+                @endif
+                <div class="vue-color-picker" title="{{ __('messages.color') }}" data-props='${JSON.stringify({
+                    name: "groups[new_" + idx + "][color]",
+                    initialColor: "",
+                    colors: ["#EF4444","#F97316","#EAB308","#84CC16","#22C55E","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1","#A855F7","#EC4899","#F43F5E","#6B7280"],
+                    clearLabel: @json(__('messages.clear')),
+                    label: @json(__('messages.color')),
+                    align: "end",
+                })}'></div>
+            </div>
         </div>
-        @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
-        <div class="mb-4">
-            <label for="group_name_en_new_${idx}" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
-            <input name="groups[new_${idx}][name_en]" type="text" id="group_name_en_new_${idx}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" />
-        </div>
-        @endif
-        <div class="mb-4">
-            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.color') }}</label>
-            <div class="vue-color-picker" data-props='${JSON.stringify({
-                name: "groups[new_" + idx + "][color]",
-                initialColor: "",
-                colors: ["#EF4444","#F97316","#EAB308","#84CC16","#22C55E","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1","#A855F7","#EC4899","#F43F5E","#6B7280"],
-                clearLabel: @json(__('messages.clear')),
-            })}'></div>
-        </div>
-        <div class="flex gap-4 items-center justify-end">
-            <button type="button" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm" data-action="remove-parent-item">
-                {{ __('messages.remove') }}
-            </button>
-        </div>
+        <button type="button" data-action="remove-list-row" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
     `;
     container.appendChild(div);
-    div.querySelectorAll('.vue-color-picker').forEach(window.mountColorPicker);
+    if (window.mountColorPicker) {
+        div.querySelectorAll('.vue-color-picker').forEach(window.mountColorPicker);
+    }
+    const name = div.querySelector('input');
+    if (name) {
+        name.focus();
+    }
 }
 
 function copyFeedUrl(inputId, button) {
@@ -6084,13 +6233,24 @@ function testImport() {
     const cityInputs = document.querySelectorAll('input[name^="import_cities["]');
     const cities = Array.from(cityInputs).map(input => input.value.trim()).filter(city => city);
     
+    // The button itself, not window.event's target: that only worked where the browser keeps one.
+    const button = document.getElementById('test-import-btn');
+    let importNote = document.getElementById('test-import-note');
+    if (! importNote) {
+        importNote = document.createElement('p');
+        importNote.id = 'test-import-note';
+        importNote.className = 'sched-inline-error';
+        importNote.setAttribute('role', 'alert');
+        button.insertAdjacentElement('afterend', importNote);
+    }
+    importNote.textContent = '';
     if (urls.length === 0 && cities.length === 0) {
-        alert(@json(__('messages.please_enter_urls_or_cities'), JSON_UNESCAPED_UNICODE));
+        // Said beside the button, not in a dialog.
+        importNote.textContent = @json(__('messages.please_enter_urls_or_cities'), JSON_UNESCAPED_UNICODE);
         return;
     }
     
     // Show loading state
-    const button = event.target;
     const originalText = button.textContent;
     button.textContent = @json(__('messages.testing'), JSON_UNESCAPED_UNICODE) + '...';
     button.disabled = true;
@@ -6190,7 +6350,7 @@ function closeImportOutput() {
 
 function addImportUrlField() {
     const container = document.getElementById('import-url-items');
-    const idx = container.children.length;
+    const idx = container.children.length + '_' + Date.now();
     const div = document.createElement('div');
     div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
     div.innerHTML = `
@@ -6410,7 +6570,7 @@ function setupSourceAutocomplete(inputEl) {
 
 function addImportCityField() {
     const container = document.getElementById('import-city-items');
-    const idx = container.children.length;
+    const idx = container.children.length + '_' + Date.now();
     const div = document.createElement('div');
     div.className = 'mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
     div.innerHTML = `
@@ -6993,40 +7153,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Reset to first tab if the section is already active
-    function resetToFirstTab(sectionId) {
-        const section = document.getElementById(sectionId);
-        if (section && section.style.display === 'block') {
-            const tabs = section.querySelectorAll('[data-tab], [data-style-tab]');
-            for (const tab of tabs) {
-                if (tab.offsetParent !== null) {
-                    tab.click();
-                    break;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    // Handle navigation link clicks
+    // Handle navigation link clicks. Pressing the tab you are on leaves its rows as they are:
+    // it used to press the first inner tab, which threw away the place you were in.
     sectionLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const sectionId = this.getAttribute('data-section');
-            if (!resetToFirstTab(sectionId)) {
-                showSection(sectionId);
-            }
+            showSection(this.getAttribute('data-section'));
         });
     });
 
     // Handle mobile accordion header clicks
     mobileHeaders.forEach(header => {
         header.addEventListener('click', function() {
-            const sectionId = this.getAttribute('data-section');
-            if (!resetToFirstTab(sectionId)) {
-                showSection(sectionId);
-            }
+            showSection(this.getAttribute('data-section'));
         });
     });
 
@@ -7035,27 +7174,39 @@ document.addEventListener('DOMContentLoaded', function() {
         return window.matchMedia('(min-width: 1024px)').matches;
     }
 
-    // Initialize: show section based on hash or first section
+    window.FormKit.showSection = function(sectionId) {
+        showSection(sectionId);
+    };
+
+    // Which tab opens. A refused save comes back with no hash, and used to open Details whatever
+    // the message was about: the tab (and the row) holding the first message wins. Then the
+    // link's own hash, which may name a tab, a row or a field inside one. Then the first tab.
     function initializeSections() {
-        // Check URL hash first
-        const hash = window.location.hash.replace('#', '');
-        if (hash && document.getElementById(hash)) {
-            showSection(hash, true);
-        } else {
-            // Show first section
+        const errorTabs = window.FormKit.errorSections();
+        if (errorTabs.length) {
+            window.FormKit.routeErrors();
+            // The address editor is folded away until Edit is pressed, and a refused address has
+            // its message inside it.
+            const addressEditor = document.getElementById('subdomain-edit');
+            if (addressEditor && addressEditor.classList.contains('hidden') && addressEditor.querySelector('ul.text-red-600, ul.text-red-400')) {
+                toggleSubdomainEdit();
+            }
+            document.dispatchEvent(new CustomEvent('formkit:errors', { detail: { sections: errorTabs } }));
+            window.scrollTo(0, 0);
+            return;
+        }
+        if (! window.FormKit.openFromHash(window.location.hash)) {
             const firstSection = sections[0];
             if (firstSection) {
                 showSection(firstSection.id, true);
             }
         }
+        window.scrollTo(0, 0);
     }
 
     // Handle hash changes
     window.addEventListener('hashchange', function() {
-        const hash = window.location.hash.replace('#', '');
-        if (hash && document.getElementById(hash)) {
-            showSection(hash);
-        }
+        window.FormKit.openFromHash(window.location.hash);
     });
 
     // Initialize on page load
@@ -7109,44 +7260,50 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, true); // Use capture phase since invalid doesn't bubble
 
-        // Form submit handler - check validity before submission
+        // Form submit handler - check validity before submission.
+        //
+        // Only the fields of the form's own tabs are checked. The form also wraps things that are
+        // not fields of it (the Add Link dialog's address box, the box a sponsor's link is typed
+        // in before it is added): a leftover value there used to fail the check with nothing to
+        // show, so Save did nothing and said nothing. A control with no name is never sent, so it
+        // is never checked.
+        // And a field in a closed row, behind the address editor or in a block that is folded
+        // away (the gift card settings while gift cards are off) cannot take focus or show its
+        // message, which had the same result: whatever holds it is opened first (FormKit.reveal).
         form.addEventListener('submit', function(e) {
-            if (!form.checkValidity()) {
+            const invalidFields = Array.from(form.querySelectorAll('input, select, textarea')).filter(function(field) {
+                return field.name && field.closest('.section-content') && ! field.disabled && ! field.checkValidity();
+            });
+
+            if (invalidFields.length) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Find first invalid field across ALL form elements
-                let firstInvalidField = null;
-                let firstInvalidSection = null;
-                const allFields = form.querySelectorAll('input, select, textarea');
-
-                for (const field of allFields) {
-                    if (!field.checkValidity()) {
-                        if (!firstInvalidField) {
-                            firstInvalidField = field;
-                            const sectionContent = field.closest('.section-content');
-                            firstInvalidSection = sectionContent ? sectionContent.id : null;
-                        }
+                const firstInvalidField = invalidFields[0];
+                const invalidTabs = [];
+                invalidFields.forEach(function(field) {
+                    const tabId = field.closest('.section-content').id;
+                    if (! invalidTabs.includes(tabId)) {
+                        invalidTabs.push(tabId);
+                        highlightSectionError(tabId);
                     }
-                }
-
-                if (firstInvalidField && firstInvalidSection) {
-                    showSection(firstInvalidSection);
-                    highlightSectionError(firstInvalidSection);
-
-                    setTimeout(() => {
-                        firstInvalidField.focus();
-                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstInvalidField.reportValidity();
-                    }, 100);
-                }
-            } else {
-                // Disable all submit buttons and show saving state
-                var submitButtons = form.querySelectorAll('button[type="submit"]');
-                submitButtons.forEach(function(btn) {
-                    btn.disabled = true;
-                    btn.textContent = @json(__('messages.saving'));
                 });
+                document.dispatchEvent(new CustomEvent('formkit:errors', { detail: { sections: invalidTabs } }));
+
+                window.FormKit.reveal(firstInvalidField);
+                const addressEditor = firstInvalidField.closest('#subdomain-edit');
+                if (addressEditor && addressEditor.classList.contains('hidden')) {
+                    toggleSubdomainEdit();
+                }
+
+                setTimeout(() => {
+                    firstInvalidField.focus();
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidField.reportValidity();
+                }, 100);
+            } else {
+                document.dispatchEvent(new CustomEvent('formkit:errors', { detail: { sections: [] } }));
+                document.dispatchEvent(new CustomEvent('formkit:saving', { detail: { saving: true } }));
             }
         });
 
@@ -7196,249 +7353,28 @@ window.addEventListener('load', function() {
     });
 });
 
-// Integration tabs switching
+// The rows inside the tabs (partials/form-kit-script opens and closes them).
 document.addEventListener('DOMContentLoaded', function() {
-    const integrationTabs = document.querySelectorAll('.integration-tab');
-    const integrationTabContents = document.querySelectorAll('.integration-tab-content');
-
-    // Restore active tab from localStorage
-    if (!isNewSchedule) {
-        const savedTab = localStorage.getItem('integrationActiveTab');
-        if (savedTab && document.getElementById('integration-tab-' + savedTab)) {
-            switchIntegrationTab(savedTab);
-        }
-    }
-
-    integrationTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            switchIntegrationTab(tabName);
-            localStorage.setItem('integrationActiveTab', tabName);
-        });
+    // The tab strips these rows replaced remembered which tab was open, per browser and not per
+    // schedule, and the Help link read the same keys. Rows start closed; the keys go.
+    ['detailsActiveTab', 'linksActiveTab', 'customizeActiveTab', 'settingsActiveTab', 'engagementActiveTab', 'integrationActiveTab', 'styleActiveTab'].forEach(function(key) {
+        try { localStorage.removeItem(key); } catch (e) {}
     });
 
-    function switchIntegrationTab(tabName) {
-        // Update tab buttons
-        integrationTabs.forEach(tab => {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            }
-        });
-
-        // Update tab contents
-        integrationTabContents.forEach(content => {
-            const contentId = content.id.replace('integration-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
-            }
-        });
-    }
-
-    // Email settings link handler
-    document.querySelectorAll('.js-email-settings-link').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            var emailTab = document.querySelector('.integration-tab[data-tab="email"]');
-            if (emailTab) {
-                switchIntegrationTab('email');
-                localStorage.setItem('integrationActiveTab', 'email');
-            }
-            // Navigate to integrations section
-            var section = document.getElementById('section-integrations');
-            if (section) {
-                document.querySelectorAll('.section-nav-link').forEach(function(navLink) {
-                    if (navLink.dataset.section === 'section-integrations') {
-                        navLink.click();
-                    }
-                });
-            }
-        });
-    });
-});
-
-// Engagement tabs switching
-document.addEventListener('DOMContentLoaded', function() {
-    const engagementTabs = document.querySelectorAll('.engagement-tab');
-    const engagementTabContents = document.querySelectorAll('.engagement-tab-content');
-
-    if (engagementTabs.length === 0) return;
-
-    // Restore active tab from localStorage
-    if (!isNewSchedule) {
-        const savedEngagementTab = localStorage.getItem('engagementActiveTab');
-        if (savedEngagementTab) {
-            if (document.getElementById('engagement-tab-' + savedEngagementTab)) {
-                switchEngagementTab(savedEngagementTab);
-            } else {
-                switchEngagementTab(document.querySelector('.engagement-tab').dataset.tab);
-            }
-        }
-    }
-
-    engagementTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            switchEngagementTab(tabName);
-            localStorage.setItem('engagementActiveTab', tabName);
-        });
-    });
-
-    function switchEngagementTab(tabName) {
-        // Update tab buttons
-        engagementTabs.forEach(tab => {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            }
-        });
-
-        // Update tab contents
-        engagementTabContents.forEach(content => {
-            const contentId = content.id.replace('engagement-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
-            }
-        });
-    }
-});
-
-// Links tabs switching
-document.addEventListener('DOMContentLoaded', function() {
-    const linksTabs = document.querySelectorAll('.links-tab');
-    const linksTabContents = document.querySelectorAll('.links-tab-content');
-
-    if (linksTabs.length === 0) return;
-
-    // Restore active tab from localStorage
-    if (!isNewSchedule) {
-        const savedLinksTab = localStorage.getItem('linksActiveTab');
-        if (savedLinksTab) {
-            if (document.getElementById('links-tab-' + savedLinksTab)) {
-                switchLinksTab(savedLinksTab);
-            } else {
-                switchLinksTab(document.querySelector('.links-tab').dataset.tab);
-            }
-        }
-    }
-
-    linksTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            switchLinksTab(tabName);
-            localStorage.setItem('linksActiveTab', tabName);
-        });
-    });
-
-    function switchLinksTab(tabName) {
-        // Update tab buttons
-        linksTabs.forEach(tab => {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            }
-        });
-
-        // Update tab contents
-        linksTabContents.forEach(content => {
-            const contentId = content.id.replace('links-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
-            }
-        });
-    }
-});
-
-// Customize tabs switching
-document.addEventListener('DOMContentLoaded', function() {
-    const customizeTabs = document.querySelectorAll('.customize-tab');
-    const customizeTabContents = document.querySelectorAll('.customize-tab-content');
-
-    // Restore active tab from localStorage
-    if (!isNewSchedule) {
-        const savedCustomizeTab = localStorage.getItem('customizeActiveTab');
-        if (savedCustomizeTab) {
-            if (document.getElementById('customize-tab-' + savedCustomizeTab)) {
-                switchCustomizeTab(savedCustomizeTab);
-            } else {
-                switchCustomizeTab('subschedules');
-            }
-        }
-    }
-
-    customizeTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            switchCustomizeTab(tabName);
-            localStorage.setItem('customizeActiveTab', tabName);
-        });
-    });
-
-    function switchCustomizeTab(tabName) {
-        // Update tab buttons
-        customizeTabs.forEach(tab => {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            }
-        });
-
-        // Update tab contents
-        customizeTabContents.forEach(content => {
-            const contentId = content.id.replace('customize-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
-            }
-        });
-    }
-});
-
-// Settings tabs switching
-document.addEventListener('DOMContentLoaded', function() {
-    const settingsTabs = document.querySelectorAll('.settings-tab');
-    const settingsTabContents = document.querySelectorAll('.settings-tab-content');
-
-    // A link can ask for a tab, and that beats whichever tab was open last time: the
-    // "Listed on the network" badge on the schedule page opens Advanced this way.
+    // A link can ask for a row of Settings: the "Listed on the network" badge on the schedule
+    // page opens Advanced this way.
     const settingsParams = new URLSearchParams(window.location.search);
     const requestedSettingsTab = settingsParams.get('settings_tab');
-
     if (requestedSettingsTab && document.getElementById('settings-tab-' + requestedSettingsTab)) {
-        switchSettingsTab(requestedSettingsTab);
-    } else if (!isNewSchedule) {
-        // Restore active tab from localStorage
-        const savedSettingsTab = localStorage.getItem('settingsActiveTab');
-        if (savedSettingsTab) {
-            // Migrate old tab name
-            if (savedSettingsTab === 'custom-fields') {
-                localStorage.removeItem('settingsActiveTab');
-                switchSettingsTab('general');
-            } else if (document.getElementById('settings-tab-' + savedSettingsTab)) {
-                switchSettingsTab(savedSettingsTab);
-            } else {
-                switchSettingsTab('general');
-            }
-        }
+        window.FormKit.openRow('settings', requestedSettingsTab);
+    }
+
+    // Links written while Integrations was a strip of tabs, some of them in mail already sent:
+    // Email was the tab that opened by itself, and "?tab=email" was added to some and never read.
+    // Such a link, or one that arrives while the email settings are failing, opens the Email row.
+    const emailFailing = @json($role->isEmailSettingsFailureActive());
+    if (window.location.hash === '#section-integrations' && (settingsParams.get('tab') === 'email' || emailFailing)) {
+        window.FormKit.openRow('integration', 'email');
     }
 
     // ...and a field to land on. Allow-listed rather than any id from the URL. Only recorded
@@ -7449,83 +7385,468 @@ document.addEventListener('DOMContentLoaded', function() {
         window.__settingsFocusId = settingsFocus;
     }
 
-    settingsTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            switchSettingsTab(tabName);
-            localStorage.setItem('settingsActiveTab', tabName);
+    // "Email settings" links from other tabs: the Integrations tab, with its Email row open.
+    document.querySelectorAll('.js-email-settings-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.FormKit.showSection('section-integrations');
+            window.FormKit.openRow('integration', 'email');
         });
     });
-
-    function switchSettingsTab(tabName) {
-        // Update tab buttons
-        settingsTabs.forEach(tab => {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            }
-        });
-
-        // Update tab contents
-        settingsTabContents.forEach(content => {
-            const contentId = content.id.replace('settings-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
-            }
-        });
-    }
 });
 
-// Details tabs switching
+// The new shell: what each tab and row holds, said in one line; which tabs have unsaved changes;
+// and what Save will remove. partials/form-kit-script does the drawing, this says what is true.
 document.addEventListener('DOMContentLoaded', function() {
-    const detailsTabs = document.querySelectorAll('.details-tab');
-    const detailsTabContents = document.querySelectorAll('.details-tab-content');
+    var kit = window.FormKit;
+    var form = document.getElementById('edit-form');
+    if (! kit || ! form) {
+        return;
+    }
+    var words = @json($summaryWords, JSON_UNESCAPED_UNICODE);
 
-    // Restore active tab from localStorage
-    if (!isNewSchedule) {
-        const savedDetailsTab = localStorage.getItem('detailsActiveTab');
-        if (savedDetailsTab) {
-            if (document.getElementById('details-tab-' + savedDetailsTab)) {
-                switchDetailsTab(savedDetailsTab);
-            } else {
-                switchDetailsTab('general');
-            }
+    function all(selector, root) {
+        return Array.prototype.slice.call((root || document).querySelectorAll(selector));
+    }
+    function values(selector, root) {
+        return all(selector, root).map(function(input) { return String(input.value || '').trim(); }).filter(Boolean);
+    }
+    // The labels of the switches that are on, inside one pane.
+    function onLabels(root) {
+        return all('input[type="checkbox"]:checked', root).map(function(input) {
+            var label = input.id ? root.querySelector('label[for="' + input.id + '"]') : null;
+            return label ? label.textContent.trim() : '';
+        }).filter(Boolean);
+    }
+    function radioLabel(name) {
+        var input = document.querySelector('input[type="radio"][name="' + name + '"]:checked');
+        var label = input ? (input.closest('label') || (input.id ? document.querySelector('label[for="' + input.id + '"]') : null)) : null;
+        var words = label ? (label.querySelector('.font-medium, .font-semibold') || label) : null;
+        return words ? words.textContent.trim().split('\n')[0].trim() : '';
+    }
+    function onOff(name) {
+        return kit.on(name) ? words.enabled : words.disabled;
+    }
+    // The names in one of the hidden link lists (a video's title, a link's site).
+    function jsonNames(name) {
+        try {
+            return (JSON.parse(kit.value('input[name="' + name + '"]') || '[]') || []).map(function(item) {
+                return String((item && (item.name || item.url)) || '').trim();
+            }).filter(Boolean);
+        } catch (e) {
+            return [];
         }
     }
-
-    detailsTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            switchDetailsTab(tabName);
-            localStorage.setItem('detailsActiveTab', tabName);
+    function list(items, emptyText) {
+        return items.length ? items.join(', ') : { text: emptyText === undefined ? words.none : emptyText, empty: true };
+    }
+    function byId(id) {
+        return document.getElementById(id);
+    }
+    // What a pane holds, by the names of its first settings: for a row whose contents are too
+    // mixed to have one value ("Advanced"). Read from the labels on the page, so it is already in
+    // the page's language.
+    function labelsIn(pane) {
+        if (! pane) {
+            return '';
+        }
+        // Where the pane is laid out in named groups, those names say what it holds.
+        var groups = all('.event-group-label', pane).map(function(group) { return group.textContent.trim(); }).filter(Boolean);
+        if (groups.length) {
+            return { text: groups.join(', '), empty: true };
+        }
+        var names = [];
+        all('label', pane).forEach(function(label) {
+            var text = label.textContent.replace(/\s+/g, ' ').replace(/\s*\*$/, '').trim();
+            if (text && text.length < 48 && ! names.includes(text) && names.length < 4) {
+                names.push(text);
+            }
         });
+        return names.length ? { text: names.join(', '), empty: true } : { text: '', empty: true };
+    }
+
+    // Details
+    kit.summary('section-details', function() {
+        return kit.value('#name');
+    });
+    kit.summary('details:localization', function() {
+        var translated = kit.on('translation_enabled') ? kit.chosen('#translation_language_code') : '';
+        return kit.join([kit.chosen('#language_code') + (translated ? ' + ' + translated : ''), kit.chosen('#timezone'), kit.on('use_24_hour_time') ? '24h' : '12h']);
+    });
+    kit.summary('details:contact', function() {
+        var phone = byId('role_phone') ? String(byId('role_phone').value || '').trim() : '';
+        return kit.join([kit.value('#email'), phone, kit.value('#website').replace(/^https?:\/\//, '')]);
     });
 
-    function switchDetailsTab(tabName) {
-        // Update tab buttons
-        detailsTabs.forEach(tab => {
-            if (tab.dataset.tab === tabName) {
-                tab.classList.add('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
-            } else {
-                tab.classList.remove('border-[var(--brand-blue)]', 'text-[var(--brand-blue)]');
-                tab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-300', 'hover:border-gray-300', 'dark:hover:border-gray-600');
+    // Address
+    kit.summary('section-address', function() {
+        return kit.join([kit.value('#address1'), kit.value('#city')]) || { text: '', empty: true };
+    });
+
+    // Style
+    function backgroundSummary() {
+        var type = kit.radio('background');
+        if (type === 'gradient') {
+            return kit.join([radioLabel('background'), kit.chosen('#background_colors')]);
+        }
+        if (type === 'image') {
+            return kit.join([radioLabel('background'), kit.chosen('#background_image')]);
+        }
+        return radioLabel('background');
+    }
+    kit.summary('section-style', function() {
+        return kit.join([kit.chosen('#font_family'), radioLabel('background')]);
+    });
+    kit.summary('style:animation', function() {
+        return radioLabel('list_animation');
+    });
+    kit.summary('style:background', backgroundSummary);
+    kit.summary('style:advanced', function() {
+        return kit.join([radioLabel('header_style'), radioLabel('event_layout'), kit.value('#custom_css') ? words.custom_css : '']);
+    });
+
+    // Gallery, Videos and Links
+    kit.summary('section-gallery', function() {
+        var count = all('#gallery-editor-app .es-gallery-tile').length || words.gallery_count;
+        return count ? String(count) : { text: words.gallery_prompt, empty: true };
+    });
+    kit.summary('section-links', function() {
+        // By name: a count would need a plural in every language.
+        var names = jsonNames('youtube_links').concat(jsonNames('social_links'));
+        return names.length ? names.join(', ') : { text: words.none, empty: true };
+    });
+
+    // Customize
+    function subscheduleNames() {
+        return values('#group-items input[name$="[name]"]');
+    }
+    function fieldNames() {
+        return values('#event-custom-fields-container input[name$="[name]"]');
+    }
+    function categoryNames() {
+        return values('#event-categories-container input[name$="[name]"]');
+    }
+    function labelValues() {
+        return values('#custom-labels-list input[name$="[value]"]');
+    }
+    kit.summary('customize:subschedules', function() { return list(subscheduleNames()); });
+    kit.summary('customize:custom-fields', function() { return list(fieldNames()); });
+    // The twelve a schedule starts with, untouched, are said as that: listed, they filled four lines
+    // of a phone with names nobody chose.
+    var defaultCategoryNames = (function() {
+        var box = byId('event-categories-container');
+        try {
+            return JSON.parse((box && box.dataset.defaultCategories) || '[]').map(function(category) { return String(category.name); }).sort();
+        } catch (e) {
+            return [];
+        }
+    })();
+    kit.summary('customize:categories', function() {
+        var names = categoryNames();
+        var sorted = names.slice().sort();
+        var untouched = defaultCategoryNames.length > 0 && sorted.length === defaultCategoryNames.length
+            && sorted.every(function(name, index) { return name === defaultCategoryNames[index]; });
+        return untouched
+            ? @json(__('messages.default_categories_summary', ['count' => '__N__']), JSON_UNESCAPED_UNICODE).replace('__N__', names.length)
+            : list(names);
+    });
+    kit.summary('customize:custom-labels', function() { return list(labelValues()); });
+    kit.summary('section-subschedules', function() {
+        var names = subscheduleNames();
+        return names.length ? names.join(', ') : { text: words.none, empty: true };
+    });
+
+    // Settings
+    // What the tab holds, not the address again: that is under the page's title.
+    kit.summary('section-settings', function() {
+        return { text: words.settings_holds, empty: true };
+    });
+    kit.summary('settings:advanced', function() {
+        return labelsIn(byId('settings-tab-advanced'));
+    });
+    kit.summary('integration:advanced', function() {
+        return labelsIn(byId('integration-tab-advanced'));
+    });
+    kit.summary('settings:notifications', function() {
+        var pane = byId('settings-tab-notifications');
+        return pane ? list(onLabels(pane)) : '';
+    });
+
+    // Engagement
+    function fanContent() {
+        return [
+            kit.on('fan_comments_enabled') ? words.comments : '',
+            kit.on('fan_photos_enabled') ? words.photos : '',
+            kit.on('fan_videos_enabled') ? words.videos_label : '',
+        ].filter(Boolean);
+    }
+    function sponsorCount() {
+        return all('#sponsors-list .sponsor-item').length;
+    }
+    kit.summary('engagement:requests', function() {
+        if (! kit.on('accept_requests')) {
+            return { text: words.disabled, empty: true };
+        }
+        return kit.join([words.enabled, kit.on('require_approval') ? words.require_approval : '']);
+    });
+    kit.summary('engagement:fan_content', function() {
+        var kinds = fanContent();
+        return kinds.length ? kinds.join(', ') : { text: words.disabled, empty: true };
+    });
+    kit.summary('engagement:feedback', function() {
+        if (! kit.on('feedback_enabled')) {
+            return { text: words.disabled, empty: true };
+        }
+        return kit.join([words.enabled, kit.chosen('#feedback_delay_hours')]);
+    });
+    kit.summary('engagement:carpool', function() {
+        return kit.on('carpool_enabled') ? words.enabled : { text: words.disabled, empty: true };
+    });
+    kit.summary('engagement:sponsors', function() {
+        var count = sponsorCount();
+        return count ? String(count) : { text: words.none, empty: true };
+    });
+    kit.summary('engagement:accommodation', function() {
+        return kit.on('stay22_enabled') ? words.enabled : { text: words.disabled, empty: true };
+    });
+    kit.summary('section-engagement', function() {
+        var on = [
+            kit.on('accept_requests') ? words.requests : '',
+            fanContent().length ? words.fan_content : '',
+            kit.on('feedback_enabled') ? words.feedback : '',
+            kit.on('carpool_enabled') ? words.carpool : '',
+            sponsorCount() ? words.sponsors : '',
+        ].filter(Boolean);
+        return on.length ? on.join(', ') : { text: words.disabled, empty: true };
+    });
+
+    // Gift cards, sources, auto import
+    kit.summary('section-gift-cards', function() {
+        if (! kit.on('gift_cards_enabled')) {
+            return { text: words.disabled, empty: true };
+        }
+        return kit.join([words.enabled, values('input[name="gift_card_amounts[]"]').join(', ')]);
+    });
+    kit.summary('section-sources', function() {
+        var names = values('#source-schedule-items input[type="text"]');
+        return names.length ? names.join(', ') : { text: words.none, empty: true };
+    });
+    kit.summary('section-auto-import', function() {
+        var urls = values('input[name^="import_urls["]').map(function(url) { return url.replace(/^https?:\/\//, ''); });
+        var cities = values('input[name^="import_cities["]');
+        return urls.concat(cities).join(', ') || { text: words.none, empty: true };
+    });
+
+    // Integrations
+    // The direction where its radios are on the page (the owner's view); elsewhere, that it syncs.
+    function syncing(name, saved) {
+        var radios = document.querySelector('input[type="radio"][name="' + name + '"]');
+        if (radios) {
+            return kit.radio(name) ? radioLabel(name) : { text: words.not_connected, empty: true };
+        }
+        return saved ? words.connected : { text: words.not_connected, empty: true };
+    }
+    kit.summary('integration:email', function() {
+        var host = kit.value('input[name="email_settings[host]"]');
+        if (words.email_failing) {
+            return { text: words.email_failing, warn: true };
+        }
+        return host || { text: words.not_connected, empty: true };
+    });
+    kit.summary('integration:google', function() {
+        return syncing('sync_direction', words.google_connected);
+    });
+    kit.summary('integration:microsoft', function() {
+        return syncing('microsoft_sync_direction', words.microsoft_connected);
+    });
+    kit.summary('integration:caldav', function() {
+        return words.caldav_connected ? syncing('caldav_sync_direction', true) : { text: words.not_connected, empty: true };
+    });
+    kit.summary('section-integrations', function() {
+        var on = [
+            ! words.email_failing && kit.value('input[name="email_settings[host]"]') ? words.email : '',
+            words.google_connected ? 'Google' : '',
+            words.microsoft_connected ? 'Outlook' : '',
+            words.caldav_connected ? 'CalDAV' : '',
+        ].filter(Boolean);
+        if (words.email_failing) {
+            return { text: words.email_failing, warn: true };
+        }
+        return on.length ? on.join(', ') : { text: words.not_connected, empty: true };
+    });
+
+    // Gift cards: what a gift card needs is shown once the switch is on.
+    var giftSwitch = document.querySelector('input[type="checkbox"][name="gift_cards_enabled"]');
+    var giftDetails = byId('gift-card-details');
+    if (giftSwitch && giftDetails) {
+        giftSwitch.addEventListener('change', function() {
+            giftDetails.hidden = ! giftSwitch.checked;
+        });
+    }
+
+    // Sponsors: an empty list says so, the form opens from its link (and from a sponsor's Edit)
+    // and closes once it has done its work, and the background shows once there is a sponsor.
+    var sponsorShell = byId('sponsor-form-shell');
+    var sponsorOpen = byId('sponsor-form-open');
+    var sponsorList = byId('sponsors-list');
+    function showSponsorForm(open) {
+        if (! sponsorShell) {
+            return;
+        }
+        sponsorShell.hidden = ! open;
+        syncSponsors();
+    }
+    function syncSponsors() {
+        var count = sponsorList ? sponsorList.querySelectorAll('.sponsor-item').length : 0;
+        var empty = byId('sponsors-empty');
+        var background = byId('sponsor-background-controls');
+        if (empty) {
+            empty.hidden = count > 0;
+        }
+        if (background) {
+            background.hidden = count === 0;
+        }
+        if (sponsorOpen && sponsorShell) {
+            // Not offered while the form is open, or while the list is full.
+            sponsorOpen.hidden = ! sponsorShell.hidden || count >= MAX_SPONSORS;
+        }
+    }
+    var sponsorClose = byId('sponsor-form-close');
+    if (sponsorClose) {
+        sponsorClose.addEventListener('click', function() {
+            // Cancel means what was typed is not wanted: the form closes empty.
+            if (typeof resetSponsorEditState === 'function') {
+                resetSponsorEditState();
+            }
+            showSponsorForm(false);
+        });
+    }
+    if (sponsorOpen) {
+        sponsorOpen.addEventListener('click', function() {
+            showSponsorForm(true);
+            var sponsorName = byId('new_sponsor_name_input');
+            if (sponsorName) {
+                sponsorName.focus();
             }
         });
-
-        // Update tab contents
-        detailsTabContents.forEach(content => {
-            const contentId = content.id.replace('details-tab-', '');
-            if (contentId === tabName) {
-                content.classList.remove('hidden');
-            } else {
-                content.classList.add('hidden');
+    }
+    if (sponsorList) {
+        new MutationObserver(function() {
+            showSponsorForm(false);
+        }).observe(sponsorList, { childList: true });
+        sponsorList.addEventListener('click', function(event) {
+            if (event.target.closest('[data-action="edit-sponsor"]')) {
+                showSponsorForm(true);
             }
+        });
+        document.addEventListener('click', function(event) {
+            if (! event.target.closest) {
+                return;
+            }
+            if (event.target.closest('[data-action="cancel-edit-sponsor"]')) {
+                showSponsorForm(false);
+            }
+            // Add, or Save on a sponsor being edited: closed once the page's own handler has
+            // run, unless it left a reason not to (no logo chosen).
+            if (event.target.closest('[data-action="add-sponsor"]')) {
+                setTimeout(function() {
+                    var note = byId('sponsor-form-note');
+                    if (! note || ! note.textContent) {
+                        showSponsorForm(false);
+                    }
+                }, 0);
+            }
+        });
+        syncSponsors();
+    }
+
+    kit.refresh();
+    // Not the controls that belong to another form and only sit inside this one's markup (the
+    // merge target): choosing one is not a change to the schedule.
+    kit.track(form, { ignore: '[form]:not([form="edit-form"])' });
+
+    // The lists whose rows are added, removed and dragged by buttons, which fire no input event.
+    // Each is watched: a change marks its tab, and a row that was there when the page loaded and
+    // is gone now is something Save will remove, which the bar says before it happens.
+    var lists = [
+        ['section-subschedules', '#group-items'],
+        ['section-subschedules', '#event-custom-fields-container'],
+        ['section-subschedules', '#event-categories-container'],
+        ['section-subschedules', '#custom-labels-list'],
+        ['section-engagement', '#sponsors-list'],
+        ['section-engagement', '#approved-subdomains-items'],
+        ['section-sources', '#source-schedule-items'],
+        ['section-gift-cards', '#gift-card-amounts-items'],
+        ['section-auto-import', '#import-url-items'],
+        ['section-auto-import', '#import-city-items'],
+        ['section-links', '#links-tab-youtube_videos'],
+        ['section-links', '#links-tab-social_links'],
+    ].map(function(entry) {
+        var element = document.querySelector(entry[1]);
+        return element ? { section: entry[0], element: element, saved: [] } : null;
+    }).filter(Boolean);
+
+    // By name where the row had one when the page loaded ("Main stage"), by its tab where it
+    // did not.
+    function removals() {
+        var sections = [];
+        var items = [];
+        lists.forEach(function(entry) {
+            entry.saved.forEach(function(saved) {
+                if (saved.row.isConnected) {
+                    return;
+                }
+                if (! sections.includes(entry.section)) {
+                    sections.push(entry.section);
+                }
+                items.push({ section: entry.section, name: saved.name });
+            });
+        });
+        document.dispatchEvent(new CustomEvent('formkit:removes', { detail: { sections: sections, items: items } }));
+    }
+
+    function rowName(row) {
+        var named = row.querySelector('[data-row-name], input[type="text"], input[type="url"], input[type="number"]');
+        var text = named ? (named.value !== undefined && named.value !== '' ? named.value : named.textContent) : '';
+        return String(text || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    }
+
+    window.addEventListener('load', function() {
+        // After the page's own setup (pickers mounting, lists being drawn), which is not a change.
+        setTimeout(function() {
+            lists.forEach(function(entry) {
+                // The two link lists are redrawn whole on every change, so a redraw is not a removal.
+                entry.saved = entry.section === 'section-links' ? [] : Array.prototype.slice.call(entry.element.children).map(function(row) {
+                    return { row: row, name: rowName(row) };
+                });
+                new MutationObserver(function() {
+                    kit.markDirty(entry.section);
+                    if (window._markFormDirty) { window._markFormDirty(); }
+                    kit.refresh();
+                    removals();
+                }).observe(entry.element, { childList: true, subtree: entry.section === 'section-links' });
+            });
+            kit.arm();
+        }, 600);
+    });
+
+    // The note under the address: emptied before either address button does its work.
+    document.addEventListener('click', function(event) {
+        var note = byId('address_note');
+        if (note && event.target.closest && event.target.closest('#view_map_button, #validate_button, #accept_button')) {
+            note.textContent = '';
+        }
+    }, true);
+
+    // The public address under the title.
+    var copyLink = byId('copy-schedule-link-btn');
+    if (copyLink) {
+        copyLink.addEventListener('click', function() {
+            var label = copyLink.textContent;
+            navigator.clipboard.writeText(copyLink.getAttribute('data-copy-text')).then(function() {
+                copyLink.textContent = copyLink.getAttribute('data-copied');
+                setTimeout(function() { copyLink.textContent = label; }, 2000);
+            }).catch(function() {});
         });
     }
 });
@@ -7888,8 +8209,8 @@ function addEventCustomField() {
                 </div>
             </div>
             @if($role->language_code !== 'en')
-            <div class="mt-3">
-                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
+            <div class="mt-3 sched-field-more" hidden>
+                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ $secondNameLabel }}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][name_en]"
                         dir="auto" autocomplete="off"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
@@ -7905,6 +8226,7 @@ function addEventCustomField() {
             </div>
             {{-- Visible because a new field defaults to type=string; toggleEventFieldOptions()
                  takes over from here. Mirrors the style attribute on the Blade row above. --}}
+            <div class="sched-field-more" hidden>
             <div class="mt-3 event-field-regex-container" style="">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_regex') !!}</label>
                 <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -7944,6 +8266,7 @@ function addEventCustomField() {
                     rows="2"
                     maxlength="500"></textarea>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.ai_prompt_custom_field_help') !!}</p>
+            </div>
             </div>
             <div class="mt-3 flex items-center justify-between gap-4">
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -7989,9 +8312,12 @@ function addEventCustomField() {
                     <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
-                <button type="button" data-action="remove-custom-field" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm flex-shrink-0">
+                <span class="flex flex-shrink-0 items-center gap-4">
+                <button type="button" data-action="toggle-field-more" class="event-link" aria-expanded="false">{!! __('messages.more_options') !!}</button>
+                <button type="button" data-action="remove-custom-field" class="event-link is-danger">
                     {!! __('messages.remove') !!}
                 </button>
+                </span>
             </div>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 event-field-filter-help" style="display: none;"
                 data-help="{{ __('messages.field_show_as_filter_help') }}"
@@ -8145,16 +8471,8 @@ function updateEventFieldRegexResult(fieldItem) {
 
 // Jump from Engagement > Requests to where the request-form questions are actually defined.
 function gotoCustomFieldsTab() {
-    const sectionLink = document.querySelector('.section-nav-link[data-section="section-subschedules"]')
-        || document.querySelector('.mobile-section-header[data-section="section-subschedules"]');
-    if (sectionLink) {
-        sectionLink.click();
-    }
-
-    const tabButton = document.querySelector('.customize-tab[data-tab="custom-fields"]');
-    if (tabButton) {
-        tabButton.click();
-    }
+    window.FormKit.showSection('section-subschedules');
+    window.FormKit.openRow('customize', 'custom-fields');
 
     const container = document.getElementById('event-custom-fields-container');
     if (container) {
@@ -8210,37 +8528,27 @@ function addCustomLabel() {
 
     var displayName = customLabelDefaults[key] || key;
 
+    var labelField = 'block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm';
     var enFieldHtml = '';
     if (showEnField) {
-        enFieldHtml = `
-            <div>
-                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
-                <input type="text" name="custom_labels[${key}][value_en]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                    placeholder="{!! __('messages.auto_translated_placeholder') !!}"
-                    maxlength="200" />
-            </div>`;
+        enFieldHtml = `<input type="text" name="custom_labels[${key}][value_en]" class="${labelField}"
+                    aria-label="{{ $secondNameLabel }}" placeholder="{!! __('messages.auto_translated_placeholder') !!}" maxlength="200" />`;
     }
 
     var newItem = document.createElement('div');
-    newItem.className = 'custom-label-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg';
+    newItem.className = 'event-list-row custom-label-item';
+    newItem.setAttribute('data-list-row', '');
     newItem.dataset.labelKey = key;
     newItem.innerHTML = `
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${displayName}</span>
-            <button type="button" data-action="remove-custom-label" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
-                {!! __('messages.remove') !!}
-            </button>
-        </div>
-        <div class="space-y-3">
-            <div>
-                <input type="text" name="custom_labels[${key}][value]"
-                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                    placeholder="${displayName}"
-                    maxlength="200" />
-            </div>
+        <span class="sched-label-name" data-row-name>${displayName}</span>
+        <div class="sched-label-fields ${showEnField ? 'has-second' : ''}">
+            <input type="text" name="custom_labels[${key}][value]" class="${labelField}"
+                aria-label="${displayName}" placeholder="${displayName}" maxlength="200" />
             ${enFieldHtml}
         </div>
+        <button type="button" data-action="remove-custom-label" class="event-icon-btn is-remove" title="{!! __('messages.remove') !!}" aria-label="{!! __('messages.remove') !!}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
     `;
 
     // Insert in alphabetical order
@@ -8257,6 +8565,10 @@ function addCustomLabel() {
     }
     if (!inserted) {
         list.appendChild(newItem);
+    }
+    var newValue = newItem.querySelector('input');
+    if (newValue) {
+        newValue.focus();
     }
 
     // Remove option from select
@@ -8616,13 +8928,28 @@ function addSponsor() {
         return;
     }
 
-    // Adding a new sponsor
-    if (!fileInput || !hasNewFile) return;
+    // Adding a new sponsor. Pressing Add with no logo chosen, or with the list full, used to do
+    // nothing at all: it says why, beside the button.
+    var sponsorNote = document.getElementById('sponsor-form-note');
+    if (sponsorNote) {
+        sponsorNote.textContent = '';
+    }
+    if (!fileInput || !hasNewFile) {
+        if (sponsorNote) {
+            sponsorNote.textContent = @json(__('messages.sponsor_needs_logo'), JSON_UNESCAPED_UNICODE);
+        }
+        return;
+    }
 
     var file = fileInput.files[0];
 
     var count = document.querySelectorAll('#sponsors-list .sponsor-item').length;
-    if (count >= MAX_SPONSORS) return;
+    if (count >= MAX_SPONSORS) {
+        if (sponsorNote) {
+            sponsorNote.textContent = @json(__('messages.max_sponsors_reached', ['count' => config('app.max_sponsors')]), JSON_UNESCAPED_UNICODE);
+        }
+        return;
+    }
 
     var idx = sponsorFileCounter++;
 
@@ -8745,6 +9072,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var categoriesList = document.getElementById('event-categories-container');
     if (categoriesList) {
         var showNameEnField = @json($role->language_code !== 'en' || app()->getLocale() !== 'en');
+        var secondNameLabel = escapeHtml(@json(__('messages.name').' ('.$role->translationLanguageName().')'));
 
         // formKey must be a unique string per row; all sub-fields share it so PHP groups them
         // into one outer entry. Empty `[]` brackets would scatter sub-keys into separate entries.
@@ -8754,28 +9082,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 initialColor: "",
                 colors: ["#EF4444","#F97316","#EAB308","#84CC16","#22C55E","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1","#A855F7","#EC4899","#F43F5E","#6B7280"],
                 clearLabel: @json(__('messages.clear')),
+                label: @json(__('messages.color')),
+                align: "end",
             });
+            var fieldClass = 'block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] dark:focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-[var(--brand-blue)] rounded-lg shadow-sm';
             var nameEnBlock = showNameEnField
-                ? `<div class="mb-4">
-                       <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
-                       <input type="text" name="event_categories[${formKey}][name_en]" maxlength="80" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                   </div>`
+                ? `<input type="text" name="event_categories[${formKey}][name_en]" maxlength="80" class="${fieldClass}" aria-label="${secondNameLabel}" placeholder="${secondNameLabel}">`
                 : '';
             return `
-                <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item" data-category-id="${id}" data-is-custom="${isCustom ? '1' : '0'}">
+                <div class="event-list-row event-category-item" data-list-row data-category-id="${id}" data-is-custom="${isCustom ? '1' : '0'}">
                     <input type="hidden" name="event_categories[${formKey}][id]" value="${id}" class="event-category-id">
-                    <div class="mb-4">
-                        <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} *</label>
-                        <input type="text" name="event_categories[${formKey}][name]" value="${escapeHtml(name)}" maxlength="80" class="mt-1 block w-full event-category-name border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" data-events-count="${eventsCount || 0}">
+                    <div class="min-w-0 flex-1">
+                        <div class="sched-sub-line ${showNameEnField ? '' : 'no-second'}">
+                            <input type="text" name="event_categories[${formKey}][name]" value="${escapeHtml(name)}" maxlength="80" class="${fieldClass} event-category-name" data-events-count="${eventsCount}" aria-label="{{ __('messages.name') }}" placeholder="{{ __('messages.name') }}">
+                            ${nameEnBlock}
+                            <div class="vue-color-picker" title="{{ __('messages.color') }}" data-props='${colorPickerProps.replace(/'/g, "&#39;")}'></div>
+                        </div>
                     </div>
-                    ${nameEnBlock}
-                    <div class="mb-4">
-                        <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.color') }}</label>
-                        <div class="vue-color-picker" data-props='${colorPickerProps.replace(/'/g, "&#39;")}'></div>
-                    </div>
-                    <div class="flex gap-4 items-center justify-end">
-                        <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">{{ __('messages.remove') }}</button>
-                    </div>
+                    <button type="button" data-action="remove-event-category" class="event-icon-btn is-remove" title="{{ __('messages.remove') }}" aria-label="{{ __('messages.remove') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                 </div>`;
         }
 
@@ -8906,15 +9232,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check for nav action buttons
             var navBtn = e.target.closest('[data-nav-action]');
             if (navBtn) {
+                // The arrows change a select with no input event: say so, or the bar reads
+                // "No unsaved changes" with a new font or background waiting to be saved.
+                window.FormKit.markDirty('section-style');
+                if (window._markFormDirty) { window._markFormDirty(); }
+                setTimeout(window.FormKit.refresh, 0);
                 var fn = navActionMap[navBtn.dataset.navAction];
                 if (fn) fn(parseInt(navBtn.dataset.navDirection));
-                return;
-            }
-
-            // Check for style tab buttons
-            var styleTabBtn = e.target.closest('[data-style-tab]');
-            if (styleTabBtn) {
-                showStyleTab(styleTabBtn.dataset.styleTab);
                 return;
             }
 
@@ -8979,6 +9303,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'remove-parent-item':
                 btn.parentElement.parentElement.remove();
+                break;
+            case 'remove-list-row':
+                btn.closest('[data-list-row]').remove();
+                break;
+            case 'toggle-field-more':
+                // A custom field's rarely used parts: shown and hidden together.
+                var fieldCard = btn.closest('.event-custom-field-item');
+                var showMore = btn.getAttribute('aria-expanded') !== 'true';
+                btn.setAttribute('aria-expanded', showMore ? 'true' : 'false');
+                fieldCard.querySelectorAll('.sched-field-more').forEach(function(part) {
+                    part.hidden = ! showMore;
+                });
                 break;
             case 'add-group-field':
                 addGroupField();
@@ -9341,11 +9677,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     msgEl.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
                     msgEl.style.display = '';
                     roleSendCodeBtn.disabled = false;
-                    roleSendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+                    roleSendCodeBtn.textContent = @json(__('messages.verify'), JSON_UNESCAPED_UNICODE);
                 }
             }).catch(function() {
                 roleSendCodeBtn.disabled = false;
-                roleSendCodeBtn.textContent = @json(__('messages.click_here_to_verify_phone'), JSON_UNESCAPED_UNICODE);
+                roleSendCodeBtn.textContent = @json(__('messages.verify'), JSON_UNESCAPED_UNICODE);
             });
         });
     }
@@ -10053,9 +10389,8 @@ window.handleAiStyleResults = function(data) {
         if (customImageInput) customImageInput.style.display = '';
     }
 
-    // Switch to branding tab
-    var brandingTab = document.querySelector('[data-style-tab="branding"]');
-    if (brandingTab) brandingTab.click();
+    // Branding is always on the page: close whichever row was open so the result is in view.
+    showStyleTab('branding');
 };
 </script>
 @endif

@@ -57,7 +57,7 @@
 {{-- Flashed by EventController::store() for someone's first event: where it lives and what to
      do next, instead of a three-second toast. A draft has no public page until it is published,
      so it gets no link. The name is the user's own text, hence x-user-text. --}}
-@php $firstEventCreated = session('first_event_created'); @endphp
+@php $firstEventCreated = session('first_event_created'); $eventCreated = session('event_created'); @endphp
 {{-- Someone with a setup guide gets its "Your page" panel here instead, after every event save
      until their page has a few events on it (App\Utils\SetupGuide::surface()). One panel, one
      forward button. Everyone else keeps the panel below. --}}
@@ -95,6 +95,13 @@
         @endif
 
         <div class="mt-4 flex flex-wrap gap-3">
+            {{-- Where it is comes first when the event was saved without it: it is the one thing a
+                 guest cannot do without. #section-venue opens the Event tab on its location. --}}
+            @if (empty($firstEventCreated['has_location']))
+            <x-secondary-link href="{{ $firstEventCreated['edit_url'] }}#section-venue">
+                {{ __('messages.add_location') }}
+            </x-secondary-link>
+            @endif
             <x-secondary-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}">
                 {{ __('messages.add_another_event') }}
             </x-secondary-link>
@@ -123,6 +130,48 @@
         </div>
     </div>
 </div>
+@elseif (is_array($eventCreated))
+{{-- Every event after the first: one line with its link and whatever it was saved without. The
+     name is its owner's text, so the sentence that carries it is v-pre. --}}
+<div class="pb-4">
+    <div class="ap-card rounded-xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2" role="status" id="event-created-strip">
+        <div class="min-w-0 flex-1 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <svg class="w-5 h-5 shrink-0 {{ $eventCreated['is_draft'] ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <span class="min-w-0 truncate" v-pre>{{ __($eventCreated['is_draft'] ? 'messages.event_created_as_draft' : 'messages.event_created_on_schedule', ['name' => $eventCreated['name']]) }}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            @if (empty($eventCreated['has_location']))
+            <x-link href="{{ $eventCreated['edit_url'] }}#section-venue">{{ __('messages.add_location') }}</x-link>
+            @endif
+            @if (empty($eventCreated['has_tickets']))
+            <x-link href="{{ $eventCreated['edit_url'] }}#section-tickets">{{ __('messages.add_tickets') }}</x-link>
+            @endif
+            @if (! empty($eventCreated['url']))
+            <button type="button" id="event-created-copy" data-url="{{ $eventCreated['url'] }}"
+                class="font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded">{{ __('messages.copy_link') }}</button>
+            <x-link href="{{ $eventCreated['url'] }}" target="_blank">{{ __('messages.view_event') }}</x-link>
+            @else
+            <x-link href="{{ $eventCreated['edit_url'] }}">{{ __('messages.edit_event') }}</x-link>
+            @endif
+        </div>
+    </div>
+</div>
+@if (! empty($eventCreated['url']))
+<script {!! nonce_attr() !!}>
+// Delegated, like x-copy-link's: a listener on the button itself is lost if the page re-renders it.
+document.addEventListener('click', function (e) {
+    var button = e.target.closest ? e.target.closest('#event-created-copy') : null;
+    if (! button || ! navigator.clipboard) { return; }
+    navigator.clipboard.writeText(button.getAttribute('data-url')).then(function () {
+        var original = button.textContent;
+        button.textContent = @json(__('messages.copied'), JSON_UNESCAPED_UNICODE);
+        setTimeout(function () { button.textContent = original; }, 2000);
+    }).catch(function () {});
+});
+</script>
+@endif
 @endif
 
 @include('role.partials.events-imported')

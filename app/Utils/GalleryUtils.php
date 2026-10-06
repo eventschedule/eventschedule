@@ -39,9 +39,6 @@ class GalleryUtils
 
     public const MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-    /** The "New" pill on the schedule form's Gallery nav item shows until this date. */
-    public const NEW_UNTIL = '2026-12-31';
-
     public static function maxImages(): int
     {
         return max(1, (int) config('app.max_gallery_images', 50));

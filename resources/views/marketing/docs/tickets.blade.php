@@ -58,30 +58,30 @@
             <p>The checkout charge is created on <em>your own</em> connected Stripe account, with no application fee attached, so nothing is skimmed on the way through. This is the same on Free as it is on Pro and Enterprise: you pay only your payment processor's own fees. A selfhosted install charges through its own Stripe keys, which works the same way.</p>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">When you edit an event, the <strong class="text-gray-900 dark:text-white">Tickets</strong> section offers three mutually exclusive modes. Pick the one that fits the event:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When you edit an event, the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab opens on three choices. Press the one that fits the event; <strong class="text-gray-900 dark:text-white">Not needed</strong> under them switches it off again, and carries a tick while none of the three is on:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Mode</th>
+                        <th>Choice</th>
                         <th>What it does</th>
                         <th>Plan</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><a href="#external" class="doc-link">External</a></td>
-                        <td>Sends visitors to someone else's ticketing page, or to no ticketing at all. The default.</td>
+                        <td><a href="#external" class="doc-link">Tickets elsewhere</a></td>
+                        <td>Sends visitors to someone else's ticketing page. With no choice made, the event has no ticketing at all, which is the default.</td>
                         <td>Free</td>
                     </tr>
                     <tr>
-                        <td><a href="#registration" class="doc-link">Registration</a></td>
+                        <td><a href="#registration" class="doc-link">Free registration</a></td>
                         <td>A name-and-email RSVP with an optional capacity limit per date. Unlimited on every plan.</td>
                         <td>Free</td>
                     </tr>
                     <tr>
-                        <td><a href="#ticketing" class="doc-link">Tickets</a></td>
+                        <td><a href="#ticketing" class="doc-link">Sell tickets</a></td>
                         <td>Ticket types with prices, quantities and checkout. A ticket type priced at zero is unlimited on every plan; charging for one needs Pro.</td>
                         <td>Free, Pro to charge</td>
                     </tr>
@@ -154,7 +154,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">A lightweight RSVP system for free events. Attendees sign up with their name and email - no payment setup required.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Edit your event and scroll to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
+            <li>Edit your event and open the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab</li>
             <li>Select the <strong class="text-gray-900 dark:text-white">Registration</strong> mode</li>
             <li>Optionally set a <strong class="text-gray-900 dark:text-white">Registration Limit</strong> to cap how many people can sign up</li>
             <li>Optionally add <strong class="text-gray-900 dark:text-white">Custom Fields</strong> to collect extra details (Pro)</li>
@@ -251,8 +251,8 @@
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Setting up ticket sales</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Connect a payment method first, under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong>. Without one, the only choice on the Payment tab is Cash. See <a href="#payment" class="doc-link">Payment</a>.</li>
-            <li>Edit your event and scroll to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
+            <li>Connect a payment method first, under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong>. Without one, the only payment method the Payment row offers is Cash. See <a href="#payment" class="doc-link">Payment</a>.</li>
+            <li>Edit your event and open the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab</li>
             <li>Select the <strong class="text-gray-900 dark:text-white">Tickets</strong> mode</li>
             <li>Fill in the first ticket type (the four fields are described below), then use <strong class="text-gray-900 dark:text-white">+ Add Type</strong> for each further one</li>
             <li>Open the <a href="#payment" class="doc-link">Payment</a> tab and choose a payment method and currency</li>
@@ -290,20 +290,20 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A <strong class="text-gray-900 dark:text-white">Buy Tickets</strong> button then appears on your event page, or <strong class="text-gray-900 dark:text-white">Get Tickets</strong> when every type is free. Both labels can be reworded under <strong class="text-gray-900 dark:text-white">Customize &rarr; Custom Labels</strong> on the schedule's edit page.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Tickets mode has five sub-tabs:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">With <strong class="text-gray-900 dark:text-white">Sell tickets</strong> on, the ticket types come first, one line each, and four rows open the rest. Each row shows what it holds on one line, or <em>None</em> while it holds nothing, and opens in place. The price of a ticket type is labelled with the event's currency:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">General:</strong> the ticket types themselves, plus passes and per-type sales dates</li>
+            <li><strong class="text-gray-900 dark:text-white">Ticket types:</strong> price, quantity and type on one line, with links under it for a description, a limit, a discount and extra fields, plus passes and per-type sales dates</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#payment" class="doc-link">Payment</a>:</strong> payment method (Cash, Stripe, PayPal, Invoice Ninja, Payfast or Payment Link) and the currency</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#options" class="doc-link">Options</a>:</strong> checkout toggles, custom fields, ticket notes and a terms link</li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#promo-codes" class="doc-link">Promo Codes</a>:</strong> discount codes <x-doc-badge plan="pro" /></li>
             <li><strong class="text-gray-900 dark:text-white"><a href="#add-ons" class="doc-link">Add-ons</a>:</strong> optional extras buyers can attach to an order <x-doc-badge plan="pro" /></li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Promo Codes and Add-ons tabs still open on the Free plan: they show what the feature does and an upgrade panel in place of the editor.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Promo codes and Add-ons rows still open on the Free plan: they show what the feature does and an upgrade panel in place of the editor.</p>
 
         <div class="doc-callout">
             <div class="doc-callout-title">Reuse a setup on the next event</div>
-            <p>At the bottom of the Tickets section, turn on <strong class="text-gray-900 dark:text-white">Save as default</strong> before saving. The ticket types you just built are then pre-filled on new events for this schedule.</p>
+            <p>At the bottom of the Tickets tab, turn on <strong class="text-gray-900 dark:text-white">Save as default</strong> before saving. The ticket types you just built are then pre-filled on new events for this schedule.</p>
         </div>
     </section>
 
@@ -370,7 +370,7 @@
                     </tr>
                     <tr>
                         <td>Ticket sales start</td>
-                        <td>One absolute date and time at which this type goes on sale. Appears once <strong class="text-gray-900 dark:text-white">Configure sales start/end dates</strong> is on, under <a href="#options" class="doc-link">Options</a>.</td>
+                        <td>One absolute date and time at which this type goes on sale. Appears once <strong class="text-gray-900 dark:text-white">Set when sales start and end</strong> is on, under <a href="#options" class="doc-link">Options</a>.</td>
                     </tr>
                     <tr>
                         <td>Ticket sales end</td>
@@ -449,7 +449,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">If you need multiple ticket types (e.g. General and VIP) or promo codes for a free event, use the <a href="#ticketing" class="doc-link">Tickets</a> mode and set the price to zero:</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Select the <strong class="text-gray-900 dark:text-white">Tickets</strong> mode in the Tickets section</li>
+            <li>Press <strong class="text-gray-900 dark:text-white">Sell tickets</strong> on the Tickets tab</li>
             <li>Create a ticket type</li>
             <li>Set the price to <strong class="text-gray-900 dark:text-white">$0</strong> (or leave it blank)</li>
             <li>Set a quantity limit if you have capacity constraints</li>
@@ -516,14 +516,14 @@
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong></li>
             <li>Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong></li>
             <li>Complete the Stripe onboarding process</li>
-            <li>Once connected, Stripe appears as a payment option on the event's <strong class="text-gray-900 dark:text-white">Payment</strong> tab</li>
+            <li>Once connected, Stripe appears as a payment option in the event's <strong class="text-gray-900 dark:text-white">Payment</strong> row</li>
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Stripe verifies a new account asynchronously, so there is a short window after onboarding where the account is linked but not yet ready to charge. The event editor shows a "verifying" notice during that time. If you finish onboarding in another tab, reload the event page to pick up the change.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">If no payment method is connected</div>
-            <p>The Payment tab shows a <strong class="text-gray-900 dark:text-white">Connect Stripe to get paid</strong> panel and the only selectable method is Cash. An event will still save and publish in that state, so connect a method before you announce a paid event.</p>
+            <p>As soon as a ticket has a price, a notice under the three choices reads <strong class="text-gray-900 dark:text-white">Connect Stripe to get paid</strong>, with a link that opens the Payment row. The row itself reads the same, and opening it shows the same panel; the only selectable method is Cash. An event will still save and publish in that state, so connect a method before you announce a paid event.</p>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -539,7 +539,7 @@
             <li>Copy its <strong class="text-gray-900 dark:text-white">Client ID</strong> and <strong class="text-gray-900 dark:text-white">Secret</strong></li>
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong> and open the <strong class="text-gray-900 dark:text-white">PayPal</strong> tab</li>
             <li>Paste both and save. We check them with PayPal before storing them, so a typo is caught here rather than by a buyer</li>
-            <li>PayPal now appears on the <strong class="text-gray-900 dark:text-white">Payment</strong> tab of any event priced in a currency it settles</li>
+            <li>PayPal now appears in the <strong class="text-gray-900 dark:text-white">Payment</strong> row of any event priced in a currency it settles</li>
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">PayPal settles a fixed list of currencies, and an event priced in anything else simply will not offer it. Three currencies PayPal does support - the Hungarian forint, the Japanese yen and the New Taiwan dollar - are deliberately left out. PayPal will not accept an amount with decimals in any of them, and a percentage discount here can produce one, so an event priced that way would have money taken and the ticket withheld. Rather than let that happen, PayPal is not offered for those three at all.</p>
@@ -562,7 +562,7 @@
 
         <h4 id="paypal-refused" class="font-semibold text-gray-900 dark:text-white mb-2">When a PayPal checkout is refused</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Some orders never reach PayPal, because it would reject them on its own page after the seats were already held. An event priced in a currency PayPal does not settle - or in one of the three left out above - and an order PayPal declines to create. In both cases the buyer is returned to the ticket page with a message and the seats go straight back on sale, so nothing is lost.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">If you see that on your own event, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> on the Payment tab: an event can keep PayPal selected after its currency is changed, and it then shows in the dropdown marked <em>no longer available</em> until you pick something else. The same happens if you unlink PayPal while an event still names it - there the buyer is simply returned to the ticket page, so an event left that way is worth catching before a real buyer finds it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you see that on your own event, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> in the Payment row: an event can keep PayPal selected after its currency is changed, and it then shows in the dropdown marked <em>no longer available</em> until you pick something else. The same happens if you unlink PayPal while an event still names it - there the buyer is simply returned to the ticket page, so an event left that way is worth catching before a real buyer finds it.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Two more outcomes are worth recognising. A buyer who approves the payment, closes the tab and comes back much later may find the reservation has already expired - nothing is charged in that case. And if PayPal reports a total that does not match the order, the sale is held as an <strong class="text-gray-900 dark:text-white">amount mismatch</strong> for you to look at rather than being completed: the money is with PayPal and the ticket is not issued, so it needs a person.</p>
 
         <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Refunds</h4>
@@ -578,7 +578,7 @@
             <li>Set a <strong class="text-gray-900 dark:text-white">passphrase</strong> in the same Payfast screen if you have not already</li>
             <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Settings &rarr; Payment Methods</strong> and open the <strong class="text-gray-900 dark:text-white">Payfast</strong> tab</li>
             <li>Enter all three values and save</li>
-            <li>Payfast now appears on the <strong class="text-gray-900 dark:text-white">Payment</strong> tab of any event priced in ZAR</li>
+            <li>Payfast now appears in the <strong class="text-gray-900 dark:text-white">Payment</strong> row of any event priced in ZAR</li>
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">The passphrase is required rather than optional. It is what lets us verify that a payment notification genuinely came from Payfast, so without one there is no way to tell a real payment from a forged one. Setting it on your Payfast account also makes Payfast reject unsigned checkout requests, which protects your merchant account beyond this integration.</p>
@@ -597,7 +597,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title" id="payfast-refused">When a Payfast checkout is refused</div>
-            <p>Two orders never reach Payfast, because it would reject them on its own page after the seats were already held. An order under <strong class="text-gray-900 dark:text-white">R5.00</strong> - Payfast's minimum - and any event whose currency is not ZAR. In both cases the buyer is returned to the ticket page with a message, and the seats go straight back on sale. If you see that on your own event, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> on the Payment tab: an event can keep Payfast selected after its currency is changed, and it then shows in the dropdown marked <em>no longer available</em> until you pick something else.</p>
+            <p>Two orders never reach Payfast, because it would reject them on its own page after the seats were already held. An order under <strong class="text-gray-900 dark:text-white">R5.00</strong> - Payfast's minimum - and any event whose currency is not ZAR. In both cases the buyer is returned to the ticket page with a message, and the seats go straight back on sale. If you see that on your own event, check the event's <strong class="text-gray-900 dark:text-white">Currency</strong> in the Payment row: an event can keep Payfast selected after its currency is changed, and it then shows in the dropdown marked <em>no longer available</em> until you pick something else.</p>
         </div>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -685,14 +685,14 @@
             </svg>
             Options
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Configure additional checkout settings for your event's tickets.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Configure additional checkout settings for your event's tickets. The Options row reads <em>None</em> until one of them is switched on, then names the ones that are.</p>
 
         <h3 id="checkout-fields" class="doc-subheading">Custom Checkout Fields <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Collect additional information from attendees during checkout. You can add up to 10 custom fields per event. Each field has a name, a type (single line, paragraph, switch, date, dropdown or multi-select) and a required flag, and fields can be dragged into the order you want them asked.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
-            <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Options</strong> tab</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Options</strong> row</li>
             <li>Add field labels (e.g., "Dietary Requirements", "T-Shirt Size")</li>
             <li>Mark fields as required or optional</li>
             <li>Save the event</li>
@@ -713,7 +713,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Per-Ticket Custom Fields</div>
-            <p>Fields added here are asked once per order. To ask something once per ticket instead, add the field on the ticket type itself: on the <strong>General</strong> tab, choose <strong>+ Add Field</strong> under a ticket type. Per-ticket fields are useful when each attendee needs to answer individually (meal choice, name for a badge), and each ticket type takes up to 10 of them.</p>
+            <p>Fields added here are asked once per order. To ask something once per ticket instead, add the field on the ticket type itself: choose <strong>+ Add Field</strong> under a ticket type. Per-ticket fields are useful when each attendee needs to answer individually (meal choice, name for a badge), and each ticket type takes up to 10 of them.</p>
         </div>
 
         <h3 class="doc-subheading">Additional Settings</h3>
@@ -743,7 +743,7 @@
                         <td>Free</td>
                     </tr>
                     <tr>
-                        <td>Configure sales start/end dates</td>
+                        <td>Set when sales start and end</td>
                         <td>Reveals the per-ticket-type sales start and end fields described under <a href="#ticket-types" class="doc-link">Ticket Types</a>.</td>
                         <td>Free</td>
                     </tr>
@@ -783,7 +783,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Let buyers spread the cost of an expensive ticket over monthly payments. Useful for courses, retreats and multi-day events announced well in advance: a buyer pays the first installment at checkout and gets their ticket straight away, and the rest is charged automatically to the same card each month.</p>
 
         <h3 class="doc-subheading">Setting it up</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open your event, go to <strong class="text-gray-900 dark:text-white">Tickets</strong> then the <strong class="text-gray-900 dark:text-white">Payment</strong> tab, and turn on <strong class="text-gray-900 dark:text-white">Let buyers pay in monthly installments</strong>. The option appears only when the event is <a href="#payment" class="doc-link">paid through Stripe</a>, because Stripe is the only payment method that can charge a saved card automatically.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open your event, go to the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Payment</strong> row, and turn on <strong class="text-gray-900 dark:text-white">Let buyers pay in monthly installments</strong>. The option appears only when the event is <a href="#payment" class="doc-link">paid through Stripe</a>, because Stripe is the only payment method that can charge a saved card automatically.</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -847,7 +847,7 @@
         <h3 class="doc-subheading">Adding a Promo Code</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
-            <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Promo Codes</strong> tab</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Promo codes</strong> row</li>
             <li>Click <strong class="text-gray-900 dark:text-white">+ Add Promo Code</strong></li>
             <li>Enter the code (e.g., "EARLYBIRD", "VIP50")</li>
             <li>Choose the discount type and value</li>
@@ -868,7 +868,7 @@
             <li><strong class="text-gray-900 dark:text-white">Applies To:</strong> <strong class="text-gray-900 dark:text-white">All Tickets</strong>, or <strong class="text-gray-900 dark:text-white">Specific Tickets</strong> to tick the types it covers</li>
         </ul>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Each promo code has a copy-link button that produces a shareable URL pre-filling the code at checkout, making it easy to distribute to your audience.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Under each promo code, <em>Link that applies this code</em> shows a shareable URL that pre-fills the code at checkout, with a copy button beside it, making it easy to distribute to your audience.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A promo code never discounts <a href="#add-ons" class="doc-link">add-ons</a>, and it is worked out after any <a href="#ticket-types" class="doc-link">volume discount</a> on the same line, so the two never double-count the same money. A percentage code is capped at 100% and a fixed code can never discount more than the eligible subtotal.</p>
 
@@ -896,7 +896,7 @@
         <h3 class="doc-subheading">Creating an Add-on</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit your event</li>
-            <li>Go to the <strong class="text-gray-900 dark:text-white">Tickets &rarr; Add-ons</strong> tab</li>
+            <li>On the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, open the <strong class="text-gray-900 dark:text-white">Add-ons</strong> row</li>
             <li>Click <strong class="text-gray-900 dark:text-white">+ Add add-on</strong></li>
             <li>Fill in the add-on details and save the event</li>
         </ol>
@@ -1347,7 +1347,7 @@
 
         <h3 class="doc-subheading">Getting the Embed Code</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open your event in the admin panel and go to the <strong class="text-gray-900 dark:text-white">Tickets</strong> section</li>
+            <li>Open your event in the admin panel and go to the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab</li>
             <li>Enable <strong class="text-gray-900 dark:text-white">Tickets</strong> or <strong class="text-gray-900 dark:text-white">Registration</strong> mode and save the event</li>
             <li>Click the <strong class="text-gray-900 dark:text-white">Embed Tickets</strong> (or <strong class="text-gray-900 dark:text-white">Embed Registration</strong>) link next to the section heading</li>
             <li>Copy the iframe code and paste it into your website's HTML</li>
@@ -1446,7 +1446,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Create Ticket Types",
-                    "text": "Edit your event, scroll to the Tickets section, select the Tickets mode, and add a type with a price, quantity and description.",
+                    "text": "Edit your event, open the Tickets tab, press Sell tickets, and add a type with a price and quantity.",
                     "url": "{{ url(route('marketing.docs.tickets')) }}#ticket-types"
                 },
                 {

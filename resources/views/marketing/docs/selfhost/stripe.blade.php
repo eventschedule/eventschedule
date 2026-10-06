@@ -165,9 +165,9 @@
         <h3 class="doc-subheading">4. Enable Stripe for Events</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> &rarr; <strong class="text-gray-900 dark:text-white">Payment Methods</strong>. The <strong class="text-gray-900 dark:text-white">Stripe</strong> tab should read "Stripe is configured".</li>
-            <li>Edit an event and open its <strong class="text-gray-900 dark:text-white">Tickets</strong> section, then choose <strong class="text-gray-900 dark:text-white">Tickets</strong> rather than External or Registration.</li>
-            <li>On the <strong class="text-gray-900 dark:text-white">Payment</strong> tab, set <strong class="text-gray-900 dark:text-white">Payment method</strong> to <strong class="text-gray-900 dark:text-white">Stripe</strong> and pick the <strong class="text-gray-900 dark:text-white">Currency</strong> the tickets are priced in.</li>
-            <li>Add your ticket types on the <strong class="text-gray-900 dark:text-white">General</strong> tab and save. Payments automatically use your platform Stripe account.</li>
+            <li>Edit an event and open its <strong class="text-gray-900 dark:text-white">Tickets</strong> tab, then press <strong class="text-gray-900 dark:text-white">Sell tickets</strong> rather than Free registration or Tickets elsewhere.</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Payment</strong> row and set <strong class="text-gray-900 dark:text-white">Payment method</strong> to <strong class="text-gray-900 dark:text-white">Stripe</strong> and pick the <strong class="text-gray-900 dark:text-white">Currency</strong> the tickets are priced in.</li>
+            <li>Add your ticket types and save. Payments automatically use your platform Stripe account.</li>
         </ol>
 
         <h3 class="doc-subheading">How Checkout Works</h3>
@@ -257,10 +257,10 @@
             <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> &rarr; <strong class="text-gray-900 dark:text-white">Payment Methods</strong> &rarr; <strong class="text-gray-900 dark:text-white">Stripe</strong></li>
             <li>Click <strong class="text-gray-900 dark:text-white">Connect Stripe</strong></li>
             <li>Complete Stripe's onboarding</li>
-            <li>They return to your platform, their Stripe business name is shown with an <strong class="text-gray-900 dark:text-white">Unlink Account</strong> link, and Stripe becomes selectable as an event payment method</li>
+            <li>They return to your platform, their Stripe business name is shown with a <strong class="text-gray-900 dark:text-white">Disconnect</strong> link, and Stripe becomes selectable as an event payment method</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Onboarding that is started but not finished leaves the field labeled <strong class="text-gray-900 dark:text-white">Account ID [Pending]</strong>, and the event editor's <strong class="text-gray-900 dark:text-white">Payment</strong> tab shows a "Stripe is verifying your details" notice. Stripe only becomes selectable as a payment method once Stripe reports that charges are enabled.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Onboarding that is started but not finished leaves the field labeled <strong class="text-gray-900 dark:text-white">Account ID [Pending]</strong>, and the <strong class="text-gray-900 dark:text-white">Payment</strong> row of the event's Tickets tab shows a "Stripe is verifying your details" notice. Stripe only becomes selectable as a payment method once Stripe reports that charges are enabled.</p>
 
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Connect API Endpoints</h4>
         <div class="doc-table-wrap">
@@ -449,7 +449,7 @@
             <li>Save. Event Schedule verifies the credentials and registers a webhook in your Invoice Ninja company, so the connection either works or fails outright rather than saving a broken one.</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Once connected, the company name is shown with <strong class="text-gray-900 dark:text-white">Edit</strong> and <strong class="text-gray-900 dark:text-white">Unlink Account</strong> links. Editing the credentials replaces the old webhook rather than adding a second one, and leaving the token blank there means "keep the current token", so you can correct just the URL.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Once connected, the company name is shown with <strong class="text-gray-900 dark:text-white">Edit</strong> and <strong class="text-gray-900 dark:text-white">Disconnect</strong> links. Editing the credentials replaces the old webhook rather than adding a second one, and leaving the token blank there means "keep the current token", so you can correct just the URL.</p>
 
         <h3 class="doc-subheading">How It Works</h3>
         <ol class="doc-list doc-list-numbered mb-6">

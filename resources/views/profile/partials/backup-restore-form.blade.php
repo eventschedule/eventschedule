@@ -1,41 +1,23 @@
 <section>
-    <header>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-            </svg>
-            {{ __('messages.backup_and_restore') }}
-        </h2>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.backup_description') }}
-        </p>
-    </header>
+    @include('profile.partials.heading')
+    <p class="form-kit-lead">{{ __('messages.backup_description') }}</p>
 
-    @if (is_demo_mode())
-    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
-        {{ __('messages.demo_mode_settings_disabled') }}
-    </div>
-    @endif
+    @include('profile.partials.notice', ['noticeDemo' => true])
 
-    <div id="backup-app" class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
-        {{-- Tab Bar --}}
-        <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6 mt-6">
-            <nav class="flex space-x-2 sm:space-x-6" aria-label="Tabs">
-                <button type="button" data-tab="export" @click="activeTab = 'export'"
-                    :class="activeTab === 'export' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                    class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
-                    {{ __('messages.backup_export') }}
-                </button>
-                <button type="button" data-tab="import" @click="activeTab = 'import'"
-                    :class="activeTab === 'import' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                    class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
-                    {{ __('messages.backup_import') }}
-                </button>
-            </nav>
-        </div>
+    {{-- Export and Import are rows that open in place, where two tabs used to be. They are opened
+         by this Vue app's own activeTab (an empty string is "neither"), not by the page's row
+         script: this element is a Vue mount, and its markup is Vue's to change. --}}
+    {{-- inert in demo mode: the dimmed look stops a mouse, and this stops a keyboard as well (the
+         buttons in here are Vue's, so they are not switched off by the Save partial). --}}
+    <div id="backup-app" class="event-subrows {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" data-no-dirty @if (is_demo_mode()) inert @endif>
+        <button type="button" class="event-subrow" data-tab="export" :aria-expanded="activeTab === 'export' ? 'true' : 'false'" @click="activeTab = activeTab === 'export' ? '' : 'export'">
+            <span class="event-row-title">{{ __('messages.backup_export') }}</span>
+            <span class="event-row-summary" :class="{ 'is-empty': ! exportBusy }"><bdi v-if="exportBusy">{{ __('messages.settings_in_progress') }}</bdi><bdi v-else>{{ __('messages.backup_export_description') }}</bdi></span>
+            <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+        </button>
 
         {{-- Export Section --}}
-        <div v-show="activeTab === 'export'">
+        <div id="backup-tab-export" v-show="activeTab === 'export'" class="event-subrow-body">
             <p class="text-sm text-gray-600 dark:text-gray-400">
                 {{ __('messages.backup_export_description') }}
                 @if (config('queue.default') !== 'sync')
@@ -72,9 +54,9 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <x-primary-button type="submit" v-bind:disabled="exportProcessing || selectedRoleIds.length === 0">
+                    <x-brand-button type="submit" v-bind:disabled="exportProcessing || selectedRoleIds.length === 0">
                         {{ __('messages.backup_export') }}
-                    </x-primary-button>
+                    </x-brand-button>
                 </div>
             </form>
 
@@ -126,7 +108,12 @@
         </div>
 
         {{-- Import Section --}}
-        <div v-show="activeTab === 'import'">
+        <button type="button" class="event-subrow" data-tab="import" :aria-expanded="activeTab === 'import' ? 'true' : 'false'" @click="activeTab = activeTab === 'import' ? '' : 'import'">
+            <span class="event-row-title">{{ __('messages.backup_import') }}</span>
+            <span class="event-row-summary" :class="{ 'is-empty': ! importBusy }"><bdi v-if="importBusy">{{ __('messages.settings_in_progress') }}</bdi><bdi v-else>{{ __('messages.backup_import_description') }}</bdi></span>
+            <svg class="event-row-chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+        </button>
+        <div id="backup-tab-import" v-show="activeTab === 'import'" class="event-subrow-body">
             <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.backup_import_description') }}</p>
 
             @if (! config('app.hosted'))
@@ -147,9 +134,9 @@
                         class="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-800 file:text-white hover:file:bg-gray-700 dark:file:bg-gray-200 dark:file:text-gray-800 dark:hover:file:bg-white file:cursor-pointer">
 
                     <div v-show="selectedFile" class="flex items-center gap-4 mt-4">
-                        <x-primary-button type="button" @click="uploadFile" v-bind:disabled="!selectedFile || uploadProcessing">
+                        <x-brand-button @click="uploadFile" v-bind:disabled="!selectedFile || uploadProcessing">
                             {{ __('messages.backup_upload') }}
-                        </x-primary-button>
+                        </x-brand-button>
                         <span v-if="uploadProcessing" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.backup_uploading') }}...</span>
                     </div>
 
@@ -187,12 +174,13 @@
                     </div>
 
                     <div class="flex items-center gap-4 mt-4">
-                        <x-primary-button type="button" @click="startImport" v-bind:disabled="selectedImportIndices.length === 0 || importProcessing">
-                            {{ __('messages.backup_start_import') }}
-                        </x-primary-button>
-                        <button type="button" @click="cancelImport" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                        {{-- Forward button last. --}}
+                        <button type="button" @click="cancelImport" class="event-link event-link-quiet">
                             {{ __('messages.cancel') }}
                         </button>
+                        <x-brand-button @click="startImport" v-bind:disabled="selectedImportIndices.length === 0 || importProcessing">
+                            {{ __('messages.backup_start_import') }}
+                        </x-brand-button>
                     </div>
                 </div>
 
@@ -298,7 +286,8 @@ document.addEventListener('DOMContentLoaded', function() {
     Vue.createApp({
         data: function() {
             return {
-                activeTab: 'export',
+                // Neither row is open until one is pressed, or a job is running in it.
+                activeTab: '',
                 roles: roles,
                 selectedRoleIds: roles.map(function(r) { return r.id; }),
                 exportProcessing: false,
@@ -319,7 +308,28 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         },
         mounted: function() {
+            // An address can name one of the two rows (the Help map and the user guide do):
+            // these rows are this app's own, so the page's row script cannot open them. The
+            // address is also followed when it changes with the page already open (a link
+            // pressed from another section): read from the event, because the page's own
+            // listener has by then replaced the address with the section's.
+            var self = this;
+            var openNamedRow = function(hash) {
+                if (hash === '#backup-tab-export') {
+                    self.activeTab = 'export';
+                } else if (hash === '#backup-tab-import') {
+                    self.activeTab = 'import';
+                }
+            };
+            openNamedRow(window.location.hash);
+            window.addEventListener('hashchange', function(event) {
+                try {
+                    openNamedRow(new URL(event.newURL).hash);
+                } catch (e) {}
+            });
+
             if (initialExportJobId) {
+                this.activeTab = 'export';
                 this.exportProcessing = true;
                 this.pollExportStatus(initialExportJobId);
             }
@@ -331,6 +341,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         computed: {
+            // A row says what it is for until a job is running, and then says that.
+            exportBusy: function() {
+                return !! this.exportJob && (this.exportJob.status === 'pending' || this.exportJob.status === 'processing');
+            },
+            importBusy: function() {
+                return !! this.importJob && (this.importJob.status === 'pending' || this.importJob.status === 'processing');
+            },
             importHasErrors: function() {
                 if (!this.importJob || !this.importJob.report) return false;
                 return this.importJob.report.some(function(s) { return s.error; });

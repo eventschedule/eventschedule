@@ -116,15 +116,14 @@ class CuratorEventTest extends DuskTestCase
             ->waitFor('#event_name', 10)
             ->pause(500);
 
-        // Navigate to venue section via JS (more reliable than clicking the nav link)
-        $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+        // The venue is on the Event tab, which is the one the form opens on.
         $browser->waitFor('#in_person', 5);
         $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
         $browser->waitFor('#selected_venue', 5)
             ->select('#selected_venue');
 
-        // Navigate to schedules section via JS
-        $browser->script("document.querySelector('a[data-section=\"section-schedules\"]').click()");
+        // The other schedules to list on are part of the Listing tab
+        $browser->script("document.querySelector('a[data-section=\"section-listing\"]').click()");
         $browser->pause(1000)
                 // Use curator names to find and check the checkboxes
             ->script("

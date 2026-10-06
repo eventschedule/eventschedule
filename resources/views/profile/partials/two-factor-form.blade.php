@@ -1,31 +1,50 @@
 <section>
-    <header>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-            {{ __('messages.two_factor_authentication') }}
-        </h2>
+    @include('profile.partials.heading')
+    {{-- In plain words: the old lead said "time-based one-time password (TOTP)". --}}
+    @php
+        $twoFactorUser = auth()->user();
+        // The code is asked for by the password sign-in, and by nothing else: someone who signs in
+        // with Google or Facebook is let straight in (SocialAuthController::completeLogin). Said
+        // wherever that is a way into this account: the install offers one, or it is the only way.
+        $twoFactorSaysSocial = ! $twoFactorUser->hasPassword() || config('services.google.client_id') || facebook_login_enabled();
+    @endphp
+    <p class="form-kit-lead">{{ __('messages.settings_two_factor_lead') }}@if ($twoFactorSaysSocial) {{ __('messages.settings_two_factor_not_social') }}@endif</p>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.two_factor_description') }}
-        </p>
-    </header>
+    @include('profile.partials.notice', ['noticeDemo' => true])
 
-    @if (is_demo_mode())
-    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
-        {{ __('messages.demo_mode_settings_disabled') }}
-    </div>
+    @php
+        $twoFactorPending = $twoFactorUser->two_factor_secret && ! $twoFactorUser->two_factor_confirmed_at;
+    @endphp
+
+    {{-- What the last action did, said once at the top of the section. --}}
+    @if (session('status') === 'two-factor-confirmed')
+        <p class="mb-4"><span class="event-status is-on" role="status">{{ __('messages.two_factor_confirmed_message') }}</span></p>
+    @elseif (session('status') === 'two-factor-disabled')
+        <p class="mb-4"><span class="event-status" role="status">{{ __('messages.two_factor_disabled_message') }}</span></p>
+    @elseif (session('status') === 'recovery-codes-regenerated')
+        <p class="mb-4"><span class="event-status is-on" role="status">{{ __('messages.two_factor_codes_regenerated') }}</span></p>
     @endif
 
-    @php $user = auth()->user(); @endphp
-
+    <div class="form-kit-fields">
     {{-- State 1: Not enabled --}}
-    @if (! $user->two_factor_secret)
-        <form method="POST" action="{{ route('two-factor.enable') }}" class="mt-6 space-y-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+    @if (! $twoFactorUser->two_factor_secret)
+        {{-- Off: said, with what switching it on involves. The section used to open on a bare
+             "Current Password" field. --}}
+        <div class="event-picked mb-5">
+            <div class="settings-picked-main">
+                <span class="event-status">{{ __('messages.disabled') }}</span>
+            </div>
+        </div>
+        @if ($twoFactorUser->hasPassword())
+        <p class="event-hint">{{ __('messages.settings_two_factor_how') }}</p>
+        @else
+        {{-- No password to confirm, and none for the code to be asked beside. --}}
+        <p class="event-hint">{{ __('messages.settings_two_factor_how_no_password') }}</p>
+        @endif
+        <form method="POST" action="{{ route('two-factor.enable') }}" class="space-y-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" data-no-dirty>
             @csrf
 
-            @if ($user->hasPassword())
+            @if ($twoFactorUser->hasPassword())
             <div>
                 <x-input-label for="2fa_current_password" :value="__('messages.current_password')" />
                 <x-password-input id="2fa_current_password" name="current_password" class="mt-1 block w-full" autocomplete="current-password" />
@@ -33,24 +52,20 @@
             </div>
             @endif
 
-            <x-primary-button>{{ __('messages.two_factor_enable') }}</x-primary-button>
+            <x-brand-button type="submit" :disabled="is_demo_mode()">{{ __('messages.two_factor_enable') }}</x-brand-button>
         </form>
 
     {{-- State 2: Enabled but not confirmed (pending) --}}
-    @elseif (! $user->two_factor_confirmed_at)
-        <div class="mt-6 space-y-6">
-            <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                    {{ __('messages.two_factor_confirm_instructions') }}
-                </p>
-            </div>
+    @elseif ($twoFactorPending)
+        <div class="space-y-6">
+            @include('profile.partials.notice', ['noticeText' => __('messages.two_factor_confirm_instructions'), 'noticeClass' => 'mb-0'])
 
             {{-- QR Code --}}
             <div class="flex justify-center">
                 @php
                     $google2fa = new \PragmaRX\Google2FA\Google2FA;
                     $appName = config('app.name', 'Event Schedule');
-                    $qrCodeUrl = $google2fa->getQRCodeUrl($appName, $user->email, $user->two_factor_secret);
+                    $qrCodeUrl = $google2fa->getQRCodeUrl($appName, $twoFactorUser->email, $twoFactorUser->two_factor_secret);
 
                     $dataUri = \App\Utils\QrCodeUtils::dataUri($qrCodeUrl);
                 @endphp
@@ -60,108 +75,81 @@
             {{-- Manual entry key --}}
             <div class="text-center">
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.two_factor_manual_entry') }}</p>
-                <code class="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded select-all text-gray-900 dark:text-gray-100">{{ $user->two_factor_secret }}</code>
+                <code class="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded select-all text-gray-900 dark:text-gray-100">{{ $twoFactorUser->two_factor_secret }}</code>
             </div>
 
-            {{-- Recovery codes (shown once via flash) --}}
-            @if (session('two_factor_recovery_codes'))
-            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.two_factor_recovery_codes_title') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.two_factor_recovery_codes_warning') }}</p>
-                <div class="grid grid-cols-2 gap-1">
-                    @foreach (session('two_factor_recovery_codes') as $code)
-                        <code class="text-sm font-mono text-gray-700 dark:text-gray-300">{{ $code }}</code>
-                    @endforeach
-                </div>
-            </div>
-            @endif
+            @include('profile.partials.two-factor-codes')
 
             {{-- Confirm form --}}
-            <form method="POST" action="{{ route('two-factor.confirm') }}">
+            <form method="POST" action="{{ route('two-factor.confirm') }}" data-no-dirty>
                 @csrf
 
                 <div>
                     <x-input-label for="2fa_confirm_code" :value="__('messages.two_factor_code')" />
-                    <x-text-input id="2fa_confirm_code" class="block mt-1 w-full" type="text" name="code" autofocus autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" />
+                    <x-text-input id="2fa_confirm_code" class="block mt-1 w-full" type="text" name="code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" />
                     <x-input-error :messages="$errors->get('code')" class="mt-2" />
                 </div>
 
-                <div class="flex items-center gap-4 mt-4">
-                    <x-primary-button>{{ __('messages.two_factor_confirm') }}</x-primary-button>
+                {{-- Setting up could not be backed out of: Disable was only offered once it was
+                     confirmed. Cancel goes through the same door as Disable. --}}
+                <div class="flex flex-wrap items-center gap-4 mt-4">
+                    @if (! is_demo_mode())
+                        @if ($twoFactorUser->hasPassword())
+                        <button type="button" class="event-link event-link-quiet" data-reveal="two-factor-disable" aria-expanded="{{ $errors->has('current_password') ? 'true' : 'false' }}">{{ __('messages.cancel') }}</button>
+                        @else
+                        <button type="submit" form="two-factor-disable" class="event-link event-link-quiet">{{ __('messages.cancel') }}</button>
+                        @endif
+                    @endif
+                    <x-brand-button type="submit" :disabled="is_demo_mode()">{{ __('messages.two_factor_confirm') }}</x-brand-button>
                 </div>
             </form>
         </div>
 
     {{-- State 3: Enabled and confirmed --}}
     @else
-        <div class="mt-6 space-y-6">
-            <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg flex items-center gap-3">
-                <svg class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-green-800 dark:text-green-200">
-                    {{ __('messages.two_factor_enabled') }}
-                </p>
+        <div class="event-picked">
+            <div class="settings-picked-main">
+                <span class="event-status is-on">{{ __('messages.two_factor_enabled') }}</span>
             </div>
-
-            {{-- Recovery codes (shown when regenerated) --}}
-            @if (session('two_factor_recovery_codes'))
-            <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.two_factor_recovery_codes_title') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.two_factor_recovery_codes_warning') }}</p>
-                <div class="grid grid-cols-2 gap-1">
-                    @foreach (session('two_factor_recovery_codes') as $code)
-                        <code class="text-sm font-mono text-gray-700 dark:text-gray-300">{{ $code }}</code>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
             @if (! is_demo_mode())
-            <div class="flex items-center gap-4">
-                {{-- Regenerate recovery codes --}}
-                <form method="POST" action="{{ route('two-factor.recovery-codes') }}">
+            <div class="settings-picked-actions">
+                {{-- The codes in use stop working the moment new ones are made, so it asks first. --}}
+                <form method="POST" action="{{ route('two-factor.recovery-codes') }}" data-confirm="{{ __('messages.are_you_sure') }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        {{ __('messages.two_factor_regenerate_codes') }}
-                    </button>
+                    <button type="submit" class="event-link">{{ __('messages.settings_regenerate_recovery_codes') }}</button>
                 </form>
-
-                {{-- Disable 2FA --}}
-                <form method="POST" action="{{ route('two-factor.disable') }}">
-                    @csrf
-
-                    @if ($user->hasPassword())
-                    <input type="hidden" name="current_password" id="2fa_disable_password_value">
-                    @endif
-
-                    <button type="submit" id="2fa-disable-btn" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        {{ __('messages.two_factor_disable') }}
-                    </button>
-                </form>
+                @if ($twoFactorUser->hasPassword())
+                <button type="button" id="2fa-disable-btn" class="event-link is-danger" data-reveal="two-factor-disable" aria-expanded="{{ $errors->has('current_password') ? 'true' : 'false' }}">{{ __('messages.two_factor_disable') }}</button>
+                @else
+                <button type="submit" form="two-factor-disable" id="2fa-disable-btn" class="event-link is-danger">{{ __('messages.two_factor_disable') }}</button>
+                @endif
             </div>
-
-            @if ($user->hasPassword())
-            <script {!! nonce_attr() !!}>
-            document.getElementById('2fa-disable-btn').addEventListener('click', function(e) {
-                e.preventDefault();
-                var pw = prompt(@json(__("messages.two_factor_enter_password_to_disable")));
-                if (pw !== null) {
-                    document.getElementById('2fa_disable_password_value').value = pw;
-                    this.closest('form').submit();
-                }
-            });
-            </script>
-            @endif
             @endif
         </div>
+
+        @include('profile.partials.two-factor-codes')
     @endif
 
-    @if (session('status') === 'two-factor-confirmed')
-        <p class="mt-4 text-sm text-green-600 dark:text-green-400">{{ __('messages.two_factor_confirmed_message') }}</p>
-    @elseif (session('status') === 'two-factor-disabled')
-        <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.two_factor_disabled_message') }}</p>
-    @elseif (session('status') === 'recovery-codes-regenerated')
-        <p class="mt-4 text-sm text-green-600 dark:text-green-400">{{ __('messages.two_factor_codes_regenerated') }}</p>
+    {{-- Switching it off (and backing out of a setup). With a password it asks for it here, in the
+         page, with the message beside the field when it is wrong: this was a browser prompt whose
+         refusal showed nowhere. Without one there is nothing to ask for, so it confirms instead of
+         going through on the click. --}}
+    @if ($twoFactorUser->two_factor_secret && ! is_demo_mode())
+        @if ($twoFactorUser->hasPassword())
+        <form id="two-factor-disable" method="POST" action="{{ route('two-factor.disable') }}" class="event-add-box" data-no-dirty @unless ($errors->has('current_password')) hidden @endunless>
+            @csrf
+            <x-input-label for="2fa_disable_password" :value="__('messages.two_factor_enter_password_to_disable')" />
+            <x-password-input id="2fa_disable_password" name="current_password" class="mt-1 block w-full" autocomplete="current-password" />
+            <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
+            <div class="mt-3">
+                <x-danger-button class="settings-danger">{{ __('messages.two_factor_disable') }}</x-danger-button>
+            </div>
+        </form>
+        @else
+        <form id="two-factor-disable" method="POST" action="{{ route('two-factor.disable') }}" data-confirm="{{ __('messages.are_you_sure') }}" class="hidden">
+            @csrf
+        </form>
+        @endif
     @endif
+    </div>
 </section>

@@ -944,7 +944,9 @@ class PayfastCheckoutTest extends TestCase
         $this->actingAs($owner)->get(route('profile.edit'))
             ->assertSee(__('messages.gateway_provided_by_install'))
             ->assertDontSee(__('messages.gateway_own_account_in_use'))
-            ->assertDontSee(__('messages.unlink_account'));
+            // By the form's address, not its word: the button reads "Disconnect" now, which other
+            // sections of the page say too.
+            ->assertDontSee(route('payments.disconnect', ['gateway' => 'payfast']), false);
     }
 
     public function test_the_settings_tab_reports_an_owners_own_account(): void
@@ -956,7 +958,10 @@ class PayfastCheckoutTest extends TestCase
 
         $this->actingAs($owner)->get(route('profile.edit'))
             ->assertSee(__('messages.gateway_own_account_in_use'))
-            ->assertDontSee(__('messages.gateway_provided_by_install'));
+            ->assertDontSee(__('messages.gateway_provided_by_install'))
+            // The counterpart of the test above: an owner's own account CAN be disconnected, which
+            // is what shows that the assertion there is looking at something real.
+            ->assertSee(route('payments.disconnect', ['gateway' => 'payfast']), false);
     }
 
     public function test_an_unreadable_stored_secret_never_falls_back_to_the_install_account(): void

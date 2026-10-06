@@ -28,8 +28,10 @@ class WebhookSettingsController extends Controller
         $url = $request->url;
 
         if (UrlUtils::validatedTarget($url) === null) {
+            // On the field, with what was typed: it was a toast over an emptied form.
             return redirect()->to(route('profile.edit').'#section-webhooks')
-                ->with('error', __('messages.webhook_url_not_allowed'));
+                ->withInput()
+                ->withErrors(['url' => __('messages.webhook_url_not_allowed')]);
         }
 
         $secret = bin2hex(random_bytes(32));
@@ -78,7 +80,8 @@ class WebhookSettingsController extends Controller
 
         if (UrlUtils::validatedTarget($url) === null) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
-                ->with('error', __('messages.webhook_url_not_allowed'));
+                ->withInput()
+                ->withErrors(['url' => __('messages.webhook_url_not_allowed')]);
         }
 
         $eventTypes = $request->event_types;

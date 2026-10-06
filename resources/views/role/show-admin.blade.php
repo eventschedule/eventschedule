@@ -2,6 +2,8 @@
 <x-app-admin-layout>
 
     <x-slot name="head">
+        @include('partials.form-kit-styles')
+        @include('partials.admin-page-styles')
         @if ($tab == 'availability')
         <style {!! nonce_attr() !!}>
             .day-x {
@@ -18,7 +20,7 @@
             }
 
             .day-x::after {
-                content: 'Unavailable';
+                content: attr(data-label);
                 font-size: 0.65rem;
                 color: rgba(185, 28, 28, 0.8);
                 font-weight: 500;
@@ -42,59 +44,57 @@
         </style>
         @if(!$isViewer)
         <script {!! nonce_attr() !!}>
-        $(document).ready(function () {
+        // Plain script, and listening on the document: the grid sits inside the calendar's Vue
+        // mount, which re-creates its elements, and a listener put on a day would be left on the
+        // one Vue threw away.
+        (function () {
             const availableDays = new Set();
             const unavailableDays = new Set(@json($datesUnavailable));
-            const $saveButton = $('#saveButton');
-            const $dayElements = $('.day-element');
+            const unavailableLabel = @json(__('messages.unavailable'));
 
-            $dayElements.on('click', function () {
-                const $this = $(this);
-                const day = $this.data('date');
+            document.addEventListener('click', function (e) {
+                if (! e.target.closest) return;
 
-                if (unavailableDays.has(day)) {
-                    unavailableDays.delete(day);
-                    availableDays.add(day);
-                    $this.find('.day-x').remove();
-                } else {
-                    unavailableDays.add(day);
-                    if (availableDays.has(day)) {
+                const dayEl = e.target.closest('.day-element');
+                if (dayEl) {
+                    const day = dayEl.getAttribute('data-date');
+                    const mark = dayEl.querySelector('.day-x');
+
+                    if (unavailableDays.has(day)) {
+                        unavailableDays.delete(day);
+                        availableDays.add(day);
+                        if (mark) mark.remove();
+                    } else {
+                        unavailableDays.add(day);
                         availableDays.delete(day);
+                        if (! mark) {
+                            const added = document.createElement('div');
+                            added.className = 'day-x';
+                            added.setAttribute('data-label', unavailableLabel);
+                            dayEl.appendChild(added);
+                        }
                     }
-                    $this.append('<div class="day-x"></div>');
-                }
 
-                $saveButton.prop('disabled', false);
-            });
-
-            $saveButton.on('click', function () {
-                @if (!$role->isEnterprise() && config('app.hosted'))
-                    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'upgrade-availability' }));
-                @else
-                    $('#unavailable_days').val(JSON.stringify(Array.from(unavailableDays)));
-                    $('#available_days').val(JSON.stringify(Array.from(availableDays)));
-                    $('#availability_form').submit();
-                @endif
-            });
-        });
-        </script>
-        @endif
-        @endif
-
-        <script {!! nonce_attr() !!}>
-            function onTabChange() {
-                var select = document.getElementById('current-tab');
-                var selected = select.options[select.selectedIndex];
-                var upgrade = selected.getAttribute('data-upgrade');
-                if (upgrade) {
-                    select.value = '{{ $tab }}';
-                    window.dispatchEvent(new CustomEvent('open-modal', { detail: upgrade }));
+                    const saveButton = document.getElementById('saveButton');
+                    if (saveButton) saveButton.disabled = false;
                     return;
                 }
-                var tab = $('#current-tab').find(':selected').val();
-                location.href = "{{ url('/') }}" + '/{{ $subdomain }}/' + tab;
-            }
+
+                if (e.target.closest('#saveButton')) {
+                    @if (!$role->isEnterprise() && config('app.hosted'))
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'upgrade-availability' }));
+                    @else
+                        document.getElementById('unavailable_days').value = JSON.stringify(Array.from(unavailableDays));
+                        document.getElementById('available_days').value = JSON.stringify(Array.from(availableDays));
+                        document.getElementById('availability_form').submit();
+                    @endif
+                }
+            });
+        })();
         </script>
+        @endif
+        @endif
+
     </x-slot>
 
     @php
@@ -108,6 +108,37 @@
             }
         }
         $viewGuestUrl = route('role.view_guest', $viewGuestParams);
+
+        // The public address, said the way the schedule form says it (role/edit). getGuestUrl(true)
+        // names the custom domain only when it answers: a direct-mode domain that is still pending
+        // or has failed does not route to the schedule (ResolveCustomDomain), and this is the
+        // address people copy and hand out.
+        $scheduleUrl = $role->getGuestUrl(true);
+        // Split by hand: parse_url() mangles a non-ASCII host on macOS.
+        $scheduleLinkText = $scheduleUrl ? \App\Utils\UrlUtils::clean($scheduleUrl) : '';
+        $scheduleLinkSlash = strpos($scheduleLinkText, '/');
+        // An address with no path (a subdomain on hosted, a custom domain) is all host, and the kit
+        // hides the host on a phone to leave room for the path: there the whole address is the part
+        // to keep, or a phone shows "Copy  View" beside nothing.
+        $scheduleLinkHost = $scheduleLinkSlash === false ? '' : substr($scheduleLinkText, 0, $scheduleLinkSlash);
+        $scheduleLinkPath = $scheduleLinkSlash === false ? $scheduleLinkText : substr($scheduleLinkText, $scheduleLinkSlash);
+
+        // The tabs, once, for the strip. 'count' is how many; 'waiting' marks a count of things
+        // that want an answer (requests, bookings to confirm), which is the only loud one.
+        $monthParams = (now()->year == $year && now()->month == $month) ? [] : ((now()->year == $year) ? ['month' => $month] : ['year' => $year, 'month' => $month]);
+        $isEditorHere = auth()->user()->isEditor($role->subdomain);
+        $adminTabs = array_filter([
+            'schedule' => ['label' => __('messages.schedule'), 'params' => $tab == 'schedule' ? [] : $monthParams],
+            'templates' => $isEditorHere ? ['label' => __('messages.templates')] : null,
+            'videos' => $role->isCurator() ? ['label' => __('messages.videos')] : null,
+            'availability' => $role->isTalent() ? ['label' => __('messages.availability'), 'params' => $tab == 'availability' ? [] : $monthParams] : null,
+            'appointments' => ['label' => __('messages.appointments'), 'count' => $pendingBookingCount, 'waiting' => true],
+            'seating' => $role->isVenue() && $isEditorHere ? ['label' => __('messages.seating_plans')] : null,
+            'requests' => count($requests) ? ['label' => __('messages.requests'), 'count' => count($requests), 'waiting' => true] : null,
+            'followers' => (config('app.hosted') || config('app.is_testing') || $subscribersCount) ? ['label' => __('messages.followers'), 'count' => count($followers) + $subscribersCount] : null,
+            'team' => ['label' => __('messages.team'), 'count' => count($members) > 1 ? count($members) : 0],
+            'plan' => config('app.hosted') ? ['label' => __('messages.plan')] : null,
+        ]);
     @endphp
 
     <div>
@@ -161,58 +192,19 @@
                 <h1 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $role->name }}</h1>
 
+                @if ($scheduleUrl)
+                {{-- What you share. It was nowhere on these pages: only a button that opened it. --}}
+                <div class="event-url-strip">
+                    <span class="event-url-text" dir="ltr">@if ($scheduleLinkHost !== '')<span class="event-url-host">{{ $scheduleLinkHost }}</span>@endif<span class="event-url-path">{{ $scheduleLinkPath }}</span></span>
+                    {{-- data-setup-share: copying the schedule's own address is the setup guide's "share" step. --}}
+                    <button type="button" class="event-link" id="copy-schedule-link-btn" data-setup-share="link" data-copy-text="{{ $scheduleUrl }}" data-copied="{{ __('messages.copied') }}">{{ __('messages.copy') }}</button>
+                    @if ($role->email_verified_at)
+                    <a href="{{ $viewGuestUrl }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view') }}</a>
+                    @endif
+                </div>
+                @endif
+
                 <div class="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:gap-x-6">
-                    @if($role->email)
-                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <svg class="me-1.5 h-5 w-5 flex-shrink-0 text-gray-400" viewBox="0 0 24 24" fill="currentColor"
-                            aria-hidden="true">
-                            <path
-                                d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
-                        </svg>
-                        <div class="mt-1">
-                            <a href="mailto:{{ $role->email }}" class="hover:underline">
-                                {{ $role->email }}
-                            </a>
-                        </div>
-                    </div>
-                    @endif
-
-                    @if($role->phone)
-                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <svg class="me-1.5 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
-                            aria-hidden="true">
-                            <path
-                                d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" />
-                        </svg>
-                        <div class="mt-1">
-                            <a href="tel:{{ $role->phone }}" class="hover:underline">
-                                {{ $role->phone }}
-                            </a>
-                        </div>
-                    </div>
-                    @endif
-
-                    @if($role->website)
-                    <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <svg class="me-1.5 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
-                            aria-hidden="true">
-                            <path
-                                d="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z" />
-                        </svg>
-                        <div class="mt-1">
-                            {{-- Linked only through safeHref(): any member can type the website,
-                                 and every member opens this page, in the app. --}}
-                            @if ($adminWebsiteHref = \App\Utils\UrlUtils::safeHref($role->website))
-                            <x-link href="{{ $adminWebsiteHref }}" target="_blank" hideIcon class="text-gray-500 dark:text-gray-400">
-                                {{ \App\Utils\UrlUtils::clean($role->website) }}
-                            </x-link>
-                            @else
-                            <span>{{ \App\Utils\UrlUtils::clean($role->website) }}</span>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
-
                     {{-- Whether this schedule is on the Event Schedule network. Only once the install
                          has joined one, and only for an explicit yes - undecided is the default and
                          says nothing. Links editors straight to the setting (Settings, Advanced). --}}
@@ -248,17 +240,6 @@
                     {{ __('messages.edit_schedule') }}
                 </x-secondary-link>
                 @endif
-                <x-secondary-link href="{{ $viewGuestUrl }}"
-                    target="_blank"
-                    class="{{ ! $role->email_verified_at ? 'w-full sm:w-auto opacity-50 pointer-events-none' : 'w-full sm:w-auto' }}"
-                    :aria-disabled="! $role->email_verified_at ? 'true' : null">
-                    <svg class="-ms-0.5 me-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
-                        aria-hidden="true">
-                        <path
-                            d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
-                    </svg>
-                    {{ __('messages.view_schedule') }}
-                </x-secondary-link>
             </div>
 
             {{-- Actions dropdown (always visible) --}}
@@ -313,7 +294,7 @@
                                 </div>
                             </a>
                             @elseif (config('app.hosted'))
-                            <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-scan-agenda')" class="lg:hidden w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <button type="button" data-modal-open="upgrade-scan-agenda" class="lg:hidden w-full group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
                                 </svg>
@@ -402,12 +383,12 @@
 
     @if (! $role->email_verified_at)
     <div class="pt-5 pb-2">
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-yellow-500 me-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+            <div class="flex flex-wrap items-center gap-y-2">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 me-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                <span class="text-yellow-800 dark:text-yellow-200 font-medium">{{ __('messages.verify_email_address') }}</span>
+                <span class="text-sm text-amber-800 dark:text-amber-200 font-medium">{{ __('messages.verify_email_address') }}</span>
                 <a href="{{ route('role.verification.resend', ['subdomain' => $role->subdomain]) }}"
                         class="ms-auto inline-flex items-center gap-1 rounded-lg bg-yellow-100 dark:bg-yellow-800/40 px-4 py-2 text-base font-semibold text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-300 dark:ring-yellow-700 hover:bg-yellow-200 dark:hover:bg-yellow-800/60 transition-colors duration-150"
                         >
@@ -419,86 +400,39 @@
     </div>
     @endif
 
-    <div class="pt-8 pb-4">
-        <!-- Dropdown menu on small screens -->
-        <div class="md:hidden">
-            <label for="current-tab" class="sr-only">{{ __('messages.select_a_tab') }}</label>
-            <select id="current-tab" name="current-tab"
-                class="block w-full rounded-lg border-0 py-1.5 ps-3 pe-10 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)]">
-                <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
-                @if (auth()->user()->isEditor($role->subdomain))
-                <option value="templates" {{ $tab == 'templates' ? 'selected' : '' }}>{{ __('messages.templates') }}</option>
+    {{-- One strip at every width. A tab is never cut off without a sign: the strip fades where it
+         runs on and brings the tab you are on into view (the script at the foot of this file). --}}
+    <div class="ap-tabs-select md:hidden">
+        <label for="admin-tab-select" class="sr-only">{{ __('messages.select_a_tab') }}</label>
+        <select id="admin-tab-select" autocomplete="off" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+            @if (! isset($adminTabs[$tab]))
+            {{-- A page reached by its address that this schedule's tabs do not list (a viewer on
+                 Templates): without this the dropdown claimed to be on Schedule, and choosing
+                 Schedule did nothing. --}}
+            <option value="" selected disabled>{{ __('messages.select_a_tab') }}</option>
+            @endif
+            @foreach ($adminTabs as $tabKey => $adminTab)
+            <option value="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => $tabKey] + ($adminTab['params'] ?? [])) }}" {{ $tab == $tabKey ? 'selected' : '' }}>
+                {{ $adminTab['label'] }}{{ ! empty($adminTab['count']) ? ' ('.number_format($adminTab['count']).')' : '' }}
+            </option>
+            @endforeach
+        </select>
+    </div>
+    <div class="ap-tabs-wrap hidden md:block" id="admin-tabs-wrap">
+        <nav class="ap-tabs" id="admin-tabs" aria-label="{{ __('messages.select_a_tab') }}">
+            @foreach ($adminTabs as $tabKey => $adminTab)
+            <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => $tabKey] + ($adminTab['params'] ?? [])) }}"
+                class="ap-tab" @if ($tab == $tabKey) aria-current="page" @endif>
+                {{ $adminTab['label'] }}
+                @if (! empty($adminTab['count']))
+                <span class="ap-tab-count {{ ! empty($adminTab['waiting']) ? 'is-waiting' : '' }}">{{ number_format($adminTab['count']) }}</span>
                 @endif
-                @if ($role->isCurator())
-                <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
-                    {{ __('messages.videos') }}</option>
-                @endif
-                @if ($role->isTalent())
-                <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
-                @endif
-                <option value="appointments" {{ $tab == 'appointments' ? 'selected' : '' }}>{{ __('messages.appointments') }}{{ $pendingBookingCount ? ' (' . $pendingBookingCount . ')' : '' }}</option>
-                @if ($role->isVenue() && auth()->user()->isEditor($role->subdomain))
-                <option value="seating" {{ $tab == 'seating' ? 'selected' : '' }}>{{ __('messages.seating_plans') }}</option>
-                @endif
-                @if (count($requests))
-                <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
-                    {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
-                @endif
-                @if (config('app.hosted') || config('app.is_testing') || $subscribersCount)
-                <option value="followers" {{ $tab == 'followers' ? 'selected' : '' }}>
-                    {{ __('messages.followers') }}{{ (count($followers) + $subscribersCount) ? ' (' . (count($followers) + $subscribersCount) . ')' : '' }}</option>
-                @endif
-                <option value="team" {{ $tab == 'team' ? 'selected' : '' }}>
-                    {{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</option>
-                @if (config('app.hosted'))
-                <option value="plan" {{ $tab == 'plan' ? 'selected' : '' }}>
-                    {{ __('messages.plan') }}</option>
-                @endif
-            </select>
-        </div>
-
-        <!-- Tabs at small breakpoint and up -->
-        <div class="ap-tab-container hidden md:block">
-            <nav class="-mb-px flex gap-x-8 overflow-x-auto scrollbar-hide">
-                <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.schedule') }}</a>
-                @if (auth()->user()->isEditor($role->subdomain))
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'templates']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'templates' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.templates') }}</a>
-                @endif
-                @if ($role->isCurator())
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'videos']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'videos' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.videos') }}</a>
-                @endif
-                @if ($role->isTalent())
-                <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.availability') }}</a>
-                @endif
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'appointments' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.appointments') }}{{ $pendingBookingCount ? ' (' . $pendingBookingCount . ')' : '' }}</a>
-                @if ($role->isVenue() && auth()->user()->isEditor($role->subdomain))
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'seating']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'seating' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.seating_plans') }}</a>
-                @endif
-                @if (count($requests))
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
-                @endif
-                @if (config('app.hosted') || config('app.is_testing') || $subscribersCount)
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'followers']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'followers' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.followers') }}{{ (count($followers) + $subscribersCount) ? ' (' . (count($followers) + $subscribersCount) . ')' : '' }}</a>
-                @endif
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'team' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.team') }}{{ count($members) ? ' (' . count($members) . ')' : '' }}</a>
-                @if (config('app.hosted'))
-                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}"
-                    class="whitespace-nowrap border-b-2 {{ $tab == 'plan' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.plan') }}</a>
-                @endif
-            </nav>
-        </div>
-
+            </a>
+            @endforeach
+        </nav>
     </div>
 
+    <div class="{{ in_array($tab, ['schedule', 'availability', 'appointments'], true) ? '' : 'page-col' }}">
     @if ($tab == 'schedule')
     @include('role.show-admin-schedule')
     @elseif ($tab == 'templates')
@@ -520,6 +454,7 @@
     @elseif ($tab == 'plan')
     @include('role.show-admin-plan')
     @endif
+    </div>
 
 <script {!! nonce_attr() !!}>
 @if ($tab == 'followers' || $tab == 'team')
@@ -592,11 +527,84 @@ function syncEventsFromDropdown() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab change select
-    var currentTab = document.getElementById('current-tab');
-    if (currentTab) {
-        currentTab.addEventListener('change', function() {
-            onTabChange();
+    // The tabs: bring the one you are on into view, and say when there are more to either side.
+    var tabsWrap = document.getElementById('admin-tabs-wrap');
+    var tabs = document.getElementById('admin-tabs');
+    if (tabs && tabsWrap) {
+        var paintTabs = function() {
+            var start = Math.abs(tabs.scrollLeft);
+            tabsWrap.classList.toggle('more-before', start > 4);
+            tabsWrap.classList.toggle('more-after', start + tabs.clientWidth < tabs.scrollWidth - 4);
+        };
+        var current = tabs.querySelector('[aria-current="page"]');
+        var showCurrent = function() {
+            if (current) {
+                tabs.scrollLeft = current.offsetLeft - (tabs.clientWidth - current.offsetWidth) / 2;
+            }
+            paintTabs();
+        };
+        showCurrent();
+        // Again once the fonts are in: the labels change width and the tab moves.
+        window.addEventListener('load', showCurrent);
+        tabs.addEventListener('scroll', paintTabs, { passive: true });
+        window.addEventListener('resize', paintTabs);
+        paintTabs();
+    }
+
+    var tabSelect = document.getElementById('admin-tab-select');
+    if (tabSelect) {
+        var tabHere = tabSelect.value;
+        tabSelect.addEventListener('change', function() {
+            if (tabSelect.value) {
+                window.location.href = tabSelect.value;
+            }
+        });
+        // Back brings the page back with the option that was chosen still showing, and choosing
+        // it again would fire nothing.
+        window.addEventListener('pageshow', function() {
+            tabSelect.value = tabHere;
+        });
+    }
+
+    // The public address under the name.
+    var copyLink = document.getElementById('copy-schedule-link-btn');
+    if (copyLink) {
+        // Read once: read at each press, a second press inside two seconds took "Copied" for the
+        // button's own name and left it saying so for good.
+        var copyLabel = copyLink.textContent;
+        var copyTimer = null;
+        var saidCopied = function() {
+            copyLink.textContent = copyLink.getAttribute('data-copied');
+            clearTimeout(copyTimer);
+            copyTimer = setTimeout(function() { copyLink.textContent = copyLabel; }, 2000);
+        };
+        // Without the clipboard API (an http:// selfhost install) the whole address is copied
+        // from a field made for the moment. Selecting the text on the page would copy it without
+        // its scheme, and on a phone without its host.
+        var copyByHand = function(text) {
+            var field = document.createElement('textarea');
+            field.value = text;
+            field.setAttribute('readonly', '');
+            field.style.position = 'fixed';
+            field.style.opacity = '0';
+            document.body.appendChild(field);
+            field.select();
+            var done = false;
+            try {
+                done = document.execCommand('copy');
+            } catch (e) {}
+            document.body.removeChild(field);
+            if (done) {
+                saidCopied();
+            }
+        };
+        copyLink.addEventListener('click', function() {
+            var text = copyLink.getAttribute('data-copy-text');
+            if (! navigator.clipboard) {
+                copyByHand(text);
+                return;
+            }
+            navigator.clipboard.writeText(text).then(saidCopied).catch(function() { copyByHand(text); });
         });
     }
 

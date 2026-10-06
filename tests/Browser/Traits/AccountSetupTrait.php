@@ -310,8 +310,7 @@ trait AccountSetupTrait
             nameField.dispatchEvent(new Event('input', { bubbles: true }));
         ");
 
-        // Navigate to venue section via JS
-        $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
+        // The venue is on the Event tab, which is the one the form opens on.
         $browser->waitFor('#in_person', 10);
         $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
         $browser->waitFor('#selected_venue', 5)
@@ -319,8 +318,8 @@ trait AccountSetupTrait
 
         // Navigate to tickets section via JS
         $browser->script("document.querySelector('a[data-section=\"section-tickets\"]').click()");
-        $browser->waitFor('#ticket_mode_tickets', 10)
-            ->click('label[for="ticket_mode_tickets"]')
+        $browser->waitFor('#ticket_choice_tickets', 10)
+            ->click('#ticket_choice_tickets')
             ->pause(1000);
 
         // Configure ticket via Vue (more reliable than DOM type in headless Chrome)
@@ -372,8 +371,9 @@ trait AccountSetupTrait
 
         $browser->waitForText('API settings updated successfully', 10);
 
-        // Ensure the API section is visible after redirect (toast may appear before section JS runs)
-        $browser->waitUntil("document.getElementById('section-api') && document.getElementById('section-api').style.display === 'block'", 5);
+        // Ensure the API section is visible after redirect (toast may appear before section JS runs).
+        // It shares the Developers tab with webhooks, so it is the tab that is shown or hidden.
+        $browser->waitUntil("document.getElementById('section-api') && document.getElementById('section-api').closest('.section-content').style.display === 'block'", 5);
 
         // Get the API key from the page
         $browser->waitFor('#api_key', 5);

@@ -127,12 +127,60 @@ class GrowthExportTest extends TestCase
         // outcome, audience, reach and adoption data, 10 since outside ticket links and the
         // reachable placeholders, 11 since a headline variant reached sign-up on the link as well
         // as in the consented cookie, 12 since imports are counted by source and the two Google
-        // fields read where the ids live. Bumping this is deliberate: a reader diffing two pulls
-        // needs to know the shape (or the meaning) moved.
-        $this->assertSame(13, $data['meta']['schema_version']);
+        // fields read where the ids live, 14 since the event_form section (what hand-made events
+        // are saved with). Bumping
+        // this is deliberate: a reader diffing two pulls needs to know the shape (or the meaning)
+        // moved.
+        $this->assertSame(14, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
+    }
+
+    /**
+     * The read on the event form redesign: of the events people typed in, how many have somewhere
+     * to be, a way to sign up and a flyer, first events apart from later ones.
+     */
+    public function test_event_form_counts_what_hand_made_events_are_saved_with(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->freeRole($owner, 'talent');
+        $venue = $this->freeRole($owner, 'venue');
+        $venue->forceFill(['email' => 'room@example.org'])->save();
+        $bareVenue = $this->freeRole($owner, 'venue');
+        $bareVenue->forceFill(['email' => null])->save();
+
+        // The account's first event: bare.
+        $first = $this->createEvent($talent, ['user_id' => $owner->id]);
+        // Later ones: at a venue with tickets; online with a flyer; at a venue with a link elsewhere.
+        $atVenue = $this->createEvent($talent, ['user_id' => $owner->id, 'tickets_enabled' => true]);
+        $atVenue->roles()->attach($venue->id, ['is_accepted' => true]);
+        $this->createEvent($talent, ['user_id' => $owner->id, 'event_url' => 'https://example.org/stream', 'flyer_image_url' => 'flyers/a.jpg']);
+        $elsewhere = $this->createEvent($talent, ['user_id' => $owner->id, 'registration_url' => 'https://tickets.example.org/x']);
+        $elsewhere->roles()->attach($bareVenue->id, ['is_accepted' => true]);
+
+        // An import is not the form's doing, and neither is the venue it brought.
+        $imported = $this->createEvent($talent, ['user_id' => $owner->id, 'rsvp_enabled' => true]);
+        $imported->forceFill(['import_source' => \App\Models\Event::IMPORT_ICS])->save();
+        $importedVenue = $this->freeRole($owner, 'venue');
+        $imported->roles()->attach($importedVenue->id, ['is_accepted' => true]);
+
+        // Somebody else's first event, with everything.
+        $other = $this->createOwner();
+        $otherTalent = $this->freeRole($other, 'talent');
+        $this->createEvent($otherTalent, ['user_id' => $other->id, 'rsvp_enabled' => true, 'event_url' => 'https://example.org/live', 'flyer_image_url' => 'flyers/b.jpg']);
+
+        $section = $this->build()['event_form'];
+        $month = now()->format('Y-m');
+
+        $this->assertSame(GrowthExportService::RECENT_MONTHS, count($section['by_month']));
+        $this->assertSame(['events' => 2, 'with_location' => 1, 'with_signup' => 1, 'with_flyer' => 1], $section['by_month'][$month]['first']);
+        $this->assertSame(['events' => 3, 'with_location' => 3, 'with_signup' => 2, 'with_flyer' => 1], $section['by_month'][$month]['later']);
+        $this->assertSame(['created' => 2, 'with_email' => 1], $section['new_venues'][$month]);
+
+        $oldest = array_key_first($section['by_month']);
+        $this->assertSame(['events' => 0, 'with_location' => 0, 'with_signup' => 0, 'with_flyer' => 0], $section['by_month'][$oldest]['first'], 'a month with nothing in it is a real zero');
+        $this->assertSame($first->id, \App\Models\Event::where('user_id', $owner->id)->min('id'), 'sanity check: the bare event is the first');
     }
 
     public function test_claims_reports_untracked_months_as_null_not_zero(): void

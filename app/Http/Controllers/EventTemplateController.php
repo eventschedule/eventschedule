@@ -58,7 +58,15 @@ class EventTemplateController extends Controller
 
         $template = $this->findTemplate($role, $hash);
 
-        session(['cloned_event' => $template->template_data]);
+        // A template is a stored copy, and one saved before a copy stopped carrying "this event's
+        // own sponsors" (EventRepo::buildClonePayload) still says so with no logos to show for it:
+        // the new event opened on an empty list of its own instead of the schedule's sponsors.
+        $payload = $template->template_data;
+        if (($payload['event']['sponsor_mode'] ?? null) === 'custom' && empty($payload['event']['sponsor_logos'])) {
+            $payload['event']['sponsor_mode'] = 'default';
+        }
+
+        session(['cloned_event' => $payload]);
 
         $params = ['subdomain' => $subdomain];
         if ($request->date) {

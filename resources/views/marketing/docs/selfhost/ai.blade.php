@@ -75,7 +75,7 @@
 
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI Generator for details <x-doc-badge plan="enterprise" /></h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">An <strong class="text-gray-900 dark:text-white">AI Generator</strong> button appears beside the <strong class="text-gray-900 dark:text-white">Details</strong> heading on both the schedule form and the event form. On a schedule it offers Short Description and Description; on an event it offers Category, Flyer Image, Short Description and Description. You tick the fields to fill, can add extra instructions, save those instructions as the default for the schedule, and preview each result before applying it. Fields that already have a value are left unticked so nothing is overwritten by accident.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">An <strong class="text-gray-900 dark:text-white">AI Generator</strong> button appears beside the <strong class="text-gray-900 dark:text-white">Details</strong> heading on the schedule form, and under <strong class="text-gray-900 dark:text-white">About</strong> on the event form. On a schedule it offers Short Description and Description; on an event it offers Category, Flyer Image, Short Description and Description. You tick the fields to fill, can add extra instructions, save those instructions as the default for the schedule, and preview each result before applying it. Fields that already have a value are left unticked so nothing is overwritten by accident.</p>
             </div>
 
             <div class="doc-field">

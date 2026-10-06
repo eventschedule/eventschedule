@@ -236,6 +236,7 @@ class RoleUpdateRequest extends FormRequest
             'federation_enabled' => ['nullable', 'boolean'],
             'draft_events_default' => ['nullable', 'boolean'],
             'default_event_visibility' => ['nullable', 'string', 'in:public,draft,internal,unlisted'],
+            'calendar_delete_action' => ['nullable', 'string', 'in:ignore,cancel,delete'],
             'hide_videos' => ['nullable', 'boolean'],
             'show_accessibility_widget' => ['nullable', 'boolean'],
             // sometimes, not nullable: both columns are NOT NULL, and the toggle always posts 0 or

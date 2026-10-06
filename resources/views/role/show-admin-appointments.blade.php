@@ -111,7 +111,12 @@
         @if (config('app.hosted') && ! $role->hasEmailSettings())
             <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
                 <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.appointments_no_email_warning') }}</div>
+                <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.appointments_no_email_warning') }}
+                    {{-- Where to fix it: the notice named a problem and left the reader to find the page. --}}
+                    @if (! $isViewer)
+                    <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#integration-tab-email" class="underline">{{ __('messages.edit') }}</a>
+                    @endif
+                </div>
             </div>
         @endif
 
@@ -188,8 +193,10 @@
                 <div class="ap-card rounded-xl p-3 flex flex-wrap items-center gap-2">
                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.appointments_share_link') }}</span>
                     <label for="appt-book-url" class="sr-only">{{ __('messages.appointments_share_link') }}</label>
-                    <input type="text" id="appt-book-url" readonly value="{{ $bookUrl }}"
-                           class="flex-1 min-w-0 text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                    {{-- A floor on its width: on a phone it was squeezed to "http:/" beside its own
+                         label and buttons. Below the floor it takes a line to itself. --}}
+                    <input type="text" id="appt-book-url" readonly dir="ltr" value="{{ $bookUrl }}"
+                           class="appt-book-url min-w-0 text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                     <button type="button" data-appt-copy="{{ $bookUrl }}" title="{{ __('messages.copy_link') }}"
                             class="{{ $secondaryBtnClass }} gap-1.5 px-3 py-2 text-sm">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>

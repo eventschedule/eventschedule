@@ -1,46 +1,31 @@
 <section>
-    <header>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-            </svg>
-            {{ __('messages.webhooks') }}
-        </h2>
-
-        @if(Route::has('marketing.docs.developer.webhooks'))
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                <x-link href="{{ route('marketing.docs.developer.webhooks') }}" target="_blank">
-                    {{ __('messages.view_webhook_documentation') }}
-                </x-link>
-            </p>
-        @endif
-    </header>
+    @include('profile.partials.heading', Route::has('marketing.docs.developer.webhooks')
+        ? ['asideUrl' => route('marketing.docs.developer.webhooks'), 'asideLabel' => __('messages.view_webhook_documentation')]
+        : [])
 
     @php
-        $hasPro = auth()->user()->roles()->get()->contains(fn($role) => $role->isPro());
-        $webhooks = auth()->user()->webhooks()->orderByDesc('created_at')->get();
+        // $settingsWebhooks and $settingsHasPro are read in profile/edit, where the sidebar needs
+        // them too. Which form a refused save came from: both post a field named "url", so each
+        // carries its own name and only that one shows the message and what was typed.
+        $webhookFormBack = old('_form');
+        $webhookAddOpen = $settingsWebhooks->isEmpty() || $webhookFormBack === 'add' || ($webhookFormBack === null && $errors->has('url'));
     @endphp
 
-    @if (! $hasPro)
-        <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded text-blue-800 dark:text-blue-200 text-sm">
-            {{ __('messages.webhooks_require_pro') }}
-        </div>
+    <div class="mt-4">
+    @if (! $settingsHasPro)
+        @include('profile.partials.notice', ['noticeText' => __('messages.webhooks_require_pro')])
     @endif
 
-    @if (is_demo_mode())
-    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
-        {{ __('messages.demo_mode_settings_disabled') }}
-    </div>
-    @endif
+    @include('profile.partials.notice', ['noticeDemo' => true])
 
     {{-- Secret display after creation --}}
     @if (session('show_new_webhook_secret'))
-        <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-            <p class="text-sm font-medium text-green-800 dark:text-green-200 mb-2">{{ __('messages.webhook_secret_label') }}</p>
+        <div class="mb-5 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg" data-no-dirty>
+            <label for="webhook_secret" class="block text-sm font-medium text-green-800 dark:text-green-200 mb-2">{{ __('messages.webhook_secret_label') }}</label>
             <div class="flex items-center gap-2">
-                <input type="text" id="webhook_secret" value="{{ session('new_webhook_secret') }}" class="flex-1 font-mono text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" readonly>
-                <button type="button" id="copy-webhook-secret-btn" class="px-3 py-2 border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center" title="{{ __('Copy to clipboard') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <input type="text" id="webhook_secret" value="{{ session('new_webhook_secret') }}" class="flex-1 min-w-0 font-mono text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" readonly>
+                <button type="button" id="copy-webhook-secret-btn" class="px-3 py-2 border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center" title="{{ __('messages.copy') }}" aria-label="{{ __('messages.copy') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
                 </button>
@@ -48,161 +33,176 @@
             <p class="mt-2 text-xs text-green-700 dark:text-green-300">{{ __('messages.webhook_secret_warning') }}</p>
         </div>
     @endif
+    </div>
 
-    {{-- Existing webhooks --}}
-    @if ($webhooks->isNotEmpty())
-        <div class="mt-6 space-y-4">
-            @foreach ($webhooks as $webhook)
-                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 {{ ! $webhook->is_active ? 'opacity-60' : '' }}">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0 flex-1">
-                            @if ($webhook->description)
-                                <p class="font-medium text-gray-900 dark:text-gray-100 text-sm">{{ $webhook->description }}</p>
-                            @endif
-                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate font-mono" title="{{ $webhook->url }}">{{ $webhook->url }}</p>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                @if (empty($webhook->event_types))
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">{{ __('messages.all_events') }}</span>
-                                @else
-                                    @foreach ($webhook->event_types as $type)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">{{ $type }}</span>
-                                    @endforeach
-                                @endif
-                            </div>
-                            @if ($webhook->last_triggered_at)
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('messages.last_triggered') }}: {{ $webhook->last_triggered_at->diffForHumans() }}</p>
+    {{-- One line per webhook: where it sends, what it sends, and its four actions as words. --}}
+    @if ($settingsWebhooks->isEmpty())
+        <p class="event-empty">{{ __('messages.settings_no_webhooks') }}</p>
+    @else
+        <div class="event-list">
+            @foreach ($settingsWebhooks as $webhook)
+                @php
+                    $webhookId = \App\Utils\UrlUtils::encodeId($webhook->id);
+                    $webhookEditBack = $webhookFormBack === 'edit-'.$webhookId;
+                    $webhookTypes = $webhook->event_types ?: [];
+                    $webhookSends = empty($webhookTypes)
+                        ? __('messages.all_events')
+                        : implode(', ', array_slice($webhookTypes, 0, 3)).(count($webhookTypes) > 3 ? ' +'.(count($webhookTypes) - 3) : '');
+                    $webhookChecked = $webhookEditBack ? (array) old('event_types', []) : $webhookTypes;
+                @endphp
+                <div class="event-list-row settings-row-wrap">
+                    <div class="settings-row-main">
+                        <div class="event-list-name">
+                            <span>{{ $webhook->description ?: (parse_url((string) $webhook->url, PHP_URL_HOST) ?: $webhook->url) }}</span>
+                            @if ($webhook->is_active)
+                            <span class="event-status is-on ms-2">{{ __('messages.enabled') }}</span>
+                            @else
+                            <span class="event-chip">{{ __('messages.disabled') }}</span>
                             @endif
                         </div>
-                        <div class="flex items-center gap-1 flex-shrink-0">
-                            {{-- Toggle active --}}
-                            <form method="POST" action="{{ route('webhooks.toggle', \App\Utils\UrlUtils::encodeId($webhook->id)) }}">
-                                @csrf
-                                <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ $webhook->is_active ? __('messages.disable') : __('messages.enable') }}">
-                                    @if ($webhook->is_active)
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    @else
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-                                    @endif
-                                </button>
-                            </form>
-                            {{-- Test ping --}}
-                            <form method="POST" action="{{ route('webhooks.test', \App\Utils\UrlUtils::encodeId($webhook->id)) }}">
-                                @csrf
-                                <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ __('messages.webhook_test') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                </button>
-                            </form>
-                            {{-- Edit (toggle form visibility) --}}
-                            <button type="button" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 webhook-edit-btn" data-webhook-id="{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}" title="{{ __('messages.edit') }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
-                            {{-- Delete --}}
-                            <form method="POST" action="{{ route('webhooks.destroy', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" data-confirm="{{ __('messages.are_you_sure') }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700" title="{{ __('messages.delete') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
-                            </form>
+                        <div class="event-list-sub settings-mono truncate" dir="ltr" title="{{ $webhook->url }}">{{ $webhook->url }}</div>
+                        <div class="event-list-sub">
+                            {{ $webhookSends }}@if ($webhook->last_triggered_at) &middot; {{ __('messages.last_triggered') }}: {{ $webhook->last_triggered_at->diffForHumans() }}@endif
                         </div>
                     </div>
-
-                    {{-- Edit form (hidden by default) --}}
-                    <div id="webhook-edit-{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}" class="hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <form method="POST" action="{{ route('webhooks.update', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" class="space-y-4">
+                    <div class="event-list-actions">
+                        <form method="POST" action="{{ route('webhooks.toggle', $webhookId) }}">
                             @csrf
-                            @method('PUT')
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.webhook_url') }}</label>
-                                <input type="url" name="url" value="{{ $webhook->url }}" required class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.description') }}</label>
-                                <input type="text" name="description" value="{{ $webhook->description }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" maxlength="255" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.webhook_events') }}</label>
-                                <div class="grid grid-cols-2 gap-3">
-                                    @foreach (\App\Models\Webhook::EVENT_TYPES as $type)
-                                        <label class="relative flex items-center gap-3 cursor-pointer">
-                                            <span class="relative w-11 h-6 flex-shrink-0">
-                                                <input type="checkbox" name="event_types[]" value="{{ $type }}"
-                                                    {{ empty($webhook->event_types) || in_array($type, $webhook->event_types) ? 'checked' : '' }}
-                                                    class="sr-only peer">
-                                                <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></span>
-                                                <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
-                                            </span>
-                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $type }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-                            </div>
+                            <button type="submit" class="event-link">{{ $webhook->is_active ? __('messages.disable') : __('messages.enable') }}</button>
                         </form>
-                        <form method="POST" action="{{ route('webhooks.regenerate_secret', \App\Utils\UrlUtils::encodeId($webhook->id)) }}" class="mt-2" data-confirm="{{ __('messages.are_you_sure') }}">
+                        <form method="POST" action="{{ route('webhooks.test', $webhookId) }}">
                             @csrf
-                            <button type="submit" class="text-sm text-gray-600 dark:text-gray-400 underline hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.regenerate_secret') }}</button>
+                            <button type="submit" class="event-link">{{ __('messages.webhook_test') }}</button>
+                        </form>
+                        <button type="button" class="event-link webhook-edit-btn" data-reveal="webhook-edit-{{ $webhookId }}" aria-expanded="{{ $webhookEditBack ? 'true' : 'false' }}">{{ __('messages.edit') }}</button>
+                    </div>
+                </div>
+
+                {{-- Edit form, behind "Edit". It comes back open, with what was typed and the
+                     message, when its own save was refused: that used to appear under the Add
+                     form's field with this one closed. --}}
+                <div id="webhook-edit-{{ $webhookId }}" class="event-add-box mb-4" @unless ($webhookEditBack) hidden @endunless>
+                    <form method="POST" action="{{ route('webhooks.update', $webhookId) }}" class="space-y-4">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="_form" value="edit-{{ $webhookId }}">
+                        <div>
+                            <x-input-label for="webhook_url_{{ $webhookId }}" :value="__('messages.webhook_url')" />
+                            <x-text-input id="webhook_url_{{ $webhookId }}" type="url" name="url" dir="ltr" :value="$webhookEditBack ? old('url') : $webhook->url" required class="mt-1 block w-full" />
+                            @if ($webhookEditBack)
+                            <x-input-error class="mt-2" :messages="$errors->get('url')" />
+                            @endif
+                        </div>
+                        <div>
+                            <x-input-label for="webhook_description_{{ $webhookId }}" :value="__('messages.description')" />
+                            <x-text-input id="webhook_description_{{ $webhookId }}" type="text" name="description" :value="$webhookEditBack ? old('description') : $webhook->description" class="mt-1 block w-full" maxlength="255" />
+                        </div>
+                        <div>
+                            <p class="event-group-label">{{ __('messages.webhook_events') }}</p>
+                            @php $webhookAllTicked = count(array_intersect(\App\Models\Webhook::EVENT_TYPES, ($webhookEditBack ? $webhookChecked : ($webhookTypes ?: \App\Models\Webhook::EVENT_TYPES)))) === count(\App\Models\Webhook::EVENT_TYPES); @endphp
+                            <x-toggle name="webhook_all_events" id="webhook_all_events_{{ $webhookId }}" label="{{ __('messages.all_events') }}" :checked="$webhookAllTicked" data-webhook-all-events />
+                            {{-- None ticked is stored as "all events", which nothing on the page said. --}}
+                            <p class="event-hint mt-3" data-webhook-events @if ($webhookAllTicked) hidden @endif>{{ __('messages.settings_webhook_no_events_help') }}</p>
+                            <div class="event-check-grid" data-webhook-events @if ($webhookAllTicked) hidden @endif>
+                                @foreach (\App\Models\Webhook::EVENT_TYPES as $type)
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                        <input type="checkbox" name="event_types[]" value="{{ $type }}"
+                                            @checked(($webhookEditBack ? false : empty($webhookTypes)) || in_array($type, $webhookChecked, true))
+                                            class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        <span class="settings-mono">{{ $type }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @include('profile.partials.save', ['saveClass' => ''])
+                    </form>
+                    <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <form method="POST" action="{{ route('webhooks.regenerate_secret', $webhookId) }}" data-confirm="{{ __('messages.are_you_sure') }}">
+                            @csrf
+                            <button type="submit" class="event-link event-link-quiet">{{ __('messages.regenerate_secret') }}</button>
+                        </form>
+                        <button type="button" class="event-link event-link-quiet webhook-deliveries-btn" data-webhook-id="{{ $webhookId }}">{{ __('messages.webhook_deliveries') }}</button>
+                        {{-- Delete sat on the row as an equal of Edit; it is the last of the rare
+                             actions here, and still asks first. --}}
+                        <form method="POST" action="{{ route('webhooks.destroy', $webhookId) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="ms-auto">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="event-link is-danger">{{ __('messages.delete') }}</button>
                         </form>
                     </div>
-
-                    {{-- Delivery log (loaded on demand) --}}
-                    <div class="mt-3">
-                        <button type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline webhook-deliveries-btn" data-webhook-id="{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}">{{ __('messages.webhook_deliveries') }}</button>
-                        <div id="webhook-deliveries-{{ \App\Utils\UrlUtils::encodeId($webhook->id) }}" class="hidden mt-2">
-                            <div class="text-xs text-gray-400">{{ __('messages.loading') }}...</div>
-                        </div>
+                    <div id="webhook-deliveries-{{ $webhookId }}" class="hidden mt-2">
+                        <div class="text-xs text-gray-400">{{ __('messages.loading') }}...</div>
                     </div>
                 </div>
             @endforeach
         </div>
     @endif
 
-    {{-- Add new webhook form --}}
-    <form method="POST" action="{{ route('webhooks.store') }}" class="mt-6 space-y-4 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+    {{-- Add a webhook: open when there are none yet (it is the only thing to do), otherwise
+         behind a link, as the lists of the event form are. --}}
+    @unless ($webhookAddOpen)
+    <div class="mt-3">
+        <button type="button" class="event-link" data-reveal="webhook-add-form" aria-expanded="false">+ {{ __('messages.add_webhook') }}</button>
+    </div>
+    @endunless
+    <form id="webhook-add-form" method="POST" action="{{ route('webhooks.store') }}" class="event-add-box space-y-4 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}" @unless ($webhookAddOpen) hidden @endunless>
         @csrf
+        <input type="hidden" name="_form" value="add">
 
-        <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.add_webhook') }}</h3>
+        <p class="event-group-label">{{ __('messages.add_webhook') }}</p>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.webhook_url') }}</label>
-            <input type="url" name="url" value="{{ old('url') }}" required placeholder="https://example.com/webhook" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" />
-            @error('url')
-                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-            @enderror
+            <x-input-label for="webhook_url_new" :value="__('messages.webhook_url') . ' *'" />
+            <x-text-input id="webhook_url_new" type="url" name="url" dir="ltr" :value="$webhookFormBack === 'add' ? old('url') : ''" required placeholder="https://example.com/webhook" class="mt-1 block w-full" />
+            @if ($webhookFormBack === 'add' || $webhookFormBack === null)
+            <x-input-error class="mt-2" :messages="$errors->get('url')" />
+            @endif
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.description') }}</label>
-            <input type="text" name="description" value="{{ old('description') }}" placeholder="{{ __('messages.webhook_description_placeholder') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm" maxlength="255" />
+            <x-input-label for="webhook_description_new" :value="__('messages.description')" />
+            <x-text-input id="webhook_description_new" type="text" name="description" :value="$webhookFormBack === 'add' ? old('description') : ''" placeholder="{{ __('messages.webhook_description_placeholder') }}" class="mt-1 block w-full" maxlength="255" />
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.webhook_events') }}</label>
-            <div class="grid grid-cols-2 gap-3">
+            <p class="event-group-label">{{ __('messages.webhook_events') }}</p>
+            {{-- One switch for the usual case; the list of fourteen is for sending fewer. --}}
+            @php $webhookNewAll = $webhookFormBack !== 'add' || count((array) old('event_types', [])) === count(\App\Models\Webhook::EVENT_TYPES) || old('event_types') === null; @endphp
+            <x-toggle name="webhook_all_events" id="webhook_all_events_new" label="{{ __('messages.all_events') }}" :checked="$webhookNewAll" data-webhook-all-events />
+            <p class="event-hint mt-3" data-webhook-events @if ($webhookNewAll) hidden @endif>{{ __('messages.settings_webhook_no_events_help') }}</p>
+            <div class="event-check-grid" data-webhook-events @if ($webhookNewAll) hidden @endif>
                 @foreach (\App\Models\Webhook::EVENT_TYPES as $type)
-                    <label class="relative flex items-center gap-3 cursor-pointer">
-                        <span class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" name="event_types[]" value="{{ $type }}" checked
-                                class="sr-only peer">
-                            <span class="block w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></span>
-                            <span class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
-                        </span>
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $type }}</span>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" name="event_types[]" value="{{ $type }}"
+                            @checked($webhookFormBack === 'add' ? in_array($type, (array) old('event_types', []), true) : true)
+                            class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <span class="settings-mono">{{ $type }}</span>
                     </label>
                 @endforeach
             </div>
         </div>
 
-        <div>
-            <x-primary-button>{{ __('messages.add_webhook') }}</x-primary-button>
-        </div>
+        @include('profile.partials.save', ['saveClass' => '', 'saveLabel' => __('messages.add_webhook')])
     </form>
 </section>
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
+    // "All events" is the usual choice, so it is one switch. On, every box is ticked and the list
+    // is put away; off, the list is there to untick from. What is posted is the boxes, as before.
+    document.querySelectorAll('input[type="checkbox"][data-webhook-all-events]').forEach(function(all) {
+        var form = all.closest('form');
+        if (! form) {
+            return;
+        }
+        all.addEventListener('change', function() {
+            if (all.checked) {
+                form.querySelectorAll('input[name="event_types[]"]').forEach(function(box) { box.checked = true; });
+            }
+            form.querySelectorAll('[data-webhook-events]').forEach(function(part) { part.hidden = all.checked; });
+        });
+    });
+
     // Copy webhook secret
     var copySecretBtn = document.getElementById('copy-webhook-secret-btn');
     if (copySecretBtn) {
@@ -214,21 +214,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 input.select();
                 document.execCommand('copy');
             }
-            copySecretBtn.title = '{{ __("Copied!") }}';
+            copySecretBtn.title = @json(__('messages.copied'), JSON_UNESCAPED_UNICODE);
             setTimeout(function() {
-                copySecretBtn.title = '{{ __("Copy to clipboard") }}';
+                copySecretBtn.title = @json(__('messages.copy'), JSON_UNESCAPED_UNICODE);
             }, 2000);
         });
     }
-
-    // Toggle edit forms
-    document.querySelectorAll('.webhook-edit-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var id = this.getAttribute('data-webhook-id');
-            var form = document.getElementById('webhook-edit-' + id);
-            form.classList.toggle('hidden');
-        });
-    });
 
     // Load delivery logs on demand
     document.querySelectorAll('.webhook-deliveries-btn').forEach(function(btn) {

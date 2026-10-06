@@ -1,7 +1,8 @@
-<div class="pt-5">
-    <div class="ap-card rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.videos') }}</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.videos_description') }}</p>
+<div>
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.videos_description') }}</p>
+    </div>
+    <div class="ap-card rounded-xl p-6">
         
         <div id="videos-app" data-is-viewer="{{ $isViewer ? 'true' : 'false' }}">
             <div v-if="loading" class="text-center py-8">

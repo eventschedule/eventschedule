@@ -4688,7 +4688,12 @@ class RoleController extends Controller
         }
 
         $role = new Role;
-        $role->fill($request->all());
+        // Not the columns only the server writes: see SERVER_OWNED_FIELDS. Nor two lists that are
+        // fillable and that update() rebuilds for itself. No form posts sponsor_logos: a file name
+        // stored from the request is deleted as an orphan the next time the schedule is saved or
+        // removed, and it can be the name of another schedule's logo. The default curators are
+        // held, below, to the ones the picker offered the person making the schedule.
+        $role->fill($request->except([...self::SERVER_OWNED_FIELDS, 'sponsor_logos', 'default_curator_ids']));
         // sync_direction is fillable: hold it to what the person's Google connection may do.
         $role->sync_direction = self::googleDirectionFor($request->user(), $request->input('sync_direction'));
 
@@ -4739,8 +4744,22 @@ class RoleController extends Controller
             $role->phone_verified_at = now();
         }
 
-        if (! $request->background_colors) {
+        // As in update(): "Custom" is an empty select with two colours beside it, and the short
+        // form a first schedule is made on shows none of the three. It used to store ", ".
+        if (! $request->background_colors && ($request->has('background_colors') || $request->has('custom_color1'))) {
             $role->background_colors = $request->custom_color1.', '.$request->custom_color2;
+        }
+
+        // The curators a new schedule sends its events to: only ones the picker offered this
+        // person, and none for a curator schedule, as update() holds them. A posted id was stored
+        // as it came, and every new event then went to that curator as a request.
+        if ($request->has('default_curator_ids') && ! $role->isCurator()) {
+            $offeredCuratorIds = $user->allCurators()->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $chosenCuratorIds = array_values(array_intersect(
+                array_unique(array_filter(array_map('intval', (array) $request->input('default_curator_ids', [])))),
+                $offeredCuratorIds
+            ));
+            $role->default_curator_ids = $chosenCuratorIds ?: null;
         }
 
         if ($request->has('import_urls') || $request->has('import_cities')) {
@@ -4748,7 +4767,7 @@ class RoleController extends Controller
             $importUrls = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
             foreach ($importUrls as $importUrl) {
                 if (! UrlUtils::isUrlSafe($importUrl)) {
-                    return redirect()->back()->withErrors(['import_urls' => __('messages.invalid_url')]);
+                    return redirect()->back()->withInput()->withErrors(['import_urls' => __('messages.invalid_url')]);
                 }
             }
             $importConfig['urls'] = $importUrls;
@@ -5193,6 +5212,28 @@ class RoleController extends Controller
         return view('role/edit', $data);
     }
 
+    /**
+     * Columns of a schedule that only the server writes. They are fillable for the code that sets
+     * them by hand, and update() fills from the whole request, which every member who may edit
+     * the schedule can post: the state of the custom domain's verification (which is what makes a
+     * domain route to the schedule), the notification counters, the credentials of the CalDAV
+     * server its events are synced to (CalDAVController takes those from the owner, over https,
+     * after testing them), the import list, which is rebuilt from import_urls through a check of
+     * each address, and the event graphics settings, which decide who is mailed and how often and
+     * are saved by GraphicController::saveSettings() after it has checked them. sponsor_logos and
+     * the geocode columns are held elsewhere.
+     */
+    public const SERVER_OWNED_FIELDS = [
+        'custom_domain_host',
+        'custom_domain_status',
+        'custom_domain_error',
+        'last_notified_request_count',
+        'last_notified_poll_option_count',
+        'caldav_settings',
+        'import_config',
+        'graphic_settings',
+    ];
+
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -5228,6 +5269,44 @@ class RoleController extends Controller
         // Guard custom_css behind Pro plan
         if (! $role->isPro()) {
             $request->merge(['custom_css' => $role->custom_css]);
+        }
+
+        // Custom fields and custom labels are Pro too, and each is rebuilt by its own block
+        // below, which runs on Pro when the list was on the page (it posts a marker beside
+        // itself). Both columns are fillable, so anywhere that block does not run - another plan,
+        // or a post without the marker - the posted array used to be kept exactly as it came.
+        if (! $role->isPro() || ! $request->has('event_custom_fields_submitted')) {
+            $request->merge(['event_custom_fields' => $role->event_custom_fields]);
+        }
+        if (! $role->isPro() || ! $request->has('custom_labels_submitted')) {
+            $request->merge(['custom_labels' => $role->custom_labels]);
+        }
+        // The same for the two other lists a block below tidies only when its marker says the list
+        // was on the page: without the marker the posted array was filled in and kept as it came.
+        if (! $request->boolean('approved_subdomains_submitted')) {
+            $request->merge(['approved_subdomains' => $role->approved_subdomains]);
+        }
+        if (! $request->boolean('event_categories_submitted')) {
+            $request->merge(['event_categories' => $role->event_categories]);
+        }
+
+        // The CalDAV connection belongs to the owner (CalDAVController refuses anyone else), and
+        // so does the direction it syncs in: the radios are on the page for every member.
+        // The same goes for what a deleted calendar event does here ("delete it too" removes
+        // events), which sits beside those radios.
+        $isOwner = (int) auth()->id() === (int) $role->user_id;
+        if (! $isOwner) {
+            $request->merge([
+                'caldav_sync_direction' => $role->caldav_sync_direction,
+                'calendar_delete_action' => $role->calendar_delete_action,
+            ]);
+        }
+
+        // A curator schedule's page has no "default curator schedules", and the block further
+        // down that checks the posted ids is skipped for one: without this they were stored as
+        // posted, and new events were added to whatever they named.
+        if ($role->isCurator()) {
+            $request->merge(['default_curator_ids' => $role->default_curator_ids]);
         }
 
         // sponsor_logos is fillable, but no form posts it on any plan: the sponsor block at the end
@@ -5272,8 +5351,10 @@ class RoleController extends Controller
             ]);
         }
 
-        // Normalize gift card denominations (unique, positive, sorted)
-        if ($request->has('gift_card_amounts')) {
+        // Normalize gift card denominations (unique, positive, sorted). The marker says the list
+        // was on the page: with every amount taken off nothing else is posted, and the stored
+        // list used to stay as it was while the page showed it empty.
+        if ($request->has('gift_card_amounts') || $request->boolean('gift_card_amounts_submitted')) {
             $request->merge([
                 'gift_card_amounts' => collect($request->input('gift_card_amounts', []))
                     ->map(fn ($amount) => round((float) $amount, 2))
@@ -5329,8 +5410,7 @@ class RoleController extends Controller
         // alone: an absent select used to read as "calendar cleared", which nulled the owner's
         // pivot, and Role::getGoogleCalendarId() then fell back to 'primary' - so the standing
         // sync started pulling the owner's main calendar onto the public schedule.
-        $googleSubmitted = $request->has('google_integration_submitted')
-            && (int) auth()->id() === (int) $role->user_id;
+        $googleSubmitted = $request->has('google_integration_submitted') && $isOwner;
         $oldSyncDirection = $role->sync_direction;
         $newSyncDirection = $googleSubmitted
             ? self::googleDirectionFor($request->user(), $request->input('sync_direction'))
@@ -5346,9 +5426,17 @@ class RoleController extends Controller
         // Outlook / Microsoft sync direction + calendar changes. The new direction is read from
         // the model AFTER fill() (below), not the raw request, so a hand-crafted POST that sets
         // the marker but omits the direction radio can't spuriously null it and tear the sub down.
+        //
+        // Held to the owner and to a calendar that was really chosen, as Google's are above: the
+        // select is empty until its list arrives (and after a failed load), so a save made in
+        // that moment cleared the owner's calendar, and the marker posted by any other member
+        // set it.
+        $microsoftSubmitted = $request->has('microsoft_integration_submitted') && $isOwner;
         $oldMicrosoftSyncDirection = $role->microsoft_sync_direction;
         $oldMicrosoftCalendarId = $ownerPivot?->microsoft_calendar_id;
-        $newMicrosoftCalendarId = $request->input('microsoft_calendar_id');
+        $newMicrosoftCalendarId = $microsoftSubmitted && $request->filled('microsoft_calendar_id')
+            ? $request->input('microsoft_calendar_id')
+            : $oldMicrosoftCalendarId;
 
         // Capture old category state for rename detection.
         $oldEventCategories = $role->event_categories;
@@ -5357,17 +5445,30 @@ class RoleController extends Controller
         // Compared after the save: picking a new event animation earns a "share it" card.
         $oldListAnimation = $role->listAnimation();
 
-        $role->fill($request->all());
+        // Read before the fill replaces them with what was posted.
+        $storedCuratorIds = $role->default_curator_ids;
+
+        // Not the columns only the server writes (SERVER_OWNED_FIELDS), and not the type: what kind
+        // of schedule this is was decided when it was made.
+        $role->fill($request->except([...self::SERVER_OWNED_FIELDS, 'type']));
 
         // sync_direction is fillable, so undo it when the Google controls were not submitted,
         // and hold it to what the connection may do when they were.
         $role->sync_direction = $googleSubmitted ? $newSyncDirection : $oldSyncDirection;
+        if (! $microsoftSubmitted) {
+            $role->microsoft_sync_direction = $oldMicrosoftSyncDirection;
+        }
 
         // The "offer a second language" toggle maps onto the target column: when it is off (or the
         // submitted target is blank), the target equals the authored language = "no translation".
-        // Skipped in demo mode, where the controls are disabled and frozen to current values above.
+        // Skipped in demo mode, where the controls are disabled and frozen to current values above,
+        // and on a save that did not carry the toggle at all: absent is not "off", and reading it
+        // as off discarded the translations the schedule already had.
         // Fall back to 'en' so a request that also omits language_code can't null this NOT NULL column.
-        if (! is_demo_mode() && (! $request->boolean('translation_enabled') || ! $role->translation_language_code)) {
+        if (! is_demo_mode() && $request->has('translation_enabled') && ! $request->boolean('translation_enabled')) {
+            $role->translation_language_code = $role->language_code ?: 'en';
+        }
+        if (! $role->translation_language_code) {
             $role->translation_language_code = $role->language_code ?: 'en';
         }
 
@@ -5410,7 +5511,7 @@ class RoleController extends Controller
         // clobber the owner's calendar selection or tear down their Graph subscription with the
         // wrong account's token. NOTE: microsoft_sync_direction is fillable, so when the tab is
         // absent fill() simply leaves it unchanged.
-        if ($request->has('microsoft_integration_submitted')) {
+        if ($microsoftSubmitted) {
             $role->microsoft_create_teams_meetings = $request->boolean('microsoft_create_teams_meetings');
 
             // Read the new direction from the model post-fill (fillable), not the raw request.
@@ -5446,22 +5547,26 @@ class RoleController extends Controller
             $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
             if ($newSubdomain != $storedSubdomain) {
                 if (Role::subdomain($newSubdomain)->first()) {
-                    return redirect()->back()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
+                    return redirect()->back()->withInput()->withErrors(['new_subdomain' => __('messages.subdomain_taken')]);
                 }
                 $role->subdomain = $newSubdomain;
             }
         }
 
-        if (! $request->background_colors) {
+        // "Custom" is an empty select with two colours beside it. A save that sent none of the
+        // three did not show the background at all, and used to store ", " in its place.
+        if (! $request->background_colors && ($request->has('background_colors') || $request->has('custom_color1'))) {
             $role->background_colors = $request->custom_color1.', '.$request->custom_color2;
         }
 
-        if ($request->has('import_urls') || $request->has('import_cities')) {
+        // The marker says both lists were on the page: with every row removed nothing else is
+        // posted, and the last address or city could not be taken off.
+        if ($request->has('import_urls') || $request->has('import_cities') || $request->boolean('import_lists_submitted')) {
             $importConfig = $role->import_config;
             $importUrls = array_map('strtolower', array_filter(array_map('trim', $request->input('import_urls', []))));
             foreach ($importUrls as $importUrl) {
                 if (! UrlUtils::isUrlSafe($importUrl)) {
-                    return redirect()->back()->withErrors(['import_urls' => __('messages.invalid_url')]);
+                    return redirect()->back()->withInput()->withErrors(['import_urls' => __('messages.invalid_url')]);
                 }
             }
             $importConfig['urls'] = $importUrls;
@@ -5656,10 +5761,27 @@ class RoleController extends Controller
         // Handle default curator schedules
         if ($request->has('default_curator_ids') && ! $role->isCurator()) {
             $curatorIds = array_filter(array_map('intval', $request->input('default_curator_ids', [])));
-            $validCuratorIds = [];
             $allowedCuratorIds = auth()->user()->allCurators()->pluck('id')->toArray();
+            // The picker lists the curators of whoever is saving, so their save decides those and
+            // no others: a curator another member chose was never on this page, and its absence
+            // from the post used to take it off the schedule. Kept only while some OTHER member
+            // can still manage it, though: a curator nobody on the schedule can reach any more
+            // (unfollowed, or no longer taking requests) is on nobody's page, so nobody could
+            // ever untick it, and every new event would go on being sent there.
+            // "Member" here is one who can open this form (an owner or an admin, as edit() and
+            // update() ask): someone with view access never sees the picker. And they are only
+            // asked about when the schedule holds a curator that is not the saver's own.
+            $notOnThisPage = array_diff(array_map('intval', $storedCuratorIds ?? []), $allowedCuratorIds);
+            $othersCuratorIds = $notOnThisPage ? $role->members()
+                ->wherePivotIn('level', ['owner', 'admin'])
+                ->where('users.id', '!=', auth()->id())
+                ->get()
+                ->flatMap(fn ($member) => $member->allCurators()->pluck('id'))
+                ->map(fn ($id) => (int) $id)
+                ->all() : [];
+            $validCuratorIds = array_values(array_intersect($notOnThisPage, $othersCuratorIds));
             foreach ($curatorIds as $curatorId) {
-                if (in_array($curatorId, $allowedCuratorIds)) {
+                if (in_array($curatorId, $allowedCuratorIds) && ! in_array($curatorId, $validCuratorIds)) {
                     $validCuratorIds[] = $curatorId;
                 }
             }
@@ -6039,9 +6161,11 @@ class RoleController extends Controller
             }
         }
 
-        // Delete removed groups
+        // Delete removed groups, when the list was on the page (it posts groups_submitted beside
+        // itself). Absent is not empty: a save that never showed the list used to delete every
+        // sub-schedule the schedule had.
         $toDelete = array_diff($existingGroupIds, $submittedIds);
-        if (! empty($toDelete)) {
+        if (! empty($toDelete) && $request->boolean('groups_submitted')) {
             $role->groups()->whereIn('id', $toDelete)->delete();
         }
 

@@ -31,7 +31,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Your schedule's admin panel is the central hub for day-to-day management. It is a row of tabs across the top, each of which is its own page. Not every tab is offered to every schedule: some depend on the <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-types" class="doc-link">schedule type</a>, some on your plan, and one appears only when there is something waiting for you.
+            Your schedule's admin panel is the central hub for day-to-day management. It is a row of tabs across the top, each of which is its own page (on a phone the row is a dropdown). Under the schedule's name is its public address, with <strong class="text-gray-900 dark:text-white">Copy</strong> beside it, and <strong class="text-gray-900 dark:text-white">View</strong> once the schedule's email is verified. Not every tab is offered to every schedule: some depend on the <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-types" class="doc-link">schedule type</a>, some on your plan, and one appears only when there is something waiting for you.
         </p>
 
         <x-doc-screenshot id="managing-schedules--schedule-tab" alt="Schedule admin panel with tabs" loading="eager" />
@@ -141,7 +141,7 @@
 
         <h3 id="actions" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Actions Dropdown</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Actions</strong> dropdown sits at the top right of every tab and gathers the operations that act on the schedule as a whole. On narrow screens it also carries <strong>Edit Schedule</strong> and <strong>View Schedule</strong>, which are separate buttons on desktop.
+            The <strong class="text-gray-900 dark:text-white">Actions</strong> dropdown sits at the top right of every tab and gathers the operations that act on the schedule as a whole. On narrow screens it also carries <strong>Edit Schedule</strong> and <strong>View Schedule</strong>; on desktop Edit Schedule is a button of its own, and View is the link beside the schedule's address.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -359,7 +359,7 @@
             Two different things land here:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> Anyone with your public request link can submit an event to your schedule, unless you have turned <strong>Accept requests</strong> off. A date another schedule adds you to lands here too when your schedule reviews it first, which a Talent schedule always does unless that schedule is already on its approved list. Each card shows the submitting schedule or venue with its picture, the date, the sub-schedule it was filed under, and the answers to any questions you added to your request form.</li>
+            <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> Anyone with your public request link can submit an event to your schedule, unless you have turned <strong>Accept requests</strong> off. A date another schedule adds you to lands here too when your schedule reviews it first, which a Talent schedule always does unless that schedule is already on its approved list. Each card is headed by the event's name, then says who is asking (the submitting schedule with its picture, or the person who filled in your form), the date, the sub-schedule it was filed under, and the answers to any questions you added to your request form.</li>
             <li><strong class="text-gray-900 dark:text-white">Appointment bookings</strong>, when the appointment type has <strong>Require approval before confirming</strong> turned on. These cards are badged with the appointment type and show the guest's name, email, phone, chosen time, price and payment status, plus any note they left. A booking a guest has moved to a new time is badged as moved, so you can spot it in a long list.</li>
         </ul>
 
@@ -368,7 +368,7 @@
             <li><strong>View</strong> opens the public page for an event request so you can see the whole thing, and <strong>Edit</strong> opens it in the event form if you want to tidy it up before publishing.</li>
             <li><strong>Accept</strong> publishes the event on your schedule, or confirms the booking. The person who submitted it is emailed, and a guest who booked an appointment gets their confirmation and calendar invite. On eventschedule.com every email about a booking, to the guest or to you, needs the schedule's own <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>.</li>
             <li><strong>Decline</strong> asks you to confirm, then removes it from your schedule and emails the submitter. Declining a booking also cancels it and frees the slot, but it does not return a payment. If the booking was paid, the email telling you it was cancelled gives the amount and payment reference, so you can return the money in Stripe or your payment provider. To refund from Event Schedule instead, use <strong>Refund Ticket</strong> on the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a> before you decline: it is only offered while the sale is still paid.</li>
-            <li><strong>Accept All</strong> at the top of the list takes everything in one go, after a confirmation that names the count. There is no bulk decline: declining is one at a time, on purpose.</li>
+            <li><strong>Accept All</strong>, shown at the top once more than one request is waiting, takes everything in one go, after a confirmation that names the count. There is no bulk decline: declining is one at a time, on purpose.</li>
         </ol>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -397,7 +397,7 @@
         </h2>
         @if(config('app.hosted'))
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience. Three panels at the top count it: <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> is your confirmed email subscribers, <strong class="text-gray-900 dark:text-white">Newsletter only</strong> is people who pressed Follow while signed in, and <strong class="text-gray-900 dark:text-white">Can be emailed</strong> is the two added together. Below them come the two lists: <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a>, then account followers. Nobody appears twice, because confirming a sign-up also sets up an account that follows your schedule, and those people are listed under Email subscribers with an <strong class="text-gray-900 dark:text-white">Account</strong> badge. Both lists are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
+            The <strong class="text-gray-900 dark:text-white">Followers</strong> tab lists your audience. Three figures at the top count it: <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> is your confirmed email subscribers, <strong class="text-gray-900 dark:text-white">Newsletter only</strong> is people who pressed Follow while signed in, and <strong class="text-gray-900 dark:text-white">Can be emailed</strong> is the two added together. Below them come the two lists: <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a>, then account followers. Nobody appears twice, because confirming a sign-up also sets up an account that follows your schedule, and those people are listed under Email subscribers with an <strong class="text-gray-900 dark:text-white">Account</strong> badge. Both lists are default recipients when you send a <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">newsletter</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             People join in two ways. Somebody signed in who presses <strong class="text-gray-900 dark:text-white">Follow</strong> becomes an account follower. Somebody signed out gives their email and name, in the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule and event pages or in the dialog the Follow button opens for them, and becomes an email subscriber once they open the confirmation link.
@@ -408,7 +408,7 @@
 
         <ul class="doc-list mb-6">
             <li>The table gives each follower's <strong>name</strong>, <strong>email address</strong>, their own schedule if they run one, and the <strong>date</strong> they followed you</li>
-            <li>Sort by name, email or date by clicking the column heading, and page through longer lists at the bottom</li>
+            <li>Sort by name or date by clicking the column heading, and page through longer lists at the bottom</li>
             <li><strong>QR Code</strong> at the top right downloads a PNG ready to print on a poster or a flyer. Scanning it opens your public schedule page, or your custom domain if you have one, scrolled to the sign-up form</li>
             <li><strong>Embed Signup Form</strong>, beside the QR code, gives you the code to put the sign-up form on your own website. See <a href="{{ route('marketing.docs.sharing') }}#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></li>
             <li>Before anyone has joined, the tab shows <strong>Your follow link</strong> with a <strong>Copy Link</strong> button. It opens the same place as the QR code</li>
@@ -486,10 +486,10 @@
         <h3 class="doc-subheading">Managing Members</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Click <strong>Add Member</strong> and give their name and email address. A phone number is optional, and the level defaults to Admin.</li>
-            <li>They are emailed an invitation. If they have not accepted yet, the level column shows a <strong>Resend Invite</strong> button in place of a level, and, on eventschedule.com, a second <strong>SMS</strong> button when you gave a phone number and text messaging is configured.</li>
+            <li>They are emailed an invitation. If they have not accepted yet, their row is marked <strong>Pending</strong> and has a <strong>Resend Invite</strong> link, and, on eventschedule.com, a second <strong>Resend by text message</strong> link when you gave a phone number and text messaging is configured.</li>
             <li>Once they have signed up, the owner can change their level between <strong>Admin</strong> and <strong>Viewer</strong> from the dropdown in that row. It saves as soon as you pick.</li>
-            <li><strong>Remove</strong> revokes access. Only the owner can remove someone else; anyone can remove themselves. The owner's own row has no Remove button.</li>
-            <li>Sort the list by name or email by clicking the column heading.</li>
+            <li><strong>Remove</strong> revokes access. Only the owner can remove someone else; anyone else can take themselves off with <strong>Leave</strong> on their own row. The owner's own row has neither.</li>
+            <li>Sort the list by name by clicking the column heading.</li>
         </ol>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -507,7 +507,7 @@
             Ownership can be handed to another account: a venue changes hands, an organizer leaves, or you set a schedule up for someone and want it to be theirs. It is available on every plan, and only the owner can start it. A schedule that nobody owns yet changes hands a different way, by being claimed - see <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>.
         </p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>On the Team tab click <strong>Transfer ownership</strong> and enter the new owner's email address.</li>
+            <li>On the Team tab click <strong>Transfer ownership</strong> on your own row and enter the new owner's email address.</li>
             <li>On <strong>Enterprise</strong> and selfhosted installs you can turn off <strong>Remove me from this schedule</strong> to stay on as an admin afterwards. Free and Pro schedules hold a single member, so there you are always removed.</li>
             <li>They are emailed a link. Nothing moves yet: the request sits on the Team tab with <strong>Resend Invite</strong> and <strong>Cancel</strong> buttons, and expires after seven days.</li>
             <li>To accept, they sign in with the address you sent it to. The link on its own is not enough, and if they do not have an account yet they can create one with that address.</li>
