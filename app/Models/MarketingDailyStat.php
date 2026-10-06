@@ -28,6 +28,9 @@ class MarketingDailyStat extends Model
         'signup_code_requests',
         'signup_code_verified',
         'signup_code_invalid',
+        'guest_submit_views',
+        'guest_submit_code_requests',
+        'guest_submit_submissions',
     ];
 
     protected $casts = [
@@ -58,6 +61,14 @@ class MarketingDailyStat extends Model
         // signup_code_verified: somebody can mistype once and then succeed, so it overlaps
         // both of the others. It separates "came back and got it wrong" from "never came back".
         'signup_code_invalid',
+        // The public "Submit your event" page (event.guest_submit), written by EventController and
+        // by RegisteredUserController::sendVerificationCode() on the guest route. Its own funnel,
+        // beside the sign-up one and never part of it: a visitor who saw the form, one who asked
+        // for the emailed code (hosted, new accounts only - someone signing in or signed in skips
+        // it, so it is not a stage every submitter passes), and one who got an event through.
+        'guest_submit_views',
+        'guest_submit_code_requests',
+        'guest_submit_submissions',
     ];
 
     /**
@@ -90,6 +101,10 @@ class MarketingDailyStat extends Model
         'pricing_visitors' => '2026-08-28',
         // 2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats
         'signup_code_invalid' => '2026-09-25',
+        // 2026_10_06_000001_add_guest_submit_counters_to_marketing_daily_stats
+        'guest_submit_views' => '2026-10-06',
+        'guest_submit_code_requests' => '2026-10-06',
+        'guest_submit_submissions' => '2026-10-06',
     ];
 
     /**

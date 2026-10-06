@@ -125,7 +125,7 @@ class GuestSubmitAccountCopyTest extends TestCase
         // "Create your free account..." would contradict the notice. Hidden by Vue rather than by
         // Blade, so the gate is what can be asserted server-side.
         $this->assertStringContainsString(
-            '<p v-if="!isAuthed && registrationEnabled"', $response->getContent()
+            '<p v-if="!isAuthed && registrationEnabled && accountMode === \'register\'"', $response->getContent()
         );
 
         // With registration closed EVERY email lands in login mode, so a returning user must still

@@ -30,6 +30,8 @@ use App\Models\EventPoll;
 use App\Models\EventPollVote;
 use App\Models\EventVideo;
 use App\Models\Group;
+use App\Models\MarketingDailyStat;
+use App\Models\PageView;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\Ticket;
@@ -2339,6 +2341,8 @@ class EventController extends Controller
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
+        $this->countGuestSubmit('guest_submit_views', 'guest_submit_view', $request);
+
         return view('event.guest-submit', ['role' => $role, 'isGuest' => true, 'requireAccount' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
     }
 
@@ -3022,12 +3026,59 @@ class EventController extends Controller
         // creates the user account + talent schedule - so a null name can't reach the typed
         // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
         // Covers both the non-account save below and the require_account path.
+        // The flyer reader sometimes answers a postal code or a house number as a NUMBER, and
+        // the page posts it as it came. A number under `max:255` is compared by value, so 90210
+        // would be refused on a field that looks fine: these are text, whatever their JSON type.
+        foreach (['venue_name', 'venue_address1', 'venue_address2', 'venue_city', 'venue_state', 'venue_postal_code'] as $venueKey) {
+            if (is_int($request->input($venueKey)) || is_float($request->input($venueKey))) {
+                $request->merge([$venueKey => (string) $request->input($venueKey)]);
+            }
+        }
+
+        // Everything below is checked here, before guestImportWithAccount() creates the account
+        // and the schedule: a start time Carbon cannot read threw a 500 from saveEvent(), and a
+        // venue line longer than its column was a 1406 from the venue's own save, each of them
+        // AFTER the visitor had been given an account for an event that was never saved.
         $request->validate(array_merge([
             'name' => ['required', 'string', 'max:255'],
             'name_en' => ['nullable', 'string', 'max:255'],
             'venue_name_en' => ['nullable', 'string', 'max:255'],
             'short_description_en' => ['nullable', 'string', 'max:255'],
-        ], $this->couponDiscountRules($request->input('coupon_discount_type'))));
+            'starts_at' => ['nullable', 'date_format:Y-m-d H:i:s'],
+            'duration' => ['nullable', 'numeric', 'min:0', 'max:8760'],
+            // decimal(13,3) and a TEXT column: the ceilings the save would hit, met here first.
+            // 15,000 characters is the most that fits a TEXT column whatever they are (65,535
+            // bytes, four to a character at worst); `max` counts characters, the column bytes.
+            'ticket_price' => ['nullable', 'numeric', 'min:0', 'max:9999999999'],
+            'description' => ['nullable', 'string', 'max:15000'],
+            // The rest of what these two pages post into a column with a size. The page name
+            // becomes the submitter's own schedule (roles.name), written after their account:
+            // one over 255 characters was a 500 that left the account behind with no schedule.
+            'schedule_name' => ['nullable', 'string', 'max:255'],
+            'event_url' => ['nullable', 'string', 'max:500'],
+            'coupon_code' => ['nullable', 'string', 'max:255'],
+            'category_id' => ['nullable', 'integer'],
+            'venue_name' => ['nullable', 'string', 'max:255'],
+            'venue_address1' => ['nullable', 'string', 'max:255'],
+            'venue_address2' => ['nullable', 'string', 'max:255'],
+            'venue_city' => ['nullable', 'string', 'max:255'],
+            'venue_state' => ['nullable', 'string', 'max:255'],
+            'venue_postal_code' => ['nullable', 'string', 'max:255'],
+        ], $this->couponDiscountRules($request->input('coupon_discount_type'))), [], [
+            'starts_at' => __('messages.start_time'),
+            'ticket_price' => __('messages.price'),
+            'description' => __('messages.description'),
+            'schedule_name' => __('messages.schedule_name'),
+            'event_url' => __('messages.event_url'),
+            'coupon_code' => __('messages.coupon_code'),
+            'category_id' => __('messages.category'),
+            'venue_name' => __('messages.venue_name'),
+            'venue_address1' => __('messages.street_address'),
+            'venue_address2' => __('messages.street_address'),
+            'venue_city' => __('messages.city'),
+            'venue_state' => __('messages.state_province'),
+            'venue_postal_code' => __('messages.postal_code'),
+        ]);
 
         // Prevent guests from injecting any visibility state. Both callers of this endpoint post
         // JSON, and Request::getInputSource() reads the JSON bag for those - so removing from
@@ -3080,8 +3131,20 @@ class EventController extends Controller
             throw ValidationException::withMessages(['create_account' => __('messages.request_needs_account')]);
         }
 
+        // Asked before the account is made, as the booking form asks it: saveEvent() refuses the
+        // same thing a moment later, by which time the visitor had an account and no event.
+        if (! $role->canCreateEvent($request->user())) {
+            throw new \App\Exceptions\EventCreationLimitException;
+        }
+
         // Handle user creation if requested (optional account; event owned by the curator)
         if ($request->boolean('create_account')) {
+            // The box beside the terms, required where it is recorded (hosted), as sign-up and the
+            // booking form require it. The import page drew the box and never sent it.
+            if (config('app.hosted')) {
+                $request->validate(['terms' => ['accepted']], [], ['terms' => __('messages.terms_of_service')]);
+            }
+
             $this->createAndLoginUser($request);
         }
 
@@ -3094,11 +3157,23 @@ class EventController extends Controller
         // Clear the pending request session
         session()->forget(['pending_request', 'pending_request_allow_guest', 'pending_request_form']);
 
+        // A request still waiting for approval has no public page on this schedule yet: the
+        // event's own URL answers 404 to everyone outside it, the person who just sent it included.
+        $isAccepted = (bool) $event->roles()->where('roles.id', $role->id)->first()?->pivot?->is_accepted;
+
+        if (! $isAccepted) {
+            $this->tellOwnersOfPendingRequest($role);
+        }
+
         return response()->json([
             'success' => true,
             'event' => [
-                'view_url' => $event->getGuestUrl($subdomain),
-                'message' => __('messages.event_created_guest'),
+                'status' => $isAccepted ? 'live' : 'pending',
+                'view_url' => $isAccepted ? $event->getGuestUrl($subdomain) : null,
+                'schedule_url' => $role->getGuestUrl(),
+                'message' => $isAccepted
+                    ? __('messages.event_created_guest')
+                    : __('messages.event_request_received', ['name' => $role->getDisplayName(true)]),
             ],
         ]);
     }
@@ -3139,9 +3214,10 @@ class EventController extends Controller
                 $rules[$requestKeyByField[$field]] = ['required'];
             }
         }
-        if ($rules) {
-            $request->validate($rules);
-        }
+        // The structured page cannot be submitted without a date and a start time.
+        $rules['starts_at'] = ['required'];
+
+        $request->validate($rules, [], ['starts_at' => __('messages.start_time')]);
 
         // A required sub-schedule must resolve to a real group for this curator, not merely be
         // present: the rule above is presence-only, and the attach step below silently drops an
@@ -3241,9 +3317,11 @@ class EventController extends Controller
             $user->saveQuietly();
         }
 
-        // Mirror the AP acceptance rule so require-approval curators get a pending item.
-        $isAccepted = ($role->accept_requests && ! $role->require_approval)
-            || ($role->approved_subdomains && in_array($talent->subdomain, $role->approved_subdomains));
+        // The one acceptance rule (Role::autoAcceptsEventFrom()), not a copy of half of it. The
+        // copy that was here knew "approval is off" and "pre-approved" and nothing else, so a
+        // schedule nobody owns told the submitter it would review their event and email them,
+        // with no one who ever could.
+        $isAccepted = $role->autoAcceptsEventFrom($user, $talent);
 
         // Tag the auto-created venue with the event's content language too (the venue wins in
         // Event::getLanguageCode()), so translation also works when an existing talent is reused.
@@ -3306,7 +3384,15 @@ class EventController extends Controller
             return response()->json(['message' => __('messages.error_saving_event')], 500);
         }
 
+        // Waiting for the owner: tell them now, as a booking request does, and not at the next
+        // noon run. The page has just told the submitter their event will be reviewed.
+        if (! $isAccepted) {
+            $this->tellOwnersOfPendingRequest($role);
+        }
+
         session()->forget(['pending_request', 'pending_request_allow_guest', 'pending_request_form']);
+
+        $this->countGuestSubmit('guest_submit_submissions', 'guest_submit_submission', $request);
 
         return response()->json([
             'success' => true,
@@ -3356,6 +3442,10 @@ class EventController extends Controller
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'account_password' => ['required', 'string', 'min:8'],
+        ] + (config('app.hosted') ? ['terms' => ['accepted']] : []), [], [
+            // As RegisteredUserController::store() requires it: hosted only, where the box is
+            // shown with the privacy policy. The page ticked it and never sent it.
+            'terms' => __('messages.terms_of_service'),
         ]);
 
         // Verify the emailed 6-digit code (hosted only, matching registration).
@@ -3474,6 +3564,113 @@ class EventController extends Controller
         AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $talent->id, null, null, $talent->name);
 
         return $talent;
+    }
+
+    /**
+     * Count one stage of the "Submit your event" page's funnel (MarketingDailyStat::COLUMNS).
+     *
+     * One visitor per UTC day per stage, with the bot filters the sign-up counters use, so the
+     * stages compare with each other: someone who submits three events is one visitor who
+     * submitted, as they were one visitor who saw the form.
+     */
+    private function countGuestSubmit(string $column, string $bucket, Request $request): void
+    {
+        // A counter never costs a page view or a saved event: the daily slot is a cache write,
+        // which on hosted is a database write, and this runs on a public page and again after
+        // the submission is already stored.
+        try {
+            $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+
+            if (! PageView::isBot($request->userAgent())
+                && ! PageView::isSuspiciousRequest($request)
+                && PageView::isFirstDailyVisit($bucket, $ip, $request->userAgent())) {
+                MarketingDailyStat::record($column);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * How often a schedule's owners are told, at most, that a request has arrived. Anyone can
+     * send a request, and each one used to be its own email to every owner and admin: a stranger
+     * with one account could have a schedule mailed several hundred times a day, and on a
+     * selfhost install, where nothing caps event creation, as often as the route throttle allows.
+     */
+    private const REQUEST_NOTICE_MINUTES = 15;
+
+    /**
+     * Tell a schedule's owners and admins that a request is waiting for them, at the moment it
+     * arrives. All three public request forms call this (the booking form, the submit page, the
+     * import page); the booking form was the only one that did, and the other two left the owner to
+     * find out at the next noon run of app:notify-request-changes while the submitter had just
+     * been told their event would be reviewed.
+     *
+     * The same condition as that digest (accepting requests, approval required), the same email
+     * and the same push, and it leaves last_notified_request_count at the count it announced, so
+     * the digest does not announce the same request again. Stored with writeOperationalColumns(),
+     * never save(): a save runs the schedule's whole saving hook and moves updated_at, which the
+     * sitemap publishes.
+     *
+     * Three things about when and how:
+     *  - After the response. The mail is one round trip to the mail server per recipient, and the
+     *    visitor's Submit must not wait on it: a slow server held the button, they pressed again,
+     *    and the event was saved twice.
+     *  - At most once per REQUEST_NOTICE_MINUTES per schedule. A request inside that window sends
+     *    nothing and leaves the count alone, which is what lets the digest announce it at noon.
+     *  - In each person's own language, not the submitter's: this runs inside a guest's request,
+     *    whose locale is the guest's.
+     *
+     * A mail that cannot be sent must never refuse a request that has already been saved. If the
+     * window cannot be read (the cache is down) nothing is sent either: the digest still will.
+     */
+    private function tellOwnersOfPendingRequest(Role $role): void
+    {
+        if (! $role->accept_requests || ! $role->require_approval) {
+            return;
+        }
+
+        dispatch(static function () use ($role) {
+            try {
+                if (! Cache::add('request-notice:'.$role->id, 1, now()->addMinutes(self::REQUEST_NOTICE_MINUTES))) {
+                    return;
+                }
+
+                $pendingCount = Event::whereHas('roles', function ($query) use ($role) {
+                    $query->where('event_role.role_id', $role->id)
+                        ->whereNull('event_role.is_accepted');
+                })->count();
+
+                $editors = $role->getEditorsWantingNotification('new_request');
+                $pushUrl = app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests'], false));
+
+                foreach ($editors as $editor) {
+                    $locale = is_valid_language_code($editor->language_code)
+                        ? $editor->language_code
+                        : NotificationEmailService::locale($role);
+
+                    $editor->notify((new NewRequestsNotification($role, $pendingCount))->locale($locale));
+
+                    OneSignalService::pushToUser($editor, [
+                        'title_key' => 'messages.push_new_request_title',
+                        'body_key' => 'messages.push_new_request_body',
+                        'url' => $pushUrl,
+                        'options' => ['icon' => $role->profile_image_url],
+                    ], $role);
+                }
+
+                $sharedSent = app(NotificationEmailService::class)
+                    ->sendNotification($role, 'new_request', new NewRequestsNotification($role, $pendingCount), $editors);
+
+                // Either counts: the daily digest compares against this, so a shared-address-only
+                // schedule would otherwise be told about the same request again at noon.
+                if ($editors->isNotEmpty() || $sharedSent) {
+                    $role->writeOperationalColumns(['last_notified_request_count' => $pendingCount]);
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        })->afterResponse();
     }
 
     private function attachGuestFlyerImage(Request $request, Event $event): void
@@ -3953,26 +4150,8 @@ class EventController extends Controller
             $event->roles()->attach($venue->id, ['is_accepted' => true]);
         }
 
-        if ($isAccepted === null && $role->accept_requests && $role->require_approval) {
-            $pendingCount = Event::whereHas('roles', function ($query) use ($role) {
-                $query->where('event_role.role_id', $role->id)
-                    ->whereNull('event_role.is_accepted');
-            })->count();
-
-            $editors = $role->getEditorsWantingNotification('new_request');
-            foreach ($editors as $editor) {
-                $editor->notify(new NewRequestsNotification($role, $pendingCount));
-            }
-
-            $sharedSent = app(NotificationEmailService::class)
-                ->sendNotification($role, 'new_request', new NewRequestsNotification($role, $pendingCount), $editors);
-
-            // Either counts: the daily digest compares against this, so a shared-address-only
-            // schedule would otherwise be told about the same request again at noon.
-            if ($editors->isNotEmpty() || $sharedSent) {
-                $role->last_notified_request_count = $pendingCount;
-                $role->save();
-            }
+        if ($isAccepted === null) {
+            $this->tellOwnersOfPendingRequest($role);
         }
 
         // Auto-curate event
@@ -4050,27 +4229,27 @@ class EventController extends Controller
         $file = $request->file('image');
 
         if (! $file) {
-            return response()->json(['success' => false, 'error' => 'No file uploaded'], 400);
+            return response()->json(['success' => false, 'error' => 'No file uploaded', 'message' => __('messages.error_uploading_image')], 400);
         }
 
         // Validate file extension (whitelist only safe image extensions)
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         $extension = strtolower($file->getClientOriginalExtension());
         if (! in_array($extension, $allowedExtensions)) {
-            return response()->json(['success' => false, 'error' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp'], 400);
+            return response()->json(['success' => false, 'error' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp', 'message' => __('messages.image_type_not_supported')], 400);
         }
 
         // Validate MIME type
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $mimeType = $file->getMimeType();
         if (! in_array($mimeType, $allowedMimeTypes)) {
-            return response()->json(['success' => false, 'error' => 'Invalid file type'], 400);
+            return response()->json(['success' => false, 'error' => 'Invalid file type', 'message' => __('messages.image_type_not_supported')], 400);
         }
 
         // Validate that it's actually an image
         $imageInfo = @getimagesize($file->getPathname());
         if ($imageInfo === false) {
-            return response()->json(['success' => false, 'error' => 'File is not a valid image'], 400);
+            return response()->json(['success' => false, 'error' => 'File is not a valid image', 'message' => __('messages.image_type_not_supported')], 400);
         }
 
         // Use Laravel's storage directory instead of /tmp for security

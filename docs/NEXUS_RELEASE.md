@@ -178,8 +178,8 @@ checklist:
 
 ### Migrations
 
-Eighteen, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys; these
-four are left, the two that read large tables first:
+Nineteen, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys; these
+five are left, the two that read large tables first:
 
 | Migration | What it does |
 |---|---|
@@ -187,6 +187,7 @@ four are left, the two that read large tables first:
 | `2026_10_03_000000_add_expiration_and_failed_at_indexes` | Online index builds on `cache.expiration`, `cache_locks.expiration` and `failed_jobs.failed_at`. The `cache` one reads the whole table (checklist step 5). Each waits at most 10 seconds for its metadata lock and then fails the migration rather than stalling every cache query behind it; re-run `php artisan migrate --force` from the console, and it adds only what is missing |
 | `2026_10_02_000000_add_onboarding_columns_to_users` | Three nullable columns at the end of `users` (`pending_schedule_type`, `pending_schedule_name`, `onboarding_nudge_sent_at`), no `->after()`, so INSTANT |
 | `2026_10_01_000000_create_realtime_hits_table` | New table |
+| `2026_10_06_000001_add_guest_submit_counters_to_marketing_daily_stats` | Three `unsigned int default 0` columns on `marketing_daily_stats`, a table with one row a day |
 
 Already run: `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats`,
 `2026_09_25_000002_canonicalize_timezone_aliases`, `2026_09_27_000000_add_list_animation_to_roles_table`,
@@ -374,6 +375,55 @@ ever has.
 
 **Undo:** revert and redeploy. Both migrations' `down()` drop only what they added, and old code
 runs fine on the new schema.
+
+### Guest event submissions (2026-10-06)
+
+**What ships:**
+- The public "Submit your event" page (`/{subdomain}/guest-submit`, the default request form) is
+  rebuilt: one page, a bar that says what is still needed, the emailed code as its own step after
+  Submit (in the sign-up screen's six boxes), and a "sent" screen that says which step the request
+  is on. The schedule's request terms now show on it.
+- `POST /{subdomain}/guest-add` checks the start time, price, description and every length the
+  save would hit before it creates the submitter's account. A refused event used to leave the
+  account behind, twice as a 500.
+- Three daily counters on `marketing_daily_stats` (`guest_submit_views`,
+  `guest_submit_code_requests`, `guest_submit_submissions`). Nothing reads them until the growth
+  export's next schema; they start at this deploy.
+
+**Behaviour that changes for people already using the app:**
+- **Owners and admins are emailed (and pushed) when a request arrives**, from all three request
+  forms. Before, only the booking form did that; the submit page and the import page waited for
+  the noon run of `app:notify-request-changes`. At most one email per schedule per 15 minutes
+  (`EventController::REQUEST_NOTICE_MINUTES`): a request inside the window is announced by the
+  noon run instead. The mail is sent after the response, in each person's own language.
+- **The button in that email now opens.** `NewRequestsNotification` built its link with a bare
+  `route()`, so a copy sent while a guest submitted pointed at the schedule's own host
+  (`https://{sub}.eventschedule.com/{sub}/requests`), which answers "not found". The booking form
+  has sent that link since April. Both links are `app_url()` now.
+- **A new account made on a request form must tick the terms box on hosted**, as sign-up
+  requires, and `users.terms_accepted_at` is recorded. A tab that loaded the old page before the
+  deploy and then registers is refused once, with the terms named, until it reloads; the emailed
+  code is not used up.
+- **One acceptance rule.** The submit page used a copy of half of
+  `Role::autoAcceptsEventFrom()`. Two cases move, both to what the admin form already did: a
+  schedule nobody owns takes the event at once (it said "we will review" with nobody to review),
+  and so does a member submitting to their own schedule.
+- **The import page** (`/{subdomain}/guest-add`): a guest whose event is waiting sees a
+  confirmation where they were sent to an address that answered 404.
+
+**No new env vars and no new scheduled entries.** The migration is one `ALTER` and old code runs
+on the new schema. New code on the old schema swallows the unknown column (`CounterUtils`) and
+reports it, so the minute the worker is ahead of the web container costs counts, not requests.
+
+**After the deploy:**
+1. **Send a request to a schedule you own that reviews requests**, signed out, from
+   `/{subdomain}/guest-submit`. The email should arrive within a minute, in your language, and its
+   button should open the schedule's Requests tab on `app.`. This is the path no test can see:
+   under `APP_TESTING` there is one host.
+2. **Send a second one straight away.** No second email; it is in tomorrow's noon summary.
+3. **On `/admin/queue`**, confirm nothing new is failing: the push is a queued job.
+
+**Undo:** revert and redeploy. The migration's `down()` drops only its three columns.
 
 ### Conversion, churn and owner emails
 

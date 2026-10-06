@@ -41,8 +41,13 @@ class NewRequestsNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $subject = __('messages.new_requests_notification_subject', ['name' => $this->role->name, 'count' => $this->requestCount]);
-        $actionUrl = route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'requests']);
-        $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->role->subdomain]);
+        // app_url(), never a bare route(): neither route names a host, so route() answers with
+        // the host of whatever is running. From the noon digest that is APP_URL, which works.
+        // From a guest's submission it is the schedule's own host, where /{slug}/{id} is a guest
+        // route: the owner was sent a button that opened "not found", and an unsubscribe link
+        // that did the same.
+        $actionUrl = app_url(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'requests'], false));
+        $unsubscribeUrl = app_url(route('role.unsubscribe', ['subdomain' => $this->role->subdomain], false));
 
         // The copy for the schedule's shared notification address (routed on demand, so the
         // notifiable is anonymous) unsubscribes by removing that address; nobody there has an

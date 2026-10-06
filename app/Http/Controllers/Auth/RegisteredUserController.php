@@ -243,6 +243,17 @@ class RegisteredUserController extends Controller
             }
         }
 
+        // The guest submit page's own code wall, in its own counter and its own daily slot, for
+        // the two reasons above: it is not a sign-up, and it must not claim a sign-up's slot.
+        if (request()->routeIs('event.guest_send_code')) {
+            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+            if (! PageView::isBot(request()->userAgent())
+                && ! PageView::isSuspiciousRequest(request())
+                && PageView::isFirstDailyVisit('guest_submit_code_request', $ip, request()->userAgent())) {
+                MarketingDailyStat::record('guest_submit_code_requests');
+            }
+        }
+
         // No name here, even for a stub account (a past buyer or subscriber): anyone can ask for a
         // code to any address, so answering with the name told a stranger who that address
         // belongs to. checkSignupCode() returns it once the right code proves the inbox.

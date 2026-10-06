@@ -210,6 +210,7 @@ class CustomFieldFilterTest extends TestCase
             'starts_at' => now()->addDays(4)->format('Y-m-d H:i:s'),
             'duration' => 2,
             'account_mode' => 'register',
+            'terms' => true,
             'account_name' => 'Sam Guest',
             'account_email' => 'sam-filter@eventschedule-test.org',
             'account_password' => 'password1234',

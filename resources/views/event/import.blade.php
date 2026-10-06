@@ -95,6 +95,21 @@
 
         @php $use24hr = get_use_24_hour_time($role ?? null); @endphp
 
+        @if (isset($isGuest) && $isGuest)
+        {{-- Sent, and waiting for the schedule. The server's own sentence (it names the schedule, so
+             it arrives as data and is written with v-text, never compiled as a template). The form
+             below it is cleared for the next event, which is the "submit another". --}}
+        <div v-if="guestSent" v-cloak class="ap-card p-6 sm:p-10 shadow-md rounded-xl mb-4 text-center" role="status">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+                <svg class="h-7 w-7 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <p class="max-w-xl mx-auto text-base text-gray-700 dark:text-gray-300" v-text="guestSent.message"></p>
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a :href="guestSent.schedule_url" class="px-4 py-3 text-base font-semibold rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">{{ __('messages.view_schedule') }}</a>
+            </div>
+        </div>
+        @endif
+
         <div v-if="!preview || !preview.parsed || preview.parsed.length === 0">
             <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
             <div class="max-w-3xl mx-auto">
@@ -1128,7 +1143,11 @@
                             </div>
                             <div class="relative flex items-start">
                                 <div class="flex h-6 items-center">
-                                    <input type="checkbox" id="terms_@{{ idx }}" name="terms_@{{ idx }}" required
+                                    {{-- Bound and sent: it used to be a bare box the page never read, so an
+                                         account made here carried no record of the terms being accepted.
+                                         :id, because Vue does not interpolate a mustache inside an attribute
+                                         and the label beside it is :for="'terms_' + idx". --}}
+                                    <input type="checkbox" :id="'terms_' + idx" v-model="acceptedTerms" required
                                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-blue-500 focus:ring-blue-500">
                                 </div>
                                 <div class="ms-3 text-sm leading-6">
@@ -1524,6 +1543,10 @@
                 addedCount: 0,
                 savingEvents: [], // Track which events are currently being saved
                 createAccount: false, // New data property for guest user account creation
+                acceptedTerms: false,
+                // A request that is waiting for the schedule's approval: what the server said about
+                // it. The page shows this instead of going to an event page that does not answer yet.
+                guestSent: null,
                 userName: '',
                 userEmail: '',
                 userPassword: '',
@@ -1816,7 +1839,8 @@
                            this.userName.trim() && 
                            this.userEmail.trim() && 
                            isEmailValid &&
-                           this.userPassword;
+                           this.userPassword &&
+                           this.acceptedTerms;
                 }
                 
                 // If createAccount is not checked, only validate event fields
@@ -3166,7 +3190,8 @@
             },
 
             handleView(idx) {
-                if (this.savedEvents[idx] && this.savedEventData[idx]) {
+                // No address: a request still waiting for approval has none to go to.
+                if (this.savedEvents[idx] && this.savedEventData[idx] && this.savedEventData[idx].view_url) {
                     if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
                         // For guest users, redirect to the view URL
                         window.location.href = this.savedEventData[idx].view_url;
@@ -3341,7 +3366,8 @@
                                 create_account: true,
                                 account_name: this.userName,
                                 account_email: this.userEmail,
-                                account_password: this.userPassword
+                                account_password: this.userPassword,
+                                terms: this.acceptedTerms
                             } : {})
                         })
                     });
@@ -3378,9 +3404,21 @@
                         this.venues.push(data.venue);
                     }
 
-                    // For guest users, automatically redirect to view the event
-                    if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && data.event.view_url) {
-                        window.location.href = data.event.view_url;
+                    // A guest goes to their event when it is live. One still waiting for the schedule's
+                    // approval has no public page yet (its address answers 404 to everyone outside the
+                    // schedule), so the page says what happened instead.
+                    if ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }}) {
+                        if (data.event.view_url) {
+                            window.location.href = data.event.view_url;
+                        } else {
+                            this.guestSent = data.event;
+                            this.createAccount = false;
+                            this.handleClearForNext();
+                            // After the tick in which handleClearForNext() focuses the text box:
+                            // on a phone that focus scrolls to the box, below the confirmation
+                            // this visitor has just been given, and it was read by nobody.
+                            this.$nextTick(() => window.scrollTo({ top: 0 }));
+                        }
                     } else if (! quiet) {
                         // Show success message for non-guest users
                         Toastify({
