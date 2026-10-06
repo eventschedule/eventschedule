@@ -851,7 +851,7 @@
                                 <span class="es-key-plan">Free</span>
                             </div>
                             <h3 class="es-key-ink mb-3 text-xl font-bold">Your submission, and the reply</h3>
-                            <p class="es-key-muted mb-4">Submit while signed in and the event is saved on your own schedule and linked to the one you sent it to. Its own page carries a pending-review banner until they decide, you get an email whether they accept it or decline it, and you can correct a time or swap an image without asking anybody.</p>
+                            <p class="es-key-muted mb-4">Submit while signed in and the event is saved on your own schedule and linked to the one you sent it to. It is live on your own page straight away, the schedule you sent it to is told as it arrives, you get an email whether they accept it or decline it, and you can correct a time or swap an image without asking anybody.</p>
                             <p class="es-key-muted text-sm">Signed out, the event becomes the receiving schedule's record. That is not a punishment, it is just who the row belongs to, and it is why the reply has nowhere to go.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

@@ -41,7 +41,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Account and owner emails</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Password resets, email verification for accounts and for a schedule's contact address, team member invitations, the daily digest of pending booking requests, opt-in alerts when a ticket sells, and the scheduled event graphic emails an owner sends to their own recipient list.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Password resets, email verification for accounts and for a schedule's contact address, team member invitations, the email an owner gets when an event request arrives and the daily summary of those still waiting, opt-in alerts when a ticket sells, and the scheduled event graphic emails an owner sends to their own recipient list.</p>
             </div>
         </div>
 

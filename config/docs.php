@@ -183,7 +183,7 @@ return [
             'blurb' => 'Configure details, settings, sub-schedules, auto import, and integrations.',
             'icon' => 'cog',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-06',
         ],
 
         'schedule-styling' => [
@@ -366,7 +366,7 @@ return [
             'blurb' => 'Manage events, team, availability, requests, and more.',
             'icon' => 'clipboard',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-06',
         ],
 
         'analytics' => [
@@ -491,7 +491,7 @@ return [
             'blurb' => 'Set up SMTP, Amazon SES or another mail driver, and see which emails go out automatically.',
             'icon' => 'mail',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-06',
         ],
 
         'selfhost/ai' => [

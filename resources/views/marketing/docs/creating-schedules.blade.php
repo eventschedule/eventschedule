@@ -1011,7 +1011,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Account</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code. With it off, visitors can send a request as a guest, and on the Booking Form they can also choose to create an account, wherever the site accepts new accounts. Not offered on Talent schedules, whose Booking Form always leaves the account up to the visitor.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code after they press Submit. They can add a flyer and have the form filled in from it. With it off, visitors can send a request as a guest, and on the Booking Form they can also choose to create an account, wherever the site accepts new accounts. Not offered on Talent schedules, whose Booking Form always leaves the account up to the visitor.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event Request Form</h4>
@@ -1039,7 +1039,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Terms or guidelines for people sending you requests. Use it for booking policy, technical requirements, or what you will and will not take. They are shown above the Submit button on the Booking Form, and on the AI Import form when Require Account is off.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Terms or guidelines for people sending you requests. Use it for booking policy, technical requirements, or what you will and will not take. They are shown on every request form: above the Submit button on the Booking Form, under the title of the page where a signed-up submitter enters their event, and on the AI Import form.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your own questions <x-doc-badge plan="pro" /></h4>
