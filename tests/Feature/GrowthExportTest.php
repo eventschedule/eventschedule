@@ -128,10 +128,10 @@ class GrowthExportTest extends TestCase
         // reachable placeholders, 11 since a headline variant reached sign-up on the link as well
         // as in the consented cookie, 12 since imports are counted by source and the two Google
         // fields read where the ids live, 14 since the event_form section (what hand-made events
-        // are saved with). Bumping
+        // are saved with), 15 since traffic[] counts the guest "Submit your event" page. Bumping
         // this is deliberate: a reader diffing two pulls needs to know the shape (or the meaning)
         // moved.
-        $this->assertSame(14, $data['meta']['schema_version']);
+        $this->assertSame(15, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
@@ -2166,5 +2166,32 @@ class GrowthExportTest extends TestCase
             [AuditService::SCHEDULE_CLAIM, AuditService::SUBSCRIPTION_CREATE, AuditService::TICKET_TRIAL_START],
             $left
         );
+    }
+
+    /**
+     * The public "Submit your event" page's three counters (GuestSubmitFunnelTest holds how they
+     * are written): carried per month beside the sign-up ones, and null, not zero, for a month
+     * before the columns existed.
+     */
+    public function test_the_growth_export_carries_the_three_and_knows_when_they_began(): void
+    {
+        MarketingDailyStat::create(['date' => '2026-09-15', 'visitors' => 10]);
+        MarketingDailyStat::create([
+            'date' => '2026-10-07', 'guest_submit_views' => 40, 'guest_submit_code_requests' => 12, 'guest_submit_submissions' => 9,
+            'booking_request_views' => 30, 'booking_request_submissions' => 7,
+        ]);
+
+        $traffic = collect($this->build()['traffic'])->keyBy('month');
+
+        $this->assertSame(40, $traffic['2026-10']['guest_submit_views']);
+        $this->assertSame(12, $traffic['2026-10']['guest_submit_code_requests']);
+        $this->assertSame(9, $traffic['2026-10']['guest_submit_submissions']);
+        // And the booking request page's two, beside them.
+        $this->assertSame(30, $traffic['2026-10']['booking_request_views']);
+        $this->assertSame(7, $traffic['2026-10']['booking_request_submissions']);
+        $this->assertNull($traffic['2026-09']['booking_request_views']);
+        // A month before the columns existed was not counted, which is not the same as zero.
+        $this->assertNull($traffic['2026-09']['guest_submit_views']);
+        $this->assertNull($traffic['2026-09']['guest_submit_submissions']);
     }
 }

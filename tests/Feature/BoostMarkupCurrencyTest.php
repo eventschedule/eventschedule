@@ -143,6 +143,9 @@ class BoostMarkupCurrencyTest extends TestCase
     {
         $this->useCurrency('ZAR');
         $this->adminActing();
+        // The revenue card is not on the new-install page (no schedule, no event, no account but
+        // the admin's), so the install needs one schedule for there to be a figure to read.
+        $this->createRole($this->createOwner());
 
         $html = $this->get(route('admin.dashboard'))->assertOk()->getContent();
 

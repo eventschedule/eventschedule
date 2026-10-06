@@ -278,9 +278,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Whether this person still wants to be suggested things: the setup guide, the dashboard's
-     * next steps, a schedule's "List on the network" prompt, and the reminder emails that ask
-     * the same (SendActivationNudges). Off only by their own choice (SetupGuide::suggest()).
+     * Whether this person still wants to be suggested things in the app: the setup guide, the
+     * dashboard's next steps and a schedule's "List on the network" prompt. Off only by their own
+     * choice (SetupGuide::suggest()). It says nothing about email: the reminder emails that ask
+     * the same things follow is_subscribed ("Email updates"), not this.
      */
     public function wantsSuggestions(): bool
     {
@@ -1150,45 +1151,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function referredBy()
     {
         return $this->belongsTo(User::class, 'referred_by_user_id');
-    }
-
-    public function getSignupSourceDisplay(): array
-    {
-        $primary = null;
-        $parts = [];
-
-        if ($this->referred_by_user_id && $this->referredBy) {
-            $primary = 'Referral: '.$this->referredBy->name;
-        } elseif (! empty($this->utm_source)) {
-            $primary = ucwords(strtolower($this->utm_source));
-            if (! empty($this->utm_medium)) {
-                $primary .= ' / '.$this->utm_medium;
-            }
-        }
-
-        $referrerHost = null;
-        if (! empty($this->referrer_url)) {
-            $host = parse_url($this->referrer_url, PHP_URL_HOST);
-            if ($host) {
-                $referrerHost = preg_replace('/^www\./', '', $host);
-            }
-        }
-
-        if (! $primary && $referrerHost) {
-            $primary = $referrerHost;
-        } elseif ($referrerHost) {
-            $parts[] = $referrerHost;
-        }
-
-        if (! empty($this->landing_page)) {
-            $parts[] = $this->landing_page;
-        }
-
-        return [
-            'primary' => $primary ?? 'Direct',
-            'secondary' => implode(' -> ', $parts),
-            'landing' => $this->landing_page,
-        ];
     }
 
     public function getOrCreateReferralCode(): string

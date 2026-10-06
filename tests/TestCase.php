@@ -24,6 +24,10 @@ abstract class TestCase extends BaseTestCase
         // previous test's totals would otherwise carry over.
         \App\Services\AdminAlertService::flush();
 
+        // Whether its tables exist is memoized per process, and a test may drop one to prove the
+        // app survives without it.
+        \App\Services\ActiveDays::flush();
+
         // Same reasoning, and the same trap: these two resolve once per process and are NOT
         // reset by RefreshDatabase. A test that config()s an amount or a currency and then
         // asserts on rendered output would silently read whatever an earlier test warmed - so

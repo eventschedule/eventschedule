@@ -142,8 +142,11 @@ class MarketingPriceTest extends TestCase
     private const AP_PRICE_VIEWS = [
         // admin/dashboard was the file the bug report named. It quotes ARR through plan_price()
         // and used to print the boost markup tile through a hardcoded Meta currency, and it was
-        // the one admin money page this list did not cover.
+        // the one admin money page this list did not cover. Its money markup now lives in two
+        // partials, which have to be named here or the scan passes over them without a word.
         'admin/dashboard.blade.php',
+        'admin/dashboard/_headline.blade.php',
+        'admin/dashboard/_revenue.blade.php',
         'admin/settings.blade.php',
         'role/show-admin-plan.blade.php',
         // The owner's actions on that page (subscribe, change term, cancel) and their prices.
@@ -619,9 +622,12 @@ class MarketingPriceTest extends TestCase
         // and that file declares $boostCurrency once at the top for them.
         $views = [
             'admin/dashboard.blade.php',
+            'admin/dashboard/_headline.blade.php',
+            'admin/dashboard/_revenue.blade.php',
             'admin/revenue.blade.php',
             'admin/growth.blade.php',
-            'home/panels/revenue.blade.php',
+            'home/_tiles.blade.php',
+            'home/_activity.blade.php',
             'home/panels/boosts.blade.php',
         ];
 

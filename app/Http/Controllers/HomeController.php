@@ -15,6 +15,8 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Services\AnalyticsService;
 use App\Services\FederationService;
+use App\Services\HomeDashboard;
+use App\Services\ScheduleRealtime;
 use App\Utils\DateUtils;
 use App\Utils\LegacyRedirects;
 use App\Utils\SetupGuide;
@@ -228,124 +230,60 @@ class HomeController extends Controller
         $visiblePanels = collect($dashboardConfig['panels'])->where('visible', true)->pluck('id')->toArray();
         $panelSettings = collect($dashboardConfig['panels'])->keyBy('id')->toArray();
 
-        // Dashboard data - skip queries for hidden panels
-        $upcomingCount = 0;
-        $viewsInPeriod = 0;
-        $viewsChange = 0;
-        $viewsChangeLabel = '';
-        $viewsPeriod = 30;
-        $revenuePeriod = 30;
-        $sparklineData = [];
-        $followersCount = 0;
-        $totalEventsCount = 0;
-        $upcomingEvents = collect();
-        $recentActivity = collect();
-        $revenueStats = null;
+        // One period for the page, kept where it has always been stored: on the Views panel.
+        $period = $this->resolvePanelPeriod($panelSettings['views']['period'] ?? 30);
+
+        // Everything above the calendar (App\Services\HomeDashboard): the tiles, the schedules,
+        // what is coming up and what just happened, or the page of someone who runs nothing. The
+        // live figures come from the owner's Realtime, and are null wherever there is none.
+        $dashboard = app(HomeDashboard::class)->build($user, $period, ScheduleRealtime::summary($user));
+
+        // Read by tests that pin the comparison's window (DashboardViewsComparisonTest).
+        $viewsInPeriod = $dashboard['views']['total'] ?? 0;
+        $viewsChange = $dashboard['views']['change'] ?? 0;
+        $viewsChangeLabel = 'vs_previous_'.$period.'_days';
+
+        // The cards someone switched on in Customize. Skipped while they are off, and for anyone
+        // who is not an organizer with something to count: nothing renders them then.
         $topEvents = collect();
         $latestNewsletters = collect();
         $boostCampaigns = collect();
         $trafficSources = collect();
 
-        $analyticsService = app(AnalyticsService::class);
-        $now = now()->endOfDay();
+        if (($dashboard['state'] ?? null) === 'organizer' && empty($dashboard['fresh'])) {
+            $analyticsService = app(AnalyticsService::class);
+            $now = now()->endOfDay();
+            $periodStart = now()->subDays($period - 1)->startOfDay();
 
-        if (in_array('upcoming_count', $visiblePanels)) {
-            $upcomingCount = Event::whereIn('id', function ($query) use ($roleIds) {
-                $query->select('event_id')
-                    ->from('event_role')
-                    ->whereIn('role_id', $roleIds)
-                    ->where('is_accepted', true);
-            })->upcomingOrOngoing()->whereNull('days_of_week')->count();
+            if (in_array('top_events', $visiblePanels)) {
+                $topEvents = $analyticsService->getTopEvents($user, $panelSettings['top_events']['count'] ?? 3, $periodStart, $now);
+            }
+            if (in_array('newsletters', $visiblePanels)) {
+                $latestNewsletters = Newsletter::whereIn('role_id', $roleIds)
+                    ->where('status', 'sent')
+                    ->orderByDesc('sent_at')
+                    ->limit($panelSettings['newsletters']['count'] ?? 3)
+                    ->get();
+            }
+            if (in_array('boosts', $visiblePanels)) {
+                $boostCampaigns = BoostCampaign::whereIn('role_id', $roleIds)
+                    ->whereIn('status', ['active', 'paused'])
+                    ->latest()
+                    ->limit($panelSettings['boosts']['count'] ?? 3)
+                    ->get();
+            }
+            if (in_array('traffic_sources', $visiblePanels)) {
+                $trafficSources = $analyticsService->getTopReferrerDomains($user, $panelSettings['traffic_sources']['count'] ?? 5, $periodStart, $now);
+            }
         }
-        if (in_array('views', $visiblePanels)) {
-            $viewsPeriod = $this->resolvePanelPeriod($panelSettings['views']['period'] ?? 30);
-            $viewsStart = now()->subDays($viewsPeriod)->startOfDay();
-            // Like for like: the N days before the N days shown. getMonthOverMonthComparison()
-            // compares calendar-month-to-date against a WHOLE previous month, so it never
-            // described the rolling window beside it, and it reads hugely negative early in any
-            // month for arithmetic reasons rather than traffic ones. It stays in use on
-            // /analytics, where the month framing is the intended one.
-            //
-            // This also returns the current window's own total, so calling getStatsForUser here
-            // as well would repeat the query - and its other half is an unbounded all-time SUM
-            // over analytics_daily whose result nothing reads.
-            $comparison = $analyticsService->getPeriodComparison($user, 'last_'.$viewsPeriod.'_days', $viewsStart, $now);
-            $viewsInPeriod = $comparison['current_period'] ?? 0;
-            $viewsChange = $comparison['percentage_change'] ?? 0;
-            $viewsChangeLabel = $comparison['comparison_label'] ?? '';
-            $sparklineData = $this->getSparklineData($user, $viewsPeriod);
-        }
-        if (in_array('followers', $visiblePanels)) {
-            // Follower pivots, plus the confirmed subscribers who have no pivot at all. Since
-            // RoleSubscriberController::confirm() started minting an account, most subscribers ARE
-            // a pivot and are already counted here - but an unclaimed schedule, or a selfhost
-            // install with registration closed, never creates one, so counting pivots alone would
-            // show a smaller audience here than the Followers tab does. The whereNotExists keeps
-            // anybody who has both records from being counted twice.
-            $followersCount = DB::table('role_user')
-                ->whereIn('role_id', $roleIds)
-                ->where('level', 'follower')
-                ->count()
-                + DB::table('role_subscribers')
-                    ->whereIn('role_subscribers.role_id', $roleIds)
-                    ->whereNotNull('role_subscribers.confirmed_at')
-                    ->whereNotExists(function ($query) {
-                        $query->selectRaw('1')
-                            ->from('users')
-                            ->join('role_user', 'role_user.user_id', '=', 'users.id')
-                            ->whereColumn('users.email', 'role_subscribers.email')
-                            ->whereColumn('role_user.role_id', 'role_subscribers.role_id')
-                            ->where('role_user.level', 'follower');
-                    })
-                    ->count();
-            $totalEventsCount = Event::whereIn('id', function ($query) use ($roleIds) {
-                $query->select('event_id')
-                    ->from('event_role')
-                    ->whereIn('role_id', $roleIds)
-                    ->where('is_accepted', true);
-            })->count();
-        }
-        if (in_array('upcoming_events', $visiblePanels)) {
-            $upcomingEventsCount = $panelSettings['upcoming_events']['count'] ?? 3;
-            $upcomingEvents = $this->getUpcomingEvents($roleIds, $upcomingEventsCount);
-        }
-        if (in_array('recent_activity', $visiblePanels)) {
-            $recentActivityCount = $panelSettings['recent_activity']['count'] ?? 5;
-            $recentActivity = $this->getRecentActivity($roleIds, $recentActivityCount);
-        }
-        if (in_array('revenue', $visiblePanels)) {
-            $revenuePeriod = $this->resolvePanelPeriod($panelSettings['revenue']['period'] ?? 30);
-            $revenueStart = now()->subDays($revenuePeriod)->startOfDay();
-            $revenueStats = $analyticsService->getConversionStats($user, $revenueStart, $now);
-        }
-        if (in_array('top_events', $visiblePanels)) {
-            $topEventsCount = $panelSettings['top_events']['count'] ?? 3;
-            $topEventsPeriod = $panelSettings['top_events']['period'] ?? 30;
-            $topEventsStart = now()->subDays($topEventsPeriod)->startOfDay();
-            $topEvents = $analyticsService->getTopEvents($user, $topEventsCount, $topEventsStart, $now);
-        }
-        if (in_array('newsletters', $visiblePanels)) {
-            $newslettersCount = $panelSettings['newsletters']['count'] ?? 3;
-            $latestNewsletters = Newsletter::whereIn('role_id', $roleIds)
-                ->where('status', 'sent')
-                ->orderByDesc('sent_at')
-                ->limit($newslettersCount)
-                ->get();
-        }
-        if (in_array('boosts', $visiblePanels)) {
-            $boostsCount = $panelSettings['boosts']['count'] ?? 3;
-            $boostCampaigns = BoostCampaign::whereIn('role_id', $roleIds)
-                ->whereIn('status', ['active', 'paused'])
-                ->latest()
-                ->limit($boostsCount)
-                ->get();
-        }
-        if (in_array('traffic_sources', $visiblePanels)) {
-            $trafficCount = $panelSettings['traffic_sources']['count'] ?? 5;
-            $trafficPeriod = $panelSettings['traffic_sources']['period'] ?? 30;
-            $trafficStart = now()->subDays($trafficPeriod)->startOfDay();
-            $trafficSources = $analyticsService->getTopReferrerDomains($user, $trafficCount, $trafficStart, $now);
-        }
+
+        // The month calendar. An organizer may switch it off. Anyone else gets it only when it
+        // would have something on it: it lists the events of schedules a person EDITS and events
+        // they submitted to somebody else's, so for someone who may only view a schedule, or
+        // who runs nothing, it is otherwise an empty grid under what they came for.
+        $showCalendar = $dashboard['state'] === 'organizer'
+            ? in_array('calendar', $visiblePanels)
+            : Event::where('user_id', $user->id)->exists();
 
         $canCreateSchedule = ! config('app.hosted') || $user->owner()->count() < 50;
 
@@ -391,20 +329,13 @@ class HomeController extends Controller
             'year',
             'startOfMonth',
             'roleIds',
-            'upcomingCount',
+            'dashboard',
+            'showCalendar',
             'viewsInPeriod',
             'viewsChange',
             'viewsChangeLabel',
-            'viewsPeriod',
-            'revenuePeriod',
-            'sparklineData',
-            'followersCount',
-            'totalEventsCount',
-            'upcomingEvents',
-            'recentActivity',
             'dashboardConfig',
             'panelSettings',
-            'revenueStats',
             'topEvents',
             'latestNewsletters',
             'boostCampaigns',
@@ -1102,8 +1033,8 @@ class HomeController extends Controller
     public function saveDashboardConfig(Request $request): JsonResponse
     {
         $request->validate([
-            'panels' => 'required|array|max:10',
-            'panels.*.id' => 'required|string|in:upcoming_count,views,followers,upcoming_events,recent_activity,revenue,top_events,newsletters,boosts,traffic_sources',
+            'panels' => 'required|array|max:11',
+            'panels.*.id' => 'required|string|in:upcoming_count,views,followers,upcoming_events,recent_activity,revenue,top_events,newsletters,boosts,traffic_sources,calendar',
             'panels.*.visible' => 'required|boolean',
             'panels.*.size' => 'sometimes|integer|in:1,2',
             'panels.*.period' => 'sometimes|integer|in:7,14,30',
@@ -1141,9 +1072,9 @@ class HomeController extends Controller
     /**
      * Panel periods are validated on write (saveDashboardConfig's in:7,14,30) but only int-cast on
      * read (getDashboardConfig), so a row persisted under a different rule set reaches the view
-     * unchecked. Clamp to the set that has BOTH a getPeriodComparison match arm and a
-     * messages.last_N_days translation: without an arm the badge silently compares the 30-day
-     * window and mislabels it, and without a translation the card footer renders the raw key.
+     * unchecked. Clamp to the set that has both a messages.last_N_days and a
+     * messages.vs_previous_N_days translation: without one a tile's caption renders the raw key.
+     * The comparison itself is HomeDashboard::views(), which takes any whole number of days.
      */
     private function resolvePanelPeriod($period): int
     {
@@ -1165,6 +1096,9 @@ class HomeController extends Controller
             ['id' => 'newsletters', 'visible' => false, 'size' => 2, 'count' => 3],
             ['id' => 'boosts', 'visible' => false, 'size' => 2, 'count' => 3],
             ['id' => 'traffic_sources', 'visible' => false, 'size' => 2, 'count' => 5, 'period' => 30],
+            // The month calendar under the cards. Not in a config saved before it could be
+            // switched off, so it is appended as visible by the "missing panels" pass below.
+            ['id' => 'calendar', 'visible' => true],
         ];
 
         $defaultsMap = collect($defaults)->keyBy('id')->toArray();
@@ -1212,122 +1146,6 @@ class HomeController extends Controller
         }
 
         return ['panels' => $panels, 'defaultPanels' => $defaults];
-    }
-
-    private function getUpcomingEvents($roleIds, int $count = 3)
-    {
-        return Event::whereIn('id', function ($query) use ($roleIds) {
-            $query->select('event_id')
-                ->from('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->where('is_accepted', true);
-        })
-            ->upcomingOrOngoing()
-            ->whereNull('days_of_week')
-            ->orderBy('starts_at')
-            ->limit($count)
-            // creatorRole: the panel renders each date in its own schedule's timezone.
-            ->with(['roles', 'tickets', 'creatorRole'])
-            ->get();
-    }
-
-    private function getRecentActivity($roleIds, int $count = 5)
-    {
-        $eventIds = DB::table('event_role')
-            ->whereIn('role_id', $roleIds)
-            ->where('is_accepted', true)
-            ->pluck('event_id')
-            ->unique();
-
-        $activities = collect();
-
-        // Recent sales
-        if ($eventIds->isNotEmpty()) {
-            $sales = Sale::whereIn('event_id', $eventIds)
-                ->where('status', 'paid')
-                ->latest()
-                ->limit(10)
-                ->with('event')
-                ->get()
-                ->map(function ($sale) {
-                    return [
-                        'type' => 'sale',
-                        'description' => $sale->event ? $sale->event->name : '',
-                        'date' => $sale->created_at,
-                        'amount' => $sale->payment_amount,
-                        // The sale's OWN currency, not the platform's. The panel used to print a
-                        // literal '$', so a seller in ZAR saw R120 on the Revenue panel and $120
-                        // on this one, for the same sale.
-                        'currency_code' => $sale->event?->ticket_currency_code,
-                    ];
-                });
-            $activities = $activities->merge($sales);
-        }
-
-        // Recent followers
-        $followers = DB::table('role_user')
-            ->whereIn('role_id', $roleIds)
-            ->where('level', 'follower')
-            ->orderByDesc('created_at')
-            ->limit(10)
-            ->get();
-
-        $followerUserIds = $followers->pluck('user_id')->unique();
-        $followerUsers = DB::table('users')->whereIn('id', $followerUserIds)->get()->keyBy('id');
-
-        $followers = $followers->map(function ($follow) use ($followerUsers) {
-            $user = $followerUsers[$follow->user_id] ?? null;
-
-            return [
-                'type' => 'follower',
-                'description' => $user ? trim(($user->first_name ?? '').' '.($user->last_name ?? '')) : '',
-                'email' => $user->email ?? '',
-                'date' => Carbon::parse($follow->created_at),
-            ];
-        });
-        $activities = $activities->merge($followers);
-
-        // Recent newsletters sent
-        $newsletters = Newsletter::whereIn('role_id', $roleIds)
-            ->where('status', 'sent')
-            ->whereNotNull('sent_at')
-            ->orderByDesc('sent_at')
-            ->limit(5)
-            ->get()
-            ->map(function ($newsletter) {
-                return [
-                    'type' => 'newsletter',
-                    'description' => $newsletter->subject,
-                    'date' => $newsletter->sent_at,
-                    'sent_count' => $newsletter->sent_count,
-                ];
-            });
-        $activities = $activities->merge($newsletters);
-
-        // Sort by date descending
-        return $activities->filter(fn ($a) => $a['date'] !== null)->sortByDesc('date')->take($count)->values();
-    }
-
-    private function getSparklineData($user, int $days = 30): array
-    {
-        $analyticsService = app(AnalyticsService::class);
-        $start = now()->subDays($days)->startOfDay();
-        $now = now()->endOfDay();
-
-        $viewsByPeriod = $analyticsService->getViewsByPeriod($user, 'daily', $start, $now);
-
-        // Fill in missing days with 0
-        $data = [];
-        $current = $start->copy();
-        $viewsMap = $viewsByPeriod->pluck('view_count', 'period')->toArray();
-
-        while ($current->lte($now)) {
-            $key = $current->format('Y-m-d');
-            $data[] = (int) ($viewsMap[$key] ?? 0);
-            $current->addDay();
-        }
-
-        return $data;
     }
 
     private function processPendingFanContent(array $pending): ?string

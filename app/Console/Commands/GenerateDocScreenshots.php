@@ -309,7 +309,9 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'referral-history', 'route' => '/referrals', 'script' => "(document.getElementById('referral-history') || document.getElementById('referral-how-it-works')).scrollIntoView({block: 'start'})"],
             ],
             'selfhost-admin' => [
-                ['id' => 'selfhost-admin--dashboard', 'route' => '/admin', 'pause' => 3000],
+                // ?sample=1: invented data (AdminDashboardSample). The real page lists people,
+                // schedules and events by name, and leaves demo content out.
+                ['id' => 'selfhost-admin--dashboard', 'route' => '/admin/dashboard?sample=1', 'pause' => 3000],
                 ['id' => 'selfhost-admin--users', 'route' => '/admin/users', 'pause' => 2000],
                 ['id' => 'selfhost-admin--revenue', 'route' => '/admin/revenue', 'pause' => 2000],
                 ['id' => 'selfhost-admin--analytics', 'route' => '/admin/analytics', 'pause' => 2000],

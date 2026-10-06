@@ -115,15 +115,35 @@
                         @endif
                     </p>
                     @endif
+                    {{-- When. A booking-form request can carry an end time, stored as the event's length.
+                         It is shown on the clock the start beside it uses: the viewer's own choice of 12 or
+                         24 hour, then the schedule's (get_use_24_hour_time(), as localStartsAt() decides). --}}
                     @if ($event->starts_at)
+                    @php
+                        $requestEnds = ($submitter && $event->duration > 0)
+                            ? $event->getStartDateTime(null, true, $event->scheduleTimezone())->copy()->addMinutes($event->durationInMinutes())->format(get_use_24_hour_time($role) ? 'H:i' : 'g:i A')
+                            : null;
+                    @endphp
                     <p class="request-line is-quiet">
-                        {{ $event->localStartsAt(true) }}
+                        {{ $event->localStartsAt(true) }}@if ($requestEnds) - {{ $requestEnds }}@endif
                         @if ($group)
                         <span class="event-chip" v-pre>{{ $group->translatedName() }}</span>
                         @endif
                     </p>
                     @elseif ($group)
                     <p class="request-line is-quiet is-chip-only"><span class="event-chip" v-pre>{{ $group->translatedName() }}</span></p>
+                    @endif
+                    {{-- Where. The visitor typed a venue or ticked Online, and the card said neither: the
+                         owner had to open the request to learn where they were being asked to be. The
+                         schedule's own address is not repeated back to a venue. --}}
+                    @if ($submitter)
+                        @php
+                            $requestVenue = $event->venue && $event->venue->id !== $role->id ? $event->venue : null;
+                            $requestPlace = $requestVenue ? implode(', ', array_filter([$requestVenue->name, $requestVenue->city])) : '';
+                        @endphp
+                        @if ($requestPlace || $event->event_url)
+                        <div data-request-place class="request-line is-quiet" v-pre><bdi>{{ $requestPlace }}</bdi>@if ($requestPlace && $event->event_url) &middot; @endif @if ($event->event_url){{ __('messages.online') }}@endif</div>
+                        @endif
                     @endif
                     @if ($submitter && ($event->contact_email || $event->contact_phone))
                     <p class="request-line" data-request-contact>

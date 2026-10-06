@@ -11,12 +11,17 @@ use Tests\Browser\Traits\AccountSetupTrait;
 use Tests\DuskTestCase;
 
 /**
- * The guest booking request form (issue #124).
+ * The guest booking request form.
  *
- * The form posts over fetch, so the browser's own constraint validation is the only thing between a
- * visitor and the server - and a Feature test's postJson() skips it entirely. That is how a hidden
- * `required` password field silently blocked every request from a guest who did not want an
- * account, for months, with every Feature test green. These journeys drive the real page.
+ * It began with issue #124: the form posts over fetch, so the browser's own constraint validation
+ * was the only thing between a visitor and the server, and a hidden `required` password field
+ * silently blocked every request from a guest who did not want an account, for months, with every
+ * Feature test green. The page now judges every field itself and says what is missing on a bar
+ * that stays on screen. These journeys drive the real page.
+ *
+ * The browser-test install is not hosted and takes no new accounts, so the page offers none here:
+ * the account and its emailed code are held by BookingRequestFormTest and
+ * BookingRequestProtectionTest on the server.
  */
 class BookingRequestTest extends DuskTestCase
 {
@@ -31,23 +36,32 @@ class BookingRequestTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) {
             $this->openBookingForm($browser);
+
+            // Before anything is typed the bar says nothing; once begun, it says what is left.
+            $this->assertSame('', $this->barText($browser));
             $this->fillBookingForm($browser, 'Guest Jam Session', 'A relaxed evening set.');
+            $this->assertStringContainsString('Ready to send to Booking Venue', $this->barText($browser));
 
-            // The #124 regression: with "Create an account" left alone, nothing may be invalid.
-            $this->assertSame('', $this->invalidControls($browser), 'The booking form would refuse to submit');
+            $this->pressSend($browser);
+            $this->waitForSent($browser);
 
-            $this->submitBookingForm($browser);
-            $browser->waitForTextIn('#form-message', __('messages.booking_request_submitted'), 15);
+            $sent = $this->sentText($browser);
+            // A venue that reviews: the event is not on the schedule yet, and the page says who answers and where.
+            $this->assertStringContainsString('Request sent', $sent);
+            $this->assertStringContainsString('Guest Jam Session', $sent);
+            $this->assertStringContainsString('replies to you directly, at guest.visitor@gmail.com', $sent);
+            $browser->assertPathIs('/'.self::SUBDOMAIN.'/booking-request');
 
             $event = Event::where('name', 'Guest Jam Session')->first();
             $this->assertNotNull($event, 'The request never reached the server');
             $this->assertTrue((bool) $event->is_guest_submission);
+            $this->assertSame('guest.visitor@gmail.com', $event->contact_email);
             $this->assertNull($event->event_url);
             $this->assertSame(1, User::count(), 'No account may be created for a guest who did not ask for one');
         });
     }
 
-    public function test_a_required_description_is_checked_before_anything_is_sent(): void
+    public function test_pressing_send_with_things_missing_says_which_in_the_pages_own_words(): void
     {
         $this->seedBookingVenue([
             'booking_form_config' => ['required_fields' => ['description' => true]],
@@ -55,24 +69,27 @@ class BookingRequestTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) {
             $this->openBookingForm($browser);
-            $this->fillBookingForm($browser, 'Needs A Description', null);
+            $this->pressSend($browser);
 
-            // The description lives in an editor that hides its textarea, so requiring it must not
-            // put a required attribute anywhere the browser would trip over.
-            $this->assertSame('', $this->invalidControls($browser), 'A hidden control would block the submit');
-
-            $this->submitBookingForm($browser);
-
-            $browser->waitFor('#error-description', 10)
-                ->assertSeeIn('#error-description', __('messages.field_is_required'))
-                ->assertAttributeContains('[data-error-ring="description"]', 'class', 'ring-red-500')
-                ->assertPathIs('/'.self::SUBDOMAIN.'/booking-request');
+            // Every missing thing, named on the bar, in page order, each a way to its field; and
+            // the reason under the field. Never the browser's own bubble: no control is `required`.
+            $this->assertSame('Still needed: Description, Name, Email', $this->barText($browser));
+            $this->assertTrue($browser->script('var r = document.querySelector(".gs-bar-status").getBoundingClientRect(); return r.top >= 0 && r.bottom <= window.innerHeight;')[0], 'the bar is on screen');
+            $browser->assertSeeIn('#err_description', 'Required')
+                ->assertSeeIn('#err_account_email', 'Required');
+            $this->assertSame(0, $browser->script('return document.querySelectorAll("#booking-request-form [required]").length;')[0]);
             $this->assertSame(0, Event::count(), 'Nothing may be sent while a required field is empty');
 
-            $browser->script('document.getElementById("event_description")._easyMDE.value("Now it has one.");');
-            $this->submitBookingForm($browser);
-            $browser->waitForTextIn('#form-message', __('messages.booking_request_submitted'), 15)
-                ->assertMissing('#error-description');
+            // Fill the rest and leave the description out: the bar shortens to the one thing left.
+            $this->fillBookingForm($browser, 'Needs A Description', null);
+            $this->assertSame('Still needed: Description', $this->barText($browser));
+            $this->pressSend($browser);
+            $this->assertSame(0, Event::count());
+
+            $browser->script('window.__submitApp.setDescription("Now it has one.");');
+            $browser->pause(200);
+            $this->pressSend($browser);
+            $this->waitForSent($browser);
 
             $this->assertSame('Now it has one.', Event::where('name', 'Needs A Description')->firstOrFail()->description);
         });
@@ -85,20 +102,113 @@ class BookingRequestTest extends DuskTestCase
         ]);
 
         $this->browse(function (Browser $browser) {
-            // openBookingForm() waits for the date picker, which the page script creates after it
-            // binds the Online checkbox - so this also proves a missing checkbox throws nothing.
             $this->openBookingForm($browser);
 
             $browser->assertNotPresent('#is_online')
-                ->assertNotPresent('#online-url-field');
+                ->assertNotPresent('#submit_event_url');
 
             $this->fillBookingForm($browser, 'In Person Only', 'At the venue.');
-            $this->assertSame('', $this->invalidControls($browser));
-
-            $this->submitBookingForm($browser);
-            $browser->waitForTextIn('#form-message', __('messages.booking_request_submitted'), 15);
+            $this->pressSend($browser);
+            $this->waitForSent($browser);
 
             $this->assertNull(Event::where('name', 'In Person Only')->firstOrFail()->event_url);
+        });
+    }
+
+    /** Times are typed the way they are said, kept to the minute, and an end time is the event's length. */
+    public function test_a_time_typed_as_it_is_said_and_an_end_time_are_kept(): void
+    {
+        $this->seedBookingVenue();
+
+        $this->browse(function (Browser $browser) {
+            $this->openBookingForm($browser);
+            $this->fillBookingForm($browser, 'Late Set', 'Two sets.');
+
+            $this->typeTime($browser, 'start', '7:15p');
+            $this->typeTime($browser, 'end', '11pm');
+            $state = $browser->script('var a = window.__submitApp; return [document.getElementById("submit_event_time").value, a.event.event_start_time, document.getElementById("submit_event_end_time").value, a.event.event_end_time];')[0];
+            $this->assertSame(['7:15 PM', '19:15', '11:00 PM', '23:00'], $state);
+
+            // Something that is not a time is refused in words, at once, and never guessed at.
+            $this->typeTime($browser, 'end', 'late');
+            $this->pressSend($browser);
+            $browser->assertSeeIn('#err_event_end_time', 'Enter a time like');
+            $this->assertSame(0, Event::count());
+
+            $this->typeTime($browser, 'end', '23:00');
+            $this->pressSend($browser);
+            $this->waitForSent($browser);
+
+            $event = Event::where('name', 'Late Set')->firstOrFail();
+            $this->assertSame('19:15', \Carbon\Carbon::parse($event->starts_at, 'UTC')->setTimezone('America/New_York')->format('H:i'));
+            $this->assertEquals(3.75, $event->duration);
+        });
+    }
+
+    /** Nothing typed used to survive a reload. The request is kept in the browser; who is asking, for the tab. */
+    public function test_a_reload_keeps_the_request_and_who_is_asking(): void
+    {
+        $this->seedBookingVenue();
+
+        $this->browse(function (Browser $browser) {
+            $this->openBookingForm($browser);
+            $this->fillBookingForm($browser, 'Half Written', 'Still deciding on the second set.');
+            $browser->pause(900);
+
+            $browser->refresh();
+            $this->waitForThePage($browser);
+            $browser->pause(400);
+
+            $state = $browser->script('var a = window.__submitApp; return { name: a.event.name, date: a.event.event_date, start: a.event.event_start_time, text: a.event.description, who: a.userName, email: a.userEmail, shown: a.shownInput(a.pickers.date).value, banner: a.draftRestored };')[0];
+            $this->assertSame('Half Written', $state['name']);
+            $this->assertSame(now()->addDays(10)->format('Y-m-d'), $state['date']);
+            $this->assertSame('20:00', $state['start']);
+            $this->assertSame('Still deciding on the second set.', $state['text']);
+            $this->assertSame(['Guest Visitor', 'guest.visitor@gmail.com'], [$state['who'], $state['email']]);
+            $this->assertNotSame('', $state['shown'], 'the date is back in the box a person sees');
+            $this->assertTrue($state['banner']);
+        });
+    }
+
+    /**
+     * A page left open past its session used to answer "CSRF token mismatch." under the button,
+     * below the screen on a phone. It now says what to do, offers the one thing that works, and
+     * keeps what was typed through it. The expired session is stood in for; the bar, the button
+     * and what survives the reload are the page's own.
+     */
+    public function test_an_expired_page_offers_reload_and_keeps_what_was_typed(): void
+    {
+        $this->seedBookingVenue();
+
+        $this->browse(function (Browser $browser) {
+            $this->openBookingForm($browser);
+            $this->fillBookingForm($browser, 'Left Open Overnight', 'Typed yesterday.');
+            $browser->script('
+                var real = window.fetch;
+                window.fetch = function (url) {
+                    if (String(url).indexOf("booking-request") !== -1) {
+                        return Promise.resolve(new Response(JSON.stringify({ message: "CSRF token mismatch." }), { status: 419, headers: { "Content-Type": "application/json" } }));
+                    }
+                    return real.apply(this, arguments);
+                };
+            ');
+
+            $this->pressSend($browser);
+            $browser->waitFor('#reload-btn', 10)->assertMissing('#submit-btn');
+            $this->assertStringContainsString('Reload it to continue', $this->barText($browser));
+            $this->assertStringNotContainsString('CSRF', $this->barText($browser));
+            // Typing does not make the message go away: the page is still expired.
+            $browser->type('#submit_event_name', 'Left Open Until Morning')->pause(200);
+            $this->assertStringContainsString('Reload it to continue', $this->barText($browser));
+
+            $browser->click('#reload-btn');
+            $this->waitForThePage($browser);
+            $browser->pause(400);
+
+            // What was typed after the page expired is kept too: Reload writes the draft before it leaves.
+            $state = $browser->script('var a = window.__submitApp; return [a.event.name, a.event.description, a.userEmail, !!document.getElementById("submit-btn")];')[0];
+            $this->assertSame(['Left Open Until Morning', 'Typed yesterday.', 'guest.visitor@gmail.com', true], $state);
+            $this->assertSame(0, Event::count());
         });
     }
 
@@ -199,72 +309,78 @@ class BookingRequestTest extends DuskTestCase
     }
 
     /**
-     * Open the form as a signed-out visitor and wait for the page script to finish booting. The date
-     * picker is created at the end of the page's own DOMContentLoaded handler, so its presence also
-     * proves nothing earlier in that handler threw.
+     * Open the form as a signed-out visitor and wait for the page to finish booting: the Vue app
+     * mounted, and the date picker and the description editor it creates once the document is ready.
      */
     private function openBookingForm(Browser $browser): void
     {
         $this->startFromACleanSession($browser);
 
         $browser->visit('/'.self::SUBDOMAIN.'/booking-request')
-            ->assertPathIs('/'.self::SUBDOMAIN.'/booking-request')
-            ->waitFor('#booking-request-form', 15)
-            ->waitUntil('!!document.getElementById("event_date")._flatpickr', 15)
-            ->waitUntil('!!document.getElementById("event_description")._easyMDE', 15);
+            ->assertPathIs('/'.self::SUBDOMAIN.'/booking-request');
+        $this->waitForThePage($browser);
+    }
+
+    private function waitForThePage(Browser $browser): void
+    {
+        $browser->waitFor('#booking-request-form', 15)
+            ->waitUntil('window.__submitApp !== undefined && !! window.__submitApp.pickers.date', 15)
+            ->waitUntil('!! document.getElementById("submit_description")._easyMDE', 15);
     }
 
     /**
-     * Fill the form by script. Headless Chrome drops keystrokes from type() here, and the date and
-     * description are widgets rather than plain inputs anyway.
+     * Fill the form. The name, the place and the person are typed; the date and the description are
+     * widgets, set the way the page itself sets them.
      */
     private function fillBookingForm(Browser $browser, string $eventName, ?string $description): void
     {
         $date = now()->addDays(10)->format('Y-m-d');
 
-        $browser->script('
-            function setValue(id, value) {
-                var field = document.getElementById(id);
-                if (!field) { return; }
-                field.value = value;
-                field.dispatchEvent(new Event("input", { bubbles: true }));
-                field.dispatchEvent(new Event("change", { bubbles: true }));
-            }
-            setValue("event_name", '.json_encode($eventName).');
-            document.getElementById("event_date")._flatpickr.setDate('.json_encode($date).', true);
-            setValue("event_start_time", "20:00");
-            '.($description === null ? '' : 'document.getElementById("event_description")._easyMDE.value('.json_encode($description).');').'
-            setValue("contact_name", "Guest Visitor");
-            setValue("contact_email", "guest.visitor@gmail.com");
-        ');
+        $browser->type('#submit_event_name', $eventName);
+        $browser->script('window.__submitApp.setDate('.json_encode($date).'); window.__submitApp.setTime("start", "20:00");'
+            .($description === null ? '' : ' window.__submitApp.setDescription('.json_encode($description).');'));
+        $browser->type('#account_name', 'Guest Visitor')
+            ->type('#account_email', 'guest.visitor@gmail.com')
+            ->pause(200);
 
-        $hidden = $browser->script('return [document.getElementById("hidden_date").value, document.getElementById("hidden_start_time").value];')[0];
-        $this->assertSame([$date, '20:00'], $hidden, 'The date and time pickers did not fill their hidden inputs');
+        $state = $browser->script('var a = window.__submitApp; return [a.event.name, a.event.event_date, a.event.event_start_time, a.userName, a.userEmail];')[0];
+        $this->assertSame([$eventName, $date, '20:00', 'Guest Visitor', 'guest.visitor@gmail.com'], $state, 'The form did not take what was put into it');
     }
 
     /**
-     * The controls the browser would refuse to submit, by name. requestSubmit() does nothing at all
-     * when one is invalid - no navigation, no message - so name them instead of timing out.
+     * A time typed into its box. The box is emptied through the page first: WebDriver's own clear()
+     * fires no input event, so the page would put the old time back before the new one was typed.
      */
-    private function invalidControls(Browser $browser): string
+    private function typeTime(Browser $browser, string $which, string $text): void
     {
-        return (string) $browser->script('
-            var form = document.getElementById("booking-request-form");
-            if (!form) { return "no booking form on " + window.location.pathname; }
-            return Array.from(form.elements).filter(function (el) {
-                return el.willValidate && !el.checkValidity();
-            }).map(function (el) {
-                return el.name || el.id || el.tagName;
-            }).join(", ");
-        ')[0];
+        $box = $which === 'start' ? '#submit_event_time' : '#submit_event_end_time';
+
+        $browser->script('window.__submitApp.setTime('.json_encode($which).', "");');
+        $browser->pause(150)->type($box, $text)->keys($box, '{tab}')->pause(200);
     }
 
-    /**
-     * requestSubmit() rather than form.submit(): only the former runs validation and the page's own
-     * submit handler, which is what a visitor pressing the button gets.
-     */
-    private function submitBookingForm(Browser $browser): void
+    /** What the bar's status line reads. */
+    private function barText(Browser $browser): string
     {
-        $browser->script('document.getElementById("booking-request-form").requestSubmit();');
+        return trim(preg_replace('/\s+/', ' ', $browser->script('var b = document.querySelector(".gs-bar-status"); return getComputedStyle(b).display === "none" ? "" : b.innerText;')[0]));
+    }
+
+    /** The button on the bar, pressed as a visitor presses it. */
+    private function pressSend(Browser $browser): void
+    {
+        $browser->script('document.getElementById("submit-btn").click();');
+        $browser->pause(500);
+    }
+
+    private function waitForSent(Browser $browser): void
+    {
+        $browser->waitFor('#submission-success-heading', 15);
+        // The card rises into place; read it once it has arrived.
+        $browser->pause(900);
+    }
+
+    private function sentText(Browser $browser): string
+    {
+        return trim(preg_replace('/\s+/', ' ', $browser->script('return document.getElementById("event-submit-app").innerText;')[0]));
     }
 }

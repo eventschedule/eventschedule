@@ -98,6 +98,63 @@ class RealtimeTracker
     }
 
     /**
+     * Whether a schedule's owner may see the live traffic to their own pages (/realtime).
+     *
+     * A second switch, not a consequence of the first: an operator who turned Realtime on did so
+     * under a setting that said only administrators see it, and may want it for themselves without
+     * handing a live view to every schedule on the install. On by default on the nexus, where the
+     * product offers it, and off everywhere else until someone turns it on.
+     */
+    public static function ownerViewEnabled(): bool
+    {
+        return self::enabled() && self::ownerViewSetting();
+    }
+
+    /** The stored choice on its own, which is what the settings page shows while Realtime is off. */
+    public static function ownerViewSetting(): bool
+    {
+        try {
+            $default = config('app.is_nexus') ? '1' : '0';
+
+            return (string) Setting::get('realtime_owner_view', $default) === '1';
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether this visitor's cookie choice lets a schedule's organizer see them as a row of the
+     * organizer's own Realtime page (never by name; App\Services\ScheduleRealtime).
+     *
+     * True only for a choice that allows analytics AND carries the "org" token, which
+     * cookie-consent.js writes when the notice that was answered said that a schedule's organizer
+     * sees visits to its pages (partials/cookie-banner, data-names-organizers). What the notice
+     * showed is recorded on the choice itself. It is deliberately not worked out from when the
+     * choice was made: this used to compare the choice's date with a stamp of when the wording
+     * changed, and the date of a click says nothing about which notice was clicked. A marketing
+     * page served stale from the edge, a tab left open overnight and a deploy that was rolled
+     * back all showed the OLD notice to someone who answered after the stamp.
+     *
+     * Read on the server from the cookie the same-origin beacon carries, so no page can claim it
+     * for anyone but its own visitor, and so the rule can be tested here and not only in a
+     * browser. consent_granted() also refuses a lapsed choice and Global Privacy Control.
+     */
+    public static function consentCoversOrganizers(Request $request): bool
+    {
+        try {
+            if (! self::ownerViewEnabled() || ! consent_granted('analytics', $request)) {
+                return false;
+            }
+
+            $choice = $request->cookie('cookie_consent');
+
+            return is_string($choice) && in_array('org', explode('.', $choice), true);
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    /**
      * Seconds between heartbeats for a page rendered now. Never throws: this runs inside every
      * layout render, and a selfhost install that skipped `migrate` must still serve pages.
      */
@@ -170,9 +227,34 @@ class RealtimeTracker
             't' => self::now()->timestamp,
         ];
 
+        // Present only when it is 1, and signed only then (see sign()): an anonymous page's context
+        // stays byte-for-byte what it was, so an edge-cached page and a tab opened before this
+        // shipped both keep verifying.
+        if (self::isTeamView($user, $surface, $role)) {
+            $context['tm'] = 1;
+        }
+
         $context['sig'] = self::sign($context);
 
         return $context;
+    }
+
+    /**
+     * A signed-in member of the schedule looking at that schedule's own guest page. Their visits
+     * are not the owner's audience, whatever their cookie choice, so the row is marked and the
+     * owner's Realtime page leaves it out (as Analytics leaves it out of the daily counts).
+     */
+    private static function isTeamView(mixed $user, string $surface, mixed $role): bool
+    {
+        if (! $user || $surface !== 'gp' || ! $role instanceof Role || ! $role->exists) {
+            return false;
+        }
+
+        try {
+            return $user->isMember($role->subdomain);
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /** Context fields that must arrive as strings, and as integers (JSON numbers decode to int). */
@@ -194,6 +276,12 @@ class RealtimeTracker
             $fields[$field] = (int) ($context[$field] ?? 0);
         }
 
+        // The team bit joins the signature only when set. Nobody can add it (the signature would
+        // need it) and nobody can strip it (the signature already has it).
+        if (($context['tm'] ?? 0) === 1) {
+            $fields['tm'] = 1;
+        }
+
         $payload = json_encode($fields, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
 
         return hash_hmac('sha256', 'realtime-ctx|'.$payload, (string) config('app.key'));
@@ -202,7 +290,7 @@ class RealtimeTracker
     /**
      * Check a context the browser sent back, returning it with ids decoded, or null.
      *
-     * @return array{surface: string, path: string, role_id: ?int, event_id: ?int, user_id: ?int, is_admin: bool, is_demo: bool, is_embed: bool, hb: int}|null
+     * @return array{surface: string, path: string, role_id: ?int, event_id: ?int, user_id: ?int, is_admin: bool, is_demo: bool, is_embed: bool, is_team: bool, hb: int}|null
      */
     public static function verify(mixed $context): ?array
     {
@@ -221,6 +309,9 @@ class RealtimeTracker
             if (! is_int($context[$field] ?? null)) {
                 return null;
             }
+        }
+        if (array_key_exists('tm', $context) && ! is_int($context['tm'])) {
+            return null;
         }
 
         if (! hash_equals(self::sign($context), $context['sig'])) {
@@ -248,6 +339,7 @@ class RealtimeTracker
             'is_admin' => $context['a'] === 1,
             'is_demo' => $context['d'] === 1,
             'is_embed' => $context['em'] === 1,
+            'is_team' => ($context['tm'] ?? 0) === 1,
             'hb' => max(30, min(600, $context['hb'])),
         ];
     }
@@ -414,23 +506,10 @@ class RealtimeTracker
      */
     public static function classifySource(?string $referrerHost, array $utm, string $navigation, string $surface, Request $request): array
     {
-        $source = strtolower(self::clean($utm['source'] ?? null, 100) ?? '');
-        $medium = strtolower(self::clean($utm['medium'] ?? null, 100) ?? '');
-        $campaign = self::clean($utm['campaign'] ?? null, 100);
         $host = self::normalizeHost($referrerHost);
 
-        if ($source !== '' || $medium !== '' || $campaign !== null) {
-            $sourceHost = self::normalizeHost($source);
-
-            $channel = match (true) {
-                $source === 'boost' || in_array($medium, self::PAID_MEDIUMS, true) => 'paid',
-                $source === 'newsletter' || in_array($medium, self::EMAIL_MEDIUMS, true) => 'email',
-                self::hostIn($sourceHost, self::AI_HOSTS) => 'ai',
-                $medium === 'social' || self::hostIn($sourceHost, self::SOCIAL_HOSTS) => 'social',
-                default => 'campaign',
-            };
-
-            return ['inherit' => false, 'channel' => $channel, 'name' => $source !== '' ? $source : $host, 'campaign' => $campaign];
+        if ($tagged = self::utmChannel($utm['source'] ?? null, $utm['medium'] ?? null, $utm['campaign'] ?? null, $referrerHost)) {
+            return ['inherit' => false] + $tagged;
         }
 
         if ($host === null || in_array($navigation, ['reload', 'back_forward'], true)
@@ -445,6 +524,56 @@ class RealtimeTracker
         }
 
         return ['inherit' => false, 'channel' => self::hostChannel($host) ?? 'other', 'name' => $host, 'campaign' => null];
+    }
+
+    /**
+     * What campaign tags say about a visit, or null when there are none. The tag half of
+     * classifySource(), on its own so a caller holding stored tags and no request (a sign-up's
+     * first touch, App\Utils\SignupSource) lands a visit in the same channel this tracker would.
+     *
+     * @return ?array{channel: string, name: ?string, campaign: ?string}
+     */
+    public static function utmChannel(mixed $source, mixed $medium, mixed $campaign, ?string $referrerHost = null): ?array
+    {
+        $source = strtolower(self::clean($source, 100) ?? '');
+        $medium = strtolower(self::clean($medium, 100) ?? '');
+        $campaign = self::clean($campaign, 100);
+
+        if ($source === '' && $medium === '' && $campaign === null) {
+            return null;
+        }
+
+        $sourceHost = self::normalizeHost($source);
+
+        $channel = match (true) {
+            $source === 'boost' || in_array($medium, self::PAID_MEDIUMS, true) => 'paid',
+            $source === 'newsletter' || in_array($medium, self::EMAIL_MEDIUMS, true) => 'email',
+            self::hostIn($sourceHost, self::AI_HOSTS) => 'ai',
+            $medium === 'social' || self::hostIn($sourceHost, self::SOCIAL_HOSTS) => 'social',
+            default => 'campaign',
+        };
+
+        return ['channel' => $channel, 'name' => $source !== '' ? $source : self::normalizeHost($referrerHost), 'campaign' => $campaign];
+    }
+
+    /**
+     * A host that never starts a source, judged without a request: one of ours (the base domain
+     * and everything under it, or the app's own host), or a place a visitor passes through
+     * mid-visit, such as a sign-in provider handing them back. isInternalHost() is the fuller
+     * answer for a live request, which can also see custom domains.
+     */
+    public static function isPassThroughHost(?string $host): bool
+    {
+        $host = self::normalizeHost($host);
+
+        if ($host === null) {
+            return false;
+        }
+
+        $base = strtolower(_base_domain());
+        $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+
+        return self::hostIn($host, array_filter([$base, $appHost])) || self::hostIn($host, self::HANDOFF_HOSTS);
     }
 
     /**

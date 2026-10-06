@@ -1103,7 +1103,7 @@
                                 <span class="es-stage-plan">Free</span>
                             </div>
                             <p class="es-stage-muted mb-4">Built-in analytics count views per date and per device, sales and revenue per date, the countries the views came from, the referring domains, and the campaign tags on the links you posted. That is enough to route next autumn on evidence instead of memory.</p>
-                            <p class="es-stage-muted text-sm">What it is not: there are no live viewer counts and no follower numbers imported from anywhere else. It measures your own pages.</p>
+                            <p class="es-stage-muted text-sm">What it is not: it does not count who is watching a stream, and it imports no follower numbers from anywhere else. It measures your own pages.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

@@ -31,7 +31,7 @@
                 'last30' => __('messages.realtime_last_30_minutes'),
                 'viewsPerMinute' => __('messages.realtime_views_per_minute'),
                 'acceptedCookies' => __('messages.realtime_accepted_cookies'),
-                'notIdentified' => __('messages.realtime_not_identified'),
+                'notAccepted' => __('messages.realtime_not_accepted'),
                 'thisMinute' => __('messages.realtime_this_minute'),
                 'axisNow' => __('messages.realtime_axis_now'),
                 'visitors' => __('messages.realtime_visitors'),
@@ -57,6 +57,14 @@
                 'activity' => __('messages.realtime_activity'),
                 'last24h' => __('messages.realtime_last_24_hours'),
                 'activityEmpty' => __('messages.realtime_activity_empty'),
+                'signups' => __('messages.realtime_signups'),
+                'perHour' => __('messages.realtime_signups_per_hour'),
+                'noSignups24' => __('messages.realtime_no_signups_24'),
+                'lastSignup' => __('messages.realtime_last_signup'),
+                'signedUpMark' => __('messages.realtime_signed_up_marker'),
+                'sourceUnknown' => __('messages.realtime_source_unknown'),
+                'colName' => __('messages.name'),
+                'colProgress' => __('messages.funnel_progress'),
                 'onSiteNow' => __('messages.realtime_on_site_now'),
                 'seenRecently' => __('messages.realtime_seen_recently'),
                 'showAll' => __('messages.realtime_show_all'),
@@ -110,8 +118,11 @@
                 @include('admin.realtime._toolbar')
 
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                    {{-- In this order for the single column below xl: the day's numbers come
+                         before the list of people. At xl the activity card is the rail. --}}
                     @include('admin.realtime._overview')
                     @include('admin.realtime._activity')
+                    @include('admin.realtime._signups')
                 </div>
 
                 @include('admin.realtime._visitors')

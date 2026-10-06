@@ -1,99 +1,34 @@
 <x-app-admin-layout>
-    {{-- space-y-4 rather than an mb-4 on each block: one rhythm, and it is what
-         admin/dashboard.blade.php already does. --}}
+    {{-- /dashboard. What it shows above the calendar is decided by who is looking, and built by
+         App\Services\HomeDashboard, one method to a card:
+
+           organizer   the four tiles, their schedules, what is coming up, what just happened
+           (fresh)     ... minus the tiles while there is nothing to count: the first event, and
+                       one card waiting for the first visitor
+           viewer      the schedules they were given a look at, and what is coming up on them
+           attendee    their tickets and what the schedules they follow have on
+           empty       an invitation to make a schedule
+
+         The page is server-rendered. Three small scripts ride on it: the shared popup menus of
+         layouts/app, the Realtime tile's refresh (home/_live-script) and the Customize dialog,
+         which is its own Vue island (home/_customize). The calendar below is its own Vue root and
+         none of this wraps it.
+
+         space-y-4 rather than an mb-4 on each block: one rhythm, as on admin/dashboard. --}}
+    @php
+        $state = $dashboard['state'];
+        $organizer = $state === 'organizer';
+        $fresh = $organizer && ! empty($dashboard['fresh']);
+        $period = $dashboard['period'];
+        $shown = collect($dashboardConfig['panels'])->where('visible', true)->pluck('id')->flip();
+        $several = $organizer && ! empty($dashboard['schedules']);
+    @endphp
+
     <div class="space-y-4">
-        {{-- Page title and actions. Deliberately the FIRST thing in the template: the Get Started
-             block below opens with an h2, so an h1 placed after it would put a section heading
-             ahead of the page's own title for exactly the new users that block targets.
-
-             One block, not the hosted/non-hosted pair this used to be. The two were ~50 identical
-             lines each; their only difference was the hosted arm gating the dropdown on
-             $canCreateSchedule, and HomeController defines that as
-             `! config('app.hosted') || $user->owner()->count() < 50` - unconditionally true when
-             not hosted, so the hosted arm's condition is already correct for both. --}}
-        <div class="flex flex-wrap justify-between items-center gap-3">
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ __('messages.dashboard') }}</h1>
-
-            {{-- ms-auto is load-bearing: when the buttons wrap to their own line, justify-between
-                 puts a single-item line at flex-START, which would flip them from end-aligned to
-                 start-aligned at narrow widths. --}}
-            <div class="flex items-center gap-3 ms-auto">
-                @php
-                    $secondaryAction = 'inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-white/[0.06] rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800';
-
-                    // While a setup guide is showing on this page, the next thing to do is in it,
-                    // and a second schedule is the wrong turn in someone's first hour. "New
-                    // Schedule" stays, as a secondary button, until the guide ends.
-                    $setupGuideHere = \App\Utils\SetupGuide::surface() === 'section';
-                @endphp
-
-                {{-- Customize Button --}}
-                <button type="button" x-data x-on:click="$dispatch('open-modal', 'customize-dashboard')"
-                    class="{{ $secondaryAction }}">
-                    <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    {{ __('messages.customize_dashboard') }}
-                </button>
-
-                {{-- New Schedule Dropdown. The page's one primary action, so it carries the brand
-                     button rather than a second secondary one; x-brand-button merges class, data-*
-                     and aria-* onto its <button>, so the delegated .popup-toggle[data-popup-target]
-                     handler in layouts/app.blade.php still matches. --}}
-                @if(!is_demo_mode() && $canCreateSchedule)
-                <div class="relative inline-block text-left">
-                    @if ($setupGuideHere)
-                    <button type="button" class="popup-toggle {{ $secondaryAction }}" data-popup-target="dashboard-new-schedule-menu" aria-expanded="false">
-                        {{ __('messages.new_schedule') }}
-                        <svg class="ms-1.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    @else
-                    <x-brand-button class="popup-toggle" data-popup-target="dashboard-new-schedule-menu" aria-expanded="false">
-                        {{ __('messages.new_schedule') }}
-                        <svg class="ms-1.5 h-4 w-4 text-white/80" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </x-brand-button>
-                    @endif
-                    {{-- Deliberately NOT role="menu"/role="menuitem": that pattern obliges arrow-key
-                         navigation, and the shared popup JS only handles Escape, so every item
-                         carrying tabindex="-1" made the whole menu unreachable by keyboard. As a
-                         plain list of links, Tab reaches all three natively. --}}
-                    <div id="dashboard-new-schedule-menu" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-md ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none">
-                        <div class="py-1" data-popup-target="dashboard-new-schedule-menu">
-                            <a href="{{ route('new', ['type' => 'talent']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10">
-                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
-                                </svg>
-                                <div>
-                                    {{ __('messages.talent') }}
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.new_schedule_tooltip') }}</div>
-                                </div>
-                            </a>
-                            <a href="{{ route('new', ['type' => 'venue']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10">
-                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
-                                </svg>
-                                <div>
-                                    {{ __('messages.venue') }}
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.new_venue_tooltip') }}</div>
-                                </div>
-                            </a>
-                            <a href="{{ route('new', ['type' => 'curator']) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10">
-                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C14,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
-                                </svg>
-                                <div>
-                                    {{ __('messages.curator') }}
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.new_curator_tooltip') }}</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
+        {{-- Title and actions. Deliberately the FIRST thing in the template: the blocks below open
+             with an h2, so an h1 placed after them would put a section heading ahead of the page's
+             own title. --}}
+        @include('home._header')
 
         {{-- The setup guide's home (partials/setup-guide): its steps, the open one, and a picture
              of the person's own page. Under the title, unless something is owed: then the
@@ -102,10 +37,9 @@
             @include('partials.setup-guide', ['place' => 'section', 'rows' => $nextStepItems, 'dismissedBefore' => $nextStepsDismissedBefore])
         @endif
 
-        <!-- Get Started Panel -->
-        @if($schedules->isEmpty() && $venues->isEmpty() && $curators->isEmpty() && auth()->user()->tickets()->count() === 0 && !is_demo_mode())
+        {{-- Nobody's schedule, nobody's ticket, nobody followed: the invitation to start. --}}
+        @if ($state === 'empty' && ! is_demo_mode())
         <div>
-            <!-- Header -->
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
                     {{ __('messages.getting_started_welcome', ['name' => auth()->user()->firstName()]) }}
@@ -122,284 +56,95 @@
             @include('partials.federation-prompt', ['padded' => false])
         @endif
 
-        {{-- Needs attention: pending items to handle across all editable schedules. Always the
-             full width now. It used to share a two-column grid with a "Next steps" panel of
-             suggestions; those moved into the setup guide's card (partials/setup-guide), which
-             takes the guide's place on the page whether or not there is a guide, so the to-do
-             queue is no longer set beside a card in a different look. --}}
+        {{-- Needs attention: what is owed, across every schedule. A row of chips, each as wide as
+             its own words, not a card across the page holding two short lines. In every state:
+             a schedule offered to someone who runs none arrives here. With several schedules a
+             chip says whose it is. --}}
         @if ($pendingActionItems->isNotEmpty())
-            <x-needs-attention :items="$pendingActionItems" />
+            <x-needs-attention :items="$pendingActionItems" layout="chips" :subtitles="$several" />
 
             {{-- Something is owed: the queue keeps first place and the card follows it. --}}
             @include('partials.setup-guide', ['place' => 'section', 'rows' => $nextStepItems, 'dismissedBefore' => $nextStepsDismissedBefore])
         @endif
 
-        {{-- Below the task lists on purpose: listing on the network is a suggestion, and the
-             queues above are things that are owed. --}}
+        {{-- Below the task list on purpose: listing on the network is a suggestion, and the queue
+             above is things that are owed. --}}
         @if (! empty($federationListingSchedules) && $federationListingSchedules->isNotEmpty())
             @include('partials.federation-listing-prompt', ['listingSchedules' => $federationListingSchedules, 'padded' => false])
         @endif
 
-        {{-- Configurable Dashboard Panels. sm:grid-cols-2 so the 640-1024 band is not the single
-             stacked column it used to be: a size-1 panel is half a row there and a quarter at lg,
-             a size-2 panel is a full row there and a half at lg. sm:col-span-2 needs no lg twin -
-             it already applies at lg, where 2 of 4 columns is the same half-width as before.
+        @if ($organizer)
+            @if ($fresh)
+                {{-- Nothing to count yet, so no row of four zeros: the event they made, beside the
+                     one thing worth waiting for. The two cards stretch to one height, so nothing
+                     on the page moves when the first visitor comes. --}}
+                {{-- One column where there is no live view (every selfhost by default): a card
+                     must not sit beside a hole. --}}
+                <div class="grid grid-cols-1 {{ $dashboard['live'] !== null ? 'lg:grid-cols-2' : '' }} gap-4">
+                    @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => false, 'stretch' => $dashboard['live'] !== null])
+                    @if ($dashboard['live'] !== null)
+                        @include('home._first-visitor', ['live' => $dashboard['live']])
+                    @endif
+                </div>
+            @else
+                @include('home._tiles')
 
-             An odd number of visible size-1 panels ahead of a size-2 leaves a gap, because
-             grid-auto-flow is row rather than dense. That is accepted: the same gaps already occur
-             at lg today, and dense would reorder panels against the order the user dragged them
-             into in the Customize dialog. --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            @foreach($dashboardConfig['panels'] as $panel)
-                @if($panel['visible'])
-                    <div class="{{ ($panel['size'] ?? 2) === 1 ? 'lg:col-span-1' : 'sm:col-span-2' }}">
-                        @include('home.panels.' . $panel['id'])
-                    </div>
+                @if ($several)
+                    @include('home._schedules', ['rows' => $dashboard['schedules'], 'viewer' => false])
                 @endif
-            @endforeach
-        </div>
 
-        {{-- Calendar (always shown) --}}
-        <div>
+                {{-- Two to a row when both are on the page; one alone takes the row. --}}
+                @php
+                    $showComing = $shown->has('upcoming_events') && $dashboard['coming'] !== null;
+                    $showActivity = $shown->has('recent_activity') && $dashboard['activity'] !== null;
+                @endphp
+                @if ($showComing || $showActivity)
+                <div class="grid grid-cols-1 {{ $showComing && $showActivity ? 'lg:grid-cols-2' : '' }} gap-4">
+                    @if ($showComing)
+                        @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => true, 'stretch' => false])
+                    @endif
+                    @if ($showActivity)
+                        @include('home._activity', ['activity' => $dashboard['activity']])
+                    @endif
+                </div>
+                @endif
+
+                {{-- The cards someone switched on in Customize, two to a row. --}}
+                @php $extras = collect(['top_events', 'traffic_sources', 'newsletters', 'boosts'])->filter(fn ($id) => $shown->has($id)); @endphp
+                @if ($extras->isNotEmpty())
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    @foreach ($extras as $panel)
+                        {{-- An odd one out at the end takes the row. --}}
+                        <div class="{{ $loop->last && $loop->odd ? 'lg:col-span-2' : '' }}">@include('home.panels.'.$panel)</div>
+                    @endforeach
+                </div>
+                @endif
+            @endif
+        @elseif ($state === 'viewer')
+            @include('home._schedules', ['rows' => $dashboard['schedules'], 'viewer' => true])
+            @if ($dashboard['coming'] !== null && $dashboard['coming']['rows'])
+                @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => false, 'stretch' => false])
+            @endif
+        @elseif ($state === 'attendee')
+            @include('home._attendee')
+        @endif
+
+        {{-- The month calendar: the same component as ever, its own Vue root. Someone who runs
+             nothing gets it only when it would have something on it (it also lists events they
+             submitted to somebody else's schedule). --}}
+        @if ($showCalendar)
+        <div id="dashboard-calendar" class="scroll-mt-6">
             @include('role/partials/calendar', ['route' => 'home', 'tab' => ''])
         </div>
-
+        @endif
     </div>
 
-    {{-- Outside the space-y-4 wrapper on purpose: the modal root is `fixed inset-0`, and
-         space-y-4 would give it a margin-top, which on a fixed box with top:0/bottom:0
-         shifts it down and shortens it. It is out of flow; it has no place in a spacing
-         rhythm. --}}
-    {{-- Customize Dashboard Modal --}}
-    <x-modal name="customize-dashboard" maxWidth="lg">
-        <template x-if="show">
-        <div x-data="customizeDashboard()">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.customize_dashboard') }}</h3>
-                <button type="button" x-on:click="$dispatch('close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <div class="p-6">
-                <div x-ref="panelList" class="flex flex-col gap-2">
-                    <template x-for="(panel, index) in panels" :key="panel.id">
-                        <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-opacity duration-200 select-none" :class="{ 'opacity-50': !panel.visible }">
-                            <div class="flex items-center gap-3 p-3">
-                                {{-- Drag Handle --}}
-                                <div class="drag-handle cursor-grab active:cursor-grabbing flex-shrink-0" :class="panel.visible ? 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' : 'text-gray-300 dark:text-gray-600'">
-                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></svg>
-                                </div>
-
-                                {{-- Toggle --}}
-                                <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                    <input type="checkbox" x-model="panel.visible" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                    <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                </label>
-
-                                {{-- Label --}}
-                                <span class="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300" x-text="labels[panel.id]"></span>
-
-                                {{-- Gear Icon --}}
-                                <button type="button" x-on:click="toggleSettings(panel.id)" class="flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200">
-                                    <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-90': expandedPanel === panel.id }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                </button>
-                            </div>
-
-                            {{-- Expandable Settings --}}
-                            <div x-show="expandedPanel === panel.id"
-                                 x-transition:enter="transition-all ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 max-h-0"
-                                 x-transition:enter-end="opacity-100 max-h-40"
-                                 x-transition:leave="transition-all ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 max-h-40"
-                                 x-transition:leave-end="opacity-0 max-h-0"
-                                 x-cloak class="px-3 pb-3 overflow-hidden">
-                                <div class="flex flex-wrap items-center gap-4 pt-2 border-t border-gray-200 dark:border-gray-700/50">
-                                    {{-- Size Selector --}}
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_size') }}:</span>
-                                        <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                            <button type="button" x-on:click="panel.size = 1" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1" :class="panel.size === 1 ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
-                                                <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="5" height="12" rx="1"/></svg>
-                                                {{ __('messages.panel_size_small') }}
-                                            </button>
-                                            <button type="button" x-on:click="panel.size = 2" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200 flex items-center gap-1 border-l border-gray-200 dark:border-gray-600" :class="panel.size === 2 ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
-                                                <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="12" height="12" rx="1"/></svg>
-                                                {{ __('messages.panel_size_large') }}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {{-- Period Selector --}}
-                                    <div x-show="panelMeta[panel.id]?.periods" class="flex items-center gap-2">
-                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_period') }}:</span>
-                                        <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                            <template x-for="(period, periodIdx) in (panelMeta[panel.id]?.periods || [])" :key="period">
-                                                <button type="button" x-on:click="panel.period = period" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === period ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', periodIdx > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="period + 'd'"></button>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    {{-- Count Selector --}}
-                                    <div x-show="panelMeta[panel.id]?.counts" class="flex items-center gap-2">
-                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_items') }}:</span>
-                                        <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                            <template x-for="(count, countIdx) in (panelMeta[panel.id]?.counts || [])" :key="count">
-                                                <button type="button" x-on:click="panel.count = count" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === count ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', countIdx > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="count"></button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <button type="button" x-on:click="resetDefaults()" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200">
-                    {{ __('messages.reset_defaults') }}
-                </button>
-                <div class="flex gap-3">
-                    <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200">
-                        {{ __('messages.cancel') }}
-                    </button>
-                    <button type="button" x-on:click="save()" :disabled="saving" class="px-4 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 transition-all duration-200">
-                        <span x-show="!saving">{{ __('messages.save') }}</span>
-                        <span x-show="saving" x-cloak>{{ __('messages.saving') }}...</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        </template>
-    </x-modal>
-
-    @if(collect($dashboardConfig['panels'])->where('id', 'views')->where('visible', true)->isNotEmpty())
-    <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
+    {{-- Outside the space-y-4 wrapper on purpose: the dialog is `fixed inset-0`, and a margin-top
+         on a fixed box with top:0/bottom:0 shifts it down and shortens it. --}}
+    @if ($organizer)
+        @include('home._customize')
+        @if (! empty($dashboard['live']))
+            @include('home._live-script')
+        @endif
     @endif
-    <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-        function customizeDashboard() {
-            return {
-                panels: {{ Js::from($dashboardConfig['panels']) }},
-                defaultPanels: {{ Js::from($dashboardConfig['defaultPanels']) }},
-                labels: {{ Js::from([
-                    'upcoming_count' => __('messages.panel_upcoming_count'),
-                    'views' => __('messages.panel_views'),
-                    'followers' => __('messages.panel_followers'),
-                    'upcoming_events' => __('messages.panel_upcoming_events'),
-                    'recent_activity' => __('messages.panel_recent_activity'),
-                    'revenue' => __('messages.panel_revenue'),
-                    'top_events' => __('messages.panel_top_events'),
-                    'newsletters' => __('messages.panel_newsletters'),
-                    'boosts' => __('messages.panel_boosts'),
-                    'traffic_sources' => __('messages.panel_traffic_sources'),
-                ]) }},
-                panelMeta: {
-                    upcoming_count: { defaultSize: 1 },
-                    views: { defaultSize: 1, periods: [7, 14, 30] },
-                    followers: { defaultSize: 1 },
-                    revenue: { defaultSize: 1, periods: [7, 14, 30] },
-                    upcoming_events: { defaultSize: 2, counts: [3, 5] },
-                    recent_activity: { defaultSize: 2, counts: [5, 10] },
-                    top_events: { defaultSize: 2, counts: [3, 5], periods: [7, 14, 30] },
-                    newsletters: { defaultSize: 2, counts: [3, 5] },
-                    boosts: { defaultSize: 2, counts: [3, 5] },
-                    traffic_sources: { defaultSize: 2, counts: [3, 5, 10], periods: [7, 14, 30] }
-                },
-                expandedPanel: null,
-                saving: false,
-                sortableInstance: null,
-                saveConfigUrl: {{ Js::from(route('home.save_config')) }},
-                init() {
-                    this.$nextTick(() => this.initSortable());
-                },
-                initSortable() {
-                    const list = this.$refs.panelList;
-                    if (!list || typeof Sortable === 'undefined') return;
-                    if (this.sortableInstance) this.sortableInstance.destroy();
-                    this.sortableInstance = Sortable.create(list, {
-                        handle: '.drag-handle',
-                        animation: 150,
-                        ghostClass: 'opacity-50',
-                        fallbackOnBody: true,
-                        onStart: (evt) => {
-                            this._childOrder = [...evt.from.children];
-                        },
-                        onEnd: (evt) => {
-                            this._childOrder.forEach(child => evt.from.appendChild(child));
-                            const item = this.panels.splice(evt.oldIndex, 1)[0];
-                            this.panels.splice(evt.newIndex, 0, item);
-                        }
-                    });
-                },
-                toggleSettings(panelId) {
-                    this.expandedPanel = this.expandedPanel === panelId ? null : panelId;
-                },
-                resetDefaults() {
-                    this.panels = JSON.parse(JSON.stringify(this.defaultPanels));
-                },
-                async save() {
-                    this.saving = true;
-                    try {
-                        const response = await fetch(this.saveConfigUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({ panels: this.panels })
-                        });
-                        if (!response.ok) throw new Error('Request failed');
-                        const data = await response.json();
-                        if (data.success) {
-                            window.location.reload();
-                        }
-                    } catch (e) {
-                        this.saving = false;
-                    }
-                }
-            };
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Sparkline chart
-            const sparklineCanvas = document.getElementById('sparkline-chart');
-            if (sparklineCanvas && typeof Chart !== 'undefined') {
-                const sparklineData = @json($sparklineData ?? []);
-                const ctx = sparklineCanvas.getContext('2d');
-                const gradient = ctx.createLinearGradient(0, 0, 0, 48);
-                gradient.addColorStop(0, 'rgba(14, 165, 233, 0.3)');
-                gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: sparklineData.map((_, i) => i),
-                        datasets: [{
-                            data: sparklineData,
-                            borderColor: '#0ea5e9',
-                            backgroundColor: gradient,
-                            borderWidth: 1.5,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                        scales: {
-                            x: { display: false },
-                            y: { display: false, beginAtZero: true }
-                        },
-                        animation: false,
-                    }
-                });
-            }
-        });
-    </script>
 </x-app-admin-layout>

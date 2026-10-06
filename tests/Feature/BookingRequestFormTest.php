@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -144,13 +145,14 @@ class BookingRequestFormTest extends TestCase
     }
 
     /**
-     * The browser will not submit a form holding a required control it cannot show, and says so only
-     * in the console. So no required control may sit inside anything hidden when the page loads, and
-     * the two widget-backed inputs (EasyMDE hides the textarea, Flatpickr swaps the date input for a
-     * readonly one) may never carry the attribute at all.
+     * Issue #124 was a required control inside a hidden section: the browser refused every submit
+     * and said so only in the console. The page now checks every field itself and says what is
+     * missing in its own words, in the schedule's language, on the bar that stays on screen. So no
+     * control in the form carries the native attribute at all, whatever the owner required and
+     * whoever is looking: a browser bubble would be the old failure back again.
      */
     #[DataProvider('pageScenarios')]
-    public function test_no_required_control_is_rendered_where_the_visitor_cannot_reach_it(string $type, array $attributes, ?string $variant): void
+    public function test_the_page_judges_every_field_itself_and_never_the_browser(string $type, array $attributes, ?string $variant): void
     {
         $role = $this->bookingSchedule($type, $attributes);
 
@@ -160,23 +162,13 @@ class BookingRequestFormTest extends TestCase
 
         $xpath = $this->page($role, $variant === 'signed-in' ? $this->createOwner() : null);
 
-        $hidden = "contains(concat(' ', normalize-space(@class), ' '), ' hidden ')"
-            ." or contains(translate(@style, ' ', ''), 'display:none')"
-            .' or @hidden';
+        $this->assertNotNull($this->node($xpath, "//form[@id='booking-request-form'][@novalidate]"), 'The page validates the form itself');
 
         $offenders = [];
-        foreach ($xpath->query("//form[@id='booking-request-form']//*[self::input[not(@type='hidden')] or self::select or self::textarea][@required]") as $control) {
-            $hiddenAncestor = $xpath->query("ancestor-or-self::*[$hidden]", $control)->length > 0;
-            $isWidget = str_contains(' '.$control->getAttribute('class').' ', ' html-editor ')
-                || $control->getAttribute('id') === 'event_date';
-
-            if ($hiddenAncestor || $isWidget) {
-                $offenders[] = $control->getAttribute('name') ?: $control->getAttribute('id');
-            }
+        foreach ($xpath->query("//form[@id='booking-request-form']//*[@required]") as $control) {
+            $offenders[] = $control->getAttribute('id') ?: $control->getAttribute('name');
         }
-
         $this->assertSame([], $offenders);
-        $this->assertNotNull($this->node($xpath, "//form[@id='booking-request-form'][@novalidate]"), 'The page validates the form itself');
     }
 
     public function test_a_talent_offers_an_optional_account_although_its_row_says_require_account(): void
@@ -185,18 +177,18 @@ class BookingRequestFormTest extends TestCase
         $role = $this->createRole($this->createOwner(), 'talent', ['accept_requests' => true]);
         $this->assertTrue((bool) $role->require_account);
 
-        $xpath = $this->page($role);
+        $html = $this->get($this->pageUrl($role))->assertOk()->getContent();
+        $xpath = $this->dom($html);
 
-        $box = $this->node($xpath, "//input[@id='create_account']");
+        $box = $this->node($xpath, "//input[@id='create_account'][@type='checkbox']");
         $this->assertNotNull($box);
         $this->assertFalse($box->hasAttribute('checked'));
         $this->assertFalse($box->hasAttribute('disabled'));
-        $this->assertNull($this->node($xpath, "//input[@type='hidden'][@name='create_account']"));
-
-        $section = $this->node($xpath, "//div[@id='account-fields']");
-        $this->assertStringContainsString('hidden', $section->getAttribute('class'));
-        $this->assertFalse($this->node($xpath, "//input[@id='account_password']")->hasAttribute('required'));
-        $this->assertFalse($this->node($xpath, "//input[@id='account_terms']")->hasAttribute('required'));
+        // Off until the visitor turns it on, and the password and terms only show while it is on.
+        $this->assertStringContainsString('createAccount: false,', $html);
+        $this->assertStringContainsString('mustHaveAccount: false,', $html);
+        $this->assertNotNull($this->node($xpath, "//div[@v-show='createAccount']//input[@id='account_password']"));
+        $this->assertNotNull($this->node($xpath, "//div[@v-show='createAccount']//input[@id='account_terms']"));
     }
 
     public function test_a_selfhost_with_registration_closed_offers_no_account(): void
@@ -205,11 +197,11 @@ class BookingRequestFormTest extends TestCase
 
         $xpath = $this->page($this->bookingSchedule());
 
-        $this->assertNull($this->node($xpath, "//input[@name='create_account']"));
-        $this->assertNull($this->node($xpath, "//input[@name='password']"));
-        $this->assertNull($this->node($xpath, "//input[@name='terms']"));
-        $this->assertTrue($this->node($xpath, "//input[@name='contact_name']")->hasAttribute('required'));
-        $this->assertTrue($this->node($xpath, "//input[@name='contact_email']")->hasAttribute('required'));
+        foreach (['create_account', 'account_password', 'account_terms'] as $id) {
+            $this->assertNull($this->node($xpath, "//*[@id='$id']"), "$id should not render");
+        }
+        $this->assertSame('true', $this->node($xpath, "//input[@id='account_name']")->getAttribute('aria-required'));
+        $this->assertSame('true', $this->node($xpath, "//input[@id='account_email']")->getAttribute('aria-required'));
     }
 
     public function test_a_selfhost_that_opened_registration_offers_the_account(): void
@@ -227,9 +219,10 @@ class BookingRequestFormTest extends TestCase
         $xpath = $this->dom($html);
 
         $this->assertStringContainsString($visitor->email, $html);
-        foreach (['contact_name', 'contact_email', 'create_account', 'password', 'terms'] as $name) {
-            $this->assertNull($this->node($xpath, "//input[@name='$name']"), "$name should not render");
+        foreach (['account_name', 'account_email', 'create_account', 'account_password', 'account_terms'] as $id) {
+            $this->assertNull($this->node($xpath, "//*[@id='$id']"), "$id should not render");
         }
+        $this->assertStringContainsString('isAuthed: true,', $html);
     }
 
     public function test_a_guest_is_sent_to_sign_up_when_a_venue_booking_form_requires_an_account(): void
@@ -256,80 +249,104 @@ class BookingRequestFormTest extends TestCase
 
     public function test_only_the_required_default_fields_are_marked(): void
     {
-        // Scoped past the contact labels: name and email are required of every guest whatever the
-        // owner configured, so they carry an unconditional marker. This test is about the fields the
-        // owner CAN configure, and counting every label on the page would conflate the two.
-        $configurable = "//label[not(@for='contact_name' or @for='contact_email' or @for='contact_phone')]//span[@aria-hidden='true'][normalize-space()='*']";
+        // A star the server wrote. The date and the start time carry one that the page shows or
+        // hides (each becomes needed once the other is filled), so those are read from the page's
+        // own `required` data below and not counted here.
+        $star = "span[@aria-hidden='true'][not(@v-if)][normalize-space()='*']";
+        $required = function (string $html): array {
+            $this->assertSame(1, preg_match('/^\s*required: (\{.*\}),$/m', $html, $found));
 
-        $plain = $this->page($this->bookingSchedule('talent'));
-        $this->assertSame(0, $plain->query('//*[@aria-required="true"]')->length);
-        $this->assertSame(0, $plain->query($configurable)->length);
+            return json_decode($found[1], true);
+        };
 
-        // ... and the two constants really are marked.
-        $this->assertSame(2, $plain->query("//label[@for='contact_name' or @for='contact_email']//span[@aria-hidden='true'][normalize-space()='*']")->length);
+        $html = $this->get($this->pageUrl($this->bookingSchedule('talent')))->assertOk()->getContent();
+        $plain = $this->dom($html);
+        // Name and email are asked of every guest, whatever the owner configured, and a password of
+        // whoever ticks "Create an account" (its field is only on screen once they have). Nothing else is.
+        $always = ['account_name', 'account_email', 'account_password'];
+        $needed = [];
+        foreach ($plain->query('//*[@aria-required="true"]') as $control) {
+            $needed[] = $control->getAttribute('id');
+        }
+        $this->assertSame($always, $needed);
+        $mine = implode(' or ', array_map(fn ($id) => "@for='$id'", $always));
+        $this->assertSame(3, $plain->query("//label[$mine]/$star")->length);
+        $this->assertSame(0, $plain->query("//label[not($mine)]/$star")->length);
+        $this->assertSame('createAccount', $this->node($plain, "//input[@id='account_password']/ancestor::div[@v-show][1]")->getAttribute('v-show'));
+        $this->assertSame(['event_name' => false, 'date_time' => false, 'description' => false, 'location' => false, 'phone' => false], $required($html));
 
         $role = $this->bookingSchedule('talent', [
-            'booking_form_config' => $this->requiring(['event_name', 'description']),
+            'booking_form_config' => $this->requiring(['event_name', 'description', 'date_time']),
         ]);
-        $xpath = $this->page($role);
+        $html = $this->get($this->pageUrl($role))->assertOk()->getContent();
+        $xpath = $this->dom($html);
 
-        $this->assertSame('true', $this->node($xpath, "//input[@id='event_name']")->getAttribute('aria-required'));
-        $this->assertSame('true', $this->node($xpath, "//textarea[@id='event_description']")->getAttribute('aria-required'));
-        $this->assertFalse($this->node($xpath, "//input[@id='event_date']")->hasAttribute('aria-required'));
-        $this->assertSame(2, $xpath->query($configurable)->length);
-
-        // Checked by the page script, never by a native required attribute.
-        $this->assertFalse($this->node($xpath, "//input[@id='event_name']")->hasAttribute('required'));
-        $this->assertFalse($this->node($xpath, "//textarea[@id='event_description']")->hasAttribute('required'));
+        $this->assertSame('true', $this->node($xpath, "//input[@id='submit_event_name']")->getAttribute('aria-required'));
+        $this->assertSame('true', $this->node($xpath, "//textarea[@id='submit_description']")->getAttribute('aria-required'));
+        $this->assertSame('true', $this->node($xpath, "//input[@id='submit_event_time']")->getAttribute('aria-required'));
+        $this->assertSame(1, $xpath->query("//label[@for='submit_event_name']/$star")->length);
+        $this->assertSame(1, $xpath->query("//label[@for='submit_description']/$star")->length);
+        $this->assertTrue($required($html)['date_time']);
+        $this->assertFalse($required($html)['location']);
 
         // Phone follows the same contract once the schedule asks for it.
         $asked = $this->page($this->bookingSchedule('talent', [
             'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
         ]));
-        $this->assertFalse($this->node($asked, "//input[@id='contact_phone']")->hasAttribute('aria-required'));
-        $this->assertSame(0, $asked->query("//label[@for='contact_phone']//span[@aria-hidden='true'][normalize-space()='*']")->length);
+        $this->assertSame('false', $this->node($asked, "//input[@id='contact_phone']")->getAttribute('aria-required'));
+        $this->assertSame(0, $asked->query("//label[@for='contact_phone']/$star")->length);
 
-        $required = $this->page($this->bookingSchedule('talent', [
+        $wanted = $this->page($this->bookingSchedule('talent', [
             'booking_form_config' => $this->requiring(['phone'], ['ask_phone' => true]),
         ]));
-        $this->assertSame('true', $this->node($required, "//input[@id='contact_phone']")->getAttribute('aria-required'));
-        $this->assertFalse($this->node($required, "//input[@id='contact_phone']")->hasAttribute('required'));
-        $this->assertSame(1, $required->query("//label[@for='contact_phone']//span[@aria-hidden='true'][normalize-space()='*']")->length);
+        $this->assertSame('true', $this->node($wanted, "//input[@id='contact_phone']")->getAttribute('aria-required'));
+        $this->assertSame(1, $wanted->query("//label[@for='contact_phone']/$star")->length);
     }
 
-    public function test_every_field_has_an_error_anchor_even_when_optional(): void
+    public function test_every_field_has_a_place_for_its_message_and_every_server_key_a_field(): void
     {
-        $xpath = $this->page($this->bookingSchedule('talent'));
+        $html = $this->get($this->pageUrl($this->bookingSchedule('talent')))->assertOk()->getContent();
+        $xpath = $this->dom($html);
 
-        foreach (['event_name', 'date', 'start_time', 'description', 'location', 'event_url', 'contact_name', 'account_name', 'contact_email', 'account_email', 'password', 'terms', 'create_account'] as $key) {
-            $anchor = $this->node($xpath, "//*[@data-error-for='$key']");
-            $this->assertNotNull($anchor, "missing the $key error anchor");
-            $this->assertSame('error-'.$key, $anchor->getAttribute('id'));
+        // Where each message is written. They are drawn only when there is one, so the server sends
+        // them as templates: the id is what a field's aria-describedby points at.
+        foreach (['name', 'event_date', 'event_start_time', 'event_end_time', 'description', 'location', 'event_url', 'account_name', 'account_email', 'account_password', 'terms', 'create_account'] as $key) {
+            $this->assertNotNull($this->node($xpath, "//p[@id='err_$key'][@v-if=\"msg('$key')\"]"), "nowhere to write the $key message");
         }
 
-        // contact_phone needs its own page: the schedule above does not ask for a phone, so its
-        // anchor is legitimately absent there.
-        $this->assertNull($this->node($xpath, "//*[@data-error-for='contact_phone']"));
+        // And every key bookingRequest() can refuse under has a field to land on: one it could not
+        // place was shown in the bar alone, or not at all when another key was placed.
+        foreach ([
+            "event_name: 'name'", "date: 'event_date'", "start_time: 'event_start_time'", "end_time: 'event_end_time'", "description: 'description'",
+            "location: 'location'", "venue_name: 'location'", "venue_address1: 'location'", "venue_city: 'location'", "venue_state: 'location'",
+            "venue_postal_code: 'location'", "venue_country_code: 'location'", "event_url: 'event_url'", "contact_name: 'account_name'",
+            "account_name: 'account_name'", "contact_email: 'account_email'", "account_email: 'account_email'", "contact_phone: 'contact_phone'",
+            "password: 'account_password'", "terms: 'terms'", "create_account: 'create_account'",
+        ] as $entry) {
+            $this->assertStringContainsString($entry, $html, "refused() does not place $entry");
+        }
 
+        // contact_phone needs its own page: the schedule above does not ask for a phone.
+        $this->assertNull($this->node($xpath, "//*[@id='err_contact_phone']"));
         $withPhone = $this->page($this->bookingSchedule('talent', [
             'booking_form_config' => $this->requiring([], ['ask_phone' => true]),
         ]));
-        $anchor = $this->node($withPhone, "//*[@data-error-for='contact_phone']");
-        $this->assertNotNull($anchor, 'missing the contact_phone error anchor');
-        $this->assertSame('error-contact_phone', $anchor->getAttribute('id'));
+        $this->assertNotNull($this->node($withPhone, "//p[@id='err_contact_phone']"));
     }
 
     public function test_turning_online_off_removes_the_online_controls(): void
     {
-        $xpath = $this->page($this->bookingSchedule('talent', [
+        $html = $this->get($this->pageUrl($this->bookingSchedule('talent', [
             'booking_form_config' => ['allow_online' => false],
-        ]));
+        ])))->assertOk()->getContent();
+        $xpath = $this->dom($html);
 
-        $this->assertNull($this->node($xpath, "//*[@id='is_online']"));
-        $this->assertNull($this->node($xpath, "//*[@id='online-url-field']"));
-        $this->assertNull($this->node($xpath, "//input[@name='event_url']"));
-        $this->assertNotNull($this->node($xpath, "//input[@id='in_person'][@type='hidden']"));
-        $this->assertNotNull($this->node($xpath, "//input[@name='venue_name']"));
+        // With Online gone there is nothing to choose between, so the In-person box goes too.
+        foreach (['is_online', 'in_person', 'submit_event_url'] as $id) {
+            $this->assertNull($this->node($xpath, "//*[@id='$id']"), "$id should not render");
+        }
+        $this->assertNotNull($this->node($xpath, "//input[@id='submit_venue_name']"));
+        $this->assertStringContainsString('allowOnline: false,', $html);
     }
 
     public function test_a_venue_without_online_shows_only_its_own_address(): void
@@ -341,10 +358,11 @@ class BookingRequestFormTest extends TestCase
 
         $xpath = $this->page($role);
 
-        $this->assertNull($this->node($xpath, "//form[@id='booking-request-form']//fieldset"));
-        $this->assertNull($this->node($xpath, "//*[@id='error-location']"));
-        $this->assertNull($this->node($xpath, "//input[@name='venue_name']"));
-        $this->assertNotNull($this->node($xpath, "//div[@id='location-fields']//div[normalize-space()='The Brick Hall']"));
+        foreach (['is_online', 'in_person', 'submit_venue_name', 'err_location', 'venue_country_code'] as $id) {
+            $this->assertNull($this->node($xpath, "//*[@id='$id']"), "$id should not render");
+        }
+        // The venue's own name, under v-pre: it is the owner's text inside a Vue mount.
+        $this->assertNotNull($this->node($xpath, "//div[contains(@class, 'gs-fixed-place')]//div[@v-pre][normalize-space()='The Brick Hall']"));
     }
 
     public function test_request_terms_render_escaped_with_line_breaks(): void
@@ -439,60 +457,41 @@ class BookingRequestFormTest extends TestCase
     }
 
     /**
-     * Nothing on this form proves the address, so on hosted the account must not come out
-     * verified: every hasVerifiedEmail() gate - claiming a schedule registered to the address, the
-     * ticket link on an event page - would otherwise trust an address typed by anyone. It is sent
-     * the verification link instead, the same as a registration without its emailed code.
+     * On hosted the account proves its address first, with the emailed code that sign-up and the
+     * submit page ask for. It used to be made on the spot and mailed a link afterwards: anyone
+     * could register an address that was not theirs, every hasVerifiedEmail() gate was one click
+     * from trusting it, and the honest visitor was signed in "unverified" and sent to the
+     * verify-your-email wall instead of the schedule. Run as the hosted install runs it (the code
+     * is not asked for under APP_TESTING, as on the submit page).
      */
-    public function test_an_optional_account_is_not_verified_until_the_emailed_link_is_clicked(): void
+    public function test_an_account_made_here_proves_its_address_with_the_emailed_code(): void
     {
+        config(['app.is_testing' => false]);
         $role = $this->bookingSchedule();
+        $account = ['create_account' => '1', 'password' => 'long-enough-password', 'terms' => 'on'];
 
-        $this->postJson($this->storeUrl($role), $this->complete([
-            'create_account' => '1',
-            'password' => 'long-enough-password',
-            'terms' => 'on',
-        ]))->assertOk();
+        // No code, then a code that was sent to somebody else: refused at the code, nothing made.
+        $this->postJson($this->storeUrl($role), $this->complete($account))
+            ->assertStatus(422)->assertJsonValidationErrors(['verification_code']);
+        Cache::put('signup_code_email_654321', 'someone.else@gmail.com', 600);
+        $this->postJson($this->storeUrl($role), $this->complete($account + ['verification_code' => '654321']))
+            ->assertStatus(422)->assertJsonValidationErrors(['verification_code']);
+        $this->assertGuest();
+        $this->assertSame(1, User::count());
+        $this->assertSame(0, Event::count());
+
+        Cache::put('signup_code_email_123456', 'sam.guest@gmail.com', 600);
+        $this->postJson($this->storeUrl($role), $this->complete($account + ['verification_code' => '123456', 'timezone' => 'Europe/Paris']))
+            ->assertOk()->assertJsonPath('emails_you', true);
 
         $user = User::where('email', 'sam.guest@gmail.com')->firstOrFail();
         $this->assertAuthenticatedAs($user);
-        $this->assertFalse($user->hasVerifiedEmail());
-        Notification::assertSentTo($user, \App\Notifications\VerifyEmail::class);
-    }
-
-    /**
-     * The verification mail is sent synchronously, after the account exists and before the request
-     * is saved. A mail failure must not take the request down with it: the visitor would get a 500
-     * and a retry would be refused as "email already taken".
-     */
-    public function test_a_failed_verification_email_does_not_lose_the_request(): void
-    {
-        // Only the verification mail fails; the owner's new-request notice still goes out.
-        Notification::swap(new class
-        {
-            public function send($notifiables, $notification): void
-            {
-                $this->sendNow($notifiables, $notification);
-            }
-
-            public function sendNow($notifiables, $notification, ?array $channels = null): void
-            {
-                if ($notification instanceof \App\Notifications\VerifyEmail) {
-                    throw new \RuntimeException('SMTP is down');
-                }
-            }
-        });
-
-        $role = $this->bookingSchedule();
-
-        $this->postJson($this->storeUrl($role), $this->complete([
-            'create_account' => '1',
-            'password' => 'long-enough-password',
-            'terms' => 'on',
-        ]))->assertOk();
-
-        $this->assertFalse(User::where('email', 'sam.guest@gmail.com')->firstOrFail()->hasVerifiedEmail());
-        $this->assertNotNull(Event::where('name', 'Late Night Set')->first());
+        $this->assertTrue($user->hasVerifiedEmail());
+        $this->assertNotNull($user->terms_accepted_at);
+        // The visitor's own clock, which the page sends. This path used to write America/New_York.
+        $this->assertSame('Europe/Paris', $user->timezone);
+        Notification::assertNotSentTo($user, \App\Notifications\VerifyEmail::class);
+        $this->assertSame($user->id, Event::where('name', 'Late Night Set')->firstOrFail()->user_id);
     }
 
     public function test_an_optional_account_on_selfhost_is_verified_as_registration_is(): void
@@ -765,8 +764,8 @@ class BookingRequestFormTest extends TestCase
         $xpath = $this->page($role, $visitor);
 
         $this->assertNotNull($this->node($xpath, "//input[@id='contact_phone']"));
-        $this->assertNull($this->node($xpath, "//input[@id='contact_name']"));
-        $this->assertNull($this->node($xpath, "//input[@id='contact_email']"));
+        $this->assertNull($this->node($xpath, "//input[@id='account_name']"));
+        $this->assertNull($this->node($xpath, "//input[@id='account_email']"));
     }
 
     public function test_the_phone_field_is_absent_unless_the_schedule_asks_for_it(): void

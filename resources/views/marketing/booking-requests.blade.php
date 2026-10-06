@@ -318,9 +318,9 @@
         @php
             $formOptions = [
                 ['Choose what is required', 'The form asks for an event name, a date and start time, a description and a location. Nothing is required until you tick it, so a venue that needs the date and a description can insist on exactly those.', 'Free'],
-                ['In person or online', 'The location is a venue name, an address or a city, or a tick in the Online box with a link. Take online events off the form and every request is for a real room. A venue\'s own form never asks where: the venue is the place.', 'Free'],
+                ['In person or online', 'The location is a venue name, an address or a city, or a tick in the Online box, with a link if there is one. Take online events off the form and every request is for a real room. A venue\'s own form never asks where: the venue is the place.', 'Free'],
                 ['A phone number, if you want one', 'Ask for a phone number as optional or required. Signed-in visitors are asked too, since the form does not take one from their account. On the request it is a link you can tap to call.', 'Free'],
-                ['Your request terms', 'Set out your booking policy, your technical needs or what you will not take. The terms sit just above the submit button, where they are read before a request is sent.', 'Free'],
+                ['Your request terms', 'Set out your booking policy, your technical needs or what you will not take. The terms sit under the form\'s title, where they are read before a request is written.', 'Free'],
                 ['Your own questions', 'Add custom fields to the form: a checklist of the backline an act needs, a reference number checked against a pattern, an expected head count. The answers show on the request and on the event once you accept it.', 'Pro'],
                 ['An account, or not', 'On a performer\'s schedule nobody needs an account to ask. A venue or curator can require one, and where the site accepts new accounts a guest can choose to create one as they send the request.', 'Free'],
             ];
@@ -360,7 +360,7 @@
         <!-- ============================================================ -->
         @php
             $inboxSteps = [
-                ['It lands on the Requests tab', 'The tab appears while something is waiting and carries the count. Each request shows the event, the date, and the name and email of whoever sent it, with their phone number and your custom answers when you asked for them.'],
+                ['It lands on the Requests tab', 'The tab appears while something is waiting and carries the count. Each request shows the event, the date and the place, and the name and email of whoever sent it, with their phone number and your custom answers when you asked for them.'],
                 ['You hear about it', 'Owners and admins get an email when new requests arrive, unless they switch it off under Settings, Notifications. Viewers can open a request but not decide it.'],
                 ['Accept or decline', 'Accept puts the event on your public schedule; Decline removes it, after you confirm. Anyone who sent the request signed in is emailed your decision. Accept All clears the list in one go; declining is one at a time, on purpose.'],
                 ['Or let it straight through', 'On a venue or curator schedule, switch Require Approval off and requests go straight onto the schedule. Approved schedules skip the queue when they add you to one of their own events, but a booking form request still waits. A performer\'s booking requests always wait.'],

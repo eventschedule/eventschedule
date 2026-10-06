@@ -24,6 +24,12 @@ use Illuminate\Support\Facades\DB;
  *
  * The mode is the client's choice and the server enforces it: a count-only page view is stored
  * with no visitor key, user, title, browser or OS whatever its context carries.
+ *
+ * Whether a schedule's owner may see an identified visitor as a row of their own Realtime page
+ * (owner_visible) is the one thing read from a cookie here, and it is the server's reading, not a
+ * bit the page sends: RealtimeTracker::consentCoversOrganizers() looks at the visitor's own
+ * recorded choice, which the browser sends with this same-origin request. Reading a cookie
+ * starts no session, which is what the first paragraph is about.
  */
 class RealtimeBeaconController extends Controller
 {
@@ -104,6 +110,8 @@ class RealtimeBeaconController extends Controller
             'INSERT INTO realtime_hits ('.implode(', ', $columns).') VALUES ('.$placeholders.')
              ON DUPLICATE KEY UPDATE
                 consented = GREATEST(consented, VALUES(consented)),
+                owner_visible = GREATEST(owner_visible, VALUES(owner_visible)),
+                is_team = GREATEST(is_team, VALUES(is_team)),
                 path = CASE WHEN VALUES(consented) = 1 THEN VALUES(path) ELSE path END,
                 path_template = COALESCE(VALUES(path_template), path_template),
                 engaged_at = COALESCE(engaged_at, VALUES(engaged_at)),
@@ -205,6 +213,7 @@ class RealtimeBeaconController extends Controller
                 'browser' => null,
                 'os' => null,
                 'consented' => false,
+                'owner_visible' => false,
                 'source_channel' => DB::raw('CASE WHEN is_entrance = 1 THEN source_channel ELSE NULL END'),
                 'source_name' => DB::raw('CASE WHEN is_entrance = 1 THEN source_name ELSE NULL END'),
                 'utm_campaign' => DB::raw('CASE WHEN is_entrance = 1 THEN utm_campaign ELSE NULL END'),
@@ -245,6 +254,11 @@ class RealtimeBeaconController extends Controller
             'user_id' => null,
             'is_admin' => $context['is_admin'] ? 1 : 0,
             'is_demo' => $context['is_demo'] ? 1 : 0,
+            // Known from the signed-in session at render, so it holds for a team member who
+            // declined cookies too. The owner's Realtime page reads neither of these two for
+            // anything but leaving a row out or in (App\Services\ScheduleRealtime).
+            'is_team' => ! empty($context['is_team']) ? 1 : 0,
+            'owner_visible' => $identified && RealtimeTracker::consentCoversOrganizers($request) ? 1 : 0,
             'surface' => $surface,
             'path' => $context['path'],
             'path_template' => null,

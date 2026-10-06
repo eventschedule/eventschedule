@@ -245,7 +245,9 @@ class RegisteredUserController extends Controller
 
         // The guest submit page's own code wall, in its own counter and its own daily slot, for
         // the two reasons above: it is not a sign-up, and it must not claim a sign-up's slot.
-        if (request()->routeIs('event.guest_send_code')) {
+        // The booking form asks for a code on this route too (for the few who tick "Create an
+        // account" there) and says so with `form`: those are not a stage of the submit page's funnel.
+        if (request()->routeIs('event.guest_send_code') && request()->input('form') !== 'booking') {
             $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
             if (! PageView::isBot(request()->userAgent())
                 && ! PageView::isSuspiciousRequest(request())

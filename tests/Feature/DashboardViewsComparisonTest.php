@@ -25,8 +25,8 @@ use Tests\TestCase;
  * Fixture design, all against the frozen clock:
  *
  *   Sep 1  100  inside BOTH the 7-day and 14-day current windows
- *   Aug 25  40  the 7-day previous window (Aug 23-29); also inside the 14-day CURRENT window
- *   Aug 15  50  the 14-day previous window (Aug 9-22) only
+ *   Aug 25  40  the 7-day previous window (Aug 24-30); also inside the 14-day CURRENT window
+ *   Aug 15  50  the 14-day previous window (Aug 10-23) only
  *   Aug 5 1000  outside every comparison window, inside the previous calendar MONTH
  *
  * So the 7-day answer is +150% and the 14-day answer is +180% - deliberately different from each
@@ -83,7 +83,8 @@ class DashboardViewsComparisonTest extends TestCase
         $response = $this->actingAs($user)->get(route('home'));
         $response->assertOk();
 
-        // Aug 30 - Sep 6 holds only Sep 1; Aug 23 - Aug 29 only Aug 25. Month over month would be
+        // Aug 31 - Sep 6 holds only Sep 1; Aug 24 - Aug 30 only Aug 25. Seven dates each: "7 days"
+        // is today and the six before it, against the seven before those. Month over month would be
         // (100 - 1090) / 1090 = -90.8%.
         $this->assertSame(100, (int) $response->viewData('viewsInPeriod'));
         $this->assertSame(150.0, (float) $response->viewData('viewsChange'));
@@ -112,7 +113,7 @@ class DashboardViewsComparisonTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('home'));
 
-        // Aug 23 - Sep 6 holds Sep 1 and Aug 25; Aug 9 - Aug 22 holds only Aug 15.
+        // Aug 24 - Sep 6 holds Sep 1 and Aug 25; Aug 10 - Aug 23 holds only Aug 15.
         $this->assertSame(140, (int) $response->viewData('viewsInPeriod'));
         $this->assertSame(180.0, (float) $response->viewData('viewsChange'));
         $this->assertSame('vs_previous_14_days', $response->viewData('viewsChangeLabel'));

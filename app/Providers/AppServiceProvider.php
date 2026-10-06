@@ -137,6 +137,25 @@ class AppServiceProvider extends ServiceProvider
                 'curators' => $allRoles
                     ->where('type', 'curator')
                     ->whereIn('pivot.level', ['owner', 'admin', 'viewer']),
+                // Whether the sidebar offers Realtime. Asked on each of the sidebar's two renders
+                // and not memoized here: what it reads is already cached (the settings map, and
+                // manageableRoles() on the user), and a value kept on this provider would outlive
+                // a request wherever one process serves several.
+                'realtimeAvailable' => \App\Services\ScheduleRealtime::available(auth()->user()),
+                // A selfhost shows the Tickets entry only to someone who holds a ticket. Hosted
+                // shows it to everyone, so it does not ask.
+                'hasTickets' => ! config('app.hosted') && auth()->check() && (function () {
+                    if (session()->has('has_tickets')) {
+                        return session('has_tickets');
+                    }
+                    $has = \App\Models\Sale::where('user_id', auth()->id())->where('is_deleted', false)->exists();
+                    // Remembered only once true: a first ticket bought later must show the entry.
+                    if ($has) {
+                        session(['has_tickets' => true]);
+                    }
+
+                    return $has;
+                })(),
                 'hasCarpoolActivity' => auth()->check() && (function () {
                     if (session()->has('has_carpool_activity')) {
                         return session('has_carpool_activity');

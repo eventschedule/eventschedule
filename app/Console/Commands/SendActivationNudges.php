@@ -344,12 +344,12 @@ class SendActivationNudges extends Command
             });
         }
 
-        if ($steps) {
-            // "Turn off suggestions" (SetupGuide::suggest()) is every one of those dismissals at
-            // once, for every schedule this person has or will have. Keyed on $steps, so
-            // first_sale, which asks for nothing, is exempt without being named.
-            $query->whereHas('user', fn ($q) => $q->whereNull('suggestions_off_at'));
-        }
+        // "Turn off suggestions" (users.suggestions_off_at) is deliberately NOT read here. It
+        // hides the setup guide and the dashboard's next steps, which is a choice about what the
+        // app shows. Whether mail is sent is the other switch, "Email updates" (is_subscribed,
+        // above), and the unsubscribe link in every one of these. The two were one switch for a
+        // day (2026-10-05), and someone who only wanted a quieter dashboard lost the reminders.
+        // A step somebody dismissed, and "No tickets needed", are answers and still count.
 
         if (in_array('next_step_tickets', $steps, true)) {
             // "No tickets needed", answered in the setup guide, is an answer here too

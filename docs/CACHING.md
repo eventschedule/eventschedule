@@ -122,9 +122,12 @@ this middleware can never mark one public: the messages GET is per visitor (its 
 `private, no-store`. Whether anyone is online is fetched by the widget after load for the same
 reason nothing visitor-specific may be rendered into the page: the HTML is shared.
 
-The `/admin/realtime` beacon (`POST /api/realtime`, `RealtimeBeaconController`) needs none of this,
-because it is registered in `routes/api.php`: the `api` group has no session, cookie or CSRF
-middleware at all, so it can never set `laravel_session` and is not in `STATELESS_ROUTES`. The
+The Realtime beacon (`POST /api/realtime`, `RealtimeBeaconController`; it feeds `/admin/realtime`
+and a schedule owner's `/realtime`) needs none of this, because it is registered in
+`routes/api.php`: the `api` group has no session, cookie or CSRF middleware at all, so it can never
+set `laravel_session` and is not in `STATELESS_ROUTES`. It does READ one cookie off the request,
+the visitor's own `cookie_consent`, to decide whether a schedule's owner may list them
+(`RealtimeTracker::consentCoversOrganizers()`); reading sets nothing. The
 context the marketing layout renders into it (`partials/realtime-beacon`) is the same for every
 anonymous visitor - the user field is filled only for a signed-in render, which is never cached -
 so the shared HTML stays shareable. The beacon reads the visitor's cookie choice in the browser and

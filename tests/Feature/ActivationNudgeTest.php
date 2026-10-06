@@ -1615,31 +1615,43 @@ class ActivationNudgeTest extends TestCase
         }
     }
 
-    // ---- "Turn off suggestions", and an answer given in the setup guide ------------------------
+    // ---- "Turn off suggestions", "Email updates", and an answer given in the setup guide ---------
 
     /**
-     * The account-wide switch is every dismissal at once: none of the mails that ask what the
-     * dashboard asks goes to somebody who turned suggestions off. first_sale asks for nothing
-     * and still goes.
+     * Two switches, two things. "Turn off suggestions" is about what the app shows (the setup
+     * guide, the dashboard's next steps) and stops no mail; "Email updates" is the one that stops
+     * these reminders. For a day they were one switch, and someone who only wanted a quieter
+     * dashboard lost the emails with it.
+     * Mutation: read suggestions_off_at in SendActivationNudges::candidates() again.
      */
-    public function test_the_suggestions_switch_holds_every_asking_nudge_and_not_the_congratulation(): void
+    public function test_turning_suggestions_off_does_not_stop_a_reminder_and_email_updates_does(): void
     {
         $owner = $this->owner();
         $role = $this->createRole($owner);
         $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
 
         \App\Utils\SetupGuide::suggest($owner, false);
-
-        $this->nudge('no_ticket_type');
-        $this->assertNothingSent();
-
-        \App\Utils\SetupGuide::suggest($owner->fresh(), true);
+        $this->assertFalse($owner->fresh()->wantsSuggestions());
 
         $this->nudge('no_ticket_type');
         $this->assertSent('no_ticket_type');
+        $this->assertQueuedTo($owner->email);
     }
 
-    public function test_the_switch_does_not_hold_the_first_sale_congratulation(): void
+    public function test_email_updates_off_stops_the_reminder_whatever_suggestions_says(): void
+    {
+        $owner = $this->owner();
+        $role = $this->createRole($owner);
+        $this->createEvent($role, ['starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $owner->forceFill(['is_subscribed' => false])->save();
+        $this->assertTrue($owner->fresh()->wantsSuggestions(), 'suggestions are still on');
+
+        $this->nudge('no_ticket_type');
+        $this->assertNothingSent();
+    }
+
+    public function test_the_first_sale_congratulation_goes_with_suggestions_off(): void
     {
         $owner = $this->owner();
         $role = $this->createRole($owner);
@@ -1654,7 +1666,10 @@ class ActivationNudgeTest extends TestCase
         $this->assertSent('first_sale');
     }
 
-    /** Only the RECIPIENT's own switch counts, as with a dismissal: the mail goes to the owner. */
+    /**
+     * Only the RECIPIENT's own switch counts, as with a dismissal: the mail goes to the owner,
+     * so a co-admin who turned their own emails off has said nothing about the owner's.
+     */
     public function test_a_co_admins_switch_does_not_silence_the_owners_mail(): void
     {
         $owner = $this->owner();
@@ -1663,6 +1678,7 @@ class ActivationNudgeTest extends TestCase
 
         $admin = $this->owner();
         $admin->roles()->attach($role->id, ['level' => 'admin', 'created_at' => now()]);
+        $admin->forceFill(['is_subscribed' => false])->save();
         \App\Utils\SetupGuide::suggest($admin, false);
 
         $this->nudge('no_ticket_type');

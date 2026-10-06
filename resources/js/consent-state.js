@@ -14,13 +14,18 @@
  *              cookies (Stay22, the Google Maps embed, YouTube).
  *
  * Where it is kept. The `cookie_consent` COOKIE is the record: "analytics.marketing.<t>",
- * "analytics.<t>" or "denied.<t>", with <t> the Unix second the choice was made. cookie-consent.js
+ * "analytics.<t>" or "denied.<t>", with <t> the Unix second the choice was made. One more token,
+ * "org" ("analytics.org.<t>"), is not a category: it records that the notice this choice was made
+ * on said a schedule's organizer sees visits to its pages (partials/cookie-banner). Only such a
+ * choice may put a visitor on an organizer's live page (RealtimeTracker::consentCoversOrganizers());
+ * what the notice SHOWED is recorded, because the time of a click says nothing about which notice
+ * was clicked (a page cached before the wording changed, a tab left open). cookie-consent.js
  * writes it on config('session.domain') when there is one, so on the hosted service a single
  * choice covers the marketing site, the app and every schedule subdomain: a withdrawal made on one
  * of them is a withdrawal on all of them. The server reads the same cookie through
  * consent_granted() in app/helpers.php, which ignores the trailing <t>.
  *
- * localStorage holds this origin's copy, {"v":2,"t":<ms>,"c":[...]}, kept in step with the cookie
+ * localStorage holds this origin's copy, {"v":2,"t":<ms>,"c":[...],"o":0|1}, kept in step with the cookie
  * on every page load. It is the fallback for when the cookie is gone but the choice is not: Safari
  * caps a cookie written by script at seven days, and someone may clear cookies but not site data.
  *
@@ -91,6 +96,7 @@
                 v: parseInt(state.v, 10) || 0,
                 t: Number(state.t) || 0,
                 c: onlyCategories(state.c),
+                o: state.o === 1 ? 1 : 0,
             };
         } catch (e) {
             return null;
@@ -112,7 +118,8 @@
             return null;
         }
 
-        return { v: VERSION, t: seconds * 1000, c: onlyCategories(parts) };
+        // "org" is the marker cookie-consent.js adds, not a category, so it never reaches `c`.
+        return { v: VERSION, t: seconds * 1000, c: onlyCategories(parts), o: parts.indexOf('org') !== -1 ? 1 : 0 };
     };
 
     var readStored = function () {

@@ -9,6 +9,7 @@
         <x-doc-nav-link href="#create-schedule">Create Your Schedule</x-doc-nav-link>
         <x-doc-nav-link href="#schedule-types">Schedule Types</x-doc-nav-link>
         <x-doc-nav-link href="#customize">Customize Your Schedule</x-doc-nav-link>
+        <x-doc-nav-link href="#dashboard">Your Dashboard</x-doc-nav-link>
         <x-doc-nav-link href="#faq">FAQ</x-doc-nav-link>
         <x-doc-nav-link href="#next-steps">Next Steps</x-doc-nav-link>
     </x-slot:toc>
@@ -45,7 +46,7 @@
             <p>On a selfhosted server the sign-up page doubles as the setup wizard: it asks for your MySQL details first, and the first account created there becomes the instance admin. After that, sign-up is closed unless you enable <code class="doc-inline-code">ALLOW_REGISTRATION</code>. See <a href="{{ route('marketing.docs.selfhost.installation') }}#user-accounts" class="doc-link">User Accounts and Registration</a> for the details.</p>
         </div>
 
-        <x-doc-screenshot id="getting-started--dashboard" alt="Event Schedule dashboard showing the month calendar, the sidebar list of schedules, and the New Schedule button" loading="eager" />
+        <x-doc-screenshot id="getting-started--dashboard" alt="Event Schedule dashboard: Customize, New Schedule and Add Event at the top, four numbers for views, followers, revenue and Realtime, and a row for each schedule" loading="eager" />
     </section>
 
     <!-- Create Schedule -->
@@ -225,6 +226,29 @@
             <div class="doc-callout-title">What the free plan leaves out</div>
             <p>Almost nothing on this page needs a paid plan. The free plan runs unlimited events, syncs calendars, takes unlimited RSVPs and free registrations, embeds your calendar and makes event graphics. Putting a price on a ticket is what needs Pro, and Pro also adds the live check-in dashboard (scanning tickets at the door is free on every plan), custom fields, custom CSS and removing the Event Schedule branding. There is no platform fee on any plan, and money always goes to your own Stripe, PayPal or other account. Enterprise adds custom domains, extra team members, availability and the AI generation features. Compare them on the <a href="{{ route('marketing.pricing') }}" class="doc-link">pricing page</a>. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing is held back there.</p>
         </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            Your Dashboard
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The dashboard is the page you land on after signing in. It covers every schedule you own or administer, and from top to bottom it shows:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Add Event</strong> - the main button. With several schedules it asks which one. <strong class="text-gray-900 dark:text-white">View page</strong> opens your public page when you have one schedule, and <strong class="text-gray-900 dark:text-white">New Schedule</strong> starts another</li>
+            <li><strong class="text-gray-900 dark:text-white">Needs attention</strong> - one chip for each thing waiting on you, such as event requests or an overdue payment. With several schedules a chip says which one</li>
+            <li><strong class="text-gray-900 dark:text-white">Four numbers</strong> - Views and Revenue for the last 30 days, Followers in total, and Realtime. Views, Followers and Revenue each have a bar for every day; Realtime has one for every minute of the last half hour. Views opens Analytics, Revenue opens Sales, and Followers opens your followers (with several schedules, the list of schedules below, where each one's are a click away). Views compares with the 30 days before; Revenue is shown in the currency it was taken in</li>
+            <li><strong class="text-gray-900 dark:text-white">Realtime</strong> - page views of your pages in the last 5 minutes and visitors on them now, or "Quiet right now". It opens <a href="{{ route('marketing.docs.analytics') }}#realtime" class="doc-link">Realtime</a>. Where live traffic is not switched on for the site, this place shows your number of upcoming events, which opens the calendar below while the calendar is on the page</li>
+            <li><strong class="text-gray-900 dark:text-white">Your schedules</strong> - with two or more schedules, a row for each with its upcoming events, views, followers and visitors now</li>
+            <li><strong class="text-gray-900 dark:text-white">Coming up</strong> - your next five events, soonest first. A weekly or other repeating event is listed once at its next date. Each row shows tickets sold or sign-ups and its views; an event on today offers <strong class="text-gray-900 dark:text-white">Check-in</strong></li>
+            <li><strong class="text-gray-900 dark:text-white">Recent Activity</strong> - the latest sales, new followers and newsletters</li>
+            <li><strong class="text-gray-900 dark:text-white">Calendar</strong> - the month view of all your events</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Customize</strong> chooses the period the numbers cover (7, 14 or 30 days) and which cards sit under them: Coming up, Recent Activity, Top Events, Traffic Sources, Newsletters, Boosts and the Calendar.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Until your pages have had a first view, follower or sale, the numbers are left out: you see your event and, where live traffic is switched on for the site, a card that waits for your first visitor. If you run no schedule, the dashboard shows the tickets you hold and what the schedules you follow have coming up.</p>
     </section>
 
     <!-- FAQ -->

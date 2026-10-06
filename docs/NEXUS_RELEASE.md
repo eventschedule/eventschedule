@@ -178,8 +178,9 @@ checklist:
 
 ### Migrations
 
-Nineteen, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys; these
-five are left, the two that read large tables first:
+Twenty-two, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys; these
+eight are left. Three of them read a large table: the two listed first, and the last one, which reads
+90 days of `audit_logs`:
 
 | Migration | What it does |
 |---|---|
@@ -188,6 +189,9 @@ five are left, the two that read large tables first:
 | `2026_10_02_000000_add_onboarding_columns_to_users` | Three nullable columns at the end of `users` (`pending_schedule_type`, `pending_schedule_name`, `onboarding_nudge_sent_at`), no `->after()`, so INSTANT |
 | `2026_10_01_000000_create_realtime_hits_table` | New table |
 | `2026_10_06_000001_add_guest_submit_counters_to_marketing_daily_stats` | Three `unsigned int default 0` columns on `marketing_daily_stats`, a table with one row a day |
+| `2026_10_06_000003_add_booking_request_counters_to_marketing_daily_stats` | Two `unsigned int default 0` columns on `marketing_daily_stats` |
+| `2026_10_06_000004_add_owner_view_to_realtime_hits_table` | Two `boolean default 0` columns and a `(role_id, last_seen_at)` index on `realtime_hits`, a table that holds about an hour of rows |
+| `2026_10_06_000002_create_user_active_days_table` | Two new tables, then one read of the last 90 days of `audit_logs` (five actions, served by the `(action, created_at)` index) and `insertOrIgnore` in chunks of 1000. No `INSERT ... SELECT`, so nothing is locked on `audit_logs` while the old containers write to it. Both creates are guarded with `Schema::hasTable`, which is the only reason a retry works if the run dies while seeding: do not remove the guards. See "Admin dashboard and active users" |
 
 Already run: `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats`,
 `2026_09_25_000002_canonicalize_timezone_aliases`, `2026_09_27_000000_add_list_animation_to_roles_table`,
@@ -425,6 +429,113 @@ reports it, so the minute the worker is ahead of the web container costs counts,
 
 **Undo:** revert and redeploy. The migration's `down()` drops only its three columns.
 
+### Booking requests (2026-10-06)
+
+**What ships:**
+- The public booking request page (`/{subdomain}/booking-request`: every talent schedule, and a
+  venue or curator that chose the booking form) is rebuilt in the shape of the submit page. It
+  says under its title what pressing Send leads to, shows the request terms there, takes an end
+  time, says whose clock a time is read on, keeps a bar on screen that names what is still needed,
+  keeps what was typed through a reload, and ends on a "sent" screen instead of a redirect.
+- The two request pages share one stylesheet and one script kit
+  (`partials/request-form-styles`, `partials/request-form-kit`).
+- Two daily counters on `marketing_daily_stats` (`booking_request_views`,
+  `booking_request_submissions`). Nothing reads them until the growth export's next schema.
+
+**Behaviour that changes for people already using the app:**
+- **A typed venue is never handed to another user.** A visitor with no account could type any
+  user's address as the contact email, and the venue they typed became that user's, verified, and
+  their default schedule if they had none. That branch is gone. See "A check to run" below.
+- **A request is not public before it is answered.** The typed venue was attached to the event as
+  accepted, so an unanswered request was listed on the venue's public page at once, and stayed
+  after a decline. It is attached as waiting; Accept and Accept all list it; Decline does not.
+- **A new account from this form needs the emailed code on hosted**, as sign-up does, and is
+  verified when made. It used to be made on the spot and mailed a link, and the visitor was sent
+  to the verify-your-email page. On a schedule's custom domain the form offers no account: the
+  code's bot check is registered for our own hosts.
+- **One acceptance rule** (`Role::autoAcceptsEventFrom()`): a request from someone on the
+  schedule's own team is accepted at once, and so is one to a schedule nobody owns, which used to
+  wait for an approval nobody could give.
+- **An event that will appear at once needs a name, a date and a start time**, whatever the owner
+  left optional. That is a venue or curator with Require Approval off, and a page nobody owns.
+- **Request terms move from above the button to under the title.**
+- **The owner's request card shows the place** (venue and city, or Online) and the end time.
+- A tab that loaded the old page before the deploy still works: the answer keeps `message` and
+  `redirect_url`. Ticking "Create an account" in such a tab is refused at the code, once.
+
+**A check to run after the deploy (read-only).** Venues this form handed to a user who did not
+ask for one. It cannot tell a planted venue from one the user really made by booking while signed
+out, so read the names:
+
+```sql
+SELECT r.id, r.subdomain, r.name, r.created_at, u.email
+FROM roles r
+JOIN users u ON u.id = r.user_id
+JOIN event_role er ON er.role_id = r.id
+JOIN events e ON e.id = er.event_id
+WHERE r.type = 'venue' AND e.is_guest_submission = 1 AND e.contact_email = u.email
+ORDER BY r.created_at DESC
+LIMIT 200;
+```
+
+**No new env vars and no new scheduled entries.** The migration is one `ALTER` on a one-row-a-day
+table, and old code runs on the new schema.
+
+**After the deploy:**
+1. **Send a request to a talent schedule you own**, signed out, with a venue name. It should end
+   on "Request sent", your owner email should arrive, and the venue's own page should not list the
+   event until you accept it.
+2. **Tick "Create an account" on that form.** The button reads Continue, a code arrives, and
+   entering it sends the request and leaves you signed in and verified.
+3. **Open the Requests tab**: the card shows the place.
+
+**Undo:** revert and redeploy. The migration's `down()` drops only its two columns.
+
+### Admin dashboard and active users (2026-10-06)
+
+**What ships:**
+- `/admin/dashboard` is rebuilt around what gets tracked: new organizers (24 hours, 30 days, where
+  from), active users over 12 weeks, MRR and ARR by plan with trials beside them, upcoming events
+  by how people attend, federation, and the newest schedules and events with their images. Its
+  date-range select is gone; the windows are fixed. `App\Services\AdminDashboard` owns every figure.
+- "Active users" is now a record, not a guess. `user_active_days` holds one row per account per day
+  the person loaded a page of the app while signed in (`RecordActiveDay` on the signed-in route
+  group; a background poll does not count). It used to read `users.updated_at`, which calendar
+  sync moves and a sign-in does not. `/admin/users` shows the same figure.
+- `active_users_daily` keeps each day's totals, written by `app:prune-personal-data` before it
+  prunes the rows (120 days; the rows seeded from the security log at 90). No new scheduled entry.
+
+**Numbers that step once, on this deploy:**
+- Active users (7 and 30 days) drop to people who actually used the app. Until 7 days after the
+  deploy the 7-day figure is partly an estimate from sign-ins and event edits, and the page says so;
+  the change against the previous week is hidden until both weeks are exact.
+- "Paying" replaces "Stripe paid" on the dashboard: subscriptions being billed, the count behind
+  MRR. It leaves trials out and counts past due, where the old tile did the opposite.
+  `/admin/schedules` keeps its own "Stripe paid".
+- Upcoming events now count a running series (once) and leave out drafts, cancelled events and
+  appointment bookings. The old tile counted online-only one-off events.
+- Demo content is `Role::constrainDemoContent()` on the dashboard's own queries. The exception is
+  the "Outside Stripe" line of the revenue card: those three counts come from `AdminPlanCounts`,
+  which keeps the older `demo-%` subdomain test because `/admin/schedules`, the page they belong
+  to, uses it throughout. Moving that page is a sweep of its own.
+- Deleted schedules are out of the dashboard's lists and totals, and so are the events left behind
+  on them (an event counts while one of its schedules is not deleted). "All time" events can step
+  down by that many.
+- On `/admin/realtime`, a sign-up that stored only the sign-up or login page reads "Not recorded"
+  where it read "Direct" (`App\Utils\SignupSource`, shared with the dashboard).
+- "vs previous 7 days" for active users is measured between finished days (the 7 days to yesterday
+  against the 7 before), so it does not sag every morning. The number itself includes today.
+
+**Before the deploy:** `SELECT COUNT(*) FROM audit_logs WHERE created_at >= NOW() - INTERVAL 90 DAY
+AND action IN ('auth.login','auth.google_login','auth.facebook_login','event.create','event.update');`
+The migration reads these rows once, and keeps the sign-ins and the edits made in a browser.
+Anything under a few hundred thousand is seconds.
+
+**After it:** open `/admin/dashboard`. The Active users card should show a dashed line (the
+estimate) and "Estimate" under the headline number; a `user_active_days` row with `counted = 1`
+appears for each person who opens the app. The privacy policy gained a sentence, a legal-basis row
+and a retention row for this record: it joins the notice of changes listed under GDPR above.
+
 ### Conversion, churn and owner emails
 
 **What ships:**
@@ -481,8 +592,9 @@ they must ship together - do not deploy the code without them.
 `ANALYTICS_ID` is set in the app spec, the banner is already shown and nothing changes; otherwise
 this release starts showing it (never inside embedded calendars).
 
-**Two migrations:** a new `realtime_hits` table (instant), and an `(action, created_at)` index on
-`audit_logs` for the Activity card. The index build reads the whole table inside the start
+**Three migrations:** a new `realtime_hits` table (instant), two columns and an index on it for
+the schedule owners' view below (instant, the table holds an hour of rows), and an
+`(action, created_at)` index on `audit_logs` for the Activity card. The index build reads the whole table inside the start
 command's `migrate --force`, so first run `SELECT COUNT(*) FROM audit_logs` (it is pruned to 90
 days, apart from the few actions now kept for good). If it is large, run
 `2026_10_01_000001_add_action_created_at_index_to_audit_logs` by hand from the console before
@@ -511,10 +623,35 @@ hours.
   a challenged beacon fails silently and the page just looks empty.
 - After an hour, `realtime_hits` should hold roughly an hour of rows and no more.
 
+**Schedule owners get their part of it (`/realtime`).** A second switch on the same settings card,
+on by default here: everyone who manages a schedule gets a Realtime entry in the sidebar and a
+Realtime tile on their dashboard, showing live traffic to their own pages and never who anyone is
+(`App\Services\ScheduleRealtime`). What changes for visitors is one sentence: the cookie banner's
+first line, and the privacy policy, now say that the organizer of a schedule page sees visits to
+it. A choice made on a banner that carries that sentence is recorded as such (an `org` token in
+the `cookie_consent` cookie), and only such a visitor is ever listed for an owner
+(`RealtimeTracker::consentCoversOrganizers()`). Nothing is worked out from dates, so a page still
+cached at the edge with the old banner, or a tab left open since before the deploy, lists nobody.
+Everyone who answered the banner before this release is counted for owners and not listed, until
+they choose again. So on the day of the deploy an owner's Visitors list is short and its page-view
+numbers are complete; that is the design, not a fault.
+
+Check after Deploy, the same hour as the realtime checks above:
+
+- As a schedule owner (not an admin, not the demo account), open `/realtime`: page views arrive
+  from a private window on that schedule's page; the visitor is listed only after accepting cookies
+  in that window, and your own signed-in visit to the page is not counted at all.
+- `/privacy` clauses 04 (the legal bases), 06 and 12 say what an organizer sees. If either still says owners never
+  see the live view, the release is half deployed.
+- The policy promises notice of a material change. This is one: send it.
+
 #### To stop it
 
 Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
-pages still cached at the edge are dropped by the endpoint.
+pages still cached at the edge are dropped by the endpoint. To keep Realtime and take it away from
+schedule owners only, switch off the second toggle: their page, tile and sidebar entry go, the
+banner and the policy stop naming organizers within ten minutes (the edge cache), and if it is
+switched on again later the stamp moves to that moment.
 
 With Google Analytics off as well, Realtime is all that the cookie banner's Analytics line and
 privacy policy clause 12 describe. Neither follows this switch, so switching Realtime off then

@@ -1388,6 +1388,8 @@ class EventController extends Controller
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             $role->last_notified_request_count = 0;
             $role->save();
+
+            $this->acceptThePlaceThatCameWith($event);
         }
 
         // Appointment bookings confirm on acceptance: calendar sync + guest AppointmentConfirmed.
@@ -1656,6 +1658,19 @@ class EventController extends Controller
         return redirect()->back()->with('message', __('messages.event_published'));
     }
 
+    /**
+     * A booking-form request brings its place with it: a venue nobody owns, attached as waiting so
+     * that the request is not public before it is answered (see bookingRequest()). Nobody could
+     * ever accept on that venue's behalf (Role::autoAcceptsEventFrom(), rule 2), so accepting the
+     * request is what lists the event there. Venues only, and only ones with no owner: a waiting
+     * link to a schedule somebody runs is theirs to answer.
+     */
+    private function acceptThePlaceThatCameWith(Event $event): void
+    {
+        $event->roles()->where('roles.type', 'venue')->whereNull('roles.user_id')->wherePivotNull('is_accepted')->get()
+            ->each(fn (Role $place) => $event->roles()->updateExistingPivot($place->id, ['is_accepted' => true]));
+    }
+
     public function acceptAll(Request $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -1689,6 +1704,7 @@ class EventController extends Controller
                 }
 
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
+                $this->acceptThePlaceThatCameWith($event);
                 $acceptedCount++;
 
                 // Appointment bookings confirm on acceptance (same branch as accept()): calendar
@@ -3638,7 +3654,8 @@ class EventController extends Controller
     }
 
     /**
-     * Count one stage of the "Submit your event" page's funnel (MarketingDailyStat::COLUMNS).
+     * Count one stage of a public request form's funnel: the "Submit your event" page or the
+     * booking request page (MarketingDailyStat::COLUMNS).
      *
      * One visitor per UTC day per stage, with the bot filters the sign-up counters use, so the
      * stages compare with each other: someone who submits three events is one visitor who
@@ -3931,11 +3948,17 @@ class EventController extends Controller
             }
         }
 
+        $this->countGuestSubmit('booking_request_views', 'booking_request_view', $request);
+
         return view('event.booking-request', [
             'role' => $role,
             // Offer an account only where creating one can succeed: createAndLoginUser() refuses on
             // a selfhost that has not opened registration.
-            'offerAccount' => ! auth()->check() && public_registration_enabled(),
+            // ...and where its address can be proved. On hosted that is the emailed code, whose bot
+            // check is registered for our own hosts: on a schedule's custom domain it cannot run,
+            // so the form there takes requests without offering an account.
+            'offerAccount' => ! auth()->check() && public_registration_enabled()
+                && ! (config('app.hosted') && $request->attributes->get('custom_domain_host')),
             'requiredFields' => $role->bookingFormRequiredFields(),
             'allowOnline' => $role->bookingFormAllowsOnline(),
             'askPhone' => $role->bookingFormAsksPhone(),
@@ -3974,7 +3997,13 @@ class EventController extends Controller
         $askPhone = $role->bookingFormAsksPhone();
 
         // The default fields are optional unless the owner required them (Engagement > Requests).
-        $presence = fn (string $field) => $role->bookingFormRequires($field) ? 'required' : 'nullable';
+        // One thing overrides that: an event that will appear at once is a public listing the
+        // moment it is sent, so it needs a name and a time whatever was left optional for requests
+        // the owner reads first. It used to go up as "Booking Request", with no date.
+        $appearsAtOnce = $role->autoAcceptsEventFrom(auth()->user());
+        $presence = fn (string $field) => ($role->bookingFormRequires($field) || ($appearsAtOnce && in_array($field, ['event_name', 'date_time'], true)))
+            ? 'required'
+            : 'nullable';
 
         $rules = [
             'event_name' => [$presence('event_name'), 'string', 'max:255'],
@@ -3982,7 +4011,9 @@ class EventController extends Controller
             // date is silently dropped. date_format rather than date: the date rule also passes
             // "15-09-2026", which createFromFormat('Y-m-d H:i') then throws on.
             'date' => [$presence('date_time'), 'required_with:start_time', 'date_format:Y-m-d'],
-            'start_time' => [$presence('date_time'), 'required_with:date', 'date_format:H:i'],
+            'start_time' => [$presence('date_time'), 'required_with:date', 'required_with:end_time', 'date_format:H:i'],
+            // Optional, and only ever the length of the event: it is stored as a duration.
+            'end_time' => ['nullable', 'date_format:H:i'],
             'description' => [$presence('description'), 'string', 'max:5000'],
             'is_online' => ['nullable'],
             'venue_name' => ['nullable', 'string', 'max:255'],
@@ -4027,8 +4058,8 @@ class EventController extends Controller
             }
         }
 
-        // Custom fields the schedule opted to ask here. This form posts as FormData, so a
-        // multiselect already arrives as an array and needs no normalizing.
+        // Custom fields the schedule opted to ask here. The page posts JSON (and once posted
+        // FormData): either way a multiselect already arrives as an array and needs no normalizing.
         $requestCustomFields = $role->isPro() ? $role->getRequestFormCustomFields() : [];
         $customFieldAttributes = [];
         if ($requestCustomFields) {
@@ -4047,6 +4078,7 @@ class EventController extends Controller
             'event_name' => __('messages.event_name'),
             'date' => __('messages.date'),
             'start_time' => __('messages.start_time'),
+            'end_time' => __('messages.end_time'),
             'description' => __('messages.description'),
             'venue_name' => __('messages.venue_name'),
             'event_url' => __('messages.event_url'),
@@ -4081,7 +4113,23 @@ class EventController extends Controller
             if (! $request->has('email') || ! $request->input('email')) {
                 $request->merge(['email' => $request->input('contact_email')]);
             }
-            $this->createAndLoginUser($request);
+
+            if (config('app.hosted')) {
+                // Where sign-up and the submit page ask for the emailed code, so does this form
+                // (createAccountWithCode() checks it, hosted and not under test, exactly as the
+                // submit page's account does). It used to make the account on the spot and mail a
+                // link afterwards: anyone could register an address that was not theirs, and the
+                // person signed in "unverified" was sent to the verify-your-email wall instead of
+                // the page they were promised.
+                $request->merge([
+                    'account_name' => $request->input('name'),
+                    'account_email' => $request->input('email'),
+                    'account_password' => $request->input('password'),
+                ]);
+                $this->createAccountWithCode($request, $role);
+            } else {
+                $this->createAndLoginUser($request);
+            }
         }
 
         $user = auth()->user();
@@ -4124,20 +4172,10 @@ class EventController extends Controller
                     $user->default_role_id = $venue->id;
                     $user->save();
                 }
-            } elseif ($request->contact_email) {
-                $matchingUser = User::whereEmail($request->contact_email)->first();
-                if ($matchingUser) {
-                    $venue->user_id = $matchingUser->id;
-                    $venue->email_verified_at = $matchingUser->email_verified_at;
-                    $venue->save();
-                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
-
-                    if (! $matchingUser->default_role_id) {
-                        $matchingUser->default_role_id = $venue->id;
-                        $matchingUser->save();
-                    }
-                }
             }
+            // No "or whoever has an account under the contact email": the address is typed by a
+            // stranger and proves nothing. That branch made any visitor able to plant a venue,
+            // verified and public, in any user's account, and to make it their default schedule.
         }
 
         // Build starts_at from date + time, anchored to the schedule's timezone (not the
@@ -4165,6 +4203,14 @@ class EventController extends Controller
         $event->description = $request->description;
         $event->starts_at = $startsAt;
         $event->timezone = $startsAtTimezone;
+        if ($startsAt && $request->filled('end_time')) {
+            // Hours, as every other event stores it. An end before the start is the next day.
+            [$startHour, $startMinute] = array_map('intval', explode(':', $request->start_time));
+            [$endHour, $endMinute] = array_map('intval', explode(':', $request->end_time));
+            $minutes = ($endHour * 60 + $endMinute) - ($startHour * 60 + $startMinute);
+            $minutes += $minutes < 0 ? 1440 : 0;
+            $event->duration = $minutes > 0 ? round($minutes / 60, 2) : null;
+        }
         $event->event_url = $isOnline ? ($request->event_url ?: 'online') : null;
 
         // Same stand-in as EventRepo::saveEvent(): user_id is NOT NULL, so an anonymous request has
@@ -4212,13 +4258,21 @@ class EventController extends Controller
         // Anti-abuse: count this booking-request event toward the schedule's daily cap.
         \App\Services\UsageTrackingService::track(\App\Services\UsageTrackingService::EVENT_CREATE, $role->id);
 
-        // Attach talent role
-        $isAccepted = $role->require_approval ? null : true;
+        // The one acceptance rule (Role::autoAcceptsEventFrom()), with the person who is really
+        // signed in. The line that was here read require_approval and nothing else, so the owner's
+        // own request waited for the owner, and a schedule nobody owns filed every request as
+        // waiting for an approval nobody could give.
+        $submitter = $isGuestSubmission ? null : $request->user();
+        $isAccepted = $role->autoAcceptsEventFrom($submitter) ? true : null;
         $event->roles()->attach($role->id, ['is_accepted' => $isAccepted]);
 
-        // Attach venue role if created (skip if venue is the schedule itself)
+        // The place follows the request (skip if the venue is the schedule itself). It was
+        // attached as accepted whatever happened to the request, so a request the schedule had not
+        // answered, or had declined, was listed on the venue's public page. A venue the submitter
+        // owns is theirs to list on; one made up for this request is listed when the request is.
         if ($venue && $venue->id !== $role->id) {
-            $event->roles()->attach($venue->id, ['is_accepted' => true]);
+            $onVenue = $venue->user_id ? $venue->autoAcceptsEventFrom($submitter) : (bool) $isAccepted;
+            $event->roles()->attach($venue->id, ['is_accepted' => $onVenue ? true : null]);
         }
 
         if ($isAccepted === null) {
@@ -4233,9 +4287,17 @@ class EventController extends Controller
         session()->forget('pending_request_allow_guest');
         session()->forget('pending_request_form');
 
+        $this->countGuestSubmit('booking_request_submissions', 'booking_request_submission', $request);
+
         return response()->json([
             'success' => true,
+            // live: on the schedule now. pending: waiting for the schedule's answer.
+            'status' => $isAccepted ? 'live' : 'pending',
+            // Whether an answer will be emailed by the app (EventAccepted / EventDeclined go to an
+            // account, never to a typed contact address: see requestDecisionRecipient()).
+            'emails_you' => ! $isGuestSubmission,
             'message' => __('messages.booking_request_submitted'),
+            // For a page loaded before this answer had a status: it still goes somewhere.
             'redirect_url' => $role->getGuestUrl(),
         ]);
     }

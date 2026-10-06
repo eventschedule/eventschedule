@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\AppController;
+use App\Services\ActiveDays;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +19,7 @@ class PrunePersonalData extends Command
 {
     protected $signature = 'app:prune-personal-data';
 
-    protected $description = 'Delete personal data past its retention period: failed jobs, expired reset tokens, unconfirmed sign-ups, old guest support chats, waitlists and interest lists of past events, the buyer details on deleted sales, and stale cached video thumbnails';
+    protected $description = 'Delete personal data past its retention period: failed jobs, expired reset tokens, unconfirmed sign-ups, old guest support chats, waitlists and interest lists of past events, the buyer details on deleted sales, the days an account was used, and stale cached video thumbnails';
 
     /** A failed job's payload is a serialized mail or task, addresses and all. */
     public const FAILED_JOB_DAYS = 30;
@@ -38,10 +39,30 @@ class PrunePersonalData extends Command
      */
     public const DELETED_SALE_DAYS = 30;
 
+    /**
+     * Which days an account used the app (ActiveDays). The admin dashboard reads twelve weeks and a
+     * month before that; the daily totals, which name nobody, are kept instead of the rows.
+     */
+    public const ACTIVE_DAY_DAYS = 120;
+
+    /**
+     * The rows seeded from the security log when the record began. They are that log under another
+     * name, so they live exactly as long as it does (audit:prune).
+     */
+    public const SEEDED_ACTIVE_DAY_DAYS = 90;
+
     private const BATCH = 1000;
 
     public function handle(): int
     {
+        // Before anything is deleted: the totals are what outlives the rows. Guarded on its own,
+        // because the scheduler can run this code while the web container is still migrating.
+        try {
+            ActiveDays::snapshot();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         $counts = [
             'failed jobs' => $this->deleteInBatches(
                 DB::table('failed_jobs')->where('failed_at', '<', now()->subDays(self::FAILED_JOB_DAYS))
@@ -79,6 +100,7 @@ class PrunePersonalData extends Command
                     ->where('event_date', '<', now()->subDays(self::AFTER_EVENT_DAYS)->format('Y-m-d'))
             ),
             'deleted sales' => $this->forgetDeletedBuyers(),
+            'days an account was used' => ActiveDays::prune(self::ACTIVE_DAY_DAYS, self::SEEDED_ACTIVE_DAY_DAYS),
             'cached video thumbnails' => $this->pruneThumbnailCache(),
         ];
 

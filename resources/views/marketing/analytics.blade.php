@@ -1,12 +1,21 @@
 <x-marketing-layout>
     <x-slot name="title">Privacy-First Event Analytics, Built In | Event Schedule</x-slot>
-    <x-slot name="description">Free built-in event analytics: views, devices, traffic sources, UTM tags, countries and clicks on every link. No third-party analytics and no visitor log.</x-slot>
+    {{-- "No visitor log" holds where a schedule's owner sees only daily counts. Where owners
+         also have Realtime (RealtimeTracker::ownerViewEnabled(), the predicate the FAQ below
+         asks), they watch a list of visitors for half an hour, without names: the claim that is
+         true there is the second one. The same for every visitor, so safe in cached HTML. --}}
+    @php
+        $analyticsPromise = \App\Utils\RealtimeTracker::ownerViewEnabled()
+            ? ['No third-party analytics, and visitors are never named.', 'No third-party analytics service, and visitors are never named.']
+            : ['No third-party analytics and no visitor log.', 'No third-party analytics service and no visitor log.'];
+    @endphp
+    <x-slot name="description">Free built-in event analytics: views, devices, traffic sources, UTM tags, countries and clicks on every link. {{ $analyticsPromise[0] }}</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Analytics"
-        description="Free built-in event analytics: page views, devices, traffic sources, UTM tags, countries and clicks on every link on a schedule. No third-party analytics service and no visitor log." />
+        :description="'Free built-in event analytics: page views, devices, traffic sources, UTM tags, countries and clicks on every link on a schedule. '.$analyticsPromise[1]" />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -41,9 +50,14 @@
            seven-detent range dial) plus a real <table> of the stored
            row, because the row IS the privacy argument: there is no
            visitor column, so "who was it" has nowhere to land in an
-           owner's analytics. (The platform's own /admin/realtime view
-           keeps an hour of page views for site admins only; every
-           claim on this page is scoped to the schedule's analytics.)
+           owner's analytics. (The platform's realtime view is separate:
+           it keeps an hour of page views, all of it for site admins at
+           /admin/realtime and, where RealtimeTracker::ownerViewEnabled(),
+           the part about a schedule's own pages for its owner at
+           /realtime, where a visitor who allowed analytics is a row with
+           no name. Every claim on this page is scoped to the schedule's
+           analytics; the two FAQ answers that touch the live view ask
+           that predicate.)
 
            COLOUR: emerald, kept from the first-wave page. Deliberately
            NOT for-theaters' bottle green (#14532d / #86efac) and not
@@ -498,12 +512,17 @@
                 'a' => 'Not for these numbers. The app counts views itself, into its own tables in its own database, and counting a view does not set a tracking cookie. '
                     .(google_analytics_enabled()
                         ? 'Separately, eventschedule.com runs Google Analytics on its own pages, schedule pages included, and only for a visitor who allows analytics cookies in the banner: until then not even the script is loaded.'
-                        : 'eventschedule.com does not run Google Analytics on its own pages either, schedule pages included; what waits for a visitor to allow it in the cookie banner is the administrators\' live view identifying them, and advertising and embedded content from other sites.')
+                        : 'eventschedule.com does not run Google Analytics on its own pages either, schedule pages included; what waits for a visitor to allow it in the cookie banner is the live view telling them apart from other visitors'.(\App\Utils\RealtimeTracker::ownerViewEnabled() ? ' (by name only for the site\'s administrators, never for you)' : ' (for the site\'s administrators)').', and advertising and embedded content from other sites.')
                     .' On a selfhosted install the numbers never leave your own server, including the country lookup, which reads a database file that ships with the app, and Google Analytics runs only if you add your own ID.',
             ],
             [
                 'q' => 'Can I see who visited my schedule?',
-                'a' => 'No, and that is deliberate. A stored row is a schedule, a date and a set of counters, so there is no name, no email, no session and no page-by-page trail to look up. The IP address is never written down. It is hashed with a salt that changes at midnight, and that hash sits in the cache only so the same person is not counted twenty times; the address itself is read once against the country file that ships with the app, and then it is gone. If you want to reach the people who look you up, ask them to follow your schedule: followers give you their name and email on purpose, and you can email them from the newsletter tool. Separately, the site\'s administrators see a live view of the last hour of activity across the site, including schedule pages; it identifies a visitor only if they accepted cookies, is deleted about an hour later, and is never shown to schedule owners.',
+                'a' => 'Not who they are, and that is deliberate. A stored row is a schedule, a date and a set of counters, so there is no name, no email, no session and no page-by-page trail to look up. The IP address is never written down. It is hashed with a salt that changes at midnight, and that hash sits in the cache only so the same person is not counted twenty times; the address itself is read once against the country file that ships with the app, and then it is gone. If you want to reach the people who look you up, ask them to follow your schedule: followers give you their name and email on purpose, and you can email them from the newsletter tool. '
+                    // Who sees the live view follows the predicate behind an owner's own Realtime
+                    // page, so this answer cannot promise more privacy than the install gives.
+                    .(\App\Utils\RealtimeTracker::ownerViewEnabled()
+                        ? 'Separately, Realtime shows you the live traffic to your own pages: page views as they happen, and each visitor who accepted cookies on a notice that mentions organizers as a row with no name, just a country, a device type, the page they have open and for how long. It is deleted about an hour later. The site\'s administrators see the same last hour across the whole site.'
+                        : 'Separately, the site\'s administrators see a live view of the last hour of activity across the site, including schedule pages; it identifies a visitor only if they accepted cookies, is deleted about an hour later, and is never shown to schedule owners.'),
             ],
             [
                 'q' => 'How accurate are the numbers?',

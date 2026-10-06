@@ -31,6 +31,8 @@ class MarketingDailyStat extends Model
         'guest_submit_views',
         'guest_submit_code_requests',
         'guest_submit_submissions',
+        'booking_request_views',
+        'booking_request_submissions',
     ];
 
     protected $casts = [
@@ -69,6 +71,12 @@ class MarketingDailyStat extends Model
         'guest_submit_views',
         'guest_submit_code_requests',
         'guest_submit_submissions',
+        // The public booking request page (event.booking_request), written by EventController: a
+        // visitor who saw the form, and one who sent a request. No code stage of its own: an
+        // account is optional there, so a code is asked of the few who tick the box, and
+        // sendVerificationCode() leaves those out of guest_submit_code_requests.
+        'booking_request_views',
+        'booking_request_submissions',
     ];
 
     /**
@@ -105,6 +113,9 @@ class MarketingDailyStat extends Model
         'guest_submit_views' => '2026-10-06',
         'guest_submit_code_requests' => '2026-10-06',
         'guest_submit_submissions' => '2026-10-06',
+        // 2026_10_06_000003_add_booking_request_counters_to_marketing_daily_stats
+        'booking_request_views' => '2026-10-06',
+        'booking_request_submissions' => '2026-10-06',
     ];
 
     /**

@@ -20,6 +20,7 @@
             <x-doc-nav-link href="#checkins-charts">Charts</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#no-data">No Data State</x-doc-nav-link>
+        <x-doc-nav-link href="#realtime">Realtime</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
 
@@ -389,6 +390,33 @@
             <li>Confirm the events you expect traffic on are published rather than drafts.</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Share your schedule link</a> so real visitors start arriving.</li>
         </ol>
+    </section>
+
+    <!-- Realtime -->
+    <section id="realtime" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.008H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Realtime
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Realtime</strong>, in the sidebar, shows the traffic to your own schedule and event pages as it happens. It is free on every plan and updates itself every 15 seconds. It covers every schedule you own, and each one you help run for somebody else while that schedule's plan includes team members. With several schedules, a menu narrows it to one.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Right now</strong> - two numbers. <em>Page views, last 5 minutes</em> counts everybody. <em>Visitors on your pages now</em> counts the people who have a page open and who accepted cookies: a visitor who declined sends one page view and nothing after it, so whether they are still there cannot be known</li>
+            <li><strong class="text-gray-900 dark:text-white">Last 30 minutes</strong> - page views, views of your calendar embedded on other websites (counted apart), and, when it has been quiet for five minutes, when the last page view was</li>
+            <li><strong class="text-gray-900 dark:text-white">Page views per minute</strong> - a bar for each of the last 30 minutes</li>
+            <li><strong class="text-gray-900 dark:text-white">Visitors</strong> - each visitor who accepted cookies as a row: a country, a device type, the page they have open and for how long, then the ones who left earlier in the half hour. No name, email address or account is ever shown, and a row does not open into a history</li>
+            <li><strong class="text-gray-900 dark:text-white">Top pages, Countries, Devices</strong> - page views for the last 30 minutes; each list adds up to the total, with an "Other" row for the smaller entries and for a view whose country is not known</li>
+            <li><strong class="text-gray-900 dark:text-white">Sources</strong> - where visits to your pages began: a search engine, a social network, a link from another site, or direct</li>
+        </ul>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Who is not counted</div>
+            <p>Your own visits and your team's while signed in, and site administrators. On a custom domain nobody is signed in, so a visit you make to your own page there counts like anyone's. Visitors are listed only if the cookie notice they accepted said that a schedule's organizer sees visits to its pages; everyone else, including anyone who accepted an earlier notice, is in the page views. A visitor who has left stays under Earlier for up to half an hour. Records are deleted about an hour after a visitor's last activity. For daily totals over weeks and months, use the <a href="#web-analytics" class="doc-link">Web Analytics</a> tab.</p>
+        </div>
+        <div class="doc-callout doc-callout-info mt-6">
+            <div class="doc-callout-title">Selfhost</div>
+            <p>Realtime appears for schedule owners when the site's administrator has switched on both Realtime and the owners' view. See the <a href="{{ route('marketing.docs.selfhost.admin') }}#realtime-owner-view" class="doc-link">admin guide</a>.</p>
+        </div>
     </section>
 
     <!-- See Also -->

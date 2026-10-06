@@ -89,7 +89,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Delete schedule | ✓ | `EventManagementTest` |
 | Custom event categories | ✓ | `ScheduleCategoriesTest` |
 | Availability management (Ent) | ✓ | `AvailabilityTest` |
-| Configurable dashboard | ✓ | `MiscFeaturesTest` |
+| Dashboard (tiles, schedules, coming up, activity; new organizer, viewer, attendee and empty states; Customize) | ✓ | `HomeDashboardTest` (weekly series by next date, sold and views per event, today by the schedule's timezone, a curator's sales, deleted sales, purchases by currency, follower and buyer names, equal periods, each page state, a config saved in the old shape, no query per schedule), `DashboardViewsComparisonTest`, `MiscFeaturesTest` (config save). Review round: a follower sees only public events, one live strip of bars, sold counts by who owns the event and Check-in by plan, an upcoming count that matches the list, a shared house, a pass and sign-ups, a ticket kept until its event ends, one row per purchase, a schedule the plan closes, a page whose cards all failed, Needs attention in every state. `AnalyticsRevenueListsTest` (a deleted sale in neither revenue list, seven days on both sides of a comparison). Browser: `DashboardJourneyTest` (New Schedule and Customize reachable on a laptop and a phone, Customize saves, "Allow all" records what the notice said) |
 | Multiple team members (Ent) | ✓ | `MiscFeaturesTest` (add/update/remove) |
 | Guest portal banner (Pro) | ✓ | `MiscFeaturesTest` |
 | Unlimited events & schedules | ✗ | — (non-functional) |
@@ -281,7 +281,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 ### Platform Admin
 | Feature | Tested | Test |
 |---|---|---|
-| Admin dashboard | ✓ | `ApiAdminTest` |
+| Admin dashboard | ✓ | `ApiAdminTest`, `AdminDashboardPageTest`, `AdminDashboardSignupsTest`, `AdminDashboardEventsTest`, `AdminDashboardRecentTest`, `AdminDashboardFederationTest`, `SignupSourceTest`, `ActiveDaysTest`, `RecurringRevenueTest`, `AdminInstallKindTest` |
 | Blog | ✓ | `ApiAdminTest` |
 | User / domain management | ✗ | — |
 | Sale approval / refund | ✓ | `AdminFeaturesTest` (approval; refund needs Stripe) |
@@ -290,6 +290,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Admin newsletter broadcast | ✓ | `AdminFeaturesTest` |
 | Federation moderation and welcome email (nexus) | ✓ | `FederationReviewTest`, `FederationWelcomeTest` (first-approval welcome, one-send claim, resend, bulk, locale) |
 | Realtime (`/admin/realtime` and its beacon) | ✓ | `RealtimeBeaconTest`, `RealtimeTrackerTest`, `RealtimeBeaconRenderTest`, `AdminRealtimeTest` (consent modes, upgrade and revoke, retention, people rules, filters, Activity, settings switch) |
+| Realtime for schedule owners (`/realtime`, the dashboard tile) | ✓ | `ScheduleRealtimeTest` (another schedule's visits never appear, a schedule that is not mine or that my plan closes is refused, the response names nobody, handles differ by viewer and session, admin and team visits left out, only owner-visible visitors listed, sources from entrances only, breakdowns add up, embeds apart, both Realtime pages agree on now and minutes, either switch off removes it, the poll is not a day of use, none of the admin page's markup), `RealtimeBeaconTest` (the signed team bit, the organizer bit), `PrivacyLiveViewTest` (the public wording follows the switch) Who may be listed is the server's reading of the visitor's own cookie choice (`RealtimeBeaconTest`: the `org` token, never a posted bit, never count-only, lapsed or under Global Privacy Control); the notice names organizers on its first line and is marked for it (`PrivacyLiveViewTest`) |
 
 ## Notes (findings, blockers, and pre-existing issues)
 

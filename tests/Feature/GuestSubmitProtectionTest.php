@@ -420,6 +420,39 @@ class GuestSubmitProtectionTest extends TestCase
         $this->assertSame(0, (int) $curator->fresh()->last_notified_request_count);
     }
 
+    /**
+     * The import page's optional account is mailed a verification link, synchronously, after the
+     * account exists and before the event is saved. A mail failure there must not take the request
+     * down with it: the visitor would get a 500, and a retry would be refused as "already taken".
+     * (The booking form held this test until its hosted accounts moved to the emailed code.)
+     */
+    public function test_a_failed_verification_email_does_not_lose_an_import_page_request(): void
+    {
+        config(['app.hosted' => true]);
+        Notification::swap(new class
+        {
+            public function send($notifiables, $notification): void
+            {
+                $this->sendNow($notifiables, $notification);
+            }
+
+            public function sendNow($notifiables, $notification, ?array $channels = null): void
+            {
+                if ($notification instanceof \App\Notifications\VerifyEmail) {
+                    throw new \RuntimeException('SMTP is down');
+                }
+            }
+        });
+        $curator = $this->curator(['require_account' => false]);
+        $body = $this->importBody(['create_account' => true]);
+
+        $this->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), $body)
+            ->assertOk()->assertJsonPath('success', true);
+
+        $this->assertFalse(User::where('email', $body['account_email'])->firstOrFail()->hasVerifiedEmail());
+        $this->assertSame(1, Event::count());
+    }
+
     // ---- the image ------------------------------------------------------------------------------
 
     public function test_a_refused_image_says_why_in_words_the_page_shows(): void

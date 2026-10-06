@@ -613,6 +613,19 @@
                         :disabled="is_demo_mode()" />
                 </div>
 
+                {{-- The second switch. Its marker says the switch was on the page: an unchecked box
+                     posts nothing, and a request without it leaves the setting alone. --}}
+                <div class="mb-6">
+                    <input type="hidden" name="realtime_owner_view_submitted" value="1">
+                    <x-toggle
+                        id="realtime_owner_view"
+                        name="realtime_owner_view"
+                        :checked="old('realtime_owner_view', $realtimeOwnerView)"
+                        :label="e(__('messages.realtime_owner_view_toggle'))"
+                        :help="e(__('messages.realtime_owner_view_help'))"
+                        :disabled="is_demo_mode()" />
+                </div>
+
                 <div class="flex justify-end">
                     <x-brand-button type="submit">@lang('messages.save')</x-brand-button>
                 </div>

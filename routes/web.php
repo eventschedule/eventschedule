@@ -47,6 +47,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PushController;
+use App\Http\Controllers\RealtimeController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoleSubscriberController;
@@ -564,7 +565,7 @@ Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'
 // jobs generate URLs from APP_URL (the bare marketing host), which is why ProcessBackupExport
 // forces the root to app_url(), so any future route('tickets') in a mailable would silently
 // become a marketing redirect. Not worth it for a page averaging position 23.
-Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
+Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
     Route::get('/dashboard', [HomeController::class, 'home'])->name('home');
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
@@ -610,6 +611,14 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');
     Route::post('/waitlist/remove/{id}', [WaitlistController::class, 'remove'])->name('waitlist.remove');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
+    // A schedule owner's live view of their own guest pages (not /admin/realtime, which is the
+    // operator's and about the whole install). 404 where the install does not offer it. The two
+    // JSON routes are polled, so they carry their own bucket: a page left open must not spend the
+    // budget of anything else, and the prefix form needs no named limiter.
+    Route::get('/realtime', [RealtimeController::class, 'index'])->name('realtime');
+    Route::get('/realtime/data', [RealtimeController::class, 'data'])->name('realtime.data')->middleware('throttle:60,1,realtime_poll');
+    Route::get('/realtime/summary', [RealtimeController::class, 'summary'])->name('realtime.summary')->middleware('throttle:60,1,realtime_poll');
 
     // Newsletter routes (flat, like analytics - schedule selected via ?role_id= query param)
     Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletter.index');

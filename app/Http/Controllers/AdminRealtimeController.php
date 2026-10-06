@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
- * /admin/realtime: the page, its polled JSON, and the install-wide on/off switch.
+ * /admin/realtime: the page, its polled JSON, and the install-wide switches (Realtime itself, and
+ * whether schedule owners get the part about their own pages, which RealtimeController serves).
  *
  * Inside the `admin` middleware like /admin/translations: a lapsed re-auth window answers the poll
  * with 423, which the page turns into a "confirm your password to keep it live" panel, and
@@ -70,6 +71,23 @@ class AdminRealtimeController extends Controller
             Setting::set('realtime_enabled_at', (string) now()->getTimestamp());
         }
 
+        // Whether schedule owners see their own pages' traffic at /realtime. Written only when the
+        // form that showed the switch was the one posted: absent is not "off", and a client that
+        // sends the first switch alone must not take the live view away from every organizer.
+        $ownerViewBefore = RealtimeTracker::ownerViewSetting();
+        $ownerView = $request->has('realtime_owner_view_submitted')
+            ? $request->boolean('realtime_owner_view')
+            : $ownerViewBefore;
+
+        if ($ownerView !== $ownerViewBefore) {
+            Setting::set('realtime_owner_view', $ownerView ? '1' : '0');
+        }
+
+        // Nothing to record about WHEN the view came on. The cookie notice names organizers
+        // exactly while both switches are on, and each choice records whether the notice it was
+        // made on did (RealtimeTracker::consentCoversOrganizers()), so a choice made while the
+        // view was off never lists anyone, whatever the order of saves.
+
         if (! $enabled) {
             // Saved as off first, so a beacon arriving mid-purge is already refused. Batched
             // DELETE rather than TRUNCATE, which commits implicitly.
@@ -86,8 +104,8 @@ class AdminRealtimeController extends Controller
             $request->user()->id,
             null,
             null,
-            ['realtime_enabled' => $wasEnabled ? '1' : '0'],
-            ['realtime_enabled' => $enabled ? '1' : '0'],
+            ['realtime_enabled' => $wasEnabled ? '1' : '0', 'realtime_owner_view' => $ownerViewBefore ? '1' : '0'],
+            ['realtime_enabled' => $enabled ? '1' : '0', 'realtime_owner_view' => $ownerView ? '1' : '0'],
             'Updated realtime visitor settings',
         );
 

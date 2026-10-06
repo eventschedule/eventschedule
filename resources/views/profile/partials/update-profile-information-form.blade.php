@@ -138,8 +138,9 @@
             </div>
 
             {{-- users.suggestions_off_at: the dashboard's "Turn off suggestions", and the way
-                 back on. Beside "Email updates" because it also stops the reminder emails that
-                 ask the same things. Only for somebody who edits a schedule: nobody else is
+                 back on. Beside "Email updates", which is the switch for the reminder emails
+                 that ask the same things: this one is about what the app shows, and stops no
+                 mail. Only for somebody who edits a schedule: nobody else is
                  ever suggested anything. The wrapper carries the id (the toggle component puts
                  its attributes on a hidden checkbox) for the page's highlight script. --}}
             @if (isset($editorRoles) && $editorRoles->isNotEmpty())

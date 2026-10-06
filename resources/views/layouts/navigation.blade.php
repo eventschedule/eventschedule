@@ -179,7 +179,9 @@
                     </a>
                 </li>
 
-                @if (config('app.hosted'))
+                {{-- On a selfhost most accounts never buy a ticket, so the entry is for the ones
+                     who hold one ($hasTickets, from the view composer). --}}
+                @if (config('app.hosted') || ! empty($hasTickets))
                 <li>
                     <a href="{{ route('tickets') }}"
                         class="dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white {{ request()->is('tickets') ? 'dark-nav-active text-white' : '' }}">
@@ -226,6 +228,24 @@
                         {{ __('messages.analytics') }}
                     </a>
                 </li>
+
+                {{-- The live traffic to the person's own schedule pages (RealtimeController). Only
+                     where there is such a page to open: the install offers it, they manage a
+                     schedule, and they are not the shared demo account. $realtimeAvailable comes
+                     from the view composer (AppServiceProvider), which asks for each of this
+                     sidebar's two renders; the questions behind it are memoized, the answer not. --}}
+                @if (! empty($realtimeAvailable))
+                <li>
+                    <a href="{{ route('realtime') }}"
+                        class="dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white {{ request()->is('realtime') ? 'dark-nav-active text-white' : '' }}">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('realtime') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M12,10A2,2 0 0,0 10,12C10,13.11 10.9,14 12,14C13.11,14 14,13.11 14,12A2,2 0 0,0 12,10M18,12C18,8.68 15.31,6 12,6C8.68,6 6,8.68 6,12C6,14.22 7.21,16.15 9,17.19L10,15.45C8.81,14.75 8,13.47 8,12A4,4 0 0,1 12,8A4,4 0 0,1 16,12C16,13.47 15.19,14.75 14,15.45L15,17.19C16.79,16.15 18,14.22 18,12M12,2A10,10 0 0,0 2,12C2,15.7 4,18.92 7,20.65L8,18.92C5.61,17.53 4,14.96 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12C20,14.96 18.39,17.53 16,18.92L17,20.65C20,18.92 22,15.7 22,12A10,10 0 0,0 12,2Z" />
+                        </svg>
+                        {{ __('messages.realtime') }}
+                    </a>
+                </li>
+                @endif
 
                 <li>
                     <a href="{{ route('newsletter.index') }}"

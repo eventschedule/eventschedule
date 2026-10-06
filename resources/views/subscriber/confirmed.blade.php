@@ -166,9 +166,9 @@
                 </p>
 
                 @php
-                    // The Tickets page is hosted-only - layouts/navigation.blade.php wraps that nav
-                    // item in @if (config('app.hosted')) - so on a selfhost install this bullet was
-                    // promising a page with no way to reach it.
+                    // On a selfhost the sidebar offers Tickets only to someone who already holds
+                    // one (layouts/navigation.blade.php, $hasTickets), so for a new subscriber
+                    // there this bullet would promise a page with no way to reach it yet.
                     $benefits = [__('messages.subscription_account_benefit_following')];
 
                     if (config('app.hosted')) {

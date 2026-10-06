@@ -185,6 +185,17 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
   - `visitors`, `page_views`, `docs_visitors`, `docs_page_views`, `commercial_visitors`,
     `pricing_visitors`, `pricing_views`;
   - `signup_views`, `signup_code_requests`, `signup_code_verified`, `signup_code_invalid`;
+  - `guest_submit_views`, `guest_submit_code_requests`, `guest_submit_submissions`: the public
+    "Submit your event" page (`event.guest_submit`, the request form of venue and curator
+    schedules). One visitor per day each, with the sign-up counters' bot filters.
+    `submissions / views` is the page's conversion. `code_requests` is not a stage every submitter
+    passes: only a new account on hosted is asked for a code, so `submissions` can exceed it. The
+    accounts made there are `signup_intent = request`, not organizers;
+  - `booking_request_views`, `booking_request_submissions`: the public booking request page
+    (`event.booking_request`: every talent schedule's request form, and a venue's or curator's
+    that chose it). One visitor per day each, with the same bot filters. `submissions / views` is
+    the page's conversion. An account is optional there, so it has no code stage of its own, and a
+    code asked for from it is left out of `guest_submit_code_requests`. Null before 2026-10-06;
   - `verified_signups`.
 
   A null is "not tracked yet", never zero.
@@ -362,7 +373,7 @@ Both are columnar: read `columns[]`, then `rows[][]`. They are newest first and 
 | `event_edits_90d` | Events they created or edited in the last 90 days, bucketed; system edits (imports, syncs) excluded |
 | `setup_guide` | How far through the setup guide they got (schema 13): `started`, `live` (their schedule went live with the guide watching), `shared` (copied the schedule's address), `embedded` (copied the embed code), `finished`. The furthest one reached. Null for anyone who never had a guide: everyone who signed up before it shipped, and anyone whose first schedule was not saved through the wizard (guest-submit, a claim, the API, a restore, a transfer) |
 | `setup_guide_hidden` | They hid the guide and have not brought it back. False when `setup_guide` is null |
-| `suggestions_off` | They turned suggestions off for the whole account (schema 13) and have not turned them back on: no setup guide, no next steps on the dashboard, no "List on the network" prompt, and none of the reminder emails that ask the same things. Independent of `setup_guide_hidden`, and possible for an account that never had a guide |
+| `suggestions_off` | They turned suggestions off for the whole account (schema 13) and have not turned them back on: no setup guide, no next steps on the dashboard, no "List on the network" prompt. It says nothing about email: from 2026-10-06 the reminder emails follow "Email updates" alone (for the one day before that, this switch held them too). Independent of `setup_guide_hidden`, and possible for an account that never had a guide |
 
 ### `schedules` (one row per owned, non-deleted, non-demo schedule)
 
@@ -494,6 +505,19 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **15** (2026-10-06)
+  - **Three new `traffic[]` counters:** `guest_submit_views`, `guest_submit_code_requests`,
+    `guest_submit_submissions`, for the public "Submit your event" page, which was rebuilt the same
+    day and had never been counted. Null before 2026-10-06; there is no earlier baseline. Nothing
+    else changed shape.
+  - **Two more:** `booking_request_views`, `booking_request_submissions`, for the public booking
+    request page (every talent schedule's request form), rebuilt the same day. Null before
+    2026-10-06.
+  - **`suggestions_off` no longer holds an activation nudge** (a change of meaning, not of
+    shape). Turning suggestions off hides the setup guide and the dashboard's next steps; the
+    emails follow "Email updates" and their own unsubscribe link. So the note under 13 about
+    nudges reaching fewer people is true of 2026-10-05 only, as far as that switch goes. An
+    answer still holds a nudge: a dismissed step, and "No tickets needed" for the ticket nudges.
 - **14** (2026-10-05)
   - **New `event_form` section:** hand-made events by created month, first event against later
     ones, with a location, with a way to sign up, with a flyer; and new venues with an email. It
@@ -508,7 +532,8 @@ created over the API or WhatsApp cannot carry a price.
     as the cohort of people who had it: `created_month` cannot separate them, because it did
     not start on the 1st. `suggestions_off` is the account-wide switch that shipped with it.
   - **Activation nudges reach fewer people.** An owner with `suggestions_off` gets none of the
-    nudges that ask for something (every key but `first_sale`), and one who answered "No tickets
+    nudges that ask for something (every key but `first_sale`; undone the next day, see 15), and
+    one who answered "No tickets
     needed" in the guide gets neither ticket nudge for that schedule. Neither writes a
     `dismissed_steps` row.
   - **`next_step_tickets` is offered to fewer schedules.** A free schedule that already takes

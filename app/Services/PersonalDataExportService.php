@@ -30,7 +30,7 @@ class PersonalDataExportService
         'newsletter_clicks', 'newsletter_unsubscribes', 'event_comments', 'event_photos',
         'event_videos', 'event_poll_votes', 'carpool_offers', 'carpool_requests', 'carpool_reviews',
         'carpool_reports', 'support_conversations', 'referrals', 'boost_campaigns', 'webhooks',
-        'audit_logs', 'sessions', 'realtime_hits',
+        'audit_logs', 'sessions', 'realtime_hits', 'user_active_days',
     ];
 
     /**
@@ -132,6 +132,9 @@ class PersonalDataExportService
                 ])->all(),
             'recent_page_views' => $this->rows('realtime_hits', fn ($q) => $q->where('user_id', $user->id),
                 ['surface', 'path', 'title', 'country', 'device', 'browser', 'os', 'started_at', 'last_seen_at']),
+            // The dates only: that is all the record holds. `counted` false means the day was
+            // worked out from the security log above rather than recorded.
+            'days_active' => $this->rows('user_active_days', fn ($q) => $q->where('user_id', $user->id), ['date', 'counted']),
         ];
     }
 

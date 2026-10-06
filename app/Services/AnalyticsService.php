@@ -202,29 +202,23 @@ class AnalyticsService
      */
     public function getPeriodComparison(User $user, string $range, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
     {
-        // Calculate previous period based on range
+        // Calculate previous period based on range. For the rolling ranges the current window is
+        // today and the N - 1 days before it, so the one before it is the N days ending the day
+        // before THAT: the same number of dates on both sides, with no day in neither.
         [$previousStart, $previousEnd, $label] = match ($range) {
             'last_7_days' => [
-                now()->subDays(14)->startOfDay(),
-                now()->subDays(8)->endOfDay(),
+                now()->subDays(13)->startOfDay(),
+                now()->subDays(7)->endOfDay(),
                 'vs_previous_7_days',
             ],
-            // The dashboard Views panel offers 7/14/30 (HomeController::getDashboardConfig), so
-            // 14 needs an arm here or it falls through to the 30-day default and the badge
-            // silently compares a window the number beside it never covered.
-            'last_14_days' => [
-                now()->subDays(28)->startOfDay(),
-                now()->subDays(15)->endOfDay(),
-                'vs_previous_14_days',
-            ],
             'last_30_days' => [
-                now()->subDays(60)->startOfDay(),
-                now()->subDays(31)->endOfDay(),
+                now()->subDays(59)->startOfDay(),
+                now()->subDays(30)->endOfDay(),
                 'vs_previous_30_days',
             ],
             'last_90_days' => [
-                now()->subDays(180)->startOfDay(),
-                now()->subDays(91)->endOfDay(),
+                now()->subDays(179)->startOfDay(),
+                now()->subDays(90)->endOfDay(),
                 'vs_previous_90_days',
             ],
             'this_month' => [
@@ -243,8 +237,8 @@ class AnalyticsService
                 'vs_last_year',
             ],
             default => [
-                now()->subDays(60)->startOfDay(),
-                now()->subDays(31)->endOfDay(),
+                now()->subDays(59)->startOfDay(),
+                now()->subDays(30)->endOfDay(),
                 'vs_previous_30_days',
             ],
         };
@@ -684,10 +678,15 @@ class AnalyticsService
             throw new \InvalidArgumentException("Invalid column: $column");
         }
 
+        // Never a deleted sale: the count beside this sum (getConversionStats) already leaves
+        // them out, and the two sit side by side on /analytics and on the dashboard. Every
+        // caller gets this, which is intended: the revenue totals, and the revenue credited to a
+        // boost campaign and to a newsletter, where a deleted sale was credited just the same.
         $query = DB::table('sales')
             ->join('events', 'sales.event_id', '=', 'events.id')
             ->whereIn('sales.event_id', $eventIds->toArray())
             ->where('sales.status', 'paid')
+            ->where('sales.is_deleted', false)
             ->whereBetween('sales.created_at', [$start, $end]);
 
         if ($modifier) {
@@ -848,9 +847,12 @@ class AnalyticsService
             return collect();
         }
 
-        // Get top events by revenue from the sales table (source of truth)
+        // Get top events by revenue from the sales table (source of truth). A deleted sale is
+        // not revenue, here as in the totals above this list (salesByCurrency()): the two sat on
+        // one tab and disagreed.
         $salesData = Sale::whereIn('event_id', $eventIds->toArray())
             ->where('status', 'paid')
+            ->where('is_deleted', false)
             ->whereBetween('created_at', [$start, $end])
             ->groupBy('event_id')
             ->selectRaw('event_id, COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as revenue')
@@ -1315,6 +1317,7 @@ class AnalyticsService
             ->whereIn('sales.event_id', $eventIds)
             ->whereNotNull('sales.promo_code_id')
             ->where('sales.status', 'paid')
+            ->where('sales.is_deleted', false)
             ->whereBetween('sales.created_at', [$start, $end])
             ->groupBy('sales.promo_code_id', 'events.ticket_currency_code')
             ->orderByDesc('sales_count')

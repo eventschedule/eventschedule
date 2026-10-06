@@ -91,6 +91,26 @@
             // globally on keydown - used to kill "Add to Calendar" for the rest of the session.
             // Every .pop-up-menu in the app ships with the hidden class, so this is equivalent.
             menu.removeClass('hidden').css('display', '');
+
+            // Kept on the screen. A menu hangs from its button's end edge, which is right for a
+            // button at the end of a row and puts the menu past the viewport for one at the start
+            // of a narrow row: the dashboard's phone menu opened off the left edge, with New
+            // schedule and Customize out of reach. Measured after it is shown, since a hidden box
+            // has no width; a menu that already fits is left exactly where it was.
+            var box = menu[0] ? menu[0].getBoundingClientRect() : null;
+            var gutter = 8;
+            if (box && box.left < gutter) {
+                menu.css({
+                    'left': Math.max(gutter, Math.min(rect.left, window.innerWidth - box.width - gutter)) + 'px',
+                    'right': 'auto'
+                });
+            } else if (box && box.right > window.innerWidth - gutter) {
+                menu.css({
+                    'right': Math.max(gutter, Math.min(window.innerWidth - rect.right, window.innerWidth - box.width - gutter)) + 'px',
+                    'left': 'auto'
+                });
+            }
+
             // Several toggles ship a hardcoded aria-expanded that never changes. Keep it honest
             // here rather than per call site. Both attribute spellings are handled: most toggles
             // use data-popup-target, but ticket/sales.blade.php delegates a second family through

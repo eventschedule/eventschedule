@@ -171,7 +171,7 @@ return [
             'blurb' => 'Create your account and set up your first schedule.',
             'icon' => 'bolt',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-06',
         ],
 
         'creating-schedules' => [
@@ -379,7 +379,7 @@ return [
             'blurb' => 'Track views, devices, traffic sources, and conversions.',
             'icon' => 'chart',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-06',
         ],
 
         'account-settings' => [
@@ -528,7 +528,7 @@ return [
             'blurb' => 'Monitor users, revenue and analytics, and manage platform settings.',
             'icon' => 'shield',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-06',
         ],
 
         'selfhost/federation' => [

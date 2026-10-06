@@ -122,7 +122,12 @@ class UnclaimedScheduleGuardsTest extends TestCase
         $this->assertNull($talent->user_id, 'fixture: nobody to stand in');
 
         // What each one's GET offers: the booking form for the act, the AI import for the venue.
-        $this->get('/'.$talent->subdomain.'/booking-request')->assertOk()->assertSee('name="create_account"', false);
+        // The act's page says an account is the way through before anything is typed: there the
+        // account is not a box to tick, it is already on.
+        $this->get('/'.$talent->subdomain.'/booking-request')->assertOk()
+            ->assertSee('mustHaveAccount: true,', false)
+            ->assertSee('createAccount: true,', false)
+            ->assertSee('id="account_password"', false);
         $this->get('/'.$venue->subdomain.'/guest-add')->assertOk();
 
         $this->postJson('/'.$talent->subdomain.'/booking-request', [
@@ -152,14 +157,18 @@ class UnclaimedScheduleGuardsTest extends TestCase
     {
         $talent = $this->placeholder();
 
+        // With a date and a time: an event on a page nobody owns appears at once, so it needs
+        // what a public listing needs.
         $this->postJson('/'.$talent->subdomain.'/booking-request', [
             'event_name' => 'Walk-in Night',
+            'date' => now()->addDays(9)->format('Y-m-d'),
+            'start_time' => '20:00',
             'contact_name' => 'A Fan',
             'contact_email' => 'fan@gmail.com',
             'create_account' => '1',
             'password' => 'sup3rsecret',
             'terms' => '1',
-        ])->assertOk()->assertJsonPath('success', true);
+        ])->assertOk()->assertJsonPath('success', true)->assertJsonPath('status', 'live');
 
         $fan = \App\Models\User::where('email', 'fan@gmail.com')->firstOrFail();
         $this->assertSame($fan->id, \App\Models\Event::sole()->user_id);

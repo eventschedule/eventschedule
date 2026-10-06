@@ -379,6 +379,12 @@ class HoneypotTest extends TestCase
             ->assertOk()->getContent();
 
         $this->assertStringContainsString('name="website"', $html);
+        // The page builds its request by hand, so the box alone is never posted: it is bound into
+        // the page's own state and sent from there.
+        $this->assertStringContainsString('v-model="honeypot"', $html);
+        // In the request itself, not only where the shared kit asks for an emailed code.
+        $this->assertSame(1, preg_match('/const body = \{(.*?)\n\s*\};/s', $html, $body), 'the page no longer builds its request as `const body`');
+        $this->assertStringContainsString('website: this.honeypot,', $body[1]);
     }
 
     /**

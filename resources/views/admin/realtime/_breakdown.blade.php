@@ -23,7 +23,8 @@
 
                 <span class="relative flex items-center gap-2 min-w-0 flex-1">
                     <span v-if="card.id === 'countries'" class="iti__flag shrink-0" :class="'iti__' + row.key.toLowerCase()" aria-hidden="true"></span>
-                    <svg v-else-if="row.icon && icons[row.icon]" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg v-else-if="row.icon && icons[row.icon]" class="w-4 h-4 shrink-0"
+                         :class="card.id === 'pages' || card.id === 'surfaces' ? surfaceTone(row.icon).text : 'text-gray-500 dark:text-gray-400'" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" :d="icons[row.icon]" />
                     </svg>
                     <span class="truncate" :class="isActive(card.filter, row.key) ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-900 dark:text-gray-100'"><bdi>@{{ rowLabel(card, row) }}</bdi></span>

@@ -41,10 +41,52 @@ class RecurringRevenue
     /** Stripe statuses that bill (or are mid-retry), in addition to the trial reported beside them. */
     private const BILLING_STATUSES = ['active', 'past_due'];
 
+    /** The rows of breakdown(), tier then term. Term is PlanPriceUtils::termFor()'s month|year. */
+    public const PLANS = ['pro_month', 'pro_year', 'enterprise_month', 'enterprise_year'];
+
     /**
      * @return array{mrr: float, arr: float, billing_count: int, trialing_count: int, unrecognized_count: int}
      */
     public static function summary(): array
+    {
+        $totals = self::breakdown()['totals'];
+
+        return [
+            'mrr' => $totals['mrr'],
+            'arr' => $totals['arr'],
+            'billing_count' => $totals['billing_count'],
+            'trialing_count' => $totals['trialing_count'],
+            'unrecognized_count' => $totals['unrecognized_count'],
+        ];
+    }
+
+    /**
+     * summary(), split by plan, from the same loop - so the rows add up to the total by
+     * construction rather than by two queries happening to agree.
+     *
+     * Beside what is billing, each row carries what its trials would add if they converted. A
+     * trial is priced the same way as a paying subscription and kept out of mrr and arr.
+     *
+     * Two overlays sit INSIDE the billing figures and are not added to them, or to each other:
+     * past due (a renewal Stripe is retrying) and cancelling (paid up to ends_at, then gone).
+     * at_risk_* counts a subscription that is either, once.
+     *
+     * A subscription with several prices is ONE customer, on the row of its highest recognized
+     * price (Enterprise before Pro, as hasActiveEnterpriseSubscription() reads it; then the larger
+     * amount), carrying all its recognized amounts. Splitting it by price would make rows with
+     * money and no customer.
+     *
+     * Money is added up in annualized cents and divided once. A row's mrr is its share of the total
+     * monthly cents by largest remainder: rounding each row on its own can leave the rows a cent
+     * off the total when two yearly prices divide unevenly.
+     *
+     * @return array{
+     *     plans: array<string, array{tier: string, term: string, billing_count: int, mrr: float, arr: float, trialing_count: int, trial_mrr: float}>,
+     *     unrecognized: array{billing_count: int, trialing_count: int},
+     *     totals: array{mrr: float, arr: float, billing_count: int, trialing_count: int, unrecognized_count: int, trial_mrr: float, past_due_count: int, cancelling_count: int, at_risk_count: int, at_risk_mrr: float}
+     * }
+     */
+    public static function breakdown(): array
     {
         $rows = self::liveRows();
 
@@ -58,56 +100,160 @@ class RecurringRevenue
             ->get(['subscription_id', 'stripe_price'])
             ->groupBy('subscription_id');
 
-        $arr = 0.0;
-        $billing = 0;
-        $trialing = 0;
-        $unrecognized = 0;
+        $plans = array_fill_keys(self::PLANS, ['billing_count' => 0, 'cents' => 0, 'trialing_count' => 0, 'trial_cents' => 0]);
+        $unrecognized = ['billing_count' => 0, 'trialing_count' => 0];
+        $pastDue = 0;
+        $cancelling = 0;
+        $atRisk = 0;
+        $atRiskCents = 0;
 
         foreach ($rows as $row) {
-            if ($row->stripe_status === 'trialing') {
-                // A cancelled trial keeps status trialing with ends_at at the trial's end (Cashier's
-                // cancel()), and can never convert, so it is not pipeline either.
-                // RoleBillable::hasActiveSubscription() treats it as inactive for the same reason.
-                if ($row->ends_at === null) {
-                    $trialing++;
+            $trial = $row->stripe_status === 'trialing';
+
+            // A cancelled trial keeps status trialing with ends_at at the trial's end (Cashier's
+            // cancel()), and can never convert, so it is not pipeline either.
+            // RoleBillable::hasActiveSubscription() treats it as inactive for the same reason.
+            if ($trial && $row->ends_at !== null) {
+                continue;
+            }
+
+            $prices = $row->stripe_price !== null
+                ? [$row->stripe_price]
+                : ($itemPrices[$row->id] ?? collect())->pluck('stripe_price')->all();
+
+            [$plan, $cents] = self::place($prices);
+
+            if ($trial) {
+                if ($plan === null) {
+                    $unrecognized['trialing_count']++;
+                } else {
+                    $plans[$plan]['trialing_count']++;
+                    $plans[$plan]['trial_cents'] += $cents;
                 }
 
                 continue;
             }
 
-            $billing++;
-
-            $prices = $row->stripe_price !== null
-                ? [$row->stripe_price]
-                : ($itemPrices[$row->id] ?? collect())->pluck('stripe_price')->all();
-            $recognized = false;
-
-            foreach ($prices as $price) {
-                $amount = PlanPriceUtils::amountFor($price);
-                $term = PlanPriceUtils::termFor($price);
-
-                // Both, or neither: annualizing an amount whose term we had to assume is how a
-                // yearly price gets counted twelve times over.
-                if ($amount === null || $term === null) {
-                    continue;
-                }
-
-                $recognized = true;
-                $arr += $term === 'year' ? $amount : $amount * 12;
+            if ($plan === null) {
+                $unrecognized['billing_count']++;
+            } else {
+                $plans[$plan]['billing_count']++;
+                $plans[$plan]['cents'] += $cents;
             }
 
-            if (! $recognized) {
-                $unrecognized++;
+            $isPastDue = $row->stripe_status === 'past_due';
+            $isCancelling = $row->ends_at !== null;
+            $pastDue += (int) $isPastDue;
+            $cancelling += (int) $isCancelling;
+
+            if ($isPastDue || $isCancelling) {
+                $atRisk++;
+                $atRiskCents += $cents;
             }
         }
 
+        $cents = array_sum(array_column($plans, 'cents'));
+        $trialCents = array_sum(array_column($plans, 'trial_cents'));
+        $monthly = self::apportion(array_column($plans, 'cents'), (int) round($cents / 12));
+        $trialMonthly = self::apportion(array_column($plans, 'trial_cents'), (int) round($trialCents / 12));
+
+        $out = [];
+        foreach (array_keys($plans) as $index => $key) {
+            [$tier, $term] = explode('_', $key);
+
+            $out[$key] = [
+                'tier' => $tier,
+                'term' => $term,
+                'billing_count' => $plans[$key]['billing_count'],
+                'mrr' => round($monthly[$index] / 100, 2),
+                'arr' => round($plans[$key]['cents'] / 100, 2),
+                'trialing_count' => $plans[$key]['trialing_count'],
+                'trial_mrr' => round($trialMonthly[$index] / 100, 2),
+            ];
+        }
+
         return [
-            'mrr' => round($arr / 12, 2),
-            'arr' => round($arr, 2),
-            'billing_count' => $billing,
-            'trialing_count' => $trialing,
-            'unrecognized_count' => $unrecognized,
+            'plans' => $out,
+            'unrecognized' => $unrecognized,
+            'totals' => [
+                'mrr' => round($cents / 1200, 2),
+                'arr' => round($cents / 100, 2),
+                'billing_count' => array_sum(array_column($plans, 'billing_count')) + $unrecognized['billing_count'],
+                'trialing_count' => array_sum(array_column($plans, 'trialing_count')) + $unrecognized['trialing_count'],
+                // Billing only, as it has always been: a trial on an unrecognized price is counted
+                // in trialing_count and nowhere else.
+                'unrecognized_count' => $unrecognized['billing_count'],
+                'trial_mrr' => round($trialCents / 1200, 2),
+                'past_due_count' => $pastDue,
+                'cancelling_count' => $cancelling,
+                'at_risk_count' => $atRisk,
+                'at_risk_mrr' => round($atRiskCents / 1200, 2),
+            ],
         ];
+    }
+
+    /**
+     * The row a subscription belongs on and what it is worth a year, in cents: [null, 0] when none
+     * of its prices is one config names.
+     *
+     * Both amount and term, or neither: annualizing an amount whose term we had to assume is how a
+     * yearly price gets counted twelve times over.
+     *
+     * @param  array<int, ?string>  $prices
+     * @return array{0: ?string, 1: int}
+     */
+    private static function place(array $prices): array
+    {
+        $best = null;
+        $bestRank = null;
+        $cents = 0;
+
+        foreach ($prices as $price) {
+            $amount = PlanPriceUtils::amountFor($price);
+            $term = PlanPriceUtils::termFor($price);
+            $tier = PlanPriceUtils::tierFor($price);
+
+            if ($amount === null || $term === null || $tier === null) {
+                continue;
+            }
+
+            $annual = (int) round(($term === 'year' ? $amount : $amount * 12) * 100);
+            $cents += $annual;
+            $rank = [$tier === 'enterprise' ? 1 : 0, $annual, $term === 'year' ? 1 : 0];
+
+            if ($bestRank === null || $rank > $bestRank) {
+                $bestRank = $rank;
+                $best = $tier.'_'.$term;
+            }
+        }
+
+        return [$best, $best === null ? 0 : $cents];
+    }
+
+    /**
+     * Each row's monthly cents, as whole cents that add up to $total: floor every share, then hand
+     * the leftover cents to the largest remainders.
+     *
+     * @param  array<int, int>  $annual  annualized cents per row
+     * @return array<int, int>
+     */
+    private static function apportion(array $annual, int $total): array
+    {
+        $shares = array_map(fn (int $cents) => intdiv($cents, 12), $annual);
+        $remainders = array_map(fn (int $cents) => $cents % 12, $annual);
+        $left = $total - array_sum($shares);
+
+        arsort($remainders);
+        foreach (array_keys($remainders) as $index) {
+            if ($left <= 0) {
+                break;
+            }
+
+            $shares[$index]++;
+            $left--;
+        }
+
+        return $shares;
     }
 
     /**

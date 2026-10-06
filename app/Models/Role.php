@@ -561,6 +561,7 @@ class Role extends Model implements MustVerifyEmail
         'pretix-alternative',
         'qr-code-generator-alternative',
         'qr-code-generator-replacement',
+        'realtime',
         'recurring-events',
         'referral-program',
         'referrals',

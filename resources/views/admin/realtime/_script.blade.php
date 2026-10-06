@@ -2,6 +2,17 @@
     @keyframes realtime-fresh { from { background-color: var(--brand-blue-a10); } to { background-color: transparent; } }
     .realtime-fresh { animation: realtime-fresh 2s ease-out 1; }
     @media (prefers-reduced-motion: reduce) { .realtime-fresh { animation: none; } }
+
+    /* The Activity count buttons: a recessed cell, pressed while it filters the feed. On the --ap-*
+       tokens, so every palette gets its own shade. */
+    .realtime-stat { background: var(--ap-tint-sunken); }
+    .realtime-stat:not(:disabled):hover { background: var(--ap-tint-2); }
+    .realtime-stat:disabled { cursor: default; }
+    .realtime-stat-on, .realtime-stat-on:not(:disabled):hover { background: var(--brand-blue-a10); box-shadow: var(--ap-inset-pressed); }
+    /* One short pulse when a count grows, never a loop. */
+    @keyframes realtime-bump { 0% { transform: scale(1); } 35% { transform: scale(1.04); } 100% { transform: scale(1); } }
+    .realtime-bump { animation: realtime-bump 0.5s ease-out 1; }
+    @media (prefers-reduced-motion: reduce) { .realtime-bump { animation: none; } }
 </style>
 <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function () {
@@ -45,6 +56,8 @@
                 gray: probe('bg-gray-300 dark:bg-gray-600', 'backgroundColor'),
                 grid: probe('border-gray-200 dark:border-gray-700', 'borderTopColor'),
                 ink: probe('text-gray-500 dark:text-gray-400', 'color'),
+                green: probe('text-green-500', 'color'),
+                white: probe('text-white', 'color'),
             };
         }
 
@@ -68,6 +81,9 @@
                     chartTries: 0,
                     freshTimer: null,
                     activityAll: false,
+                    feed: (INITIAL.activity && INITIAL.activity.feed) || null,
+                    signupsAll: false,
+                    bumped: {},
                     expandedCards: { pages: false, sources: false, countries: false, surfaces: false },
                     fresh: {},
                     lastOk: Date.now(),
@@ -155,6 +171,44 @@
                 hasAnyone: function () {
                     return this.cards.some(function (card) { return card.rows.length > 0; }) || this.filterChips.length > 0;
                 },
+                signups: function () {
+                    return (this.p.activity && this.p.activity.signups) || { total: 0, rows: [], steps: [], stage_titles: [], hours: [] };
+                },
+                // The server sends the filtered feed; this filters what is already loaded too, so
+                // a press answers at once and the complete list replaces it a moment later.
+                feedItems: function () {
+                    var feed = this.feed, items = (this.p.activity && this.p.activity.items) || [];
+                    return feed ? items.filter(function (item) { return item.type === feed; }) : items;
+                },
+                feedLabel: function () {
+                    var feed = this.feed;
+                    var stat = ((this.p.activity && this.p.activity.stats) || []).find(function (s) { return s.type === feed; });
+                    return stat ? stat.label : '';
+                },
+                splitTotal: function () {
+                    var o = this.p.overview || {};
+                    return (o.win_views || 0) + (o.unidentified_views || 0);
+                },
+                splitShare: function () {
+                    return this.splitTotal ? Math.round(100 * this.p.overview.win_views / this.splitTotal) : 0;
+                },
+                splitLabel: function () {
+                    return this.msg.acceptedCookies + ': ' + this.fmt(this.p.overview.win_views) + ', '
+                        + this.msg.notAccepted + ': ' + this.fmt(this.p.overview.unidentified_views);
+                },
+                // One bar per rolling hour, oldest first. A lone sign-up is half height, so a busier
+                // hour still has somewhere to go.
+                hourBars: function () {
+                    var self = this, hours = this.signups.hours || [];
+                    var max = Math.max(2, hours.reduce(function (m, n) { return Math.max(m, n); }, 0));
+                    return hours.map(function (count, index) {
+                        return {
+                            count: count,
+                            height: Math.round(100 * count / max),
+                            title: self.fmt(count) + ' · ' + self.ago((hours.length - index) * 3600, true),
+                        };
+                    });
+                },
                 chartSummary: function () {
                     var total = (this.p.minutes || []).reduce(function (sum, m) { return sum + m.consented + m.unidentified; }, 0);
                     return this.msg.viewsPerMinute + ': ' + this.fmt(total);
@@ -204,6 +258,18 @@
                     if (type === 'support') return tones.amber;
                     return tones.blue;
                 },
+                // Which part of the site: one colour and icon each, used wherever a person or a page
+                // is shown. Checked as a set (every pair, light and dark, normal vision and simulated
+                // red-green colour blindness) and kept clear of the colours this page already gives a
+                // meaning: green is live, amber is stuck, blue is the brand. Sign up & log in is a
+                // doorway between two of them, so it stays grey. The label is always beside it.
+                surfaceTone: function (surface) {
+                    return {
+                        wp: { bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-600' },
+                        gp: { bg: 'bg-pink-50 dark:bg-pink-500/10', text: 'text-pink-700 dark:text-pink-600' },
+                        ap: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-500' },
+                    }[surface] || { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-500 dark:text-gray-400' };
+                },
                 rowLabel: function (card, row) {
                     return card.id === 'countries' ? this.countryName(row.key) : row.label;
                 },
@@ -224,6 +290,31 @@
                 },
                 findPerson: function (id) {
                     return this.matchPerson(this.allPeople(this.p), id);
+                },
+                stepShare: function (step) {
+                    var total = this.signups.total || 0;
+                    return total ? Math.round(100 * step.count / total) : 0;
+                },
+                // "On the site now" in the feed and the sign-ups opens that person's row, when the
+                // Visitors list holds one for them (it may be filtered, or past its row cap).
+                canShow: function (id) {
+                    return !!(id && this.findPerson(id));
+                },
+                showPerson: function (id) {
+                    var person = id && this.findPerson(id);
+                    if (!person) return;
+                    if (this.expanded !== person.id) this.toggleExpand(person);
+                    var section = document.getElementById('realtime-visitors'), still = false;
+                    try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+                    if (section) section.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+                },
+                // Unlike changed(), this leaves an open visitor row alone: the feed is another card.
+                toggleFeed: function (type) {
+                    this.feed = this.feed === type ? null : type;
+                    this.activityAll = false;
+                    this.syncUrl();
+                    clearTimeout(this.debounce);
+                    this.debounce = setTimeout(this.poll, 0);
                 },
 
                 toggleFilter: function (filter, key) {
@@ -252,6 +343,7 @@
                     if (this.who !== 'all') params.set('who', this.who);
                     if (this.all) params.set('all', '1');
                     if (this.admins) params.set('admins', '1');
+                    if (this.feed) params.set('feed', this.feed);
                     return params;
                 },
                 syncUrl: function () {
@@ -400,10 +492,32 @@
                     // A burst of arrivals would turn the list into a light show; only a few get the fade.
                     if (added.length && added.length <= 3) added.forEach(function (person) { fresh[person.id] = true; });
 
+                    // A changed feed filter brings a different list: nothing in it is news. A sign-up
+                    // row and its feed item share a key, so one entry here highlights both.
+                    var refiltered = ((data.activity && data.activity.feed) || null) !== ((this.p.activity && this.p.activity.feed) || null);
                     var seenItems = {};
                     ((this.p.activity && this.p.activity.items) || []).forEach(function (item) { seenItems[item.key] = true; });
+                    ((this.p.activity && this.p.activity.signups && this.p.activity.signups.rows) || []).forEach(function (row) { seenItems[row.key] = true; });
                     if (this.p.activity) {
-                        ((data.activity && data.activity.items) || []).forEach(function (item) { if (!seenItems[item.key]) fresh[item.key] = true; });
+                        if (!refiltered) ((data.activity && data.activity.items) || []).forEach(function (item) { if (!seenItems[item.key]) fresh[item.key] = true; });
+                        ((data.activity && data.activity.signups && data.activity.signups.rows) || []).forEach(function (row) { if (!seenItems[row.key]) fresh[row.key] = true; });
+                    }
+
+                    // A count that grew gives its button one pulse.
+                    var counted = {}, bumped = {};
+                    ((this.p.activity && this.p.activity.stats) || []).forEach(function (stat) { counted[stat.type] = stat.count; });
+                    ((data.activity && data.activity.stats) || []).forEach(function (stat) {
+                        if (counted[stat.type] !== undefined && stat.count > counted[stat.type]) bumped[stat.type] = true;
+                    });
+                    this.bumped = bumped;
+                    clearTimeout(this.bumpTimer);
+                    this.bumpTimer = setTimeout(function () { self.bumped = {}; }, 700);
+
+                    // A filter whose kind has aged out of the window has nothing left to show.
+                    var feed = this.feed;
+                    if (feed && data.activity && !(data.activity.stats || []).some(function (stat) { return stat.type === feed && stat.count > 0; })) {
+                        this.feed = null;
+                        this.syncUrl();
                     }
 
                     if (document.hidden && data.activity && data.activity.cursor && this.seenCursor && data.activity.cursor > this.seenCursor) {
@@ -470,19 +584,55 @@
                     }
                     var colors = chartColors();
                     var bar = { borderRadius: 3, borderSkipped: 'start', barPercentage: 0.8, categoryPercentage: 0.9, maxBarThickness: 16, stack: 'views' };
+                    // A sign-up is marked on the minute it happened in: a dot in the band above the
+                    // plot (layout.padding.top), a dashed line down to that minute's bar, and the
+                    // number in the dot when two or more people signed up in the one minute.
+                    var signupMarks = {
+                        id: 'realtimeSignupMarks',
+                        afterDatasetsDraw: function (chart) {
+                            var marks = chart.$signupMarks;
+                            if (!marks) return;
+                            var ctx = chart.ctx, area = chart.chartArea, lower = chart.getDatasetMeta(0).data, upper = chart.getDatasetMeta(1).data;
+                            var tint = chart.$markColors || colors, radius = 7, cy = area.top - 11;
+                            marks.forEach(function (list, index) {
+                                if (!list || !list.length || !lower[index]) return;
+                                var x = lower[index].x, barTop = Math.min(lower[index].y, upper[index] ? upper[index].y : area.bottom);
+                                ctx.save();
+                                ctx.strokeStyle = tint.green; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+                                ctx.beginPath(); ctx.moveTo(x, cy + radius + 1); ctx.lineTo(x, Math.max(cy + radius + 1, barTop - 2)); ctx.stroke();
+                                ctx.restore();
+                                ctx.save();
+                                ctx.fillStyle = tint.green; ctx.beginPath(); ctx.arc(x, cy, radius, 0, Math.PI * 2); ctx.fill();
+                                ctx.strokeStyle = tint.white; ctx.fillStyle = tint.white; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+                                if (list.length > 1) {
+                                    ctx.font = '600 10px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+                                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                                    ctx.fillText(numberFormat.format(list.length), x, cy + 0.5);
+                                } else {
+                                    ctx.beginPath(); ctx.moveTo(x - 3, cy); ctx.lineTo(x + 3, cy); ctx.moveTo(x, cy - 3); ctx.lineTo(x, cy + 3); ctx.stroke();
+                                }
+                                ctx.restore();
+                            });
+                        },
+                    };
                     this.chart = new Chart(this.$refs.chart, {
                         type: 'bar',
+                        plugins: [signupMarks],
                         data: {
                             labels: this.axisLabels(),
                             datasets: [
                                 Object.assign({ label: this.msg.acceptedCookies, data: [], backgroundColor: colors.blue }, bar),
-                                Object.assign({ label: this.msg.notIdentified, data: [], backgroundColor: colors.gray }, bar),
+                                Object.assign({ label: this.msg.notAccepted, data: [], backgroundColor: colors.gray }, bar),
                             ],
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
                             animation: { duration: 400 },
+                            layout: { padding: { top: 22 } },
+                            // The whole column answers, not just the bar: a sign-up can fall in a
+                            // minute with no page view, and its marker still has to explain itself.
+                            interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
                                 tooltip: {
@@ -490,6 +640,10 @@
                                         title: function (items) {
                                             var index = items[0].dataIndex;
                                             return index === 29 ? self.msg.thisMinute : unit(-(29 - index), 'minute');
+                                        },
+                                        afterBody: function (items) {
+                                            var list = (self.chart && self.chart.$signupMarks || [])[items[0].dataIndex];
+                                            return list && list.length ? [''].concat(list) : [];
                                         },
                                     },
                                 },
@@ -523,6 +677,7 @@
                     if (!this.chart || !this.p.minutes) return;
                     this.chart.data.datasets[0].data = this.p.minutes.map(function (m) { return m.consented; });
                     this.chart.data.datasets[1].data = this.p.minutes.map(function (m) { return m.unidentified; });
+                    this.chart.$signupMarks = this.p.minutes.map(function (m) { return m.signups || []; });
                     this.chart.update('none');
                 },
                 recolorChart: function () {
@@ -533,7 +688,10 @@
                     this.chart.options.scales.x.ticks.color = colors.ink;
                     this.chart.options.scales.y.ticks.color = colors.ink;
                     this.chart.options.scales.y.grid.color = colors.grid;
-                    this.chart.update('none');
+                    this.chart.$markColors = colors;
+                    // Not update('none'): in that mode Chart.js keeps each bar's shared options, so
+                    // the new colours never reached the bars and they stayed in the old palette.
+                    this.chart.update();
                 },
             },
 

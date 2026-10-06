@@ -11,6 +11,15 @@
     // user can dismiss. Side by side the two panels are otherwise identical chrome, and the
     // badge is the only thing carrying which of them is actually owed.
     'badgeTone' => 'brand',
+    // 'panel' is the card every caller has always had. 'chips' is one row of links, each as wide
+    // as its own text, for a page whose first screen is numbers: a full-width card holding two
+    // short lines reads there as empty space. Chips carry no dismiss control and no subtitle
+    // (it becomes the link's title), and whatever the caller puts in the slot shares the row.
+    'layout' => 'panel',
+    // Chips only: say the subtitle on the chip itself. The dashboard of someone with several
+    // schedules turns it on, because the subtitle there is which schedule the row is about, and
+    // three chips reading "event requests" with nothing to tell them apart are three guesses.
+    'subtitles' => false,
 ])
 
 @php
@@ -77,6 +86,54 @@
     ];
 @endphp
 
+@if ($layout === 'chips')
+    @php
+        // Tinted background with a full 1px tinted border, the AP's warning panel in small.
+        $chipTones = [
+            'red' => 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30',
+            'amber' => 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30',
+            'blue' => 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30',
+            'green' => 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30',
+            'purple' => 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30',
+        ];
+        $chip = 'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
+    @endphp
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h2 class="inline-flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+            {{ $heading }}
+            <span role="img" aria-label="{{ $heading }}: {{ number_format($total) }}"
+                class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-semibold rounded-full {{ $toneClasses }}">{{ number_format($total) }}</span>
+        </h2>
+
+        @foreach ($visibleItems as $item)
+            <a href="{{ $item['url'] }}" title="{{ $item['subtitle'] }}" class="{{ $chip }} {{ $chipTones[$item['color']] ?? $chipTones['blue'] }}">
+                <svg class="w-4 h-4 flex-shrink-0 {{ ($styles[$item['color']] ?? $styles['blue'])['text'] }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    {!! $icons[$item['type']] ?? '' !!}
+                </svg>
+                <span>{{ $item['title'] }}@if ($subtitles && ! empty($item['subtitle'])) <span class="font-normal text-gray-600 dark:text-gray-300">&middot; {{ $item['subtitle'] }}</span>@endif</span>
+                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </a>
+        @endforeach
+
+        {{-- The rest open as a short list under the chip that counts them. --}}
+        @if ($hiddenItems->isNotEmpty())
+            <details class="relative">
+                <summary class="{{ $chip }} cursor-pointer select-none list-none border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 [&::-webkit-details-marker]:hidden">
+                    {{ __('messages.pending_action_show_more', ['count' => $hiddenItems->count()]) }}
+                </summary>
+                <div class="absolute start-0 z-20 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1">
+                    @foreach ($hiddenItems as $item)
+                        <a href="{{ $item['url'] }}" class="block px-4 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]">{{ $item['title'] }}</a>
+                    @endforeach
+                </div>
+            </details>
+        @endif
+
+        {{ $slot }}
+    </div>
+@else
 <div class="ap-card rounded-xl overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4 flex items-center justify-between gap-3">
         <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ $heading }}</h2>
@@ -121,3 +178,4 @@
         @endif
     </div>
 </div>
+@endif

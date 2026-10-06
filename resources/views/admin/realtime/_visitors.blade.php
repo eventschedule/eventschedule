@@ -5,7 +5,8 @@
     $segItem = 'rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
     $rowGrid = 'grid grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_7rem] xl:grid-cols-[minmax(0,16rem)_minmax(0,1fr)_10rem_7rem] gap-x-4 items-start';
 @endphp
-<section class="ap-card rounded-xl" aria-labelledby="realtime-visitors-heading">
+{{-- scroll-mt: "On the site now" elsewhere on the page scrolls here, under a sticky header. --}}
+<section id="realtime-visitors" class="ap-card rounded-xl scroll-mt-20" aria-labelledby="realtime-visitors-heading">
     <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex flex-wrap items-center justify-between gap-3">
         <div class="min-w-0">
             <h2 id="realtime-visitors-heading" class="text-base font-semibold text-gray-900 dark:text-white">@{{ msg.visitors }}</h2>
@@ -82,14 +83,23 @@
                                 </span>
                                 <span v-if="person.stuck_text" class="mt-1 inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">@{{ person.stuck_text }}</span>
                                 {{-- Below md the page moves under the name. --}}
-                                <span class="md:hidden mt-1 block text-xs text-gray-600 dark:text-gray-300 truncate"><bdi>@{{ person.page.label }}</bdi> · @{{ person.page.surface_label }}</span>
+                                <span class="md:hidden mt-1 flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 min-w-0">
+                                    <svg class="w-3.5 h-3.5 shrink-0" :class="surfaceTone(person.page.surface).text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="icons[person.page.surface] || icons.other" /></svg>
+                                    <span class="truncate"><bdi>@{{ person.page.label }}</bdi> · @{{ person.page.surface_label }}</span>
+                                </span>
                             </span>
                         </span>
 
-                        {{-- Page --}}
-                        <span class="hidden md:block min-w-0">
-                            <span class="block text-sm truncate" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'"><bdi>@{{ person.page.label }}</bdi></span>
-                            <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">@{{ person.page.surface_label }}</span>
+                        {{-- Page. The tile says which part of the site it is in (surfaceTone()), so the
+                             column reads as a strip of areas before a word of it is read. --}}
+                        <span class="hidden md:flex items-start gap-3 min-w-0">
+                            <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center" :class="surfaceTone(person.page.surface).bg" aria-hidden="true">
+                                <svg class="w-4 h-4 shrink-0" :class="surfaceTone(person.page.surface).text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="icons[person.page.surface] || icons.other" /></svg>
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block text-sm truncate" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'"><bdi>@{{ person.page.label }}</bdi></span>
+                                <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">@{{ person.page.surface_label }}</span>
+                            </span>
                         </span>
 
                         {{-- Came from --}}
@@ -139,6 +149,9 @@
                                     </span>
                                 </template>
                                 <template v-else>
+                                    {{-- The area's icon before each page: a journey reads marketing site,
+                                         sign up, app without reading the words. --}}
+                                    <span class="self-center"><svg class="w-4 h-4 shrink-0" :class="surfaceTone(entry.surface).text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="icons[entry.surface] || icons.other" /></svg></span>
                                     <span class="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-300">
                                         <x-link v-if="entry.url" v-bind:href="entry.url" target="_blank" class="inline-block max-w-full truncate align-bottom"><bdi>@{{ entry.label }}</bdi></x-link>
                                         <bdi v-else>@{{ entry.label }}</bdi>

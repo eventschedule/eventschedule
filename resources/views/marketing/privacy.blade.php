@@ -782,7 +782,7 @@
 
         // The date of the last change to what this policy says. A fact about the document: move it
         // only in a commit that changes a clause.
-        $lastUpdated = 'October 4, 2026';
+        $lastUpdated = 'October 6, 2026';
 
         // The AI providers this install actually calls (GeminiUtils, OpenAIUtils).
         $aiProviders = array_values(array_filter([
@@ -1000,6 +1000,7 @@
                                                     <li><strong>Paid plans:</strong> billing is handled by Stripe, and we keep the card type, its last four digits, and the history of your plan.</li>
                                                     <li><strong>How you found us:</strong> when you create an account, the page you first landed on, the site that sent you and any campaign tags, if you allowed marketing cookies or signed up in the same visit. If you came through the sign-up or sign-in button on our homepage, also which headline the homepage was showing.</li>
                                                     <li><strong>Security records:</strong> while you are signed in, your session with its IP address and browser; and a log of sensitive actions on your account with the IP address and browser, kept for 90 days.</li>
+                                                    <li><strong>Days you used the app:</strong> the dates on which you opened the app while signed in, and nothing about what you did there. We use them to count how many people use the service, and keep them for 120 days.</li>
                                                     <li><strong>Visit statistics:</strong> your country, worked out from your IP address, which itself is not stored. If you accept analytics cookies while signed in: the pages you view, and those you viewed in this browser just before signing in, kept for about one hour after your last activity (see "Analytics &amp; Cookies").</li>
                                                     <li><strong>Connected services:</strong> if you connect a calendar, the access tokens Google or Microsoft issue, stored encrypted, and which events are synced. If you turn on push notifications, the identifier the push service gives your browser. On Enterprise schedules, WhatsApp messages sent to the schedule's number to add events, with their images.</li>
                                                 </ul>
@@ -1039,7 +1040,9 @@
                                                                 ['Keep sales records for organizers and for tax', 'Contract, and legal obligation'],
                                                                 ['Keep the service secure, stop fraud and abuse, fix errors, keep the security log', 'Legitimate interests'],
                                                                 ['Count visits as daily totals, and the anonymous version of our live view', 'Legitimate interests'],
+                                                                ['Count how many signed-in people use the app, from the dates each account was used. No cookie is involved', 'Legitimate interests'],
                                                                 [(google_analytics_enabled() ? 'Google Analytics, the identified live view' : 'The identified version of our live view').', and remembering in your browser which homepage headline you saw', 'Your consent (analytics cookies)'],
+                                                                ...(\App\Utils\RealtimeTracker::ownerViewEnabled() ? [['Show a schedule\'s organizer your visit to their own pages as a row with no name (country, device type, page, time on page)', 'Your consent (analytics cookies)']] : []),
                                                                 ['Record the page or site that brought you when you create an account or buy in the same visit, and which homepage headline was showing when you create an account from our homepage', 'Legitimate interests'],
                                                                 ['Campaign attribution kept across visits, the Meta Pixel and Conversions API, ads, and maps, videos and booking widgets from other sites', 'Your consent (marketing cookies), or your click on that one item'],
                                                                 ['Push notifications', 'Your consent (your browser\'s permission)'],
@@ -1088,6 +1091,13 @@
                                                 <p>
                                                     Signing up for a schedule's email updates works the same way: the schedule owner sees the address you enter, and confirming the link we send also sets up an account for you that follows the schedule. Submitting an event to a curator's schedule makes you a follower too, as the submission form says, and so does listing another schedule's venue or performer on an event you create, so it appears in your lists. Buying a ticket, RSVPing, or posting a comment, photo or video does not make you a follower.
                                                 </p>
+                                                {{-- The owner's Realtime page. Same predicate as the live-view paragraph under
+                                                     "Cookies and analytics", which says what is recorded and for how long. --}}
+                                                @if (\App\Utils\RealtimeTracker::ownerViewEnabled())
+                                                <p>
+                                                    A schedule owner can also see live traffic to their own schedule's pages: how many times they were viewed in the last half hour, from which countries and kinds of device, and from which sites visits to them began; and, for visitors who allowed analytics cookies on a notice that mentions organizers, a row with no name showing a country, a device type, which page is open and for how long. The row stays in their list for up to half an hour after you leave. That view never shows your name, email address or account, and it is deleted about an hour after your last activity.
+                                                </p>
+                                                @endif
                                                 @break
 
                                             @case('google-calendar-use')
@@ -1189,9 +1199,22 @@
                                                      the visitor for its route template) from every row this browser still has on its
                                                      network, plus the account's when the withdrawing page is signed in. Rows are
                                                      pruned about an hour after last activity (realtime:prune on both cron rails, plus
-                                                     a request-time backstop). Keep this paragraph in step with that code. --}}
+                                                     a request-time backstop). Keep this paragraph in step with that code.
+
+                                                     Who sees it follows RealtimeTracker::ownerViewEnabled(), the predicate behind a
+                                                     schedule owner's own Realtime page (/realtime, App\Services\ScheduleRealtime):
+                                                     where that page exists this says what an organizer sees of it, and where it does
+                                                     not, that they see none. An organizer's page lists a visitor only from a row that
+                                                     is owner_visible, i.e. whose analytics choice was made after the cookie notice
+                                                     began to name organizers. PrivacyLiveViewTest fails the build if this page says
+                                                     organizers never see the live view on an install where they do. --}}
                                                 <p>
-                                                    We also keep a short-lived record for a live view of the site that only our administrators can see, never schedule owners. What it holds depends on your analytics choice. If you allow analytics, each page you view is recorded with the page, the referring site and campaign tag, your country (looked up from your IP address, which itself is not stored), your device type, browser and operating system, and how long the page stays open, under a one-way hash of your IP address, browser and language settings that changes every day; while you are signed in it is linked to your account, including the pages you viewed in this browser just before signing in. If you decline, do not answer, or your browser sends Global Privacy Control, each page view is still counted, but with no identifier and nothing that links it to you or to your other page views: only the page (for pages behind sign-in, just which kind of page), your country, your device type and, when you arrive from another site or a tagged link, that site and campaign tag. Either way, records are deleted about an hour after your last activity, and if you withdraw your consent, the identifiers are removed from what this browser still has on its current network and, if you are signed in when you withdraw, from your account's records.
+                                                    @if (\App\Utils\RealtimeTracker::ownerViewEnabled())
+                                                    We also keep a short-lived record for a live view of the site. Our administrators can see all of it. The organizer of a schedule can see the part about that schedule's own pages, and never who you are: how many times its pages were viewed, from which countries and kinds of device, and from which sites visits to it began; and, if you allowed analytics, a row with no name showing your country, your device type, which of their pages you have open and for how long, kept in their list for up to half an hour after you leave. An organizer never sees your name, email address or account, your browser or operating system, or any page outside their own schedules. A choice you made before our cookie notice began to mention organizers does not put you in that list: you are then only counted.
+                                                    @else
+                                                    We also keep a short-lived record for a live view of the site that only our administrators can see, never schedule owners.
+                                                    @endif
+                                                    What it holds depends on your analytics choice. If you allow analytics, each page you view is recorded with the page, the referring site and campaign tag, your country (looked up from your IP address, which itself is not stored), your device type, browser and operating system, and how long the page stays open, under a one-way hash of your IP address, browser and language settings that changes every day; while you are signed in it is linked to your account, including the pages you viewed in this browser just before signing in. If you decline, do not answer, or your browser sends Global Privacy Control, each page view is still counted, but with no identifier and nothing that links it to you or to your other page views: only the page (for pages behind sign-in, just which kind of page), your country, your device type and, when you arrive from another site or a tagged link, that site and campaign tag. Either way, records are deleted about an hour after your last activity, and if you withdraw your consent, the identifiers are removed from what this browser still has on its current network and, if you are signed in when you withdraw, from your account's records.
                                                 </p>
                                                 <p>
                                                     We honor the <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="es-fine-link">Global Privacy Control<svg class="es-fine-ext" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5h6v6M19 5L9 15M15 19H5V9" /></svg></a> signal: if your browser sends GPC, we treat it as declining both categories, and the banner does not appear.
@@ -1260,7 +1283,7 @@
                                                 @break
 
                                             @case('retention')
-                                                {{-- The periods are App\Console\Commands\PrunePersonalData's constants, audit:prune,
+                                                {{-- The periods are App\Console\Commands\PrunePersonalData's constants (ACTIVE_DAY_DAYS among them), audit:prune,
                                                      RealtimeTracker::RETENTION_MINUTES, config('session.lifetime'), the backup and
                                                      webhook-delivery cleanups. Change one and change this table with it. --}}
                                                 <div class="es-fine-scroll">
@@ -1286,6 +1309,7 @@
                                                                 ['Live view records', 'About an hour after your last activity'],
                                                                 ['Sessions', $sessionHours.' hours after your last request'],
                                                                 ['Security log', '90 days. For records of plan changes, schedule claims and connected payment or calendar accounts, which are kept, the IP address and browser are removed after 90 days.'],
+                                                                ['The dates you used the app while signed in', '120 days. After that only daily totals remain, which contain nothing about you'],
                                                                 ['Background tasks that failed, which can contain an email address', '30 days'],
                                                                 ['Exports you download', '7 days'],
                                                                 ['Records of webhooks sent to organizers\' systems', '30 days'],

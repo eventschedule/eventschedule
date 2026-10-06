@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 14;
+    public const SCHEMA_VERSION = 15;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -570,6 +570,12 @@ class GrowthExportService
                 .'code step\'s conversion. signup_code_invalid is visitors who had at least one code '
                 .'rejected; it overlaps both others (a mistype followed by a success counts in each) and '
                 .'is null before 2026-09-25.',
+            'traffic[].guest_submit_views, guest_submit_code_requests and guest_submit_submissions count the '
+                .'public "Submit your event" page (the request form of venue and curator schedules), one '
+                .'visitor per day each with the sign-up counters\' bot filters. submissions/views is the '
+                .'page\'s conversion. code_requests is NOT a stage every submitter passes: only a new account '
+                .'on hosted is asked for a code, so submissions can exceed it. Accounts made there are '
+                .'signup_intent=request and are not organizers. All three are null before 2026-10-06.',
             'hit_ticket_paywall counts organizers shown the paid-ticket paywall in the event editor '
                 .'(a priced row on a schedule that cannot sell it), including a price typed and never '
                 .'saved. It is null for a window that opens before the first such view on this install. '
@@ -898,8 +904,8 @@ class GrowthExportService
                 // cannot say who that is, since the guide started mid-month.
                 SetupGuide::stage($u->setup_guide),
                 is_array($u->setup_guide) && ! empty($u->setup_guide['dismissed_at']),
-                // The account-wide "Turn off suggestions" switch: no guide, no next steps and
-                // none of the reminder emails that ask the same things.
+                // The account-wide "Turn off suggestions" switch: no guide and no next steps in
+                // the app. The reminder emails are not part of it (they follow is_subscribed).
                 $u->suggestions_off_at !== null,
             ];
         }
@@ -2722,7 +2728,12 @@ class GrowthExportService
                 .'SUM(pricing_views) as pricing_views, SUM(pricing_visitors) as pricing_visitors, '
                 .'SUM(signup_code_requests) as signup_code_requests, '
                 .'SUM(signup_code_verified) as signup_code_verified, '
-                .'SUM(signup_code_invalid) as signup_code_invalid')
+                .'SUM(signup_code_invalid) as signup_code_invalid, '
+                .'SUM(guest_submit_views) as guest_submit_views, '
+                .'SUM(guest_submit_code_requests) as guest_submit_code_requests, '
+                .'SUM(guest_submit_submissions) as guest_submit_submissions, '
+                .'SUM(booking_request_views) as booking_request_views, '
+                .'SUM(booking_request_submissions) as booking_request_submissions')
             ->orderBy('ym')
             ->get()->keyBy('ym');
 
@@ -2791,6 +2802,15 @@ class GrowthExportService
                 'signup_code_requests' => $count('signup_code_requests'),
                 'signup_code_verified' => $count('signup_code_verified'),
                 'signup_code_invalid' => $count('signup_code_invalid'),
+                // The public "Submit your event" page, its own funnel beside the sign-up one: one
+                // visitor per day who saw the form, who asked for the emailed code, and who got an
+                // event through. The middle one is not a stage everybody passes: only a NEW
+                // account on hosted is asked for a code, so submissions can exceed code requests.
+                'guest_submit_views' => $count('guest_submit_views'),
+                'guest_submit_code_requests' => $count('guest_submit_code_requests'),
+                'guest_submit_submissions' => $count('guest_submit_submissions'),
+                'booking_request_views' => $count('booking_request_views'),
+                'booking_request_submissions' => $count('booking_request_submissions'),
                 // Queried from users, not a counter column, so this one is tracked all the way
                 // back and is the only column here that never goes null.
                 'verified_signups' => (int) ($signups[$m]->c ?? 0),
@@ -3231,18 +3251,10 @@ class GrowthExportService
      */
     private function federation(): array
     {
-        $instances = DB::table('federated_instances');
-
-        return [
-            'by_status' => (clone $instances)->selectRaw('status, COUNT(*) as c')->groupBy('status')
-                ->pluck('c', 'status')->map(fn ($n) => (int) $n)->all(),
-            'active_30d' => (clone $instances)->where('status', 'approved')
-                ->where('last_seen_at', '>=', now()->copy()->subDays(30))->count(),
-            'by_version' => (clone $instances)->where('status', 'approved')
-                ->selectRaw("COALESCE(app_version, 'unknown') as v, COUNT(*) as c")
-                ->groupBy(DB::raw("COALESCE(app_version, 'unknown')"))->orderByDesc('c')->limit(10)
-                ->pluck('c', 'v')->map(fn ($n) => (int) $n)->all(),
-            'registered_by_month' => (clone $instances)->where('created_at', '>=', now()->copy()->startOfMonth()->subMonths(11))
+        // The three counts the admin dashboard also shows come from one place, so the page and
+        // this payload cannot disagree. Same keys in the same order as before.
+        return FederationStats::instances() + [
+            'registered_by_month' => DB::table('federated_instances')->where('created_at', '>=', now()->copy()->startOfMonth()->subMonths(11))
                 ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, COUNT(*) as c")
                 ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))->orderBy('ym')
                 ->pluck('c', 'ym')->map(fn ($n) => (int) $n)->all(),

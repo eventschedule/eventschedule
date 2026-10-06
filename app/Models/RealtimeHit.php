@@ -24,6 +24,8 @@ class RealtimeHit extends Model
             'consented' => 'boolean',
             'is_admin' => 'boolean',
             'is_demo' => 'boolean',
+            'is_team' => 'boolean',
+            'owner_visible' => 'boolean',
             'is_entrance' => 'boolean',
             'started_at' => 'datetime',
             'last_seen_at' => 'datetime',

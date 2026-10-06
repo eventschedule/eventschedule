@@ -51,7 +51,9 @@ const writeCookie = (state) => {
     let age = 0;
 
     if (state && state.v >= consent.VERSION) {
-        value = `${state.c.length ? state.c.join('.') : 'denied'}.${Math.floor(state.t / 1000)}`;
+        // "org" rides with an analytics choice only: it means nothing without one.
+        const marker = state.o === 1 && state.c.includes('analytics') ? '.org' : '';
+        value = `${state.c.length ? state.c.join('.') : 'denied'}${marker}.${Math.floor(state.t / 1000)}`;
         age = Math.max(0, Math.floor((consent.MAX_AGE_MS - (Date.now() - state.t)) / 1000));
     } else if (state && state.c.length) {
         // A version-1 "granted", until it stops counting.
@@ -230,6 +232,10 @@ const save = (categories) => {
         v: consent.VERSION,
         t: Math.floor(Date.now() / 1000) * 1000,
         c: consent.CATEGORIES.filter((c) => categories.includes(c)),
+        // Whether THIS notice, the one being answered, says that a schedule's organizer sees
+        // visits to its pages. Read off the banner itself and never worked out from a date: a
+        // page served from a cache, or a tab left open, shows the notice it was rendered with.
+        o: banner()?.hasAttribute('data-names-organizers') ? 1 : 0,
     };
 
     writeStored(state);

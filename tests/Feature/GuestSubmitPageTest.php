@@ -207,10 +207,16 @@ class GuestSubmitPageTest extends TestCase
         $this->assertSame(1, substr_count($html, '#code-boxes .code-input {'));
 
         // One rendered copy each is also what two pages with a copy apiece would show. What makes
-        // it one set of rules is that neither view writes them: both include the same file.
-        foreach (['auth/register.blade.php', 'event/guest-submit.blade.php'] as $view) {
+        // it one set of rules is that neither view writes them: both include the same file (the
+        // request pages through the stylesheet they share, partials/request-form-styles).
+        foreach (['auth/register.blade.php', 'partials/request-form-styles.blade.php'] as $view) {
             $source = file_get_contents(resource_path('views/'.$view));
             $this->assertStringContainsString("@include('partials.code-boxes-styles')", $source, $view);
+            $this->assertStringNotContainsString('#code-boxes .code-input', $source, $view.' writes the rules out again');
+        }
+        foreach (['event/guest-submit.blade.php', 'event/booking-request.blade.php'] as $view) {
+            $source = file_get_contents(resource_path('views/'.$view));
+            $this->assertStringContainsString("@include('partials.request-form-styles')", $source, $view);
             $this->assertStringNotContainsString('#code-boxes .code-input', $source, $view.' writes the rules out again');
         }
         $this->assertStringContainsString('#code-boxes .code-input {', file_get_contents(resource_path('views/partials/code-boxes-styles.blade.php')));

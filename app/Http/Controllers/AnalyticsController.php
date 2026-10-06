@@ -110,15 +110,18 @@ class AnalyticsController extends Controller
 
         // Date range filter
         $range = $request->range ?? 'last_30_days';
+        // "Last N days" is today and the N - 1 before it: N dates, the same span as the N it is
+        // compared with (AnalyticsService::getPeriodComparison()). subDays(N) made it N + 1 dates
+        // against N, a head start of one day in every comparison.
         [$start, $end] = match ($range) {
-            'last_7_days' => [now()->subDays(7)->startOfDay(), now()->endOfDay()],
-            'last_30_days' => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
-            'last_90_days' => [now()->subDays(90)->startOfDay(), now()->endOfDay()],
+            'last_7_days' => [now()->subDays(6)->startOfDay(), now()->endOfDay()],
+            'last_30_days' => [now()->subDays(29)->startOfDay(), now()->endOfDay()],
+            'last_90_days' => [now()->subDays(89)->startOfDay(), now()->endOfDay()],
             'this_month' => [now()->startOfMonth(), now()->endOfDay()],
             'last_month' => [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()],
             'this_year' => [now()->startOfYear(), now()->endOfDay()],
             'all_time' => [now()->subYears(10)->startOfDay(), now()->endOfDay()],
-            default => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
+            default => [now()->subDays(29)->startOfDay(), now()->endOfDay()],
         };
 
         // Every preset above except 'last_month' ends at now(), because they window things that

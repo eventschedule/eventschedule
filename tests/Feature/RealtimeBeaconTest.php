@@ -485,9 +485,148 @@ class RealtimeBeaconTest extends TestCase
         $this->assertTrue($hit->is_demo);
     }
 
-    private function beacon(array $message, array $server = []): TestResponse
+    /**
+     * The team bit: a signed-in member of a schedule looking at that schedule's own guest page.
+     * Their row is marked whatever their cookie choice, because the mark comes from the session
+     * that rendered the page and not from consent, and a schedule's owner never counts it
+     * (App\Services\ScheduleRealtime). Mutation: read is_team from the unsigned message.
+     */
+    public function test_a_member_viewing_their_own_schedule_page_is_marked_even_when_count_only(): void
     {
-        return $this->call('POST', '/api/realtime', [], [], [], array_merge($this->server(), $server), json_encode($message));
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $stranger = $this->createOwner();
+
+        $render = function (?\App\Models\User $user) use ($role): ?array {
+            $request = \Illuminate\Http\Request::create('/'.$role->subdomain);
+            $request->setUserResolver(fn () => $user);
+
+            return RealtimeTracker::context($request, 'gp', $role);
+        };
+
+        $member = $render($owner);
+        $this->assertSame(1, $member['tm']);
+        $this->assertTrue(RealtimeTracker::verify($member)['is_team']);
+
+        // Anyone else's context is exactly what it was before the bit existed.
+        $this->assertArrayNotHasKey('tm', $render($stranger));
+        $this->assertArrayNotHasKey('tm', $render(null));
+
+        $this->beacon(['t' => 'pv', 'm' => 'c', 'k' => $this->key(1), 'c' => $member])->assertNoContent();
+
+        $hit = RealtimeHit::sole();
+        $this->assertFalse($hit->consented);
+        $this->assertTrue($hit->is_team);
+    }
+
+    /**
+     * Nobody can add the bit (the signature would need it) and nobody can strip it (the signature
+     * already has it); and a page rendered before the bit shipped still verifies, as nobody's team.
+     * Mutation: always sign `tm`, or never sign it.
+     */
+    public function test_the_team_bit_cannot_be_forged_or_stripped_and_old_pages_still_verify(): void
+    {
+        $plain = $this->context(['s' => 'gp', 'p' => '/somewhere']);
+        $this->assertFalse(RealtimeTracker::verify($plain)['is_team']);
+
+        // A tab opened before the bit existed, signed the way that release signed: these eleven
+        // fields and nothing else. Spelled out here, not taken from sign(), which is the thing
+        // that must go on producing it.
+        $legacy = ['s' => 'gp', 'p' => '/somewhere', 'pt' => '/somewhere', 'r' => '', 'e' => '', 'u' => '', 'a' => 0, 'd' => 0, 'em' => 0, 'hb' => 60, 't' => RealtimeTracker::now()->timestamp];
+        $legacy['sig'] = hash_hmac('sha256', 'realtime-ctx|'.json_encode($legacy, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), (string) config('app.key'));
+        $this->assertNotNull(RealtimeTracker::verify($legacy), 'an open tab must not start being refused');
+
+        $forged = $plain + ['tm' => 1];
+        $this->assertNull(RealtimeTracker::verify($forged));
+
+        $team = $this->context(['s' => 'gp', 'p' => '/somewhere', 'tm' => 1]);
+        $this->assertTrue(RealtimeTracker::verify($team)['is_team']);
+
+        $stripped = $team;
+        unset($stripped['tm']);
+        $this->assertNull(RealtimeTracker::verify($stripped));
+
+        $this->assertNull(RealtimeTracker::verify(['tm' => 'yes'] + $plain), 'a mistyped bit is refused, not cast');
+    }
+
+    /**
+     * Who may be listed for a schedule's organizer is the SERVER's reading of the visitor's own
+     * recorded choice: it has to allow analytics and carry "org", the token cookie-consent.js
+     * writes when the notice that was answered said that an organizer sees visits to their pages.
+     * Nothing a page posts can stand in for it, and a count-only view has nobody to list.
+     *
+     * This used to be a bit the page sent after comparing the choice's date with a stamp, which
+     * no test ran and which was wrong for anyone who answered an older notice after the stamp.
+     * Mutation: set owner_visible from $identified alone, or from a posted `o`.
+     */
+    public function test_only_a_choice_made_on_a_notice_that_named_organizers_lists_the_visitor(): void
+    {
+        Setting::set('realtime_owner_view', '1');
+
+        $at = now()->timestamp;
+        $told = ['cookie_consent' => "analytics.marketing.org.{$at}"];
+        $view = fn (int $n, string $mode, array $cookies, array $more = [], array $server = []) => $this->beacon(
+            ['t' => 'pv', 'm' => $mode, 'k' => $this->key($n), 'c' => $this->context()] + $more, $server, $cookies
+        )->assertNoContent();
+
+        $view(1, 'f', $told);
+        $view(2, 'f', ['cookie_consent' => "analytics.marketing.{$at}"]);
+        $view(3, 'f', [], ['o' => 1]);
+        $view(4, 'c', $told);
+        $view(5, 'f', ['cookie_consent' => "marketing.org.{$at}"]);
+        $view(6, 'f', ['cookie_consent' => 'analytics.org.'.now()->subYears(2)->timestamp]);
+        $view(7, 'f', $told, [], ['HTTP_SEC_GPC' => '1']);
+        $view(8, 'f', ['cookie_consent' => 'granted']);
+
+        $visible = fn (int $n) => RealtimeHit::where('hit_key', $this->key($n))->sole()->owner_visible;
+
+        $this->assertTrue($visible(1));
+        $this->assertFalse($visible(2), 'answered a notice that did not name organizers: counted, never listed');
+        $this->assertFalse($visible(3), 'a page cannot say it for its visitor');
+        $this->assertFalse($visible(4), 'a count-only view has no one to list');
+        $this->assertFalse($visible(5), 'the token means nothing without analytics');
+        $this->assertFalse($visible(6), 'a choice that lapsed');
+        $this->assertFalse($visible(7), 'Global Privacy Control declines everything');
+        $this->assertFalse($visible(8), 'the one-category notice of before never named anyone');
+
+        // And with the organizers' view off the notice does not name them, so nothing is marked
+        // even for a choice that carries the token from a time it was on.
+        Setting::set('realtime_owner_view', '0');
+        $view(9, 'f', $told);
+        $this->assertFalse($visible(9));
+    }
+
+    /**
+     * Accepting mid-page upgrades the row in place and may bring the mark with it; withdrawing
+     * takes it away with the rest of the identity. And a heartbeat that has to recreate a pruned
+     * row reads the same choice. Mutation: leave owner_visible out of revoke().
+     */
+    public function test_accepting_mid_page_can_list_the_visitor_and_withdrawing_removes_them(): void
+    {
+        Setting::set('realtime_owner_view', '1');
+        $told = ['cookie_consent' => 'analytics.org.'.now()->timestamp];
+
+        $this->beacon(['t' => 'pv', 'm' => 'c', 'k' => $this->key(1), 'c' => $this->context()])->assertNoContent();
+        $this->assertFalse(RealtimeHit::sole()->owner_visible);
+
+        $this->beacon(['t' => 'pv', 'm' => 'f', 'k' => $this->key(1), 'c' => $this->context()], [], $told)->assertNoContent();
+        $this->assertTrue(RealtimeHit::sole()->owner_visible);
+
+        $this->beacon(['t' => 'revoke', 'k' => $this->key(1), 'c' => $this->context()], [], $told)->assertNoContent();
+
+        $hit = RealtimeHit::sole();
+        $this->assertFalse($hit->consented);
+        $this->assertFalse($hit->owner_visible);
+
+        RealtimeHit::query()->delete();
+        $this->beacon(['t' => 'hb', 'g' => 1, 'k' => $this->key(2), 'c' => $this->context()], [], $told)->assertNoContent();
+        $this->assertTrue(RealtimeHit::sole()->owner_visible, 'a recreated row is the same visitor under the same choice');
+    }
+
+    /** Raw cookies, as a browser sends them: the api group neither encrypts nor decrypts any. */
+    private function beacon(array $message, array $server = [], array $cookies = []): TestResponse
+    {
+        return $this->call('POST', '/api/realtime', [], $cookies, [], array_merge($this->server(), $server), json_encode($message));
     }
 
     private function server(): array

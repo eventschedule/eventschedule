@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\SupportConversation;
 use App\Models\User;
+use App\Utils\RealtimeRows;
 use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
 use Carbon\CarbonImmutable;
@@ -21,8 +22,8 @@ use Throwable;
  * realtime_hits and aggregated in PHP (portable to MySQL 5.7 / MariaDB 10.3, and testable on rows).
  *
  * Two populations from the same rows:
- *  - every engaged row feeds PAGE-VIEW numbers: the per-minute chart, the "+ N page views" line, the
- *    four breakdown cards, the dashboard teaser. A visitor who has not accepted cookies is counted
+ *  - every engaged row feeds PAGE-VIEW numbers: the per-minute chart, the "Last 30 minutes" total and
+ *    its split, the four breakdown cards, the dashboard teaser. A visitor who has not accepted cookies is counted
  *    here, as an anonymous page view, and nowhere else.
  *  - consented rows only feed everything about PEOPLE: visitors, right now, the Visitors list,
  *    timelines, "possibly stuck".
@@ -85,6 +86,7 @@ class RealtimeDashboard
         public readonly bool $all = false,
         public readonly bool $admins = false,
         public readonly ?string $expand = null,
+        public readonly ?string $feed = null,
     ) {
         $this->now = RealtimeTracker::now();
         $this->nowTs = $this->now->getTimestamp();
@@ -120,6 +122,7 @@ class RealtimeDashboard
 
         $who = $request->query('who');
         $expand = $request->query('expand');
+        $feed = $request->query('feed');
 
         return new self(
             filters: $filters,
@@ -127,6 +130,7 @@ class RealtimeDashboard
             all: $request->query('all') === '1',
             admins: $request->query('admins') === '1',
             expand: is_string($expand) && preg_match('/^(u:[A-Za-z0-9]+|v:[0-9a-f]{16})$/', $expand) === 1 ? $expand : null,
+            feed: in_array($feed, RealtimeActivity::FEEDS, true) ? $feed : null,
         );
     }
 
@@ -164,6 +168,11 @@ class RealtimeDashboard
 
         $state = $people->isEmpty() && $pageRows->isEmpty() && $this->justEnabled() ? 'waiting' : 'ok';
 
+        // Built first: the per-minute chart marks the sign-ups it reports.
+        $activity = (new RealtimeActivity)->build($this->admins, $this->presenceByUser($people), $this->feed);
+        $marks = $activity['signups']['marks'];
+        unset($activity['signups']['marks']);
+
         $payload = [
             'state' => $state,
             't' => $this->nowTs,
@@ -179,6 +188,7 @@ class RealtimeDashboard
                 'now_total' => $people->filter(fn ($person) => $person['now'])->count(),
                 'now_signed_in' => $nowPeople->where('kind', 'user')->count(),
                 'now_anon' => $nowPeople->where('kind', 'anon')->count(),
+                'now_by_surface' => $this->nowBySurface($people),
                 'win_visitors' => $counts['all'],
                 'win_views' => $consentedViews,
                 'unidentified_views' => $unidentifiedViews,
@@ -186,7 +196,7 @@ class RealtimeDashboard
                 'last_seen_ago' => $nowPeople->isEmpty() ? $this->lastSeenAgo() : null,
                 'phrases' => $this->overviewPhrases($nowPeople, $counts['all'], $consentedViews, $unidentifiedViews, $allViews),
             ],
-            'minutes' => $this->minutes($matchingRows),
+            'minutes' => $this->minutes($matchingRows, $marks),
             'counts' => $counts,
             'visitors' => $this->visitorList($matchingPeople),
             'breakdowns' => [
@@ -195,7 +205,7 @@ class RealtimeDashboard
                 'countries' => $this->countriesBreakdown($matchingRows),
                 'surfaces' => $this->surfacesBreakdown($pageRows->filter(fn ($row) => $this->matches($row, ignoreSurface: true)), $embedViews),
             ],
-            'activity' => (new RealtimeActivity)->build($this->admins, $this->presenceByUser($people)),
+            'activity' => $activity,
             'expanded' => $this->expanded($people),
         ];
 
@@ -245,7 +255,7 @@ class RealtimeDashboard
                 $row->started = $this->timestamp($row->started_at);
                 $row->last_seen = $this->timestamp($row->last_seen_at);
                 $row->ended = $row->ended_at ? $this->timestamp($row->ended_at) : null;
-                $row->is_now = $row->ended === null && $row->last_seen >= $this->nowTs - (2 * (int) $row->hb + 30);
+                $row->is_now = RealtimeRows::isNow($row->ended, $row->last_seen, (int) $row->hb, $this->nowTs);
                 $row->page_key = $this->pageKey($row);
                 $row->source_key = $this->sourceKey($row);
 
@@ -253,12 +263,10 @@ class RealtimeDashboard
             });
     }
 
-    /**
-     * strtotime, not Carbon: this runs up to three times per row, 60,000 times a poll at the cap.
-     */
+    /** One definition for both Realtime pages: see RealtimeRows. */
     private function timestamp(string $value): int
     {
-        return (int) strtotime($value.' UTC');
+        return RealtimeRows::timestamp($value);
     }
 
     private function pageKey(object $row): string
@@ -470,7 +478,7 @@ class RealtimeDashboard
             'demo' => in_array('demo', $badges, true),
             'name' => $user?->name,
             'email' => $user?->email,
-            'initials' => $user ? $this->initials($user->name ?: $user->email) : null,
+            'initials' => $user ? self::initials($user->name ?: $user->email) : null,
             'badges' => $badges,
             'stuck_mins' => $stuck,
             'country' => $current->country,
@@ -491,11 +499,13 @@ class RealtimeDashboard
             'left_ago' => $isNow ? null : max(0, $this->nowTs - $lastSeen),
             'matches_window' => $rows->contains(fn ($row) => $this->matches($row)),
             'matches_now' => $this->matches($current),
+            // For the "where are they" buttons, which keep every area's count while one is the filter.
+            'matches_now_any_surface' => $this->matches($current, ignoreSurface: true),
             'rows' => $rows,
         ];
     }
 
-    private function initials(string $name): string
+    public static function initials(string $name): string
     {
         $words = preg_split('/\s+/u', trim($name)) ?: [];
         $letters = array_map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)), array_slice($words, 0, 2));
@@ -569,7 +579,8 @@ class RealtimeDashboard
         };
     }
 
-    private function channelLabel(string $channel): string
+    /** Public and static: App\Utils\SignupSource names its channels with the same words. */
+    public static function channelLabel(string $channel): string
     {
         return match ($channel) {
             'direct' => __('messages.direct'),
@@ -589,13 +600,13 @@ class RealtimeDashboard
                 'signed_in' => trans_choice('messages.realtime_signed_in_count', $nowPeople->where('kind', 'user')->count(), ['count' => number_format($nowPeople->where('kind', 'user')->count())]),
                 'anonymous' => trans_choice('messages.realtime_anonymous_count', $nowPeople->where('kind', 'anon')->count(), ['count' => number_format($nowPeople->where('kind', 'anon')->count())]),
             ]),
-            'window' => __('messages.realtime_split', [
-                'signed_in' => trans_choice('messages.realtime_visitors_count', $visitors, ['count' => number_format($visitors)]),
-                'anonymous' => trans_choice('messages.realtime_views_count', $views, ['count' => number_format($views)]),
+            // The total first, then how it splits: every phrase carries its own unit.
+            'views_total' => trans_choice('messages.realtime_views_count', $allViews, ['count' => number_format($allViews)]),
+            'accepted' => __('messages.realtime_split', [
+                'signed_in' => trans_choice('messages.realtime_views_count', $views, ['count' => number_format($views)]),
+                'anonymous' => trans_choice('messages.realtime_visitors_count', $visitors, ['count' => number_format($visitors)]),
             ]),
-            'unidentified' => $unidentified > 0
-                ? trans_choice('messages.realtime_unidentified_views', $unidentified, ['count' => number_format($unidentified)])
-                : null,
+            'not_accepted' => trans_choice('messages.realtime_views_count', $unidentified, ['count' => number_format($unidentified)]),
             'consent' => $share !== null
                 ? __('messages.realtime_consent_share', ['percent' => $share])
                 : null,
@@ -604,20 +615,29 @@ class RealtimeDashboard
 
     /**
      * 30 clock-aligned page-view buckets, oldest first, the last one being the current minute.
+     * Each also carries the sign-ups that happened in it, as the sentences the feed shows, for the
+     * chart's markers. Like the rest of Activity, those ignore the page filters.
+     *
+     * @param  list<array{ago: int, text: string}>  $marks
      */
-    private function minutes(Collection $rows): array
+    private function minutes(Collection $rows, array $marks = []): array
     {
-        $currentMinute = intdiv($this->nowTs, 60) * 60;
-        $first = $currentMinute - 29 * 60;
-        $buckets = array_fill(0, 30, ['consented' => 0, 'unidentified' => 0]);
+        $first = RealtimeRows::firstMinute($this->nowTs);
+        $buckets = array_fill(0, RealtimeRows::MINUTES, ['consented' => 0, 'unidentified' => 0, 'signups' => []]);
 
         foreach ($rows as $row) {
-            if ($row->started < $first) {
-                continue;
-            }
+            $index = RealtimeRows::minuteIndex($row->started, $this->nowTs);
 
-            $index = min(29, intdiv($row->started - $first, 60));
-            $buckets[$index][$row->consented ? 'consented' : 'unidentified']++;
+            if ($index !== null) {
+                $buckets[$index][$row->consented ? 'consented' : 'unidentified']++;
+            }
+        }
+
+        foreach ($marks as $mark) {
+            $at = $this->nowTs - $mark['ago'];
+            if ($at >= $first) {
+                $buckets[min(29, intdiv($at - $first, 60))]['signups'][] = $mark['text'];
+            }
         }
 
         return $buckets;
@@ -705,7 +725,7 @@ class RealtimeDashboard
     private function publicPerson(array $person): array
     {
         $person['page'] = $this->pageLabel($person['current']);
-        unset($person['rows'], $person['current'], $person['user_id'], $person['matches_window'], $person['matches_now']);
+        unset($person['rows'], $person['current'], $person['user_id'], $person['matches_window'], $person['matches_now'], $person['matches_now_any_surface']);
 
         if ($person['stuck_mins'] !== null) {
             $person['stuck_text'] = trans_choice('messages.realtime_stuck', $person['stuck_mins'], ['count' => $person['stuck_mins']]);
@@ -817,6 +837,36 @@ class RealtimeDashboard
         return $list->all();
     }
 
+    /**
+     * Where the people on the site right now are: one entry per area, in a fixed order, for the
+     * buttons beside "Visitors right now". An area is where a person's CURRENT page is.
+     *
+     * The other filters apply; the surface filter does not, so pressing one area leaves the counts
+     * of the rest in place (surfacesBreakdown() makes the same exception). The marketing site
+     * exists on the nexus only, and "Sign up & log in" is a doorway rather than a place to be, so
+     * it is listed only while someone is on it or it is the filter.
+     *
+     * @return list<array{key: string, label: string, count: int}>
+     */
+    private function nowBySurface(Collection $people): array
+    {
+        $counts = $people
+            ->filter(fn ($person) => $person['now'] && $person['matches_now_any_surface'])
+            ->countBy(fn ($person) => $person['current']->surface)
+            ->all();
+
+        $surfaces = config('app.is_nexus') ? ['wp', 'gp', 'ap'] : ['gp', 'ap'];
+        if (($counts['auth'] ?? 0) > 0 || ($this->filters['surface'] ?? null) === 'auth') {
+            $surfaces[] = 'auth';
+        }
+
+        return array_map(fn ($surface) => [
+            'key' => $surface,
+            'label' => __('messages.realtime_surface_'.$surface),
+            'count' => $counts[$surface] ?? 0,
+        ], $surfaces);
+    }
+
     private function currentRow(array $person): object
     {
         $rows = $person['rows'];
@@ -826,14 +876,19 @@ class RealtimeDashboard
     }
 
     /**
-     * @return array<int, array{now: bool, ago: int}>
+     * @return array<int, array{now: bool, ago: int, stuck: ?int, surface: string}>
      */
     private function presenceByUser(Collection $people): array
     {
         $presence = [];
         foreach ($people as $person) {
             if ($person['user_id']) {
-                $presence[$person['user_id']] = ['now' => $person['now'], 'ago' => $person['left_ago'] ?? 0];
+                $presence[$person['user_id']] = [
+                    'now' => $person['now'],
+                    'ago' => $person['left_ago'] ?? 0,
+                    'stuck' => $person['stuck_mins'],
+                    'surface' => $person['current']->surface,
+                ];
             }
         }
 
@@ -929,7 +984,7 @@ class RealtimeDashboard
                 $row->started = $this->timestamp($row->started_at);
                 $row->last_seen = $this->timestamp($row->last_seen_at);
                 $row->ended = $row->ended_at ? $this->timestamp($row->ended_at) : null;
-                $row->is_now = $row->ended === null && $row->last_seen >= $this->nowTs - (2 * (int) $row->hb + 30);
+                $row->is_now = RealtimeRows::isNow($row->ended, $row->last_seen, (int) $row->hb, $this->nowTs);
 
                 return $row;
             })

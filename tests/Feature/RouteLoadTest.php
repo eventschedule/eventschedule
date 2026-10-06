@@ -324,6 +324,24 @@ class RouteLoadTest extends TestCase
         ], $user);
     }
 
+    /**
+     * A schedule owner's own Realtime page, its poll and the dashboard tile's poll. They exist
+     * only where both switches are on (they are a 404 otherwise, which the list above would
+     * accept as "loads"), so this turns them on and asks for a 200.
+     */
+    public function test_owner_realtime_routes_load(): void
+    {
+        [$user] = $this->createUserWithSchedule();
+
+        \Illuminate\Support\Facades\Cache::flush();
+        \App\Models\Setting::set('realtime_enabled', '1');
+        \App\Models\Setting::set('realtime_owner_view', '1');
+
+        foreach (['/realtime', '/realtime/data', '/realtime/summary'] as $url) {
+            $this->actingAs($user)->get($url)->assertOk();
+        }
+    }
+
     public function test_ap_schedule_routes_load(): void
     {
         [$user, $role] = $this->createUserWithSchedule('talent', 'testtalent');

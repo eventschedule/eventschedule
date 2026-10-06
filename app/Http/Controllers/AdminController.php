@@ -23,7 +23,10 @@ use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\UsageDaily;
 use App\Models\User;
+use App\Services\ActiveDays;
 use App\Services\AdminAlertService;
+use App\Services\AdminDashboard;
+use App\Services\AdminPlanCounts;
 use App\Services\AppUpdateService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
@@ -120,7 +123,8 @@ class AdminController extends Controller
     }
 
     /**
-     * Display the admin dashboard (overview/highlights).
+     * The admin dashboard. What each card counts, and why its windows are fixed rather than chosen
+     * with the date-range select the other admin pages have, is AdminDashboard's to say.
      */
     public function dashboard(Request $request)
     {
@@ -128,296 +132,29 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        // Get date range
-        $range = $request->input('range', 'last_30_days');
-        $dates = $this->getDateRange($range);
-        $startDate = $dates['start'];
-        $endDate = $dates['end'];
-        $previousStartDate = $dates['previous_start'];
-        $previousEndDate = $dates['previous_end'];
+        // ?sample=1 renders invented data for the documentation screenshot, which must not publish
+        // the developer's real schedules and people. Local and testing only: in production the
+        // parameter does nothing.
+        $dashboard = $request->boolean('sample') && app()->environment('local', 'testing')
+            ? AdminDashboard::sample()
+            : app(AdminDashboard::class)->build();
 
-        // Key Metrics (only count confirmed users and claimed roles, excluding demo data)
-        $totalUsers = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->count();
-        $totalSchedules = Role::whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->count();
-        $totalEvents = Event::whereDoesntHave('roles', function ($query) {
-            $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                ->orWhere('subdomain', 'like', 'demo-%');
-        })->count();
+        // The same figure the growth page reports as MRR, from the same class, read off the
+        // revenue card. Zero where there is no card: an install with no billing, and a card whose
+        // query failed. Not a second RecurringRevenue call: build() has just caught and reported
+        // that failure so the rest of the page stands, and asking again here, outside its guard,
+        // turned one missing card back into a 500.
+        $recurring = $dashboard['revenue']['totals'] ?? ['arr' => 0.0, 'trialing_count' => 0];
 
-        // Users in current period (only confirmed, excluding demo user)
-        $usersInPeriod = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereBetween('created_at', [$startDate, $endDate])->count();
-        $usersInPreviousPeriod = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
-        $usersChangePercent = $usersInPreviousPeriod > 0
-            ? round((($usersInPeriod - $usersInPreviousPeriod) / $usersInPreviousPeriod) * 100, 1)
-            : ($usersInPeriod > 0 ? 100 : 0);
-
-        // Schedules in current period (only claimed, excluding demo roles)
-        $schedulesInPeriod = Role::whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->whereBetween('created_at', [$startDate, $endDate])->count();
-        $schedulesInPreviousPeriod = Role::whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
-        $schedulesChangePercent = $schedulesInPreviousPeriod > 0
-            ? round((($schedulesInPeriod - $schedulesInPreviousPeriod) / $schedulesInPreviousPeriod) * 100, 1)
-            : ($schedulesInPeriod > 0 ? 100 : 0);
-
-        // Events in current period (excluding demo events)
-        $eventsInPeriod = Event::whereDoesntHave('roles', function ($query) {
-            $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                ->orWhere('subdomain', 'like', 'demo-%');
-        })->whereBetween('created_at', [$startDate, $endDate])->count();
-        $eventsInPreviousPeriod = Event::whereDoesntHave('roles', function ($query) {
-            $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                ->orWhere('subdomain', 'like', 'demo-%');
-        })->whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
-        $eventsChangePercent = $eventsInPreviousPeriod > 0
-            ? round((($eventsInPeriod - $eventsInPreviousPeriod) / $eventsInPreviousPeriod) * 100, 1)
-            : ($eventsInPeriod > 0 ? 100 : 0);
-
-        // Active users (confirmed users who logged in within the period, excluding demo user)
-        $activeUsers7Days = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->where('updated_at', '>=', now()->subDays(7))->count();
-        $activeUsers30Days = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->where('updated_at', '>=', now()->subDays(30))->count();
-
-        // Average events per schedule
-        $avgEventsPerSchedule = $totalSchedules > 0 ? round($totalEvents / $totalSchedules, 1) : 0;
-
-        // Upcoming online events (events with event_url but no venue)
-        $upcomingOnlineEvents = Event::whereNotNull('event_url')
-            ->where('event_url', '!=', '')
-            ->upcomingOrOngoing()
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('roles.type', 'venue');
-            })
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })
-            ->count();
-
-        // Events by country (from venue's country_code)
-        $eventsByCountry = Event::upcomingOrOngoing()
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })
-            ->whereHas('roles', function ($query) {
-                $query->where('roles.type', 'venue')
-                    ->whereNotNull('country_code')
-                    ->where('country_code', '!=', '');
-            })
-            ->join('event_role', 'events.id', '=', 'event_role.event_id')
-            ->join('roles', 'event_role.role_id', '=', 'roles.id')
-            ->where('roles.type', 'venue')
-            ->whereNotNull('roles.country_code')
-            ->select('roles.country_code', DB::raw('COUNT(DISTINCT events.id) as count'))
-            ->groupBy('roles.country_code')
-            ->orderByDesc('count')
-            ->limit(10)
-            ->get();
-
-        // Recent schedules (only claimed, excluding demo roles)
-        $recentSchedules = Role::with('users')
-            ->whereNotNull('user_id')
-            ->where(function ($query) {
-                $query->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->orderBy('created_at', 'desc')
-            ->limit(20)
-            ->get();
-
-        // Recent events (excluding demo and private events)
-        $recentEvents = Event::with('roles', 'creatorRole')
-            ->where('is_private', false)
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })
-            ->orderBy('created_at', 'desc')
-            ->limit(20)
-            ->get();
-
-        // Trends data - users, schedules, events over time
-        $trendData = $this->getTrendData($startDate, $endDate);
-
-        // Private event counts
-        $privateEvents = Event::where('is_private', true)
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })->count();
-        $passwordProtectedEvents = Event::where('is_private', true)
-            ->whereNotNull('event_password')
-            ->where('event_password', '!=', '')
-            ->whereDoesntHave('roles', function ($query) {
-                $query->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
-                    ->orWhere('subdomain', 'like', 'demo-%');
-            })->count();
-
-        // Boost & Newsletter stats
-        $activeBoostCampaigns = BoostCampaign::where('status', 'active')->count();
-        $boostMarkupRevenue = BoostBillingRecord::where('type', 'charge')
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('markup_amount');
-        // Off the campaigns, not off META_DEFAULT_CURRENCY: that config names the Meta ad
-        // account, defaults to USD and is absent from .env.example, so this tile printed "$0"
-        // on every selfhost no matter what currency the operator had picked.
-        $boostMarkupCurrency = BoostBillingService::markupCurrency($startDate, $endDate);
-        $adminNewslettersSent = Newsletter::admin()->where('status', 'sent')->count();
-        $newsletterSubscribers = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereNull('admin_newsletter_unsubscribed_at')
-            ->count();
-
-        // Signups by method (selected period)
-        $emailUsersInPeriod = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereNotNull('password')
-            ->whereNull('google_oauth_id')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
-
-        $googleUsersInPeriod = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereNotNull('google_oauth_id')
-            ->whereNull('password')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
-
-        $hybridUsersInPeriod = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->whereNotNull('password')
-            ->whereNotNull('google_oauth_id')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
-
-        // Recent signups
-        $recentSignups = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->orderByDesc('created_at')
-            ->limit(10)
-            ->with(['referredBy:id,name'])
-            ->get([
-                'id', 'name', 'created_at',
-                'utm_source', 'utm_medium', 'referrer_url', 'landing_page',
-                'referred_by_user_id',
-            ]);
-
-        // Stripe paid count (verified, non-demo roles only)
-        $validSubscriptionScope = function ($sq) {
-            $sq->where(function ($q) {
-                $q->active();
-            })->orWhere(function ($q) {
-                $q->onTrial();
-            })->orWhere(function ($q) {
-                $q->onGracePeriod();
-            });
-        };
-        $stripePaidCount = Role::whereNotNull('user_id')
-            ->where(function ($q) {
-                $q->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
-            ->whereHas('subscriptions', $validSubscriptionScope)
-            ->count();
-
-        // The same figure the growth page reports as MRR, from the same class - see RecurringRevenue
-        // for what it counts. Trials are left out of it and shown beside it.
-        $recurringRevenue = RecurringRevenue::summary();
-        $arr = $recurringRevenue['arr'];
-        $arrTrialingCount = $recurringRevenue['trialing_count'];
-
-        // Domains overview
-        $totalCustomDomains = Role::whereNotNull('custom_domain')->count();
-        $directCount = Role::where('custom_domain_mode', 'direct')->count();
-        $activeCount = Role::where('custom_domain_mode', 'direct')->where('custom_domain_status', 'active')->count();
-        $pendingCount = Role::where('custom_domain_mode', 'direct')->where('custom_domain_status', 'pending')->count();
-
-        // Queue health
-        $pendingJobsCount = DB::table('jobs')->count();
-        $failedJobsCount = DB::table('failed_jobs')->count();
-
-        // Everything across /admin that is waiting on an admin, as one to-do list.
-        $adminAlerts = AdminAlertService::items();
-
-        // The teaser line above the metrics; null when realtime is off.
-        $realtimeRecentViews = \App\Services\RealtimeDashboard::recentViews();
-
-        return view('admin.dashboard', compact(
-            'realtimeRecentViews',
-            'adminAlerts',
-            'totalUsers',
-            'totalSchedules',
-            'totalEvents',
-            'usersInPeriod',
-            'usersChangePercent',
-            'schedulesInPeriod',
-            'schedulesChangePercent',
-            'eventsInPeriod',
-            'eventsChangePercent',
-            'activeUsers7Days',
-            'activeUsers30Days',
-            'avgEventsPerSchedule',
-            'upcomingOnlineEvents',
-            'eventsByCountry',
-            'recentSchedules',
-            'recentEvents',
-            'privateEvents',
-            'passwordProtectedEvents',
-            'trendData',
-            'range',
-            'activeBoostCampaigns',
-            'boostMarkupRevenue',
-            'boostMarkupCurrency',
-            'adminNewslettersSent',
-            'newsletterSubscribers',
-            'emailUsersInPeriod',
-            'googleUsersInPeriod',
-            'hybridUsersInPeriod',
-            'recentSignups',
-            'stripePaidCount',
-            'arr',
-            'arrTrialingCount',
-            'totalCustomDomains',
-            'directCount',
-            'activeCount',
-            'pendingCount',
-            'pendingJobsCount',
-            'failedJobsCount',
-        ));
+        return view('admin.dashboard', [
+            'dashboard' => $dashboard,
+            'arr' => $recurring['arr'],
+            'arrTrialingCount' => $recurring['trialing_count'],
+            // Everything across /admin that is waiting on an admin, as one to-do list.
+            'adminAlerts' => AdminAlertService::items(),
+            // The line beside the alerts; null when realtime is off.
+            'realtimeRecentViews' => \App\Services\RealtimeDashboard::recentViews(),
+        ]);
     }
 
     /**
@@ -453,13 +190,23 @@ class AdminController extends Controller
             ? round((($usersInPeriod - $usersInPreviousPeriod) / $usersInPreviousPeriod) * 100, 1)
             : ($usersInPeriod > 0 ? 100 : 0);
 
-        // Active users
-        $activeUsers7Days = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->where('updated_at', '>=', now()->subDays(7))->count();
-        $activeUsers30Days = User::whereNotNull('email_verified_at')
-            ->where('email', '!=', DemoService::DEMO_EMAIL)
-            ->where('updated_at', '>=', now()->subDays(30))->count();
+        // Active users: the record ActiveDays keeps, so this page and the dashboard show one
+        // figure. It used to be users.updated_at, which calendar sync moves and a sign-in does not.
+        // Guarded like the dashboard's card: stats() writes yesterday's totals on the way, and a
+        // lock or a missing column there is not a reason to lose this whole page.
+        try {
+            $activeUsers = ActiveDays::stats();
+        } catch (\Throwable $e) {
+            report($e);
+            $activeUsers = ['available' => false, 'active_7d' => 0, 'active_30d' => 0, 'exact' => false, 'exact_30d' => false];
+        }
+        $activeUsers7Days = $activeUsers['active_7d'];
+        $activeUsers30Days = $activeUsers['active_30d'];
+        // Until the record is old enough the figure is part estimate, and the tile says so. Not
+        // where there is no record at all (the tables are not migrated yet): a zero is not an
+        // estimate of anything.
+        $activeUsers7Estimate = $activeUsers['available'] && ! $activeUsers['exact'];
+        $activeUsers30Estimate = $activeUsers['available'] && ! $activeUsers['exact_30d'];
 
         // Newsletter subscriber stats
         $newsletterSubscribed = User::whereNotNull('email_verified_at')
@@ -598,6 +345,8 @@ class AdminController extends Controller
             'usersChangePercent',
             'activeUsers7Days',
             'activeUsers30Days',
+            'activeUsers7Estimate',
+            'activeUsers30Estimate',
             'newsletterSubscribed',
             'newsletterUnsubscribed',
             'emailUsers',
@@ -1638,32 +1387,12 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        // Reusable scope: matches subscriptions that Cashier considers valid
-        // (active, on trial, or on a grace period after cancellation)
-        $validSubscriptionScope = function ($sq) {
-            $sq->where(function ($q) {
-                $q->active();
-            })->orWhere(function ($q) {
-                $q->onTrial();
-            })->orWhere(function ($q) {
-                $q->onGracePeriod();
-            });
-        };
+        // The two scopes the plan cards share, and the counts the admin dashboard also shows:
+        // AdminPlanCounts owns them so the dashboard's line and this page cannot disagree.
+        $validSubscriptionScope = AdminPlanCounts::validSubscription();
 
         // Plan statistics (excluding demo roles) using actualPlanTier() for accurate counts
-        $verifiedNonDemoScope = function ($query) {
-            $query->whereNotNull('user_id')
-                // Deleted schedules are not customers, and the list below excludes them from
-                // every state but status=deleted - so counting them here would put these cards
-                // at odds with the page they sit on.
-                ->where('is_deleted', false)
-                ->where(function ($q) {
-                    $q->whereNotNull('email_verified_at')
-                        ->orWhereNotNull('phone_verified_at');
-                })
-                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-                ->where('subdomain', 'not like', 'demo-%');
-        };
+        $verifiedNonDemoScope = AdminPlanCounts::verifiedNonDemo();
 
         $totalRoleCount = Role::where($verifiedNonDemoScope)->count();
 
@@ -1701,19 +1430,10 @@ class AdminController extends Controller
             ->count();
 
         // Manually assigned paid plans (have plan_expires, not free, no active Stripe subscription)
-        $manualPlanCount = Role::where($verifiedNonDemoScope)
-            ->where('plan_type', '!=', 'free')
-            ->whereNotNull('plan_expires')
-            ->where('plan_expires', '>=', now()->format('Y-m-d'))
-            ->whereDoesntHave('subscriptions', $validSubscriptionScope)
-            ->whereNull('trial_ends_at')
-            ->count();
+        $manualPlanCount = AdminPlanCounts::manual();
 
         // Schedules currently on trial (verified, non-demo roles only)
-        $trialCount = Role::where($verifiedNonDemoScope)
-            ->whereNotNull('trial_ends_at')
-            ->where('trial_ends_at', '>', now())
-            ->count();
+        $trialCount = AdminPlanCounts::trial();
 
         // Expiring in 30 days (verified, non-demo roles only)
         $expiringSoon = Role::where($verifiedNonDemoScope)
@@ -3278,6 +2998,7 @@ class AdminController extends Controller
             'stay22Available' => \App\Services\Stay22Service::isEnabled(),
             'stay22Aid' => \App\Services\Stay22Service::operatorAid(),
             'realtimeEnabled' => \App\Utils\RealtimeTracker::enabled(),
+            'realtimeOwnerView' => \App\Utils\RealtimeTracker::ownerViewSetting(),
         ]);
     }
 

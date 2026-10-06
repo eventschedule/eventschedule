@@ -20,7 +20,13 @@
      The context is built in a php block rather than inline, because the json directive splits its
      argument on commas, and the URL is host-less (see RealtimeTracker::beaconUrl). On an
      edge-cached marketing page the context is the same for every anonymous visitor; `u` is only
-     filled for a signed-in render, which is never cached. --}}
+     filled for a signed-in render, which is never cached.
+
+     Whether a schedule's owner may see a visitor as a row of their own Realtime page is NOT
+     decided here. The server reads it off the cookie choice this request carries
+     (RealtimeTracker::consentCoversOrganizers()), which records whether the notice that was
+     answered said so. A page deciding it by comparing dates listed people who had answered an
+     older notice after the wording changed. --}}
 @php
     $realtimeContext = \App\Utils\RealtimeTracker::context(request(), $surface ?? 'gp', $role ?? null, $event ?? null);
     $realtimeUrl = $realtimeContext ? \App\Utils\RealtimeTracker::beaconUrl() : null;

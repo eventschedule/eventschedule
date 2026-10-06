@@ -93,6 +93,10 @@ class SimulateRealtimeTraffic extends Command
                 $rows[] = $this->row([
                     'visitor_key' => $visitorKey,
                     'consented' => true,
+                    // Four in five accepted cookies after the banner named the organizer, so a
+                    // schedule's own Realtime page (/realtime) has both kinds to show: people it
+                    // may list, and people it may only count.
+                    'owner_visible' => $i % 5 !== 0,
                     'user_id' => $user && ($page > 0 || $pages === 1) ? $user->id : null,
                     'country' => $country,
                     'device' => $device,
@@ -183,6 +187,7 @@ class SimulateRealtimeTraffic extends Command
             'hit_key' => bin2hex(random_bytes(16)),
             'visitor_key' => null,
             'consented' => false,
+            'owner_visible' => false,
             'user_id' => null,
             'is_admin' => false,
             'is_demo' => false,

@@ -216,6 +216,10 @@ class HelpUtils
             ],
         ],
         'sales.import' => '/docs/tickets#importing-attendees',
+        // The signed-in dashboard, and a schedule owner's own live view (not /admin/realtime,
+        // which is the operator's and has its own entry below).
+        'dashboard' => '/docs/getting-started#dashboard',
+        'realtime' => '/docs/analytics#realtime',
         'analytics' => [
             'doc' => '/docs/analytics',
             'anchors' => [
@@ -233,6 +237,7 @@ class HelpUtils
         'checkin' => '/docs/tickets#check-in',
         'waitlist' => '/docs/tickets#waitlist',
         'referrals' => '/docs/referral-program',
+        'admin/dashboard*' => '/docs/selfhost/admin#dashboard',
         'admin/realtime*' => '/docs/selfhost/admin#realtime',
         'admin/schedules*' => '/docs/selfhost/admin#manage-plans',
         'admin/queue*' => '/docs/selfhost/admin#system-queue',

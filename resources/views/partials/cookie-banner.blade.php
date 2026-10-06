@@ -27,7 +27,17 @@
      centring, so the entrance animation is free to use transform. The bottom offset clears the
      iPhone home indicator where the layout opts into viewport-fit=cover. --}}
 @if (cookie_banner_visible())
+{{-- Where a schedule's organizer has a Realtime page (RealtimeTracker::ownerViewEnabled()), the
+     notice says so on its FIRST line, where "Allow all" is, and carries data-names-organizers.
+     cookie-consent.js reads that attribute when a choice is saved and records it on the choice;
+     only such a choice may put a visitor on an organizer's page
+     (RealtimeTracker::consentCoversOrganizers()). So the sentence and the attribute go together,
+     always: an attribute on a notice that does not show the sentence would list people who were
+     never told. The sentence used to sit in the Choose panel, which "Allow all" never opens.
+     The same value for every visitor, so it is safe in edge-cached marketing HTML. --}}
+@php $consentNamesOrganizers = \App\Utils\RealtimeTracker::ownerViewEnabled(); @endphp
 <div data-cookie-consent
+     @if ($consentNamesOrganizers) data-names-organizers @endif
      hidden
      role="region"
      aria-live="polite"
@@ -51,6 +61,9 @@
             </span>
             <p class="text-sm leading-relaxed">
                 {{ __('messages.cookie_consent_message') }}
+                @if ($consentNamesOrganizers)
+                    <span data-cookie-consent-organizers>{{ __('messages.cookie_consent_analytics_organizers') }}</span>
+                @endif
                 <x-link :href="policy_url('cookies')">{{ __('messages.cookie_consent_learn_more') }}</x-link>
                 <span aria-hidden="true">&middot;</span>
                 <button type="button" data-cookie-consent-choose aria-expanded="false" aria-controls="cookie-consent-choices"

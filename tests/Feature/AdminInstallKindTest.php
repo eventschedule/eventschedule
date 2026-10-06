@@ -44,7 +44,7 @@ class AdminInstallKindTest extends TestCase
         config(['app.hosted' => false, 'app.is_nexus' => false]);
 
         $this->page('/admin/dashboard')
-            ->assertDontSee(__('messages.stripe_paid'))
+            ->assertDontSee(__('messages.admin_dash_outside_stripe'))
             ->assertDontSee(__('messages.boost_markup_revenue'));
 
         $this->page('/admin/users')
@@ -115,7 +115,7 @@ class AdminInstallKindTest extends TestCase
         config(['app.hosted' => true, 'app.is_nexus' => true]);
 
         $this->page('/admin/dashboard')
-            ->assertSee(__('messages.stripe_paid'))
+            ->assertSee(__('messages.admin_dash_outside_stripe'))
             ->assertSee(__('messages.boost_markup_revenue'));
 
         $this->page('/admin/users')

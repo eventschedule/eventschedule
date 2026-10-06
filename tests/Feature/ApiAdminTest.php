@@ -211,6 +211,10 @@ class ApiAdminTest extends TestCase
     public function test_admin_dashboard_loads(): void
     {
         $admin = $this->createOwner(true);
+        // An install with no schedule, no event and no account but the admin's gets the
+        // new-install page, which has the headline numbers and none of the cards
+        // (AdminDashboardPageTest holds that). One schedule makes this the ordinary page.
+        $this->createRole($this->createOwner());
 
         $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
             ->actingAs($admin)->get(route('admin.dashboard'))

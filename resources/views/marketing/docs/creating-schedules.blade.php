@@ -1039,7 +1039,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On by default. Submitted events wait in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="doc-link">pending queue</a> until you accept them; turn it off and they go straight onto your public schedule. Review them under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>. Not offered on Talent schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On by default. Submitted events wait in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="doc-link">pending queue</a> until you accept them; turn it off and they go straight onto your public schedule. With it off, the Booking Form asks every visitor for an event name, a date and a start time, whatever you left optional: the event is public the moment it is sent. A request from someone on the schedule's own team skips the queue either way. Review them under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>. Not offered on Talent schedules.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Approved Schedules</h4>
@@ -1047,7 +1047,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Terms or guidelines for people sending you requests. Use it for booking policy, technical requirements, or what you will and will not take. They are shown on every request form: above the Submit button on the Booking Form, under the title of the page where a signed-up submitter enters their event, and on the AI Import form.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Terms or guidelines for people sending you requests. Use it for booking policy, technical requirements, or what you will and will not take. They are shown on every request form, where they are read before anything is typed: under the title of the Booking Form and of the page where a signed-up submitter enters their event, and on the AI Import form.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your own questions <x-doc-badge plan="pro" /></h4>

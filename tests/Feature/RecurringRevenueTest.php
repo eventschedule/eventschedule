@@ -208,4 +208,126 @@ class RecurringRevenueTest extends TestCase
         $this->assertSame(0.0, $money['mrr']);
         $this->assertNull($money['arpu']);
     }
+
+    /**
+     * The dashboard's plan table and its total come from one loop, so the rows are the total.
+     * Mutation: give the plan rows a query of their own, or count a trial as billing.
+     */
+    public function test_the_plan_rows_are_the_total_split_four_ways(): void
+    {
+        $arr = $this->seedEveryCase();
+
+        $breakdown = RecurringRevenue::breakdown();
+        $plans = $breakdown['plans'];
+
+        $this->assertSame(RecurringRevenue::PLANS, array_keys($plans));
+        // Three on Pro monthly (one past due, one whose owner never confirmed), and one each on
+        // Pro yearly, Enterprise monthly (priced from its item) and Enterprise yearly.
+        $this->assertSame([3, 1, 1, 1], array_column($plans, 'billing_count'));
+        $this->assertSame([180.0, 50.0, 180.0, 150.0], array_column($plans, 'arr'));
+        // 50 a year is 4.1666 a month. The odd cent goes to that row, and the four add up.
+        $this->assertSame([15.0, 4.17, 15.0, 12.5], array_column($plans, 'mrr'));
+
+        $this->assertSame($arr, array_sum(array_column($plans, 'arr')));
+        $this->assertSame(46.67, $breakdown['totals']['mrr']);
+        $this->assertSame(4667, (int) round(array_sum(array_column($plans, 'mrr')) * 100));
+
+        // The two on a price config no longer names are customers, at zero, on a row of their own.
+        $this->assertSame(['billing_count' => 2, 'trialing_count' => 0], $breakdown['unrecognized']);
+        $this->assertSame(8, $breakdown['totals']['billing_count']);
+        $this->assertSame(RecurringRevenue::summary(), array_intersect_key($breakdown['totals'], RecurringRevenue::summary()));
+    }
+
+    /**
+     * A trial is priced like a subscription and shown beside the revenue, never in it. A trial
+     * that was cancelled cannot convert, so it is not pipeline either. Mutation: add trial_cents
+     * to cents, or stop skipping a trialing row that has ends_at.
+     */
+    public function test_a_trial_is_priced_beside_the_revenue_and_never_in_it(): void
+    {
+        $this->seedEveryCase();
+
+        $breakdown = RecurringRevenue::breakdown();
+
+        $this->assertSame([1, 0, 0, 0], array_column($breakdown['plans'], 'trialing_count'));
+        $this->assertSame([5.0, 0.0, 0.0, 0.0], array_column($breakdown['plans'], 'trial_mrr'));
+        $this->assertSame(1, $breakdown['totals']['trialing_count']);
+        $this->assertSame(5.0, $breakdown['totals']['trial_mrr']);
+        // And the revenue is what it was without them.
+        $this->assertSame(46.67, $breakdown['totals']['mrr']);
+    }
+
+    /**
+     * Past due and cancelling sit inside the billing figures, and a subscription that is both is
+     * at risk once. Mutation: add the two counts together for at_risk_count.
+     */
+    public function test_revenue_at_risk_is_counted_once_and_inside_the_total(): void
+    {
+        $this->seedEveryCase();
+
+        $totals = RecurringRevenue::breakdown()['totals'];
+
+        $this->assertSame(1, $totals['past_due_count']);
+        $this->assertSame(1, $totals['cancelling_count']);
+        $this->assertSame(2, $totals['at_risk_count']);
+        // Pro monthly past due (60 a year) and Pro yearly cancelling (50): 110 a year.
+        $this->assertSame(9.17, $totals['at_risk_mrr']);
+
+        // Past due AND cancelling: both counts move, the subscription is at risk once.
+        $this->subscribe($this->schedule(), 'price_ent_m', 'past_due', ['ends_at' => now()->addDays(5)]);
+
+        $totals = RecurringRevenue::breakdown()['totals'];
+
+        $this->assertSame(2, $totals['past_due_count']);
+        $this->assertSame(2, $totals['cancelling_count']);
+        $this->assertSame(3, $totals['at_risk_count']);
+        $this->assertSame(24.17, $totals['at_risk_mrr']);
+    }
+
+    /**
+     * Two yearly prices that do not divide by twelve: rounded one by one the rows come to 18.34
+     * against a total of 18.33. Mutation: round each row on its own.
+     */
+    public function test_rows_never_differ_from_the_total_by_a_cent(): void
+    {
+        config(['services.stripe_platform.enterprise_price_yearly_amount' => '170']);
+
+        $this->subscribe($this->schedule(), 'price_pro_y');
+        $this->subscribe($this->schedule(), 'price_ent_y');
+
+        $breakdown = RecurringRevenue::breakdown();
+
+        $this->assertSame(18.33, $breakdown['totals']['mrr']);
+        $this->assertSame(1833, (int) round(array_sum(array_column($breakdown['plans'], 'mrr')) * 100));
+    }
+
+    /**
+     * Cashier keeps a subscription with several prices as one row with its prices on items. It is
+     * one customer, on the row of its highest plan, worth all of them. Mutation: split it by
+     * price, which makes a Pro row with money and nobody on it.
+     */
+    public function test_a_subscription_with_two_prices_is_one_customer_on_its_highest_plan(): void
+    {
+        $id = $this->subscribe($this->schedule(), null);
+
+        foreach (['price_pro_m', 'price_ent_m'] as $price) {
+            DB::table('subscription_items')->insert([
+                'subscription_id' => $id,
+                'stripe_id' => 'si_'.Str::random(14),
+                'stripe_product' => 'prod_x',
+                'stripe_price' => $price,
+                'quantity' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $breakdown = RecurringRevenue::breakdown();
+
+        $this->assertSame([0, 0, 1, 0], array_column($breakdown['plans'], 'billing_count'));
+        $this->assertSame(20.0, $breakdown['plans']['enterprise_month']['mrr']);
+        $this->assertSame(0.0, $breakdown['plans']['pro_month']['mrr']);
+        $this->assertSame(1, $breakdown['totals']['billing_count']);
+        $this->assertSame(240.0, $breakdown['totals']['arr']);
+    }
 }

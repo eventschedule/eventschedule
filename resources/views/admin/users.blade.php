@@ -225,12 +225,21 @@
                 </div>
             </div>
 
+            {{-- The record ActiveDays keeps, as on the dashboard. "Estimate" while the window still
+                 reaches back before counting began: those days are sign-ins and event edits only,
+                 and run low. --}}
             <x-stat-panel label="{{ __('messages.active_users_7_days') }}">
                 {{ number_format($activeUsers7Days) }}
+                @if ($activeUsers7Estimate)
+                    <x-slot:subtitle>@lang('messages.admin_dash_estimate')</x-slot:subtitle>
+                @endif
             </x-stat-panel>
 
             <x-stat-panel label="{{ __('messages.active_users_30_days') }}">
                 {{ number_format($activeUsers30Days) }}
+                @if ($activeUsers30Estimate)
+                    <x-slot:subtitle>@lang('messages.admin_dash_estimate')</x-slot:subtitle>
+                @endif
             </x-stat-panel>
 
             <x-stat-panel label="{{ __('messages.newsletter_subscribers') }}">
