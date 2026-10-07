@@ -213,7 +213,18 @@ trait CalendarDataTrait
         ];
     }
 
-    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, int $firstDayOfWeek = 0, bool $guestView = false, ?string $displayLang = null): JsonResponse
+    /**
+     * Cut a list that was fetched with one row to spare back to its cap, and say whether it was
+     * cut. The row cap used to be silent: the list simply ended, as though the schedule did.
+     *
+     * @return array{0: \Illuminate\Support\Collection, 1: bool}
+     */
+    protected function capListEvents($events, int $cap): array
+    {
+        return [$events->take($cap)->values(), $events->count() > $cap];
+    }
+
+    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, int $firstDayOfWeek = 0, bool $guestView = false, ?string $displayLang = null, bool $truncated = false): JsonResponse
     {
         $month = DateUtils::normalizeMonth($month);
         $year = DateUtils::normalizeYear($year);
@@ -257,6 +268,8 @@ trait CalendarDataTrait
             'pastEvents' => $pastEventsForVue,
             'hasMorePastEvents' => $hasMorePastEvents,
             'filterMeta' => $filterMeta,
+            // True when the row cap cut the list: later events exist that this payload lacks.
+            'truncated' => $truncated,
         ]);
     }
 }

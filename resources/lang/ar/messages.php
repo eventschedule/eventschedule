@@ -1022,6 +1022,7 @@ return [
     'include_past_events' => 'تضمين الأحداث السابقة',
     'past_events' => 'الأحداث السابقة',
     'load_more' => 'تحميل المزيد',
+    'later_events_not_listed' => 'هناك أحداث أخرى مجدولة بعد هذه. ستظهر هنا مع اقتراب مواعيدها.',
     'category' => 'الفئة',
     'all_categories' => 'جميع الفئات',
     'search_events' => 'البحث عن الفعاليات...',

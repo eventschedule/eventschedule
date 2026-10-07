@@ -568,6 +568,7 @@ return [
     'include_past_events' => 'Eerdere evenementen opnemen',
     'past_events' => 'Eerdere evenementen',
     'load_more' => 'Meer Laden',
+    'later_events_not_listed' => 'Na deze staan er nog meer evenementen gepland. Ze verschijnen hier naarmate de data dichterbij komen.',
     'category' => 'Categorie',
     'all_categories' => 'Alle Categorieën',
     'search_events' => 'Zoek evenementen...',

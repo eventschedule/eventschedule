@@ -612,6 +612,21 @@
 </div>
 @endif
 
+    {{-- A load that failed. It used to end in "No scheduled events", which is a statement about
+         the schedule and was only ever true of the connection. Above both views, and above the
+         rows the cache may still have drawn. --}}
+    <div v-cloak v-if="loadFailed" data-load-failed role="alert"
+         class="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <span class="flex-1 text-sm font-medium text-amber-900 dark:text-amber-100">{{ __('messages.error_loading') }}</span>
+        <button type="button" @click="retryLoad" :disabled="isLoadingEvents"
+                class="inline-flex items-center justify-center rounded-lg border border-amber-300 dark:border-amber-600 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 transition-all duration-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+            {{ __('messages.try_again') }}
+        </button>
+    </div>
+
     <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
 
         @if (request()->graphic)
@@ -641,7 +656,7 @@
         @if (($tab ?? '') != 'availability')
         {{-- The month grid has nothing for the active filters. Offers the two ways out that keep
              them: the list (every upcoming event, not just this month) and the next month. --}}
-        <div v-cloak v-if="!isLoadingEvents && narrowingFilterCount > 0 && monthMatchCount === 0"
+        <div v-cloak v-if="!isLoadingEvents && !loadFailed && narrowingFilterCount > 0 && monthMatchCount === 0"
              class="hidden md:flex {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} mb-4 flex-wrap items-center justify-between gap-3 rounded-xl bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700 px-4 py-3">
             <span v-pre class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('no_events_found') }}</span>
             @if ($route === 'guest' && ! (isset($embed) && $embed))
@@ -881,6 +896,7 @@
                         </div>
                     </template>
                 </div>
+                @include('role/partials/list-more')
                 {{-- Only an includer that caps the list opts in, so the schedule's own page never
                      links to itself. The server half of the condition is baked into the v-if the
                      way $alwaysShowFilters is: the window gap is known before Vue boots, the
@@ -906,7 +922,7 @@
             {{-- Not on the event page (force_mobile): its side agenda has no filter UI, and a Clear
                  there would change the sub-schedule and rewrite the event page's own address. --}}
             @if (! (isset($force_mobile) && $force_mobile))
-            <div v-else-if="!isLoadingEvents && narrowingFilterCount > 0" class="pb-4 text-center">
+            <div v-else-if="!isLoadingEvents && !loadFailed && narrowingFilterCount > 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_events_found') }}
@@ -920,7 +936,7 @@
                 </div>
             </div>
             @endif
-            <div v-else-if="!isLoadingEvents && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
+            <div v-else-if="!isLoadingEvents && !loadFailed && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_scheduled_events') }}
@@ -985,6 +1001,10 @@
             {{-- Upcoming Events --}}
             <div v-if="allListGroups.length" class="space-y-8">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-d-' + group.date">
+                    {{-- The end of the upcoming rows, which is above the past ones. --}}
+                    <template v-if="groupIndex === firstPastGroupIndex">
+                        @include('role/partials/list-more')
+                    </template>
                     {{-- Past Events Divider (once, before the first all-past group) --}}
                     <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))"
                          class="py-4 flex items-center gap-4">
@@ -1724,6 +1744,11 @@
                 </template>
             </div>
 
+            {{-- No past rows drawn: the end of the upcoming rows is the end of the list. --}}
+            <template v-if="firstPastGroupIndex === -1">
+                @include('role/partials/list-more')
+            </template>
+
             {{-- Load More Button --}}
             <div v-if="!hidePastEvents && hasMorePastEvents && activeFilterCount === 0" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
@@ -1736,12 +1761,15 @@
                     </svg>
                     {{ $label('load_more') }}
                 </button>
+                <div v-if="pastLoadFailed" role="alert" class="mt-3">
+                    <span class="inline-block rounded-lg bg-white/95 dark:bg-gray-900/95 px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ __('messages.error_loading') }}</span>
+                </div>
             </div>
 
 
             {{-- Empty State. With a filter active, flatPastEvents is always empty, so the raw
                  pastEvents test below would leave a filter that matches nothing on a blank page. --}}
-            <div v-if="!isLoadingEvents && narrowingFilterCount > 0 && allListGroups.length === 0" class="pb-4 text-center">
+            <div v-if="!isLoadingEvents && !loadFailed && narrowingFilterCount > 0 && allListGroups.length === 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_events_found') }}
@@ -1754,7 +1782,7 @@
                     @endif
                 </div>
             </div>
-            <div v-else-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
+            <div v-else-if="!isLoadingEvents && !loadFailed && flatUpcomingEvents.length === 0 && pastEvents.length === 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_scheduled_events') }}
@@ -1807,6 +1835,10 @@
             {{-- All events grouped by date --}}
             <div v-if="allListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
+                    {{-- The end of the upcoming rows, which is above the past ones. --}}
+                    <template v-if="groupIndex === firstPastGroupIndex">
+                        @include('role/partials/list-more')
+                    </template>
                     {{-- Past Events Divider --}}
                     <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))"
                          class="py-1 flex items-center gap-4">
@@ -1839,6 +1871,11 @@
                 </template>
             </div>
 
+            {{-- No past rows drawn: the end of the upcoming rows is the end of the list. --}}
+            <template v-if="firstPastGroupIndex === -1">
+                @include('role/partials/list-more')
+            </template>
+
             {{-- Load More Button --}}
             <div v-if="!hidePastEvents && hasMorePastEvents && activeFilterCount === 0" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
@@ -1851,10 +1888,13 @@
                     </svg>
                     {{ $label('load_more') }}
                 </button>
+                <div v-if="pastLoadFailed" role="alert" class="mt-3">
+                    <span class="inline-block rounded-lg bg-white/95 dark:bg-gray-900/95 px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{{ __('messages.error_loading') }}</span>
+                </div>
             </div>
 
             {{-- Empty State (see the desktop list's note on filters) --}}
-            <div v-if="!isLoadingEvents && narrowingFilterCount > 0 && allListGroups.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
+            <div v-if="!isLoadingEvents && !loadFailed && narrowingFilterCount > 0 && allListGroups.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_events_found') }}
@@ -1867,7 +1907,7 @@
                     @endif
                 </div>
             </div>
-            <div v-else-if="!isLoadingEvents && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
+            <div v-else-if="!isLoadingEvents && !loadFailed && flatUpcomingEvents.length === 0 && pastEvents.length === 0 && {{ ($tab ?? '') != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
                         {{ $label('no_scheduled_events') }}
@@ -2452,6 +2492,15 @@ const calendarApp = createApp({
             use24Hour: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
             hidePastEvents: {{ (isset($hide_past_events) && $hide_past_events) ? 'true' : 'false' }},
             maxEvents: {{ isset($max_events) ? $max_events : 0 }},
+            // How many upcoming rows the list draws. It was a fixed 200 with nothing after it;
+            // "Show more" raises it (role/partials/list-more).
+            listRowLimit: 200,
+            // The server's row cap cut the payload: later events exist that the page does not hold.
+            listTruncated: false,
+            // The last load failed. Every empty state is behind this: "No scheduled events" is a
+            // statement about the schedule, and used to be what a dropped connection produced.
+            loadFailed: false,
+            pastLoadFailed: false,
             subdomain: '{{ isset($subdomain) ? $subdomain : '' }}',
             guestBasePath: @json($guestBasePath),
             route: '{{ $route }}',
@@ -3060,8 +3109,26 @@ const calendarApp = createApp({
                 return this.compareSameDay(a, b, a.occurrenceDate);
             });
         },
+        // An includer's max_events wins; otherwise the number "Show more" raises.
+        listRowCap() {
+            return this.maxEvents || this.listRowLimit;
+        },
         mobileEventsList() {
-            return this.allMobileOccurrences.slice(0, this.maxEvents || 200);
+            return this.allMobileOccurrences.slice(0, this.listRowCap);
+        },
+        // Whether "Show more" has anything to show: a visible occurrence past the cut. Same
+        // reasoning as hasMoreEventsThanShown below, for the list that is NOT capped by its
+        // includer.
+        hasMoreListRows() {
+            if (this.maxEvents) {
+                return false;
+            }
+            return this.allMobileOccurrences.slice(this.listRowLimit).some(e => this.isEventVisible(e));
+        },
+        // Where the past rows begin in allListGroups (-1: none are drawn). "Show more" belongs at
+        // the end of the upcoming rows, which is above the past ones.
+        firstPastGroupIndex() {
+            return this.allListGroups.findIndex(group => group.events.every(e => e._isPast));
         },
         // Whether the max_events cap is hiding occurrences the widget would otherwise render.
         // mobileEventsList is by construction a PREFIX of allMobileOccurrences, so "more visible
@@ -3107,7 +3174,7 @@ const calendarApp = createApp({
                     });
                 }
             });
-            return events.slice(0, this.maxEvents || 200);
+            return events.slice(0, this.listRowCap);
         },
         flatPastEvents() {
             if (this.activeFilterCount > 0) return [];
@@ -3475,6 +3542,22 @@ const calendarApp = createApp({
         },
         playVideo(key) {
             this.playingVideo = this.playingVideo === key ? null : key;
+        },
+        showMoreListRows() {
+            this.listRowLimit += 200;
+        },
+        // Try the load again: the button on the failed-load notice, and the browser's `online`
+        // event. The same choice mounted() makes between the list's payload and the month's.
+        retryLoad() {
+            if (this.isLoadingEvents) {
+                return;
+            }
+            this.isLoadingEvents = true;
+            if (this.currentView === 'list') {
+                this.fetchCalendarEvents({ skipMonthFilter: true });
+            } else {
+                this.fetchCalendarEventsForMonth(this.pageMonth, this.pageYear);
+            }
         },
         toggleView(view) {
             this.currentView = view;
@@ -4500,6 +4583,7 @@ const calendarApp = createApp({
         async loadMorePastEvents() {
             if (this.loadingPastEvents || !this.hasMorePastEvents) return;
             this.loadingPastEvents = true;
+            this.pastLoadFailed = false;
             try {
                 const oldestEvent = this.pastEvents[this.pastEvents.length - 1];
                 if (!oldestEvent || !oldestEvent.starts_at) return;
@@ -4509,6 +4593,11 @@ const calendarApp = createApp({
                     url += '&lang=' + encodeURIComponent(this.languageCode);
                 }
                 const response = await fetch(url);
+                // An error answered in JSON has no has_more: read as "no more", the button used to
+                // vanish as though the past had run out.
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
                 const data = await response.json();
                 if (data.events && data.events.length > 0) {
                     this.pastEvents = this.pastEvents.concat(data.events);
@@ -4516,6 +4605,7 @@ const calendarApp = createApp({
                 this.hasMorePastEvents = data.has_more;
             } catch (e) {
                 console.error('Failed to load more past events:', e);
+                this.pastLoadFailed = true;
             } finally {
                 this.loadingPastEvents = false;
             }
@@ -4592,6 +4682,7 @@ const calendarApp = createApp({
                         this.updateEventIdsInViewedMonth(data.eventsMap);
                         this.pastEvents = data.pastEvents || [];
                         this.hasMorePastEvents = data.hasMorePastEvents || false;
+                        this.listTruncated = !!data.truncated;
                         this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
                         this.isLoadingEvents = false;
                         this.onEventsReady();
@@ -4616,7 +4707,12 @@ const calendarApp = createApp({
                     url += '&lang=' + encodeURIComponent(this.languageCode);
                 }
 
+                this.loadFailed = false;
                 const response = await fetch(url);
+                // fetch() resolves on a 500 or a 404 too, so the status has to be read.
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
                 const data = await response.json();
 
                 this.allEvents = data.events;
@@ -4624,6 +4720,7 @@ const calendarApp = createApp({
                 this.updateEventIdsInViewedMonth(data.eventsMap);
                 this.pastEvents = data.pastEvents || [];
                 this.hasMorePastEvents = data.hasMorePastEvents || false;
+                this.listTruncated = !!data.truncated;
                 this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
 
                 // Cache for stale-while-revalidate on next visit
@@ -4635,6 +4732,8 @@ const calendarApp = createApp({
 
             } catch (e) {
                 console.error('Failed to load calendar events:', e);
+                // Said on the page (data-load-failed), above whatever the cache could still draw.
+                this.loadFailed = true;
             } finally {
                 this.isLoadingEvents = false;
                 this.onEventsReady();
@@ -4665,6 +4764,7 @@ const calendarApp = createApp({
                         this.updateEventIdsInViewedMonth(data.eventsMap);
                         this.pastEvents = data.pastEvents || [];
                         this.hasMorePastEvents = data.hasMorePastEvents || false;
+                        this.listTruncated = !!data.truncated;
                         this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
                         this.isLoadingEvents = false;
                         this.onEventsReady();
@@ -4691,7 +4791,12 @@ const calendarApp = createApp({
                     url += '&lang=' + encodeURIComponent(this.languageCode);
                 }
 
+                this.loadFailed = false;
                 const response = await fetch(url);
+                // fetch() resolves on a 500 or a 404 too, so the status has to be read.
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
                 const data = await response.json();
 
                 this.allEvents = data.events;
@@ -4699,6 +4804,7 @@ const calendarApp = createApp({
                 this.updateEventIdsInViewedMonth(data.eventsMap);
                 this.pastEvents = data.pastEvents || [];
                 this.hasMorePastEvents = data.hasMorePastEvents || false;
+                this.listTruncated = !!data.truncated;
                 this.uniqueCategoryIds = data.filterMeta.uniqueCategoryIds;
 
                 this.listDataLoaded = true;
@@ -4712,6 +4818,8 @@ const calendarApp = createApp({
 
             } catch (e) {
                 console.error('Failed to load calendar events:', e);
+                // Said on the page (data-load-failed), above whatever the cache could still draw.
+                this.loadFailed = true;
             } finally {
                 this.isLoadingEvents = false;
                 this.onEventsReady();
@@ -4759,6 +4867,13 @@ const calendarApp = createApp({
 
         // Clean up early-load CSS override; Vue/inline styles now have correct values
         document.documentElement.removeAttribute('data-es-view');
+
+        // A load that failed for want of a connection is tried again when there is one.
+        window.addEventListener('online', () => {
+            if (this.loadFailed) {
+                this.retryLoad();
+            }
+        });
 
         if (this.isLoadingEvents) {
             // Ajax mode: fetch events, then init popups after data loads. The list layout needs the

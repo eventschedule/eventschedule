@@ -978,6 +978,7 @@ return [
     'include_past_events' => 'Inclure les événements passés',
     'past_events' => 'Événements passés',
     'load_more' => 'Charger plus',
+    'later_events_not_listed' => 'D\'autres événements sont programmés après ceux-ci. Ils apparaîtront ici à mesure que les dates approchent.',
     'category' => 'Catégorie',
     'all_categories' => 'Toutes les catégories',
     'search_events' => 'Rechercher des événements...',

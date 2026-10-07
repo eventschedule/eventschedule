@@ -450,6 +450,7 @@ return [
     'include_past_events' => 'כלול אירועים קודמים',
     'past_events' => 'אירועים קודמים',
     'load_more' => 'טען עוד',
+    'later_events_not_listed' => 'יש אירועים נוספים אחרי אלה. הם יופיעו כאן כשהתאריכים יתקרבו.',
     'category' => 'קטגוריה',
     'all_categories' => 'כל הקטגוריות',
     'search_events' => 'חפש אירועים...',

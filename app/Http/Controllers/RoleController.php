@@ -88,9 +88,10 @@ class RoleController extends Controller
     use Traits\ResolvesGuestLanguage;
 
     // Max events loaded whenever the month window is dropped, which is now both calendar-events
-    // endpoints, guest and admin, in either layout. They display at most 200 upcoming events
-    // client-side, so the nearest 400 upcoming rows are a safe superset while keeping the query
-    // bounded (prevents hydrating the full event table on large schedules).
+    // endpoints, guest and admin, in either layout. The nearest 400 upcoming rows keep the query
+    // bounded (prevents hydrating the full event table on large schedules). It is a cut, not a
+    // superset: each query asks for one row more, and the payload's `truncated` says when that
+    // row was there, so the end of the list can say later events exist (capListEvents()).
     private const LIST_EVENT_CAP = 400;
 
     protected $eventRepo;
@@ -3313,7 +3314,7 @@ class RoleController extends Controller
                     });
                 })
                 ->orderBy('starts_at')
-                ->limit(self::LIST_EVENT_CAP)
+                ->limit(self::LIST_EVENT_CAP + 1)
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
@@ -3335,9 +3336,11 @@ class RoleController extends Controller
                     });
                 })
                 ->orderBy('starts_at')
-                ->limit(self::LIST_EVENT_CAP)
+                ->limit(self::LIST_EVENT_CAP + 1)
                 ->get();
         }
+
+        [$events, $truncated] = $this->capListEvents($events, self::LIST_EVENT_CAP);
 
         $pastEvents = collect();
         $hasMorePastEvents = false;
@@ -3392,7 +3395,7 @@ class RoleController extends Controller
             }
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $firstDayOfWeek, true, $displayLang);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $firstDayOfWeek, true, $displayLang, $truncated);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse
@@ -3428,7 +3431,7 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->orderBy('starts_at')
-                ->limit(self::LIST_EVENT_CAP)
+                ->limit(self::LIST_EVENT_CAP + 1)
                 ->get();
         } else {
             $events = Event::with('roles', 'parts', 'tickets')
@@ -3440,11 +3443,13 @@ class RoleController extends Controller
                 })
                 ->inMonth($startOfGridUtc, null)
                 ->orderBy('starts_at')
-                ->limit(self::LIST_EVENT_CAP)
+                ->limit(self::LIST_EVENT_CAP + 1)
                 ->get();
         }
 
-        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $firstDayOfWeek);
+        [$events, $truncated] = $this->capListEvents($events, self::LIST_EVENT_CAP);
+
+        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $firstDayOfWeek, false, null, $truncated);
     }
 
     public function auditLog(Request $request, $subdomain)

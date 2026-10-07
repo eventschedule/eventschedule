@@ -1019,6 +1019,7 @@ return [
     'include_past_events' => 'Include Evenimente Trecute',
     'past_events' => 'Evenimente Trecute',
     'load_more' => 'Încarcă Mai Mult',
+    'later_events_not_listed' => 'Mai sunt programate evenimente după acestea. Vor apărea aici pe măsură ce datele se apropie.',
     'category' => 'Categorie',
     'all_categories' => 'Toate Categoriile',
     'subschedule' => 'Sub-program',
