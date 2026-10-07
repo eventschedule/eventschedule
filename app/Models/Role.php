@@ -4045,6 +4045,26 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * Where the credit chip points: eventschedule.com, tagged with why this page carries it, or
+     * null when it carries none. Always eventschedule.com and never marketing_url(): it is the
+     * license attribution, and that is not the operator's to rebrand. The tag lets the /admin
+     * traffic sources report tell an operator's platform from a selfhost install from our own
+     * free tier from a granted plan.
+     */
+    public function creditChipUrl(): ?string
+    {
+        $utm = [
+            'selfhost' => '?utm_source=selfhost&utm_medium=footer',
+            'saas' => '?utm_source=saas&utm_medium=footer',
+            'free_plan' => '?utm_source=free-plan&utm_medium=footer',
+            'granted_plan' => '?utm_source=granted-plan&utm_medium=footer',
+        ];
+        $reason = $this->creditChipReason();
+
+        return $reason ? 'https://eventschedule.com'.($utm[$reason] ?? '') : null;
+    }
+
+    /**
      * Why this schedule's guest pages carry the small "Event Schedule" credit chip, or null when
      * they do not - either because none is owed, or because the footer strip is already carrying
      * one:

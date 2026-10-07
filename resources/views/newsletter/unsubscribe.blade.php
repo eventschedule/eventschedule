@@ -1,4 +1,4 @@
-<x-auth-layout>
+<x-auth-layout :schedule="($isAdminNewsletter ?? false) ? null : ($role ?? null)">
     @php
         $displayName = ($isAdminNewsletter ?? false) ? config('app.name') : ($role?->name ?? '');
     @endphp

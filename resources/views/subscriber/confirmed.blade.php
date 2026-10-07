@@ -9,7 +9,7 @@
     refresh re-renders it from the session instead of replaying a token confirm() has already burned
     and landing on the 410. That matters here because this page now carries a password form.
 --}}
-<x-auth-layout>
+<x-auth-layout :schedule="$role ?? null">
     {{-- Both password surfaces carry a timezone field, so the script covers both ids. --}}
     @if ((($claimToken ?? null) && ($claimEmail ?? null)) || ($offerPassword ?? false))
     <x-slot name="head">

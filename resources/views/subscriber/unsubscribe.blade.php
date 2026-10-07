@@ -3,7 +3,7 @@
     word "unsubscribed" - it was once also declared as "Successfully unsubscribed from emails", but
     PHP kept the later label, so a page heading built on it reads, in full, "unsubscribed".
 --}}
-<x-auth-layout>
+<x-auth-layout :schedule="$role ?? null">
     @php
         $scheduleName = $role?->name ?? config('app.name');
     @endphp

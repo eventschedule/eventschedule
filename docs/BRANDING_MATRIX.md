@@ -74,6 +74,7 @@ Enterprise Stripe subscription.
 | Embed snippet line, on the host's page | yes | -- | -- | yes | -- | -- |
 | Ticket/RSVP embed frame | yes | -- | -- | yes | -- | -- |
 | Newsletter email footer | yes | -- | -- | yes | -- | -- |
+| Pages a schedule's mail links to (confirm, manage, unsubscribe), the chip under the card | yes, `utm_source=free-plan` | -- | yes, `utm_source=granted-plan` | -- | yes, `utm_source=saas` | yes, `utm_source=selfhost` |
 | Head metadata: `<title>`, `og:site_name` | -- | -- | -- | -- | -- | -- |
 | Head metadata: `twitter:site` | -- | -- | -- | -- | -- | -- |
 | Head metadata: `BreadcrumbList` root | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` | `marketing_url()` |

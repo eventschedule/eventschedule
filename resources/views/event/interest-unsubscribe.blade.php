@@ -5,7 +5,7 @@
     Deliberately does NOT reuse messages.unsubscribed: that key is an admin stat label and renders
     as the bare word "unsubscribed". Same reason subscriber/unsubscribe.blade.php avoids it.
 --}}
-<x-auth-layout>
+<x-auth-layout :schedule="$event?->creatorRole">
     @php
         $eventName = $event?->name ?: __('messages.event');
     @endphp

@@ -10,7 +10,7 @@
     The GET mutates nothing: Safe Links, Proofpoint and Barracuda dereference footer links before a
     human ever sees them. The POST only ever mails the address on the token's row.
 --}}
-<x-auth-layout>
+<x-auth-layout :schedule="$role ?? null">
     <div class="text-center">
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('messages.subscription_manage_heading') }}

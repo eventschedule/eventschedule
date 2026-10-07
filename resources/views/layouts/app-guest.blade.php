@@ -699,13 +699,8 @@
         // query string self-canonicalizes away. The chip always points at eventschedule.com
         // rather than marketing_url(): it is the license attribution, and that is not the
         // operator's to rebrand.
-        $creditUtm = [
-            'selfhost' => '?utm_source=selfhost&utm_medium=footer',
-            'saas' => '?utm_source=saas&utm_medium=footer',
-            'free_plan' => '?utm_source=free-plan&utm_medium=footer',
-            'granted_plan' => '?utm_source=granted-plan&utm_medium=footer',
-        ];
-        $creditUrl = 'https://eventschedule.com'.($creditUtm[$creditReason] ?? '');
+        // (Role::creditChipUrl(), which the pages a schedule's mail links to print too.)
+        $creditUrl = $role->creditChipUrl() ?? 'https://eventschedule.com';
     @endphp
 
     {{-- The privacy policy that covers this page, and the way back into the cookie banner (GDPR

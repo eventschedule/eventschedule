@@ -26,7 +26,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Event Schedule</title>
+    @php
+        // The schedule whose own mail led here, or null: see App\View\Components\AuthLayout.
+        $authSchedule = (($schedule ?? null) instanceof \App\Models\Role && $schedule->exists) ? $schedule : null;
+    @endphp
+    <title>{{ $authSchedule ? $authSchedule->translatedName() : 'Event Schedule' }}</title>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -44,9 +48,20 @@
     {{ isset($abovePage) ? $abovePage : '' }}
 
     <div id="main-content" tabindex="-1" class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
+        @if ($authSchedule)
+            {{-- The schedule's own logo and name, and the way back to its page. No platform logo:
+                 this is the schedule speaking to its own audience (docs/BRANDING_MATRIX.md). --}}
+            <a href="{{ $authSchedule->getGuestUrl() }}" data-auth-schedule class="flex flex-col items-center gap-3 px-4 text-center">
+                @if ($authSchedule->profile_image_url)
+                    <img src="{{ $authSchedule->profile_image_url }}" alt="" class="h-20 w-20 rounded-2xl object-cover shadow-sm">
+                @endif
+                <span class="text-xl font-bold text-gray-900 dark:text-gray-100" dir="auto">{{ $authSchedule->translatedName() }}</span>
+            </a>
+        @else
         <a href="{{ marketing_url() }}">
             <x-application-logo class="w-20 h-20 fill-current text-gray-500 dark:text-gray-400" />
         </a>
+        @endif
 
         <div class="flex flex-col lg:flex-row lg:gap-8 w-full max-w-md mx-auto">
             <div class="auth-card w-full sm:max-w-md sm:min-w-[28rem] mt-6 px-6 py-4 overflow-hidden sm:rounded-lg">
@@ -61,6 +76,18 @@
             <a href="{{ policy_url('privacy') }}" class="hover:text-gray-700 dark:hover:text-gray-200 hover:underline">{{ __('messages.privacy_policy') }}</a>
             <span aria-hidden="true">&middot;</span>
             <button type="button" data-cookie-consent-reopen class="hover:text-gray-700 dark:hover:text-gray-200 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
+        </p>
+        @endif
+
+        {{-- The credit a schedule's own page carries, where it carries one (Role::creditChipUrl()). --}}
+        @if ($authSchedule && ($authCreditUrl = $authSchedule->creditChipUrl()))
+        <p class="mt-8 flex justify-center px-4">
+            {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
+            <a href="{{ $authCreditUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
+               class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 transition-colors hover:bg-white hover:text-gray-900">
+                <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
+                <span>Event Schedule</span>
+            </a>
         </p>
         @endif
 
