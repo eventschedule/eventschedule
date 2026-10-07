@@ -73,7 +73,7 @@
                 <div class="mb-4">
                     <label class="inline-flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" id="send_to_self" name="send_to_self" value="1" {{ old('send_to_self') ? 'checked' : '' }}
-                            class="rounded border-gray-300 dark:border-gray-600" style="accent-color: {{ $accentColor }}">
+                            class="rounded border-gray-300 dark:border-gray-600" style="accent-color: var(--es-accent-readable)">
                         <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.gift_card_send_to_self') }}</span>
                     </label>
                 </div>
@@ -124,7 +124,7 @@
                 @endif
 
                 <button type="submit"
-                    style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                    style="border-color: var(--es-accent); background-color: var(--es-accent); color: var(--es-accent-text)"
                     class="w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-base font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--gift-accent)]">
                     {{ __('messages.buy_gift_card') }}
                 </button>
@@ -132,15 +132,15 @@
         </div>
 
         <p class="mt-4 text-center text-sm">
-            <a href="{{ $role->getGuestUrl() }}" class="hover:underline" style="color: {{ $accentColor }}">&larr; {{ __('messages.gift_card_back_to_schedule', ['schedule' => $role->name]) }}</a>
+            <a href="{{ $role->getGuestUrl() }}" class="hover:underline" style="color: var(--es-accent-readable)">&larr; {{ __('messages.gift_card_back_to_schedule', ['schedule' => $role->name]) }}</a>
         </p>
     </div>
 </div>
 
 <style {!! nonce_attr() !!}>
     :root {
-        --gift-accent: {{ $accentColor }};
-        --gift-contrast: {{ $contrastColor }};
+        --gift-accent: var(--es-accent);
+        --gift-contrast: var(--es-accent-text);
     }
 </style>
 

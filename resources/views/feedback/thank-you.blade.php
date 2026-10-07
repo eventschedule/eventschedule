@@ -65,7 +65,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
                 <a href="{{ $event->getGuestUrl() }}#gp-fan-content"
                     class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 hover:opacity-90"
-                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                    style="background-color: var(--es-accent); color: var(--es-accent-text);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                     </svg>

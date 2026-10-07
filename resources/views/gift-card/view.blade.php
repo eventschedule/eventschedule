@@ -51,7 +51,7 @@
 
         {{-- Card --}}
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center">
-            <div class="text-4xl font-bold" style="color: {{ $accentColor }}">
+            <div class="text-4xl font-bold" style="color: var(--es-accent-readable)">
                 {{ \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code) }}
             </div>
             @if ((float) $giftCard->remaining_amount !== (float) $giftCard->amount)
@@ -99,13 +99,13 @@
 
         <div class="mt-6 text-center space-y-2">
             <a href="{{ $role->getGuestUrl() }}"
-                style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                style="border-color: var(--es-accent); background-color: var(--es-accent); color: var(--es-accent-text)"
                 class="inline-flex items-center justify-center rounded-lg px-4 py-3 text-base font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg">
                 {{ __('messages.gift_card_browse_events', ['schedule' => $role->name]) }}
             </a>
             @if ($role->canSellGiftCards())
             <p class="text-sm">
-                <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="hover:underline" style="color: {{ $accentColor }}">
+                <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="hover:underline" style="color: var(--es-accent-readable)">
                     {{ __('messages.gift_card_buy_another') }}
                 </a>
             </p>

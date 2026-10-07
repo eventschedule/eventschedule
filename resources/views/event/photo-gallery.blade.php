@@ -76,7 +76,7 @@
           {{-- Add photo button --}}
           <button x-data @click="$dispatch('toggle-upload')"
                   class="hidden sm:inline-flex items-center gap-1.5 px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
-                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                  style="background-color: var(--es-accent); color: var(--es-accent-text);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
             {{ __('messages.add_photo') }}
           </button>
@@ -108,7 +108,7 @@
                @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
                class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
                :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
-               :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+               :style="dragging ? 'border-color: var(--es-accent)' : ''">
             <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 mb-2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
               <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
@@ -121,7 +121,7 @@
           </div>
           <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
                   class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
-                  style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                  style="border-color: var(--es-accent-readable); color: var(--es-accent-readable)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
             {{ __('messages.take_photo') }}
           </button>
@@ -129,7 +129,7 @@
                  @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
           <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
           @include('partials.fan-content-guest-fields')
-          <button x-show="photoPreview" type="submit" class="self-start font-semibold text-base px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
+          <button x-show="photoPreview" type="submit" class="self-start font-semibold text-base px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
         </form>
       </div>
     </div>
@@ -156,7 +156,7 @@
     <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
       @foreach ($allPhotos as $photo)
       <a href="{{ $photo->photo_url }}" data-lightbox-set="fan" data-lightbox-index="{{ $loop->index }}"
-              class="group relative block aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900" style="--tw-ring-color: {{ $accentColor }};">
+              class="group relative block aspect-square rounded-lg overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900" style="--tw-ring-color: var(--es-accent-readable);">
         <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div class="absolute bottom-0 inset-x-0 p-3">
@@ -175,7 +175,7 @@
       @if (! $photoLimitReached && $event->isFanPhotosEnabled() && ! is_demo_role($role))
       <button x-data @click="$dispatch('toggle-upload')"
               class="inline-flex items-center gap-1.5 px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
-              style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+              style="background-color: var(--es-accent); color: var(--es-accent-text);">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
         {{ __('messages.add_photo') }}
       </button>
@@ -223,7 +223,7 @@
       <button type="button"
               @click="$dispatch('toggle-upload'); window.scrollTo({ top: 0, behavior: 'smooth' })"
               class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg inline-flex items-center gap-2"
-              style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+              style="background-color: var(--es-accent); color: var(--es-accent-text);">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
         {{ __('messages.add_photo') }}
       </button>

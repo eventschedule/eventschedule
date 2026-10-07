@@ -73,7 +73,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
             </svg>
             <p class="text-gray-600 dark:text-gray-300 mb-4">{{ __('messages.carpool_login_required') }}</p>
-            <a href="{{ app_url(route('login', [], false)) }}" class="inline-block px-4 py-2 rounded-lg text-white font-medium text-sm" style="background-color: {{ $accentColor }};">
+            <a href="{{ app_url(route('login', [], false)) }}" class="inline-block px-4 py-2 rounded-lg text-white font-medium text-sm" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                 {{ __('messages.log_in') }}
             </a>
         </div>
@@ -90,7 +90,7 @@
                     <input type="checkbox" name="agree" value="1" class="mt-1 rounded border-gray-300 dark:border-gray-500 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" required>
                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.carpool_disclaimer_checkbox', ['app' => config('app.name')]) }}</span>
                 </label>
-                <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: {{ $accentColor }};">
+                <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                     {{ __('messages.confirm') }}
                 </button>
             </form>
@@ -102,16 +102,16 @@
 
             {{-- Direction filter tabs --}}
             <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'all' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'all' ? 'background-color: {{ $accentColor }}' : ''" @click="filter = 'all'">
+                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'all' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'all' ? 'background-color: var(--es-accent); color: var(--es-accent-text)' : ''" @click="filter = 'all'">
                     {{ __('messages.all') }}
                 </button>
-                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'to_event' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'to_event' ? 'background-color: {{ $accentColor }}' : ''" @click="filter = 'to_event'">
+                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'to_event' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'to_event' ? 'background-color: var(--es-accent); color: var(--es-accent-text)' : ''" @click="filter = 'to_event'">
                     {{ __('messages.carpool_to_event') }}
                 </button>
-                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'from_event' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'from_event' ? 'background-color: {{ $accentColor }}' : ''" @click="filter = 'from_event'">
+                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'from_event' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'from_event' ? 'background-color: var(--es-accent); color: var(--es-accent-text)' : ''" @click="filter = 'from_event'">
                     {{ __('messages.carpool_from_event') }}
                 </button>
-                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'round_trip' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'round_trip' ? 'background-color: {{ $accentColor }}' : ''" @click="filter = 'round_trip'">
+                <button type="button" class="carpool-filter-tab px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="filter === 'round_trip' ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'" :style="filter === 'round_trip' ? 'background-color: var(--es-accent); color: var(--es-accent-text)' : ''" @click="filter = 'round_trip'">
                     {{ __('messages.carpool_round_trip') }}
                 </button>
             </div>
@@ -126,7 +126,7 @@
             {{-- Offer a ride button --}}
             @if (! $eventEnded)
             <div class="mb-4">
-                <button type="button" @click="showOfferForm = !showOfferForm" class="w-full px-4 py-3 text-base rounded-lg text-white font-medium flex items-center justify-center gap-2" style="background-color: {{ $accentColor }};">
+                <button type="button" @click="showOfferForm = !showOfferForm" class="w-full px-4 py-3 text-base rounded-lg text-white font-medium flex items-center justify-center gap-2" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -185,7 +185,7 @@
                         <button type="button" @click="showOfferForm = false" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium">
                             {{ __('messages.cancel') }}
                         </button>
-                        <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: {{ $accentColor }};">
+                        <button type="submit" class="px-4 py-3 text-base rounded-lg text-white font-medium" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                             {{ __('messages.carpool_create_offer') }}
                         </button>
                     </div>
@@ -371,7 +371,7 @@
                                     @endfor
                                 </select>
                             </div>
-                            <button type="submit" class="px-2.5 py-1 text-xs rounded-md text-white font-medium" style="background-color: {{ $accentColor }};">{{ __('messages.save') }}</button>
+                            <button type="submit" class="px-2.5 py-1 text-xs rounded-md text-white font-medium" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.save') }}</button>
                             <button type="button" @click="editSpotsOfferId = null" class="px-2.5 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium">{{ __('messages.cancel') }}</button>
                         </form>
                     </div>
@@ -413,7 +413,7 @@
                                     <div class="flex-1">
                                         <input type="text" name="message" maxlength="500" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_message_placeholder') }}">
                                     </div>
-                                    <button type="submit" class="px-3 py-2 text-sm rounded-lg text-white font-medium whitespace-nowrap" style="background-color: {{ $accentColor }};">
+                                    <button type="submit" class="px-3 py-2 text-sm rounded-lg text-white font-medium whitespace-nowrap" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                                         {{ __('messages.carpool_request_spot') }}
                                     </button>
                                 </div>
@@ -429,7 +429,7 @@
                             <div class="flex-1">
                                 <input type="text" name="message" maxlength="500" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_message_placeholder') }}">
                             </div>
-                            <button type="submit" class="px-3 py-2 text-sm rounded-lg text-white font-medium whitespace-nowrap" style="background-color: {{ $accentColor }};">
+                            <button type="submit" class="px-3 py-2 text-sm rounded-lg text-white font-medium whitespace-nowrap" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                                 {{ __('messages.carpool_request_spot') }}
                             </button>
                         </div>
@@ -489,7 +489,7 @@
                                     @endfor
                                 </select>
                                 <input type="text" name="comment" maxlength="1000" class="flex-1 px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]" placeholder="{{ __('messages.carpool_review_comment') }}">
-                                <button type="submit" class="px-2.5 py-1 text-xs rounded-md text-white font-medium" style="background-color: {{ $accentColor }};">{{ __('messages.submit') }}</button>
+                                <button type="submit" class="px-2.5 py-1 text-xs rounded-md text-white font-medium" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                             </div>
                         </form>
                         @endforeach

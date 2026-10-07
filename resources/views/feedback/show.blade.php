@@ -80,7 +80,7 @@
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
                         class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-700 opacity-50 cursor-not-allowed"
-                        style="background-color: {{ $accentColor }}; --tw-ring-color: {{ $accentColor }};"
+                        style="background-color: var(--es-accent); color: var(--es-accent-text); --tw-ring-color: var(--es-accent-readable);"
                         disabled>
                         {{ __('messages.feedback_submit') }}
                     </button>
