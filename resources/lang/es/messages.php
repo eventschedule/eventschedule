@@ -704,6 +704,8 @@ return [
     'logged_in_as' => 'Conectado como',
     'sold' => 'Vendido',
     'sold_out' => 'Agotado',
+    'price_from' => 'Desde :price',
+    'few_left' => 'Quedan pocas',
     'sales_ended' => 'Ventas finalizadas',
     'sales_not_started' => 'Próximamente',
     'sell_after_start' => 'Permitir ventas después del inicio del evento',

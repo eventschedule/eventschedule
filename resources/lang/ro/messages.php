@@ -757,6 +757,8 @@ return [
     'after_number_of_hours' => 'După un număr de ore',
     'sold' => 'Vândut',
     'sold_out' => 'Epuizat',
+    'price_from' => 'De la :price',
+    'few_left' => 'Ultimele locuri',
     'sales_ended' => 'Vânzări încheiate',
     'sales_not_started' => 'În curând',
     'sell_after_start' => 'Permite vânzări după începerea evenimentului',

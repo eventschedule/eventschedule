@@ -2847,6 +2847,51 @@ class Event extends Model
     }
 
     /**
+     * What a ticket costs, for one line on the event page: said before anybody presses Buy.
+     *
+     * The page used to say nothing about price until the form was opened. The line is drawn from
+     * the rows a visitor could be shown: the ones on sale, or, when none is, every row only if the
+     * owner chose "show unavailable tickets" (an owner who hides tickets before sales open has not
+     * published their prices either). Passes count like any other row: the cheapest way in is
+     * what "from" means.
+     *
+     *  - free: every such row costs nothing.
+     *  - min / from: the lowest price, and whether there is a higher one.
+     *  - low:  tickets can be bought and few are left: a tenth of the house or fewer, and never
+     *          more than ten. Only where the house has a size (not unlimited, not a seat map).
+     *          Never a number: the page says "Few left", not how many.
+     *
+     * @return array{free: bool, min: float, from: bool, currency: ?string, low: bool}|null
+     */
+    public function ticketPriceSummary($date = null): ?array
+    {
+        if (! $this->tickets_enabled) {
+            return null;
+        }
+
+        $rows = $this->tickets->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable());
+        $onSale = $rows->filter(fn ($ticket) => ! $ticket->isSalesEnded() && ! $ticket->isSalesNotStarted());
+        $shown = $onSale->isNotEmpty() ? $onSale : ($this->show_unavailable_tickets ? $rows : collect());
+
+        if ($shown->isEmpty()) {
+            return null;
+        }
+
+        $prices = $shown->map(fn ($ticket) => (float) $ticket->price);
+        $capacity = $this->seatCapacity();
+        $left = $capacity !== null ? $this->seatsRemainingForSale($date) : null;
+
+        return [
+            'free' => $prices->max() <= 0,
+            'min' => $prices->min(),
+            'from' => $prices->min() < $prices->max(),
+            'currency' => $this->ticket_currency_code,
+            'low' => $left !== null && $left > 0 && $this->ticketSaleState($date) === 'open'
+                && $left <= min(10, max(2, (int) floor($capacity * 0.1))),
+        ];
+    }
+
+    /**
      * 'open', 'sold_out', 'not_started' or 'ended': see ticketSale().
      */
     public function ticketSaleState($date = null): string
@@ -4587,6 +4632,27 @@ class Event extends Model
             return null;
         }
 
+        $capacity = $this->seatCapacity();
+
+        if ($capacity === null) {
+            return null;
+        }
+
+        $regularSold = $this->seatTickets()->sum(fn ($t) => $t->soldCountFor($date));
+
+        return max(0, $capacity - $regularSold - $this->passReservedSeats($date));
+    }
+
+    /**
+     * How many seats one occurrence holds, or null when there is no ceiling: no seat tickets, any
+     * seat ticket that is unlimited, or allocated seating (each band owns its own seats).
+     */
+    public function seatCapacity(): ?int
+    {
+        if ($this->hasAllocatedSeating()) {
+            return null;
+        }
+
         $seatTickets = $this->seatTickets();
 
         // No seat tickets, or any unlimited seat ticket => no defined ceiling.
@@ -4594,13 +4660,9 @@ class Event extends Model
             return null;
         }
 
-        $capacity = ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities())
+        return ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities())
             ? (int) $this->getSameTicketQuantity()
             : (int) $seatTickets->sum('quantity');
-
-        $regularSold = $seatTickets->sum(fn ($t) => $t->soldCountFor($date));
-
-        return max(0, $capacity - $regularSold - $this->passReservedSeats($date));
     }
 
     /**

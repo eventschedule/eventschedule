@@ -303,6 +303,8 @@ return [
     'logged_in_as' => 'Conectado como',
     'sold' => 'Vendido',
     'sold_out' => 'Esgotado',
+    'price_from' => 'A partir de :price',
+    'few_left' => 'Últimas vagas',
     'sales_ended' => 'Vendas encerradas',
     'sales_not_started' => 'Em breve',
     'sell_after_start' => 'Permitir vendas após o início do evento',

@@ -707,6 +707,8 @@ return [
     'logged_in_as' => 'Connecté en tant que',
     'sold' => 'Vendu',
     'sold_out' => 'Épuisé',
+    'price_from' => 'À partir de :price',
+    'few_left' => 'Plus que quelques places',
     'sales_ended' => 'Ventes terminées',
     'sales_not_started' => 'Bientôt disponible',
     'sell_after_start' => 'Autoriser les ventes après le début de l\'événement',

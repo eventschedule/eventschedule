@@ -303,6 +303,8 @@ return [
     'logged_in_as' => 'Ingelogd als',
     'sold' => 'Verkocht',
     'sold_out' => 'Uitverkocht',
+    'price_from' => 'Vanaf :price',
+    'few_left' => 'Nog maar enkele',
     'sales_ended' => 'Verkoop beëindigd',
     'sales_not_started' => 'Binnenkort beschikbaar',
     'sell_after_start' => 'Verkoop toestaan na start evenement',

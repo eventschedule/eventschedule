@@ -670,6 +670,8 @@ return [
     'logged_in_as' => 'Angemeldet als',
     'sold' => 'Verkauft',
     'sold_out' => 'Ausverkauft',
+    'price_from' => 'Ab :price',
+    'few_left' => 'Nur noch wenige',
     'sales_ended' => 'Verkauf beendet',
     'sales_not_started' => 'Demnächst',
     'sell_after_start' => 'Verkauf nach Veranstaltungsbeginn erlauben',

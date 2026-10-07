@@ -748,6 +748,8 @@ return [
     'after_number_of_hours' => 'Pärast tundide arvu',
     'sold' => 'Müüdud',
     'sold_out' => 'Välja müüdud',
+    'price_from' => 'Alates :price',
+    'few_left' => 'Vähe alles',
     'sales_ended' => 'Müük lõppenud',
     'sales_not_started' => 'Tulekul',
     'sell_after_start' => 'Luba müüki pärast ürituse algust',

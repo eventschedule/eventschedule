@@ -748,6 +748,8 @@ return [
     'after_number_of_hours' => 'Через количество часов',
     'sold' => 'Продано',
     'sold_out' => 'Распроданный',
+    'price_from' => 'От :price',
+    'few_left' => 'Осталось мало',
     'sales_ended' => 'Продажи завершены',
     'sales_not_started' => 'Скоро в продаже',
     'sell_after_start' => 'Разрешить продажи после начала мероприятия',

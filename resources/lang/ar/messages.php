@@ -666,6 +666,8 @@ return [
     'logged_in_as' => 'مسجل الدخول باسم',
     'sold' => 'تم البيع',
     'sold_out' => 'نفذت الكمية',
+    'price_from' => 'ابتداءً من :price',
+    'few_left' => 'الكمية محدودة',
     'sales_ended' => 'انتهت المبيعات',
     'sales_not_started' => 'قريبًا',
     'sell_after_start' => 'السماح بالمبيعات بعد بدء الحدث',

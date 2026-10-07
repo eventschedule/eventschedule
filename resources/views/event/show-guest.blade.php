@@ -1071,6 +1071,37 @@
         </div>
         @endif
 
+        {{-- What a ticket costs, for an event that sells its own. The page said nothing about
+             price until Buy tickets was pressed. One #gp-event-price a page: the two rows above
+             are for sign-up and for tickets sold elsewhere, and neither is this case. --}}
+        @php
+            $ticketPrice = (! $event->rsvp_enabled && $event->canSellTickets($date)) ? $event->ticketPriceSummary($date) : null;
+        @endphp
+        @if ($ticketPrice)
+        <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+                      bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-lg font-semibold text-gray-900 dark:text-white" data-ticket-price>
+              @if ($ticketPrice['free'])
+                {{ $role->customLabel('free_entry') }}
+              @elseif ($ticketPrice['from'])
+                {{ __('messages.price_from', ['price' => \App\Utils\MoneyUtils::format($ticketPrice['min'], $ticketPrice['currency'])]) }}
+              @else
+                {{ \App\Utils\MoneyUtils::format($ticketPrice['min'], $ticketPrice['currency']) }}
+              @endif
+            </span>
+            @if ($ticketPrice['low'])
+            <span class="text-sm font-medium text-amber-700 dark:text-amber-300" data-ticket-low>{{ __('messages.few_left') }}</span>
+            @endif
+          </div>
+        </div>
+        @endif
+
         {{-- Already registered indicator --}}
         @if ($userSale)
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">

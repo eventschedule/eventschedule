@@ -297,6 +297,8 @@ return [
     'logged_in_as' => 'מחובר כ',
     'sold' => 'נמכר',
     'sold_out' => 'אזלו הכרטיסים',
+    'price_from' => 'החל מ-:price',
+    'few_left' => 'נותרו מעטים',
     'sales_ended' => 'המכירות הסתיימו',
     'sales_not_started' => 'בקרוב',
     'sell_after_start' => 'אפשר מכירות אחרי תחילת האירוע',

@@ -760,6 +760,8 @@ return [
     'after_number_of_hours' => 'After number of hours',
     'sold' => 'Sold',
     'sold_out' => 'Sold Out',
+    'price_from' => 'From :price',
+    'few_left' => 'Few left',
     'sales_ended' => 'Sales Ended',
     'sales_not_started' => 'Coming Soon',
     'sell_after_start' => 'Allow sales after event starts',
