@@ -109,6 +109,27 @@ class GuestEventSidebarLinkTest extends TestCase
         }
     }
 
+    public function test_the_rows_stay_inside_the_category_the_visitor_is_browsing(): void
+    {
+        $role = $this->createRole($this->createOwner());
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1), 'category_id' => 3, 'creator_role_id' => $role->id]);
+        // Thirteen of another category sooner than the one of this visitor's: it used to be
+        // looked for among the first twelve only.
+        foreach (range(1, 13) as $n) {
+            $this->createEvent($role, ['name' => 'Talk '.$n, 'starts_at' => $this->at(1 + $n), 'category_id' => 5, 'creator_role_id' => $role->id]);
+        }
+        $this->createEvent($role, ['name' => 'Late Concert', 'starts_at' => $this->at(30), 'category_id' => 3, 'creator_role_id' => $role->id]);
+        $url = $event->fresh()->getGuestUrl($role->subdomain);
+
+        $more = $this->more($this->get($url.'?category=3')->assertOk()->getContent());
+        $this->assertStringContainsString('Late Concert', $more);
+        $this->assertStringNotContainsString('Talk ', $more);
+        $this->assertStringContainsString('category=3', $more, 'and the row carries it on');
+
+        // ?category[]=x is an array, and casting one was an error page.
+        $this->get($url.'?category[]=3')->assertOk();
+    }
+
     public function test_an_event_with_nothing_after_it_has_no_empty_section(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');

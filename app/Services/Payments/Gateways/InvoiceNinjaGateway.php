@@ -229,7 +229,9 @@ class InvoiceNinjaGateway extends PaymentGatewayDriver
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', __('messages.error'));
+            // withInput(): the event page reopens its form for a refusal that comes back with
+            // what was posted, and without it this one relied on the address still saying so.
+            return back()->withInput()->with('error', __('messages.error'));
         }
     }
 

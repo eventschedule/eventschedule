@@ -64,8 +64,9 @@ class EventInterestController extends Controller
         }
 
         // Validated by hand rather than $request->validate(). A ValidationException redirects back
-        // with $errors populated, and event/show-guest.blade.php force-opens the RSVP / ticket
-        // modal on `$errors->any()` - so a mistyped address here would pop the buy dialog. Same
+        // with $errors populated, which event/show-guest.blade.php now says in a toast (it used
+        // to force-open the RSVP / ticket form on `$errors->any()`), where this form says its
+        // own refusal beside itself, under interest_error. Same
         // reason RoleSubscriberController validates by hand, and the same reason respond() below
         // never flashes session('error').
         //

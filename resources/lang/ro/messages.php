@@ -759,7 +759,7 @@ return [
     'sold_out' => 'Epuizat',
     'price_from' => 'De la :price',
     'few_left' => 'Ultimele locuri',
-    'every_count_weeks' => 'La fiecare :count săptămâni',
+    'every_count_weeks' => '[2,19] La fiecare :count săptămâni|[20,*] La fiecare :count de săptămâni',
     'more_dates' => 'Alte date',
     'repeats_until' => 'Până la :date',
     'sales_ended' => 'Vânzări încheiate',
@@ -3480,7 +3480,7 @@ return [
     'spots_remaining' => ':count locuri rămase',
     'registered' => 'Înregistrat',
     'you_are_registered' => 'Ești înregistrat!',
-    'you_have_tickets' => 'Ai :count bilet|Ai :count bilete',
+    'you_have_tickets' => '{1} Ai un bilet|[2,19] Ai :count bilete|[20,*] Ai :count de bilete',
     'registration_full' => 'Înregistrare completă',
     'cancel_registration' => 'Anulare înregistrare',
 

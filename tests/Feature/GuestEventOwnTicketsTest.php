@@ -113,9 +113,37 @@ class GuestEventOwnTicketsTest extends TestCase
         $this->assertSame([$other->secret], $this->links($indicator));
     }
 
+    public function test_more_rows_than_the_page_links_are_still_all_counted(): void
+    {
+        foreach (range(1, 8) as $n) {
+            $this->buy(1);
+        }
+        $indicator = $this->indicator($this->buyer);
+
+        $this->assertStringContainsString('data-user-tickets="8"', $indicator, 'it said six of eight while the count was taken from six rows');
+        $this->assertCount(6, $this->links($indicator), 'six links are plenty');
+    }
+
+    public function test_a_buyer_who_typed_their_own_address_for_every_guest_keeps_their_own_ticket(): void
+    {
+        // A party of eight, the buyer's address on every row. The buyer's own row is the oldest,
+        // and a cap of six rows, newest first, cut it: six tickets, and no link to their own.
+        $lead = $this->buy(1);
+        Sale::whereKey($lead->id)->update(['group_id' => $lead->id]);
+        foreach (range(1, 7) as $n) {
+            $this->buy(1, ['group_id' => $lead->id, 'name' => 'Guest '.$n]);
+        }
+        $indicator = $this->indicator($this->buyer);
+
+        $this->assertStringContainsString('data-user-tickets="8"', $indicator);
+        $this->assertSame([$lead->secret], $this->links($indicator), 'one ticket page, the buyer\'s, which shows the party');
+    }
+
     public function test_a_sign_up_has_no_tickets_to_count(): void
     {
-        $this->createSale($this->event, $this->role, ['user_id' => $this->buyer->id, 'email' => 'sam@gmail.com', 'payment_method' => 'rsvp']);
+        // With a ticket row on it, so that it is the sign-up and not an empty sale that counts none.
+        $ticket = $this->createTicket($this->event, ['price' => 0, 'quantity' => 50]);
+        $this->createSale($this->event, $this->role, ['user_id' => $this->buyer->id, 'email' => 'sam@gmail.com', 'payment_method' => 'rsvp'], $ticket, 1);
         $indicator = $this->indicator($this->buyer);
 
         $this->assertStringContainsString('data-user-tickets="0"', $indicator);

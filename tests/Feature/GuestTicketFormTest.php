@@ -148,6 +148,15 @@ class GuestTicketFormTest extends TestCase
         // the box they had been typing in was gone.
         $this->assertFalse($opens($this->withSession(['error' => 'That link is not a video.'])->get($url)));
 
+        // A fan's photo over the size limit comes back as validation errors, which nothing on
+        // the page printed: the form stays shut and the first of them is said in a toast.
+        $tooBig = (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag(['photo' => ['The photo is too large.']]));
+        $page = $this->flushSession()->withSession(['errors' => $tooBig])->get($url)->assertOk()->getContent();
+        $this->assertStringNotContainsString('data-show-initial="true"', $page);
+        $this->assertStringContainsString('window.esSayOnPage("The photo is too large.");', $page);
+        $this->assertStringNotContainsString('window.esSayOnPage("', $this->flushSession()->get($url)->getContent(), 'and only then');
+        $this->flushSession();
+
         // The form's own refusal comes back with what was posted, the event's id in it.
         $this->assertTrue($opens($this->withSession(['error' => 'Sold out a moment ago.', '_old_input' => ['event_id' => 'abc', 'name' => 'Sam']])->get($url)));
     }
@@ -168,7 +177,20 @@ class GuestTicketFormTest extends TestCase
         // handed to the bar, with the field to bring into view.
         $errors = (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag(['password' => ['The password is too short.']]));
         $html = $this->withSession(['errors' => $errors, '_old_input' => ['event_id' => 'abc']])->get($url)->assertOk()->getContent();
-        $this->assertStringContainsString('this.say("The password is too short.", "password" || null);', $html);
+        $this->assertStringContainsString('this.say("The password is too short.", "password" || null, \'server\');', $html);
+        // Only what answers a message takes it away: the security check finishing a second
+        // after the page opens used to wipe the server's refusal from the bar.
+        $this->assertStringContainsString("this.settle('check');", $html);
+        $this->assertStringContainsString("if (this.problemAbout === about) { this.problem = ''; this.problemAbout = ''; }", $html);
+        $this->assertSame(0, preg_match('/callback: \(token\) => \{\s*this\.turnstileToken = token;\s*this\.problem = \'\';/', $html));
+        // Said whether or not the page's "the form is open" has already been and gone.
+        $this->assertStringContainsString('if (mount && mount.offsetParent !== null) {', $html);
+
+        // A cart refused from this page, or a fan's photo: errors, but not this form's to say.
+        $html = $this->flushSession()->withSession(['errors' => $errors])->get($url)->assertOk()->getContent();
+        $this->assertStringNotContainsString('this.say("The password', $html);
+        $html = $this->flushSession()->withSession(['errors' => $errors, '_old_input' => ['event_id' => 'abc'], 'cart_submitted' => true])->get($url)->assertOk()->getContent();
+        $this->assertStringNotContainsString('this.say("The password', $html);
         $this->assertStringNotContainsString('this.say("The password', $this->flushSession()->get($url)->getContent(), 'and only then');
     }
 

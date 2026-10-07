@@ -65,6 +65,26 @@ class GuestEventAccentTest extends TestCase
         $this->assertStringContainsString('--es-accent-readable: '.$dark['--es-accent-readable'].';', $html);
     }
 
+    public function test_the_embed_is_in_one_schedules_colours_from_its_header_to_checkout(): void
+    {
+        // A venue's widget for a show by a claimed performer with a look of its own: the layout
+        // paints the performer's background and prints the performer's tokens. The card's header
+        // used to paint the venue's raw accent over them.
+        $venue = $this->createRole($this->createOwner(), 'venue', ['accent_color' => '#dc2626']);
+        $talent = $this->createRole($this->createOwner(), 'talent', ['accent_color' => '#16a34a', 'background' => 'solid', 'background_color' => '#052e16']);
+        $event = $this->createEvent($venue, ['tickets_enabled' => true, 'creator_role_id' => $venue->id]);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+        $this->createTicket($event, ['price' => 10, 'quantity' => 5]);
+
+        $html = $this->page($event, $venue, '?embed=true&tickets=true');
+        $card = substr($html, strpos($html, 'class="ticket-embed-card '));
+
+        $this->assertStringContainsString('<div class="px-6 py-4" style="background-color: var(--es-accent); color: var(--es-accent-text);">', $card);
+        $this->assertStringContainsString('style="background-color: var(--es-accent); color: var(--es-accent-text);"', substr($card, strpos($card, 'id="ticket-selector"')));
+        $this->assertStringNotContainsString('#dc2626', $card, 'nothing in the card is in the raw colour of either schedule');
+        $this->assertStringNotContainsString('#16a34a', $card);
+    }
+
     public function test_the_page_wears_one_schedules_look_from_its_background_to_its_buttons(): void
     {
         // A venue's page for an event with a claimed performer who never chose a background.

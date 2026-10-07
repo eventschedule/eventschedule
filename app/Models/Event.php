@@ -2370,7 +2370,8 @@ class Event extends Model
      */
     public function recurrenceSummary(): ?array
     {
-        if (! $this->days_of_week) {
+        // A cancelled series is not running, whatever its pattern says.
+        if (! $this->days_of_week || $this->is_cancelled) {
             return null;
         }
 
@@ -2382,9 +2383,13 @@ class Event extends Model
             // days are named only for the two that do.
             $days = [];
             if ($weekly) {
+                // In the order the schedule's own week runs, from its first day.
                 $sunday = Carbon::now()->startOfWeek(Carbon::SUNDAY);
-                foreach (str_split(str_pad((string) $this->days_of_week, 7, '0')) as $index => $on) {
-                    if ($on === '1' && $index < 7) {
+                $flags = str_split(str_pad((string) $this->days_of_week, 7, '0'));
+                $first = ((int) ($this->creatorRole?->first_day_of_week ?? 0)) % 7;
+                for ($step = 0; $step < 7; $step++) {
+                    $index = ($first + $step) % 7;
+                    if (($flags[$index] ?? '0') === '1') {
                         $days[] = $sunday->copy()->addDays($index)->translatedFormat('l');
                     }
                 }
@@ -2421,35 +2426,56 @@ class Event extends Model
      * The next days this event happens on after $after (a Y-m-d day, today when null), nearest
      * first: what the guest page offers beside the date it is showing.
      *
+     * Bounded by a horizon measured from TODAY, not from the day shown, and that bound is
+     * load-bearing twice over. Every one of these is a real page, so three links on each dated
+     * page, each to a later date, is a chain a crawler follows for ever: that space is what once
+     * cost the site some 164k "crawled, not indexed" addresses (see RoleController::getEvent()).
+     * With the horizon the page of a far-off date links nothing, and the chain ends where the
+     * schedule's own list does. And the scan stops there, so a series that has run its course
+     * ("after N events", which counts from the series' start on every pattern day) is not
+     * walked a year ahead on each view.
+     *
      * @return string[] Y-m-d
      */
     public function occurrencesAfter(?string $after = null, int $limit = 3): array
     {
-        if (! $this->days_of_week || $limit < 1) {
+        if (! $this->days_of_week || $this->is_cancelled || $limit < 1) {
             return [];
         }
 
         try {
             $timezone = $this->scheduleTimezone();
+            $frequency = $this->recurring_frequency ?? 'weekly';
+            // Far enough to hold the next occurrence of each rhythm, and no further.
+            $horizon = match (true) {
+                $frequency === 'yearly' => 370,
+                $frequency === 'monthly_date', $frequency === 'monthly_weekday' => 100,
+                $frequency === 'every_n_weeks' => min(370, max(60, (int) ($this->recurring_interval ?? 2) * 7 + 7)),
+                default => 60,
+            };
+
             // From the day after the one shown, and never a day that is already over there: the
             // page of a date long past offers what is still to come.
-            $today = Carbon::parse(Carbon::now($timezone)->format('Y-m-d'));
+            $now = Carbon::now($timezone);
+            $today = Carbon::parse($now->format('Y-m-d'));
+            $lastDay = $today->copy()->addDays($horizon);
             $cursor = $after ? Carbon::parse($after)->startOfDay()->addDay() : $today->copy();
             if ($cursor->lt($today)) {
                 $cursor = $today->copy();
             }
 
-            // A year's scan per date is three years of days for a yearly event: one is enough to
-            // say when it is next.
-            $limit = ($this->recurring_frequency ?? 'weekly') === 'yearly' ? 1 : $limit;
+            // One is enough to say when a yearly event is next.
+            $limit = $frequency === 'yearly' ? 1 : $limit;
 
             $dates = [];
-            while (count($dates) < $limit) {
-                $next = $this->nextOccurrenceFrom($cursor->format('Y-m-d'), 370);
+            while (count($dates) < $limit && $cursor->lte($lastDay)) {
+                $next = $this->nextOccurrenceFrom($cursor->format('Y-m-d'), (int) $cursor->diffInDays($lastDay));
                 if (! $next) {
                     break;
                 }
-                if ($next !== $after) {
+                // Today's, once it has started, is not a day to send anybody to.
+                $started = $next === $today->format('Y-m-d') && $this->getStartDateTime($next, true, $timezone)->lte($now);
+                if ($next !== $after && ! $started) {
                     $dates[] = $next;
                 }
                 $cursor = Carbon::parse($next)->addDay();
@@ -2461,6 +2487,19 @@ class Event extends Model
 
             return [];
         }
+    }
+
+    /**
+     * Whether a day has nothing left, by the ticket rows' own sold counts: no query, so it can
+     * be asked of several days on one page. It does not see a seat held by a pass or a seat
+     * map (those answer false), which is the event page's own, costlier, question.
+     */
+    public function rowsSoldOutOn(string $date): bool
+    {
+        $capacity = $this->tickets_enabled ? $this->seatCapacity() : null;
+
+        return $capacity !== null && $capacity > 0
+            && $capacity - $this->seatTickets()->sum(fn ($ticket) => $ticket->soldCountFor($date)) <= 0;
     }
 
     protected function matchesFrequency(string $frequency, Carbon $date, Carbon $startDate): bool

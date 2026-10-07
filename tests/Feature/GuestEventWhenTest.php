@@ -101,7 +101,7 @@ class GuestEventWhenTest extends TestCase
         $when = $this->when($weekly, '2026-10-15');
         $this->assertSame('Weekly · Thursday', $this->text(preg_match('/<span[^>]*data-event-repeats>(.*?)<\/span>/s', $when, $m) ? $m[1] : ''));
 
-        preg_match_all('/<a href="([^"]+)" class="gk-link">([^<]+)<\/a>/', $when, $links);
+        preg_match_all('/<a href="([^"]+)" class="gk-link" rel="nofollow">([^<]+)<\/a>/', $when, $links);
         $this->assertSame(['Thu, Oct 22', 'Thu, Oct 29', 'Thu, Nov 5'], $links[2], 'the next three, after the one being shown');
         $this->assertSame($weekly->fresh()->getGuestUrl($this->role->subdomain, '2026-10-22'), html_entity_decode($links[1][0]));
         $this->assertStringContainsString(__('messages.more_dates'), $when);
@@ -117,6 +117,67 @@ class GuestEventWhenTest extends TestCase
         $this->assertStringNotContainsString('data-event-more-dates', $when);
     }
 
+    public function test_the_other_dates_end_at_a_horizon_from_today_so_no_crawler_follows_them_for_ever(): void
+    {
+        $weekly = $this->createEvent($this->role, [
+            'starts_at' => $this->at('2026-10-01', '20:00'), 'duration' => 2,
+            'days_of_week' => '0000100', 'recurring_frequency' => 'weekly', 'creator_role_id' => $this->role->id,
+        ])->fresh();
+
+        // Each of these is a real page. From every date to the next three, with no end, is a
+        // chain: the page of a Thursday in 2031 linked three more, and so did each of those.
+        $this->assertSame([], $weekly->occurrencesAfter('2031-01-02'));
+        $this->assertSame([], $weekly->occurrencesAfter('2026-12-31'), 'past sixty days from today');
+        $this->assertNotSame([], $weekly->occurrencesAfter('2026-11-19'));
+        $this->assertStringNotContainsString('data-event-more-dates', $this->when($weekly, '2027-03-04'));
+        // And what is linked asks not to be followed.
+        $this->assertSame(3, substr_count($this->when($weekly, '2026-10-15'), 'rel="nofollow"'));
+    }
+
+    public function test_a_series_that_is_over_or_cancelled_does_not_read_as_running(): void
+    {
+        $series = fn (array $attrs) => $this->createEvent($this->role, $attrs + [
+            'starts_at' => $this->at('2026-08-06', '20:00'), 'duration' => 2,
+            'days_of_week' => '0000100', 'recurring_frequency' => 'weekly', 'creator_role_id' => $this->role->id,
+        ])->fresh();
+
+        // A six-week course that ended in September, looked at on its last date.
+        $course = $series(['recurring_end_type' => 'after_events', 'recurring_end_value' => '6']);
+        $this->assertSame([], $course->occurrencesAfter('2026-09-10'));
+        $when = $this->when($course, '2026-09-10');
+        $this->assertStringNotContainsString('data-event-repeats', $when, '"Weekly" under a course that is over says it is still on');
+        $this->assertStringNotContainsString('data-event-more-dates', $when);
+
+        $cancelled = $series(['is_cancelled' => true]);
+        $this->assertNull($cancelled->recurrenceSummary());
+        $this->assertSame([], $cancelled->occurrencesAfter('2026-10-08'));
+
+        // A series of dates added by hand has no pattern to name, and still has other days.
+        $byHand = $series(['days_of_week' => '0000000', 'recurring_include_dates' => ['2026-10-10', '2026-10-17', '2026-10-24']]);
+        $this->assertNull($byHand->recurrenceSummary());
+        $when = $this->when($byHand, '2026-10-10');
+        $this->assertStringContainsString('data-event-more-dates', $when);
+        $this->assertStringContainsString('Sat, Oct 17', $when);
+    }
+
+    public function test_today_is_the_schedules_and_a_night_already_under_way_is_not_offered(): void
+    {
+        // 02:00 UTC on the 9th is ten at night on the 8th in New York: with the server's day
+        // the 8th would already be over.
+        $this->travelTo(Carbon::parse('2026-10-09 02:00:00', 'UTC'));
+        $weekly = $this->createEvent($this->role, [
+            'starts_at' => $this->at('2026-10-01', '20:00'), 'duration' => 4,
+            'days_of_week' => '0000100', 'recurring_frequency' => 'weekly', 'creator_role_id' => $this->role->id,
+        ])->fresh();
+
+        // Thursday the 8th is today there, and started two hours ago: not a day to send anybody to.
+        $this->assertSame(['2026-10-15', '2026-10-22', '2026-10-29'], $weekly->occurrencesAfter());
+
+        // Earlier that evening it still is.
+        $this->travelTo(Carbon::parse('2026-10-08 22:00:00', 'UTC'));
+        $this->assertSame('2026-10-08', $weekly->occurrencesAfter()[0]);
+    }
+
     public function test_a_next_date_with_nothing_left_says_so(): void
     {
         $weekly = $this->createEvent($this->role, [
@@ -127,6 +188,9 @@ class GuestEventWhenTest extends TestCase
         $this->createSale($weekly, $this->role, ['status' => 'paid', 'event_date' => '2026-10-22'], $ticket, 2);
         $this->assertSame('sold_out', $weekly->fresh()->ticketSaleState('2026-10-22'), 'fixture');
         $this->assertSame('open', $weekly->fresh()->ticketSaleState('2026-10-29'), 'fixture');
+        // Asked of the rows' own counts, which costs no query a date.
+        $this->assertTrue($weekly->fresh()->rowsSoldOutOn('2026-10-22'));
+        $this->assertFalse($weekly->fresh()->rowsSoldOutOn('2026-10-29'));
 
         $text = $this->text($this->when($weekly, '2026-10-15'));
 

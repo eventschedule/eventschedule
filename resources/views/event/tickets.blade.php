@@ -217,6 +217,7 @@
                     addedToCart: false,
                     isSubmitting: false,
                     problem: '',
+                    problemAbout: '',
                     {{-- Installments. payMonthly defaults to FALSE: pay-in-full is the default
                          choice and a credit arrangement is never pre-selected. --}}
                     payMonthly: false,
@@ -326,16 +327,28 @@
                 // with nothing on screen to say anything had gone wrong. The first refusal is
                 // said in the bar, which stays on screen, and its field is brought into view
                 // once the form is.
-                @if ($errors->any())
-                {{-- Built here and handed to the directive as bare variables: it splits what it
-                     is given on commas, and an expression with one in it loses its escaping. --}}
+                {{-- Its OWN refusal only: both checkout forms post the event's id and come back
+                     with their input, where a cart refused from this page, or a fan's photo, does
+                     not, and that message is not this form's to say. Built here and handed to
+                     the directive as bare variables: it splits what it is given on commas, and
+                     an expression with one in it loses its escaping. --}}
+                @if ($errors->any() && old('event_id') !== null && ! session('cart_submitted'))
                 @php
                     $refusedMessage = $errors->first();
                     $refusedField = (string) preg_replace('/[^A-Za-z0-9_-]/', '', $errors->keys()[0] ?? '');
                 @endphp
-                window.addEventListener('event-form-shown', () => {
-                    this.say(@json($refusedMessage), @json($refusedField) || null);
-                }, { once: true });
+                {{-- Said once the form can be seen. The page opens it a moment after it loads and
+                     says so with an event, which on a slow phone has already gone by the time
+                     this runs, and the embed never sends at all: so look first, then listen. --}}
+                const sayRefusal = () => this.say(@json($refusedMessage), @json($refusedField) || null, 'server');
+                const mount = document.getElementById('ticket-selector');
+                if (mount && mount.offsetParent !== null) {
+                    // Already on screen. After the page has finished bringing the form to the
+                    // top (it does so a moment after opening it), so the field stays in view.
+                    setTimeout(sayRefusal, 450);
+                } else {
+                    window.addEventListener('event-form-shown', sayRefusal, { once: true });
+                }
                 @endif
 
                 // Back from the payment page by the Back button: a browser restores this page as
@@ -385,7 +398,7 @@
                                     'refresh-expired': 'auto',
                                     callback: (token) => {
                                         this.turnstileToken = token;
-                                        this.problem = '';
+                                        this.settle('check');
                                     },
                                     'error-callback': () => {
                                         this.turnstileToken = '';
@@ -638,8 +651,13 @@
                 // What is still missing, said in the page beside the button (#checkout-problem)
                 // and shown: the thing itself is brought into view, and focused if it can be.
                 // A browser alert box named nothing on the page and had to be dismissed first.
-                say(message, target) {
+                // $about says what the message is about ('ticket', 'consent', 'check', or
+                // 'server' for a refusal), so that only the thing that answers it takes it away:
+                // the security check finishing a second after the page opens used to wipe the
+                // server's refusal from the bar before anybody had read it.
+                say(message, target, about = '') {
                     this.problem = message;
+                    this.problemAbout = about;
                     this.$nextTick(() => {
                         const el = typeof target === 'string' ? document.getElementById(target) : target;
                         if (el) {
@@ -654,7 +672,7 @@
                 firstTicketControl() {
                     const root = document.getElementById('ticket-selector');
                     return root.querySelector('select[id^="ticket-"]:not([disabled])')
-                        || root.querySelector('[data-seat-picker], #seat-picker')
+                        || root.querySelector('.seating-picker-mount')
                         || root.querySelector('select[id^="ticket-"]');
                 },
                 validateForm(e) {
@@ -670,7 +688,7 @@
                     // ticket, then the details, then the two things asked for at its foot.
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
                         e.preventDefault();
-                        this.say(@json(__('messages.please_select_ticket')), this.firstTicketControl());
+                        this.say(@json(__('messages.please_select_ticket')), this.firstTicketControl(), 'ticket');
                         return;
                     }
                     // The fields: the browser marks the first one that is missing, says what is
@@ -688,12 +706,12 @@
                     }
                     if (this.needsConsent) {
                         e.preventDefault();
-                        this.say(@json(__('messages.installments_consent_required')), 'installments-consent');
+                        this.say(@json(__('messages.installments_consent_required')), 'installments-consent', 'consent');
                         return;
                     }
                     if (this.turnstileEnabled && !this.turnstileToken) {
                         e.preventDefault();
-                        this.say(@json(__('messages.turnstile_verification_failed')), 'turnstile-checkout-widget');
+                        this.say(@json(__('messages.turnstile_verification_failed')), 'turnstile-checkout-widget', 'check');
                         return;
                     }
                     this.problem = '';
@@ -782,8 +800,12 @@
                         });
                     }
                 },
+                // Take the bar's message away, if it was about this.
+                settle(about) {
+                    if (this.problemAbout === about) { this.problem = ''; this.problemAbout = ''; }
+                },
                 onTicketChange() {
-                    this.problem = '';
+                    this.settle('ticket');
                     this.updateTicketQuantities();
                     this.rebuildGuests();
                     if (this.totalSelectedTickets === 0) {
@@ -1917,7 +1939,7 @@
                 </p>
 
                 <label class="flex items-start gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input type="checkbox" id="installments-consent" name="installments_consent" value="1" v-model="installmentConsent" @change="problem = ''" class="mt-1 rounded" style="color: var(--es-accent-readable);">
+                    <input type="checkbox" id="installments-consent" name="installments_consent" value="1" v-model="installmentConsent" @change="settle('consent')" class="mt-1 rounded" style="color: var(--es-accent-readable);">
                     <span>@{{ consentText }}</span>
                 </label>
 

@@ -727,7 +727,7 @@
                     style="background-color: var(--es-accent); color: var(--es-accent-text);"
                     aria-expanded="true" aria-haspopup="true">
                   {{ $role->customLabel('add_to_calendar') }}
-                  <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg class="-me-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                   </svg>
                 </button>
@@ -801,7 +801,7 @@
               style="background-color: var(--es-accent); color: var(--es-accent-text);"
               aria-expanded="true" aria-haspopup="true">
             {{ $role->customLabel('add_to_calendar') }}
-            <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <svg class="-me-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
             </svg>
           </button>
@@ -929,11 +929,18 @@
           // zone with no abbreviation of its own.
           $hasTime = strlen((string) $event->starts_at) > 10;
           $zone = $hasTime ? $startDt->format('T') : '';
-          $zone = preg_match('/^[+-]/', $zone) ? 'GMT'.$zone : $zone;
+          // "+0545" as "GMT+5:45", "+08" as "GMT+8".
+          if (preg_match('/^([+-])(\d{2})(\d{2})?$/', $zone, $offset)) {
+              $zone = 'GMT'.$offset[1].((int) $offset[2]).(($offset[3] ?? '00') !== '00' ? ':'.$offset[3] : '');
+          }
           // "10:00 PM - 2:00 AM" needs no help. An end well into the next morning says its day.
           $endsNextDay = ! $manyDays && $endDt && ! $endDt->isSameDay($startDt) && (int) $endDt->format('G') >= 6;
-          $recurrence = $event->recurrenceSummary();
-          $moreDates = $recurrence ? $event->occurrencesAfter($date ?: null, 3) : [];
+          // The other days of a series, and how it repeats. Asked of every series, one of
+          // hand-added dates included (it has no pattern to name, and still has other days).
+          // A series that has run its course says neither: "Weekly" under a date of a course
+          // that ended in the spring reads as though it were still on.
+          $moreDates = $event->days_of_week ? $event->occurrencesAfter($date ?: null, 3) : [];
+          $recurrence = ($moreDates || ($event->recurring_end_type ?? 'never') !== 'after_events') ? $event->recurrenceSummary() : null;
         @endphp
         <div id="gp-event-date" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($manyDays && $endDt && $startDt->format('m') === $endDt->format('m'))
@@ -1004,16 +1011,20 @@
         </div>
         @if ($moreDates)
           {{-- The other days it is on, each a link to that day's own page: a page for one date
-               of a series used to offer no way to any other. A day with nothing left says so. --}}
+               of a series used to offer no way to any other. A day with nothing left says so.
+
+               nofollow, and never a day past the horizon Event::occurrencesAfter() keeps from
+               today: each of these is a real page, and a link from every date to the next
+               three is a chain a crawler would follow for ever. --}}
           <div class="gk-more-dates flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm {{ $role->isRtl() ? 'rtl' : '' }}" data-event-more-dates>
             <span class="text-gray-500 dark:text-gray-400">{{ __('messages.more_dates') }}</span>
             @foreach ($moreDates as $moreDate)
               @php
                 $moreDt = $event->getStartDateTime($moreDate, true, $event->scheduleTimezone());
-                $moreGone = $event->tickets_enabled && $event->ticketSaleState($moreDate) === 'sold_out';
+                $moreGone = $event->rowsSoldOutOn($moreDate);
               @endphp
               <span class="whitespace-nowrap">
-                <a href="{{ $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link">{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
+                <a href="{{ $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link" rel="nofollow">{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
               </span>
             @endforeach
           </div>
@@ -1179,12 +1190,10 @@
           </div>
           <div class="flex flex-col">
             @php
-              // How many places that is. A buyer's own sale counts its whole party; a guest's
-              // row counts itself, unless the party's buyer is this same visitor and has
-              // already counted it.
-              $userPrimaryGroups = $userSales->filter(fn ($s) => $s->group_id && $s->isPrimarySale())->pluck('group_id');
-              $userTicketCount = (int) $userSales->sum(fn ($s) => $s->isRsvp() ? 0
-                  : ($s->isPrimarySale() ? $s->legTotalQuantity() : ($userPrimaryGroups->contains($s->group_id) ? 0 : $s->quantity())));
+              // How many places that is. A buyer's own sale counts its whole party and a guest's
+              // row counts itself; the controller has already left out a guest's row whose
+              // party this same visitor bought.
+              $userTicketCount = (int) $userSales->sum(fn ($s) => $s->isRsvp() ? 0 : ($s->isPrimarySale() ? $s->legTotalQuantity() : $s->quantity()));
             @endphp
             <span class="text-lg font-semibold text-gray-900 dark:text-white" data-user-tickets="{{ $userTicketCount }}">
               {{-- "You're registered" said nothing of how many, to somebody deciding whether to
@@ -1192,7 +1201,7 @@
               {{ $userTicketCount > 0 ? trans_choice('messages.you_have_tickets', $userTicketCount, ['count' => $userTicketCount]) : __('messages.you_are_registered') }}
             </span>
             <span class="flex flex-wrap gap-x-3 gap-y-1">
-              @foreach ($userSales as $userSaleIndex => $oneSale)
+              @foreach ($userSales->take(6) as $userSaleIndex => $oneSale)
                 <x-link href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $oneSale->secret]) }}"
                    target="_blank"
                    class="text-sm font-medium">
@@ -1295,7 +1304,7 @@
                   style="background-color: var(--es-accent); color: var(--es-accent-text);"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ $role->customLabel('add_to_calendar') }}
-              <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <svg class="-me-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
               </button>
@@ -1704,13 +1713,13 @@
           @if ($hasTimes)
             {{-- Timed agenda: vertical timeline --}}
             <div class="relative {{ $role->isRtl() ? 'pr-8' : 'pl-8' }}">
-              <div class="absolute {{ $role->isRtl() ? 'right-[11px]' : 'left-[11px]' }} top-2 bottom-2 w-[3px] rounded-full" style="background-color: {{ $accentColor }}33;"></div>
+              <div class="absolute {{ $role->isRtl() ? 'right-[11px]' : 'left-[11px]' }} top-2 bottom-2 w-[3px] rounded-full" style="background-color: color-mix(in srgb, var(--es-accent) 20%, transparent);"></div>
               @foreach ($event->parts as $part)
               <div class="relative mb-6 last:mb-0">
-                <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900" style="background-color: {{ $accentColor }}; box-shadow: 0 0 0 2px {{ $accentColor }}33;"></div>
+                <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900" style="background-color: var(--es-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--es-accent) 20%, transparent);"></div>
                 <div class="flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                   @if ($part->start_time)
-                  <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: var(--es-accent-readable); background-color: {{ $accentColor }}10;">
+                  <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: var(--es-accent-readable); background-color: color-mix(in srgb, var(--es-accent) 6%, transparent);">
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
@@ -2140,7 +2149,7 @@
                                       :disabled="votingOption['{{ $pollHash }}'] != null"
                                       class="w-full text-start px-3 py-2.5 mb-1.5 text-sm rounded-lg border transition-all duration-200"
                                       :class="votingOption['{{ $pollHash }}'] != null && votingOption['{{ $pollHash }}'] !== {{ $idx }} ? 'opacity-40 border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600 hover:border-gray-500'"
-                                      :style="votingOption['{{ $pollHash }}'] === {{ $idx }} ? { borderColor: '{{ $accentColor }}', backgroundColor: '{{ $accentColor }}15' } : {}">
+                                      :style="votingOption['{{ $pollHash }}'] === {{ $idx }} ? { borderColor: 'var(--es-accent)', backgroundColor: 'color-mix(in srgb, var(--es-accent) 8%, transparent)' } : {}">
                                   <span class="dark:text-gray-200" :class="votingOption['{{ $pollHash }}'] === {{ $idx }} ? 'font-medium' : ''">{{ $option }}</span>
                               </button>
                               @endforeach
@@ -2162,8 +2171,8 @@
                                           <div class="h-2.5 rounded-full"
                                                :style="{
                                                    width: (showResults['{{ $pollHash }}'] ? getPercent('{{ $pollHash }}', idx) : 0) + '%',
-                                                   backgroundColor: idx === pollData['{{ $pollHash }}']?.userVote ? '{{ $accentColor }}' : (getCount('{{ $pollHash }}', idx) === getMaxCount('{{ $pollHash }}') && (pollData['{{ $pollHash }}']?.totalVotes || 0) > 0 ? '{{ $accentColor }}80' : '#9ca3af'),
-                                                   boxShadow: idx === pollData['{{ $pollHash }}']?.userVote ? '0 0 8px {{ $accentColor }}40' : 'none',
+                                                   backgroundColor: idx === pollData['{{ $pollHash }}']?.userVote ? 'var(--es-accent)' : (getCount('{{ $pollHash }}', idx) === getMaxCount('{{ $pollHash }}') && (pollData['{{ $pollHash }}']?.totalVotes || 0) > 0 ? 'color-mix(in srgb, var(--es-accent) 50%, transparent)' : '#9ca3af'),
+                                                   boxShadow: idx === pollData['{{ $pollHash }}']?.userVote ? '0 0 8px color-mix(in srgb, var(--es-accent) 25%, transparent)' : 'none',
                                                    transition: 'width 700ms ease-out',
                                                    transitionDelay: (idx * 120) + 'ms'
                                                }"></div>
@@ -2201,7 +2210,7 @@
                                   <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
                               </div>
                               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                  <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isUserChoice ? $accentColor : ($isLeading ? $accentColor . '80' : '#9ca3af') }};{{ $isUserChoice ? ' box-shadow: 0 0 8px ' . $accentColor . '40' : '' }}"></div>
+                                  <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isUserChoice ? 'var(--es-accent)' : ($isLeading ? 'color-mix(in srgb, var(--es-accent) 50%, transparent)' : '#9ca3af') }};{{ $isUserChoice ? ' box-shadow: 0 0 8px color-mix(in srgb, var(--es-accent) 25%, transparent)' : '' }}"></div>
                               </div>
                           </div>
                           @endforeach
@@ -2258,7 +2267,7 @@
                               <span class="text-gray-500 dark:text-gray-400 text-xs tabular-nums">{{ $count }} ({{ $pct }}%)</span>
                           </div>
                           <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                              <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isLeading ? $accentColor . '80' : '#9ca3af' }}"></div>
+                              <div class="h-2.5 rounded-full" style="width: {{ max($pct, $totalVotes > 0 ? 2 : 0) }}%; background-color: {{ $isLeading ? 'color-mix(in srgb, var(--es-accent) 50%, transparent)' : '#9ca3af' }}"></div>
                           </div>
                       </div>
                       @endforeach
@@ -2690,6 +2699,14 @@
        shares this corner and reads the same variable, and the accessibility widget is off by
        default. Harmless when the widget is off - .es-a11y-cta-offset then matches no a11y
        element. --}}
+  {{-- A refusal that is not the ticket or sign-up form's own and came back as validation errors
+       (a fan's photo over the size limit, a comment too long): nothing on the page prints
+       those, and the layout's toast only knows session('error'). It used to open the ticket
+       form with a generic error over it; now that the form opens for its own refusals only,
+       the first message is said here, or the page simply reloaded with no word. --}}
+  @php
+    $strayRefusal = ($errors->any() && ! $formRefused && ! session('cart_submitted')) ? $errors->first() : null;
+  @endphp
   <script {!! nonce_attr() !!}>
   {{-- What a browser alert box used to say on this page (a vote that was refused, a payment link
        that only works on a phone): the layout's own toast, which escapes what it is given. --}}
@@ -2698,6 +2715,9 @@
           Toastify({ text: String(text), close: true, duration: 8000, position: 'center', stopOnFocus: true, style: { background: '#FF0000' } }).showToast();
       }
   };
+  @if ($strayRefusal)
+  window.addEventListener('load', function () { window.esSayOnPage(@json($strayRefusal)); });
+  @endif
   (function() {
       var bar = document.getElementById('gp-mobile-cta');
       var form = document.getElementById('gp-event-form');

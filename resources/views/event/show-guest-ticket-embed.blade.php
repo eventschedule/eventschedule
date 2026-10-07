@@ -30,9 +30,14 @@
         <div class="ticket-embed-card max-w-xl mx-auto overflow-hidden">
 
             {{-- Header --}}
-            <div class="px-6 py-4" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+            {{-- The tokens the layout prints, as the form's own buttons below take them, so the
+                 card is in one schedule's colours from its header to Checkout. The header used
+                 to paint this schedule's raw accent while the layout painted the event's other
+                 schedule's background, and once the buttons moved onto the tokens a performer's
+                 widget for a show at a venue had a header in one colour and Checkout in another. --}}
+            <div class="px-6 py-4" style="background-color: var(--es-accent); color: var(--es-accent-text);">
                 <h1 class="text-lg font-bold">
-                    <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top" style="color: {{ $contrastColor }}; text-decoration: none;">
+                    <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top" style="color: inherit; text-decoration: none;">
                         {{ $event->name }}
                     </a>
                 </h1>
@@ -57,7 +62,7 @@
 
                 @if ($isTicketMode)
                     @if ($event->hasProTicketingPlan() && $event->canSellTickets($eventDate))
-                        @include('event.tickets', ['accentColor' => $accentColor, 'contrastColor' => $contrastColor])
+                        @include('event.tickets')
                     @else
                         <div class="text-center py-8">
                             <p class="text-gray-500 dark:text-gray-400">{{ __('messages.tickets_not_available_embed') }}</p>
@@ -72,7 +77,7 @@
                          event and then refuse what was sent. A FULL event still passes, and the
                          form shows its waitlist. --}}
                     @if ($event->canAcceptRsvp($eventDate))
-                        @include('event.rsvp', ['accentColor' => $accentColor, 'contrastColor' => $contrastColor])
+                        @include('event.rsvp')
                     @else
                         <div class="text-center py-8">
                             <p class="text-gray-500 dark:text-gray-400">{{ __('messages.registration_not_available_embed') }}</p>

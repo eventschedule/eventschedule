@@ -2481,7 +2481,7 @@ class RoleController extends Controller
         $moreEvents = collect();
 
         // Whether the schedule page loads the poll celebration script. Null leaves the calendar
-        // partial to its own check of $events, which the event page and ?graphic=1 still use.
+        // partial to its own check of $events, which ?graphic=1 still uses.
         $hasActivePolls = null;
 
         if ($event && ! request()->graphic) {
@@ -2700,10 +2700,13 @@ class RoleController extends Controller
             // another date: a weekly night's page does not need next week's as "more". Inside
             // the sub-schedule and the category the visitor is browsing, as the side list this
             // replaces was: the page's links carry both.
-            $moreCategory = request('category');
-            $moreEvents = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 12)
+            // is_scalar: ?category[]=x arrives as an array, and casting one is an error page.
+            // A category is looked for further down the schedule's list than the plain three
+            // are, or one whose next event is thirteenth in line would have none.
+            $moreCategory = is_scalar(request('category')) ? (string) request('category') : '';
+            $moreEvents = $this->eventRepo->upcomingForGuest($role, $selectedGroup, $moreCategory !== '' ? 60 : 12)
                 ->reject(fn (array $row) => $row['event']->id === $event->id)
-                ->when($moreCategory, fn ($rows) => $rows->filter(fn (array $row) => (string) $row['event']->category_id === (string) $moreCategory))
+                ->when($moreCategory !== '', fn ($rows) => $rows->filter(fn (array $row) => (string) $row['event']->category_id === $moreCategory))
                 ->take(3)
                 ->values();
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
@@ -2749,9 +2752,19 @@ class RoleController extends Controller
                         }
                     })
                     ->when($date, fn ($q, $d) => $q->where('event_date', $d))
+                    // A series with no day left has no "this date": nothing is claimed about
+                    // tickets for days gone by.
+                    ->when($event->days_of_week && ! $date, fn ($q) => $q->whereRaw('1 = 0'))
                     ->orderByDesc('id')
-                    ->limit(6)
+                    ->limit(60)
                     ->get();
+
+                // The ones the page links: a buyer's own sale, which shows its whole party, and
+                // a guest's row only where the party's buyer is somebody else. A buyer who typed
+                // their own address on every guest's row matched every row of the party, and a
+                // cap of six rows then cut the buyer's own, the oldest, first.
+                $userPartyIds = $userSales->filter(fn ($sale) => $sale->group_id && $sale->isPrimarySale())->pluck('group_id');
+                $userSales = $userSales->filter(fn ($sale) => ! $sale->group_id || $sale->isPrimarySale() || ! $userPartyIds->contains($sale->group_id))->values();
                 $userSale = $userSales->first();
             }
 
