@@ -450,28 +450,23 @@
                      <h1>, so an act's own "# Heading" prints as an <h2>. --}}
                 @if ($each->description_html)
                   @php $eachDir = content_dir($each, false, $each->description_html); @endphp
-                  @if(str_word_count(strip_tags($each->description_html)) > 5)
-                    <div x-data="{ expanded: false }" class="text-sm text-gray-700 dark:text-gray-300">
-                      <span x-show="!expanded" class="description-collapsed">
-                        {{ Str::words(html_entity_decode(strip_tags($each->description_html)), 5, '') }}...
-                        <button :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap text-blue-600 dark:text-blue-400">
-                          {{ __('messages.show_more') }}
-                        </button>
-                      </span>
-                      <div x-show="expanded" x-cloak class="description-expanded">
-                        <div class="custom-content {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
-                          {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($each->description_html)) !!}
-                        </div>
-                        <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
-                          {{ __('messages.show_less') }}
-                        </button>
-                      </div>
-                    </div>
-                  @else
-                    <div class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
+                  {{-- Cut by LINES, by the browser, and only when it overflows. It used to be cut
+                       after five words, and the test for "is it long" was str_word_count(), which
+                       counts no words at all in Hebrew or Arabic: those were never shortened,
+                       however long they ran. --}}
+                  <div x-data="{ expanded: false, long: false }"
+                       x-init="$nextTick(() => { long = $refs.blurb.scrollHeight > $refs.blurb.clientHeight + 1 })"
+                       class="text-sm text-gray-700 dark:text-gray-300">
+                    <div x-ref="blurb" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3 {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($each->description_html)) !!}
                     </div>
-                  @endif
+                    <button type="button" x-show="long && !expanded" x-cloak :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
+                      {{ __('messages.show_more') }}
+                    </button>
+                    <button type="button" x-show="long && expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
+                      {{ __('messages.show_less') }}
+                    </button>
+                  </div>
                 @endif
 
                 {{-- YouTube videos --}}

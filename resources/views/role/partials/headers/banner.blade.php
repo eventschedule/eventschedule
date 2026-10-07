@@ -293,7 +293,6 @@
               {{-- Description below --}}
               @if($role->translatedDescription())
               @php
-                $descPreview = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...');
                 $descDir = content_dir($role, false, $role->translatedDescription());
               @endphp
               <div class="w-full mt-2">
@@ -301,9 +300,12 @@
                      x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                      dir="{{ $descDir }}"
                      class="text-start text-sm text-[#33383C] dark:text-gray-300">
-                  <div x-show="long && !expanded" x-cloak>{{ $descPreview }}</div>
-                  {{-- demoteH1(): the schedule's name above is the page's one <h1>. --}}
-                  <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
+                  {{-- Cut by LINES, by the browser, and only when it overflows. A description that
+                       did not fit used to be swapped for its first five words and "...", so a
+                       schedule introduced itself as "Welcome to Springfield Events! ...". The
+                       clamp is in the markup, not added by script, so the full text never flashes.
+                       demoteH1(): the schedule's name above is the page's one <h1>. --}}
+                  <div x-ref="content" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
                   </div>
                   <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
@@ -529,16 +531,15 @@
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
               @php
-                $descPreviewDesktop = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...');
                 $descDirDesktop = content_dir($role, false, $role->translatedDescription());
               @endphp
               <div x-data="{ expanded: false, long: false }"
                    x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                    dir="{{ $descDirDesktop }}"
                    class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
-                <div x-show="long && !expanded" x-cloak>{{ $descPreviewDesktop }}</div>
-                {{-- demoteH1(): the schedule's name above is the page's one <h1>. --}}
-                <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
+                {{-- Cut by lines, as in the phone body above.
+                     demoteH1(): the schedule's name above is the page's one <h1>. --}}
+                <div x-ref="content" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3">
                   {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
                 </div>
                 <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">

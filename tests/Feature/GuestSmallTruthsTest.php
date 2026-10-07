@@ -62,4 +62,45 @@ class GuestSmallTruthsTest extends TestCase
         // And as the page is served: the owner's wording reaches the compact card's template.
         $this->assertGreaterThanOrEqual(2, substr_count($html, 'No cover charge'), 'the laptop card and the compact card both say it the owner\'s way');
     }
+
+    /**
+     * A description that did not fit was replaced by its first five words and "...", so a schedule
+     * introduced itself as "Welcome to Springfield Events! ...". Performers' descriptions were cut
+     * the same way on the event page, and there the test for "is it long" was str_word_count(),
+     * which counts no words at all in Hebrew or Arabic, so those were never shortened however long
+     * they ran. Both are cut by lines now, by the browser, and only when they overflow.
+     */
+    public function test_a_schedules_description_is_cut_by_lines_not_after_five_words(): void
+    {
+        $text = 'Welcome to the Blue Room, home of late jazz, early soul and a kitchen that stays open until the band stops.';
+        $role = $this->createRole($this->createOwner(), 'venue', ['description' => $text]);
+
+        $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Welcome to the Blue Room,...', $html, 'the five-word stand-in');
+        $this->assertSame(2, preg_match_all('/x-ref="content"[^>]*class="[^"]*\bline-clamp-3\b/', $html), 'the phone and the laptop header both clamp the real text');
+        $this->assertGreaterThanOrEqual(2, substr_count($html, 'a kitchen that stays open until the band stops'), 'and the whole description is in the page for both');
+    }
+
+    public function test_a_performers_description_is_cut_by_lines_in_every_script(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $english = $this->createRole($owner, 'talent', ['name' => 'The Nightjars', 'description' => 'Six players from the north side who have held the Thursday residency for eleven years running.']);
+        $hebrew = $this->createRole($owner, 'talent', ['name' => 'Layla', 'description' => 'שישה נגנים מהצד הצפוני של העיר שמחזיקים בערב חמישי כבר אחת עשרה שנים ברציפות בלי הפסקה.']);
+
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+        $event->roles()->attach($english->id, ['is_accepted' => true]);
+        $event->roles()->attach($hebrew->id, ['is_accepted' => true]);
+
+        $html = $this->get($event->fresh()->getGuestUrl($venue->subdomain))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Six players from the north...', $html, 'the five-word stand-in');
+        $this->assertStringNotContainsString('description-collapsed', $html);
+        $this->assertStringContainsString('held the Thursday residency for eleven years running', $html);
+        $this->assertStringContainsString('ברציפות בלי הפסקה', $html);
+
+        // One rule for both: clamped by lines, with the button the browser shows only on overflow.
+        $this->assertSame(2, preg_match_all('/x-ref="blurb"[^>]*class="[^"]*\bline-clamp-3\b/', $html));
+    }
 }
