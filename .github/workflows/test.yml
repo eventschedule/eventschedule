@@ -196,6 +196,9 @@ jobs:
           # The venue map exists only where an address search is named (VenueMapJourneyTest).
           # The discard port: the journey writes every position itself and nothing is asked.
           echo "MAP_GEOCODER_URL=http://127.0.0.1:9/search" >> .env
+          # Its "street images" are one small picture of the app's own, same origin: the journey
+          # checks when a browser asks for them, and no browser here reaches another site.
+          echo 'MAP_TILE_URL=http://127.0.0.1:8000/vendor/leaflet/images/layers.png?z={z}&x={x}&y={y}' >> .env
 
       - name: Generate application key
         run: php artisan key:generate

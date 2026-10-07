@@ -93,7 +93,12 @@ class VenueMap
      * old enough to be asked again goes back in the queue. That is the only write a page view
      * makes here: one INSERT IGNORE, for a new address, once.
      *
-     * @return Collection<int, array{venue: Role, upcoming: bool, state: string, why: ?string, lat: ?float, lon: ?float, hash: ?string, street: bool}>
+     * The owner's own decisions come first (venue_map_marks): a venue taken off this map is still
+     * returned, flagged `hidden`, for the owner's list to put back, and every public reader leaves
+     * it out; a pin placed by hand is where the venue is, whatever the search said or did not say
+     * (`by_hand`).
+     *
+     * @return Collection<int, array{venue: Role, upcoming: bool, state: string, why: ?string, lat: ?float, lon: ?float, hash: ?string, street: bool, hidden: bool, by_hand: bool}>
      */
     public static function venues(Role $role, ?Group $group = null, bool $register = true): Collection
     {
@@ -120,7 +125,9 @@ class VenueMap
                 ->unique('hash')->values()->all());
         }
 
-        return $venues->map(function (Role $venue) use ($addresses, $rows, $upcoming, $register) {
+        $marks = \App\Models\VenueMapMark::where('role_id', $role->id)->whereIn('venue_id', $venues->pluck('id'))->get()->keyBy('venue_id');
+
+        return $venues->map(function (Role $venue) use ($addresses, $rows, $upcoming, $register, $marks) {
             $address = $addresses[$venue->id];
             $row = $address['hash'] !== null ? $rows->get($address['hash']) : null;
 
@@ -136,15 +143,22 @@ class VenueMap
                 default => [self::NOT_FOUND, null, null],
             };
 
+            $mark = $marks->get($venue->id);
+            $byHand = $mark && $mark->lat !== null && $mark->lon !== null;
+
             return [
                 'venue' => $venue,
                 'upcoming' => $upcoming->has($venue->id),
-                'state' => $state,
-                'why' => $address['why'],
-                'lat' => $lat,
-                'lon' => $lon,
+                'state' => $byHand ? self::PLACED : $state,
+                'why' => $byHand ? null : $address['why'],
+                'lat' => $byHand ? $mark->lat : $lat,
+                'lon' => $byHand ? $mark->lon : $lon,
                 'hash' => $address['hash'],
                 'street' => $address['street'],
+                'hidden' => (bool) $mark?->hidden,
+                'by_hand' => $byHand,
+                // Where the search put it, kept beside a pin moved by hand so it can be gone back to.
+                'found' => $lat !== null ? [$lat, $lon] : null,
             ];
         })->values();
     }
@@ -201,7 +215,7 @@ class VenueMap
             return null;
         }
 
-        $venues = self::venues($role, $group)->reject(fn (array $v) => $v['state'] === self::WAITING)->values();
+        $venues = self::venues($role, $group)->reject(fn (array $v) => $v['hidden'] || $v['state'] === self::WAITING)->values();
         $placed = $venues->filter(fn (array $v) => $v['lat'] !== null)->values();
 
         if ($placed->count() < 2) {
@@ -232,7 +246,7 @@ class VenueMap
      */
     public static function payload(Role $role, ?Group $group, string $lang): array
     {
-        $venues = self::venues($role, $group)->reject(fn (array $v) => $v['state'] === self::WAITING)->values();
+        $venues = self::venues($role, $group)->reject(fn (array $v) => $v['hidden'] || $v['state'] === self::WAITING)->values();
 
         if ($venues->isEmpty()) {
             return [];
@@ -345,26 +359,51 @@ class VenueMap
      *
      * @return array{ready: bool, total: int, asked: int, placed: int, venues: array<int, array<string, mixed>>}
      */
-    public static function status(Role $role): array
+    public static function status(Role $role, ?\App\Models\User $viewer = null): array
     {
         $venues = self::venues($role);
+        $onMap = $venues->reject(fn (array $v) => $v['hidden'])->values();
         $lang = $role->displayLanguageCode();
 
-        // Problems first, as the owner's list shows them.
+        // The schedules this person may edit, read once: asking per venue is a query per row.
+        $editable = $viewer ? $viewer->editor()->pluck('subdomain')->flip() : collect();
+
+        // Problems first, as the owner's list shows them; what was taken off the map last.
         $order = [self::NOT_FOUND => 0, self::NO_ADDRESS => 1, self::WAITING => 2, self::APPROXIMATE => 3, self::PLACED => 4];
 
         return [
             'ready' => self::ready($role),
-            'total' => $venues->count(),
-            'asked' => $venues->reject(fn (array $v) => $v['state'] === self::WAITING)->count(),
-            'placed' => $venues->filter(fn (array $v) => $v['lat'] !== null)->count(),
-            'venues' => $venues->sortBy(fn (array $v) => [$order[$v['state']], $v['venue']->name])->map(fn (array $v) => [
-                'key' => $v['venue']->subdomain,
-                'name' => $v['venue']->nameInLanguage($lang),
-                'state' => $v['state'],
-                'why' => $v['why'],
-                'claimed' => $v['venue']->isClaimed(),
-            ])->values()->all(),
+            // The counts are about the map: a venue taken off it is not waited for or counted.
+            'total' => $onMap->count(),
+            'asked' => $onMap->reject(fn (array $v) => $v['state'] === self::WAITING)->count(),
+            'placed' => $onMap->filter(fn (array $v) => $v['lat'] !== null)->count(),
+            'venues' => $venues->sortBy(fn (array $v) => [$v['hidden'] ? 1 : 0, $order[$v['state']], $v['venue']->name])->map(function (array $v) use ($lang, $editable) {
+                $venue = $v['venue'];
+                $raw = $venue->getAttributes();
+
+                return [
+                    // The handle the mark endpoints take: an id is never shown raw.
+                    'id' => \App\Utils\UrlUtils::encodeId($venue->id),
+                    'key' => $venue->subdomain,
+                    'name' => $venue->nameInLanguage($lang),
+                    'address' => implode(', ', array_filter(array_map(fn ($part) => trim((string) ($raw[$part] ?? '')), ['address1', 'city']))),
+                    'state' => $v['state'],
+                    'why' => $v['why'],
+                    'hidden' => $v['hidden'],
+                    'by_hand' => $v['by_hand'],
+                    'lat' => $v['lat'],
+                    'lon' => $v['lon'],
+                    // Whether the address search has a position of its own to go back to.
+                    'found' => $v['found'] !== null,
+                    'claimed' => $venue->isClaimed(),
+                    // Where the address is changed, for someone who may change it. A venue nobody
+                    // has claimed is edited inside its events; one that is another person's, only
+                    // by them.
+                    'edit_url' => $venue->isClaimed() && $editable->has($venue->subdomain)
+                        ? route('role.edit', ['subdomain' => $venue->subdomain]).'#section-address'
+                        : null,
+                ];
+            })->values()->all(),
         ];
     }
 
@@ -378,7 +417,8 @@ class VenueMap
             return self::ready($role);
         }
 
-        if (self::venues($role)->contains(fn (array $v) => $v['state'] === self::WAITING)) {
+        // A venue the owner took off the map, or placed by hand, is not waited for.
+        if (self::venues($role)->contains(fn (array $v) => $v['state'] === self::WAITING && ! $v['hidden'])) {
             return false;
         }
 

@@ -244,6 +244,18 @@ const mountVenueMap = () => {
         .catch(() => {});
 };
 
+// The owner's list of venues on the schedule form (Engagement > Venue map), with its dialog for
+// placing a pin. Only where the form drew its host.
+const mountVenueMapEditor = () => {
+    if (! document.getElementById('es-venue-map-editor')) {
+        return;
+    }
+
+    import('./venue-map-editor-boot.js')
+        .then((module) => module.mountVenueMapEditor())
+        .catch(() => {});
+};
+
 const mountVueWidgets = () => {
     mountAccessibilityWidget();
     // Each bails out immediately when its host element is absent, so this stays cheap on
@@ -252,6 +264,7 @@ const mountVueWidgets = () => {
     mountConsentEmbeds();
     mountSetupGuide();
     mountVenueMap();
+    mountVenueMapEditor();
 };
 
 if (document.readyState === 'loading') {

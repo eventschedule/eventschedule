@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\PlaceLookup;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\VenueMapMark;
 use App\Models\VenueMapSetting;
 use App\Services\PlaceLookupService;
 use App\Services\VenueMap;
@@ -23,9 +24,9 @@ use Tests\DuskTestCase;
  * history, and "See all events here" reaches into another app on the page (the list of events)
  * and sets its filter.
  *
- * The Dusk environment names an address search and NO street images (.env.dusk.local), so the
- * map is pins on a plain ground and no browser here ever reaches another site. Every position is
- * written by the test: nothing is looked up.
+ * The Dusk environment names an address search that is never asked (every position is written by
+ * the test) and, for street images, one small picture of this app's own (.env.dusk.local): the
+ * journeys can see WHEN a browser asks for streets, and no browser here reaches another site.
  */
 class VenueMapJourneyTest extends DuskTestCase
 {
@@ -133,6 +134,22 @@ class VenueMapJourneyTest extends DuskTestCase
             ->waitUntil('window.calendarVueApp !== undefined && ! window.calendarVueApp.isLoadingEvents', 15);
     }
 
+    /** How many requests for a street image this page has made. */
+    private function streetRequests(Browser $browser): int
+    {
+        return (int) $this->js($browser, 'performance.getEntriesByType("resource").filter(function (e) { return e.name.indexOf("/vendor/leaflet/images/layers.png?z=") !== -1; }).length');
+    }
+
+    /**
+     * Presses the button with these words INSIDE one element. Dusk's press() takes the first
+     * button on the page with the words, and every venue in the owner's list has the same ones.
+     */
+    private function pressIn(Browser $browser, string $selector, string $words): void
+    {
+        $browser->script('var el = document.querySelector('.json_encode($selector).'); el.scrollIntoView({ block: "center" });'
+            .'Array.prototype.filter.call(el.querySelectorAll("button"), function (b) { return b.textContent.trim() === '.json_encode($words).'; })[0].click();');
+    }
+
     private function openMap(Browser $browser): void
     {
         $browser->click('#gp-map .gk-map-acts .gk-map-toggle')
@@ -149,18 +166,23 @@ class VenueMapJourneyTest extends DuskTestCase
             $this->metrics($browser, 1280, 900);
             $this->page($browser);
 
-            // The band: its name, the towns, and nothing about street images on an install with none.
+            // The band, for a visitor who has not allowed cookies: the sentence that says who will
+            // see their address stands beside Show map, and nothing has been asked for yet.
             $browser->assertSeeIn('#gp-map', 'Map')
-                ->assertSeeIn('#gp-map .gk-map-sub', 'Southport')
-                ->assertMissing('#gp-map .gk-map-sub-ask')
+                ->assertSeeIn('#gp-map .gk-map-sub-ask', 'which will see your IP address')
+                ->assertSeeIn('#gp-map .gk-map-sub-ask', 'Open without streets')
                 ->assertMissing('.gk-map-leaflet');
+            $this->assertSame(0, $this->streetRequests($browser), 'no street image is asked for before the press');
 
+            // Show map, beside that sentence, is the visitor's choice: the map opens WITH streets.
             $this->openMap($browser);
+            $browser->waitFor('.gk-map-leaflet .leaflet-tile', 10);
 
             $this->assertSame('#gp-map', $this->js($browser, 'location.hash'), 'the open map is a step in the address');
             $this->assertSame(4, $this->js($browser, 'document.querySelectorAll(".gk-map-item").length'), 'every venue is in the list beside the map');
-            $this->assertSame(0, $this->js($browser, 'document.querySelectorAll(".leaflet-tile").length'), 'no street images on this install');
-            $this->assertStringContainsString('Venue positions', $this->js($browser, 'document.querySelector(".leaflet-control-attribution").textContent'));
+            $this->assertGreaterThan(0, $this->streetRequests($browser));
+            $this->assertStringContainsString('gk-map-leaflet leaflet-container', $this->js($browser, 'document.querySelector(".gk-map-leaflet").className'), 'Leaflet keeps its own classes on its container');
+            $browser->assertSeeIn('#gp-map .gk-map-sub', 'Southport')->assertMissing('.gk-map-askcard');
             // Three venues a few streets apart are one group at this distance, never three pins on top of each other.
             $this->assertGreaterThanOrEqual(1, $this->js($browser, 'document.querySelectorAll(".gk-cluster-dot").length'));
 
@@ -201,6 +223,30 @@ class VenueMapJourneyTest extends DuskTestCase
         });
     }
 
+    public function test_the_map_opens_without_streets_and_asks_for_them_on_the_map(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->metrics($browser, 1280, 900);
+            $this->page($browser);
+
+            $browser->click('#gp-map .gk-map-plain')
+                ->waitFor('.gk-map-leaflet .leaflet-marker-icon', 15)
+                ->pause(500)
+                ->assertVisible('.gk-map-askcard')
+                ->assertSeeIn('.gk-map-askcard', 'which will see your IP address');
+
+            $this->assertSame(0, $this->streetRequests($browser), 'pins on a plain ground: nothing was asked of anyone');
+            $this->assertStringContainsString('Venue positions', $this->js($browser, 'document.querySelector(".leaflet-control-attribution").textContent'), 'the positions are credited all the same');
+
+            $before = $this->js($browser, 'document.querySelector(".gk-pin, .gk-cluster-dot").getBoundingClientRect().left');
+            $browser->click('.gk-map-askcard button')->waitFor('.gk-map-leaflet .leaflet-tile', 10)->pause(300);
+
+            $this->assertGreaterThan(0, $this->streetRequests($browser));
+            $browser->assertMissing('.gk-map-askcard');
+            $this->assertSame($before, $this->js($browser, 'document.querySelector(".gk-pin, .gk-cluster-dot").getBoundingClientRect().left'), 'nothing moves when the streets arrive');
+        });
+    }
+
     public function test_a_link_to_a_venue_opens_the_map_on_it(): void
     {
         $barn = $this->venues['barn']->subdomain;
@@ -212,6 +258,8 @@ class VenueMapJourneyTest extends DuskTestCase
                 ->waitFor('.gk-map-venue', 15)
                 ->assertSeeIn('.gk-map-venue', 'The Old Barn')
                 ->assertSeeIn('.gk-map-venue', 'The Old Barn night 2')
+                // A link is not a press: the map is open, and the streets are still asked about.
+                ->assertVisible('.gk-map-askcard')
                 // Its two events are both in the panel, so there is nothing more to see below.
                 ->assertMissing('.gk-map-cta');
 
@@ -315,5 +363,76 @@ class VenueMapJourneyTest extends DuskTestCase
             $browser->waitForTextIn('#venue-map-notice', 'Your venue map is on your page', 12)
                 ->assertVisible('#venue-map-notice [data-map-notice-view]');
         });
+    }
+
+    public function test_an_owner_takes_a_venue_off_the_map_and_moves_a_pin(): void
+    {
+        $loft = $this->venues['loft'];
+        $cellar = $this->venues['cellar'];
+        $row = fn (Role $venue) => '#es-venue-map-editor li[data-venue="'.$venue->subdomain.'"]';
+
+        $this->browse(function (Browser $browser) use ($loft, $row) {
+            $this->metrics($browser, 1280, 900);
+            $browser->script('window._skipUnsavedWarning = true;');
+            $browser->loginAs($this->owner)
+                ->visit('/mapjourney/edit?visit='.uniqid())
+                ->waitFor('#edit-form', 15)
+                ->waitUntil('window.FormKit !== undefined && window.FormSaveBar !== undefined && window.FormKit.isArmed()', 15)
+                ->pause(100);
+
+            $browser->script('document.querySelector(\'a[data-section="section-engagement"]\').click();');
+            $browser->waitUntil('document.getElementById("section-engagement").style.display === "block"', 10);
+            $browser->script('document.querySelector(\'button.engagement-tab[data-tab="map"]\').scrollIntoView({ block: "center" });');
+            $browser->pause(150)->click('button.engagement-tab[data-tab="map"]')
+                ->waitFor($row($loft), 10);
+
+            $this->assertSame(4, $this->js($browser, 'document.querySelectorAll("#es-venue-map-editor li").length'));
+            $browser->assertSeeIn($row($loft), 'On the map')->assertSeeIn($row($loft), '9 Mill Lane, Southport');
+
+            // Take off the map: saved at once, and no part of the form's own Save.
+            $this->pressIn($browser, $row($loft), 'Take off the map');
+            $browser->waitForTextIn($row($loft), 'Off the map', 10)->assertSeeIn($row($loft), 'Saved');
+        });
+
+        $this->assertTrue(VenueMapMark::where('role_id', $this->curator->id)->where('venue_id', $loft->id)->value('hidden'));
+        $this->assertNotContains($loft->subdomain, array_column(VenueMap::payload($this->curator->fresh(), null, 'en'), 'key'), 'it is gone from the public map');
+
+        $this->browse(function (Browser $browser) use ($loft, $cellar, $row) {
+            $this->assertSame('No unsaved changes', trim(preg_replace('/\s+/', ' ', $this->js($browser, 'document.querySelector("#form-save-bar .event-save-status").innerText'))), 'the form itself has nothing to save');
+
+            // The row stays where it was pressed (it is at the end of the list on the next visit),
+            // so the way back is under the same finger.
+            $this->pressIn($browser, $row($loft), 'Put back on the map');
+            $browser->waitUntil('document.querySelector('.json_encode($row($loft)).').getAttribute("data-venue-state") === "placed"', 10);
+
+            // Move a pin: the dialog, a click on the map, Save position.
+            $this->pressIn($browser, $row($cellar), 'Move pin');
+            $browser->waitFor('#es-venue-pin-dialog .leaflet-marker-icon', 15)
+                ->assertSeeIn('#es-venue-pin-dialog', 'Where is The Cellar?')
+                ->pause(400);
+
+            [$x, $y] = $browser->script('var r = document.querySelector(\'#es-venue-pin-dialog .leaflet-container\').getBoundingClientRect(); return [Math.round(r.left + 70), Math.round(r.top + 70)];')[0];
+            $browser->clickAtPoint($x, $y)->pause(300);
+
+            $browser->press('Save position')->waitUntilMissing('#es-venue-pin-dialog', 10)
+                ->waitForTextIn($row($cellar), 'Placed by hand', 10);
+        });
+
+        $mark = VenueMapMark::where('role_id', $this->curator->id)->where('venue_id', $cellar->id)->first();
+        $this->assertNotNull($mark, 'the pin placed by hand is the owner\'s own mark');
+        $this->assertNotEqualsWithDelta(32.1660, $mark->lat, 0.00001, 'and it is not where the search had put it');
+        $this->assertEqualsWithDelta(32.1660, $mark->lat, 0.02, 'it is a click away from it');
+        $this->assertSame(0, VenueMapMark::where('venue_id', $loft->id)->count(), 'the venue that was put back carries no mark');
+
+        // And back to what the search found.
+        $this->browse(function (Browser $browser) use ($cellar, $row) {
+            $this->pressIn($browser, $row($cellar), 'Move pin');
+            $browser->waitFor('#es-venue-pin-dialog .leaflet-marker-icon', 15)
+                ->press('Use the looked-up position')
+                ->waitUntilMissing('#es-venue-pin-dialog', 10)
+                ->waitForTextIn($row($cellar), 'On the map', 10);
+        });
+
+        $this->assertSame(0, VenueMapMark::count());
     }
 }

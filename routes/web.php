@@ -783,6 +783,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     // How a schedule's venues are placed on its venue map, for its editors.
     Route::get('/{subdomain}/venue-map/status', [\App\Http\Controllers\VenueMapController::class, 'status'])->name('role.venue_map.status');
+    Route::put('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'mark'])->name('role.venue_map.mark');
+    Route::delete('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'unmark'])->name('role.venue_map.unmark');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
     Route::post('/{subdomain}/notification-email/resend', [NotificationEmailController::class, 'resend'])->name('role.notification_email.resend')->middleware('throttle:5,1');
     Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');

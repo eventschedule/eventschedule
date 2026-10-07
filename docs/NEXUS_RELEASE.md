@@ -503,9 +503,11 @@ table, and old code runs on the new schema.
   default on). Nothing changes for anyone until an owner switches it off.
 - A map of a schedule's venues on its public page, each with its logo on its pin, off until an
   owner switches it on AND off on this install until the two env vars below are set.
-- Three migrations: `2026_10_07_000003_add_show_sponsors_to_roles_table` (one `boolean default 1`
-  column), `2026_10_07_000004_create_place_lookups_table` and
-  `2026_10_07_000005_create_venue_map_settings_table` (new tables).
+- Four migrations: `2026_10_07_000003_add_show_sponsors_to_roles_table` (one `boolean default 1`
+  column), and three new tables: `2026_10_07_000004_create_place_lookups_table`,
+  `2026_10_07_000005_create_venue_map_settings_table` and
+  `2026_10_07_000006_create_venue_map_marks_table` (an owner's own decisions about a venue on
+  their map: off it, or a pin placed by hand).
 
 **`roles` is full.** `show_sponsors` took the last byte of MySQL's 65,535-byte row: one more
 column of any size fails with error 1118 ("Row size too large"). That is why the map's settings
@@ -544,6 +546,8 @@ Leave them unset and nothing about this ships to anyone: the feature stays dark.
   `approximate` (villages without street names), some `missing`. All `pending` an hour after a map
   was switched on means the worker cannot reach the address search; `/admin`'s Needs attention
   list says so after an hour of failures.
+- In the same row, a venue's **Move pin** opens a small map with streets, and **Save position**
+  answers "Saved": the pin on the public map moves on the next load.
 - The privacy policy at `/privacy` lists the two services by itself once the vars are set (clause
   on embedded content and the provider table). Nothing to edit.
 

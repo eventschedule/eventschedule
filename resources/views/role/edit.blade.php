@@ -4812,14 +4812,7 @@
                         @php
                             $venueMapStored = \App\Services\VenueMap::enabledFor($role);
                             $venueMapOn = (bool) old('show_venues_map', $venueMapStored);
-                            $venueMapStatus = $venueMapStored ? \App\Services\VenueMap::status($role) : null;
-                            $venueMapStates = [
-                                \App\Services\VenueMap::PLACED => __('messages.venue_map_placed'),
-                                \App\Services\VenueMap::APPROXIMATE => __('messages.venue_map_approx'),
-                                \App\Services\VenueMap::WAITING => __('messages.venue_map_waiting'),
-                                \App\Services\VenueMap::NO_ADDRESS => __('messages.venue_map_no_address'),
-                                \App\Services\VenueMap::NOT_FOUND => __('messages.venue_map_address_not_found'),
-                            ];
+                            $venueMapStatus = $venueMapStored ? \App\Services\VenueMap::status($role, auth()->user()) : null;
                         @endphp
                         <x-form-row group="engagement" tab="map" :title="__('messages.venue_map')" class="engagement-tab" />
                         <div id="engagement-tab-map" class="event-subrow-body engagement-tab-content" hidden>
@@ -4833,9 +4826,10 @@
                         </div>
 
                         {{-- A map that starts open is for visitors who have allowed cookies. On an install
-                             that fetches street images and shows no cookie banner nobody can, so the
-                             switch would do nothing and is not drawn. --}}
-                        @if (! (map_tiles() && ! consent_required()))
+                             that fetches street images and asks nobody (cookie_banner_required(), the
+                             predicate behind the banner itself) nobody can, so the switch would do
+                             nothing and is not drawn. --}}
+                        @if (! (map_tiles() && ! cookie_banner_required()))
                         <div class="mb-6" id="venues-map-open-row" @if (! $venueMapOn) hidden @endif>
                             <x-toggle name="venues_map_open"
                                 label="{{ __('messages.venues_map_open') }}"
@@ -4845,38 +4839,65 @@
                         </div>
                         @endif
 
-                        {{-- Every venue the map would hold and where each stands, problems first. Drawn
-                             once the map is switched on and saved: before that nothing has been asked. --}}
+                        {{-- Every venue the map would hold, where each stands and what can be done about it
+                             (resources/js/components/VenueMapEditor.vue): take one off the map, move a
+                             pin, place one by hand. Drawn once the map is switched on and saved: before
+                             that nothing has been asked. An island with an EMPTY host: a venue's name
+                             inside a Vue mount would be compiled as a template, and this form is not a
+                             Vue app. Its changes are saved at once and are no part of this form's Save. --}}
                         @if ($venueMapStatus)
+                        @php
+                            $venueMapTiles = map_tiles();
+                            $venueMapEditor = [
+                                'venues' => $venueMapStatus['venues'],
+                                'markUrl' => route('role.venue_map.mark', ['subdomain' => $role->subdomain, 'venue' => '__VENUE__']),
+                                'csrf' => csrf_token(),
+                                'tiles' => $venueMapTiles ? ['url' => $venueMapTiles['url']] : null,
+                                'credit' => (string) config('services.map.attribution'),
+                                'assets' => [
+                                    'leaflet' => asset('vendor/leaflet/leaflet.js').'?v=1.9.4',
+                                    'leafletCss' => asset('vendor/leaflet/leaflet.css').'?v=1.9.4',
+                                ],
+                                'rtl' => is_rtl(),
+                                't' => [
+                                    'venues' => __('messages.venues'),
+                                    'none' => __('messages.venue_map_no_venues'),
+                                    'help' => __('messages.venue_map_venues_help'),
+                                    'streets_note' => __('messages.venue_map_editor_streets', ['provider' => $venueMapTiles['name'] ?? '']),
+                                    'state_placed' => __('messages.venue_map_placed'),
+                                    'state_approximate' => __('messages.venue_map_approx'),
+                                    'state_waiting' => __('messages.venue_map_waiting'),
+                                    'state_no_address' => __('messages.venue_map_no_address'),
+                                    'state_not_found' => __('messages.venue_map_address_not_found'),
+                                    'state_hidden' => __('messages.venue_map_off_the_map'),
+                                    'state_by_hand' => __('messages.venue_map_by_hand'),
+                                    'fix_no_address' => __('messages.venue_map_fix_no_address'),
+                                    'fix_no_country' => __('messages.venue_map_fix_no_country'),
+                                    'fix_not_found' => __('messages.venue_map_fix_not_found'),
+                                    'owner_only' => __('messages.venue_map_owner_only'),
+                                    'in_its_events' => __('messages.venue_map_in_its_events'),
+                                    'or_place' => __('messages.venue_map_or_place'),
+                                    'take_off' => __('messages.venue_map_take_off'),
+                                    'put_back' => __('messages.venue_map_put_back'),
+                                    'move' => __('messages.venue_map_move_pin'),
+                                    'place' => __('messages.venue_map_place_by_hand'),
+                                    'edit_venue' => __('messages.venue_map_edit_venue'),
+                                    'saved' => __('messages.saved'),
+                                    'failed' => __('messages.venue_map_not_saved'),
+                                    'where' => __('messages.venue_map_where'),
+                                    'drag' => __('messages.venue_map_drag'),
+                                    'use_found' => __('messages.venue_map_use_found'),
+                                    'save_position' => __('messages.venue_map_save_position'),
+                                    'cancel' => __('messages.cancel'),
+                                    'map_failed' => __('messages.venue_map_failed'),
+                                ],
+                            ];
+                            // Bare flags, spelled out, as for the guest map: "<" never reaches the block.
+                            $venueMapEditorJson = json_encode($venueMapEditor, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                        @endphp
                         <div id="venue-map-venues" class="mb-6" @if (! $venueMapOn) hidden @endif>
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.venues') }}</h3>
-                            @if (! count($venueMapStatus['venues']))
-                                <p class="event-hint">{{ __('messages.venue_map_no_venues') }}</p>
-                            @else
-                                <p class="event-hint">{{ __('messages.venue_map_venues_help') }}</p>
-                                <ul class="divide-y divide-gray-200 dark:divide-gray-700 border-y border-gray-200 dark:border-gray-700">
-                                    @foreach ($venueMapStatus['venues'] as $mapVenue)
-                                    @php
-                                        $mapVenueFix = match (true) {
-                                            $mapVenue['why'] === 'no_country' => __('messages.venue_map_fix_no_country'),
-                                            $mapVenue['state'] === \App\Services\VenueMap::NO_ADDRESS => __('messages.venue_map_fix_no_address'),
-                                            $mapVenue['state'] === \App\Services\VenueMap::NOT_FOUND => __('messages.venue_map_fix_not_found'),
-                                            default => null,
-                                        };
-                                        $mapVenueOnMap = in_array($mapVenue['state'], [\App\Services\VenueMap::PLACED, \App\Services\VenueMap::APPROXIMATE], true);
-                                    @endphp
-                                    <li class="py-2.5" data-venue-state="{{ $mapVenue['state'] }}">
-                                        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100 min-w-0 break-words"><bdi>{{ $mapVenue['name'] }}</bdi></span>
-                                            <span class="event-status {{ $mapVenueOnMap ? 'is-on' : '' }}">{{ $venueMapStates[$mapVenue['state']] }}</span>
-                                        </div>
-                                        @if ($mapVenueFix)
-                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $mapVenueFix }}</p>
-                                        @endif
-                                    </li>
-                                    @endforeach
-                                </ul>
-                            @endif
+                            <div id="es-venue-map-editor" data-venue-map-editor></div>
+                            <script type="application/json" id="es-venue-map-editor-json" {!! nonce_attr() !!}>{!! $venueMapEditorJson !!}</script>
                         </div>
                         @endif
 

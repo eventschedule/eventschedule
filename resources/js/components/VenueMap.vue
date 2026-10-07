@@ -152,6 +152,7 @@
 
 <script>
 import { CONSENT_EVENT, hasConsent } from '../cookie-consent';
+import { loadLeaflet } from '../leaflet-loader';
 
 /**
  * The venue map on a schedule's guest page: a band that opens a map of the schedule's venues,
@@ -177,38 +178,6 @@ import { CONSENT_EVENT, hasConsent } from '../cookie-consent';
  */
 
 const HASH = '#gp-map';
-
-let assets = null;
-
-const loadAssets = (urls) => {
-    if (assets) {
-        return assets;
-    }
-
-    const script = (src) => new Promise((resolve, reject) => {
-        const el = document.createElement('script');
-        el.src = src;
-        el.onload = resolve;
-        el.onerror = reject;
-        document.head.appendChild(el);
-    });
-
-    [urls.leafletCss, urls.clusterCss].forEach((href) => {
-        const el = document.createElement('link');
-        el.rel = 'stylesheet';
-        el.href = href;
-        document.head.appendChild(el);
-    });
-
-    assets = (window.L ? Promise.resolve() : script(urls.leaflet))
-        .then(() => (window.L.markerClusterGroup ? null : script(urls.cluster)))
-        .catch((e) => {
-            assets = null;
-            throw e;
-        });
-
-    return assets;
-};
 
 export default {
     name: 'VenueMap',
@@ -463,7 +432,7 @@ export default {
                     this.venues.forEach(this.measure);
                 });
 
-            this.ready = Promise.all([data, loadAssets(this.assets)])
+            this.ready = Promise.all([data, loadLeaflet(this.assets)])
                 .then(() => {
                     this.loading = false;
                 })

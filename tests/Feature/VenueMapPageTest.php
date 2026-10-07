@@ -198,6 +198,29 @@ class VenueMapPageTest extends TestCase
         $this->assertStringNotContainsString('id="engagement-tab-map"', $form($curator), 'no row on an install with no address search');
     }
 
+    public function test_the_owners_list_of_venues_is_an_empty_host_with_its_data_beside_it(): void
+    {
+        $curator = $this->curatorWithMap(2, ['name' => '{{ constructor.constructor("alert(1)")() }}</script><i>']);
+        $owner = $curator->users()->first();
+
+        $html = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $curator->subdomain]))->assertOk()->getContent();
+
+        $this->assertStringContainsString('<div id="es-venue-map-editor" data-venue-map-editor></div>', $html, 'nothing is printed inside the mount');
+        $this->assertSame(1, preg_match('/<script type="application\/json" id="es-venue-map-editor-json"[^>]*>(.*?)<\/script>/s', $html, $m));
+
+        $props = json_decode($m[1], true, 512, JSON_THROW_ON_ERROR);
+        $this->assertCount(2, $props['venues']);
+        $this->assertSame('{{ constructor.constructor("alert(1)")() }}</script><i>', $props['venues'][0]['name'], 'a venue\'s name arrives whole, as data');
+        $this->assertStringNotContainsString('</script><i>', $html, 'and cannot end the block it is printed in');
+        $this->assertStringContainsString('/venue-map/marks/__VENUE__', $props['markUrl']);
+        $this->assertSame(['id', 'key', 'name', 'address', 'state', 'why', 'hidden', 'by_hand', 'lat', 'lon', 'found', 'claimed', 'edit_url'], array_keys($props['venues'][0]));
+        $this->assertStringContainsString('tiles.test', $props['t']['streets_note'], 'the list says whose streets a pin is moved on');
+
+        // A map that is switched off has asked about nothing, and lists nothing.
+        VenueMap::saveSettings($curator, false, false);
+        $this->assertStringNotContainsString('id="es-venue-map-editor"', $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $curator->subdomain]))->assertOk()->getContent());
+    }
+
     public function test_the_row_has_a_help_link_into_the_guide(): void
     {
         $anchor = \App\Utils\HelpUtils::class;
