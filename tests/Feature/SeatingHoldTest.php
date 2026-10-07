@@ -728,12 +728,13 @@ class SeatingHoldTest extends TestCase
             'subdomain' => $role->subdomain, 'slug' => $event->slug,
         ]))->assertOk()->getContent();
 
-        $this->assertStringContainsString('seating-picker-mount', $html, 'the mount point is missing');
+        $mounts = $this->pickerMounts($html);
+        $this->assertNotSame(0, $mounts, 'the mount point is missing');
 
         // ONE mount for the venue, not one per band. Two instances each posted only their own seats
         // while acquire() replaces the session's whole selection, so picking in a second band
         // silently released the first - and checkout then failed the books-balance guard.
-        $this->assertSame(1, substr_count($html, 'seating-picker-mount'),
+        $this->assertSame(1, $mounts,
             'a second mount means a second instance, which is the two-band hold bug');
         $this->assertStringContainsString('pickerProps()', $html);
         $this->assertStringNotContainsString('pickerProps(ticket)', $html, 'the per-band signature is gone');
@@ -772,14 +773,27 @@ class SeatingHoldTest extends TestCase
             'subdomain' => $role->subdomain, 'slug' => $event->slug,
         ]))->assertOk()->getContent();
 
-        // The mount element's CLASS is part of the client-side template and is therefore always in
-        // the source; what must differ is that no ticket claims to be allocated and the picker gets
-        // no props at all.
+        // The mount's NAME is always in the source, because the page's script names it as a
+        // selector; the element itself is not, and no ticket claims to be allocated and the picker
+        // gets no props at all.
+        $this->assertSame(0, $this->pickerMounts($html), 'an event with no plan was given a mount');
         $this->assertStringContainsString('"is_allocated":false', $html);
         $this->assertStringNotContainsString('"is_allocated":true', $html);
         $this->assertStringContainsString('seatingPicker: null', $html);
         $this->assertStringNotContainsString('seating_choose_own', $html);
         $this->assertStringNotContainsString(__('messages.seating_choose_own'), $html);
+    }
+
+    /**
+     * How many picker mount ELEMENTS the page holds.
+     *
+     * The page's own script names the class too, as a selector (firstTicketControl() brings the
+     * seat map into view when no ticket is chosen), so the name alone says nothing: count the
+     * elements that carry it.
+     */
+    private function pickerMounts(string $html): int
+    {
+        return preg_match_all('/class="[^"]*(?<![\w-])seating-picker-mount(?![\w-])[^"]*"/', $html);
     }
 
     // ------------------------------------------------ review finding 2
