@@ -503,11 +503,13 @@ table, and old code runs on the new schema.
   default on). Nothing changes for anyone until an owner switches it off.
 - A map of a schedule's venues on its public page, each with its logo on its pin, off until an
   owner switches it on AND off on this install until the two env vars below are set.
-- Four migrations: `2026_10_07_000003_add_show_sponsors_to_roles_table` (one `boolean default 1`
-  column), and three new tables: `2026_10_07_000004_create_place_lookups_table`,
+- Five migrations: `2026_10_07_000003_add_show_sponsors_to_roles_table` (one `boolean default 1`
+  column), three new tables: `2026_10_07_000004_create_place_lookups_table`,
   `2026_10_07_000005_create_venue_map_settings_table` and
   `2026_10_07_000006_create_venue_map_marks_table` (an owner's own decisions about a venue on
-  their map: off it, or a pin placed by hand).
+  their map: off it, or a pin placed by hand), and
+  `2026_10_07_000007_add_needed_at_to_place_lookups_table` (one nullable date and its index on
+  that new table, so an address no map reads any more is deleted after 90 days).
 
 **`roles` is full.** `show_sponsors` took the last byte of MySQL's 65,535-byte row: one more
 column of any size fails with error 1118 ("Row size too large"). That is why the map's settings
@@ -527,10 +529,13 @@ MAP_TILE_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
 
 Both services are OpenStreetMap's own and free, and both have a usage policy:
 - the address search allows one request a second at the very most, four a minute for a script on
-  a timer, and blocks a client that repeats a query. The code keeps to all three (one runner at a
-  time across both rails and the queue, answers kept by address, a miss asked again after 30
-  days). At a few hundred venues this is well inside it. If the map is taken up widely, move to a
-  hosted Nominatim or run one: only the URL changes.
+  a timer, and blocks a client that repeats a query. The code keeps to all three: one runner at a
+  time across both rails and the queue, a second since the last request whoever made it, one
+  timer run a minute however many rails tick, answers kept by address, a miss asked again after
+  30 days. At a few hundred venues this is well inside it. If the map is taken up widely, move to
+  a hosted Nominatim or run one: only the URL changes, and a key in its query string is sent with
+  every request. A hosted one answers "no result" with a 404 and an error object; that is read as
+  a miss for the address, never as an outage.
 - the tile servers are best-effort and forbid bulk fetching. Tiles are fetched by visitors'
   browsers only, on their own request, never by the server.
 
@@ -545,11 +550,14 @@ Leave them unset and nothing about this ships to anyone: the feature stays dark.
 - `select status, count(*) from place_lookups group by status`: mostly `found`, some
   `approximate` (villages without street names), some `missing`. All `pending` an hour after a map
   was switched on means the worker cannot reach the address search; `/admin`'s Needs attention
-  list says so after an hour of failures.
+  list says so after an hour of failures. All `missing` means the address in `MAP_GEOCODER_URL`
+  answers, in JSON, that it knows nothing: check its path and its key.
 - In the same row, a venue's **Move pin** opens a small map with streets, and **Save position**
   answers "Saved": the pin on the public map moves on the next load.
-- The privacy policy at `/privacy` lists the two services by itself once the vars are set (clause
-  on embedded content and the provider table). Nothing to edit.
+- The privacy policy at `/privacy` names the services by itself once the vars are set: a row in
+  the provider table, the tile service in the clause on what marketing consent loads, and the
+  hidden-map preference in the list of what the browser keeps. Nothing to edit. Open the page
+  and read the three places once after the deploy.
 
 ### Guest page counts (2026-10-07)
 

@@ -272,4 +272,33 @@ class VenueMapMarksTest extends TestCase
         Role::where('id', $curator->id)->delete();
         $this->assertSame(0, VenueMapMark::count());
     }
+
+    public function test_a_merge_carries_the_owners_decision_to_the_venue_it_became(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createRole($owner, 'curator', ['country_code' => 'il']);
+        VenueMap::saveSettings($curator, true, false);
+
+        // The same place twice: the owner's own venue, and a placeholder a calendar import made.
+        $real = $this->createRole($owner, 'venue', ['name' => 'Ozen Bar', 'city' => 'Tel Aviv', 'country_code' => 'il']);
+        $stub = new Role;
+        $stub->forceFill(['subdomain' => 'stubozenbar', 'type' => 'venue', 'name' => 'Ozen Bar', 'address1' => 'Ozen Bar', 'city' => 'Tel Aviv', 'country_code' => 'il'])->save();
+        $this->followRole($owner, $stub);
+        $event = $this->createEvent($curator, ['creator_role_id' => $curator->id]);
+        $event->roles()->attach($stub->id, ['is_accepted' => true]);
+
+        // The pin was placed by hand on the placeholder.
+        $this->mark($owner, $curator, $stub->fresh(), ['lat' => 32.07, 'lon' => 34.77])->assertOk();
+
+        $this->actingAs($owner)->post(route('following.merge_venues_group'), [
+            'target_id' => UrlUtils::encodeId($real->id),
+            'source_ids' => [UrlUtils::encodeId($stub->id)],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('roles', ['id' => $stub->id, 'is_deleted' => true]);
+        $this->assertSame([$real->id], VenueMapMark::pluck('venue_id')->all(), 'the pin moved with the venue');
+
+        $row = $this->row($curator, $real);
+        $this->assertSame([32.07, 34.77, true], [$row['lat'], $row['lon'], $row['by_hand']]);
+    }
 }

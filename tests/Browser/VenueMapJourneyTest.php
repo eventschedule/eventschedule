@@ -20,9 +20,14 @@ use Tests\DuskTestCase;
  * The venue map on a schedule's guest page, driven the way a visitor and an owner drive it.
  *
  * What a rendered-HTML test cannot see: the band is drawn by a script, the map and the list
- * beside it are built in the browser, a venue and the map itself are steps in the browser's
- * history, and "See all events here" reaches into another app on the page (the list of events)
- * and sets its filter.
+ * beside it are built in the browser, the map says in the address what is open, and "See all
+ * events here" reaches into another app on the page (the list of events) and sets its filter.
+ *
+ * The list has a history of its own (it pushes an entry on a month change and rewrites the
+ * current one on a filter change), and the first version of the map went back through entries it
+ * had pushed when it was hidden: the list's month went back with it and a chosen category was
+ * lost. So only the full-window map owns an entry, one, and several journeys here end on the
+ * list's state.
  *
  * The Dusk environment names an address search that is never asked (every position is written by
  * the test) and, for street images, one small picture of this app's own (.env.dusk.local): the
@@ -39,13 +44,16 @@ class VenueMapJourneyTest extends DuskTestCase
     /** @var array<string, Role> */
     private array $venues = [];
 
+    private int $entries = 0;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        if (! VenueMap::available()) {
-            $this->markTestSkipped('MAP_GEOCODER_URL is not set in the Dusk environment.');
-        }
+        // Fail, do not skip: with the two lines gone from the workflow (or from .env.dusk.local)
+        // every journey here would be reported green without having run.
+        $this->assertTrue(VenueMap::available(), 'MAP_GEOCODER_URL is not set in the Dusk environment (.env.dusk.local, and the Dusk job in .github/workflows/test.yml).');
+        $this->assertNotNull(map_tiles(), 'MAP_TILE_URL is not set in the Dusk environment: the journeys watch for requests to it.');
 
         $this->owner = User::factory()->create(['email_verified_at' => now()]);
         $this->curator = $this->role($this->owner, 'curator', 'mapjourney', 'What is on');
@@ -158,13 +166,43 @@ class VenueMapJourneyTest extends DuskTestCase
             ->pause(500);
     }
 
+    private function mapOpen(Browser $browser): bool
+    {
+        return (bool) $this->js($browser, 'document.querySelector(".gk-map-body") !== null && document.querySelector(".gk-map-body").offsetParent !== null');
+    }
+
+    private function sheetOpen(Browser $browser): bool
+    {
+        return (bool) $this->js($browser, 'getComputedStyle(document.getElementById("gp-map-sheet")).display !== "none"');
+    }
+
+    /**
+     * Who the visitor is, said at the start of a journey: Dusk keeps one browser for the whole
+     * class, so a cookie choice or a hidden map left by the journey before would decide this one.
+     * A page of the site is opened first: a cookie cannot be written on the blank page a browser
+     * starts on.
+     */
+    private function visitor(Browser $browser, bool $allowedCookies): void
+    {
+        $browser->visit('/mapjourney?visit='.uniqid())->waitFor('#es-venue-map-host', 15);
+        $browser->script(
+            'try { localStorage.clear(); sessionStorage.clear(); } catch (e) {}'
+            // The cookie the banner writes, in its own format.
+            .($allowedCookies
+                ? 'document.cookie = "cookie_consent=analytics.marketing.'.time().'; path=/";'
+                : 'document.cookie = "cookie_consent=; path=/; max-age=0";')
+        );
+    }
+
     public function test_a_visitor_opens_the_map_and_reaches_a_venues_events(): void
     {
         $cellar = $this->venues['cellar']->subdomain;
 
         $this->browse(function (Browser $browser) use ($cellar) {
             $this->metrics($browser, 1280, 900);
+            $this->visitor($browser, false);
             $this->page($browser);
+            $this->entries = $this->js($browser, 'history.length');
 
             // The band, for a visitor who has not allowed cookies: the sentence that says who will
             // see their address stands beside Show map, and nothing has been asked for yet.
@@ -209,17 +247,149 @@ class VenueMapJourneyTest extends DuskTestCase
             $browser->assertSeeIn('.gk-map-cta', 'Clear filter');
 
             // And taken off again from the same place.
-            $browser->click('.gk-map-cta button')->pause(300);
-            $this->assertSame('', $this->js($browser, 'window.calendarVueApp.selectedVenue'));
+            $browser->click('.gk-map-cta button')->waitUntil('window.calendarVueApp.selectedVenue === ""', 5);
 
-            // Back: the venue, then the venues, then closed.
-            $browser->back()->pause(600);
+            // Venues: back to the list beside the map, and focus on the row it came from.
+            $browser->click('.gk-map-back')->waitUntilMissing('.gk-map-venue', 5);
             $this->assertSame('#gp-map', $this->js($browser, 'location.hash'));
-            $browser->assertMissing('.gk-map-venue')->assertVisible('.gk-map-item');
+            $this->assertSame($cellar, $this->js($browser, 'document.activeElement.getAttribute("data-venue")'), 'focus is not dropped on the page');
 
-            $browser->back()->pause(600);
+            // In the page the map pushed nothing: the browser's history is as long as it was when
+            // the page opened, so Back is the page's own.
+            $this->assertSame($this->entries, $this->js($browser, 'history.length'));
+
+            // Hide map: the hash goes, nothing travels, and a pin is not left drawn as chosen.
+            $browser->click('.gk-map-item[data-venue="'.$cellar.'"]')->waitFor('.gk-map-venue', 5);
+            $browser->script('document.querySelectorAll("#gp-map .gk-map-acts .gk-map-toggle")[1].click();');
+            $browser->waitUntil('location.hash === ""', 5);
+            $this->assertFalse($this->mapOpen($browser));
+            $this->assertSame($this->entries, $this->js($browser, 'history.length'));
+
+            $this->openMap($browser);
+            $this->assertSame(0, $this->js($browser, 'document.querySelectorAll(".gk-pin.is-on").length'), 'opened again, no pin is the chosen one');
+        });
+    }
+
+    /**
+     * The list is left as it is. Its month and its filters are steps in ITS history, and hiding
+     * the map used to go back through them.
+     */
+    public function test_hiding_the_map_does_not_rewind_the_lists_month_or_filter(): void
+    {
+        $cellar = $this->venues['cellar']->subdomain;
+
+        $this->browse(function (Browser $browser) use ($cellar) {
+            $this->metrics($browser, 1280, 900);
+            $this->visitor($browser, false);
+            $this->page($browser, 'layout=calendar');
+            $this->openMap($browser);
+
+            // Next month, in the list's own way, with the map open.
+            $month = $this->js($browser, 'window.calendarVueApp.pageMonth');
+            $browser->script('window.calendarVueApp.navigateMonth(1);');
+            $browser->waitUntil('window.calendarVueApp.pageMonth !== '.$month.' && ! window.calendarVueApp.isLoadingEvents', 15);
+            $next = $this->js($browser, 'window.calendarVueApp.pageMonth');
+
+            $browser->click('.gk-map-item[data-venue="'.$cellar.'"]')->waitFor('.gk-map-venue', 5);
+            $browser->script('document.querySelectorAll("#gp-map .gk-map-acts .gk-map-toggle")[1].click();');
+            $browser->waitUntil('location.hash === ""', 5)->pause(400);
+
+            $this->assertFalse($this->mapOpen($browser), 'Hide hides');
+            $this->assertSame($next, $this->js($browser, 'window.calendarVueApp.pageMonth'), 'and the month the visitor went to is still the month');
+            $this->assertStringContainsString('month='.$next, $this->js($browser, 'location.search'));
+
+            // A filter the list writes into the address while the map is open.
+            $this->openMap($browser);
+            $browser->script('window.calendarVueApp.selectedCategory = "7";');
+            $browser->waitUntil('location.search.indexOf("category=7") !== -1', 5);
+            $browser->script('document.querySelectorAll("#gp-map .gk-map-acts .gk-map-toggle")[1].click();');
+            $browser->waitUntil('location.hash === ""', 5)->pause(400);
+
+            $this->assertSame('7', $this->js($browser, 'window.calendarVueApp.selectedCategory'), 'the category chosen while the map was open is kept');
+            $this->assertStringContainsString('category=7', $this->js($browser, 'location.search'));
+        });
+    }
+
+    /** A link to the map has no entry of the map's own under it: closing must not go looking for one. */
+    public function test_arriving_by_a_link_and_closing_stays_on_the_page(): void
+    {
+        $barn = $this->venues['barn']->subdomain;
+        $cellar = $this->venues['cellar']->subdomain;
+
+        $this->browse(function (Browser $browser) use ($barn, $cellar) {
+            $this->visitor($browser, false);
+
+            foreach ([[1280, 900], [390, 800]] as [$width, $height]) {
+                $this->metrics($browser, $width, $height);
+                $browser->visit('/mapjourney?visit='.uniqid().'&layout=list#gp-map/'.$barn)->waitFor('.gk-map-venue', 15)->pause(400);
+                $entries = $this->js($browser, 'history.length');
+
+                // Another venue, then close: the X on a phone, Hide map on a laptop.
+                $browser->click('.gk-map-back')->waitFor('.gk-map-item[data-venue="'.$cellar.'"]', 5)
+                    ->click('.gk-map-item[data-venue="'.$cellar.'"]')->waitFor('.gk-map-venue', 5);
+                $browser->script($width < 600
+                    ? 'document.querySelector("#gp-map-sheet .gk-map-sheetbar button").click();'
+                    : 'document.querySelectorAll("#gp-map .gk-map-acts .gk-map-toggle")[1].click();');
+                $browser->waitUntil('location.hash === ""', 5)->pause(400);
+
+                $this->assertFalse($this->mapOpen($browser), "closed at {$width}px");
+                $this->assertStringContainsString('/mapjourney', $this->js($browser, 'location.pathname'), 'still on the schedule');
+                $this->assertSame($entries, $this->js($browser, 'history.length'), 'nothing was pushed and nothing was travelled');
+            }
+
+            $this->metrics($browser, 1280, 900);
+        });
+    }
+
+    /**
+     * "Open the map on arrival" is the one way street images load with no press, so it is for
+     * visitors who allowed that, on a larger screen, who have not hidden it.
+     */
+    public function test_a_map_that_starts_open_does_so_only_for_those_it_may(): void
+    {
+        VenueMap::saveSettings($this->curator, true, true);
+
+        $this->browse(function (Browser $browser) {
+            $this->metrics($browser, 1280, 900);
+
+            // Has not allowed cookies: the band, and nothing asked of the street service.
+            $this->visitor($browser, false);
+            $this->page($browser);
+            $browser->pause(600);
+            $this->assertFalse($this->mapOpen($browser));
+            $this->assertSame(0, $this->streetRequests($browser));
+            $browser->assertSeeIn('#gp-map .gk-map-sub-ask', 'which will see your IP address');
+
+            // Allowed: open on arrival, with streets, and no hash in the address.
+            $this->visitor($browser, true);
+            $this->page($browser);
+            $this->assertTrue((bool) $this->js($browser, 'window.esConsent.has("marketing")'), 'sanity: the fixture cookie reads as marketing allowed');
+            $browser->waitFor('.gk-map-leaflet .leaflet-tile', 15);
+            $this->assertTrue($this->mapOpen($browser));
             $this->assertSame('', $this->js($browser, 'location.hash'));
-            $this->assertFalse((bool) $this->js($browser, 'document.querySelector(".gk-map-body").offsetParent !== null'), 'the map is closed');
+            $this->assertStringContainsString('is-open', $this->js($browser, 'document.getElementById("es-venue-map-host").className'), 'its room was kept from the first paint');
+
+            // Somebody else's Back does not close it: the list's month forward, then Back.
+            $browser->script('window.calendarVueApp.navigateMonth(1);');
+            $browser->pause(1500)->back()->pause(1500);
+            $this->assertTrue($this->mapOpen($browser), 'still open after the list went back a month');
+
+            // Hidden by the visitor, it stays hidden on the next visit.
+            $browser->script('document.querySelectorAll("#gp-map .gk-map-acts .gk-map-toggle")[1].click();');
+            $browser->pause(500);
+            $this->page($browser);
+            $browser->pause(800);
+            $this->assertFalse($this->mapOpen($browser), 'a visitor who hid it keeps it hidden');
+
+            // And on a phone it starts closed whatever was allowed.
+            $browser->script('try { localStorage.clear(); } catch (e) {}');
+            $this->metrics($browser, 390, 800);
+            $this->page($browser);
+            $browser->pause(800);
+            $this->assertFalse($this->mapOpen($browser));
+            $this->assertFalse($this->sheetOpen($browser));
+
+            $this->metrics($browser, 1280, 900);
         });
     }
 
@@ -227,6 +397,7 @@ class VenueMapJourneyTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $this->metrics($browser, 1280, 900);
+            $this->visitor($browser, false);
             $this->page($browser);
 
             $browser->click('#gp-map .gk-map-plain')
@@ -253,6 +424,7 @@ class VenueMapJourneyTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($barn) {
             $this->metrics($browser, 1280, 900);
+            $this->visitor($browser, false);
             // Straight to a venue on the map, as a link to one lands.
             $browser->visit('/mapjourney?visit='.uniqid().'&layout=list#gp-map/'.$barn)
                 ->waitFor('.gk-map-venue', 15)
@@ -305,12 +477,30 @@ class VenueMapJourneyTest extends DuskTestCase
             $this->assertLessThanOrEqual(390, $this->js($browser, 'document.documentElement.scrollWidth'), 'nothing is wider than the phone');
             $this->assertSame(4, $this->js($browser, 'document.querySelectorAll("#gp-map-sheet .gk-map-item").length'));
 
-            // Close is Back: the sheet goes, the page scrolls again, and focus returns to the band.
-            $browser->click('#gp-map-sheet .gk-map-sheetbar button')->pause(700);
+            $whole = trim($this->js($browser, 'document.querySelector("#gp-map-sheet .leaflet-control-scale-line").textContent'));
+            $entries = $this->js($browser, 'history.length');
 
-            $this->assertTrue((bool) $this->js($browser, 'getComputedStyle(document.getElementById("gp-map-sheet")).display === "none"'));
+            // Close: the sheet goes, the page scrolls again, and focus returns to the band. Two
+            // taps in a row must not go back twice.
+            $browser->script('var x = document.querySelector("#gp-map-sheet .gk-map-sheetbar button"); x.click(); x.click();');
+            $browser->waitUntil('location.hash === ""', 5)->pause(500);
+
+            $this->assertFalse($this->sheetOpen($browser));
             $this->assertSame('', $this->js($browser, 'document.body.style.overflow'));
-            $this->assertSame('', $this->js($browser, 'location.hash'));
+            $this->assertStringContainsString('/mapjourney', $this->js($browser, 'location.pathname'), 'one step back, not two');
+
+            // Open again: the whole map, at the scale it first opened at. Fitted while it was
+            // hidden, it came back at street zoom on one spot with an empty list beside it.
+            $browser->click('#gp-map .gk-map-acts .gk-map-toggle')->waitFor('#gp-map-sheet .leaflet-marker-icon', 15)->pause(700);
+            $this->assertSame($whole, trim($this->js($browser, 'document.querySelector("#gp-map-sheet .leaflet-control-scale-line").textContent')));
+            $this->assertSame(4, $this->js($browser, 'document.querySelectorAll("#gp-map-sheet .gk-map-item").length'));
+            $this->assertSame($entries, $this->js($browser, 'history.length'), 'the full-window map owns one entry, each time');
+
+            // A venue, then the phone's own Back: the map closes in one step.
+            $browser->click('#gp-map-sheet .gk-map-item')->waitFor('#gp-map-sheet .gk-map-venue', 5);
+            $browser->back()->waitUntil('location.hash === ""', 5)->pause(400);
+            $this->assertFalse($this->sheetOpen($browser));
+            $this->assertStringContainsString('/mapjourney', $this->js($browser, 'location.pathname'));
 
             $this->metrics($browser, 1280, 900);
         });
@@ -411,8 +601,21 @@ class VenueMapJourneyTest extends DuskTestCase
                 ->assertSeeIn('#es-venue-pin-dialog', 'Where is The Cellar?')
                 ->pause(400);
 
-            [$x, $y] = $browser->script('var r = document.querySelector(\'#es-venue-pin-dialog .leaflet-container\').getBoundingClientRect(); return [Math.round(r.left + 70), Math.round(r.top + 70)];')[0];
-            $browser->clickAtPoint($x, $y)->pause(300);
+            // Looking is not moving: Save is not live until the pin has been put somewhere.
+            $saveDisabled = 'Array.prototype.filter.call(document.querySelectorAll("#es-venue-pin-dialog button"), function (b) { return b.textContent.trim() === "Save position"; })[0].disabled';
+            $this->assertTrue((bool) $this->js($browser, $saveDisabled));
+
+            // A real pointer, 120px left of the map's centre and 60 above it. Dusk's
+            // clickAtPoint() is elementFromPoint().click(), whose event has no coordinates:
+            // Leaflet then drops the pin at the corner of the window and the journey passed.
+            $map = $browser->driver->findElement(\Facebook\WebDriver\WebDriverBy::cssSelector('#es-venue-pin-dialog .leaflet-container'));
+            $browser->driver->action()->moveToElement($map, -120, -60)->click()->perform();
+            $browser->pause(400);
+
+            $tip = $browser->script('var m = document.querySelector("#es-venue-pin-dialog .leaflet-marker-icon").getBoundingClientRect(); var c = document.querySelector("#es-venue-pin-dialog .leaflet-container").getBoundingClientRect(); return [Math.round(m.left + m.width / 2 - (c.left + c.width / 2)), Math.round(m.bottom - (c.top + c.height / 2))];')[0];
+            $this->assertEqualsWithDelta(-120, $tip[0], 3, 'the pin\'s tip is under the pointer');
+            $this->assertEqualsWithDelta(-60, $tip[1], 3);
+            $this->assertFalse((bool) $this->js($browser, $saveDisabled), 'and now there is something to save');
 
             $browser->press('Save position')->waitUntilMissing('#es-venue-pin-dialog', 10)
                 ->waitForTextIn($row($cellar), 'Placed by hand', 10);
@@ -420,8 +623,10 @@ class VenueMapJourneyTest extends DuskTestCase
 
         $mark = VenueMapMark::where('role_id', $this->curator->id)->where('venue_id', $cellar->id)->first();
         $this->assertNotNull($mark, 'the pin placed by hand is the owner\'s own mark');
-        $this->assertNotEqualsWithDelta(32.1660, $mark->lat, 0.00001, 'and it is not where the search had put it');
-        $this->assertEqualsWithDelta(32.1660, $mark->lat, 0.02, 'it is a click away from it');
+        // 120px west and 60px north of the looked-up position, at the dialog's zoom 16: about
+        // 0.0026 degrees of longitude and 0.0011 of latitude. North and west, and not a block away.
+        $this->assertEqualsWithDelta(34.8100 - 0.00257, $mark->lon, 0.0004);
+        $this->assertEqualsWithDelta(32.1660 + 0.00109, $mark->lat, 0.0003);
         $this->assertSame(0, VenueMapMark::where('venue_id', $loft->id)->count(), 'the venue that was put back carries no mark');
 
         // And back to what the search found.
@@ -434,5 +639,19 @@ class VenueMapJourneyTest extends DuskTestCase
         });
 
         $this->assertSame(0, VenueMapMark::count());
+
+        // Without a pointer: the arrow keys move the map, and one button puts the pin at its
+        // centre. Escape closes the dialog wherever focus is.
+        $this->browse(function (Browser $browser) use ($cellar, $row) {
+            $this->pressIn($browser, $row($cellar), 'Move pin');
+            $browser->waitFor('#es-venue-pin-dialog .leaflet-marker-icon', 15)->pause(300);
+            $browser->press('Put the pin at the centre of the map')->pause(200);
+            $this->assertFalse((bool) $this->js($browser, 'Array.prototype.filter.call(document.querySelectorAll("#es-venue-pin-dialog button"), function (b) { return b.textContent.trim() === "Save position"; })[0].disabled'));
+
+            $browser->script('document.body.focus(); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));');
+            $browser->waitUntilMissing('#es-venue-pin-dialog', 5);
+        });
+
+        $this->assertSame(0, VenueMapMark::count(), 'closed without Save, nothing was stored');
     }
 }

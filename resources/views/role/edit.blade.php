@@ -4834,7 +4834,7 @@
                             <x-toggle name="venues_map_open"
                                 label="{{ __('messages.venues_map_open') }}"
                                 checked="{{ old('venues_map_open', \App\Services\VenueMap::startsOpen($role)) }}"
-                                help="{{ __('messages.venues_map_open_help') }}" />
+                                help="{{ map_tiles() ? __('messages.venues_map_open_help') : __('messages.venues_map_open_help_plain') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('venues_map_open')" />
                         </div>
                         @endif
@@ -4850,13 +4850,17 @@
                             $venueMapTiles = map_tiles();
                             $venueMapEditor = [
                                 'venues' => $venueMapStatus['venues'],
+                                'placedNow' => (int) $venueMapStatus['placed'],
                                 'markUrl' => route('role.venue_map.mark', ['subdomain' => $role->subdomain, 'venue' => '__VENUE__']),
                                 'csrf' => csrf_token(),
                                 'tiles' => $venueMapTiles ? ['url' => $venueMapTiles['url']] : null,
                                 'credit' => (string) config('services.map.attribution'),
+                                'creditUrl' => preg_match('~^https?://~i', (string) config('services.map.attribution_url')) ? config('services.map.attribution_url') : null,
                                 'assets' => [
                                     'leaflet' => asset('vendor/leaflet/leaflet.js').'?v=1.9.4',
                                     'leafletCss' => asset('vendor/leaflet/leaflet.css').'?v=1.9.4',
+                                    // The pin's own picture, named outright (see leaflet-loader.js).
+                                    'images' => asset('vendor/leaflet/images').'/',
                                 ],
                                 'rtl' => is_rtl(),
                                 't' => [
@@ -4869,6 +4873,10 @@
                                     'state_waiting' => __('messages.venue_map_waiting'),
                                     'state_no_address' => __('messages.venue_map_no_address'),
                                     'state_not_found' => __('messages.venue_map_address_not_found'),
+                                    'state_no_country' => __('messages.venue_map_no_country'),
+                                    'needs_two' => __('messages.venue_map_needs_two_here'),
+                                    'pin_centre' => __('messages.venue_map_pin_centre'),
+                                    'expired' => __('messages.venue_map_session_expired'),
                                     'state_hidden' => __('messages.venue_map_off_the_map'),
                                     'state_by_hand' => __('messages.venue_map_by_hand'),
                                     'fix_no_address' => __('messages.venue_map_fix_no_address'),
@@ -7734,6 +7742,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('change', function(e) {
         if (e.target && e.target.name === 'show_venues_map') { syncVenueMapRows(); }
     });
+    // Once at load too: a browser that restores a form on reload ticks the switch without
+    // saying so, and "Open the map on arrival" stayed hidden under a switch that was on.
+    syncVenueMapRows();
     kit.summary('engagement:requests', function() {
         if (! kit.on('accept_requests')) {
             return { text: words.disabled, empty: true };

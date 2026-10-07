@@ -42,7 +42,7 @@ class SchedulerHealth
      * config('app.hosted') or config('app.is_nexus') that is missing here, or listed under the
      * wrong kind, fails the build.
      *
-     * @var array<string, 'hosted'|'not_hosted'|'nexus'|'not_nexus'>
+     * @var array<string, 'hosted'|'not_hosted'|'nexus'|'not_nexus'|'map'>
      */
     public const ONLY_ON = [
         // Gated in routes/console.php.
@@ -61,6 +61,8 @@ class SchedulerHealth
         'federation-maintain' => 'nexus',
         'app-check-version' => 'not_nexus',
         'federation-push' => 'not_nexus',
+        // Does nothing until the operator names an address search (services.map.geocoder_url).
+        'app-place-venues' => 'map',
     ];
 
     /** Whether this scheduled task does anything on this install. */
@@ -71,6 +73,7 @@ class SchedulerHealth
             'not_hosted' => ! config('app.hosted'),
             'nexus' => (bool) config('app.is_nexus'),
             'not_nexus' => ! config('app.is_nexus'),
+            'map' => PlaceLookupService::enabled(),
             default => true,
         };
     }

@@ -140,7 +140,8 @@ class VenueMapPageTest extends TestCase
 
     public function test_without_street_images_nothing_names_a_tile_service(): void
     {
-        config(['services.map.tile_url' => null]);
+        // Named here, not read from the developer's .env, where an operator's own credit may be set.
+        config(['services.map.tile_url' => null, 'services.map.attribution' => '© OpenStreetMap contributors']);
 
         $props = $this->props($this->page($this->curatorWithMap()));
 
@@ -162,10 +163,6 @@ class VenueMapPageTest extends TestCase
             'eventsForFilters() {' => 'the events the list is holding',
             'passesFilters(event, except = {}) {' => 'the list\'s own filter test',
             'event.venue_subdomain !== this.selectedVenue' => 'a venue is filtered by its subdomain, which is the map\'s key',
-            'selectedCategory:' => 'the category filter',
-            'showFreeOnly:' => 'the Free filter',
-            'showOnlineOnly:' => 'the Online filter',
-            'clearSearch() {' => 'the search box\'s reset',
             "phoneDay: ''," => 'the day pressed in the phone\'s month',
             'isLoadingEvents:' => 'whether the list has loaded',
             'window.calendarVueApp = calendarAppInstance;' => 'where the list\'s app is reachable',
@@ -175,6 +172,29 @@ class VenueMapPageTest extends TestCase
 
         $component = file_get_contents(resource_path('js/components/VenueMap.vue'));
         $this->assertStringNotContainsString('showVenue', $calendar.$component, 'nothing was added to the list for the map');
+
+        // The venue filter is the only one the map sets. The visitor's category, Free, Online,
+        // search and custom fields are theirs: the first version cleared four of them to avoid an
+        // empty list, and could still land on one.
+        foreach (['selectedCategory', 'showFreeOnly', 'showOnlineOnly', 'clearSearch', 'selectedCustomFields', 'selectedGroup', 'clearFilters'] as $theirs) {
+            $this->assertStringNotContainsString($theirs, $component, "the map leaves {$theirs} alone");
+        }
+
+        // And it travels through history only over the one entry the full-window map pushed: the
+        // list has entries of its own, and a map that went back through several took the list's
+        // month and filters back with it.
+        $this->assertSame(1, substr_count($component, 'history.pushState('), 'one place pushes an entry');
+        $this->assertSame(1, substr_count($component, 'history.back()'), 'one place travels, by one');
+        $this->assertStringNotContainsString('history.go(', $component);
+    }
+
+    public function test_the_host_keeps_no_room_for_a_band_that_will_not_come(): void
+    {
+        $html = $this->page($this->curatorWithMap());
+
+        $this->assertMatchesRegularExpression('/<noscript><style[^>]*>\.gk-map-host \{ min-height: 0; \}<\/style><\/noscript>/', $html, 'no scripts, no band, no gap');
+        $this->assertStringContainsString("classList.add('is-mounted')", file_get_contents(resource_path('js/app.js')), 'a chunk that fails to load gives the room back');
+        $this->assertStringContainsString("host.classList.add('is-mounted');\n\n        return;", file_get_contents(resource_path('js/venue-map-boot.js')), 'and so does a boot that finds nothing to mount');
     }
 
     public function test_the_form_row_is_offered_where_a_map_can_exist(): void
@@ -265,6 +285,14 @@ class VenueMapPageTest extends TestCase
         $this->assertTrue(VenueMap::enabledFor($curator->fresh()));
         $this->assertTrue(VenueMap::startsOpen($curator->fresh()));
 
+        // The same for "Open on arrival" alone: its switch is not drawn where nobody can allow
+        // cookies, and a save from that form used to clear it.
+        $save(['show_venues_map' => '1']);
+        $this->assertTrue(VenueMap::startsOpen($curator->fresh()), 'absent is not off');
+        $save(['show_venues_map' => '1', 'venues_map_open' => '0']);
+        $this->assertFalse(VenueMap::startsOpen($curator->fresh()));
+        $save(['show_venues_map' => '1', 'venues_map_open' => '1']);
+
         // Switched off: both go, and nothing about the first pass is forgotten.
         $save(['show_venues_map' => '0', 'venues_map_open' => '1']);
         $this->assertFalse(VenueMap::enabledFor($curator->fresh()));
@@ -322,11 +350,17 @@ class VenueMapPageTest extends TestCase
         $this->assertSame(1, substr_count($both, '>OpenStreetMap<'), 'one row when both services are the same provider');
         $this->assertStringContainsString('Our servers send it the address of a venue', $both);
         $this->assertStringContainsString('so it sees your IP address', $both);
+        // The clause on what marketing consent loads, and the list of what the browser keeps: the
+        // provider table alone was updated at first, and the release note said nothing was left.
+        $this->assertStringContainsString('the street images of a schedule&#039;s map of venues, which your browser fetches from OpenStreetMap', $both);
+        $this->assertStringContainsString('map of venues that you hid', $both);
 
         config(['services.map.tile_url' => null]);
         $lookupOnly = $this->get('/privacy')->assertOk()->getContent();
         $this->assertStringContainsString('Address search for the map of venues', $lookupOnly);
         $this->assertStringNotContainsString('so it sees your IP address, and only if you allow marketing cookies or press the button that shows the map', $lookupOnly);
+
+        $this->assertStringNotContainsString('which your browser fetches from', $lookupOnly, 'no street images, no such clause');
 
         config(['services.map.geocoder_url' => null]);
         $this->assertStringNotContainsString('OpenStreetMap', $this->get('/privacy')->assertOk()->getContent(), 'an install without the map says nothing about it');

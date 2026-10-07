@@ -13,7 +13,7 @@
       </p>
       <p v-else class="gk-map-sub">{{ townsLine }}</p>
       <ul class="gk-map-stack" aria-hidden="true">
-        <li v-for="(logo, i) in band.logos" :key="logo" :class="{ 'gk-map-wide': i > 2 }"><img :src="logo" alt="" loading="lazy" @load="fit"></li>
+        <li v-for="(logo, i) in band.logos" :key="logo" :class="{ 'gk-map-wide': i > 2 }"><img :src="logo" alt="" loading="lazy" @load="fit($event)"></li>
         <li v-if="rest > 0" class="gk-map-more gk-map-wide" dir="ltr">+{{ rest }}</li>
         <li v-if="restNarrow > 0" class="gk-map-more gk-map-narrow" dir="ltr">+{{ restNarrow }}</li>
       </ul>
@@ -33,7 +33,7 @@
          anything fixed. It comes BEFORE the body below in this template on purpose: a Teleport
          looks its target up when it is mounted, so the slot has to be in the document by then. -->
     <Teleport to="body">
-      <div v-show="sheet" id="gp-map-sheet" ref="sheet" class="gk-map-sheet" role="dialog" aria-modal="true" :aria-label="t.map" :dir="rtl ? 'rtl' : 'ltr'" @keydown="trap">
+      <div v-show="sheet" id="gp-map-sheet" ref="sheet" class="gk-map-sheet" role="dialog" aria-modal="true" :aria-label="t.map" :dir="rtl ? 'rtl' : 'ltr'">
         <div class="gk-map-sheetbar">
           <h2><bdi>{{ name }}</bdi></h2>
           <button ref="close" type="button" class="gk-btn gk-btn-quiet gk-btn-icon" :aria-label="t.close" @click="close">
@@ -56,6 +56,7 @@
               {{ failed ? t.failed : t.loading }}
               <button v-if="failed" type="button" class="gk-link gk-map-plain" @click="retry">{{ t.try_again }}</button>
             </p>
+            <p v-else-if="empty" class="gk-map-wait" role="status">{{ t.none }}</p>
             <div v-if="askOnMap" class="gk-map-askcard">
               <p :id="askId + '-map'">{{ t.streets_note }}</p>
               <button type="button" class="gk-btn gk-btn-secondary gk-btn-sm gk-map-toggle" :aria-describedby="askId + '-map'" @click="showStreets">{{ t.show_streets }}</button>
@@ -63,7 +64,7 @@
           </div>
         </div>
 
-        <aside ref="side" class="gk-map-side" @mouseenter="syncFilter" @focusin="syncFilter">
+        <aside ref="side" class="gk-map-side" @mouseenter="syncFilter" @focusin="syncFilter" @touchstart.passive="syncFilter">
           <template v-if="!current">
             <div class="gk-map-when" role="group">
               <button v-for="w in ['all', 'today', 'week']" :key="w" type="button" class="gk-chip gk-map-whenchip" :aria-pressed="when === w ? 'true' : 'false'" @click="setWhen(w)">{{ t['when_' + w] }}</button>
@@ -84,7 +85,7 @@
               <ul class="gk-map-list">
                 <li v-for="v in group.venues" :key="v.key">
                   <button type="button" class="gk-map-item" :class="{ 'is-hot': hotKey === v.key }" :data-venue="v.key" @click="select(v.key)" @mouseenter="hot(v.key, true)" @mouseleave="hot(v.key, false)">
-                    <span class="gk-map-face"><img v-if="v.logo && !v.wide" :src="v.logo" alt="" loading="lazy" @load="fit"><template v-else>{{ initial(v) }}</template></span>
+                    <span class="gk-map-face"><img v-if="v.logo && !v.wide" :src="v.logo" alt="" loading="lazy" @load="fit($event, v)"><template v-else>{{ initial(v) }}</template></span>
                     <span class="gk-map-itemtext">
                       <strong><bdi>{{ v.name }}</bdi></strong>
                       <small v-if="v.next"><span dir="auto">{{ v.next.when }}</span> · <bdi>{{ v.next.name }}</bdi></small>
@@ -95,7 +96,9 @@
                 </li>
               </ul>
             </template>
-            <p v-if="venues && !groups.length" class="gk-map-nopin gk-map-empty">{{ t.none_when }}</p>
+            <!-- "Nothing then" only when a day filter is what emptied the list: panned away from
+                 every venue, the Whole map row above already says where they are. -->
+            <p v-if="venues && !groups.length && !followed" class="gk-map-nopin gk-map-empty">{{ when === 'all' ? t.none : t.none_when }}</p>
           </template>
 
           <template v-else>
@@ -105,7 +108,7 @@
                 {{ t.venues }}
               </button>
               <div class="gk-map-who">
-                <span class="gk-map-face gk-map-face-lg"><img v-if="current.logo" :src="current.logo" alt="" @load="fit"><template v-else>{{ initial(current) }}</template></span>
+                <span class="gk-map-face gk-map-face-lg"><img v-if="current.logo" :key="current.key" :src="current.logo" alt="" @load="fit($event)"><template v-else>{{ initial(current) }}</template></span>
                 <h3 ref="name" tabindex="-1"><bdi>{{ current.name }}</bdi></h3>
               </div>
               <p class="gk-map-addr"><bdi>{{ current.address }}</bdi><span v-if="current.approx" class="gk-chip">{{ t.approx }}</span></p>
@@ -128,7 +131,7 @@
                 <ul class="gk-map-list gk-map-list-flush">
                   <li v-for="n in nearby" :key="n.v.key">
                     <button type="button" class="gk-map-item" @click="select(n.v.key)">
-                      <span class="gk-map-face"><img v-if="n.v.logo && !n.v.wide" :src="n.v.logo" alt="" loading="lazy" @load="fit"><template v-else>{{ initial(n.v) }}</template></span>
+                      <span class="gk-map-face"><img v-if="n.v.logo && !n.v.wide" :src="n.v.logo" alt="" loading="lazy" @load="fit($event, n.v)"><template v-else>{{ initial(n.v) }}</template></span>
                       <span class="gk-map-itemtext">
                         <strong><bdi>{{ n.v.name }}</bdi></strong>
                         <small><span dir="ltr">{{ n.far }}</span><template v-if="n.v.next"> · <span dir="auto">{{ n.v.next.when }}</span></template></small>
@@ -171,10 +174,20 @@ import { loadLeaflet } from '../leaflet-loader';
  *
  * The list of events below the map is not this component's, and nothing in it was changed for the
  * map. "See all events here" sets the list's OWN venue filter (window.calendarVueApp.selectedVenue,
- * the field its Venue select is bound to), and is offered only for a venue the list is holding
- * events for, so the press never ends on an empty list. Everything read from the list is read
- * through list(), which answers null unless the list still has that shape; VenueMapPageTest fails
- * the build if one of those names leaves role/partials/calendar.
+ * the field its Venue select is bound to) and NO other filter, and is offered only for a venue
+ * that has an event passing the filters the visitor already has, so the press never ends on an
+ * empty list. Everything read from the list is read through list(), which answers null unless
+ * the list still has that shape; VenueMapPageTest fails the build if one of those names leaves
+ * role/partials/calendar.
+ *
+ * HISTORY. Only the full-window map owns a history entry, and only one: pushed when it opens (a
+ * phone, or Larger map), so Back closes it. Everything else REWRITES the current entry
+ * (replaceState, keeping whatever state is on it): opening the map in the page, choosing a venue,
+ * going back to the venues, hiding. The list has entries of its own - it pushes one on a month
+ * change and rewrites the current one when a filter changes - and a map that pushed and then
+ * travelled back through its own steps took the list's month and filters back with it. So the
+ * map in the page never travels. The address still says #gp-map or #gp-map/<venue>, which is
+ * what lets a venue be linked and Back from an event page return to it.
  */
 
 const HASH = '#gp-map';
@@ -212,6 +225,8 @@ export default {
             inView: null,
             filtered: '',
             listed: {},
+            // No venue in the answer has a position: said in words, and no map is built.
+            empty: false,
             hotKey: null,
             askId: 'gp-map-ask',
         };
@@ -300,6 +315,13 @@ export default {
         sheet(on) {
             document.body.style.overflow = on ? 'hidden' : '';
             this.$nextTick(() => {
+                // Closed, the map is not on the screen and has no size: fitted then, the venues
+                // were "fitted" to a box of nothing, at street zoom on one spot, and that view was
+                // remembered as the whole map.
+                if (!this.isOpen) {
+                    return;
+                }
+
                 this.resize();
 
                 // More room, or less: the venues are fitted to it again, unless the visitor has
@@ -320,32 +342,56 @@ export default {
         },
     },
     mounted() {
-        this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || this.widgetReducesMotion();
         this.markers = {};
         this.phoneQuery = window.matchMedia('(max-width: 47.9375rem)');
         this.onPhone = () => {
             this.phone = this.phoneQuery.matches;
             this.$nextTick(this.resize);
         };
-        this.phoneQuery.addEventListener('change', this.onPhone);
+        // The older call too, as the list's own code keeps it: a browser without the newer one
+        // would throw here, and the band would never be drawn.
+        if (this.phoneQuery.addEventListener) {
+            this.phoneQuery.addEventListener('change', this.onPhone);
+        } else if (this.phoneQuery.addListener) {
+            this.phoneQuery.addListener(this.onPhone);
+        }
         document.addEventListener(CONSENT_EVENT, this.onConsent);
         document.addEventListener('keydown', this.onKey);
         window.addEventListener('popstate', this.fromAddress);
+        window.addEventListener('pageshow', this.onPageShow);
+
+        // The list's Calendar / List switch changes the width of the column the map stands in,
+        // and Leaflet only hears of the WINDOW changing size.
+        if (window.ResizeObserver) {
+            this.sizeWatch = new ResizeObserver(() => this.resize());
+            this.sizeWatch.observe(this.$refs.view);
+        }
 
         // A map on arrival is for visitors who have allowed cookies: the others would land on
         // pins with no streets, so they get the band and its one press. A phone always starts
         // with the band. A visitor who hid it stays hidden.
-        if (location.hash.indexOf(HASH) === 0) {
+        if (this.hashState()) {
             this.fromAddress();
         } else if (this.startsOpen && !this.phone && (this.consent || !this.tiles) && !this.hid()) {
-            this.open(true, true);
+            this.show(true);
         }
     },
     beforeUnmount() {
-        this.phoneQuery.removeEventListener('change', this.onPhone);
+        if (this.phoneQuery.removeEventListener) {
+            this.phoneQuery.removeEventListener('change', this.onPhone);
+        } else if (this.phoneQuery.removeListener) {
+            this.phoneQuery.removeListener(this.onPhone);
+        }
         document.removeEventListener(CONSENT_EVENT, this.onConsent);
         document.removeEventListener('keydown', this.onKey);
         window.removeEventListener('popstate', this.fromAddress);
+        window.removeEventListener('pageshow', this.onPageShow);
+        this.sizeWatch?.disconnect();
+        clearTimeout(this.labelTimer);
+        clearTimeout(this.followTimer);
+        clearTimeout(this.closeTimer);
+        clearInterval(this.listTimer);
         document.body.style.overflow = '';
         this.map?.remove();
     },
@@ -363,28 +409,33 @@ export default {
         },
         // A logo fills its disc when it is roughly square; a wider or taller one is fitted whole
         // on white, and one too wide to read at pin size gives way to the venue's initial.
-        fit(e) {
+        // A logo fills its disc when it is roughly square; a wider or taller one is fitted whole
+        // on white, and one too wide to read at pin size gives way to the venue's initial. Read
+        // from the picture itself as it arrives, wherever it is drawn: asked for up front, a
+        // finger that brushed the band downloaded every venue's logo.
+        fit(e, v) {
             const img = e.target;
             const ratio = img.naturalWidth / (img.naturalHeight || 1);
 
-            if (ratio > 1.25 || ratio < 0.8) {
-                img.classList.add('is-fit');
-            }
-        },
-        measure(v) {
-            if (!v.logo || v.wide !== undefined) {
-                return;
-            }
+            // toggle, not add: a reused element kept the last venue's look.
+            img.classList.toggle('is-fit', ratio > 1.25 || ratio < 0.8);
 
-            const probe = new Image();
-            probe.onload = () => {
-                const ratio = probe.naturalWidth / (probe.naturalHeight || 1);
+            if (v && v.wide === undefined) {
                 v.wide = ratio > 2 || ratio < 0.5;
+
                 if (v.wide && this.map) {
                     this.redraw(v.key);
                 }
-            };
-            probe.src = v.logo;
+            }
+        },
+        // The accessibility widget's own switch, as the list reads it: its class lands on <html>
+        // only once the widget's module has run.
+        widgetReducesMotion() {
+            try {
+                return localStorage.getItem('es_a11y_reduce_motion') === '1';
+            } catch (e) {
+                return false;
+            }
         },
         km(a, b) {
             const r = Math.PI / 180;
@@ -409,10 +460,11 @@ export default {
             this.loading = true;
             this.failed = false;
 
+            // The page's own sub-schedule, the one the band was drawn for. Not whichever the list
+            // is on now: the band said "12 venues" of this one.
             const query = new URLSearchParams();
-            const group = window.calendarVueApp && typeof window.calendarVueApp.selectedGroup === 'string' ? window.calendarVueApp.selectedGroup : this.schedule;
-            if (group) {
-                query.set('schedule', group);
+            if (this.schedule) {
+                query.set('schedule', this.schedule);
             }
             const lang = new URLSearchParams(location.search).get('lang');
             if (lang) {
@@ -429,7 +481,7 @@ export default {
                 })
                 .then((json) => {
                     this.venues = Array.isArray(json.venues) ? json.venues : [];
-                    this.venues.forEach(this.measure);
+                    this.empty = !this.venues.some((v) => v.lat !== null);
                 });
 
             this.ready = Promise.all([data, loadLeaflet(this.assets)])
@@ -448,11 +500,12 @@ export default {
 
             return this.ready;
         },
+        // A real second try: the first one's promise is not handed back.
         retry() {
+            this.ready = null;
+            this.failed = false;
             this.load().then(() => this.$nextTick(this.build)).catch(() => {});
         },
-        // ensureMap(), with a failure inside it said on the map instead of swallowed by the
-        // promise it runs in: a map that is open and empty with nothing said is the worst outcome.
         build() {
             try {
                 this.ensureMap();
@@ -471,19 +524,58 @@ export default {
         toggle() {
             this.inline ? this.close() : this.open(true);
         },
-        // withStreets: the press was Show map, which beside the sentence is the visitor's choice.
-        open(withStreets, quietly) {
+        // What the address says is open: null, or { key } with an empty key for the map alone.
+        hashState() {
+            const hash = location.hash;
+
+            if (hash !== HASH && hash.indexOf(HASH + '/') !== 0) {
+                return null;
+            }
+
+            try {
+                return { key: decodeURIComponent(hash.slice(HASH.length + 1)) };
+            } catch (e) {
+                // "#gp-map/%" is somebody's typo, not a venue.
+                return { key: '' };
+            }
+        },
+        // Say in the address what is open, WITHOUT a history entry: the current one is rewritten,
+        // and whatever state the list put on it is kept.
+        address(hash) {
+            history.replaceState(history.state, '', hash || (location.pathname + location.search));
+        },
+        // Whether the entry we are on is the one the full-window map pushed.
+        ownsEntry() {
+            return !!(history.state && history.state.esMap);
+        },
+        pushEntry(hash) {
+            history.pushState(Object.assign({}, history.state, { esMap: 1 }), '', hash);
+        },
+        // A press on the band. withStreets: the press was Show map, which beside the sentence is
+        // the visitor's choice.
+        open(withStreets) {
             if (withStreets && this.tiles && !this.consent) {
                 this.optedIn = this.asking || this.optedIn;
             }
 
-            if (!this.isOpen && !quietly) {
-                history.pushState({ esMap: 1 }, '', HASH);
+            if (this.isOpen) {
+                return;
             }
 
-            this.show(quietly);
+            this.addressed = true;
+
+            // On a phone the map is the whole window, and Back must close it.
+            if (this.phone) {
+                this.pushEntry(HASH);
+            } else {
+                this.address(HASH);
+            }
+
+            this.show(false);
         },
         show(quietly) {
+            const built = !!this.map;
+
             this.isOpen = true;
             this.forget();
             this.syncFilter();
@@ -491,6 +583,13 @@ export default {
             this.load()
                 .then(() => this.$nextTick(() => {
                     this.build();
+
+                    // Opened again: the whole map, as on the first opening.
+                    if (built && this.map && !this.selected) {
+                        this.fitAll();
+                        this.buildMarkers();
+                        this.placeLabels();
+                    }
 
                     // Its top comes to the top of the window, so its foot is never under whatever
                     // sits at the bottom of the screen.
@@ -500,34 +599,63 @@ export default {
                 }))
                 .catch(() => {});
         },
+        // The larger map is the full window, so it takes the one entry too.
         grow() {
+            this.pushEntry(location.hash || HASH);
             this.big = true;
         },
-        // One step back: the larger map to the map in the page, the map to the band.
+        // X, Hide map, and "See all events here" from the full window.
         close() {
-            if (this.big && !this.phone) {
-                this.big = false;
-                this.$nextTick(() => this.$refs.grow?.focus());
+            if (this.closing) {
+                return;
+            }
+
+            // Hiding the map, not shrinking the larger one back into the page.
+            if (this.phone || !this.big) {
+                this.remember();
+            }
+
+            if (this.sheet && this.ownsEntry()) {
+                // Back over the one entry the full-window map pushed; fromAddress() does the
+                // rest. The flag keeps a second tap from travelling again, off the page.
+                this.closing = true;
+                this.closeTimer = setTimeout(() => {
+                    if (this.closing) {
+                        this.closing = false;
+                        this.address('');
+                        this.hide();
+                    }
+                }, 1000);
+                history.back();
 
                 return;
             }
 
-            this.remember();
-
-            if (history.state && history.state.esMap) {
-                // Back to the entry before the map was opened; fromAddress() does the rest.
-                history.go(-history.state.esMap);
-            } else {
-                history.replaceState(null, '', location.pathname + location.search);
-                this.hide();
-            }
+            // Nothing of ours in history (the map in the page, or one a link opened): the address
+            // is rewritten where it stands and nothing travels.
+            this.address('');
+            this.hide();
         },
         hide() {
+            const previous = this.selected;
+
             this.isOpen = false;
             this.big = false;
             this.selected = null;
-            this.$nextTick(() => this.$refs.toggle?.focus({ preventScroll: true }));
+            this.addressed = false;
+            this.followed = false;
+            this.inView = null;
 
+            // Its pin was drawn as the chosen one, and stayed so for the next opening.
+            if (previous && this.map) {
+                this.redraw(previous);
+            }
+
+            this.$nextTick(() => this.$refs.toggle?.focus({ preventScroll: true }));
+            this.settle();
+        },
+        // What was waiting for the full window to close ("See all events here").
+        settle() {
             if (this.afterClose) {
                 const then = this.afterClose;
                 this.afterClose = null;
@@ -536,25 +664,54 @@ export default {
             }
         },
         // The address says what is open: #gp-map, or #gp-map/<venue>. Back and Forward land here,
-        // and so does a link to a venue on the map.
-        fromAddress() {
-            const hash = location.hash;
+        // and so does a link to a venue on the map (called with no event, on arrival).
+        fromAddress(event) {
+            const arriving = !(event instanceof Event);
+            const wasClosing = this.closing;
+            const at = this.hashState();
 
-            if (hash.indexOf(HASH) !== 0) {
-                if (this.isOpen) {
+            this.closing = false;
+            clearTimeout(this.closeTimer);
+
+            if (!at) {
+                // Not the map's address. That closes a map the address had opened. A map that
+                // started open by the owner's setting has no address, and is not closed by
+                // somebody else's Back (the list's month, a gallery photo).
+                if (this.isOpen && (this.addressed || wasClosing)) {
                     this.hide();
                 }
 
                 return;
             }
 
-            const key = decodeURIComponent(hash.slice(HASH.length + 1));
+            this.addressed = true;
+            // Larger map is open exactly while we stand on the entry it pushed.
+            this.big = this.ownsEntry() && !this.phone;
 
             if (!this.isOpen) {
-                this.show(true);
+                // A link to the map on a laptop brings it into view; Back and Forward leave the
+                // page where it is.
+                this.show(!arriving);
             }
 
-            this.load().then(() => this.$nextTick(() => this.choose(key || null, true))).catch(() => {});
+            if (wasClosing) {
+                // The larger map closed back into the page. It is the same map, left as it was:
+                // the entry we came back to still names whatever was chosen when Larger map was
+                // pressed, so it is rewritten to say what is chosen now, not read.
+                this.address(this.selected ? HASH + '/' + encodeURIComponent(this.selected) : HASH);
+                this.$nextTick(() => this.$refs.grow?.focus());
+                this.settle();
+
+                return;
+            }
+
+            this.load().then(() => this.$nextTick(() => this.choose(at.key || null, true))).catch(() => {});
+        },
+        // Consent withdrawn on another page is not heard by a page kept in the back/forward cache.
+        onPageShow(e) {
+            if (e.persisted) {
+                this.onConsent();
+            }
         },
         hid() {
             try {
@@ -578,7 +735,19 @@ export default {
             } catch (e) { /* nothing to forget */ }
         },
         onKey(e) {
-            if (e.key !== 'Escape' || !this.isOpen) {
+            if (!this.isOpen || e.defaultPrevented) {
+                return;
+            }
+
+            if (e.key === 'Tab' && this.sheet) {
+                this.trap(e);
+
+                return;
+            }
+
+            // Escape is the map's only when it was pressed in the map. Heard anywhere, the Escape
+            // that closed the list's filter panel or a photo also stepped the map back.
+            if (e.key !== 'Escape' || !(this.sheet || this.$el.contains(e.target))) {
                 return;
             }
 
@@ -588,13 +757,12 @@ export default {
                 this.close();
             }
         },
-        // Focus stays inside the full-window map while it is open.
+        // Focus stays inside the full-window map while it is open. Heard on the document, as the
+        // lightbox hears it: on the sheet alone, focus that had fallen to the page was free to
+        // walk the page behind a dialog that says it is modal.
         trap(e) {
-            if (e.key !== 'Tab') {
-                return;
-            }
-
-            const stops = Array.from(this.$refs.sheet.querySelectorAll('button, a[href], [tabindex="0"]')).filter((el) => el.offsetParent !== null);
+            const sheet = this.$refs.sheet;
+            const stops = Array.from(sheet.querySelectorAll('button, a[href], [tabindex="0"]')).filter((el) => el.offsetParent !== null);
 
             if (!stops.length) {
                 return;
@@ -603,7 +771,10 @@ export default {
             const first = stops[0];
             const last = stops[stops.length - 1];
 
-            if (e.shiftKey && document.activeElement === first) {
+            if (!sheet.contains(document.activeElement)) {
+                e.preventDefault();
+                (e.shiftKey ? last : first).focus();
+            } else if (e.shiftKey && document.activeElement === first) {
                 e.preventDefault();
                 last.focus();
             } else if (!e.shiftKey && document.activeElement === last) {
@@ -627,7 +798,10 @@ export default {
         ensureMap() {
             const L = window.L;
 
-            if (!L || !this.venues || !this.isOpen) {
+            // Nothing in the answer has a position (the owner switched the map off after this
+            // page loaded, or took venues off it): said in words. Leaflet throws on a map that
+            // was never given a view, which used to read as "could not be loaded" for good.
+            if (!L || !this.venues || !this.isOpen || this.empty) {
                 return;
             }
 
@@ -673,8 +847,9 @@ export default {
             this.moveGround();
             this.placeLabels();
         },
+        // Only while it is on the screen: a hidden map has no size to be told about.
         resize() {
-            if (this.map) {
+            if (this.map && this.isOpen) {
                 this.map.invalidateSize();
                 this.placeLabels();
             }
@@ -747,7 +922,7 @@ export default {
                 const img = document.createElement('img');
                 img.src = v.logo;
                 img.alt = '';
-                img.addEventListener('load', this.fit);
+                img.addEventListener('load', (e) => this.fit(e, v));
 
                 return img;
             }
@@ -964,7 +1139,7 @@ export default {
         follow() {
             clearTimeout(this.followTimer);
             this.followTimer = setTimeout(() => {
-                if (!this.map || !this.venues) {
+                if (!this.map || !this.venues || !this.isOpen) {
                     return;
                 }
 
@@ -1019,24 +1194,13 @@ export default {
                 return;
             }
 
-            // One history entry for a venue: choosing another replaces it, so Back goes venue,
-            // venues, closed, however many venues were looked at.
-            const url = HASH + '/' + encodeURIComponent(key);
-            if (history.state && history.state.esMap === 2) {
-                history.replaceState({ esMap: 2 }, '', url);
-            } else {
-                history.pushState({ esMap: 2 }, '', url);
-            }
-
+            this.addressed = true;
+            this.address(HASH + '/' + encodeURIComponent(key));
             this.choose(key);
         },
         back() {
-            if (history.state && history.state.esMap === 2) {
-                history.back();
-            } else {
-                history.replaceState(history.state, '', HASH);
-                this.choose(null);
-            }
+            this.address(HASH);
+            this.choose(null);
         },
         choose(key, quietly) {
             const previous = this.selected;
@@ -1103,8 +1267,13 @@ export default {
             const listed = {};
 
             if (list) {
+                const passes = typeof list.passesFilters === 'function';
+
                 list.eventsForFilters.forEach((event) => {
-                    if (event.venue_subdomain) {
+                    // Under every filter the visitor already has, the venue's own left aside:
+                    // the button is offered only where pressing it shows something, because it
+                    // never changes another filter to make that so.
+                    if (event.venue_subdomain && (!passes || list.passesFilters(event, { venue: true }))) {
                         listed[event.venue_subdomain] = true;
                     }
                 });
@@ -1112,6 +1281,21 @@ export default {
 
             this.listed = listed;
             this.filtered = list ? list.selectedVenue : '';
+
+            // A link to a venue is read before the list has loaded its events: asked again until
+            // it has, or "See all events here" would wait for the pointer to wander over the panel.
+            clearInterval(this.listTimer);
+            if (!list && this.isOpen && window.calendarVueApp) {
+                let tries = 0;
+                this.listTimer = setInterval(() => {
+                    if (this.list() || ++tries > 40 || !this.isOpen) {
+                        clearInterval(this.listTimer);
+                        if (this.isOpen) {
+                            this.syncFilter();
+                        }
+                    }
+                }, 250);
+            }
         },
         seeAll() {
             const venue = this.current;
@@ -1124,21 +1308,10 @@ export default {
                 const list = this.list();
 
                 if (list) {
-                    const here = (event) => event.venue_subdomain === venue.key;
-
-                    // A category, Free, Online or a search chosen earlier that this venue's
-                    // events do not pass would answer the press with nothing: those give way.
-                    // The sub-schedule never does: the map is the sub-schedule's own.
-                    if (typeof list.passesFilters === 'function' && !list.eventsForFilters.some((event) => here(event) && list.passesFilters(event, { venue: true }))) {
-                        list.selectedCategory = '';
-                        list.showFreeOnly = false;
-                        list.showOnlineOnly = false;
-                        if (typeof list.clearSearch === 'function') {
-                            list.clearSearch();
-                        }
-                    }
-
-                    // A day pressed in the phone's month would hold the list to that day.
+                    // The venue filter and nothing else: the category, Free, Online, the search
+                    // and the custom fields are the visitor's, and stay as they chose them.
+                    // A day pressed in the phone's month is not one of them: "all events here"
+                    // is not all of them on one day.
                     if (typeof list.phoneDay === 'string') {
                         list.phoneDay = '';
                     }
@@ -1158,9 +1331,8 @@ export default {
             };
 
             if (this.sheet) {
-                // The sheet closes first. Its closing goes through history, and the list reads the
-                // address on that same event, so the filter is set one tick after it.
-                this.big = false;
+                // The full window closes first. Where that goes through history, the list reads
+                // the address on the same event, so the filter is set one tick after it (settle()).
                 this.afterClose = act;
                 this.close();
             } else {

@@ -249,4 +249,31 @@ class SponsorsVisibilityTest extends TestCase
             }
         }
     }
+
+    /**
+     * "Hidden" is about sponsors that exist. The switch is drawn only while there is one, so left
+     * off after the last sponsor went it stayed off where nobody could see it: the next sponsors
+     * were saved hidden, the row said "2", and the pages showed nothing.
+     */
+    public function test_emptying_the_list_puts_the_switch_back_on(): void
+    {
+        [$role, , $owner] = $this->sponsoredSchedule();
+
+        // Hidden for the off season.
+        $this->save($owner, $role, ['show_sponsors' => '0', 'existing_sponsors' => $role->sponsor_logos])->assertSessionHasNoErrors();
+        $this->assertFalse($role->fresh()->show_sponsors);
+
+        // Last season's sponsors removed. The form still drew the switch, and posts it off.
+        $this->save($owner, $role, ['show_sponsors' => '0', 'existing_sponsors' => '[]'])->assertSessionHasNoErrors();
+        $this->assertNull($role->fresh()->sponsor_logos);
+        $this->assertTrue($role->fresh()->show_sponsors, 'with nothing to hide, the switch is on again');
+
+        // New sponsors, from a form that drew no switch and so sends none.
+        $html = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<input type="checkbox"[^>]*name="show_sponsors"/', $html);
+
+        $this->save($owner, $role, ['existing_sponsors' => $this->sponsors(2, 'New')])->assertSessionHasNoErrors();
+        $this->assertCount(2, $role->fresh()->shownSponsorLogos(), 'and the new sponsors are on the page');
+        $this->get($role->fresh()->getGuestUrl())->assertOk()->assertSee('id="gp-sponsors"', false);
+    }
 }

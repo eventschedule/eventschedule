@@ -216,7 +216,7 @@ its own affiliate ID - custom domains.
 
 Off by default and **not a plan tier feature**: it exists only when the instance operator sets
 `MAP_GEOCODER_URL` (and, for street images, `MAP_TILE_URL`). Free on every plan once it does.
-Never offered to a venue schedule, which is one place.
+Never offered to a venue schedule, which is one place, or to a demo schedule.
 
 Pins come from an OpenStreetMap-based address search (`place_lookups`, keyed by address), never
 from `roles.geo_lat` / `geo_lon`: those are Google's, and Google's terms allow them on a Google map
@@ -226,8 +226,8 @@ the sentence naming the service. Not in embeds, not in `?graphic=1`.
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
 | Venue map on the schedule page | `VenueMap::offeredTo()` + `venue_map_settings.enabled` | Free on all tiers. Per-schedule toggle in Engagement > Venue map, off by default. The band appears once every venue has been looked up and two have a position (`VenueMap::band()`) |
-| Open the map on arrival | `venue_map_settings.starts_open` | Larger screens, visitors who allowed cookies. Not offered on an install with street images and no cookie banner |
-| Venue status list | `VenueMap::status()` | In the same row: On the map, Approximate position, Waiting, No street address, Address not found |
+| Open the map on arrival | `venue_map_settings.starts_open` | Larger screens, visitors who allowed the marketing category (everyone, on an install with no `MAP_TILE_URL`). Not offered on an install with street images and no cookie banner |
+| Venue status list | `VenueMap::status()` | In the same row: On the map, Approximate position, Placed by hand, Waiting, No street address, No country, Address not found, Off the map |
 | Fix a pin by hand | `venue_map_marks` + `VenueMapController::mark()` | In that list, saved at once: take a venue off this map and put it back, move a pin, place one the search could not find, go back to the looked-up position. For the schedule's editors, about that schedule's map only. Moving and placing need `MAP_TILE_URL` |
 
 ## Paid Ticket Selling

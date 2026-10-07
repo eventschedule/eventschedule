@@ -25,6 +25,7 @@
     .gk-map-host.is-ask { min-height: 6.25rem; }
     @media (min-width: 40rem) { .gk-map-host.is-ask { min-height: 4.875rem; } }
     @media (min-width: 64rem) { .gk-map-host.is-ask { min-height: 3.6875rem; } }
+    @media (min-width: 48rem) { .gk-map-host.is-open { min-height: calc(3.6875rem + 30rem); } }
     .gk-map-host.is-mounted { min-height: 0; }
     .gk-map { overflow: hidden; }
     .gk-map-band { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "icon title stack acts" "sub sub sub sub"; align-items: center; column-gap: .75rem; padding: .625rem .75rem .625rem 1rem; transition: background-color var(--gk-swap); }
@@ -120,6 +121,9 @@
 
 
     .gk-map-sheet { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--gk-solid); color: var(--gk-ink); font-family: inherit; }
+    {{-- The layout draws edge to edge on a phone (viewport-fit=cover), so the full-window map keeps
+         clear of the notch and the home bar by itself. --}}
+    .gk-map-sheet { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
     .gk-map-sheetbar { flex: none; display: flex; align-items: center; gap: .5rem; min-height: 3.25rem; padding: 0 .375rem 0 1rem; border-bottom: 1px solid var(--gk-line); }
     [dir="rtl"] .gk-map-sheetbar { padding: 0 1rem 0 .375rem; }
     .gk-map-sheetbar h2 { margin: 0; margin-inline-end: auto; font-size: 1.0625rem; font-weight: 700; }
@@ -170,6 +174,9 @@
     .gk-map-leaflet .leaflet-bar { border: 0; border-radius: .625rem; overflow: hidden; box-shadow: var(--gk-shadow-lift); }
     .gk-map-leaflet .leaflet-bar a { width: 2.25rem; height: 2.25rem; line-height: 2.25rem; background: var(--gk-solid); color: var(--gk-ink); border-bottom-color: var(--gk-line); }
     .gk-map-leaflet .leaflet-bar a:hover { background: var(--gk-well); color: var(--gk-ink); }
+    {{-- Leaflet's own rule for a zoom button at its limit has the same weight as the two above and
+         comes earlier, so without this a button that does nothing looked as live as the other. --}}
+    .gk-map-leaflet .leaflet-bar a.leaflet-disabled, .gk-map-leaflet .leaflet-bar a.leaflet-disabled:hover { background: var(--gk-solid); color: var(--gk-ink-3); opacity: .55; cursor: default; }
     .gk-map-leaflet .leaflet-control-scale { direction: ltr; }
     .gk-map-leaflet .leaflet-control-scale-line { border-color: var(--gk-ink-3); border-top: 0; background: transparent; color: var(--gk-ink-3); font-weight: 600; font-size: .6875rem; line-height: 1.4; text-shadow: none; }
     .gk-map-leaflet .leaflet-control-attribution { background: color-mix(in srgb, var(--gk-solid) 82%, transparent); color: var(--gk-ink-2); font-weight: 500; font-size: .6875rem; line-height: 1.5; }

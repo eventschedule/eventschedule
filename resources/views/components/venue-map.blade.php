@@ -53,6 +53,7 @@
             'show_streets' => __('messages.venue_map_show_streets'),
             'loading' => __('messages.venue_map_loading'),
             'failed' => __('messages.venue_map_failed'),
+            'none' => __('messages.venue_map_none'),
             'when_all' => __('messages.venue_map_any_day'),
             'when_today' => __('messages.today'),
             'when_week' => __('messages.venue_map_next_7_days'),
@@ -90,17 +91,34 @@
 @endonce
 
 <div id="es-venue-map-host" class="gk-map-host" data-venue-map></div>
-{{-- The band is taller while it carries the sentence about street images, which is while the
-     visitor has not allowed the marketing category (window.esConsent is in the head for exactly
-     this: an inline reader before the modules load). The host is given that height too. --}}
-@if ($tiles)
+{{-- Without scripts no band will ever be drawn here, so no room is kept for one. --}}
+<noscript><style {!! nonce_attr() !!}>.gk-map-host { min-height: 0; }</style></noscript>
+{{-- The room the host keeps before the component arrives is the room the component will take,
+     decided here the way the component decides it (VenueMap.vue, mounted()):
+       - the band is taller while it carries the sentence about street images, which is while the
+         visitor has not allowed the marketing category (window.esConsent is in the head for
+         exactly this: an inline reader before the modules load);
+       - a map that starts open is 30rem taller still, for a visitor on a larger screen who has
+         allowed that category (or on an install with no street images) and has not hidden it.
+         Kept only for the band, the list below jumped that far on every load. --}}
 <script {!! nonce_attr() !!}>
     (function () {
+        var host = document.getElementById('es-venue-map-host');
         var consent = window.esConsent;
-        if (! (consent && consent.has('marketing'))) {
-            document.getElementById('es-venue-map-host').classList.add('is-ask');
+        var allowed = !! (consent && consent.has('marketing'));
+        var tiles = @json((bool) $tiles);
+
+        if (tiles && ! allowed) {
+            host.classList.add('is-ask');
+        }
+
+        if (@json(\App\Services\VenueMap::startsOpen($role)) && (allowed || ! tiles) && ! location.hash && ! window.matchMedia('(max-width: 47.9375rem)').matches) {
+            var hidden = false;
+            try { hidden = localStorage.getItem('es_map_hidden_' + @json($mapProps['url'])) === '1'; } catch (e) {}
+            if (! hidden) {
+                host.classList.add('is-open');
+            }
         }
     })();
 </script>
-@endif
 <script type="application/json" id="es-venue-map-json" {!! nonce_attr() !!}>{!! $mapJson !!}</script>

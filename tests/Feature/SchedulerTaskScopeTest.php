@@ -33,6 +33,7 @@ class SchedulerTaskScopeTest extends TestCase
         'not_hosted' => "if (config('app.hosted'))",
         'nexus' => "if (! config('app.is_nexus'))",
         'not_nexus' => "if (config('app.is_nexus'))",
+        'map' => 'if (! PlaceLookupService::enabled())',
     ];
 
     public function test_every_listed_task_is_scheduled(): void

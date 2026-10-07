@@ -877,7 +877,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
             </svg>
             Sponsors <x-doc-badge plan="pro" /></h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Override sponsor display for a single event. By default, events show whatever sponsors are configured on the schedule.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Override sponsor display for a single event. By default, events show whatever sponsors are configured on the schedule, unless the schedule has its sponsors hidden.</p>
 
         <h3 class="doc-subheading">Sponsor Mode</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">On the <strong class="text-gray-900 dark:text-white">Sponsors</strong> tab of the event form, press one of three choices:</p>
@@ -885,7 +885,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Same as schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default. The choice names them on the form, or says the schedule has none.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The event page displays the same sponsors configured on the schedule. This is the default. The choice names them on the form, says when the schedule has them hidden (the event page then shows none), or says the schedule has none.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No sponsors</h4>

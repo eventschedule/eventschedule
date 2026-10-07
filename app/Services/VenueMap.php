@@ -8,6 +8,8 @@ use App\Models\Role;
 use App\Repos\EventRepo;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The venue map on a schedule's guest page: which venues are on it, where each one is, and what
@@ -26,7 +28,8 @@ use Illuminate\Support\Collection;
  *
  * A venue is one of: placed (a pin), approximate (a pin at a small place's centre), waiting (its
  * address has not been asked yet), no_address, not_found. The public is never shown a waiting
- * venue: "not on the map" would be said of a venue that is only in the queue.
+ * venue: "not on the map" would be said of a venue that is only in the queue. A map's FIRST pass
+ * is published whole (ready_at); a venue added afterwards joins the map when it has been placed.
  */
 class VenueMap
 {
@@ -47,16 +50,25 @@ class VenueMap
 
     public const NOT_FOUND = 'not_found';
 
+    /** How long the closed band is served from the cache. */
+    private const BAND_SECONDS = 300;
+
+    private const VERSION_KEY = 'venue_map.version.';
+
     /** Whether this install has a venue map at all: it needs an address search to place pins. */
     public static function available(): bool
     {
         return PlaceLookupService::enabled();
     }
 
-    /** Whether the schedule form offers the map. A venue schedule's venue is itself. */
+    /**
+     * Whether the schedule form offers the map. A venue schedule's venue is itself. And never a
+     * demo schedule: anybody can sign in to the demo, and whatever they typed as a venue's
+     * address would be sent to the address search under this install's name.
+     */
     public static function offeredTo(Role $role): bool
     {
-        return self::available() && ! $role->isVenue();
+        return self::available() && ! $role->isVenue() && ! is_demo_role($role);
     }
 
     public static function enabledFor(Role $role): bool
@@ -84,14 +96,26 @@ class VenueMap
     {
         \App\Models\VenueMapSetting::updateOrCreate(['role_id' => $role->id], ['enabled' => $enabled, 'starts_open' => $enabled && $startsOpen]);
         $role->unsetRelation('venueMapSetting');
+        self::changed($role);
+    }
+
+    /**
+     * Something the band is drawn from was changed by its owner (a switch, a pin, a venue taken
+     * off) or by the first pass finishing: the cached band is not to be served again. A counter
+     * in the cache, read into the band's key, because the keys cannot be listed to forget them.
+     */
+    public static function changed(Role $role): void
+    {
+        Cache::forever(self::VERSION_KEY.$role->id, ((int) Cache::get(self::VERSION_KEY.$role->id, 0)) + 1);
     }
 
     /**
      * Every venue on $role's map, with where it is and why not when it is nowhere.
      *
-     * With $register, an address nobody has asked about yet is noted for the runner, and a miss
-     * old enough to be asked again goes back in the queue. That is the only write a page view
-     * makes here: one INSERT IGNORE, for a new address, once.
+     * With $register, an address nobody has asked about yet is noted for the runner, a miss old
+     * enough to be asked again goes back in the queue, and a row read for the first time today is
+     * dated as still needed. Those are the writes a page view can make here, each of them once:
+     * an INSERT IGNORE for a new address, an UPDATE for a stale miss, an UPDATE a day for the date.
      *
      * The owner's own decisions come first (venue_map_marks): a venue taken off this map is still
      * returned, flagged `hidden`, for the owner's list to put back, and every public reader leaves
@@ -102,30 +126,32 @@ class VenueMap
      */
     public static function venues(Role $role, ?Group $group = null, bool $register = true): Collection
     {
-        $now = Carbon::now('UTC');
-        $ids = self::venueIds($role, $group, $now->copy()->subDays(self::GRACE_DAYS));
+        // Venue id => whether something is still to come there.
+        $upcoming = self::venueIds($role, $group, Carbon::now('UTC'));
 
-        if ($ids->isEmpty()) {
+        if ($upcoming->isEmpty()) {
             return collect();
         }
 
-        $upcoming = self::venueIds($role, $group, $now)->flip();
-
-        $venues = Role::query()->whereIn('id', $ids)->orderBy('name')->orderBy('id')->get();
+        $venues = Role::query()->whereIn('id', $upcoming->keys())->orderBy('name')->orderBy('id')->get();
         $addresses = $venues->mapWithKeys(fn (Role $venue) => [$venue->id => PlaceLookupService::addressFor($venue, $role)]);
 
         // An online event's "venue" (a meeting link a calendar import stored as an address) is not
         // a place: it is on nobody's map and in nobody's list, the owner's included.
         $venues = $venues->reject(fn (Role $venue) => $addresses[$venue->id]['why'] === 'online')->values();
         $rows = PlaceLookupService::rows($addresses->pluck('hash')->all());
+        $marks = \App\Models\VenueMapMark::where('role_id', $role->id)->whereIn('venue_id', $venues->pluck('id'))->get()->keyBy('venue_id');
 
         if ($register) {
-            PlaceLookupService::register($addresses
-                ->filter(fn (array $a) => $a['hash'] !== null && ! $rows->has($a['hash']))
-                ->unique('hash')->values()->all());
-        }
+            // A venue its owner took off the map is not asked about: nobody will see the answer.
+            $wanted = $addresses->filter(fn (array $a, int $venueId) => $a['hash'] !== null && ! $marks->get($venueId)?->hidden);
 
-        $marks = \App\Models\VenueMapMark::where('role_id', $role->id)->whereIn('venue_id', $venues->pluck('id'))->get()->keyBy('venue_id');
+            PlaceLookupService::register($wanted->filter(fn (array $a) => ! $rows->has($a['hash']))->unique('hash')->values()->all());
+            // Not ->only(): on an Eloquent collection that reads its argument as PRIMARY keys,
+            // whatever the collection itself is keyed by, and no row here has a hash for an id.
+            $wantedHashes = $wanted->pluck('hash')->flip();
+            PlaceLookupService::stillNeeded($rows->filter(fn (\App\Models\PlaceLookup $row) => $wantedHashes->has($row->address_hash)));
+        }
 
         return $venues->map(function (Role $venue) use ($addresses, $rows, $upcoming, $register, $marks) {
             $address = $addresses[$venue->id];
@@ -148,7 +174,7 @@ class VenueMap
 
             return [
                 'venue' => $venue,
-                'upcoming' => $upcoming->has($venue->id),
+                'upcoming' => (bool) $upcoming->get($venue->id),
                 'state' => $byHand ? self::PLACED : $state,
                 'why' => $byHand ? null : $address['why'],
                 'lat' => $byHand ? $mark->lat : $lat,
@@ -164,19 +190,34 @@ class VenueMap
     }
 
     /**
-     * The ids of the venues of $role's public events from $since onwards.
+     * The venues of $role's public events of the last GRACE_DAYS and to come, each with whether
+     * something is still to come there.
      *
      * er1 is this schedule's side of an event, er2 the venue's. The venue is the event's FIRST
      * venue (the lowest pivot id), which is the one Event::getVenueAttribute() and the list's own
      * venue filter mean: a second venue on an event would be a pin whose "see all events here"
      * finds none.
+     *
+     * Two things here are for a schedule that lists tens of thousands of events, measured on one
+     * that lists 30,000 beside as many of other schedules:
+     *   - the read starts from this schedule's own rows and the order is HELD (straight_join).
+     *     Left to choose, MySQL started from every venue on the install and walked all of their
+     *     rows: 470 ms against 145, and a cost that grew with the install, not the schedule;
+     *   - it is ONE walk. "Still to come" was a second run of the same query with a later date.
+     *
+     * @return Collection<int, bool>
      */
-    private static function venueIds(Role $role, ?Group $group, Carbon $since): Collection
+    private static function venueIds(Role $role, ?Group $group, Carbon $now): Collection
     {
-        return Role::query()
-            ->join('event_role as er2', 'er2.role_id', '=', 'roles.id')
-            ->join('event_role as er1', 'er1.event_id', '=', 'er2.event_id')
+        // "Still to come", as an expression: the rule the window below is, asked of now.
+        $coming = DB::query();
+        Event::constrainToOccurrencesSince($coming, $now);
+        $comingSql = preg_replace('/^\s*where\s+/i', '', $coming->getGrammar()->compileWheres($coming));
+
+        return DB::table('event_role as er1')
             ->join('events', 'events.id', '=', 'er1.event_id')
+            ->join('event_role as er2', 'er2.event_id', '=', 'er1.event_id')
+            ->join('roles', 'roles.id', '=', 'er2.role_id')
             ->where('er1.role_id', $role->id)
             ->where('er1.is_accepted', true)
             ->when($group, fn ($q) => $q->where('er1.group_id', $group->id))
@@ -190,14 +231,16 @@ class VenueMap
             ->where('events.is_private', false)
             ->where('events.is_cancelled', false)
             ->where(fn ($q) => Event::constrainNotPasswordProtected($q))
-            ->where(fn ($q) => Event::constrainToOccurrencesSince($q, $since))
+            ->where(fn ($q) => Event::constrainToOccurrencesSince($q, $now->copy()->subDays(self::GRACE_DAYS)))
             ->where('roles.id', '!=', $role->id)
             ->where('roles.type', 'venue')
             ->where('roles.is_deleted', false)
-            ->distinct()
+            ->groupBy('roles.id')
             ->orderBy('roles.id')
             ->limit(self::CAP)
-            ->pluck('roles.id');
+            ->selectRaw('straight_join roles.id, max(case when '.$comingSql.' then 1 else 0 end) as upcoming', $coming->getBindings())
+            ->pluck('upcoming', 'id')
+            ->map(fn ($flag) => (bool) $flag);
     }
 
     /**
@@ -215,14 +258,26 @@ class VenueMap
             return null;
         }
 
+        $lang ??= $role->displayLanguageCode();
+
+        // On every view of the schedule's page, so not worked out on every view: the venue set is
+        // two joins over everything the schedule ever listed, and up to 200 whole schedule rows,
+        // for five logos and three town names. Served for five minutes, and not at all once its
+        // owner has changed something (changed()). Whether there is a map is decided above, fresh.
+        $key = 'venue_map.band.'.$role->id.'.'.($group?->id ?? 0).'.'.$lang.'.'.((int) Cache::get(self::VERSION_KEY.$role->id, 0));
+
+        // false, not null, for "no band": a null is never stored, and would be worked out each time.
+        return Cache::remember($key, self::BAND_SECONDS, fn () => self::bandNow($role, $group, $upcoming, $lang) ?? false) ?: null;
+    }
+
+    private static function bandNow(Role $role, ?Group $group, ?Collection $upcoming, string $lang): ?array
+    {
         $venues = self::venues($role, $group)->reject(fn (array $v) => $v['hidden'] || $v['state'] === self::WAITING)->values();
         $placed = $venues->filter(fn (array $v) => $v['lat'] !== null)->values();
 
         if ($placed->count() < 2) {
             return null;
         }
-
-        $lang ??= $role->displayLanguageCode();
 
         $soonest = collect($upcoming ?? [])->map(fn (array $row) => $row['event']->venue?->id)->filter()->unique()->values()->flip();
         $ordered = $placed->sortBy(fn (array $v) => [$soonest->get($v['venue']->id, PHP_INT_MAX), $v['upcoming'] ? 0 : 1, $v['venue']->name])->values();
@@ -252,10 +307,6 @@ class VenueMap
             return [];
         }
 
-        $timezone = $role->timezone ?: config('app.timezone');
-        $today = Carbon::now($timezone)->format('Y-m-d');
-        $weekEnd = Carbon::now($timezone)->addDays(6)->format('Y-m-d');
-
         $use24 = get_use_24_hour_time($role);
 
         // What the list itself can show, soonest first, grouped by the venue the list files each
@@ -268,7 +319,7 @@ class VenueMap
         // ones with nothing listed after them, by name.
         $venues = $venues->sortBy(fn (array $v) => [$soonest->get($v['venue']->id, PHP_INT_MAX), $v['venue']->name])->values();
 
-        return $venues->map(function (array $v) use ($role, $lang, $coming, $today, $weekEnd, $use24) {
+        return $venues->map(function (array $v) use ($role, $lang, $coming, $use24) {
             $venue = $v['venue'];
             $rows = $coming->get($venue->id, collect())->values();
             $first = $rows->first();
@@ -300,6 +351,21 @@ class VenueMap
                 ];
             };
 
+            // Whether its next event is today or within a week, on that EVENT's own clock (the same
+            // zone its row is dated in, or the pin says "today" beside a row that says Tomorrow),
+            // and a show that has begun and is still on is on today.
+            $soon = function (array $row) {
+                $zone = $row['event']->scheduleTimezone();
+                $start = $row['event']->getStartDateTime($row['date'], true, $zone);
+                $now = Carbon::now($zone);
+
+                return match (true) {
+                    $start->lte($now) || $start->format('Y-m-d') === $now->format('Y-m-d') => 'today',
+                    $start->format('Y-m-d') <= $now->copy()->addDays(6)->format('Y-m-d') => 'week',
+                    default => null,
+                };
+            };
+
             return [
                 'key' => $venue->subdomain,
                 'name' => $name,
@@ -309,7 +375,9 @@ class VenueMap
                 'lat' => $v['lat'],
                 'lon' => $v['lon'],
                 'approx' => $v['state'] === self::APPROXIMATE,
-                'why' => $v['lat'] !== null ? null : ($v['state'] === self::NO_ADDRESS ? 'no_address' : 'not_found'),
+                // "No street address" only when that IS the reason: a venue with a full address
+                // and no country was told to visitors as having none.
+                'why' => $v['lat'] !== null ? null : ($v['why'] === 'no_street' ? 'no_address' : 'not_found'),
                 'logo' => $venue->profile_image_url ? $venue->getProfileImageUrl(480) : null,
                 'url' => $venue->isClaimed() ? ($venue->getGuestUrl() ?: null) : null,
                 // By the address, never by coordinates: Google gets what it would be given on any
@@ -317,7 +385,7 @@ class VenueMap
                 'directions' => $v['street'] && $where !== '' ? 'https://www.google.com/maps/search/?api=1&query='.urlencode($where) : null,
                 // Something still to come here, even where the list above could not hold it.
                 'upcoming' => $v['upcoming'],
-                'soon' => $first ? ($first['date'] === $today ? 'today' : ($first['date'] <= $weekEnd ? 'week' : null)) : null,
+                'soon' => $first ? $soon($first) : null,
                 'next' => $first ? $event($first) : null,
                 'events' => $rows->take(self::EVENTS_PER_VENUE)->map($event)->values()->all(),
                 // Whether the list holds more than the panel shows: more rows, a series (one row
@@ -424,6 +492,7 @@ class VenueMap
 
         \App\Models\VenueMapSetting::where('role_id', $role->id)->update(['ready_at' => now()]);
         $role->unsetRelation('venueMapSetting');
+        self::changed($role);
 
         return true;
     }

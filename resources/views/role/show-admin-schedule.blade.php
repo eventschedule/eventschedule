@@ -242,7 +242,7 @@ document.addEventListener('click', function (e) {
          data-status-url="{{ route('role.venue_map.status', ['subdomain' => $role->subdomain]) }}"
          data-ready="{{ $venueMapNotice['ready'] ? '1' : '0' }}"
          data-total="{{ $venueMapNotice['total'] }}" data-asked="{{ $venueMapNotice['asked'] }}" data-placed="{{ $venueMapNotice['placed'] }}"
-         data-title-preparing="{{ __('messages.venue_map_preparing') }}" data-body-preparing="{{ __('messages.venue_map_preparing_help') }}"
+         data-title-preparing="{{ __('messages.venue_map_preparing') }}" data-body-preparing="{{ __('messages.venue_map_preparing_help') }}" data-body-slow="{{ __('messages.venue_map_still_working') }}"
          data-title-live="{{ __('messages.venue_map_live') }}" data-body-live="{{ __('messages.venue_map_live_help') }}"
          data-title-short="{{ __('messages.venue_map_not_yet') }}" data-body-short="{{ __('messages.venue_map_needs_two') }}">
         <div class="flex items-start gap-3">
@@ -285,11 +285,15 @@ document.addEventListener('click', function (e) {
 
     var part = function(name) { return card.querySelector('[data-map-notice-' + name + ']'); };
     var tries = 0;
+    var slow = false;
 
     function draw(state) {
         // Three things it can say: still asking, on the page, or asked and short of two pins.
         var kind = ! state.ready ? 'preparing' : (state.placed >= 2 ? 'live' : 'short');
         var body = kind === 'live' && state.placed >= state.total ? '' : card.getAttribute('data-body-' + kind);
+
+        // A long first pass (a head start of a dozen, then four a minute) says that it is long.
+        if (kind === 'preparing' && slow) { body = card.getAttribute('data-body-slow'); }
 
         part('title').textContent = card.getAttribute('data-title-' + kind);
         part('body').textContent = body;
@@ -297,26 +301,27 @@ document.addEventListener('click', function (e) {
         part('progress').hidden = kind !== 'preparing' || ! state.total;
         part('bar').style.width = (state.total ? Math.round(100 * state.asked / state.total) : 0) + '%';
         part('count').textContent = state.asked + ' / ' + state.total;
-        part('actions').hidden = kind === 'preparing';
+        part('actions').hidden = kind === 'preparing' && ! slow;
         if (part('view')) { part('view').hidden = kind !== 'live'; }
 
         return kind !== 'preparing';
     }
 
     function ask() {
-        // Five minutes of asking is longer than any first pass: after that the owner has the
-        // list of venues to look at instead of a bar that does not move.
-        if (++tries > 100) {
-            part('actions').hidden = false;
-            return;
-        }
+        // Every three seconds for the first five minutes, then every twenty for half an hour:
+        // two hundred venues are fifty minutes of four a minute, and a card that stopped at five
+        // said "being prepared" over a bar that no longer moved. From then on it also offers the
+        // list of venues, which is where a pin that will not come can be placed by hand.
+        tries++;
+        if (tries > 190) { return; }
+        slow = tries > 100;
 
         fetch(card.getAttribute('data-status-url'), { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
             .then(function(response) { return response.ok ? response.json() : null; })
             .then(function(state) {
-                if (! state || ! draw(state)) { setTimeout(ask, 3000); }
+                if (! state || ! draw(state)) { setTimeout(ask, slow ? 20000 : 3000); }
             })
-            .catch(function() { setTimeout(ask, 6000); });
+            .catch(function() { setTimeout(ask, slow ? 20000 : 6000); });
     }
 
     var done = draw({

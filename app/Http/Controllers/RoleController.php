@@ -707,6 +707,13 @@ class RoleController extends Controller
         // Drop the now-merged source pivot rows for overlapping events.
         DB::table('event_role')->where('role_id', $source->id)->delete();
 
+        // What a schedule's owner decided about the merged-away venue on THEIR venue map (off it,
+        // or a pin placed by hand) now belongs to the venue it became. Where the target already
+        // has that owner's decision, the target's stands and the source's row is dropped.
+        $markedFor = DB::table('venue_map_marks')->where('venue_id', $target->id)->pluck('role_id');
+        DB::table('venue_map_marks')->where('venue_id', $source->id)->whereNotIn('role_id', $markedFor)->update(['venue_id' => $target->id]);
+        DB::table('venue_map_marks')->where('venue_id', $source->id)->delete();
+
         // Re-point calendar_syncs.role_id from source to target so future
         // Google/CalDAV sync doesn't lose state or PATCH/DELETE the wrong
         // calendar event. Drop source rows that would collide with an existing
@@ -6367,6 +6374,14 @@ class RoleController extends Controller
             }
 
             $role->sponsor_logos = ! empty($sponsors) ? json_encode(array_values($sponsors)) : null;
+
+            // "Hidden" is about sponsors that exist. With none left the switch is no longer drawn
+            // (role/edit), so left off it stayed off unseen: the next sponsors an owner added were
+            // saved hidden, the row said "2", and nothing on the form said they were not showing.
+            if (empty($sponsors)) {
+                $role->show_sponsors = true;
+            }
+
             $role->save();
         }
 
@@ -6393,8 +6408,9 @@ class RoleController extends Controller
             ]);
         }
 
-        // A venue map that has not had its first pass: note its venues' addresses now, and ask
-        // about them from the queue, a second apart, so the map is on the page in under a minute.
+        // A venue map that has not had its first pass: note its venues' addresses now, and give
+        // them a head start from the queue (a dozen or so, a second apart). The timer does the
+        // rest at four a minute, so a map of thirty venues is on the page in about five minutes.
         // Never inside this request: on the sync driver the job would run right here, and the
         // every-minute app:place-venues does the same work four addresses at a time.
         //
@@ -6404,7 +6420,13 @@ class RoleController extends Controller
         $venueMapWasOn = \App\Services\VenueMap::enabledFor($role);
 
         if ($request->has('show_venues_map') && \App\Services\VenueMap::offeredTo($role)) {
-            \App\Services\VenueMap::saveSettings($role, $request->boolean('show_venues_map'), $request->boolean('venues_map_open'));
+            // "Open on arrival" only when its switch was on the form: it is not drawn on an
+            // install where nobody can allow cookies, and absent is not off.
+            \App\Services\VenueMap::saveSettings(
+                $role,
+                $request->boolean('show_venues_map'),
+                $request->has('venues_map_open') ? $request->boolean('venues_map_open') : \App\Services\VenueMap::startsOpen($role)
+            );
         }
 
         // Nothing is looked up here: the addresses are noted, and asked about by the queued job

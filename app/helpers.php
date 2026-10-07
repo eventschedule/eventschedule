@@ -81,7 +81,9 @@ if (! function_exists('map_provider_name')) {
      */
     function map_provider_name(?string $url): string
     {
-        $host = strtolower((string) parse_url((string) $url, PHP_URL_HOST));
+        // A tile address may carry placeholders in its host ("{s}.tiles.example.com"): they are
+        // not part of the service's name, and parse_url() refuses a host with braces in it.
+        $host = strtolower((string) parse_url(preg_replace('~\{[a-z]+\}\.~i', '', (string) $url), PHP_URL_HOST));
 
         if ($host === 'openstreetmap.org' || str_ends_with($host, '.openstreetmap.org')) {
             return 'OpenStreetMap';

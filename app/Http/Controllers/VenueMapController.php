@@ -93,6 +93,7 @@ class VenueMapController extends Controller
         }
 
         $this->keepOrDrop($mark);
+        VenueMap::changed($role);
 
         return $this->markAnswer($role, $venueId);
     }
@@ -108,6 +109,7 @@ class VenueMapController extends Controller
             $mark->lat = null;
             $mark->lon = null;
             $this->keepOrDrop($mark);
+            VenueMap::changed($role);
         }
 
         return $this->markAnswer($role, $venueId);

@@ -71,6 +71,8 @@ class VenueMapTest extends TestCase
     {
         $address = PlaceLookupService::addressFor($venue->fresh(), $curator);
 
+        VenueMap::changed($curator);
+
         return PlaceLookup::updateOrCreate(['address_hash' => $address['hash']], [
             'address' => $address['address'],
             'country_code' => $address['country'],
@@ -84,6 +86,9 @@ class VenueMapTest extends TestCase
     private function ready(Role $curator): Role
     {
         \App\Models\VenueMapSetting::where('role_id', $curator->id)->update(['ready_at' => now()]);
+        // The closed band is served from the cache for five minutes. A test that writes the rows
+        // it is drawn from by hand says so, as the app does when an owner changes something.
+        VenueMap::changed($curator);
 
         return $curator->fresh();
     }
@@ -392,5 +397,135 @@ class VenueMapTest extends TestCase
 
         $this->assertTrue(VenueMap::refreshReady($curator), 'a miss is an answer too');
         $this->assertTrue(VenueMap::ready($curator->fresh()));
+    }
+
+    /**
+     * The guard at the top of the endpoint, with a map there to hide. The fixtures that used to
+     * stand for "deleted" and "unpublished" had no ready map, so they answered [] with the guard
+     * taken out.
+     */
+    public function test_a_deleted_or_unpublished_schedule_with_a_ready_map_answers_as_nothing(): void
+    {
+        $curator = $this->curator();
+        foreach (['Alpha', 'Beta'] as $name) {
+            [$venue] = $this->venueWithEvent($curator, $name);
+            $this->place($venue, $curator);
+        }
+        $curator = $this->ready($curator);
+        $this->assertCount(2, $this->endpoint($curator), 'sanity: there is a map to hide');
+
+        \Illuminate\Support\Facades\DB::table('roles')->where('id', $curator->id)->update(['is_deleted' => true]);
+        $this->assertSame([], $this->endpoint($curator->fresh()), 'a deleted schedule');
+
+        // Unpublished: nobody has verified it. Its own page 404s for everyone but its people.
+        \Illuminate\Support\Facades\DB::table('roles')->where('id', $curator->id)->update(['is_deleted' => false, 'email_verified_at' => null, 'phone_verified_at' => null]);
+        $this->assertFalse($curator->fresh()->isClaimed(), 'sanity: the fixture is unpublished');
+        $this->assertSame([], $this->endpoint($curator->fresh()), 'an unpublished schedule');
+    }
+
+    public function test_the_band_is_worked_out_once_and_again_when_its_owner_changes_something(): void
+    {
+        $curator = $this->curator();
+        foreach (['Alpha', 'Beta', 'Gamma'] as $name) {
+            [$venue] = $this->venueWithEvent($curator, $name);
+            $this->place($venue, $curator);
+            $venues[] = $venue;
+        }
+        $curator = $this->ready($curator);
+
+        $queries = function (callable $fn) {
+            \Illuminate\Support\Facades\DB::flushQueryLog();
+            \Illuminate\Support\Facades\DB::enableQueryLog();
+            $result = $fn();
+            $count = count(\Illuminate\Support\Facades\DB::getQueryLog());
+            \Illuminate\Support\Facades\DB::disableQueryLog();
+
+            return [$count, $result];
+        };
+
+        [$first, $band] = $queries(fn () => VenueMap::band($curator));
+        $this->assertSame(3, $band['total']);
+        $this->assertGreaterThanOrEqual(5, $first, 'the venue set is the expensive part');
+
+        // The next visitor: the two joins and the two hundred rows are not run again. What is
+        // left is what decides whether there is a map at all: the settings row, and the
+        // schedule's owner for the demo check (which the page has loaded already).
+        $next = $curator->fresh();
+        [$second, $again] = $queries(fn () => VenueMap::band($next));
+        $this->assertSame($band, $again);
+        $this->assertLessThanOrEqual(2, $second);
+
+        // The owner takes a venue off: the very next page view says so.
+        $owner = $curator->users()->first();
+        $this->actingAs($owner)->putJson(route('role.venue_map.mark', ['subdomain' => $curator->subdomain, 'venue' => \App\Utils\UrlUtils::encodeId($venues[0]->id)]), ['hidden' => true])->assertOk();
+        $this->assertSame(2, VenueMap::band($curator->fresh())['total']);
+
+        // And switched off, there is no band whatever the cache holds.
+        VenueMap::saveSettings($curator, false, false);
+        $this->assertNull(VenueMap::band($curator->fresh()));
+    }
+
+    public function test_a_demo_schedule_is_never_offered_a_map(): void
+    {
+        // Anybody can sign in to the demo, and a venue's address is sent to the address search.
+        $demoUser = \App\Models\User::factory()->create(['email' => \App\Services\DemoService::DEMO_EMAIL, 'email_verified_at' => now()]);
+        $demo = $this->createRole($demoUser, 'curator', ['country_code' => 'il']);
+
+        $this->assertTrue(is_demo_role($demo->fresh()), 'sanity: the fixture is a demo schedule');
+        $this->assertFalse(VenueMap::offeredTo($demo->fresh()));
+
+        VenueMap::saveSettings($demo, true, false);
+        $this->assertFalse(VenueMap::enabledFor($demo->fresh()), 'even with a row that says on');
+    }
+
+    public function test_a_venue_taken_off_the_map_is_not_asked_about(): void
+    {
+        $curator = $this->curator();
+        [$kept] = $this->venueWithEvent($curator, 'Kept');
+        [$off] = $this->venueWithEvent($curator, 'Taken Off');
+        \App\Models\VenueMapMark::create(['role_id' => $curator->id, 'venue_id' => $off->id, 'hidden' => true]);
+
+        VenueMap::venues($curator->fresh());
+
+        $this->assertSame(['1 Kept St, Binyamina'], PlaceLookup::pluck('address')->all());
+    }
+
+    public function test_today_is_the_events_own_today_and_a_show_still_on_is_on_today(): void
+    {
+        // Wednesday 14 October, 23:30 in Jerusalem: still Wednesday in New York (16:30).
+        \Carbon\Carbon::setTestNow(\Carbon\Carbon::parse('2026-10-14 20:30:00', 'UTC'));
+
+        $curator = $this->curator();
+        $curator->forceFill(['timezone' => 'Asia/Jerusalem'])->save();
+        $curator = $this->ready($curator->fresh());
+
+        // A show that began yesterday evening and runs for two days: it is on now.
+        [$running] = $this->venueWithEvent($curator, 'Festival Field', [], ['starts_at' => '2026-10-13 17:00:00', 'duration' => 48]);
+        // Tomorrow morning, on the schedule's clock.
+        [$tomorrow] = $this->venueWithEvent($curator, 'Morning Hall', [], ['starts_at' => '2026-10-15 07:00:00']);
+        foreach ([$running, $tomorrow] as $venue) {
+            $this->place($venue, $curator);
+        }
+
+        $sent = collect($this->endpoint($curator->fresh()))->keyBy('name');
+
+        $this->assertSame('today', $sent['Festival Field']['soon'], 'it began yesterday and is still on');
+        $this->assertSame('week', $sent['Morning Hall']['soon']);
+        $this->assertStringStartsWith(__('messages.tomorrow'), $sent['Morning Hall']['next']['when'], 'and its row agrees with its pin');
+    }
+
+    public function test_a_venue_with_an_address_and_no_country_is_not_told_as_having_no_address(): void
+    {
+        $curator = $this->curator();
+        $curator->forceFill(['country_code' => null])->save();
+        $curator = $this->ready($curator->fresh());
+        [$a] = $this->venueWithEvent($curator, 'Alpha', ['country_code' => null]);
+
+        $row = VenueMap::venues($curator->fresh())->first();
+        $this->assertSame([VenueMap::NO_ADDRESS, 'no_country'], [$row['state'], $row['why']]);
+
+        $sent = $this->endpoint($curator->fresh())[0];
+        $this->assertSame('not_found', $sent['why'], '"This venue has no street address" would be false: it has one');
+        $this->assertSame('no_country', VenueMap::status($curator->fresh())['venues'][0]['why'], 'the owner is told the real reason');
     }
 }

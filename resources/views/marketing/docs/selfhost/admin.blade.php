@@ -224,6 +224,11 @@
                         <td>Every install</td>
                     </tr>
                     <tr>
+                        <td>Venue map address lookups are failing</td>
+                        <td>The address search behind the <a href="#venue-map" class="doc-link">venue map</a> has not answered for an hour, so maps that owners switched on are still waiting for their pins. Check that the address in <code class="doc-inline-code">MAP_GEOCODER_URL</code> is reachable from the server. Links to Queue.</td>
+                        <td>Where <code class="doc-inline-code">MAP_GEOCODER_URL</code> is set</td>
+                    </tr>
+                    <tr>
                         <td>Subscriptions on an unrecognized price</td>
                         <td>A live Stripe subscription whose price is none of the four plan prices this install sells, so the customer is charged for a plan the app cannot recognize. Links to a list on the Revenue page.</td>
                         <td>Installs that sell plans through Stripe</td>
@@ -862,15 +867,15 @@
         </div>
 
         <h3 id="venue-map" class="doc-subheading">Venue map</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Schedules can show <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-venue-map" class="doc-link">a map of their venues</a> on their public page. It is off until you name the two services it uses in <code class="doc-inline-code">.env</code>, and it has no card on this page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Schedules can show <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-venue-map" class="doc-link">a map of their venues</a> on their public page. It is off until you name its address search in <code class="doc-inline-code">.env</code>, and it has no card on this page.</p>
         <ul class="doc-list mb-6">
-            <li><code class="doc-inline-code">MAP_GEOCODER_URL</code> is the address search that finds each venue's position. Your server asks it, once per address: at most four addresses a minute from the scheduler, and one a second for a moment after an owner switches a map on. It has to answer in Nominatim's <code class="doc-inline-code">/search</code> format. Until it is set there is no map and no row in the schedule form.</li>
+            <li><code class="doc-inline-code">MAP_GEOCODER_URL</code> is the address search that finds each venue's position. Your server asks it, once per address: at most four addresses a minute from the scheduler, and one a second for a quarter of a minute after an owner switches a map on. An address is kept while a map still uses it and for 90 days after. It has to answer in Nominatim's <code class="doc-inline-code">/search</code> format, and a key it wants in its query string can be part of the address. Until it is set there is no map and no row in the schedule form.</li>
             <li><code class="doc-inline-code">MAP_TILE_URL</code> is where a visitor's browser fetches the street images, so that service sees the visitor's IP address. Nothing is fetched until the visitor has allowed marketing cookies or pressed <strong>Show map</strong> beside a sentence naming the service. Left unset, the map is pins on a plain ground and no third party is contacted from the browser.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">OpenStreetMap's own services work for both: <code class="doc-inline-code">https://nominatim.openstreetmap.org/search</code> and <code class="doc-inline-code">https://tile.openstreetmap.org/{z}/{x}/{y}.png</code>. Both are free and both have a usage policy you accept by using them, so a busy install should run its own or use a hosted provider. The credit printed on the map comes from <code class="doc-inline-code">MAP_ATTRIBUTION</code> and links to <code class="doc-inline-code">MAP_ATTRIBUTION_URL</code>.</p>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">What to know before switching it on</div>
-            <p>Positions never come from Google: its terms allow its coordinates on a Google map only, so the map keeps its own. Setting these does not raise the cookie banner; without a banner every visitor presses <strong>Show map</strong> once, and <strong>Open the map on arrival</strong> is not offered to owners. If address lookups fail for an hour, the dashboard's <a href="#dashboard" class="doc-link">Needs attention</a> list says so. If you replaced the privacy policy on the <a href="#system-legal-pages" class="doc-link">Legal Pages</a> page, add the two services to yours: the built-in policy lists them by itself.</p>
+            <p>Positions never come from Google: its terms allow its coordinates on a Google map only, so the map keeps its own. Setting these does not raise the cookie banner; without a banner every visitor presses <strong>Show map</strong> each time they open a page, and <strong>Open the map on arrival</strong> is not offered to owners. If address lookups fail for an hour, the dashboard's <a href="#dashboard" class="doc-link">Needs attention</a> list says so. If you replaced the privacy policy on the <a href="#system-legal-pages" class="doc-link">Legal Pages</a> page, add the two services to yours: the built-in policy lists them by itself.</p>
         </div>
 
         <h3 class="doc-subheading">Accommodation affiliate</h3>

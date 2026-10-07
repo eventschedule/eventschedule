@@ -241,7 +241,9 @@ const mountVenueMap = () => {
 
     import('./venue-map-boot.js')
         .then((module) => module.mountVenueMap())
-        .catch(() => {});
+        // The host keeps the band's height from the first paint so the list does not move when
+        // the band arrives. When it is not going to arrive, that height is given back.
+        .catch(() => document.getElementById('es-venue-map-host')?.classList.add('is-mounted'));
 };
 
 // The owner's list of venues on the schedule form (Engagement > Venue map), with its dialog for

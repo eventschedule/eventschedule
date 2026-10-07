@@ -24,10 +24,13 @@ export function mountVenueMap() {
     try {
         props = JSON.parse(jsonEl.textContent || '{}');
     } catch (e) {
-        return;
+        props = {};
     }
 
     if (!props.url || !props.band) {
+        // No band is coming: the room kept for it is given back, not left as a blank gap.
+        host.classList.add('is-mounted');
+
         return;
     }
 

@@ -25,9 +25,16 @@ use Illuminate\Support\Facades\Http;
  *     rails and the queued job reach through the same cache lock.
  *   - A client that repeats a query is blocked. So answers are kept by ADDRESS, for as long as
  *     the address is in use, and a miss is an answer too.
- *   - It has no guarantee. A failure in transit (a timeout, a 5xx, a 429 or a 403, a body that is
- *     not its JSON) says nothing about the address: nothing is recorded against it, the run ends,
- *     and nobody asks again for ten minutes. The same three outcomes GeocodingService has.
+ *   - It has no guarantee. A failure in transit (a timeout, a 5xx, a 429, a 401 or 403, a body
+ *     that is not JSON) says nothing about the address: nothing is recorded against it, the run
+ *     ends, and nobody asks again for ten minutes. The same three outcomes GeocodingService has.
+ *     But ONE address must never be able to hold the line: a refusal the service gives in its own
+ *     JSON (a hosted search answers "no result" with a 404 and an error object) is a miss for
+ *     that address, an address that has failed is asked after the ones that have not, and after
+ *     MAX_TRANSIT_FAILURES it is given up on. Before that, the oldest row was asked first again
+ *     after every pause, and one row the service would not answer was every lookup on the install.
+ *   - An address is somebody's address. A row is kept while a map still reads it (needed_at) and
+ *     KEEP_DAYS after, and an erased account's venues are forgotten at once (forget()).
  *
  * What is sent is the venue's own words and nothing about a person: see addressFor().
  */
@@ -48,7 +55,20 @@ class PlaceLookupService
     /** What one queued run may ask when an owner has just switched a map on, a second apart. */
     public const BURST_BATCH = 25;
 
+    /**
+     * And how long it may take over them. The queue is drained by ONE worker, in the scheduler's
+     * own process, so every second here is a second a ticket email waits: the burst gets a
+     * quarter of a minute and the timer finishes what is left.
+     */
+    public const BURST_SECONDS = 15.0;
+
     public const RETRY_MISS_DAYS = 30;
+
+    /** Failures in transit one address is allowed before it is recorded as a miss. */
+    public const MAX_TRANSIT_FAILURES = 5;
+
+    /** How long an address no map has read is kept. A venue stays on a map 60 days after its last event. */
+    public const KEEP_DAYS = 90;
 
     private const PAUSE_MINUTES = 10;
 
@@ -64,6 +84,9 @@ class PlaceLookupService
 
     /** When lookups began failing, for AdminAlertService. Cleared by the next answer. */
     public const FAILING_SINCE_KEY = 'place_lookups.failing_since';
+
+    /** When the last request left, so two runs back to back still keep a second between them. */
+    private const LAST_ASKED_KEY = 'place_lookups.last_asked_at';
 
     public static function enabled(): bool
     {
@@ -92,8 +115,11 @@ class PlaceLookupService
     {
         $raw = fn (string $column) => trim((string) ($venue->getAttributes()[$column] ?? ''));
 
+        // A link ANYWHERE in the field, with or without a scheme: "Zoom: https://...?pwd=..." was
+        // sent whole when the test looked only at the start, password and all. What stands beside
+        // a link cannot be told from it, so the whole field goes.
         $street = $raw('address1');
-        $link = $street !== '' && preg_match('~^\s*(?:[a-z][a-z0-9+.-]*://|www\.)~i', $street);
+        $link = $street !== '' && preg_match('~(?:[a-z][a-z0-9+.-]*://|\bwww\.|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}/\S)~i', $street);
         if ($link) {
             $street = '';
         }
@@ -153,9 +179,62 @@ class PlaceLookupService
             'address' => $a['address'],
             'country_code' => $a['country'],
             'status' => self::PENDING,
+            'needed_at' => $now->toDateString(),
             'created_at' => $now,
             'updated_at' => $now,
         ], array_values($addresses)));
+    }
+
+    /**
+     * Say that a map still reads these rows. At most one UPDATE a day per address, and none at
+     * all on a page view whose rows were already read today.
+     *
+     * @param  Collection<string, PlaceLookup>  $rows
+     */
+    public static function stillNeeded(Collection $rows): void
+    {
+        $today = now()->startOfDay();
+        $stale = $rows->filter(fn (PlaceLookup $row) => ! $row->needed_at || $row->needed_at->lt($today))->pluck('id');
+
+        if ($stale->isNotEmpty()) {
+            PlaceLookup::whereIn('id', $stale)->update(['needed_at' => $today->toDateString()]);
+        }
+    }
+
+    /** Delete the addresses no map has read for KEEP_DAYS. Returns how many went. */
+    public static function prune(): int
+    {
+        $cutoff = now()->subDays(self::KEEP_DAYS);
+
+        return PlaceLookup::query()
+            ->where(fn ($q) => $q->where('needed_at', '<', $cutoff->toDateString())
+                ->orWhere(fn ($q2) => $q2->whereNull('needed_at')->where('created_at', '<', $cutoff)))
+            ->delete();
+    }
+
+    /**
+     * Forget these venues' addresses now: an erased account's venue is often somebody's home.
+     * Another venue at the same address simply has it looked up again.
+     *
+     * @param  iterable<Role>  $venues
+     */
+    public static function forget(iterable $venues): int
+    {
+        // By the address as it was sent, not by its hash: a venue with no country of its own was
+        // filed under the country of whichever schedule listed it, which this side cannot know.
+        // The words are the same under every one of them.
+        $anyCountry = (new Role)->forceFill(['country_code' => 'xx']);
+        $addresses = [];
+
+        foreach ($venues as $venue) {
+            $address = self::addressFor($venue, $anyCountry)['address'];
+
+            if ($address !== null) {
+                $addresses[] = $address;
+            }
+        }
+
+        return $addresses ? PlaceLookup::whereIn('address', array_values(array_unique($addresses)))->delete() : 0;
     }
 
     /** @return Collection<string, PlaceLookup> keyed by address_hash */
@@ -173,7 +252,7 @@ class PlaceLookupService
             return false;
         }
 
-        $row->update(['status' => self::PENDING, 'try_after' => null]);
+        $row->update(['status' => self::PENDING, 'try_after' => null, 'attempts' => 0, 'created_at' => now()]);
 
         return true;
     }
@@ -185,10 +264,13 @@ class PlaceLookupService
      * all come through here, and withoutOverlapping() only ever serialised a rail against itself.
      * The lock's TTL is a backstop for a killed run, sized above the longest one.
      *
+     * Never-failed addresses first, then oldest: one that keeps failing cannot hold the line.
+     * With $budgetSeconds the run stops once that long has passed (one address is always asked).
+     *
      * @param  array<int, string>|null  $onlyHashes  limit the run to these addresses
      * @return array{asked: int, busy: bool, paused: bool, failed: bool}
      */
-    public static function run(int $max, int $gapMicroseconds = 1000000, ?array $onlyHashes = null): array
+    public static function run(int $max, int $gapMicroseconds = 1000000, ?array $onlyHashes = null, ?float $budgetSeconds = null): array
     {
         $result = ['asked' => 0, 'busy' => false, 'paused' => false, 'failed' => false];
 
@@ -211,15 +293,22 @@ class PlaceLookupService
                 ->where('status', self::PENDING)
                 ->where(fn ($q) => $q->whereNull('try_after')->orWhere('try_after', '<=', now()))
                 ->when($onlyHashes !== null, fn ($q) => $q->whereIn('address_hash', $onlyHashes ?: ['']))
+                ->orderBy('attempts')
                 ->orderBy('created_at')
                 ->orderBy('id')
                 ->limit($max)
                 ->get();
 
+            $started = microtime(true);
+
             foreach ($rows as $index => $row) {
-                if ($index > 0 && $gapMicroseconds > 0) {
-                    usleep($gapMicroseconds);
+                if ($index > 0 && $budgetSeconds !== null && microtime(true) - $started >= $budgetSeconds) {
+                    break;
                 }
+
+                // A second since the LAST request, whoever made it: the queued job's last and the
+                // timer's first used to leave milliseconds apart.
+                self::waitOutTheGap($gapMicroseconds);
 
                 $result['asked']++;
 
@@ -248,28 +337,61 @@ class PlaceLookupService
             return null;
         }
 
+        // A hosted search wants its key in the query string, and the HTTP client REPLACES an
+        // address's own query with the parameters it is handed: carried over, ours on top.
+        parse_str((string) parse_url($lookup['url'], PHP_URL_QUERY), $configured);
+        $endpoint = explode('#', explode('?', $lookup['url'], 2)[0], 2)[0];
+
+        $json = null;
+        $refused = false;
+
         try {
             $response = Http::withHeaders([
                 // The service refuses a stock library User-Agent: this names the app and where it runs.
                 'User-Agent' => config('app.name', 'Event Schedule').' venue map (+'.config('app.url').')',
-            ])->timeout(8)->get($lookup['url'], array_filter([
+            ])->timeout(8)->get($endpoint, array_merge($configured, array_filter([
                 'format' => 'jsonv2',
                 'limit' => 1,
                 'q' => $row->address,
                 'countrycodes' => $row->country_code,
-            ]));
+            ])));
 
-            $json = $response->successful() ? $response->json() : null;
+            Cache::put(self::LAST_ASKED_KEY, microtime(true), 60);
+
+            if ($response->successful()) {
+                $json = $response->json();
+            } else {
+                // A 4xx in the service's own JSON is the service answering about THIS address
+                // (a hosted search says "no result" as 404 {"error": ...}). Not 401, 403 or 429,
+                // which are about us, nor 408; and not a 4xx page that is not JSON, which is a
+                // wrong address in MAP_GEOCODER_URL and must reach the admin's list, not turn
+                // every venue into "address not found".
+                $refused = $response->clientError()
+                    && ! in_array($response->status(), [401, 403, 407, 408, 429], true)
+                    && is_array($response->json());
+            }
         } catch (\Throwable $e) {
             $json = null;
         }
 
+        if ($refused) {
+            Cache::forget(self::FAILING_SINCE_KEY);
+
+            return self::record($row, self::MISSING, null, null);
+        }
+
         // Not its JSON list: a timeout, a 5xx, a 429 or 403, an error page. A verdict on the
-        // request, never on the address.
+        // request, never on the address - until the same address has had it MAX_TRANSIT_FAILURES
+        // times, which is an address the service will not answer.
         if (! is_array($json) || ($json !== [] && ! array_is_list($json))) {
-            $row->update(['attempts' => $row->attempts + 1, 'try_after' => now()->addMinutes(self::PAUSE_MINUTES)]);
             Cache::put(self::PAUSE_KEY, true, now()->addMinutes(self::PAUSE_MINUTES));
             Cache::add(self::FAILING_SINCE_KEY, now()->timestamp, now()->addDays(7));
+
+            if ($row->attempts + 1 >= self::MAX_TRANSIT_FAILURES) {
+                self::record($row, self::MISSING, null, null);
+            } else {
+                $row->update(['attempts' => $row->attempts + 1, 'try_after' => now()->addMinutes(self::PAUSE_MINUTES)]);
+            }
 
             return null;
         }
@@ -278,6 +400,11 @@ class PlaceLookupService
 
         [$status, $lat, $lon] = self::read($json[0] ?? null);
 
+        return self::record($row, $status, $lat, $lon);
+    }
+
+    private static function record(PlaceLookup $row, string $status, ?float $lat, ?float $lon): string
+    {
         $row->update([
             'status' => $status,
             'lat' => $lat,
@@ -288,6 +415,20 @@ class PlaceLookupService
         ]);
 
         return $status;
+    }
+
+    private static function waitOutTheGap(int $gapMicroseconds): void
+    {
+        if ($gapMicroseconds <= 0) {
+            return;
+        }
+
+        $last = Cache::get(self::LAST_ASKED_KEY);
+        $wait = is_numeric($last) ? $gapMicroseconds - (int) round((microtime(true) - (float) $last) * 1000000) : 0;
+
+        if ($wait > 0) {
+            usleep(min($wait, $gapMicroseconds));
+        }
     }
 
     /**

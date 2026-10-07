@@ -5,6 +5,8 @@
     <template v-else>
       <p class="event-hint">{{ t.help }}</p>
       <p v-if="tiles" class="event-hint">{{ t.streets_note }}</p>
+      <!-- The map is on the page only with two pins: taking one of two off takes the map off. -->
+      <p v-if="placed < 2" class="event-hint font-medium text-gray-700 dark:text-gray-300" role="status">{{ t.needs_two }}</p>
       <ul class="divide-y divide-gray-200 dark:divide-gray-700 border-y border-gray-200 dark:border-gray-700">
         <li v-for="venue in list" :key="venue.id" class="py-3" :data-venue-state="venue.hidden ? 'hidden' : venue.state" :data-venue="venue.key">
           <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -22,7 +24,7 @@
               <button type="button" class="event-link" :disabled="busy === venue.id" @click="save(venue, { hidden: false })">{{ t.put_back }}</button>
             </template>
             <template v-else>
-              <button v-if="tiles && venue.state !== 'waiting'" type="button" class="event-link" :disabled="busy === venue.id" @click="place(venue)">{{ venue.lat === null ? t.place : t.move }}</button>
+              <button v-if="tiles" type="button" class="event-link" :disabled="busy === venue.id" @click="place(venue)">{{ venue.lat === null ? t.place : t.move }}</button>
               <a v-if="venue.edit_url" class="event-link" :href="venue.edit_url">{{ t.edit_venue }}</a>
               <button type="button" class="event-link" :disabled="busy === venue.id" @click="save(venue, { hidden: true })">{{ t.take_off }}</button>
             </template>
@@ -35,9 +37,12 @@
 
     <!-- The dialog a pin is placed in. On the body: the form's panes clip, and the save bar is fixed. -->
     <Teleport to="body">
-      <div v-if="open" class="fixed inset-0 z-[70] flex items-center justify-center p-4" :dir="rtl ? 'rtl' : 'ltr'" @keydown.esc.stop="close">
-        <div class="absolute inset-0 bg-black/50" @click="close"></div>
-        <div id="es-venue-pin-dialog" ref="dialog" class="ap-card relative w-full max-w-2xl rounded-xl p-5" role="dialog" aria-modal="true" :aria-label="title" @keydown="trap">
+      <!-- overflow-y-auto with a min-h-full wrapper: on a short window (a phone on its side) the
+           card is taller than the screen, and centred without scrolling its Save was out of reach. -->
+      <div v-if="open" class="fixed inset-0 z-[70] overflow-y-auto" :dir="rtl ? 'rtl' : 'ltr'">
+        <div class="fixed inset-0 bg-black/50" @click="close"></div>
+        <div class="relative flex min-h-full items-center justify-center p-4">
+        <div id="es-venue-pin-dialog" ref="dialog" class="ap-card relative w-full max-w-2xl rounded-xl p-5" role="dialog" aria-modal="true" :aria-label="title">
           <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100"><bdi>{{ title }}</bdi></h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
             <template v-if="open.address"><bdi>{{ open.address }}</bdi>. </template>{{ t.drag }}
@@ -49,14 +54,24 @@
             <p v-if="mapFailed" class="absolute inset-x-4 top-1/2 -translate-y-1/2 text-center text-sm text-gray-700 dark:text-gray-300" role="status">{{ t.map_failed }}</p>
           </div>
 
+          <!-- For a keyboard: the arrow keys move the map, and this puts the pin where it is looking. -->
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <button type="button" class="event-link" :disabled="!mapReady" @click="dropAtCentre">{{ t.pin_centre }}</button>
+            <p v-if="dialogError" class="text-sm text-red-600 dark:text-red-400" role="alert">{{ dialogError }}</p>
+          </div>
+
           <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
             <button v-if="open.by_hand && open.found" type="button" class="event-link" :disabled="busy === open.id" @click="forget">{{ t.use_found }}</button>
             <span v-else></span>
             <div class="flex flex-wrap gap-3">
               <button ref="cancel" type="button" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]" @click="close">{{ t.cancel }}</button>
-              <button type="button" class="inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-base text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] disabled:opacity-50" :disabled="!pin || busy === open.id" @click="savePin">{{ t.save_position }}</button>
+              <!-- Live only once the pin has been put somewhere: pressed after only LOOKING at a
+                   pin, it stored the looked-up position as one placed by hand, and the pin then
+                   ignored the venue's address being corrected. -->
+              <button type="button" class="inline-flex items-center justify-center px-4 py-3 rounded-lg font-semibold text-base text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] disabled:opacity-50" :disabled="!moved || busy === open.id" @click="savePin">{{ t.save_position }}</button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </Teleport>
@@ -90,6 +105,9 @@ export default {
         csrf: { type: String, default: '' },
         tiles: { type: Object, default: null },
         credit: { type: String, default: '' },
+        creditUrl: { type: String, default: null },
+        // How many venues have a pin on the map now: under two, there is no map on the page.
+        placedNow: { type: Number, default: 0 },
         assets: { type: Object, required: true },
         rtl: { type: Boolean, default: false },
         t: { type: Object, required: true },
@@ -102,15 +120,23 @@ export default {
             failed: null,
             open: null,
             pin: null,
+            moved: false,
+            mapReady: false,
             mapFailed: false,
+            dialogError: '',
+            placed: this.placedNow,
         };
     },
     computed: {
         title() {
-            return this.open ? this.t.where.replace(':name', this.open.name) : '';
+            return this.open ? this.t.where.replace(':name', () => this.open.name) : '';
         },
     },
+    mounted() {
+        document.addEventListener('keydown', this.onKey);
+    },
     beforeUnmount() {
+        document.removeEventListener('keydown', this.onKey);
         this.destroyMap();
     },
     methods: {
@@ -124,6 +150,11 @@ export default {
 
             if (venue.by_hand) {
                 return this.t.state_by_hand;
+            }
+
+            // A full address and no country is not "no street address".
+            if (venue.state === 'no_address' && venue.why === 'no_country') {
+                return this.t.state_no_country;
             }
 
             return this.t['state_' + venue.state] || venue.state;
@@ -143,6 +174,7 @@ export default {
             this.busy = venue.id;
             this.saved = null;
             this.failed = null;
+            this.dialogError = '';
 
             return fetch(this.markUrl.replace('__VENUE__', encodeURIComponent(venue.id)), {
                 method,
@@ -150,12 +182,25 @@ export default {
                 headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrf, 'X-Requested-With': 'XMLHttpRequest' },
                 body: body ? JSON.stringify(body) : undefined,
             })
-                .then((response) => (response.ok ? response.json() : Promise.reject(new Error('mark ' + response.status))))
+                .then((response) => {
+                    if (!response.ok) {
+                        const error = new Error('mark ' + response.status);
+                        // Signed out, or a form left open past its token: trying again cannot work.
+                        error.expired = response.status === 401 || response.status === 419;
+                        throw error;
+                    }
+
+                    return response.json();
+                })
                 .then((json) => {
                     const at = this.list.findIndex((v) => v.id === venue.id);
 
                     if (at >= 0 && json.venue) {
                         this.list.splice(at, 1, json.venue);
+                    }
+
+                    if (typeof json.placed === 'number') {
+                        this.placed = json.placed;
                     }
 
                     this.saved = venue.id;
@@ -164,6 +209,8 @@ export default {
                 })
                 .catch((e) => {
                     this.failed = venue.id;
+                    // Said where the person is looking: with the dialog open the row is behind it.
+                    this.dialogError = e.expired ? this.t.expired : this.t.failed;
                     throw e;
                 })
                 .finally(() => {
@@ -178,10 +225,13 @@ export default {
         place(venue) {
             this.open = venue;
             this.pin = venue.lat !== null ? [venue.lat, venue.lon] : null;
+            this.moved = false;
+            this.mapReady = false;
             this.mapFailed = false;
+            this.dialogError = '';
             this.returnTo = document.activeElement;
 
-            loadLeaflet({ leaflet: this.assets.leaflet, leafletCss: this.assets.leafletCss })
+            loadLeaflet({ leaflet: this.assets.leaflet, leafletCss: this.assets.leafletCss, images: this.assets.images })
                 .then(() => this.$nextTick(this.buildMap))
                 .catch(() => {
                     this.mapFailed = true;
@@ -215,13 +265,33 @@ export default {
             L.tileLayer(this.tiles.url, { maxZoom: 19 }).addTo(this.map);
 
             const credit = L.control.attribution({ prefix: false }).addTo(this.map).getContainer();
-            credit.textContent = this.credit;
+            const name = document.createElement(this.creditUrl ? 'a' : 'span');
+            name.textContent = this.credit;
+            if (this.creditUrl) {
+                name.href = this.creditUrl;
+                name.target = '_blank';
+                name.rel = 'noopener noreferrer';
+            }
+            credit.textContent = '';
+            credit.appendChild(name);
 
             if (this.pin) {
                 this.drop(this.pin);
             }
 
-            this.map.on('click', (e) => this.drop([e.latlng.lat, e.latlng.lng]));
+            this.map.on('click', (e) => this.put([e.latlng.lat, e.latlng.lng]));
+            this.mapReady = true;
+        },
+        // The pin put somewhere by the person: only this makes Save live.
+        put(at) {
+            this.drop(at);
+            this.moved = true;
+        },
+        dropAtCentre() {
+            if (this.map) {
+                const centre = this.map.getCenter();
+                this.put([centre.lat, centre.lng]);
+            }
         },
         // The pin: dragged, or put where the map is clicked.
         drop(at) {
@@ -238,12 +308,13 @@ export default {
             this.marker.on('dragend', () => {
                 const where = this.marker.getLatLng();
                 this.pin = [where.lat, where.lng];
+                this.moved = true;
             });
         },
         savePin() {
             const venue = this.open;
 
-            if (!venue || !this.pin) {
+            if (!venue || !this.pin || !this.moved) {
                 return;
             }
 
@@ -265,10 +336,25 @@ export default {
 
             this.map = null;
             this.marker = null;
+            this.mapReady = false;
+        },
+        // Escape and Tab while the dialog is open, heard on the document: bound to the dialog
+        // itself they stopped working the moment focus left it (a click on its heading).
+        onKey(e) {
+            if (!this.open) {
+                return;
+            }
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.close();
+            } else if (e.key === 'Tab') {
+                this.trap(e);
+            }
         },
         // Focus stays in the dialog while it is open.
         trap(e) {
-            if (e.key !== 'Tab' || !this.$refs.dialog) {
+            if (!this.$refs.dialog) {
                 return;
             }
 
@@ -281,7 +367,10 @@ export default {
             const first = stops[0];
             const last = stops[stops.length - 1];
 
-            if (e.shiftKey && document.activeElement === first) {
+            if (!this.$refs.dialog.contains(document.activeElement)) {
+                e.preventDefault();
+                (e.shiftKey ? last : first).focus();
+            } else if (e.shiftKey && document.activeElement === first) {
                 e.preventDefault();
                 last.focus();
             } else if (!e.shiftKey && document.activeElement === last) {

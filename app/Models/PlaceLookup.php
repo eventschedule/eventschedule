@@ -18,5 +18,6 @@ class PlaceLookup extends Model
         'attempts' => 'integer',
         'try_after' => 'datetime',
         'looked_up_at' => 'datetime',
+        'needed_at' => 'date',
     ];
 }
