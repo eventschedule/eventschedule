@@ -18,7 +18,7 @@ use Tests\TestCase;
  * belongs, and it carries on down it as it did.)
  *
  * The test that matters for privacy is still here: a draft, cancelled, unlisted or
- * password-protected event must never be one of the rows.
+ * password-protected event must never be one of the cards.
  */
 class GuestEventSidebarLinkTest extends TestCase
 {
@@ -85,8 +85,25 @@ class GuestEventSidebarLinkTest extends TestCase
         $main = strpos($html, 'class="gk-event-col gk-event-main"');
         $here = strpos($html, 'id="gp-upcoming-events"');
         $this->assertTrue($side < $here && $here < $main, 'inside the left column');
-        $foot = substr($html, strpos($html, 'class="gk-event-foot"'), 400);
-        $this->assertStringNotContainsString('gp-upcoming-events', $foot);
+        // The foot holds only the free tier's "create your own", and is not drawn without it:
+        // empty, it was a blank block at the end of every paid schedule's event page.
+        $this->assertFalse($role->fresh()->showBranding(), 'fixture: a paid schedule');
+        $this->assertStringNotContainsString('class="gk-event-foot"', $html);
+
+        $free = $this->createFreeRole(null, 'venue');
+        $freeEvent = $this->createEvent($free, ['name' => 'Free Tonight', 'starts_at' => $this->at(1)]);
+        $this->createEvent($free, ['name' => 'Free Tomorrow', 'starts_at' => $this->at(2)]);
+        $html = $this->get($this->guestEventUrl($free, $freeEvent))->assertOk()->getContent();
+        $foot = strpos($html, 'class="gk-event-foot"');
+        $this->assertNotFalse($foot);
+        $this->assertStringContainsString('id="gp-create-your-own"', substr($html, $foot, 600));
+        $this->assertLessThan($foot, strpos($html, 'id="gp-upcoming-events"'), 'the other events are in the column above, not in the foot');
+
+        // Wherever the page is one column (below 64rem) the list is at its end and stops after
+        // five: cut below 48rem only, a tablet got all twenty there.
+        $kit = file_get_contents(resource_path('views/partials/guest-kit-styles.blade.php'));
+        $this->assertStringContainsString('@media (max-width: 63.99rem) { .gk-up-late { display: none; } }', $kit);
+        $this->assertStringContainsString('@media (min-width: 64rem) {', $kit, 'fixture: where the two columns start');
     }
 
     public function test_the_way_to_the_whole_schedule_is_always_there_in_the_owners_words(): void
@@ -104,7 +121,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $this->assertStringContainsString('href="'.e(route('role.view_guest', ['subdomain' => $role->subdomain])).'"', $more);
     }
 
-    public function test_events_a_visitor_may_not_see_are_never_rows(): void
+    public function test_events_a_visitor_may_not_see_are_never_listed(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');
         $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
@@ -125,7 +142,7 @@ class GuestEventSidebarLinkTest extends TestCase
         }
     }
 
-    public function test_the_rows_stay_inside_the_category_the_visitor_is_browsing(): void
+    public function test_the_list_stays_inside_the_category_the_visitor_is_browsing(): void
     {
         $role = $this->createRole($this->createOwner());
         $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1), 'category_id' => 3, 'creator_role_id' => $role->id]);
@@ -140,7 +157,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $more = $this->more($this->get($url.'?category=3')->assertOk()->getContent());
         $this->assertStringContainsString('Late Concert', $more);
         $this->assertStringNotContainsString('Talk ', $more);
-        $this->assertStringContainsString('category=3', $more, 'and the row carries it on');
+        $this->assertStringContainsString('category=3', $more, 'and the card carries it on');
 
         // ?category[]=x is an array, and casting one was an error page.
         $this->get($url.'?category[]=3')->assertOk();

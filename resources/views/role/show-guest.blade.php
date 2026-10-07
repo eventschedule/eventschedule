@@ -55,9 +55,9 @@
   html[data-es-view="calendar"] [data-view-width] { max-width: 200rem !important; }
   html[data-es-view="list"] [data-view-width] { max-width: 56rem !important; }
   {{-- The next-event card leads the MONTH, which names no next event (the grid on a wide
-       screen, the small month on a phone). In the list view it stands aside: the first thing
-       in the list is the next event already, as a large card from a tablet up and as the
-       first row on a phone, and the card above it said the same event twice. data-view is the
+       screen, the small month on a phone). In the list view it stands aside: the list
+       opens on today and what comes next itself, as large cards from a tablet up and as rows
+       on a phone, and the card above it said the same event twice. data-view is the
        server's layout, then whatever the list's app switches to (updateOuterContainers());
        the other two rules are for the moment before that app has started. --}}
   [data-lead-wrap][data-view="list"] { display: none; }
@@ -384,8 +384,10 @@ html[data-es-view="list"] #gp-calendar {
       @endif
 
       <section id="gp-events" aria-label="{{ $role->customLabel('events') }}">
-      {{-- What is next, said by the server before the list has loaded: the list is fetched by
-           the page's script, and until it arrived the page had a header and a grey placeholder.
+      {{-- What is next, said by the server above the MONTH, which names no next event itself
+           (in the list view this card stands aside, see the style block at the top): the
+           month is fetched by the page's script, and until it arrives the page has a header
+           and a grey placeholder.
            The first of the schedule's upcoming events the page already has (EventRepo::
            upcomingForGuest(), which leaves out anything draft, private or behind a password),
            inside the category the address names. Not in an embed, which is the list alone.
@@ -417,10 +419,14 @@ html[data-es-view="list"] #gp-calendar {
           $leadWord = $leadDay === $leadToday ? __('messages.today')
               : ($leadDay === \Carbon\Carbon::now($leadZone)->addDay()->format('Y-m-d') ? __('messages.tomorrow') : null);
           $leadName = $leadEvent->nameInLanguage($leadLang, $role);
-          // The place as the rows below name it, unless this IS the place's own schedule.
+          // The place as the list names it, unless this IS the place's own schedule.
           $leadWhere = ($leadEvent->venue && $leadEvent->venue->id === $role->id) ? null : ($leadEvent->getVenueDisplayName(true, $leadLang) ?: null);
           $leadTime = $leadEvent->getStartEndTime($leadRow['date'], get_use_24_hour_time($role));
           $leadImage = $leadEvent->flyer_image_url ? $leadEvent->getImageUrl(960) : null;
+          // ONE query, for this one event's tickets, said here so it is not a side effect of
+          // reading them: the fifty events of $upcoming are deliberately loaded without theirs
+          // (GuestScheduleSchemaTest holds that the list never costs a query an event).
+          $leadEvent->loadMissing('tickets');
           $leadFacts = $leadEvent->cardTicketFields();
           $leadGone = in_array($leadRow['date'], $leadFacts['sold_out_dates'], true);
           $leadFree = $leadFacts['ticket_free'] || $leadEvent->rsvp_enabled;
@@ -441,7 +447,9 @@ html[data-es-view="list"] #gp-calendar {
           <a id="gp-next-event" class="gk-panel gk-lead {{ $leadImage ? '' : 'gk-lead-bare' }} bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}"
              href="{{ $leadUrl }}" data-funnel="list_tap">
             @if ($leadImage)
-              <img class="gk-lead-img" src="{{ $leadImage }}" alt="" width="960" height="540" decoding="async">
+              {{-- lazy: in the list view this card is display:none, and a picture that is not
+                   lazy is fetched all the same. Shown, it is at the top and loads at once. --}}
+              <img class="gk-lead-img" src="{{ $leadImage }}" alt="" width="960" height="540" loading="lazy" decoding="async">
             @endif
             <span class="gk-lead-body">
               <span class="gk-lead-when">

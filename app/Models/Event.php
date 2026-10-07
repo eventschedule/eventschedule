@@ -2429,7 +2429,7 @@ class Event extends Model
      * Bounded by a horizon measured from TODAY, not from the day shown, and that bound is
      * load-bearing twice over. Every one of these is a real page, so three links on each dated
      * page, each to a later date, is a chain a crawler follows for ever: that space is what once
-     * cost the site some 164k "crawled, not indexed" addresses (see RoleController::getEvent()).
+     * cost the site some 164k "crawled, not indexed" addresses (see RoleController::viewGuest()).
      * With the horizon the page of a far-off date links nothing, and the chain ends where the
      * schedule's own list does. And the scan stops there, so a series that has run its course
      * ("after N events", which counts from the series' start on every pattern day) is not
@@ -3335,32 +3335,48 @@ class Event extends Model
         return 'flyer_image_url';
     }
 
-    /** What cardTicketFields() answers when a row has nothing to say about tickets. */
+    /** What cardTicketFields() answers when a card or a row has nothing to say about tickets. */
     public const NO_CARD_TICKET_FIELDS = [
-        'ticket_free' => false, 'ticket_from' => null, 'sold_out_dates' => [], 'low_stock_dates' => [], 'sells_after_start' => false,
+        'ticket_free' => false, 'ticket_from' => null, 'sold_out_dates' => [], 'low_stock_dates' => [],
+        'sells_after_start' => false, 'zone' => null,
     ];
 
     /**
-     * What a list row may say about this event's tickets: that they are free, what they cost,
-     * and the days with nothing or little left. Never a count.
+     * What a schedule's list may say about this event's tickets, on a card (from a tablet up)
+     * or a row (a phone): that they are free, what they cost, and the days with nothing or
+     * little left. Never a count.
      *
      * For MANY events at once (a schedule's list is up to 400 of them), so it reads only what
      * the list's query already loaded, the ticket rows and their own sold counts, and asks the
      * database nothing. It therefore says nothing where the answer needs more than that: an
      * event behind a password, one with a seat map, one with a pass among its rows. The one
-     * thing it cannot see is a seat held by a pass sold on ANOTHER event of the schedule: a row
+     * thing it cannot see is a seat held by a pass sold on ANOTHER event of the schedule: a card
      * then merely fails to say Sold out, and the event's own page, which counts those, does.
      *
-     * The same fields in every builder of a card (as cardImageFields() below), so a row loaded
-     * with the month and one loaded by "load more" say the same.
+     * The same fields in every builder of a card (as cardImageFields() below), so an event
+     * loaded with the month and one loaded by "load more" say the same.
      *
-     * It agrees with the event's own page where both can answer: a price is one somebody can
-     * still pay, a day is sold out when the house is full OR every type on sale is gone (a type
-     * whose sales have closed does not keep a day open), and an event whose sales are over says
-     * nothing. sells_after_start lets the list drop the price of a series' occurrence that has
-     * begun today, which only the list knows the clock for.
+     * It is the event page's own answer, worked out without the page's queries, and each rule
+     * here is one of the page's:
+     *  - the state is ticketSale()'s. A day is 'open' while the house has room and a type on
+     *    sale has stock. Not open, it is 'not_started' when a type has yet to go on sale (the
+     *    page says "sales have not started", and the list says NOTHING: the first version said
+     *    Sold out there, for an early-bird type that had gone before the general release
+     *    opened), and only otherwise 'sold_out'.
+     *  - the price is ticketPriceSummary()'s: of the types somebody can still buy, and of the
+     *    types on sale when all of them are gone.
+     *  - "few left" is ticketPriceSummary()'s too: a share of the WHOLE house, never of the
+     *    types that happen to be on sale (eighteen of twenty early birds gone beside two
+     *    hundred seats not yet released is not a house running out).
+     *  - an event whose sales are over (passesSellingWindow()) says nothing.
+     * A series is judged by day for stock; its price is the event's, since the list has one
+     * line for it.
      *
-     * @return array{ticket_free: bool, ticket_from: ?string, sold_out_dates: string[], low_stock_dates: string[], sells_after_start: bool}
+     * sells_after_start and zone are for the list's own clock: whether a series' occurrence
+     * that has begun today is still selling is a question about now, in the EVENT's schedule
+     * timezone (on a curator's page that is not the page's).
+     *
+     * @return array{ticket_free: bool, ticket_from: ?string, sold_out_dates: string[], low_stock_dates: string[], sells_after_start: bool, zone: ?string}
      */
     public function cardTicketFields(): array
     {
@@ -3375,11 +3391,12 @@ class Event extends Model
             return $none;
         }
 
-        $onSale = $rows->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable()
-            && ! $ticket->isSalesEnded() && ! $ticket->isSalesNotStarted());
+        $sellable = $rows->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable());
+        $onSale = $sellable->filter(fn ($ticket) => ! $ticket->isSalesEnded() && ! $ticket->isSalesNotStarted());
         if ($onSale->isEmpty()) {
             return $none;
         }
+        $opensLater = $sellable->contains(fn ($ticket) => $ticket->isSalesNotStarted());
 
         // An event on one day: once its sales are over (it has started, or it is past), a price
         // and "Few left" are about something nobody can buy. A series is judged a day at a
@@ -3389,39 +3406,27 @@ class Event extends Model
             return $none;
         }
 
-        // What is left of a type on a day, or null for a type with no ceiling.
-        $leftOf = fn ($ticket, string $date) => $ticket->quantity > 0 ? $ticket->quantity - $ticket->soldCountFor($date) : null;
-        $house = $this->seatCapacity();
-        $houseLeft = fn (string $date) => $house === null ? null
-            : $house - $this->seatTickets()->sum(fn ($ticket) => $ticket->soldCountFor($date));
-        // What a day can still sell: the least of the house and the types on sale put together.
-        $dayLeft = function (string $date) use ($onSale, $leftOf, $houseLeft) {
-            $types = $onSale->map(fn ($ticket) => $leftOf($ticket, $date));
-            // containsStrict: contains(null) compares loosely, and a type with 0 left is == null.
-            $ofTypes = $types->containsStrict(null) ? null : (int) $types->map(fn ($left) => max(0, $left))->sum();
-            $ofHouse = $houseLeft($date);
+        // What is left of a type on a day, or null for a type with no ceiling; and of the house.
+        $typeLeft = fn ($ticket, string $date) => $ticket->quantity > 0 ? $ticket->quantity - $ticket->soldCountFor($date) : null;
+        $inStock = fn ($ticket, string $date) => ($left = $typeLeft($ticket, $date)) === null || $left > 0;
+        $capacity = $this->seatCapacity();
+        $houseLeft = fn (string $date) => $capacity === null ? null
+            : $capacity - $this->seatTickets()->sum(fn ($ticket) => $ticket->soldCountFor($date));
+        // ticketSale()'s state, for the three it can be once something is on sale.
+        $state = function (string $date) use ($onSale, $opensLater, $inStock, $houseLeft) {
+            $left = $houseLeft($date);
+            $open = ($left === null || $left > 0) && $onSale->contains(fn ($ticket) => $inStock($ticket, $date));
 
-            return match (true) {
-                $ofTypes === null && $ofHouse === null => null,
-                $ofTypes === null => $ofHouse,
-                $ofHouse === null => $ofTypes,
-                default => min($ofTypes, $ofHouse),
-            };
+            return $open ? 'open' : ($opensLater ? 'not_started' : 'sold_out');
         };
 
-        // "From $10" has to be a price somebody can pay: on a one-day event a type that has
-        // sold out is left out of it, as Event::ticketPriceSummary() does on the event's page.
         $priced = $onSale;
         if ($oneDay) {
-            $inStock = $onSale->filter(fn ($ticket) => ($left = $leftOf($ticket, $oneDay)) === null || $left > 0);
-            $priced = $inStock->isNotEmpty() ? $inStock : $onSale;
-        }
-        $prices = $priced->map(fn ($ticket) => (float) $ticket->price);
-        $free = $prices->max() <= 0;
-        $lowest = \App\Utils\MoneyUtils::format($prices->min(), $this->ticket_currency_code);
-        $from = $free ? null : ($prices->min() < $prices->max() ? __('messages.price_from', ['price' => $lowest]) : $lowest);
-
-        if ($oneDay) {
+            if ($state($oneDay) === 'not_started') {
+                return $none;
+            }
+            $buyable = $onSale->filter(fn ($ticket) => $inStock($ticket, $oneDay));
+            $priced = $buyable->isNotEmpty() ? $buyable : $onSale;
             $dates = [$oneDay];
         } else {
             // A series: the days that have sold anything are the keys of the rows' own sold
@@ -3433,19 +3438,24 @@ class Event extends Model
                 ->unique()->sort()->take(120)->values()->all();
         }
 
+        $prices = $priced->map(fn ($ticket) => (float) $ticket->price);
+        $free = $prices->max() <= 0;
+        $lowest = \App\Utils\MoneyUtils::format($prices->min(), $this->ticket_currency_code);
+        $from = $free ? null : ($prices->min() < $prices->max() ? __('messages.price_from', ['price' => $lowest]) : $lowest);
+
         $soldOut = [];
         $low = [];
-        // The whole of what the types on sale could ever hold, for "few" to be a share of.
-        $ceiling = $onSale->contains(fn ($ticket) => $ticket->quantity <= 0) ? $house : min($house ?? PHP_INT_MAX, (int) $onSale->sum('quantity'));
+        $few = $capacity === null ? 0 : min(10, max(2, (int) floor($capacity * 0.1)));
         foreach ($dates as $date) {
-            $left = $dayLeft($date);
-            if ($left === null) {
-                continue;
-            }
-            if ($left <= 0) {
+            $is = $state($date);
+            if ($is === 'sold_out') {
                 $soldOut[] = $date;
-            } elseif ($ceiling && $left < $ceiling && $left <= min(10, max(2, (int) floor($ceiling * 0.1)))) {
-                $low[] = $date;
+            } elseif ($is === 'open' && $capacity !== null) {
+                // "Few left" is about what has gone: a room of two with nothing sold is not running out.
+                $left = $houseLeft($date);
+                if ($left > 0 && $left < $capacity && $left <= $few) {
+                    $low[] = $date;
+                }
             }
         }
 
@@ -3455,6 +3465,7 @@ class Event extends Model
             'sold_out_dates' => $soldOut,
             'low_stock_dates' => $low,
             'sells_after_start' => (bool) $this->sell_after_start,
+            'zone' => $this->scheduleTimezone(),
         ];
     }
 

@@ -135,6 +135,22 @@ class GiftCardTest extends TestCase
             ->assertOk();
     }
 
+    /**
+     * The page's accent (the chosen amount's fill, every focus ring) is two aliases of the
+     * schedule's colour tokens. The tokens are declared on body, so an alias declared on :root
+     * reads a variable that does not exist there, and everything that used it drew nothing.
+     */
+    public function test_the_purchase_pages_accent_is_declared_where_the_tokens_are(): void
+    {
+        $role = $this->enableGiftCards($this->createRole($this->createOwner()));
+        $html = $this->get(route('gift_card.purchase', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+
+        $this->assertSame(1, preg_match('/(\S+) \{\s*--gift-accent: var\(--es-accent\);\s*--gift-contrast: var\(--es-accent-text\);/', $html, $alias));
+        // The same selector the tokens themselves are printed under (partials/guest-theme).
+        $this->assertSame(1, preg_match('/(\S+) \{[^}]*--es-accent:/', $html, $tokens));
+        $this->assertSame($tokens[1], $alias[1], 'an alias is only defined where what it reads is');
+    }
+
     public function test_cash_purchase_creates_unpaid_card(): void
     {
         $owner = $this->createOwner();

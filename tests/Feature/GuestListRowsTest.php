@@ -105,16 +105,32 @@ class GuestListRowsTest extends TestCase
         // Never beside the sign-up's own badge or behind a password, and nothing once it is over.
         $this->assertStringContainsString('if (event._isPast || event.is_password_protected || event.rsvp_enabled) return false;', $html);
 
-        // The admin's list and the dashboard's are as they were: no ticket line, both lists
-        // in the page with the CSS switch.
-        $this->assertStringContainsString("@includeWhen(\$guestRows, 'role/partials/card-ticket-badge')", file_get_contents(resource_path('views/role/partials/calendar.blade.php')));
+        // One card, one price: the price an owner typed for an event that used to be sold
+        // somewhere else stands aside for our own line (both stay saved on the event).
+        $this->assertSame(2, substr_count($html, 'event.ticket_price != null && !event.is_password_protected && !cardHasTickets(event)"'));
 
-        // The next-event card stands aside for these cards: the first of them IS the next event.
+        // The admin's Schedule tab is as it was, rendered and not read from the source: both
+        // lists in the page behind the CSS switch, the phone's old cards, no ticket line, no
+        // chips, and the typed price shown whatever the event sells here.
+        $owner = $this->role->fresh()->members()->first() ?? \App\Models\User::find($this->role->user_id);
+        $admin = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+        $this->assertSame(2, substr_count($admin, 'v-show="currentView === \'list\' && !isLoadingEvents"'));
+        $this->assertStringContainsString('id="mobileEventsList"', $admin);
+        foreach (['data-card-tickets', 'class="gk-pills ', 'class="gk-row gk-row-press"', 'class="gk-list" data-phone-month>', '!cardHasTickets(event)"', '&& !isNarrow"'] as $guestOnly) {
+            $this->assertStringNotContainsString($guestOnly, $admin, $guestOnly.' is a guest page\'s');
+        }
+        $this->assertStringContainsString('phoneMonth: false,', $admin);
+        auth()->logout();
+
+        // The next-event card leads the month and stands aside in the list view, which opens
+        // on today and what comes next itself. Hidden, its picture is not
+        // fetched (a picture that is not lazy is, display:none or not).
         $this->assertStringContainsString('[data-lead-wrap][data-view="list"] { display: none; }', $html);
         $this->assertStringContainsString('leadWrap.dataset.view = view;', $html);
         $event = $this->event(['name' => 'Coming Up']);
         $this->assertSame(1, preg_match('/data-lead-wrap data-view="list"/', $this->get('/'.$this->role->subdomain.'?layout=list')->assertOk()->getContent()));
         $this->assertSame(1, preg_match('/data-lead-wrap data-view="calendar"/', $this->get('/'.$this->role->subdomain.'?layout=calendar')->assertOk()->getContent()));
+        $this->assertSame(1, preg_match('/<img class="gk-lead-img"[^>]* loading="lazy"/', file_get_contents(resource_path('views/role/show-guest.blade.php'))));
     }
 
     /**
@@ -145,7 +161,7 @@ class GuestListRowsTest extends TestCase
         $this->assertSame(1, preg_match('/class="gk-days" :data-list-anim="activeListAnimation !== \'none\' \? activeListAnimation : null"/', substr($html, $start, 9000)));
     }
 
-    public function test_the_next_event_is_drawn_by_the_server_above_the_list(): void
+    public function test_the_next_event_is_drawn_by_the_server_above_the_month(): void
     {
         $url = '/'.$this->role->subdomain;
         $lead = function (string $html): ?string {
@@ -198,7 +214,7 @@ class GuestListRowsTest extends TestCase
      * begun. The first row of a schedule with a morning class was that class, hours over,
      * leading the page ahead of tonight's show.
      */
-    public function test_the_next_event_is_never_one_that_has_already_begun(): void
+    public function test_the_next_event_is_one_that_has_not_begun_while_there_is_one(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue', ['timezone' => 'UTC']);
         $this->travelTo(now('UTC')->addDay()->setTime(18, 0));
@@ -217,6 +233,9 @@ class GuestListRowsTest extends TestCase
         $this->assertSame($today, $upcoming->first()['date'], 'fixture: the list itself dates it today');
         $lead = $repo->leadOf($upcoming);
         $this->assertSame([$class->id, $tomorrow], [$lead['event']->id, $lead['date']]);
+        // And that walk is remembered for the day: it runs on every view of the page, once a
+        // series that has begun, and an "after N events" series counts from its start each time.
+        $this->assertSame($tomorrow, \Illuminate\Support\Facades\Cache::get('guest_lead_next:'.$class->id.':'.$today.':'.$class->fresh()->updated_at->getTimestamp()));
 
         // Tonight's show is what is next.
         \Illuminate\Support\Facades\Cache::flush();
@@ -457,42 +476,107 @@ class GuestListRowsTest extends TestCase
     }
 
     /**
-     * Where a row agreed with nobody: "From $10" for an early-bird type that had sold out, a
-     * price beside a show whose sales had closed when it began, and no "Sold out" where the
-     * only type on sale was gone while a type not yet on sale still had stock.
+     * The card and the event's own page, asked the same question about the same event. The
+     * first version of this test pinned the card's answer alone, and pinned it wrong: it said
+     * Sold out for an early-bird type that had gone before the general release opened, where
+     * the page says sales have not started.
      */
-    public function test_a_row_says_only_what_the_events_own_page_would(): void
+    public function test_a_card_says_what_the_events_own_page_says(): void
     {
         $date = now()->addDays(7)->format('Y-m-d');
+        $page = fn (Event $event) => [$event->fresh()->ticketSaleState($date), $event->fresh()->ticketPriceSummary($date)];
 
+        // A type that sold out is not the price: "From $10" nobody can pay.
         $early = $this->event(['name' => 'Early Bird Gone']);
         $this->createTicket($early, ['price' => 10, 'quantity' => 5])->updateSold($date, 5);
         $this->createTicket($early, ['price' => 25, 'quantity' => 50]);
         $row = $this->row($early);
-        $this->assertSame(MoneyUtils::format(25, 'USD'), $row['ticket_from'], 'the price somebody can still pay');
-        $this->assertSame([], $row['sold_out_dates']);
+        [$state, $summary] = $page($early);
+        $this->assertSame(['open', 25.0, false], [$state, $summary['min'], $summary['from']], 'the page');
+        $this->assertSame([MoneyUtils::format(25, 'USD'), []], [$row['ticket_from'], $row['sold_out_dates']], 'the card');
 
+        // What is on sale is gone and more goes on sale in three days: the page says sales
+        // have not started, and the card says nothing. Never Sold out.
         $staged = $this->event(['name' => 'Second Release Later']);
         $this->createTicket($staged, ['price' => 10, 'quantity' => 5])->updateSold($date, 5);
         $this->createTicket($staged, ['price' => 20, 'quantity' => 50, 'sales_start_at' => now()->addDays(3)->format('Y-m-d H:i:s')]);
-        $this->assertFalse($staged->fresh()->tickets->every(fn ($ticket) => ! $ticket->isSalesNotStarted()), 'fixture: one type is not on sale yet');
-        $this->assertSame([$date], $this->row($staged)['sold_out_dates'], 'what is on sale is gone, whatever is not on sale yet holds');
+        $this->assertSame('not_started', $page($staged)[0], 'the page');
+        $this->assertSame(Event::NO_CARD_TICKET_FIELDS, $staged->fresh()->cardTicketFields(), 'the card');
 
-        // Sales close when it starts: once it has, the row says nothing of a price.
+        // What is on sale is gone and the other type's sales have CLOSED: sold out, both.
+        $closed = $this->event(['name' => 'Presale Over']);
+        $this->createTicket($closed, ['price' => 10, 'quantity' => 5])->updateSold($date, 5);
+        $this->createTicket($closed, ['price' => 8, 'quantity' => 50, 'sales_end_at' => now()->subDay()->format('Y-m-d H:i:s')]);
+        $this->assertSame('sold_out', $page($closed)[0], 'the page');
+        $this->assertSame([$date], $this->row($closed)['sold_out_dates'], 'the card');
+
+        // "Few left" is a share of the whole house, not of the types that happen to be on
+        // sale: eighteen of twenty early birds gone beside two hundred seats not yet released.
+        $house = $this->event(['name' => 'Big House']);
+        $this->createTicket($house, ['price' => 10, 'quantity' => 20])->updateSold($date, 18);
+        $this->createTicket($house, ['price' => 20, 'quantity' => 200, 'sales_start_at' => now()->addDays(3)->format('Y-m-d H:i:s')]);
+        [$state, $summary] = $page($house);
+        $this->assertSame(['open', false], [$state, $summary['low']], 'the page');
+        $this->assertSame([], $this->row($house)['low_stock_dates'], 'the card');
+
+        // And where the house IS nearly full, both say so.
+        $nearly = $this->event(['name' => 'Nearly Full']);
+        $this->createTicket($nearly, ['price' => 10, 'quantity' => 20])->updateSold($date, 18);
+        $this->assertTrue($page($nearly)[1]['low'], 'the page');
+        $this->assertSame([$date], $this->row($nearly)['low_stock_dates'], 'the card');
+
+        // Sales close when it starts: once it has, the card says nothing of a price.
         $begun = $this->event(['name' => 'Already Started', 'starts_at' => now()->subHour()->format('Y-m-d H:i:s'), 'duration' => 3]);
         $this->createTicket($begun, ['price' => 20, 'quantity' => 50]);
         $this->assertSame(Event::NO_CARD_TICKET_FIELDS, $begun->fresh()->cardTicketFields());
-        // Unless it sells after it starts, which the row is told so a series can be judged by day.
+        // Unless it sells after it starts, which the list is told so a series can be judged by day.
         $begun->update(['sell_after_start' => true]);
         $facts = $begun->fresh()->cardTicketFields();
         $this->assertSame([MoneyUtils::format(20, 'USD'), true], [$facts['ticket_from'], $facts['sells_after_start']]);
+    }
 
-        // The row's own script: the day tickets are sold under is the event's, not the day a
-        // running event is listed on, and a night that has begun says nothing.
+    /**
+     * Whether a night that has begun is still selling is a question about now, and the list
+     * answers it in the browser, for a series and for a page left open. It is the server's
+     * rule (Event::passesSellingWindow()) branch for branch, on the EVENT's clock: on a
+     * curator's page that is not the page's, and a New York curator's page dropped the price
+     * of a Los Angeles 20:00 show at 17:00 there.
+     */
+    public function test_the_lists_clock_is_the_events_own_and_its_rule_the_servers(): void
+    {
+        $la = $this->createRole($this->createOwner(), 'venue', ['timezone' => 'America/Los_Angeles']);
+        $show = $this->createEvent($la, [
+            'name' => 'West Coast Show', 'creator_role_id' => $la->id, 'tickets_enabled' => true, 'ticket_currency_code' => 'USD',
+            'starts_at' => now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s'),
+        ]);
+        $this->createTicket($show, ['price' => 20, 'quantity' => 50]);
+        $this->assertSame('America/Los_Angeles', $show->fresh()->cardTicketFields()['zone']);
+        $this->assertNull(Event::NO_CARD_TICKET_FIELDS['zone']);
+
         $html = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
+        // The clock: the row's own zone, the page's only where a row has none.
+        $this->assertStringContainsString('const where = zone || this.userTimezone;', $html);
+        $this->assertStringContainsString('const now = this.scheduleNow(event.zone);', $html);
+        // The rule. Until it starts: a series whatever its length, and anything on one date
+        // that is not over several days. Otherwise until it ends, and an event with no length
+        // ends two hours in (Event::getEndDateTime()).
+        $this->assertStringContainsString("if (!event.sells_after_start && (series || !event.is_multi_day)) { return now >= date + ' ' + time; }", $html);
+        $this->assertStringContainsString('const hours = event.duration > 0 ? event.duration : 2;', $html);
+        // The day tickets are sold under is the event's, not the day a running event is listed on.
         $this->assertSame(1, preg_match('/rowDate\(event\) \{\s*if \(event\.days_of_week && event\.days_of_week\.length\) \{\s*return event\._originalOccurrenceDate \|\| event\.occurrenceDate \|\| null;\s*\}\s*return event\.local_date \|\| null;/', $html));
-        $this->assertStringContainsString("if (!event.sells_after_start && !event.is_multi_day) { return now >= date + ' ' + time; }", $html);
         $this->assertStringContainsString('return event.ticket_from && !this.rowSalesOver(event) ? event.ticket_from : null;', $html);
+
+        // The server half of the same rule, so the two cannot drift unseen: a series sells
+        // until its occurrence starts even when it runs over several days.
+        $series = $this->event(['name' => 'Long Weekly', 'days_of_week' => '1111111', 'recurring_frequency' => 'daily', 'duration' => 30,
+            'starts_at' => now()->subDays(3)->subHour()->format('Y-m-d H:i:s')]);
+        $this->createTicket($series, ['price' => 5, 'quantity' => 0]);
+        $today = now($series->fresh()->scheduleTimezone())->format('Y-m-d');
+        $this->assertFalse($series->fresh()->passesSellingWindow($today), 'begun an hour ago: over, though it runs thirty hours');
+        $series->update(['sell_after_start' => true, 'duration' => 0]);
+        $this->assertTrue($series->fresh()->passesSellingWindow($today), 'sells after its start, for the two hours an event with no length is given');
+        $this->travel(90)->minutes();
+        $this->assertFalse($series->fresh()->passesSellingWindow($today), 'and not until midnight');
     }
 
     /**

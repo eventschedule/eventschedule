@@ -42,8 +42,9 @@ class CalendarCrawlableLinksTest extends TestCase
     }
 
     /**
-     * The mobile agenda and the mobile list render every card through that partial, so its link is
-     * theirs: both includes must still be there.
+     * The mobile agenda and the mobile list of the admin and the dashboard render every card
+     * through that partial, so its link is theirs: both includes must still be there. (A guest
+     * page's phone list and phone month draw role/partials/guest-row, whose name is the link.)
      */
     public function test_the_mobile_agenda_and_the_mobile_list_render_the_linked_card(): void
     {

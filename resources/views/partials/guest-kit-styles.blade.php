@@ -120,7 +120,7 @@
          this weighs what every other rule here weighs, one class. --}}
     :where([data-buybar-floating]) .gk-buybar { border-radius: 0; box-shadow: 0 -.5rem 1.125rem -.75rem rgb(0 0 0 / .28); }
 
-    {{-- A list of events as rows: when, what, where, and a small picture. A row is a link. --}}
+    {{-- A list of events as rows, on a phone: when, what, where, and a small picture. --}}
     .gk-dayhead { display: flex; align-items: baseline; gap: .5rem; padding: .75rem 1rem; border-bottom: 1px solid var(--gk-line); }
     .gk-dayhead h2 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
     .gk-dayhead-link { margin-inline-start: auto; font-size: .875rem; }
@@ -136,7 +136,8 @@
     .gk-row-title { font-size: 1.03125rem; font-weight: 700; line-height: 1.25; }
     .gk-row-where { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0; font-size: .875rem; color: var(--gk-ink-3); }
     .gk-row-img { display: block; width: 100%; height: 100%; object-fit: cover; }
-    {{-- From a tablet up the time has a column of its own, so a day reads down its left edge. --}}
+    {{-- On a wide phone (40rem to 48rem, where the cards take over) the time has a column of
+         its own, so a day reads down its left edge. --}}
     @media (min-width: 40rem) {
         .gk-row { grid-template-columns: 9.5rem minmax(0, 1fr) 4.75rem; grid-template-areas: "t b i"; grid-template-rows: auto; align-items: center; column-gap: 1rem; padding: .875rem 1.25rem; }
         .gk-row-bare { grid-template-columns: 9.5rem minmax(0, 1fr); grid-template-areas: "t b"; }
@@ -144,7 +145,7 @@
         .gk-dayhead { padding: .75rem 1.25rem; }
     }
 
-    {{-- The schedule's next event, above its list (role/show-guest). One link: a picture in a
+    {{-- The schedule's next event, above its month (role/show-guest). One link: a picture in a
          box of its own shape, then when, what and where. --}}
     .gk-lead { display: grid; overflow: hidden; max-width: 46rem; margin-inline: auto; color: var(--gk-ink); text-decoration: none; transition: box-shadow var(--gk-swap, 120ms) ease; }
     .gk-lead:hover { box-shadow: var(--gk-shadow-lift); }
@@ -195,11 +196,11 @@
     .gk-pill:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     .gk-pill-on { border-color: var(--es-accent-edge, transparent); background: var(--es-accent); color: var(--es-accent-text); }
 
-    {{-- The schedule's list: one column of day panels, a row for each event (role/partials/
-         calendar, guest route). The same rows as the event page's "more events". --}}
+    {{-- The schedule's list on a phone, and the days under a phone's month: one column of day
+         panels, a row for each event (role/partials/calendar, guest route). --}}
     .gk-list { max-width: 46rem; margin-inline: auto; }
     .gk-days { display: grid; gap: .875rem; }
-    {{-- Rounded at every width (the list sits inside the page's own gutters), and clipped, so a
+    {{-- Rounded (the list sits inside the page's own gutters), and clipped, so a
          row's hover tint keeps to the panel's corners. --}}
     .gk-day { overflow: hidden; }
     .gk-dayhead-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
@@ -264,7 +265,9 @@
     .gk-up-meta svg { flex: none; width: .875rem; height: .875rem; margin-top: .0625rem; }
     .gk-up-img { width: 100%; height: 100%; min-height: 5.5rem; object-fit: cover; }
     .gk-up-all { display: block; margin-top: .875rem; font-size: .875rem; text-align: center; }
-    @media (max-width: 47.99rem) { .gk-up-late { display: none; } }
+    {{-- Wherever the page is ONE column (below 64rem, see .gk-event) the list is at its end, and
+         stops after five. Cut below 48rem only, a tablet got all twenty there. --}}
+    @media (max-width: 63.99rem) { .gk-up-late { display: none; } }
     .gk-event-foot { display: grid; gap: 1rem; margin-top: 1rem; }
     .gk-create { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .875rem 1rem; }
     @media (min-width: 64rem) {

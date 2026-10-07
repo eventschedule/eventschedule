@@ -196,9 +196,9 @@
 
   @include('role.partials.guest-banner', ['onEventPage' => true])
 
-  {{-- Built here rather than beside the breadcrumb that used to own it: the sidebar's agenda
-       widget renders FIRST and links to the same place, and one block is what keeps the two
-       from drifting apart. --}}
+  {{-- Built here rather than beside the breadcrumb that used to own it: the left column's
+       list of other events renders FIRST and links to the same place, and one block is what
+       keeps the two from drifting apart. --}}
   @php
     $backUrl = route('role.view_guest', ['subdomain' => $role->subdomain]);
     $queryParams = [];
@@ -207,7 +207,7 @@
     // A custom field filter (?custom_1=room+a), carried here by the calendar's event links.
     $queryParams += \App\Utils\CustomFieldUtils::filterParams(request()->query());
     if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
-    // The same filter, for the links to other events at the foot of the page: a visitor
+    // The same filter, for the links to other events down the left column: a visitor
     // browsing one category or sub-schedule keeps it on the next page and on its way back.
     $filterQuery = $queryParams;
     // Scratch name, never $date: the controller passes a sanitized $date into this view and
@@ -2533,14 +2533,16 @@
 
     </div>
 
-    {{-- The foot, under both columns: the free tier's "create your own". --}}
-    <div class="gk-event-foot">
-      {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
+    {{-- The foot, under both columns: the free tier's "create your own". The wrapper is drawn
+         only with the card: empty, it was a blank 2.5rem at the end of every paid schedule's
+         event page. --}}
+    {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
            the page's free-tier credit (the corner chip on eventschedule.com, an operator's
            footer strip on their own platform), so the two cannot disagree. It used to read
            `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
            free curator's page dropped this card while still carrying the free-tier credit. --}}
-      @if ($role->showBranding())
+    @if ($role->showBranding())
+    <div class="gk-event-foot">
       <div id="gp-create-your-own" class="gk-panel gk-panel-flush gk-create bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}">
         <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
           {{ __('messages.create_your_own_event_schedule') }}
@@ -2549,8 +2551,8 @@
           {{ __('messages.create_schedule') }}
         </x-guest.button>
       </div>
-      @endif
     </div>
+    @endif
   </div>
 
   {{-- Fan photos in the shared viewer (partials/lightbox, included at the end of the page). Each

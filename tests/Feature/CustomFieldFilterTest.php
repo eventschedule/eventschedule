@@ -483,9 +483,9 @@ class CustomFieldFilterTest extends TestCase
 
     public function test_a_custom_field_filter_travels_from_an_event_page_to_the_next(): void
     {
-        // The event page's other events are three rows drawn by the server (it used to hold a
-        // second copy of the list app, whose links carried the filter). The rows and the way
-        // back both keep the filter the visitor arrived with, so following one does not drop it.
+        // The event page's other events are cards drawn by the server (it used to hold a second
+        // copy of the list app, whose links carried the filter). The cards and the way back
+        // both keep the filter the visitor arrived with, so following one does not drop it.
         $venue = $this->createRole($this->createOwner(), 'venue', ['event_custom_fields' => self::ROOM_FIELD]);
         $soon = $this->createEvent($venue, ['name' => 'Soon', 'starts_at' => now()->addDay()->setTime(12, 0)->format('Y-m-d H:i:s')]);
         $later = $this->createEvent($venue, ['name' => 'Later', 'starts_at' => now()->addDays(70)->setTime(12, 0)->format('Y-m-d H:i:s')]);

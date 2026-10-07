@@ -2793,8 +2793,8 @@ class EventRepo
     public const UPCOMING_SERIES_LIMIT = 30;
 
     /**
-     * The event a schedule page leads with, from upcomingForGuest()'s rows: the next one that
-     * has not begun, inside $category when one is named.
+     * The event a schedule page's month leads with (#gp-next-event), from upcomingForGuest()'s
+     * rows: the next one that has not begun, inside $category when one is named.
      *
      * The first row is not always that. A series is dated by its next occurrence from TODAY,
      * and today's still counts once it has started (the list shows the day), so the first row
@@ -2823,7 +2823,7 @@ class EventRepo
             $begun = $starts->lte(Carbon::now($zone));
 
             if ($begun && $event->days_of_week) {
-                $next = $event->occurrencesAfter(null, 1)[0] ?? null;
+                $next = $this->occurrenceAfterToday($event);
                 if ($next) {
                     $ahead[] = ['event' => $event, 'date' => $next, 'at' => $event->getStartDateTime($next, true, $zone)->getTimestamp()];
                 }
@@ -2842,6 +2842,25 @@ class EventRepo
         $lead = $ahead[0] ?? $rows->first();
 
         return $lead ? ['event' => $lead['event'], 'date' => $lead['date']] : null;
+    }
+
+    /**
+     * A series' first occurrence after today's, once today's has begun: what leadOf() asks.
+     *
+     * Remembered, for the reason upcomingSeriesDates() below remembers its own answer: an
+     * 'after_events' series counts every occurrence since it started to say whether a day is
+     * one of its days, and this runs on every view of a schedule page, once for each series
+     * that has already begun today (a studio with thirty daily classes, by the evening). The
+     * answer cannot change before midnight where the event is, so the day is in the key, with
+     * updated_at so an edit is seen at once.
+     */
+    private function occurrenceAfterToday(Event $event): ?string
+    {
+        $today = Carbon::now($event->scheduleTimezone())->format('Y-m-d');
+        $key = 'guest_lead_next:'.$event->id.':'.$today.':'.$event->updated_at?->getTimestamp();
+
+        // '' and not null for "none": a null is not kept, and would be asked for again.
+        return Cache::remember($key, self::UPCOMING_CACHE_SECONDS, fn () => $event->occurrencesAfter(null, 1)[0] ?? '') ?: null;
     }
 
     /**

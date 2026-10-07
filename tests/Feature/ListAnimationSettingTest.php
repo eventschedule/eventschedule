@@ -155,8 +155,8 @@ class ListAnimationSettingTest extends TestCase
     public function test_the_event_pages_other_events_never_animate(): void
     {
         // The setting is about scrolling the schedule. The event page's "events" panel used to
-        // be the same list partial, told to stay still; it is three plain rows drawn by the
-        // server now (event/partials/more-events), with no list app to animate at all.
+        // be the same list partial, told to stay still; it is plain cards drawn by the server
+        // now, down the left column (event/partials/more-events), with no list app to animate.
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['list_animation' => 'deal']);
         $event = $this->createEvent($role, ['name' => 'Headliner']);

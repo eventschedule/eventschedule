@@ -2477,7 +2477,7 @@ class RoleController extends Controller
         // list, and on its own page the title and description (AppGuestLayout::$upcoming).
         $upcoming = null;
 
-        // The event page's "more events" rows (event/partials/more-events).
+        // The event page's other upcoming events, down its left column (event/partials/more-events).
         $moreEvents = collect();
 
         // Whether the schedule page loads the poll celebration script. Null leaves the calendar
@@ -2485,9 +2485,9 @@ class RoleController extends Controller
         $hasActivePolls = null;
 
         if ($event && ! request()->graphic) {
-            // An event page has no calendar on it any more (its other events are three rows,
-            // $moreEvents below), so there is nothing to ask about this month. It used to run
-            // an EXISTS here on every view, for a side list that is gone.
+            // An event page has no calendar on it any more (its other events are drawn by the
+            // server, $moreEvents below), so there is nothing to ask about this month. It used
+            // to run an EXISTS here on every view, for a second calendar app that is gone.
             $events = collect();
         } elseif (request()->graphic) {
             // ?graphic=1 renders the month itself (role/partials/calendar-graphic), so it keeps the
@@ -2535,9 +2535,9 @@ class RoleController extends Controller
             $upcoming = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 50);
             $events = $upcoming->pluck('event');
 
-            // The calendar's popups let a visitor vote in any active poll of the events it shows,
-            // and it shows past nights of the month, and unlisted events to the schedule's own
-            // people, none of which the list above holds - so asking the list left the confetti
+            // The list's cards let a visitor vote in any active poll of the events it shows,
+            // and it shows past nights, and unlisted events to the schedule's own people, none
+            // of which the list above holds - so asking the list left the confetti
             // script out wherever the only poll was on one of those. Any active poll on an event
             // the schedule accepted loads it: the script is small, and a missing one is a vote
             // with no celebration.
@@ -3175,9 +3175,9 @@ class RoleController extends Controller
             'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
             ...$imageFields,
-            // The keys a row's ticket chips read, with nothing in them: these are past events
-            // (the list's "load more"), whose rows say nothing about tickets, and this query
-            // does not load the ticket rows that Event::cardTicketFields() would read.
+            // The keys a card's ticket line and a row's chips read, with nothing in them: these
+            // are past events (the list's "load more"), which say nothing about tickets, and this
+            // query does not load the ticket rows that Event::cardTicketFields() would read.
             ...Event::NO_CARD_TICKET_FIELDS,
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
             'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
@@ -3255,10 +3255,10 @@ class RoleController extends Controller
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         // No upper date bound, for the same reason adminCalendarEvents has none. The list layout
-        // renders every upcoming event in one flat list, and the calendar layout's mobile view is
-        // a flat agenda spanning six months with no month navigation at all (the controls are
-        // hidden below md), so stopping at the month boundary left later events permanently
-        // unreachable there. Cap the row count instead: bounded memory (this is what prevents the
+        // renders every upcoming event in one flat list, and in an embed too narrow for the
+        // month grid the calendar layout is a flat agenda spanning six months with no month
+        // navigation at all, so stopping at the month boundary left later events permanently
+        // unreachable there. (On the page itself a phone has a small month it can page.) Cap the row count instead: bounded memory (this is what prevents the
         // original OOM) and a safe superset of what either layout displays. The desktop month grid
         // is unaffected - buildEventsMap() still places events per day within the viewed month, so
         // the extra rows are loaded but never rendered.

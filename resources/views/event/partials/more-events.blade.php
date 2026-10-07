@@ -1,14 +1,15 @@
 {{-- The schedule's other upcoming events, down the left column of an event page under the
      flyer, the performers and the venue: a date set between two lines, then a small card for
-     each event that day, with its picture where it has one. On a phone it is the last thing on
-     the page and stops after five.
+     each event that day, with its picture where it has one. Where the page is one column (a
+     phone, a tablet) it comes after everything but the free tier's "create your own", and
+     stops after five.
 
      This is what the page always had there, and what gives a visitor somewhere to go next
      without going back. For a few days in October 2026 it was three rows across the foot of the
      page instead; it read as a footer and the column beside the story stood empty.
 
      What did change stays changed: it is drawn by the server from EventRepo::upcomingForGuest()
-     (RoleController::getEvent() hands over up to twenty). It used to be a second copy of the
+     (RoleController::viewGuest() hands over up to twenty). It used to be a second copy of the
      calendar's Vue app, which fetched up to 400 events and built twenty cards from them in
      the browser, with a footer link decided half here and half there.
 

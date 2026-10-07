@@ -2,7 +2,8 @@
      (role/partials/calendar, guest route), inside a v-for whose item is `event`.
 
      A row says when, what and where, then what it costs and whether any are left; performers,
-     the agenda, polls and the fan buttons are on the event's own page.
+     the agenda, polls and the fan buttons are on the cards a wider screen gets, and on the
+     event's own page.
 
      Its shape is the one the schedule's list animations were written for (resources/css/
      list-reveal.css), which is also the shape a reader and a crawler need: the card is a div

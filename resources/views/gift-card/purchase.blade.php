@@ -137,8 +137,11 @@
     </div>
 </div>
 
+{{-- On body, where the tokens themselves are declared (partials/guest-theme). On :root they
+     read a variable that does not exist there yet, and every use of them drew nothing: the
+     chosen amount had no fill and no field showed a focus ring. --}}
 <style {!! nonce_attr() !!}>
-    :root {
+    body {
         --gift-accent: var(--es-accent);
         --gift-contrast: var(--es-accent-text);
     }

@@ -223,7 +223,7 @@ class GuestNoscriptListTest extends TestCase
     }
 
     /**
-     * The calendar's popups take votes on every event it fetches - this month's past nights too,
+     * The list's cards take votes on every event the calendar fetches - this month's past nights too,
      * and the unlisted events the schedule's own people see - but the script loaded only for a poll
      * on one of the next 50 public events. Any active poll on an event the schedule shows loads it.
      */
@@ -249,7 +249,7 @@ class GuestNoscriptListTest extends TestCase
     }
 
     /**
-     * Not for a poll that is closed, which the popups take no vote on - the old check counted every
+     * Not for a poll that is closed, which the cards take no vote on - the old check counted every
      * poll, closed ones included - and not on a plan without polls.
      */
     public function test_the_confetti_script_stays_out_without_an_active_poll_or_a_pro_plan(): void

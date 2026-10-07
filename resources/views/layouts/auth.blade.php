@@ -51,12 +51,23 @@
         @if ($authSchedule)
             {{-- The schedule's own logo and name, and the way back to its page. No platform logo:
                  this is the schedule speaking to its own audience (docs/BRANDING_MATRIX.md). --}}
-            <a href="{{ $authSchedule->getGuestUrl() }}" data-auth-schedule class="flex flex-col items-center gap-3 px-4 text-center">
+            {{-- A schedule nobody has claimed has no public page, and getGuestUrl() answers ''
+                 for it: a link to '' reloads the page it is on. Its name stands unlinked. --}}
+            @php $authScheduleUrl = $authSchedule->getGuestUrl(); @endphp
+            @if ($authScheduleUrl)
+            <a href="{{ $authScheduleUrl }}" data-auth-schedule class="flex flex-col items-center gap-3 px-4 text-center">
+            @else
+            <div data-auth-schedule class="flex flex-col items-center gap-3 px-4 text-center">
+            @endif
                 @if ($authSchedule->profile_image_url)
                     <img src="{{ $authSchedule->profile_image_url }}" alt="" class="h-20 w-20 rounded-2xl object-cover shadow-sm">
                 @endif
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100" dir="auto">{{ $authSchedule->translatedName() }}</span>
+            @if ($authScheduleUrl)
             </a>
+            @else
+            </div>
+            @endif
         @else
         <a href="{{ marketing_url() }}">
             <x-application-logo class="w-20 h-20 fill-current text-gray-500 dark:text-gray-400" />

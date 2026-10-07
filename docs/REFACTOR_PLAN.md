@@ -802,9 +802,9 @@ Same recipe. `resources/views/role/edit.blade.php` (7,953 lines, ~4,470 of JS, 7
 
 ### F3 - Calendar partial JS extraction (6 consumers)
 
-**Goal:** `resources/views/role/partials/calendar.blade.php` (3,972 lines, ~2,051 of JS, Vue global build) is `@include`d by SIX views: `home`, `role/show-guest`, `role/show-guest-embed`, `role/show-admin-schedule`, `role/show-admin-availability`, `event/show-guest`. Extract its JS into ONE shared entry `resources/js/pages/schedule-calendar.js` via the stage-A recipe.
+**Goal:** `resources/views/role/partials/calendar.blade.php` (3,972 lines, ~2,051 of JS, Vue global build) is `@include`d by FIVE views (the event page's copy went in 2026-10): `home`, `role/show-guest`, `role/show-guest-embed`, `role/show-admin-schedule`, `role/show-admin-availability`. Extract its JS into ONE shared entry `resources/js/pages/schedule-calendar.js` via the stage-A recipe.
 
-**Key point:** the six consumers pass different include parameters (`route`, `tab`, `category`, `force_mobile`, `max_events`, ...) - the PARTIAL keeps emitting its own per-page config island, so it keeps owning its data contract; the shared entry reads the island.
+**Key point:** the consumers pass different include parameters (`route`, `tab`, `category`, ...) - the PARTIAL keeps emitting its own per-page config island, so it keeps owning its data contract; the shared entry reads the island.
 
 **Verification:** all stage-A gates, and the mount smoke + manual pass must exercise ALL SIX consumer pages, embed variant included. Dusk: calendar month navigation + event click-through on 2 consumers. **Risk:** high - blast radius; do this only after F1 or F2a has proven the pattern. **Manual QA:** click through the calendar on all six pages, light + dark, one RTL locale, plus the embed on a third-party-style test page.
 

@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Newsletter;
+use App\Models\NewsletterRecipient;
 use App\Models\Role;
 use App\Models\RoleSubscriber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -73,7 +76,53 @@ class GuestMailLinkPagesTest extends TestCase
         $this->assertStringNotContainsString('data-auth-schedule', $html);
         $this->assertStringContainsString('<a href="'.e(marketing_url()).'">', $html);
 
-        // A link that has expired names no schedule, and stands under the platform too.
-        $this->assertStringNotContainsString('data-auth-schedule', file_get_contents(resource_path('views/subscriber/link-expired.blade.php')));
+        // A link that has expired names no schedule, and stands under the platform too. The
+        // page is rendered: the mark lives in the layout, so the view's own source never held
+        // it and reading the file could not fail.
+        $expired = $this->get('/sub/c/'.Str::random(40));
+        $expired->assertStatus(410);
+        $this->assertStringNotContainsString('data-auth-schedule', $expired->getContent());
+        $this->assertStringContainsString('<a href="'.e(marketing_url()).'">', $expired->getContent());
+    }
+
+    /**
+     * The newsletter unsubscribe page serves two senders: a schedule's newsletter, and the
+     * platform's own to its account holders. Only the first is the schedule's page.
+     */
+    public function test_a_schedules_newsletter_page_is_its_own_and_the_platforms_is_the_platforms(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'The Blue Room']);
+        $recipient = fn (array $newsletter) => NewsletterRecipient::create([
+            'newsletter_id' => Newsletter::create($newsletter + [
+                'user_id' => $owner->id, 'subject' => 'News', 'status' => 'sent', 'template' => 'modern', 'blocks' => [],
+            ])->id,
+            'email' => 'fan@fans.test', 'name' => 'Fan', 'token' => Str::random(64), 'status' => 'sent', 'sent_at' => now(),
+        ]);
+
+        $theirs = $this->get('/nl/u/'.$recipient(['role_id' => $role->id, 'type' => 'schedule'])->token)->assertOk()->getContent();
+        $this->assertStringContainsString('data-auth-schedule', $theirs);
+        $this->assertStringContainsString('<title>The Blue Room</title>', $theirs);
+
+        $ours = $this->get('/nl/u/'.$recipient(['role_id' => null, 'type' => 'admin'])->token)->assertOk()->getContent();
+        $this->assertStringNotContainsString('data-auth-schedule', $ours);
+        $this->assertStringNotContainsString('The Blue Room', $ours);
+        $this->assertStringContainsString('<a href="'.e(marketing_url()).'">', $ours);
+    }
+
+    /**
+     * A schedule nobody has claimed has no public page, and Role::getGuestUrl() answers '' for
+     * it. The header was a link to '', which reloads the page it is on.
+     */
+    public function test_an_unclaimed_schedules_name_is_not_a_link_to_nowhere(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Not Yet Live', 'email_verified_at' => null]);
+        $this->assertSame('', $role->fresh()->getGuestUrl(), 'fixture: unclaimed');
+
+        $html = $this->get('/sub/u/'.$this->subscriber($role)->token)->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('href=""', $html);
+        $this->assertSame(1, preg_match('/<div data-auth-schedule[^>]*>(.*?)<\/div>/s', $html, $m), 'its name stands, unlinked');
+        $this->assertStringContainsString('Not Yet Live', $m[1]);
     }
 }

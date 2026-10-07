@@ -27,9 +27,10 @@
     $isAdminRoute = $route == 'admin';
     $alwaysShowFilters = in_array($route ?? '', ['guest', 'admin']);
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
-    // Whether this is a guest page that draws the list as rows (the one list, the chips above
-    // it, the month on a phone). Not ?graphic=1: that renders a picture to share, and keeps the
-    // cards it always had.
+    // Whether this is a guest PAGE (or embed): its list is in the page once, the cards from a
+    // tablet up and the rows on a phone (the name is from when it was rows at every width), and
+    // it has the chips above the list, the ticket line on a card and the month on a phone.
+    // Not ?graphic=1: that renders a picture to share, and keeps both lists as they always were.
     $guestRows = ($route ?? '') === 'guest' && ! request()->graphic;
     $guestEmbed = (bool) (isset($embed) && $embed);
     // The path this schedule's own page lives at, with no trailing slash: '' when the schedule
@@ -1191,8 +1192,11 @@
 
                                         @includeWhen($guestRows, 'role/partials/card-ticket-badge')
 
-                                        {{-- Ticket Price Badge --}}
-                                        <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
+                                        {{-- Ticket Price Badge: the price an owner typed for an event sold somewhere
+                                             else. An event that used to be sold elsewhere and is sold here now keeps
+                                             that price saved, so on a guest page it stands aside for our own line
+                                             above, as it does on a phone's row: one card, one price. --}}
+                                        <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected{!! $guestRows ? ' && !cardHasTickets(event)' : '' !!}" class="flex items-center gap-4">
                                             <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                                 <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                     <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -1554,7 +1558,7 @@
                                     @includeWhen($guestRows, 'role/partials/card-ticket-badge')
 
                                     {{-- Ticket Price Badge --}}
-                                    <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
+                                    <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected{!! $guestRows ? ' && !cardHasTickets(event)' : '' !!}" class="flex items-center gap-4">
                                         <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
                                             <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
                                                 <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -1930,8 +1934,8 @@
 
                  A row says when, what and where, and nothing that needs a second request or a
                  second look: performers, the agenda, polls and the fan buttons are on the
-                 event's own page. data-reveal-* are the hooks the schedule's list animation
-                 uses (resources/css/list-reveal.css). --}}
+                 cards a wider screen gets, and on the event's own page. data-reveal-* are the
+                 hooks the schedule's list animation uses (resources/css/list-reveal.css). --}}
             <div v-if="allListGroups.length > 0" class="gk-days">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
                     {{-- The end of the upcoming rows, which is above the past ones. --}}
@@ -1948,7 +1952,7 @@
                             {{-- "Today" and "Tomorrow" by the schedule's clock, not the visitor's:
                                  a day is a day because of where it happens. --}}
                             <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
-                            {{-- A heading, as the day and the event were on the cards these rows replace. --}}
+                            {{-- A heading, as the day is over the cards a wider screen gets. --}}
                             <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></h2>
                         </div>
                         <ul class="gk-rows">
@@ -2405,8 +2409,8 @@
 </div>
 
 {{-- A schedule page passes $hasActivePolls: its $events are only the next 50 public ones, while the
-     popups take votes on whatever the calendar fetches. Other callers (the event page, ?graphic=1,
-     the admin) pass none and keep asking their own $events. --}}
+     list's cards take votes on whatever the calendar fetches. Other callers (?graphic=1, the
+     admin, the dashboard) pass none and keep asking their own $events. --}}
 @if (isset($role) && $role->isPro() && ($hasActivePolls ?? $events->contains(fn($e) => ($e->polls_count ?? 0) > 0)))
 <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>
 <script src="{{ asset('js/poll-confetti.js') }}" {!! nonce_attr() !!}></script>
@@ -2416,7 +2420,8 @@
 if (typeof Vue !== 'undefined') {
 const { createApp } = Vue;
 
-// Event animations: cards in the three event lists (desktop list, mobile list, mobile agenda)
+// Event animations: the entries of the event lists (the wide list's cards, a phone's rows, the
+// rows under a phone's month; on the admin and the dashboard, the mobile list and agenda)
 // animate in as they scroll into view, styled by resources/css/list-reveal.css. The CSS only hides
 // a card under a root that carries data-list-anim, which Vue binds from activeListAnimation, so a
 // script that never runs leaves every card visible. The reveal state lives in data-list-revealed
@@ -2527,7 +2532,7 @@ const listReveal = (() => {
 
         // Anything still waiting ABOVE the viewport was jumped past (End, find-in-page, a restored
         // scroll). Show it as-is: animating it later, from the wrong direction, looks broken.
-        // Only the list on screen is scanned (two of the three are display:none at any width),
+        // Only the list on screen is scanned (the others are display:none, or not in the page),
         // and every position is read before anything is written, so a long jump costs one layout.
         const rootShown = new Map();
         const passed = [...pending].filter(el => {
@@ -2636,8 +2641,8 @@ const calendarApp = createApp({
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
             // The layout ?layout= asked for, or null. Read from the helper rather than $role
             // because this partial also renders on the home route, which has none. It is the
-            // requested value, not currentView, so the event page's mini-calendar (which is
-            // always a mobile agenda) still hands the right layout back to the schedule.
+            // requested value, not currentView, so a link from here to an event carries what
+            // the address asked for, and the event's way back returns to that view.
             layoutFromUrl: @json(requested_event_layout()),
             directRegistration: {{ isset($role) && $role->direct_registration ? 'true' : 'false' }},
             isRtl: {{ $isAdminRoute ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
@@ -2702,8 +2707,10 @@ const calendarApp = createApp({
             searchInput: '',
             searchQuery: '',
             searchDebounceTimer: null,
-            // Below md the calendar layout is the flat agenda, not the month grid (see
-            // filterScopeIsMonth). Kept live by a matchMedia listener in mounted().
+            // Below md there is no month grid: a guest page shows cards or rows by it, and the
+            // calendar layout is a small month there (the flat agenda on the admin, the
+            // dashboard and in an embed; see filterScopeIsMonth). Kept live by a matchMedia
+            // listener in mounted().
             isNarrow: !!(window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches),
             restoringFiltersFromUrl: false,
             filterShareBaseUrl: @json($filterShareBaseUrl),
@@ -2845,11 +2852,11 @@ const calendarApp = createApp({
             });
             return map;
         },
-        // Whether the filters look at the one month on the desktop grid (true), or at every
-        // loaded upcoming event: the list layout, and the calendar layout below md, which is a
-        // flat agenda reaching six months ahead rather than a month grid. Offering the phone
-        // only this month's rooms would hide a room that is in use next month from the very
-        // list it filters.
+        // Whether the filters look at the one month being shown (true), or at every loaded
+        // upcoming event: the list layout, and wherever the calendar layout below md is the
+        // flat agenda reaching six months ahead (the admin, the dashboard, a narrow embed).
+        // Offering that agenda only this month's rooms would hide a room that is in use next
+        // month from the very list it filters.
         filterScopeIsMonth() {
             // A guest page's phone month is a month too (phoneMonth): its chips, counts and
             // "N events" are about the month it draws, as the laptop grid's are.
@@ -3543,8 +3550,8 @@ const calendarApp = createApp({
             this.phoneDay = left.day || '';
             this.$nextTick(() => requestAnimationFrame(() => window.scrollTo(0, left.y || 0)));
         },
-        // The next event above the list was chosen by the server for the page as it was asked
-        // for (its sub-schedule and category included; an address that filters by anything
+        // The next-event card above the month was chosen by the server for the page as it was
+        // asked for (its sub-schedule and category included; an address that filters by anything
         // else gets no lead at all, see role/show-guest). Once the visitor changes what the
         // list shows it may not be among it, so it steps aside until the list is back as it
         // loaded: leadFilterKeyAtLoad, read in created() before anything can have changed.
@@ -3885,8 +3892,8 @@ const calendarApp = createApp({
         },
         updateOuterContainers(view, animate = true) {
             const maxWidth = view === 'list' ? '56rem' : '200rem';
-            // The next-event card above the list (role/show-guest) is told which view is on:
-            // over the cards of a wide list it would say the first card twice.
+            // The next-event card (role/show-guest) is told which view is on: it leads the
+            // month, and stands aside in the list view at every width.
             const leadWrap = document.querySelector('[data-lead-wrap]');
             if (leadWrap) { leadWrap.dataset.view = view; }
             document.querySelectorAll('[data-view-width]').forEach(el => {
@@ -4314,27 +4321,32 @@ const calendarApp = createApp({
             }
             return event.local_date || null;
         },
-        // 'YYYY-MM-DD HH:MM' where the schedule is.
-        scheduleNow() {
-            const there = this.userTimezone ? new Date(new Date().toLocaleString('en-US', { timeZone: this.userTimezone })) : new Date();
+        // 'YYYY-MM-DD HH:MM' in a zone: the event's own (event.zone) where a row has one. On a
+        // curator's page that is not the page's, and an event's times are in its own: a New
+        // York curator's page dropped the price of a Los Angeles 20:00 show at 17:00 there.
+        scheduleNow(zone) {
+            const where = zone || this.userTimezone;
+            const there = where ? new Date(new Date().toLocaleString('en-US', { timeZone: where })) : new Date();
             const two = number => String(number).padStart(2, '0');
             return there.getFullYear() + '-' + two(there.getMonth() + 1) + '-' + two(there.getDate()) + ' ' + two(there.getHours()) + ':' + two(there.getMinutes());
         },
         // Whether our own tickets for this row can no longer be bought because the night has
-        // begun (or, for an event that sells after it starts, ended): Event::passesSellingWindow()
-        // on the list's clock. The server already leaves the price off a one-day event that
-        // has begun; this is for a series, which has a different answer each day, and for a
-        // page left open across the start.
+        // begun, or ended: Event::passesSellingWindow() on the list's clock, branch for branch.
+        // An occurrence sells until it STARTS; until it ENDS where the event sells after it
+        // starts, and for an event on one date that runs over several days (not for a series
+        // of them). Its end is its length, or two hours where it has none (getEndDateTime()).
+        // The server already leaves the price off a one-day event that has begun; this is for
+        // a series, which has a different answer each day, and for a page left open.
         rowSalesOver(event) {
             const date = this.rowDate(event);
             const time = (event.local_starts_at || '').slice(11, 16);
             if (!date || !time) { return false; }
-            const now = this.scheduleNow();
-            if (!event.sells_after_start && !event.is_multi_day) { return now >= date + ' ' + time; }
-            // Until it ends: a length in hours, or the end of its day where it has none.
-            if (!event.duration) { return now.slice(0, 10) > date; }
+            const now = this.scheduleNow(event.zone);
+            const series = !!(event.days_of_week && event.days_of_week.length);
+            if (!event.sells_after_start && (series || !event.is_multi_day)) { return now >= date + ' ' + time; }
+            const hours = event.duration > 0 ? event.duration : 2;
             const [y, m, d] = date.split('-').map(Number), [h, min] = time.split(':').map(Number);
-            const end = new Date(y, m - 1, d, h, min + Math.round(event.duration * 60));
+            const end = new Date(y, m - 1, d, h, min + Math.round(hours * 60));
             const two = number => String(number).padStart(2, '0');
             return now >= end.getFullYear() + '-' + two(end.getMonth() + 1) + '-' + two(end.getDate()) + ' ' + two(end.getHours()) + ':' + two(end.getMinutes());
         },

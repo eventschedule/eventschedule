@@ -509,7 +509,7 @@
                     <tr><td><code class="doc-inline-code">#gp-video-carousel</code></td><td>The strip of videos from upcoming events</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-sponsors</code></td><td>The sponsor logo grid (also on event pages)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-events</code></td><td>Everything from the events heading down, including the calendar</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-next-event</code></td><td>The card above the list that shows your next event</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-next-event</code></td><td>The card above the month calendar that shows your next event</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-calendar</code></td><td>The calendar or event list panel on its own</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-subscribe</code></td><td>The follow and subscribe panel (also on event pages)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-gallery</code></td><td>Your photo gallery (also on event pages, for an event's own gallery)</td></tr>
