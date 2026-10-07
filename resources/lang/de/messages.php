@@ -3285,6 +3285,8 @@ return [
     'ticket_sales_end_at' => 'Ticketverkauf endet',
     'ticket_sales_end_at_help' => 'Der Verkauf wird automatisch zu diesem Datum und dieser Uhrzeit gestoppt',
     'ticket_sales_ended' => 'Der Ticketverkauf ist beendet',
+    'payment_cancelled_not_charged' => 'Die Zahlung wurde abgebrochen und es wurde nichts abgebucht.',
+    'payment_not_completed' => 'Die Zahlung wurde nicht abgeschlossen, daher wurde keine Bestellung aufgegeben.',
     'stripe_paid' => 'Stripe bezahlt',
     'recurring_revenue_excludes_trials' => 'Ohne :count in der Testphase',
     'all_sources' => 'Alle Quellen',

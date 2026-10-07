@@ -3285,6 +3285,8 @@ return [
     'ticket_sales_end_at' => 'Ticketverkoop eindigt',
     'ticket_sales_end_at_help' => 'De verkoop stopt automatisch op deze datum en tijd',
     'ticket_sales_ended' => 'De ticketverkoop is beëindigd',
+    'payment_cancelled_not_charged' => 'De betaling is geannuleerd en er is niets afgeschreven.',
+    'payment_not_completed' => 'De betaling is niet voltooid, dus er is geen bestelling geplaatst.',
     'stripe_paid' => 'Stripe betaald',
     'recurring_revenue_excludes_trials' => 'Exclusief :count in proefperiode',
     'all_sources' => 'Alle bronnen',

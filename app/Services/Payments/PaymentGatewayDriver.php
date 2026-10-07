@@ -559,6 +559,45 @@ abstract class PaymentGatewayDriver
     }
 
     /**
+     * Session key of the one-shot "a payment was just cancelled" signal.
+     */
+    public const CANCELLED_FLASH = 'payment_cancelled';
+
+    /**
+     * Tell the page the buyer is about to land on that their payment was cancelled.
+     *
+     * The form saves what was typed just before it hands the buyer to the provider, and used to
+     * put it back only after a refused submit, so backing out of the provider's page landed on an
+     * empty form with no word on whether anything had been charged. Called by every handler a
+     * cancelled payment comes back through (handleCancel() below, TicketController::cancel() and
+     * ::paymentUrlCancel()), and ONLY when that handler has just moved the sale from unpaid to
+     * expired: a cancel address is a GET the buyer can open again after paying, and "nothing was
+     * charged" would then be false.
+     *
+     * $chargeUnknown is for a payment that happens on a page we do not run (the organizer's own
+     * payment link): there we know the order was not placed, and cannot vouch for the money.
+     */
+    public static function flashCancelled(Sale $sale, bool $chargeUnknown = false): void
+    {
+        session()->flash(self::CANCELLED_FLASH, [
+            'event_id' => UrlUtils::encodeId($sale->event_id),
+            'charge_unknown' => $chargeUnknown,
+        ]);
+    }
+
+    /**
+     * The signal, if it is for this event (event/partials/payment-cancelled, event/tickets).
+     *
+     * @return array{event_id: string, charge_unknown: bool}|null
+     */
+    public static function cancelledFor(Event $event): ?array
+    {
+        $flash = session(self::CANCELLED_FLASH);
+
+        return is_array($flash) && ($flash['event_id'] ?? null) === UrlUtils::encodeId($event->id) ? $flash : null;
+    }
+
+    /**
      * Buyer abandoned the payment: release the seats and put them back on the tickets page.
      */
     public function handleCancel(Request $request, Sale $sale): Response
@@ -579,6 +618,8 @@ abstract class PaymentGatewayDriver
             AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'expired'],
                 $this->key().'_abandon:event_id:'.$sale->event_id);
+
+            self::flashCancelled($sale);
         }
 
         $event = $sale->event;

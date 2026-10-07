@@ -752,6 +752,8 @@ return [
     'ticket_sales_end_at' => 'Vânzarea biletelor se încheie',
     'ticket_sales_end_at_help' => 'Vânzările se vor opri automat la această dată și oră',
     'ticket_sales_ended' => 'Vânzarea biletelor s-a încheiat',
+    'payment_cancelled_not_charged' => 'Plata a fost anulată și nu s-a perceput nicio sumă.',
+    'payment_not_completed' => 'Plata nu a fost finalizată, așa că nu a fost plasată nicio comandă.',
     'after_number_of_hours' => 'După un număr de ore',
     'sold' => 'Vândut',
     'sold_out' => 'Epuizat',

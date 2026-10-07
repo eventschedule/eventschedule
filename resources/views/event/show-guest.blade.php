@@ -1338,6 +1338,12 @@
              is why the subscribe panel at the foot of the page vanishes during checkout. --}}
         @include('event.partials.interest-capture')
 
+        {{-- A cancelled payment coming back to a page with no ticket form to say it in. Where
+             there is one, the same line is inside the form's panel below. --}}
+        @if ($event->canAcceptRsvp($date) || ! $event->canSellTickets($date))
+            @include('event.partials.payment-cancelled')
+        @endif
+
         {{-- RSVP form section (hidden by default, shown on CTA click) --}}
         @if ($event->canAcceptRsvp($date))
         <div id="gp-event-form" class="scroll-mt-4"
@@ -1375,6 +1381,7 @@
              @endif>
             <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
               <div class="flex-1">
+                @include('event.partials.payment-cancelled')
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
               </div>
             </div>

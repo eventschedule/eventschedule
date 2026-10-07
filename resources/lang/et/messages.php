@@ -3282,6 +3282,8 @@ return [
     'ticket_sales_end_at' => 'Piletimüük lõpeb',
     'ticket_sales_end_at_help' => 'Müük peatub automaatselt sellel kuupäeval ja kellaajal',
     'ticket_sales_ended' => 'Piletimüük on lõppenud',
+    'payment_cancelled_not_charged' => 'Makse tühistati ja raha ei võetud.',
+    'payment_not_completed' => 'Makset ei viidud lõpule, seega tellimust ei esitatud.',
     'stripe_paid' => 'Stripe\'iga makstud',
     'recurring_revenue_excludes_trials' => 'Välja arvatud :count prooviperioodil',
     'all_sources' => 'Kõik allikad',

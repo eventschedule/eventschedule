@@ -3347,6 +3347,8 @@ return [
     'ticket_sales_end_at' => 'انتهاء بيع التذاكر',
     'ticket_sales_end_at_help' => 'ستتوقف المبيعات تلقائيًا في هذا التاريخ والوقت',
     'ticket_sales_ended' => 'انتهى بيع التذاكر',
+    'payment_cancelled_not_charged' => 'تم إلغاء الدفع ولم يتم خصم أي مبلغ.',
+    'payment_not_completed' => 'لم يكتمل الدفع، لذلك لم يُسجَّل أي طلب.',
     'stripe_paid' => 'مدفوع عبر Stripe',
     'recurring_revenue_excludes_trials' => 'باستثناء :count في الفترة التجريبية',
     'all_sources' => 'جميع المصادر',

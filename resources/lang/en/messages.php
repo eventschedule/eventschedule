@@ -755,6 +755,8 @@ return [
     'ticket_sales_end_at' => 'Ticket sales end',
     'ticket_sales_end_at_help' => 'Sales will automatically stop at this date and time',
     'ticket_sales_ended' => 'Ticket sales have ended',
+    'payment_cancelled_not_charged' => 'Your payment was cancelled and nothing was charged.',
+    'payment_not_completed' => 'Your payment was not completed, so no order was placed.',
     'after_number_of_hours' => 'After number of hours',
     'sold' => 'Sold',
     'sold_out' => 'Sold Out',

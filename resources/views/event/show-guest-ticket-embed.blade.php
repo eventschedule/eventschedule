@@ -48,6 +48,8 @@
                 </div>
                 @endif
 
+                @include('event.partials.payment-cancelled')
+
                 @if ($isTicketMode)
                     @if ($event->hasProTicketingPlan() && $event->canSellTickets($eventDate))
                         @include('event.tickets', ['accentColor' => $accentColor, 'contrastColor' => $contrastColor])

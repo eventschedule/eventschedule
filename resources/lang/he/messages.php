@@ -3342,6 +3342,8 @@ return [
     'ticket_sales_end_at' => 'סיום מכירת כרטיסים',
     'ticket_sales_end_at_help' => 'המכירות ייפסקו אוטומטית בתאריך ובשעה אלה',
     'ticket_sales_ended' => 'מכירת הכרטיסים הסתיימה',
+    'payment_cancelled_not_charged' => 'התשלום בוטל ולא בוצע חיוב.',
+    'payment_not_completed' => 'התשלום לא הושלם, ולכן לא בוצעה הזמנה.',
     'stripe_paid' => 'שולם ב-Stripe',
     'recurring_revenue_excludes_trials' => 'לא כולל :count בתקופת ניסיון',
     'all_sources' => 'כל המקורות',

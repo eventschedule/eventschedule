@@ -3285,6 +3285,8 @@ return [
     'ticket_sales_end_at' => 'Fim da venda de ingressos',
     'ticket_sales_end_at_help' => 'As vendas serão encerradas automaticamente nesta data e hora',
     'ticket_sales_ended' => 'A venda de ingressos foi encerrada',
+    'payment_cancelled_not_charged' => 'O pagamento foi cancelado e nada foi cobrado.',
+    'payment_not_completed' => 'O pagamento não foi concluído, por isso nenhum pedido foi feito.',
     'stripe_paid' => 'Pago pelo Stripe',
     'recurring_revenue_excludes_trials' => 'Exclui :count em teste',
     'all_sources' => 'Todas as fontes',

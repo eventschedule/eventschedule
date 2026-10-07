@@ -24,6 +24,7 @@ use App\Services\InstallmentService;
 use App\Services\PassBookingService;
 use App\Services\PassRedemptionService;
 use App\Services\Payments\CheckoutContext;
+use App\Services\Payments\PaymentGatewayDriver;
 use App\Services\RoleMailerService;
 use App\Services\SaleSettlementService;
 use App\Services\TicketVolumeDiscount;
@@ -2655,6 +2656,8 @@ class TicketController extends Controller
         if ($expired) {
             AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'expired'], 'guest_abandon:event_id:'.$sale->event_id);
+
+            PaymentGatewayDriver::flashCancelled($sale);
         }
 
         $event = $sale->event;
@@ -2663,9 +2666,10 @@ class TicketController extends Controller
         // Unconditional ?tickets=true, matching PaymentGatewayDriver::handleCancel(): every
         // ticket surface handles a closed gate itself - the embed shows its not-available state
         // and show-guest falls through to Add to Calendar - so the anchor param is inert rather
-        // than broken. No flash message: show-guest reads session('error') only as a
-        // data-show-initial flag and never displays it, and on an RSVP-enabled event the flash
-        // force-opens the RSVP form with no explanation.
+        // than broken. No session('error'): show-guest reads that only as a data-show-initial
+        // flag and never displays it, and on an RSVP-enabled event it force-opens the RSVP form
+        // with no explanation. What the page does read is PaymentGatewayDriver::flashCancelled(),
+        // set above: it restores the form and says the payment was cancelled.
         return redirect($cancelRedirectUrl);
     }
 
@@ -2742,6 +2746,10 @@ class TicketController extends Controller
         if ($expired) {
             AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'expired'], 'payment_url_abandon:event_id:'.$sale->event_id);
+
+            // The payment page is the organizer's own: the order was not placed, and whether
+            // money moved there is not ours to say.
+            PaymentGatewayDriver::flashCancelled($sale, chargeUnknown: true);
         }
 
         $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
@@ -2749,9 +2757,10 @@ class TicketController extends Controller
         // Unconditional ?tickets=true, matching PaymentGatewayDriver::handleCancel(): every
         // ticket surface handles a closed gate itself - the embed shows its not-available state
         // and show-guest falls through to Add to Calendar - so the anchor param is inert rather
-        // than broken. No flash message: show-guest reads session('error') only as a
-        // data-show-initial flag and never displays it, and on an RSVP-enabled event the flash
-        // force-opens the RSVP form with no explanation.
+        // than broken. No session('error'): show-guest reads that only as a data-show-initial
+        // flag and never displays it, and on an RSVP-enabled event it force-opens the RSVP form
+        // with no explanation. What the page does read is PaymentGatewayDriver::flashCancelled(),
+        // set above: it restores the form and says the payment was cancelled.
         return redirect($cancelUrl);
     }
 

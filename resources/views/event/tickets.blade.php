@@ -240,6 +240,9 @@
                     oldGuests: @json(old('guests', [])),
                     oldGuestTicketCustomValues: @json(old('guest_ticket_custom_values', [])),
                     hasError: @json(session('error') || $errors->any()),
+                    {{-- Back from a payment that was cancelled: what was typed is put back, as it
+                         is after a refused submit (event/partials/payment-cancelled says why). --}}
+                    paymentCancelled: @json((bool) \App\Services\Payments\PaymentGatewayDriver::cancelledFor($event)),
                     {{-- Add-ons are Pro. They were only unreachable before because a free schedule could not
                          render this form at all; now it can, so a lapsed Pro schedule would otherwise keep
                          selling them. --}}
@@ -295,7 +298,7 @@
                         }
                     });
                 }
-                if (this.hasError) {
+                if (this.hasError || this.paymentCancelled) {
                     this.restoreFormState();
                 }
                 const urlParams = new URLSearchParams(window.location.search);

@@ -3345,6 +3345,8 @@ return [
     'ticket_sales_end_at' => 'Продажа билетов заканчивается',
     'ticket_sales_end_at_help' => 'Продажа автоматически прекратится в указанную дату и время',
     'ticket_sales_ended' => 'Продажа билетов завершена',
+    'payment_cancelled_not_charged' => 'Платёж отменён, деньги не списаны.',
+    'payment_not_completed' => 'Платёж не был завершён, поэтому заказ не оформлен.',
     'stripe_paid' => 'Оплачено через Stripe',
     'recurring_revenue_excludes_trials' => 'Без учета :count на пробном периоде',
     'all_sources' => 'Все источники',

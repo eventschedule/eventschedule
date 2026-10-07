@@ -10,6 +10,10 @@
     it fires only on the redirect that follows a purchase. A ticket link is permanent and gets
     reopened long afterwards; clearing on every view would silently empty a cart the buyer had
     since refilled. An abandoned payment (checkout.cancel) sets no flash and keeps its cart.
+
+    The same moment clears what the ticket and sign-up forms saved in the tab just before they
+    were sent (name, email, answers): it is there to be put back after a refused submit or a
+    cancelled payment, and nothing used to remove it once the order went through.
 --}}
 @php
     $cartPurchasedLegs = collect(session('cart_purchased', []))
@@ -22,6 +26,11 @@
     var purchased = @json($cartPurchasedLegs);
 
     purchased.forEach(function (leg) {
+        try {
+            sessionStorage.removeItem('checkout_form_' + leg.event_id);
+            sessionStorage.removeItem('rsvp_form_' + leg.event_id);
+        } catch (e) {}
+
         var key = 'es_cart_' + leg.subdomain;
 
         try {
