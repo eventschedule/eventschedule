@@ -25,9 +25,12 @@
             : ($rowEvent->event_url ? __('messages.online') : '');
         $rowImage = $rowEvent->flyer_image_url ? $rowEvent->getImageUrl(480) : null;
         $rowTime = $rowEvent->getStartEndTime($row['date'], get_use_24_hour_time($role));
+        // The filter the visitor arrived with rides along, as it did on the list this replaces.
+        $rowUrl = $rowEvent->getGuestUrl($role->subdomain, $rowEvent->days_of_week ? $row['date'] : null);
+        $rowUrl .= empty($filterQuery) ? '' : (str_contains($rowUrl, '?') ? '&' : '?').http_build_query($filterQuery);
       @endphp
       <li>
-        <a class="gk-row {{ $rowImage ? '' : 'gk-row-bare' }}" href="{{ $rowEvent->getGuestUrl($role->subdomain, $rowEvent->days_of_week ? $row['date'] : null) }}">
+        <a class="gk-row {{ $rowImage ? '' : 'gk-row-bare' }}" href="{{ $rowUrl }}">
           <span class="gk-row-time">
             <time datetime="{{ $rowStart->format('Y-m-d\TH:i:sP') }}">{{ $rowStart->translatedFormat($rowStart->isCurrentYear() ? 'D, M j' : 'D, M j, Y') }}</time>
             @if ($rowTime)

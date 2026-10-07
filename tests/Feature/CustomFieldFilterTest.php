@@ -481,23 +481,25 @@ class CustomFieldFilterTest extends TestCase
 
     // -- The event page ----------------------------------------------------------------------
 
-    public function test_a_custom_field_filter_skips_the_earlier_events_count_on_the_event_page(): void
+    public function test_a_custom_field_filter_travels_from_an_event_page_to_the_next(): void
     {
-        // The event page's agenda starts at the event's month, and a server-side EXISTS says
-        // whether it skipped anything earlier. It cannot see a client-side filter, so under one it
-        // must stay out of it rather than claim events the filtered agenda hides.
+        // The event page's other events are three rows drawn by the server (it used to hold a
+        // second copy of the list app, whose links carried the filter). The rows and the way
+        // back both keep the filter the visitor arrived with, so following one does not drop it.
         $venue = $this->createRole($this->createOwner(), 'venue', ['event_custom_fields' => self::ROOM_FIELD]);
-        $this->createEvent($venue, ['name' => 'Soon', 'starts_at' => now()->addDay()->setTime(12, 0)->format('Y-m-d H:i:s')]);
+        $soon = $this->createEvent($venue, ['name' => 'Soon', 'starts_at' => now()->addDay()->setTime(12, 0)->format('Y-m-d H:i:s')]);
         $later = $this->createEvent($venue, ['name' => 'Later', 'starts_at' => now()->addDays(70)->setTime(12, 0)->format('Y-m-d H:i:s')]);
 
         $url = $this->guestEventUrl($venue, $later);
 
-        $this->get($url)->assertOk()
-            ->assertSee('v-if="true" id="viewFullScheduleFooter"', false);
+        $plain = $this->get($url)->assertOk()->getContent();
+        $this->assertStringContainsString('href="'.e($soon->fresh()->getGuestUrl($venue->subdomain)).'"', $plain, 'no filter, no query');
+        $this->assertStringNotContainsString('viewFullScheduleFooter', $plain, 'the list app and its "earlier events" count are gone from this page');
 
-        $filtered = $this->get($url.(str_contains($url, '?') ? '&' : '?').'custom_1=room+a')->assertOk();
-        $filtered->assertSee('v-if="hasMoreEventsThanShown" id="viewFullScheduleFooter"', false);
-        // ...and the page's back link keeps the filter.
-        $filtered->assertSee('custom_1=room+a', false);
+        $filtered = $this->get($url.(str_contains($url, '?') ? '&' : '?').'custom_1=room+a')->assertOk()->getContent();
+        $rows = substr($filtered, strpos($filtered, 'id="gp-upcoming-events"'), 2500);
+        $this->assertStringContainsString('href="'.e($soon->fresh()->getGuestUrl($venue->subdomain).'?custom_1=room+a').'"', $rows, 'the row keeps the filter');
+        // ...and the page's back link keeps it too.
+        $this->assertSame(1, preg_match('/class="gk-link gk-dayhead-link" href="[^"]*custom_1=room\+a"/', $rows));
     }
 }

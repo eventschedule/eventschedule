@@ -19,6 +19,11 @@
             background: rgb(var(--ap-surface));
             border-color: rgb(var(--ap-border));
         }
+        {{-- The form's bar, fitted to this card. The kit's bar bleeds to the edges of the event
+             page's panel and sticks to the foot of the screen; this card has its own padding
+             (1.5rem and 1.25rem), is as tall as what it holds, and clips, so here the bar is the
+             card's plain foot, in the card's own colour. --}}
+        .ticket-embed-card .gk-buybar { position: static; margin: 1.25rem -1.5rem -1.25rem; padding: .875rem 1.5rem; border-radius: 0; background: transparent; }
     </style>
 
     <div class="pt-4 pb-4 px-4">

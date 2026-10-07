@@ -74,6 +74,7 @@
                                     'refresh-expired': 'auto',
                                     callback: (token) => {
                                         this.turnstileToken = token;
+                                        this.problem = '';
                                     },
                                     'error-callback': () => {
                                         this.turnstileToken = '';
@@ -630,12 +631,16 @@
         </div>
 
         @if (session('error'))
-        <div class="mb-6 text-sm text-red-600 dark:text-red-400">
+        {{-- v-pre: this is inside the form's Vue mount, and a refusal can name an event. --}}
+        <div v-pre class="mb-6 text-sm text-red-600 dark:text-red-400">
             {{ session('error') }}
         </div>
         @endif
 
-        {{-- Said in the page, where a browser alert box used to be. --}}
+        {{-- Said in the page, where a browser alert box used to be. The cloak rule is this
+             file's own: no other reaches this form, and without it the box was on screen,
+             reading its own template, until Vue started. --}}
+        <style {!! nonce_attr() !!}>#rsvp-form [v-cloak] { display: none; }</style>
         <p v-if="problem" v-cloak id="rsvp-problem" role="alert"
             class="mb-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm font-medium text-amber-900 dark:text-amber-100">@{{ problem }}</p>
         <div class="flex justify-end items-center pt-2 gap-8">

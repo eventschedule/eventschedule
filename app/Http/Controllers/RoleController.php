@@ -51,7 +51,6 @@ use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
-use App\Utils\CustomFieldUtils;
 use App\Utils\DateUtils;
 use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
@@ -2486,43 +2485,10 @@ class RoleController extends Controller
         $hasActivePolls = null;
 
         if ($event && ! request()->graphic) {
-            // For event detail view (non-graphic), only check if calendar has events
-            // The calendar partial loads data via Ajax, so we just need existence
-            if ($role->isCurator()) {
-                $query = Event::inMonth($startOfGridUtc, $endOfGridUtc)
-                    ->whereIn('id', function ($query) use ($role) {
-                        $query->select('event_id')
-                            ->from('event_role')
-                            ->where('role_id', $role->id)
-                            ->where('is_accepted', true);
-                    });
-                if (! $isMemberOrAdmin) {
-                    $query->where('is_draft', false);
-                    $query->where('is_cancelled', false);
-                    $query->where(function ($q) use ($unlockedEventIds) {
-                        $q->where('is_private', false);
-                        if ($unlockedEventIds) {
-                            $q->orWhereIn('id', $unlockedEventIds);
-                        }
-                    });
-                }
-                $hasCalendarEvents = $query->exists();
-            } else {
-                $query = Event::inMonth($startOfGridUtc, $endOfGridUtc)
-                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
-                if (! $isMemberOrAdmin) {
-                    $query->where('is_draft', false);
-                    $query->where('is_cancelled', false);
-                    $query->where(function ($q) use ($unlockedEventIds) {
-                        $q->where('is_private', false);
-                        if ($unlockedEventIds) {
-                            $q->orWhereIn('id', $unlockedEventIds);
-                        }
-                    });
-                }
-                $hasCalendarEvents = $query->exists();
-            }
-            $events = $hasCalendarEvents ? collect([true]) : collect();
+            // An event page has no calendar on it any more (its other events are three rows,
+            // $moreEvents below), so there is nothing to ask about this month. It used to run
+            // an EXISTS here on every view, for a side list that is gone.
+            $events = collect();
         } elseif (request()->graphic) {
             // ?graphic=1 renders the month itself (role/partials/calendar-graphic), so it keeps the
             // full month's events with everything a card shows.
@@ -2629,64 +2595,6 @@ class RoleController extends Controller
             $pastEvents = $pastEvents->filter($keep);
         }
 
-        // The event page's agenda widget is keyed off $month/$year, which follow the EVENT's date,
-        // so its payload starts at that month's grid. Viewing an event a month or more out hides
-        // every upcoming event before it, and the client cannot count what it never fetched - the
-        // max_events cap it CAN see is a separate truncation. One EXISTS answers whether the window
-        // skipped anything. Skipped entirely when the window already starts at or before today,
-        // which is every event in the current month.
-        //
-        // Not run while a category, sub-schedule or custom field filter is active: the client half of this gate
-        // compares isEventVisible()-filtered counts, and re-deriving that filtering in SQL is the
-        // front/back sync burden this codebase has refused before. Under a filter the client half
-        // decides alone - it can under-report the window gap, but it cannot claim events that the
-        // filter would hide.
-        $hasEarlierUpcomingEvents = false;
-        $todayStartUtc = Carbon::now($timezone)->startOfDay()->setTimezone('UTC');
-
-        if ($event && ! request('category') && ! request('schedule') && ! CustomFieldUtils::filterParams(request()->query())
-            && $startOfGridUtc->gt($todayStartUtc)) {
-            $hasEarlierUpcomingEvents = Event::whereNull('days_of_week')
-                // The model's own "upcoming or still running", so a festival that began last week
-                // counts as reachable rather than past.
-                ->upcomingOrOngoing($todayStartUtc)
-                // ...and everything scopeInMonth($startOfGridUtc, null) would NOT return, because
-                // that is exactly what calendarEvents() fetches. Recurring events never qualify
-                // (that scope returns them regardless of the window) and neither does a still-
-                // running multi-day event, which it also carries in regardless of when it started -
-                // both are already in the widget, so neither is hidden. duration is nullable, hence
-                // the explicit whereNull: `NULL < 24` is NULL, not true, and would drop the row.
-                ->where(function ($q) use ($startOfGridUtc) {
-                    $q->where('starts_at', '<', $startOfGridUtc)
-                        ->where(function ($q2) use ($startOfGridUtc) {
-                            $q2->whereNull('duration')
-                                ->orWhere('duration', '<', 24)
-                                ->orWhereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) < ?', [$startOfGridUtc]);
-                        });
-                })
-                ->when(
-                    $role->isCurator(),
-                    fn ($q) => $q->whereIn('id', function ($query) use ($role) {
-                        $query->select('event_id')
-                            ->from('event_role')
-                            ->where('role_id', $role->id)
-                            ->where('is_accepted', true);
-                    }),
-                    fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('role_id', $role->id)->where('is_accepted', true))
-                )
-                ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
-                    $q->where('is_draft', false);
-                    $q->where('is_cancelled', false);
-                    $q->where(function ($q) use ($unlockedEventIds) {
-                        $q->where('is_private', false);
-                        if ($unlockedEventIds) {
-                            $q->orWhereIn('id', $unlockedEventIds);
-                        }
-                    });
-                })
-                ->exists();
-        }
-
         // Dedicated bounded query for the homepage "upcoming events with videos" carousel. Kept
         // separate from the calendar's month-windowed $events so it can promote the next videos
         // across months without loading the entire event table (which OOMs large schedules). The
@@ -2787,11 +2695,15 @@ class RoleController extends Controller
             // a schedule's own team, embeds and demo schedules (GuestFunnel::counts()).
             GuestFunnel::count('event_view', $request, $role);
 
-            // Three other events for the foot of the page, from the schedule's cached list of
-            // what is next. Never this event again on another date: a weekly night's page does
-            // not need next week's as "more".
+            // Three other events for the foot of the page, from the schedule's list of what is
+            // next (a handful of queries, not a cached answer). Never this event again on
+            // another date: a weekly night's page does not need next week's as "more". Inside
+            // the sub-schedule and the category the visitor is browsing, as the side list this
+            // replaces was: the page's links carry both.
+            $moreCategory = request('category');
             $moreEvents = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 12)
                 ->reject(fn (array $row) => $row['event']->id === $event->id)
+                ->when($moreCategory, fn ($rows) => $rows->filter(fn (array $row) => (string) $row['event']->category_id === (string) $moreCategory))
                 ->take(3)
                 ->values();
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
@@ -2886,7 +2798,6 @@ class RoleController extends Controller
                 'events',
                 'upcoming',
                 'moreEvents',
-                'hasEarlierUpcomingEvents',
                 'carouselEvents',
                 'hasActivePolls',
                 'role',

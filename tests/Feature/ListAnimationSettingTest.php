@@ -152,10 +152,11 @@ class ListAnimationSettingTest extends TestCase
         $this->assertSame(['Published'], array_column($events, 'name'));
     }
 
-    public function test_the_event_page_side_agenda_never_animates(): void
+    public function test_the_event_pages_other_events_never_animate(): void
     {
-        // The event page includes the same partial (force_mobile) for its "events" panel; the
-        // setting is about scrolling the schedule, so that small list stays still.
+        // The setting is about scrolling the schedule. The event page's "events" panel used to
+        // be the same list partial, told to stay still; it is three plain rows drawn by the
+        // server now (event/partials/more-events), with no list app to animate at all.
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['list_animation' => 'deal']);
         $event = $this->createEvent($role, ['name' => 'Headliner']);
@@ -163,9 +164,11 @@ class ListAnimationSettingTest extends TestCase
 
         $html = $this->get($event->getGuestUrl($role->subdomain).'?list_animation=curtain')->assertOk()->getContent();
 
-        $this->assertStringContainsString('activeListAnimation: listRevealMotionOk ? "none"', $html);
-        $this->assertStringNotContainsString('listRevealMotionOk ? "deal"', $html);
-        $this->assertStringNotContainsString('listRevealMotionOk ? "curtain"', $html);
+        $rows = substr($html, strpos($html, 'id="gp-upcoming-events"'), 2500);
+        $this->assertStringContainsString('Next Week', $rows, 'fixture: the other event is offered');
+        $this->assertStringNotContainsString('data-list-anim', $html);
+        $this->assertStringNotContainsString('activeListAnimation', $html);
+        $this->assertStringNotContainsString('listRevealMotionOk', $html);
     }
 
     public function test_choosing_a_new_design_flashes_the_share_card(): void

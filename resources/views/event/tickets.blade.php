@@ -320,6 +320,24 @@
                 }
             },
             mounted() {
+                // A refused order comes back open on the tickets, and what the server refused
+                // is usually a field further down (a password too short, an address that
+                // already has an account): its message was under that field and below the fold,
+                // with nothing on screen to say anything had gone wrong. The first refusal is
+                // said in the bar, which stays on screen, and its field is brought into view
+                // once the form is.
+                @if ($errors->any())
+                {{-- Built here and handed to the directive as bare variables: it splits what it
+                     is given on commas, and an expression with one in it loses its escaping. --}}
+                @php
+                    $refusedMessage = $errors->first();
+                    $refusedField = (string) preg_replace('/[^A-Za-z0-9_-]/', '', $errors->keys()[0] ?? '');
+                @endphp
+                window.addEventListener('event-form-shown', () => {
+                    this.say(@json($refusedMessage), @json($refusedField) || null);
+                }, { once: true });
+                @endif
+
                 // Back from the payment page by the Back button: a browser restores this page as
                 // it was left, with Checkout still saying "Processing" and refusing to be pressed.
                 window.addEventListener('pageshow', (event) => {
@@ -367,6 +385,7 @@
                                     'refresh-expired': 'auto',
                                     callback: (token) => {
                                         this.turnstileToken = token;
+                                        this.problem = '';
                                     },
                                     'error-callback': () => {
                                         this.turnstileToken = '';
@@ -461,10 +480,13 @@
                         .replace(':count', this.installmentCount - 1)
                         .replace(':amount', this.formatPrice(this.installmentSchedule[this.installmentSchedule.length - 1]));
                 },
+                // Pay monthly is chosen and its authorisation is not ticked yet.
+                needsConsent() {
+                    return this.payMonthly && this.installmentsOffered && !this.installmentConsent;
+                },
                 payNowLabel() {
                     return @json(__('messages.pay_amount_now'))
-                        .replace(':amount', this.formatPrice(this.installmentSchedule[0] || 0))
-                        .toUpperCase();
+                        .replace(':amount', this.formatPrice(this.installmentSchedule[0] || 0));
                 },
                 noExtraCostText() {
                     return @json(__('messages.installments_no_extra_cost')).replace(':total', this.formatPrice(this.totalAmount));
@@ -616,15 +638,24 @@
                 // What is still missing, said in the page beside the button (#checkout-problem)
                 // and shown: the thing itself is brought into view, and focused if it can be.
                 // A browser alert box named nothing on the page and had to be dismissed first.
-                say(message, elementId) {
+                say(message, target) {
                     this.problem = message;
                     this.$nextTick(() => {
-                        const el = elementId ? document.getElementById(elementId) : null;
+                        const el = typeof target === 'string' ? document.getElementById(target) : target;
                         if (el) {
                             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             if (el.focus) { try { el.focus({ preventScroll: true }); } catch (err) {} }
                         }
                     });
+                },
+                // Where choosing a ticket starts: the first quantity that can still be chosen,
+                // or the seat map, or failing both the first row (the first one may be sold out
+                // or closed, and then has no box at all).
+                firstTicketControl() {
+                    const root = document.getElementById('ticket-selector');
+                    return root.querySelector('select[id^="ticket-"]:not([disabled])')
+                        || root.querySelector('[data-seat-picker], #seat-picker')
+                        || root.querySelector('select[id^="ticket-"]');
                 },
                 validateForm(e) {
                     // The button carries aria-disabled rather than disabled, so the submit still
@@ -635,22 +666,34 @@
                         this.showSeatProblem();
                         return;
                     }
+                    // What is missing, one thing at a time and in the order of the page: a
+                    // ticket, then the details, then the two things asked for at its foot.
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
                         e.preventDefault();
-                        this.say(@json(__('messages.please_select_ticket')), 'ticket-0');
+                        this.say(@json(__('messages.please_select_ticket')), this.firstTicketControl());
+                        return;
+                    }
+                    // The fields: the browser marks the first one that is missing, says what is
+                    // wrong with it, and brings it into view.
+                    if (e.target && e.target.checkValidity && !e.target.checkValidity()) {
+                        e.preventDefault();
+                        this.problem = '';
+                        // Brought to the middle of the screen first. Left to the browser, a
+                        // field is scrolled only as far as the screen's edge, which is under
+                        // the bar pinned at its foot (a scroll margin does not move it there).
+                        const missing = e.target.querySelector(':invalid');
+                        if (missing) { missing.scrollIntoView({ block: 'center' }); }
+                        e.target.reportValidity();
+                        return;
+                    }
+                    if (this.needsConsent) {
+                        e.preventDefault();
+                        this.say(@json(__('messages.installments_consent_required')), 'installments-consent');
                         return;
                     }
                     if (this.turnstileEnabled && !this.turnstileToken) {
                         e.preventDefault();
                         this.say(@json(__('messages.turnstile_verification_failed')), 'turnstile-checkout-widget');
-                        return;
-                    }
-                    // The fields, in the order they are on the page: the browser marks the first
-                    // one that is missing, says what is wrong with it, and brings it into view.
-                    if (e.target && e.target.checkValidity && !e.target.checkValidity()) {
-                        e.preventDefault();
-                        this.problem = '';
-                        e.target.reportValidity();
                         return;
                     }
                     this.problem = '';
@@ -1231,7 +1274,9 @@
         @endif
 
         @if (session('error'))
-        <div class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+        {{-- v-pre: a refusal can name an event (TicketController::refuseCartLeg()), and this is
+             inside the form's Vue mount, where a name holding a mustache would be compiled. --}}
+        <div v-pre class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
             {{ session('error') }}
         </div>
         @endif
@@ -1431,7 +1476,9 @@
         {{-- Who it is for, AFTER what is being bought. The form used to open on a name field, with
              the tickets and their prices below it: on a phone that was a keyboard over a page that
              had not yet said what anything cost. --}}
-        <h3 v-if="!isAllSoldOut || waitlistOpen" v-cloak class="mb-4 mt-8 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.your_details') }}</h3>
+        {{-- Not over the per-guest cards, which have a heading of their own; and with no room
+             above it where nothing is above it (a payment link has no rows to choose from). --}}
+        <h3 v-if="(!isAllSoldOut || waitlistOpen) && !showGuestForms" v-cloak :class="isPaymentLinkMode ? 'mt-0' : 'mt-8'" class="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.your_details') }}</h3>
         {{-- Nobody is asked for a name where there is nothing to give it for: nothing to buy,
              and no waitlist (which reads these same two fields). --}}
         <div v-if="!showGuestForms && (!isAllSoldOut || waitlistOpen)">
@@ -1870,7 +1917,7 @@
                 </p>
 
                 <label class="flex items-start gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input type="checkbox" name="installments_consent" value="1" v-model="installmentConsent" class="mt-1 rounded" style="color: var(--es-accent-readable);">
+                    <input type="checkbox" id="installments-consent" name="installments_consent" value="1" v-model="installmentConsent" @change="problem = ''" class="mt-1 rounded" style="color: var(--es-accent-readable);">
                     <span>@{{ consentText }}</span>
                 </label>
 
@@ -2042,20 +2089,23 @@
                  because that fires after the buyer has already committed here and leaves us
                  holding no record of the mandate. --}}
             <button type="submit"
-                v-bind:disabled="isSubmitting || (payMonthly && installmentsOffered && !installmentConsent)"
+                v-bind:disabled="isSubmitting"
                 {{-- aria-disabled, NOT disabled: a disabled button leaves the tab order, so a
                      screen reader never reaches it and never hears the reason. This one keeps
-                     focus, points at the reason, and refuses the submit in onSubmit(). The
-                     installment gate above stays on plain disabled - its cause is a checkbox two
-                     lines away, not a seat map several hundred pixels up the page. --}}
-                v-bind:aria-disabled="seatsBlocked ? 'true' : null"
+                     focus, points at the reason, and refuses the submit in validateForm(). The
+                     pay-monthly consent is gated the same way since the button moved into the
+                     bar: it used to sit two lines under that checkbox, and is now pinned to the
+                     foot of the screen with the checkbox scrolled away, greyed out for no reason
+                     anybody could see. Pressed without it, the bar says what is missing and the
+                     checkbox is brought into view. --}}
+                v-bind:aria-disabled="(seatsBlocked || needsConsent) ? 'true' : null"
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
-                v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-sm' : ''"
+                v-bind:class="(seatsBlocked || needsConsent) ? 'opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-sm' : ''"
                 class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
                 style="background-color: var(--es-accent); color: var(--es-accent-text);">
                 <span v-if="isSubmitting">{{ __('messages.processing') }}</span>
                 <span v-else-if="payMonthly && installmentsOffered">@{{ payNowLabel }}</span>
-                <span v-else>{{ __('messages.checkout') }}<template v-if="totalAmount > 0"> &middot; <bdi>@{{ formatPrice(totalAmount) }}</bdi></template></span>
+                <span v-else>{{ __('messages.checkout') }}<template v-if="totalAmount > 0 && !isPaymentLinkMode"> &middot; <bdi>@{{ formatPrice(totalAmount) }}</bdi></template></span>
             </button>
         </div>
 

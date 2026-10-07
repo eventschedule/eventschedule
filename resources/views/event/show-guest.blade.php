@@ -60,6 +60,14 @@
     $accentColor = \App\Utils\GuestTheme::lookRole($role, $otherRole ?? null, $selectedGroup ?? null)->accent_color ?? '#4E81FA';
     $contrastColor = accent_contrast_color($accentColor);
 
+    // Whether a refusal that came back with this page is the ticket or sign-up form's own. Both
+    // post the event's id and come back withInput(); a fan's comment, photo or video and a
+    // cart checkout refused from this page do neither. The form used to open for any error at
+    // all, and now that an open form really hides the panels below it, a fan whose video link
+    // was refused came back to a ticket form they never opened, with the box they had been
+    // typing in gone. Their message is the layout's toast, as it always was.
+    $formRefused = (session('error') || $errors->any()) && old('event_id') !== null;
+
     // What a visitor can do about tickets right now. canSellTickets() says the event is selling;
     // it does not say there is anything to buy (see Event::ticketSale(), which answers from the
     // rows and the stock the form itself is built from).
@@ -199,6 +207,9 @@
     // A custom field filter (?custom_1=room+a), carried here by the calendar's event links.
     $queryParams += \App\Utils\CustomFieldUtils::filterParams(request()->query());
     if ($requestedLayout = requested_event_layout()) $queryParams['layout'] = $requestedLayout;
+    // The same filter, for the links to other events at the foot of the page: a visitor
+    // browsing one category or sub-schedule keeps it on the next page and on its way back.
+    $filterQuery = $queryParams;
     // Scratch name, never $date: the controller passes a sanitized $date into this view and
     // assigning to it here would replace it with the raw query param for the whole rest of
     // the page (Blade @php shares the template scope), feeding garbage to every date
@@ -299,9 +310,12 @@
         @endphp
         @if ($fallbackImageRole)
         {{-- The 960 derivative, with the 480 for a phone at 1x. fetchpriority="high" only without
-             a flyer: the flyer is the page's largest image when there is one, and on a phone this
-             column renders below it. --}}
-        <div id="gp-event-hero-image" class="gk-o1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+             a flyer: the flyer is the page's largest image when there is one.
+
+             No order class: on a phone a stand-in does not lead the page. It is the schedule's
+             square profile picture, not this event's, and it pushed the title and the date to
+             the second screen; it comes with the other cards of this column, after the facts. --}}
+        <div id="gp-event-hero-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
             <img src="{{ $fallbackImageRole->getProfileImageUrl(960) }}"
                  @if ($fallbackImageSrcset) srcset="{{ $fallbackImageSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  alt="{{ $eventName }}"
@@ -1464,7 +1478,7 @@
         @if ($event->canAcceptRsvp($date))
         <div id="gp-event-form" class="gk-o3 scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
-             @if (request()->get('rsvp') === 'true' || session('error') || $errors->any())
+             @if (request()->get('rsvp') === 'true' || $formRefused)
              data-show-initial="true"
              @endif>
             <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
@@ -1492,13 +1506,17 @@
              (#gp-event-form) had never been rendered. Keep these two conditions identical. --}}
         <div id="gp-event-form" class="gk-o3 scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
-             @if (request()->get('tickets') === 'true' || session('error') || $errors->any())
+             @if (request()->get('tickets') === 'true' || $formRefused)
              data-show-initial="true"
              @endif>
             <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
               <div class="flex-1">
                 @include('event.partials.payment-cancelled')
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
+                {{-- Where the form's bar comes to rest. Outside the form's Vue mount on purpose:
+                     Vue puts new elements in place of the ones the server sent, and an observer
+                     set on one of those would be watching something no longer on the page. --}}
+                <div data-buybar-end aria-hidden="true" style="height: 1px; margin-top: -1px;"></div>
               </div>
             </div>
         </div>
@@ -1592,6 +1610,15 @@
                 }, 200);
             }
 
+            // The form's bar is square while it floats over the form and takes the panel's
+            // rounded corners where it comes to rest ([data-buybar-floating] in the kit).
+            var barEnd = form.querySelector('[data-buybar-end]');
+            if (barEnd && window.IntersectionObserver) {
+                new IntersectionObserver(function (entries) {
+                    form.toggleAttribute('data-buybar-floating', ! entries[0].isIntersecting);
+                }).observe(barEnd);
+            }
+
             window.addEventListener('show-event-form', showForm);
             window.addEventListener('hide-event-form', hideForm);
 
@@ -1623,9 +1650,11 @@
         </script>
 
         @if ($galleryInFlyerSlot)
-        {{-- No flyer: the gallery leads the page instead, and its first photo is the page's one
-             high-priority image (the hero fallback in the other column gives it up). --}}
-        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        {{-- No flyer: the gallery stands in, and its first photo is the page's one high-priority
+             image (the hero fallback in the other column gives it up). Ordered AFTER the form on
+             a phone, as it is in the markup: an open form hides what follows it, and a gallery
+             drawn above the form used to vanish from the top of the page on pressing Buy. --}}
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => true, 'accentColor' => $accentColor])
         </section>
         @endif
@@ -2649,19 +2678,45 @@
     </div>
   </div>
 
-  {{-- Lift the accessibility widget above the sticky mobile CTA bar so it does not cover the button --}}
-  {{-- Publishes the sticky mobile CTA bar's measured height as --es-a11y-cta-clearance.
-       Deliberately NOT gated on show_accessibility_widget any more: the guest cart's floating
-       button shares this corner and reads the same variable, and the accessibility widget is off
-       by default, so gating it left the cart sitting inside the bar on every mobile event page.
-       Harmless when the widget is off - .es-a11y-cta-offset then matches no a11y element. --}}
+  {{-- Lift the fixed things in the bottom corner clear of whichever bar is at the foot of the
+       screen: the phone's bar, or, while the form is open, the form's own (.gk-buybar), which
+       took its place. Publishes that bar's measured height as --es-a11y-cta-clearance.
+
+       The form's bar counts since it became one that stays on screen: opening the form hides the
+       phone's bar, the clearance went with it, and the cart button, the accessibility launcher
+       and the cookie notice all dropped onto Checkout.
+
+       Deliberately NOT gated on show_accessibility_widget: the guest cart's floating button
+       shares this corner and reads the same variable, and the accessibility widget is off by
+       default. Harmless when the widget is off - .es-a11y-cta-offset then matches no a11y
+       element. --}}
   <script {!! nonce_attr() !!}>
+  {{-- What a browser alert box used to say on this page (a vote that was refused, a payment link
+       that only works on a phone): the layout's own toast, which escapes what it is given. --}}
+  window.esSayOnPage = function (text) {
+      if (text && typeof Toastify === 'function') {
+          Toastify({ text: String(text), close: true, duration: 8000, position: 'center', stopOnFocus: true, style: { background: '#FF0000' } }).showToast();
+      }
+  };
   (function() {
       var bar = document.getElementById('gp-mobile-cta');
-      if (!bar) return;
+      var form = document.getElementById('gp-event-form');
+      if (!bar && !form) return;
       var root = document.documentElement;
       function update() {
-          var h = bar.offsetHeight; // 0 when display:none (desktop `sm:hidden`, or form open)
+          var h = bar ? bar.offsetHeight : 0; // 0 when display:none (desktop `sm:hidden`, or form open)
+          if (!h && form && form.style.display !== 'none') {
+              var buy = form.querySelector('.gk-buybar');
+              if (buy) {
+                  var r = buy.getBoundingClientRect();
+                  {{-- From the foot of the screen up to the bar's TOP, not the bar's height: a
+                       form shorter than the screen leaves its bar resting above the foot, and
+                       the cart button, lifted by the bar's height alone, landed on it there.
+                       Only while the bar is down in the corner those things live in. --}}
+                  var foot = window.innerHeight;
+                  h = (r.top < foot && r.bottom > foot - 140) ? Math.max(0, Math.round(foot - r.top)) : 0;
+              }
+          }
           if (h > 0) {
               root.style.setProperty('--es-a11y-cta-clearance', h + 'px');
               root.classList.add('es-a11y-cta-offset');
@@ -2671,11 +2726,21 @@
       }
       window.esUpdateA11yCtaClearance = update;
       update();
+      {{-- The form's bar moves with the page until it sticks, so its place is read on scroll
+           too, once a frame at most. --}}
+      var queued = false;
+      window.addEventListener('scroll', function () {
+          if (queued || !form || form.style.display === 'none') { return; }
+          queued = true;
+          requestAnimationFrame(function () { queued = false; update(); });
+      }, { passive: true });
       window.addEventListener('resize', update);
       window.addEventListener('orientationchange', update);
       window.addEventListener('load', update);
       if (window.ResizeObserver) {
-          try { new ResizeObserver(update).observe(bar); } catch (e) {}
+          {{-- The form too: its bar is drawn by Vue after this runs, and grows by a line when it
+               has something to say. --}}
+          try { var watch = new ResizeObserver(update); if (bar) { watch.observe(bar); } if (form) { watch.observe(form); } } catch (e) {}
       }
   })();
   </script>
@@ -2722,7 +2787,7 @@
                 });
               });
             } else {
-              alert(data.error || '{{ __("messages.an_error_occurred") }}');
+              esSayOnPage(data.error || @json(__('messages.an_error_occurred')));
             }
           } finally {
             this.votingOption[pollHash] = null;
@@ -2835,7 +2900,7 @@
     document.querySelectorAll('.payment-mobile-only-link').forEach(function(link) {
       link.addEventListener('click', function(e) {
         e.preventDefault();
-        alert(this.getAttribute('data-mobile-msg'));
+        esSayOnPage(this.getAttribute('data-mobile-msg'));
       });
     });
 

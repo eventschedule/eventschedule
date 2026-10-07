@@ -115,6 +115,10 @@
          2rem from a tablet up), so it reads as the panel's own foot. --}}
     .gk-buybar { position: sticky; bottom: 0; z-index: 5; margin: 1.25rem -1.25rem -1.5rem; padding: .75rem 1.25rem calc(.75rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--gk-line); background: var(--gk-solid); }
     @media (min-width: 40rem) { .gk-buybar { margin: 1.5rem -2rem -2rem; padding: 1rem 2rem; border-radius: 0 0 1rem 1rem; } }
+    {{-- Floating over the form it is a plain strip with a little shadow; the rounded corners are
+         the panel's, and belong to it only at rest (the page sets the attribute). :where() so
+         this weighs what every other rule here weighs, one class. --}}
+    :where([data-buybar-floating]) .gk-buybar { border-radius: 0; box-shadow: 0 -.5rem 1.125rem -.75rem rgb(0 0 0 / .28); }
 
     {{-- A list of events as rows: when, what, where, and a small picture. A row is a link. --}}
     .gk-dayhead { display: flex; align-items: baseline; gap: .5rem; padding: .75rem 1rem; border-bottom: 1px solid var(--gk-line); }

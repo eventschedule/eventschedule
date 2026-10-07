@@ -297,13 +297,22 @@ class GuestImagePerformanceTest extends TestCase
         $this->assertStringContainsString('src="'.url('/storage/profile_abc_w960.webp').'"', $hero);
         $this->assertStringContainsString(url('/storage/profile_abc_w480.webp').' 480w', $hero);
         $this->assertStringContainsString('fetchpriority="high"', $hero);
+        // A stand-in does not lead the page on a phone: it is the schedule's square picture,
+        // not this event's, so it takes its column's own place, after the facts. (On a phone
+        // the order is the order classes, not the order of the markup.)
+        $this->assertSame(1, preg_match('/<div id="gp-event-hero-image" class="([^"]*)"/', $html, $heroClass));
+        $this->assertDoesNotMatchRegularExpression('/\bgk-o\d\b/', $heroClass[1]);
 
         $withFlyer = $this->createEvent($role, ['name' => 'Winter Session', 'creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_abc.png']);
         $html = $this->page($this->guestEventUrl($role, $withFlyer));
 
         $this->assertStringNotContainsString('id="gp-event-hero-image"', $html);
         $this->assertStringContainsString('id="gp-flyer"', $html);
-        // And the flyer comes before the facts in the page, so a phone opens on it.
+        // And a phone opens on it: first in the order a phone lays the page out by, ahead of
+        // the facts, as well as first in the markup.
+        $this->assertSame(1, preg_match('/<div id="gp-flyer" class="gk-o1 /', $html));
+        $this->assertSame(1, preg_match('/<div id="gp-event-details" class="gk-o2 /', $html));
+        $this->assertStringContainsString('.gk-o1 { order: 1; }', $html);
         $this->assertLessThan(strpos($html, 'id="gp-event-details"'), strpos($html, 'id="gp-flyer"'));
     }
 
