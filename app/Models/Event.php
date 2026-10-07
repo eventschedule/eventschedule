@@ -2358,6 +2358,111 @@ class Event extends Model
         return null;
     }
 
+    /**
+     * How the event repeats, for the guest page's When block: a word for the rhythm, the weekdays
+     * of a weekly one, and the day it ends on when it has one. Null for an event that does not.
+     *
+     * A label and a list, never a sentence. "Every Thursday" puts a day's name in a case that
+     * half of the twelve languages decline, and a sentence joined from parts is wrong in most of
+     * them; "Weekly · Thursday" is right in all.
+     *
+     * @return array{label: string, days: string[], until: ?string}|null
+     */
+    public function recurrenceSummary(): ?array
+    {
+        if (! $this->days_of_week) {
+            return null;
+        }
+
+        try {
+            $frequency = $this->recurring_frequency ?? 'weekly';
+            $weekly = ! in_array($frequency, ['daily', 'monthly_date', 'monthly_weekday', 'yearly'], true);
+
+            // saveEvent() writes '1111111' for the rhythms that do not read the days, so the
+            // days are named only for the two that do.
+            $days = [];
+            if ($weekly) {
+                $sunday = Carbon::now()->startOfWeek(Carbon::SUNDAY);
+                foreach (str_split(str_pad((string) $this->days_of_week, 7, '0')) as $index => $on) {
+                    if ($on === '1' && $index < 7) {
+                        $days[] = $sunday->copy()->addDays($index)->translatedFormat('l');
+                    }
+                }
+
+                if ($days === []) {
+                    // No day chosen: the series has no pattern left, only dates added by hand.
+                    return null;
+                }
+            }
+
+            $interval = max(2, (int) ($this->recurring_interval ?? 2));
+            $label = match (true) {
+                $frequency === 'daily', $frequency === 'weekly' && count($days) === 7 => __('messages.daily'),
+                $frequency === 'every_n_weeks' => trans_choice('messages.every_count_weeks', $interval, ['count' => $interval]),
+                $frequency === 'monthly_date', $frequency === 'monthly_weekday' => __('messages.monthly'),
+                $frequency === 'yearly' => __('messages.yearly'),
+                default => __('messages.weekly'),
+            };
+
+            $until = ($this->recurring_end_type === 'on_date' && $this->recurring_end_value)
+                ? Carbon::createFromFormat('Y-m-d', $this->recurring_end_value)->format('Y-m-d')
+                : null;
+
+            return ['label' => $label, 'days' => count($days) === 7 ? [] : $days, 'until' => $until];
+        } catch (\Throwable $e) {
+            // A restored backup never went through saveEvent(): see EventRepo::nextOccurrenceOrNull().
+            report($e);
+
+            return null;
+        }
+    }
+
+    /**
+     * The next days this event happens on after $after (a Y-m-d day, today when null), nearest
+     * first: what the guest page offers beside the date it is showing.
+     *
+     * @return string[] Y-m-d
+     */
+    public function occurrencesAfter(?string $after = null, int $limit = 3): array
+    {
+        if (! $this->days_of_week || $limit < 1) {
+            return [];
+        }
+
+        try {
+            $timezone = $this->scheduleTimezone();
+            // From the day after the one shown, and never a day that is already over there: the
+            // page of a date long past offers what is still to come.
+            $today = Carbon::parse(Carbon::now($timezone)->format('Y-m-d'));
+            $cursor = $after ? Carbon::parse($after)->startOfDay()->addDay() : $today->copy();
+            if ($cursor->lt($today)) {
+                $cursor = $today->copy();
+            }
+
+            // A year's scan per date is three years of days for a yearly event: one is enough to
+            // say when it is next.
+            $limit = ($this->recurring_frequency ?? 'weekly') === 'yearly' ? 1 : $limit;
+
+            $dates = [];
+            while (count($dates) < $limit) {
+                $next = $this->nextOccurrenceFrom($cursor->format('Y-m-d'), 370);
+                if (! $next) {
+                    break;
+                }
+                if ($next !== $after) {
+                    $dates[] = $next;
+                }
+                $cursor = Carbon::parse($next)->addDay();
+            }
+
+            return $dates;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return [];
+        }
+    }
+
     protected function matchesFrequency(string $frequency, Carbon $date, Carbon $startDate): bool
     {
         switch ($frequency) {

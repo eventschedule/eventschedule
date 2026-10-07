@@ -112,14 +112,24 @@ class GuestStyleSanitizingTest extends TestCase
         // The accent also goes into Vue :style bindings, which the runtime compiler runs as
         // JavaScript: RoleUpdateRequest only accepts #rrggbb for that reason, and a restore does not
         // ask it.
-        $talent = $this->createRole($this->createOwner(), 'talent', ['accent_color' => "#fff' + alert(document.domain) + '; } ".self::BREAK_OUT]);
+        //
+        // With a background of its own, so that this IS the schedule whose look the page wears
+        // (GuestTheme::lookRole()): its accent is the one the page reads.
+        $talent = $this->createRole($this->createOwner(), 'talent', [
+            'accent_color' => "#fff' + alert(document.domain) + '; } ".self::BREAK_OUT,
+            'background' => 'solid',
+            'background_color' => '#123456',
+        ]);
 
         $html = $this->eventPageWith($venue, $talent);
 
         $this->assertStringNotContainsString('alert(document.domain)', $html);
         $this->assertStringNotContainsString(self::BREAK_OUT, $html);
-        // The page falls back to the default accent, as it does for a schedule without one.
-        $this->assertStringContainsString('background-color: #4E81FA', $html);
+        $this->assertStringContainsString('background-color: #123456', $html, 'fixture: the page does wear the act\'s look');
+        // The page falls back to the default accent, as it does for a schedule without one: in
+        // the tokens its fills are drawn from, and in the one literal still handed to script.
+        $this->assertMatchesRegularExpression('/body \{ --es-accent: #4e81fa;/i', $html);
+        $this->assertStringContainsString('background-color: var(--es-accent); color: var(--es-accent-text)', $html);
     }
 
     public function test_an_uploaded_background_url_cannot_leave_its_css_string(): void

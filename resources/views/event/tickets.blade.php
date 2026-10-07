@@ -1388,7 +1388,7 @@
                             <input type="checkbox" :value="option.trim()"
                                 v-model="ticket.multiselect_values[fieldKey]"
                                 class="h-4 w-4 border-gray-300 rounded"
-                            style="accent-color: {{ $accentColor }}" />
+                            style="accent-color: var(--es-accent-readable)" />
                             @{{ option.trim() }}
                         </label>
                     </div>
@@ -1626,7 +1626,7 @@
                                 <input type="checkbox" :value="option.trim()"
                                     v-model="guest.ticketMultiselectValues[fieldKey]"
                                     class="h-4 w-4 border-gray-300 rounded"
-                                    style="accent-color: {{ $accentColor }}" />
+                                    style="accent-color: var(--es-accent-readable)" />
                                 @{{ option.trim() }}
                             </label>
                         </div>
@@ -1741,7 +1741,7 @@
                         <input type="checkbox" :value="option.trim()"
                             v-model="eventMultiselectValues[fieldKey]"
                             class="h-4 w-4 border-gray-300 rounded"
-                            style="accent-color: {{ $accentColor }}" />
+                            style="accent-color: var(--es-accent-readable)" />
                         @{{ option.trim() }}
                     </label>
                 </div>
@@ -1820,7 +1820,7 @@
 
         @if ($role->canSellGiftCards())
         <p v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-            🎁 <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" target="_blank" rel="noopener" class="hover:underline" style="color: {{ $accentColor }}">{{ __('messages.gift_cards_available_buy') }}</a>
+            🎁 <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" target="_blank" rel="noopener" class="hover:underline" style="color: var(--es-accent-readable)">{{ __('messages.gift_cards_available_buy') }}</a>
         </p>
         @endif
 
@@ -1834,8 +1834,8 @@
         <div v-if="installmentsOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="mb-6">
             <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer mb-2"
                 :class="!payMonthly ? 'border-2' : 'border-gray-200 dark:border-gray-600'"
-                :style="!payMonthly ? 'border-color: {{ $accentColor }}' : ''">
-                <input type="radio" name="installments_choice" :value="false" v-model="payMonthly" class="mt-1" style="color: {{ $accentColor }};">
+                :style="!payMonthly ? 'border-color: var(--es-accent-readable)' : ''">
+                <input type="radio" name="installments_choice" :value="false" v-model="payMonthly" class="mt-1" style="color: var(--es-accent-readable);">
                 <span class="flex-1 flex justify-between items-center">
                     <span class="text-gray-900 dark:text-gray-100 font-medium">@lang('messages.pay_in_full')</span>
                     <span class="text-gray-900 dark:text-gray-100 font-medium">@{{ formatPrice(totalAmount) }}</span>
@@ -1844,8 +1844,8 @@
 
             <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer"
                 :class="payMonthly ? 'border-2' : 'border-gray-200 dark:border-gray-600'"
-                :style="payMonthly ? 'border-color: {{ $accentColor }}' : ''">
-                <input type="radio" name="installments_choice" :value="true" v-model="payMonthly" class="mt-1" style="color: {{ $accentColor }};">
+                :style="payMonthly ? 'border-color: var(--es-accent-readable)' : ''">
+                <input type="radio" name="installments_choice" :value="true" v-model="payMonthly" class="mt-1" style="color: var(--es-accent-readable);">
                 <span class="flex-1">
                     <span class="flex justify-between items-center">
                         <span class="text-gray-900 dark:text-gray-100 font-medium">@lang('messages.pay_monthly')</span>
@@ -1870,7 +1870,7 @@
                 </p>
 
                 <label class="flex items-start gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input type="checkbox" name="installments_consent" value="1" v-model="installmentConsent" class="mt-1 rounded" style="color: {{ $accentColor }};">
+                    <input type="checkbox" name="installments_consent" value="1" v-model="installmentConsent" class="mt-1 rounded" style="color: var(--es-accent-readable);">
                     <span>@{{ consentText }}</span>
                 </label>
 
@@ -1954,7 +1954,7 @@
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
                     class="mt-4 whitespace-nowrap text-lg px-6 inline-flex items-center rounded-lg border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
-                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                    style="background-color: var(--es-accent); color: var(--es-accent-text);">
                     <span v-if="waitlistSubmitting">{{ __('messages.processing') }}</span>
                     <span v-else>{{ __('messages.join_waitlist') }}</span>
                 </button>
@@ -2030,7 +2030,7 @@
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
                 v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''"
                 class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
-                style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
+                style="border-color: var(--es-accent-readable); color: var(--es-accent-readable);">
                 <span v-if="addedToCart">{{ __('messages.added_to_cart') }}</span>
                 <span v-else>{{ __('messages.add_to_cart') }}</span>
             </button>
@@ -2052,7 +2052,7 @@
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
                 v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-sm' : ''"
                 class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
-                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                style="background-color: var(--es-accent); color: var(--es-accent-text);">
                 <span v-if="isSubmitting">{{ __('messages.processing') }}</span>
                 <span v-else-if="payMonthly && installmentsOffered">@{{ payNowLabel }}</span>
                 <span v-else>{{ __('messages.checkout') }}<template v-if="totalAmount > 0"> &middot; <bdi>@{{ formatPrice(totalAmount) }}</bdi></template></span>

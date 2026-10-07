@@ -106,6 +106,10 @@
     .gk-input:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
     .gk-input-bad { border-color: var(--gk-bad); box-shadow: 0 0 0 1px var(--gk-bad); }
 
+    {{-- The other days of a series, under the When row and in line with its text (the tile is
+         4rem and the row's gap 1rem). --}}
+    .gk-more-dates { margin-top: -.75rem; padding-inline-start: 5rem; }
+
     {{-- The foot of a form: its actions, kept at the bottom of the screen while the form is longer
          than it. It bleeds to the edges of the panel it sits in (1.25rem of padding on a phone,
          2rem from a tablet up), so it reads as the panel's own foot. --}}

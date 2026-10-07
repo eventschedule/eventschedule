@@ -45,11 +45,19 @@
     @endphp
 
     @php
-    $accentColor = (isset($otherRole) && $otherRole && $otherRole->isClaimed())
-        ? ($otherRole->accent_color ?? '#4E81FA')
-        : ((isset($selectedGroup) && $selectedGroup && $selectedGroup->role)
-            ? ($selectedGroup->role->accent_color ?? '#4E81FA')
-            : ($role->accent_color ?? '#4E81FA'));
+    // Whose look this page wears is decided once, by the rule the layout's background and the
+    // colour tokens already follow (GuestTheme::lookRole()). This page used to ask a looser
+    // question of its own (any claimed schedule), so an event could sit on one schedule's
+    // background under another's buttons.
+    //
+    // Fills, text and outlines take the tokens (--es-accent, --es-accent-text,
+    // --es-accent-readable), which are made per mode: a yellow accent as text on a white panel
+    // and a black one as an outline on a dark panel were both close to invisible as the raw
+    // colour. An icon and a plain outline are decoration and keep the fill colour itself
+    // (--es-accent: the schedule's own, turned over only where it would vanish), so the page
+    // stays in the schedule's colour. $accentColor is still the raw one, for the few places
+    // that need a literal: a hex with an alpha suffix, a value handed to script, a component's own prop.
+    $accentColor = \App\Utils\GuestTheme::lookRole($role, $otherRole ?? null, $selectedGroup ?? null)->accent_color ?? '#4E81FA';
     $contrastColor = accent_contrast_color($accentColor);
 
     // What a visitor can do about tickets right now. canSellTickets() says the event is selling;
@@ -452,7 +460,7 @@
                         <a href="{{ app_url(route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false)) }}"
                           class="inline-flex items-center justify-center">
                           <button type="button" name="follow"
-                            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                            style="background-color: var(--es-accent); color: var(--es-accent-text)"
                             class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold border-2 border-transparent shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
                             {{ __('messages.manage') }}
                           </button>
@@ -468,7 +476,7 @@
                           data-schedule-image="{{ $each->profile_image_url }}"
                           data-accent-color="{{ $accentColor }}"
                           data-contrast-color="{{ $contrastColor }}"
-                          style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                          style="background-color: var(--es-accent); color: var(--es-accent-text)"
                           class="inline-flex items-center justify-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
                           {{ __('messages.follow') }}
                         </button>
@@ -702,7 +710,7 @@
               <div class="relative mt-4">
                 <button type="button"
                     class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                    style="background-color: var(--es-accent); color: var(--es-accent-text);"
                     aria-expanded="true" aria-haspopup="true">
                   {{ $role->customLabel('add_to_calendar') }}
                   <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -776,7 +784,7 @@
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
               class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+              style="background-color: var(--es-accent); color: var(--es-accent-text);"
               aria-expanded="true" aria-haspopup="true">
             {{ $role->customLabel('add_to_calendar') }}
             <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -889,18 +897,36 @@
         </p>
         @endif
 
-        {{-- Calendar date badge + time --}}
+        {{-- When. The day in the tile, then what a visitor has to know to be there: the year
+             when it is not this one, the hours with the zone they are in, how it repeats and the
+             next days it is on.
+
+             A show that runs past midnight is one night, not two days. Event::isMultiDay() is
+             true the moment an event crosses midnight, so a 10 PM to 2 AM show was drawn as
+             "16-17" with a date range; is_multi_day (a day or longer) is what a range is for. --}}
         @php
           // Venue-local: this feeds the machine-readable <time datetime> attribute below.
           $startDt = $event->getStartDateTime($date, true, $event->scheduleTimezone());
-          $endDt = $event->isMultiDay() ? (clone $startDt)->addMinutes($event->durationInMinutes()) : null;
+          $manyDays = (bool) $event->is_multi_day;
+          $endDt = $event->duration > 0 ? (clone $startDt)->addMinutes($event->durationInMinutes()) : null;
+          $use24 = get_use_24_hour_time($role);
+          $otherYear = $startDt->year !== \Carbon\Carbon::now($event->scheduleTimezone())->year;
+          // A date with no time of day has no zone worth naming. Carbon prints an offset for a
+          // zone with no abbreviation of its own.
+          $hasTime = strlen((string) $event->starts_at) > 10;
+          $zone = $hasTime ? $startDt->format('T') : '';
+          $zone = preg_match('/^[+-]/', $zone) ? 'GMT'.$zone : $zone;
+          // "10:00 PM - 2:00 AM" needs no help. An end well into the next morning says its day.
+          $endsNextDay = ! $manyDays && $endDt && ! $endDt->isSameDay($startDt) && (int) $endDt->format('G') >= 6;
+          $recurrence = $event->recurrenceSummary();
+          $moreDates = $recurrence ? $event->occurrencesAfter($date ?: null, 3) : [];
         @endphp
         <div id="gp-event-date" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          @if ($event->isMultiDay() && $endDt && $startDt->format('m') === $endDt->format('m'))
+          @if ($manyDays && $endDt && $startDt->format('m') === $endDt->format('m'))
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
-                  style="color: {{ $accentColor }};">
+                  style="color: var(--es-accent-readable);">
               {{ $startDt->translatedFormat('M') }}
             </span>
             <span class="text-lg font-bold text-gray-900 dark:text-white leading-none">
@@ -911,7 +937,7 @@
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
-                  style="color: {{ $accentColor }};">
+                  style="color: var(--es-accent-readable);">
               {{ $startDt->translatedFormat('M') }}
             </span>
             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">
@@ -919,15 +945,14 @@
             </span>
           </div>
           @endif
-          <div class="flex flex-col">
-            @if ($event->isMultiDay())
+          <div class="flex flex-col min-w-0">
+            @if ($manyDays && $endDt)
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
                   {{ $event->getDateRangeDisplay($date) }}
                 </time>
               </span>
               @php
-                $use24 = get_use_24_hour_time($role);
                 $timeFormat = $use24 ? 'H:i' : 'g:i A';
                 $multiStartTime = $startDt->format($timeFormat);
                 $multiEndTime = $endDt->format($timeFormat);
@@ -938,19 +963,47 @@
                 @else
                   {{ $startDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
                 @endif
+                @if ($zone) <bdi dir="ltr" data-event-zone>{{ $zone }}</bdi>@endif
               </span>
             @else
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
-                  {{ $startDt->translatedFormat('l') }}
+                  {{-- The tile has no room for a year, and next October is not this October. --}}
+                  {{ $otherYear ? $startDt->translatedFormat('l, F j, Y') : $startDt->translatedFormat('l') }}
                 </time>
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                <time dir="ltr" datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
+                <time dir="ltr" datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, $use24) }}</time>@if ($endsNextDay) <span data-event-ends>({{ $endDt->translatedFormat('D') }})</span>@endif
+                @if ($zone) <bdi dir="ltr" data-event-zone>{{ $zone }}</bdi>@endif
+              </span>
+            @endif
+            @if ($recurrence)
+              {{-- A label and a list, not a sentence (Event::recurrenceSummary() says why). --}}
+              <span class="text-sm text-gray-500 dark:text-gray-400" data-event-repeats>
+                {{ $recurrence['label'] }}@if ($recurrence['days']) · {{ implode(', ', $recurrence['days']) }}@endif
+                @if ($recurrence['until'])
+                  · {{ __('messages.repeats_until', ['date' => \Carbon\Carbon::parse($recurrence['until'])->translatedFormat('M j, Y')]) }}
+                @endif
               </span>
             @endif
           </div>
         </div>
+        @if ($moreDates)
+          {{-- The other days it is on, each a link to that day's own page: a page for one date
+               of a series used to offer no way to any other. A day with nothing left says so. --}}
+          <div class="gk-more-dates flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm {{ $role->isRtl() ? 'rtl' : '' }}" data-event-more-dates>
+            <span class="text-gray-500 dark:text-gray-400">{{ __('messages.more_dates') }}</span>
+            @foreach ($moreDates as $moreDate)
+              @php
+                $moreDt = $event->getStartDateTime($moreDate, true, $event->scheduleTimezone());
+                $moreGone = $event->tickets_enabled && $event->ticketSaleState($moreDate) === 'sold_out';
+              @endphp
+              <span class="whitespace-nowrap">
+                <a href="{{ $event->getGuestUrl($subdomain, $moreDate) }}" class="gk-link">{{ $moreDt->translatedFormat($moreDt->year !== $startDt->year ? 'D, M j, Y' : 'D, M j') }}</a>@if ($moreGone) <span class="text-gray-500 dark:text-gray-400">({{ __('messages.sold_out') }})</span>@endif
+              </span>
+            @endforeach
+          </div>
+        @endif
 
         {{-- Location icon badge. An online event shows the domain of its link, or "Online" when
              the link is free text or has no public domain - never the link itself. --}}
@@ -962,7 +1015,7 @@
               @if ($event->venue && $event->venue->profile_image_url)
                 <img src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
               @else
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ $accentColor }}" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
                   <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
                 </svg>
               @endif
@@ -1024,7 +1077,7 @@
         <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
-            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
           </div>
@@ -1042,7 +1095,7 @@
         <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
-            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
           </div>
@@ -1080,7 +1133,7 @@
         <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
-            <svg width="24" height="24" viewBox="0 0 20 20" fill="{{ $accentColor }}" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
           </div>
@@ -1107,7 +1160,7 @@
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" style="fill: {{ $accentColor }}" />
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" style="fill: var(--es-accent)" />
             </svg>
           </div>
           <div class="flex flex-col">
@@ -1149,7 +1202,7 @@
             <button type="button"
                   @click="$dispatch('show-event-form')"
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                  style="background-color: var(--es-accent); color: var(--es-accent-text);">
               @if ($event->isRsvpFull($date))
                 {{ __('messages.join_waitlist') }}
               @else
@@ -1177,7 +1230,7 @@
             <button type="button"
                   @click="$dispatch('show-event-form')"
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                  style="background-color: var(--es-accent); color: var(--es-accent-text);">
               @if ($saleState === 'sold_out')
                 {{-- Only reached where a waitlist will be accepted: $saleOffersForm is false otherwise. --}}
                 {{ __('messages.join_waitlist') }}
@@ -1211,7 +1264,7 @@
         @if (!empty($showCalendarPopup))
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
+                  style="background-color: var(--es-accent); color: var(--es-accent-text);"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ $role->customLabel('add_to_calendar') }}
               <svg class="-me-1 h-5 w-5" style="color: {{ $contrastColor }};" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -1614,7 +1667,7 @@
                 <div class="absolute {{ $role->isRtl() ? '-right-8' : '-left-8' }} top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900" style="background-color: {{ $accentColor }}; box-shadow: 0 0 0 2px {{ $accentColor }}33;"></div>
                 <div class="flex flex-col bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                   @if ($part->start_time)
-                  <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: {{ $accentColor }}; background-color: {{ $accentColor }}10;">
+                  <span class="text-xs font-medium mb-1 inline-flex {{ $role->isRtl() ? 'self-end' : 'self-start' }} rounded-full px-2.5 py-0.5" style="color: var(--es-accent-readable); background-color: {{ $accentColor }}10;">
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
@@ -1709,19 +1762,19 @@
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
                     @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
-                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
                     @endif
                     @if ($event->isFanVideosEnabled())
-                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
                     @endif
                     @if ($event->isFanCommentsEnabled())
-                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -1740,7 +1793,7 @@
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -1759,7 +1812,7 @@
                              @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
                              class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
                              :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
-                             :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+                             :style="dragging ? 'border-color: var(--es-accent-readable)' : ''">
                           <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                             <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
@@ -1772,7 +1825,7 @@
                         </div>
                         <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
                                 class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
-                                style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                                style="border-color: var(--es-accent-readable); color: var(--es-accent-readable)">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                           {{ __('messages.take_photo') }}
                         </button>
@@ -1780,7 +1833,7 @@
                                @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                         <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
                         @include('partials.fan-content-guest-fields')
-                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
+                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
                     @endif
@@ -1794,7 +1847,7 @@
                         @endif
                         <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -1810,7 +1863,7 @@
             <div class="space-y-3">
               @foreach ($event->parts as $index => $part)
               <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-                <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
+                <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ $index + 1 }}</span>
                 <div class="flex-1">
                   <span dir="{{ content_dir_for_language($part->nameInLanguage($displayLang, $eventTargetLang), $displayLang) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->nameInLanguage($displayLang, $eventTargetLang))) !!}</span>
                   @if ($part->descriptionHtmlInLanguage($displayLang, $eventTargetLang))
@@ -1903,19 +1956,19 @@
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
                     @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
-                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
                     @endif
                     @if ($event->isFanVideosEnabled())
-                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
                     @endif
                     @if ($event->isFanCommentsEnabled())
-                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -1934,7 +1987,7 @@
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -1953,7 +2006,7 @@
                              @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
                              class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
                              :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
-                             :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+                             :style="dragging ? 'border-color: var(--es-accent-readable)' : ''">
                           <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                             <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
@@ -1966,7 +2019,7 @@
                         </div>
                         <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
                                 class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
-                                style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                                style="border-color: var(--es-accent-readable); color: var(--es-accent-readable)">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                           {{ __('messages.take_photo') }}
                         </button>
@@ -1974,7 +2027,7 @@
                                @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                         <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
                         @include('partials.fan-content-guest-fields')
-                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
+                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
                     @endif
@@ -1988,7 +2041,7 @@
                         @endif
                         <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2056,7 +2109,7 @@
                                       <div class="flex justify-between text-sm mb-1">
                                           <span class="flex items-center gap-1 text-gray-800 dark:text-gray-200" :class="{ 'font-semibold': getCount('{{ $pollHash }}', idx) === getMaxCount('{{ $pollHash }}') && (pollData['{{ $pollHash }}']?.totalVotes || 0) > 0 }">
                                               <span x-text="option"></span>
-                                              <svg x-show="idx === pollData['{{ $pollHash }}']?.userVote" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" style="color: {{ $accentColor }}">
+                                              <svg x-show="idx === pollData['{{ $pollHash }}']?.userVote" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" style="color: var(--es-accent-readable)">
                                                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                               </svg>
                                           </span>
@@ -2097,7 +2150,7 @@
                                   <span class="flex items-center gap-1 text-gray-800 dark:text-gray-200 {{ $isLeading ? 'font-semibold' : '' }}">
                                       {{ $option }}
                                       @if ($isUserChoice)
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" style="color: {{ $accentColor }}">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 shrink-0" style="color: var(--es-accent-readable)">
                                           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                       </svg>
                                       @endif
@@ -2123,8 +2176,8 @@
                                      class="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm py-1.5 px-2.5">
                               <button type="button" @click="suggestOption('{{ $pollHash }}')"
                                       :disabled="suggestSubmitting['{{ $pollHash }}'] || !(suggestInput['{{ $pollHash }}'] || '').trim()"
-                                      class="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-                                      style="background-color: {{ $accentColor }}">
+                                      class="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+                                      style="background-color: var(--es-accent); color: var(--es-accent-text)">
                                   <span x-show="!suggestSubmitting['{{ $pollHash }}']">+</span>
                                   <span x-show="suggestSubmitting['{{ $pollHash }}']" x-cloak>...</span>
                               </button>
@@ -2253,19 +2306,19 @@
           @if ($event->parts->count() == 0 && $event->isFanContentEnabled())
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
             @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
-            <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+            <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
               {{ __('messages.add_photo') }}
             </button>
             @endif
             @if ($event->isFanVideosEnabled())
-            <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+            <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
             @endif
             @if ($event->isFanCommentsEnabled())
-            <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
+            <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
@@ -2283,7 +2336,7 @@
                 @endif
                 <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                 @include('partials.fan-content-guest-fields')
-                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
               </form>
             </div>
             @endif
@@ -2301,7 +2354,7 @@
                      @drop.prevent="dragging = false; if ($event.dataTransfer.files[0] && $event.dataTransfer.files[0].type.startsWith('image/')) { const f = $event.dataTransfer.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }"
                      class="rounded-lg border-2 border-dashed cursor-pointer transition-colors"
                      :class="dragging ? '' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
-                     :style="dragging ? 'border-color: {{ $accentColor }}' : ''">
+                     :style="dragging ? 'border-color: var(--es-accent-readable)' : ''">
                   <div x-show="!photoPreview" class="flex flex-col items-center justify-center py-6 text-gray-500 dark:text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mb-1" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                     <span class="text-sm hidden sm:inline">{{ __('messages.drag_photo_or_click') }}</span>
@@ -2314,7 +2367,7 @@
                 </div>
                 <button type="button" x-show="!photoPreview" @click="$refs.cameraInput.click()"
                         class="sm:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border-2 transition-colors"
-                        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}">
+                        style="border-color: var(--es-accent-readable); color: var(--es-accent-readable)">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                   {{ __('messages.take_photo') }}
                 </button>
@@ -2322,7 +2375,7 @@
                        @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                 <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
                 @include('partials.fan-content-guest-fields')
-                <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
+                <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
               </form>
             </div>
             @endif
@@ -2335,7 +2388,7 @@
                 @endif
                 <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                 @include('partials.fan-content-guest-fields')
-                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
+                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
               </form>
             </div>
             @endif
@@ -2489,7 +2542,7 @@
         <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
            target="_blank"
            class="flex-shrink-0 inline-flex items-center justify-center rounded-md px-4 py-3 text-sm font-semibold border transition-colors hover:opacity-80"
-           style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
+           style="border-color: var(--es-accent-readable); color: var(--es-accent-readable);">
           {{ __('messages.view_ticket') }}
         </a>
       @endif
@@ -2500,7 +2553,7 @@
           <button type="button"
                 @click="$dispatch('show-event-form')"
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                style="background-color: var(--es-accent); color: var(--es-accent-text);">
             @if ($event->isRsvpFull($date))
               {{ __('messages.join_waitlist') }}
             @else
@@ -2521,7 +2574,7 @@
           <button type="button"
             id="mobile-calendar-cta"
             class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"
-            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+            style="background-color: var(--es-accent); color: var(--es-accent-text);">
           {{ $role->customLabel('add_to_calendar') }}
         </button>
           @endif
@@ -2529,7 +2582,7 @@
           <button type="button"
                 @click="$dispatch('show-event-form')"
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                style="background-color: var(--es-accent); color: var(--es-accent-text);">
             @if ($saleState === 'sold_out')
               {{ __('messages.join_waitlist') }}
             @else
@@ -2557,7 +2610,7 @@
         <button type="button"
             id="mobile-calendar-cta"
             class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"
-            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+            style="background-color: var(--es-accent); color: var(--es-accent-text);">
           {{ $role->customLabel('add_to_calendar') }}
         </button>
         @endif
@@ -2567,7 +2620,7 @@
         <button type="button"
             id="mobile-calendar-cta"
             class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"
-            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+            style="background-color: var(--es-accent); color: var(--es-accent-text);">
           {{ $role->customLabel('add_to_calendar') }}
         </button>
         @endif
@@ -2575,7 +2628,7 @@
         <button type="button"
             id="mobile-calendar-cta"
             class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+            style="background-color: var(--es-accent); color: var(--es-accent-text);">
           {{ $role->customLabel('add_to_calendar') }}
         </button>
       @endif

@@ -327,7 +327,7 @@
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
                     class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                    style="background-color: var(--es-accent); color: var(--es-accent-text);">
                     <span v-if="waitlistSubmitting">{{ __('messages.processing') }}</span>
                     <span v-else>{{ __('messages.join_waitlist') }}</span>
                 </button>
@@ -649,7 +649,7 @@
             <button type="submit"
                 :disabled="isSubmitting"
                 class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                style="background-color: var(--es-accent); color: var(--es-accent-text);">
                 <span v-if="isSubmitting">...</span>
                 <span v-else>{{ __('messages.submit') }}</span>
             </button>

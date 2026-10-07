@@ -90,7 +90,7 @@
             {{-- Accent colour, not brand blue: the guest portal is the schedule's surface, and every
                  other primary button on these pages follows the schedule's accent. --}}
             <button type="submit"
-                style="background-color: {{ $accentColor ?? '#4E81FA' }}; color: {{ $contrastColor ?? '#ffffff' }}"
+                style="background-color: var(--es-accent, #4E81FA); color: var(--es-accent-text, #ffffff)"
                 class="shrink-0 sm:self-end inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
                 {{ __('messages.event_interest_submit') }}
             </button>
