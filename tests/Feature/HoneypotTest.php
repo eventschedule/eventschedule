@@ -149,6 +149,28 @@ class HoneypotTest extends TestCase
     // Ticketing and waitlist
     // -----------------------------------------------------------------
 
+    public function test_filled_honeypot_blocks_an_event_password_guess(): void
+    {
+        $role = $this->createRole($this->createOwner());
+        $event = $this->createEvent($role, ['event_password' => 'opensesame', 'is_private' => true]);
+        $post = fn (array $extra) => $this->post(route('event.check_password', ['subdomain' => $role->subdomain]), [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'password' => 'opensesame',
+        ] + $extra);
+
+        // The right password, from something that also filled the field nobody can see.
+        $post(['website' => self::TRAP])->assertSessionHas('error', __('messages.invalid_request'));
+        $this->assertFalse(session()->has('event_password_'.$event->id), 'and the event stays locked');
+
+        // From a person, it opens.
+        $post([]);
+        $this->assertTrue(session()->has('event_password_'.$event->id));
+
+        // The page carries the field.
+        $this->flushSession();
+        $this->get($event->fresh()->getGuestUrl($role->subdomain))->assertOk()->assertSee('name="website"', false);
+    }
+
     public function test_filled_honeypot_blocks_an_rsvp(): void
     {
         $role = $this->createRole($this->createOwner());

@@ -22,7 +22,8 @@
     <style {!! nonce_attr() !!}>
         #appt-chooser { --es-accent: {{ $accent }}; --es-accent-readable: {{ $accentOnLight }}; --es-accent-tint: {{ $accentTint }}; }
         .dark #appt-chooser { --es-accent-readable: {{ $accentOnDark }}; }
-        #appt-chooser .es-type-card { border-inline-start: 4px solid var(--es-accent-readable); }
+        {{-- A plain card: no stripe of colour down one side. The schedule's colour is the
+             card's outline once it is pointed at. --}}
         #appt-chooser .es-type-card:hover { border-color: var(--es-accent-readable); }
         #appt-chooser a:focus-visible { outline: 2px solid var(--es-accent-readable); outline-offset: 2px; }
     </style>

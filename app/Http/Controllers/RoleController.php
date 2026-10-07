@@ -2844,6 +2844,12 @@ class RoleController extends Controller
 
     public function checkEventPassword(Request $request, $subdomain)
     {
+        // A public form, and the one a script guessing passwords would post. The refusal is the
+        // layout's toast (session('error')), which is what this page can show.
+        if (HoneypotUtils::isTripped($request)) {
+            return back()->withInput()->with('error', __('messages.invalid_request'));
+        }
+
         $request->validate([
             'event_id' => 'required|string',
             'password' => 'required|string',

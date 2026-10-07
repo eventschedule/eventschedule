@@ -27,6 +27,8 @@
 
           <form method="POST" action="{{ route('event.check_password', ['subdomain' => $role->subdomain]) }}">
             @csrf
+            {{-- A form anybody can post: the decoy field every public form carries. --}}
+            <x-honeypot />
             <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
             {{-- The occurrence the visitor opened, so the answer returns them to it. The controller
                  re-checks it is still an occurrence before redirecting anywhere near it. --}}
