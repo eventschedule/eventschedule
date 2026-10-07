@@ -254,8 +254,9 @@ class TicketTest extends DuskTestCase
                 ->assertSee($name);
 
             // Assert only General Admission ticket appears (VIP was not purchased)
+            // The ticket prints a type and its quantity on one line ("General Admission × 1").
             $browser->assertSee('General Admission')
-                ->assertSee('x1')
+                ->assertSee('× 1')
                 ->assertDontSee('VIP');
 
             // Assert promo code discount is shown

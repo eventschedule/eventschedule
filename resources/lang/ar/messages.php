@@ -667,7 +667,7 @@ return [
     'sold' => 'تم البيع',
     'sold_out' => 'نفذت الكمية',
     'price_from' => 'ابتداءً من :price',
-    'few_left' => 'الكمية محدودة',
+    'few_left' => 'بقي القليل',
     'sales_ended' => 'انتهت المبيعات',
     'sales_not_started' => 'قريبًا',
     'sell_after_start' => 'السماح بالمبيعات بعد بدء الحدث',

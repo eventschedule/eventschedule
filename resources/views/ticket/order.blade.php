@@ -1,6 +1,11 @@
 @php
     // The schedule the order was placed on: the page wears its colour, as each ticket does.
     $themeRole = $sales->first()?->sellingRole() ?? $role;
+    // A card order lands here before its confirmation does. The first leg still waiting says for
+    // how long and where to ask; without it the page said nothing and each ticket said NOT PAID.
+    $waitingLeg = $sales->first(fn ($sale) => $sale->status === 'unpaid' && ! $sale->event->is_cancelled
+        && payment_gateways()->awaitsConfirmation($sale->payment_method, $sale)
+        && \App\Services\Payments\PaymentGatewayDriver::landedSecondsLeft($sale) > 0);
 @endphp
 <x-app-layout :title="__('messages.your_tickets') . ($themeRole ? ' | ' . $themeRole->translatedName() : '')">
 
@@ -38,6 +43,14 @@
           </header>
 
           <div class="gk-tk-body">
+            @if ($waitingLeg)
+              <div class="gk-tk-msg" data-ticket-state="confirming" role="status"
+                data-confirming="{{ \App\Services\Payments\PaymentGatewayDriver::landedSecondsLeft($waitingLeg) }}"
+                data-status-url="{{ route('ticket.status', ['event_id' => \App\Utils\UrlUtils::encodeId($waitingLeg->event_id), 'secret' => $waitingLeg->secret], false) }}">
+                @include('ticket.partials.icon', ['icon' => 'clock'])
+                <div><strong>{{ __('messages.ticket_confirming_payment') }}</strong><br>{{ __('messages.ticket_confirming_payment_hint') }}</div>
+              </div>
+            @endif
             <ul class="gk-tk-legs">
               @foreach ($sales as $sale)
                 @php
@@ -55,7 +68,7 @@
                     // One day is a date, not a range from a day to itself.
                     $legDate = $legEvent->is_multi_day
                         ? $legEvent->getDateRangeDisplay($sale->event_date)
-                        : $legEvent->getStartDateTime($sale->event_date, true)->format('F j, Y');
+                        : $legEvent->getStartDateTime($sale->event_date, true)->translatedFormat('F j, Y');
                 @endphp
                 {{-- The row is a list item holding the link, not the link itself, so the wallet
                      badge below can be a sibling. An anchor inside an anchor is invalid HTML and
@@ -95,4 +108,7 @@
       </div>
     </main>
 
+    @if ($waitingLeg)
+      @include('ticket.partials.confirming-script')
+    @endif
 </x-app-layout>

@@ -20,8 +20,18 @@
         ->contains(fn ($leg) => ($leg['event_id'] ?? null) === \App\Utils\UrlUtils::encodeId($event->id));
     // Back from a payment provider before its confirmation has reached us. Not "unpaid": the
     // buyer has just paid, and a NOT PAID stamp across their code is the last thing to show them.
-    // The page asks again every few seconds (the script at the foot) and gives up after forty.
-    $confirming = $fresh && $isUnpaid && payment_gateways()->awaitsConfirmation($sale->payment_method, $sale);
+    // Read from the session's own note of the landing (PaymentGatewayDriver::markLanded()), so a
+    // reload, or this ticket opened from the order page of a several-event checkout, says the
+    // same. The page asks where the sale stands until those seconds run out (the script at the
+    // foot) and then shows whatever is true.
+    $confirmingFor = ($isUnpaid && ! $event->is_cancelled && payment_gateways()->awaitsConfirmation($sale->payment_method, $sale))
+        ? \App\Services\Payments\PaymentGatewayDriver::landedSecondsLeft($sale)
+        : 0;
+    $confirming = $confirmingFor > 0;
+    // Inside an organizer's frame the event page refuses to be framed without embed=true, so a
+    // link to it leaves the frame for a tab of its own.
+    $isEmbed = request()->boolean('embed');
+    $outOfFrame = $isEmbed ? ' target="_blank" rel="noopener noreferrer"' : '';
 
     $canShowPayNow = $isUnpaid && ! $confirming
         && payment_gateways()->canResumePayment($sale->payment_method, $sale)
@@ -43,8 +53,11 @@
     $qrUrl = route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
     $ticketNotes = $event->parsedTicketNotesHtml($eventDate);
 
-    $stamp = $planOnHold ? __('messages.ticket_on_hold')
-        : ($isUnpaid ? __('messages.unpaid') : ($eventCancelled ? __('messages.cancelled') : __('messages.void')));
+    // The same order as the message at the top, so the two never disagree: a cancelled event
+    // used to say "this ticket is not valid" above a code stamped UNPAID and "Payment required
+    // to enter".
+    $stamp = $eventCancelled ? __('messages.cancelled')
+        : ($planOnHold ? __('messages.ticket_on_hold') : ($isUnpaid ? __('messages.unpaid') : __('messages.void')));
 
     // Self-cancel is for a free place only. A gift-card order is a purchase: cancelling it would
     // be an instant refund to the card, so that stays the owner's.
@@ -84,10 +97,10 @@
         @include('partials.guest-ticket-styles')
     </x-slot>
 
-    <main id="main-content" class="gk-tkpage" tabindex="-1" data-sale-status="{{ $sale->status }}">
+    <main id="main-content" class="gk-tkpage" tabindex="-1" data-sale-status="{{ $sale->status }}" data-ticket="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
       <div class="gk-tk-wrap">
 
-        <a href="{{ $eventUrl }}" class="gk-tk-back">
+        <a href="{{ $eventUrl }}" class="gk-tk-back"{!! $outOfFrame !!}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19l-7-7 7-7"/></svg>
           <span>{{ __('messages.view_event') }}</span>
         </a>
@@ -123,10 +136,16 @@
               @if ($eventCancelled)
                 <div class="gk-tk-msg gk-tk-msg-bad" data-ticket-state="event-cancelled">
                   @include('ticket.partials.icon', ['icon' => 'alert'])
-                  <div><strong>{{ __('messages.event_cancelled_heading') }}</strong><br>{{ __('messages.this_ticket_is_not_valid') }}</div>
+                  <div>
+                    <strong>{{ __('messages.event_cancelled_heading') }}</strong><br>{{ __('messages.this_ticket_is_not_valid') }}
+                    {{-- The buyer who opens a cancelled event's ticket is looking for their money. --}}
+                    @if ($sale->status === 'refunded')
+                      <br>{{ __('messages.this_ticket_is_refunded') }}
+                    @endif
+                  </div>
                 </div>
               @elseif ($confirming)
-                <div class="gk-tk-msg" data-ticket-state="confirming" data-confirming>
+                <div class="gk-tk-msg" data-ticket-state="confirming" data-confirming="{{ $confirmingFor }}" data-status-url="{{ route('ticket.status', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret], false) }}">
                   @include('ticket.partials.icon', ['icon' => 'clock'])
                   <div><strong>{{ __('messages.ticket_confirming_payment') }}</strong><br>{{ __('messages.ticket_confirming_payment_hint') }}</div>
                 </div>
@@ -141,7 +160,7 @@
                   </div>
                 </div>
                 @if ($canShowPayNow)
-                  <a href="{{ $eventUrl }}" class="gk-tk-btn gk-tk-btn-fill gk-tk-btn-block">{{ __('messages.complete_payment') }}</a>
+                  <a href="{{ $eventUrl }}" class="gk-tk-btn gk-tk-btn-fill gk-tk-btn-block"{!! $outOfFrame !!}>{{ __('messages.complete_payment') }}</a>
                 @endif
               @elseif ($sale->status !== 'paid')
                 <div class="gk-tk-msg gk-tk-msg-bad" data-ticket-state="{{ $sale->status }}">
@@ -194,7 +213,9 @@
               </div>
               @if (! $confirming)
               <p class="gk-tk-qr-note">
-                @if ($planOnHold)
+                @if ($eventCancelled)
+                  {{ __('messages.this_ticket_is_not_valid') }}
+                @elseif ($planOnHold)
                   {{ __('messages.installment_on_hold_door') }}
                 @elseif ($isUnpaid)
                   {{ __('messages.payment_required_to_enter') }}
@@ -223,10 +244,12 @@
                   <span>{{ __('messages.add_to_calendar') }}</span>
                 </button>
                 {{-- The EVENT's public address, never this page's: the ticket's link is the ticket. --}}
-                <button type="button" class="gk-tk-tile" data-invite data-url="{{ $eventUrl }}" data-title="{{ $eventName }}" data-copied="{{ __('messages.link_copied') }}">
+                @if ($eventUrl)
+                <button type="button" class="gk-tk-tile" data-invite data-url="{{ $eventUrl }}" data-title="{{ $eventName }}" data-copied="{{ __('messages.link_copied') }}" aria-controls="ticket-invite">
                   @include('ticket.partials.icon', ['icon' => 'share'])
                   <span data-invite-label>{{ __('messages.ticket_invite_friends') }}</span>
                 </button>
+                @endif
                 @if ($venueAddress)
                   <a class="gk-tk-tile" href="https://www.google.com/maps/search/?api=1&query={{ urlencode($venueAddress) }}" target="_blank" rel="noopener noreferrer">
                     @include('ticket.partials.icon', ['icon' => 'pin'])
@@ -234,32 +257,40 @@
                   </a>
                 @endif
               </div>
+              {{-- Where neither the share sheet nor the clipboard is given (a frame on another
+                   site, a page not served over https), the link itself, to copy by hand. The
+                   button used to do nothing at all there. --}}
+              @if ($eventUrl)
+                <label class="gk-tk-menu gk-tk-noprint" id="ticket-invite" hidden>
+                  <span class="gk-tk-quiet">{{ __('messages.ticket_invite_friends') }}</span>
+                  <input type="text" readonly value="{{ $eventUrl }}" dir="ltr">
+                </label>
+              @endif
               <div class="gk-tk-menu gk-tk-noprint" id="ticket-calendar" hidden>
                 <a href="{{ $event->getGoogleCalendarUrl($eventDate) }}" target="_blank" rel="noopener noreferrer">Google Calendar</a>
-                <a href="{{ $event->getAppleCalendarUrl($eventDate, $sale->subdomain) }}">Apple Calendar</a>
+                {{-- The calendar file is the event page's, and a locked event gives it only to a
+                     session that has entered the password: opened from the email, this was a 404. --}}
+                @if (! $event->isPasswordProtected() || session()->has('event_password_'.$event->id))
+                  <a href="{{ $event->getAppleCalendarUrl($eventDate, $sale->subdomain) }}"{!! $outOfFrame !!}>Apple Calendar</a>
+                @endif
                 <a href="{{ $event->getMicrosoftCalendarUrl($eventDate) }}" target="_blank" rel="noopener noreferrer">{{ __('messages.microsoft_calendar') }}</a>
               </div>
             @endif
 
             <dl class="gk-tk-facts">
               <div class="gk-tk-fact">
-                <span class="gk-tk-ico gk-tk-ico-a">@include('ticket.partials.icon', ['icon' => 'calendar'])</span>
-                <div>
-                  <dt>{{ __('messages.date') }}</dt>
+                <dt><span class="gk-tk-ico gk-tk-ico-a" aria-hidden="true">@include('ticket.partials.icon', ['icon' => 'calendar'])</span>{{ __('messages.date') }}</dt>
                   <dd>
-                    {{ $event->is_multi_day ? $event->getDateRangeDisplay($eventDate) : $event->getStartDateTime($eventDate, true)->format('F j, Y') }}
+                    {{ $event->is_multi_day ? $event->getDateRangeDisplay($eventDate) : $event->getStartDateTime($eventDate, true)->translatedFormat('F j, Y') }}
                     @if ($time = $event->getStartEndTime($eventDate, $event->use24HourTime()))
                       <small><bdi>{{ $time }}</bdi> <bdi>{{ $zone }}</bdi></small>
                     @endif
                   </dd>
-                </div>
               </div>
 
               @if ($venue || $event->event_url)
               <div class="gk-tk-fact">
-                <span class="gk-tk-ico gk-tk-ico-b">@include('ticket.partials.icon', ['icon' => $venue ? 'pin' : 'link'])</span>
-                <div>
-                  <dt>{{ $venue ? __('messages.venue') : __('messages.online') }}</dt>
+                <dt><span class="gk-tk-ico gk-tk-ico-b" aria-hidden="true">@include('ticket.partials.icon', ['icon' => $venue ? 'pin' : 'link'])</span>{{ $venue ? __('messages.venue') : __('messages.online') }}</dt>
                   <dd>
                     @if ($venue)
                       {{ $venue->translatedName() ?: $venue->shortAddress() }}
@@ -277,19 +308,15 @@
                       @endif
                     @endif
                   </dd>
-                </div>
               </div>
               @endif
 
               <div class="gk-tk-fact">
-                <span class="gk-tk-ico gk-tk-ico-c">@include('ticket.partials.icon', ['icon' => 'person'])</span>
-                <div>
-                  <dt>{{ __('messages.attendee') }}</dt>
+                <dt><span class="gk-tk-ico gk-tk-ico-c" aria-hidden="true">@include('ticket.partials.icon', ['icon' => 'person'])</span>{{ __('messages.attendee') }}</dt>
                   <dd>
                     <bdi>{{ $sale->name }}</bdi>
                     <small>{{ __('messages.guests') }}: {{ $admits }}</small>
                   </dd>
-                </div>
               </div>
 
               @php
@@ -330,9 +357,7 @@
               @endphp
               @if ($sale->isRsvp() || $regularTickets->count() > 0)
               <div class="gk-tk-fact">
-                <span class="gk-tk-ico gk-tk-ico-d">@include('ticket.partials.icon', ['icon' => 'ticket'])</span>
-                <div>
-                  <dt>{{ __('messages.tickets') }}</dt>
+                <dt><span class="gk-tk-ico gk-tk-ico-d" aria-hidden="true">@include('ticket.partials.icon', ['icon' => 'ticket'])</span>{{ __('messages.tickets') }}</dt>
                   @if ($sale->isRsvp())
                     <dd>{{ __('messages.registered') }}</dd>
                   @else
@@ -340,7 +365,7 @@
                       <dd>
                         <bdi>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</bdi> <bdi>&times;&nbsp;{{ $saleTicket->quantity }}</bdi>
                         @if ($saleTicket->ticket->is_pass)
-                          <span class="gk-tk-pill">{{ __('messages.season_pass') }}</span>
+                          <span class="gk-tk-pill">{{ __('messages.season_pass') }} · {{ __('messages.pass_valid_all_dates') }}</span>
                         @endif
                         @php $seatLabels = $seatLabelsFor($saleTicket); @endphp
                         @if (count($seatLabels))
@@ -350,7 +375,6 @@
                       </dd>
                     @endforeach
                   @endif
-                </div>
               </div>
               @endif
             </dl>
@@ -359,10 +383,10 @@
               <div class="gk-tk-sec">
                 <ul class="gk-tk-rows">
                   @if ($ticketDiscountTotal > 0)
-                    <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.discount') }}@if ($sale->promoCode) (<bdi>{{ $sale->promoCode->code }}</bdi>)@endif</span><span>-{{ number_format($ticketDiscountTotal, 2) }} {{ $event->ticket_currency_code }}</span></li>
+                    <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.discount') }}@if ($sale->promoCode) (<bdi>{{ $sale->promoCode->code }}</bdi>)@endif</span><span><bdi>-{{ \App\Utils\MoneyUtils::format($ticketDiscountTotal, $event->ticket_currency_code) }}</bdi></span></li>
                   @endif
                   @if ($ticketGiftCardTotal > 0)
-                    <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.gift_card') }}</span><span>-{{ number_format($ticketGiftCardTotal, 2) }} {{ $event->ticket_currency_code }}</span></li>
+                    <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.gift_card') }}</span><span><bdi>-{{ \App\Utils\MoneyUtils::format($ticketGiftCardTotal, $event->ticket_currency_code) }}</bdi></span></li>
                   @endif
                 </ul>
               </div>
@@ -462,7 +486,7 @@
                           @if ($pastCutoff && $latePolicy === 'block')
                             <span class="gk-tk-quiet">{{ __('messages.pass_cancel_closed') }}</span>
                           @else
-                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ ($pastCutoff && $latePolicy === 'forfeit') ? __('messages.pass_cancel_forfeit_confirm') : __('messages.are_you_sure') }}">
+                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ ($pastCutoff && $latePolicy === 'forfeit') ? __('messages.pass_forfeit_warning') : __('messages.are_you_sure') }}">
                               @csrf
                               <input type="hidden" name="book_event_id" value="{{ $b['event_id'] }}">
                               <input type="hidden" name="date" value="{{ $b['date'] }}">
@@ -519,7 +543,12 @@
                       <span>
                         <bdi>{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</bdi>
                         @if ($saleTicket->ticket->url)
-                          <br><a href="{{ $saleTicket->ticket->url }}" target="_blank" rel="noopener noreferrer" class="gk-tk-quiet">{{ $saleTicket->ticket->url }}</a>
+                          {{-- Owner-typed: linked only when it is a web link (safeHref()). --}}
+                          @if ($addonHref = \App\Utils\UrlUtils::safeHref($saleTicket->ticket->url))
+                            <br><a href="{{ $addonHref }}" target="_blank" rel="noopener noreferrer" class="gk-tk-quiet">{{ $saleTicket->ticket->url }}</a>
+                          @else
+                            <br><span class="gk-tk-quiet">{{ $saleTicket->ticket->url }}</span>
+                          @endif
                         @endif
                       </span>
                       <span><bdi>&times;&nbsp;{{ $saleTicket->quantity }}</bdi></span>
@@ -593,7 +622,8 @@
 
             {{-- Google's badge keeps its own white ground (partials/wallet-buttons says why). --}}
             @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $event))
-              <div class="gk-tk-sec gk-tk-noprint" style="display: flex; justify-content: center;">
+              {{-- No inline display here: it would outrank the print sheet's "not on paper". --}}
+              <div class="gk-tk-sec gk-tk-center gk-tk-noprint">
                 @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
               </div>
             @endif
@@ -606,15 +636,19 @@
               </div>
               {{-- Asked in the page, in the page's own words and buttons, not in a browser box
                    that says "OK" and "Cancel" about a cancellation. --}}
-              <form id="ticket-cancel" class="gk-tk-confirm gk-tk-noprint" hidden action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST">
+              <form id="ticket-cancel" class="gk-tk-confirm gk-tk-noprint" role="group" aria-labelledby="ticket-cancel-question" hidden action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST">
                 @csrf
                 <input type="hidden" name="secret" value="{{ $sale->secret }}">
-                <p>{{ __('messages.are_you_sure') }}</p>
+                {{-- The group's name, so a screen reader hears the question when focus arrives
+                     on "Keep my place". --}}
+                <p id="ticket-cancel-question">{{ __('messages.are_you_sure') }}</p>
                 <div>
                   <button type="button" class="gk-tk-btn" data-cancel-keep>{{ __('messages.ticket_keep') }}</button>
                   <button type="submit" class="gk-tk-btn gk-tk-btn-danger">{{ $sale->isRsvp() ? __('messages.cancel_registration') : __('messages.cancel_ticket') }}</button>
                 </div>
               </form>
+              {{-- Without scripts nothing can open the question, so it is simply there. --}}
+              <noscript><style {!! nonce_attr() !!}>.gk-tk-confirm[hidden] { display: grid; } [data-cancel-toggle] { display: none; }</style></noscript>
             @endif
 
             <div class="gk-tk-foot">
@@ -625,9 +659,18 @@
                 // The event's own terms link is owner-typed free text: linked only through
                 // safeHref(), and shown as text when it is no web link.
                 $termsHref = $event->terms_url ? \App\Utils\UrlUtils::safeHref($event->terms_url) : $termsUrl;
-                $organizer = $themeRole ? $themeRole->translatedName() : $event->user->email;
+                // The mail goes to whoever made the event, so that is who is named: on a ticket
+                // bought from a curator's page the selling schedule is somebody else. The address
+                // is printed too, for paper and for a phone with no mail app.
+                $contactEmail = $event->user?->email;
+                $organizer = ($event->creatorRole ?? $themeRole)?->translatedName() ?: $contactEmail;
               @endphp
-              <a href="mailto:{{ $event->user->email }}">{{ __('messages.ticket_contact_organizer', ['name' => $organizer]) }}</a>
+              @if ($contactEmail)
+                <a href="mailto:{{ $contactEmail }}">{{ __('messages.ticket_contact_organizer', ['name' => $organizer]) }}</a>
+                @if ($organizer !== $contactEmail)
+                  <span class="gk-tk-foot-addr"><bdi>{{ $contactEmail }}</bdi></span>
+                @endif
+              @endif
               @if ($termsHref)
                 <a href="{{ $termsHref }}" target="_blank" rel="noopener noreferrer">{{ __('messages.terms_and_conditions') }}</a>
               @else
@@ -644,8 +687,12 @@
         @endif
       </div>
 
-      {{-- The door view. Outside the ticket on purpose: the ticket has a filter, and a fixed
-           element inside a filtered one is no longer fixed to the screen. --}}
+    </main>
+
+    {{-- The door view. Outside the ticket: the ticket has a filter, and a fixed element inside a
+         filtered one is no longer fixed to the screen. And outside <main>: the page is a stacking
+         context of its own, so in there the door sat UNDER the cookie notice whatever z-index it
+         was given, on the first open of a ticket link at the door. --}}
       @if ($valid)
         <div class="gk-door" id="ticket-door" role="dialog" aria-modal="true" aria-label="{{ __('messages.ticket_your_code') }}" hidden>
           <button type="button" class="gk-door-close" data-door-close>{{ __('messages.close') }}</button>
@@ -656,7 +703,6 @@
           <a class="gk-door-save" href="{{ $qrUrl }}" download="ticket.png">{{ __('messages.ticket_save_code') }}</a>
         </div>
       @endif
-    </main>
 
     <script {!! nonce_attr() !!}>
     (function () {
@@ -669,9 +715,35 @@
             var opener = null;
             var wake = null;
 
+            function keepAwake() {
+                if (navigator.wakeLock && navigator.wakeLock.request) {
+                    navigator.wakeLock.request('screen').then(function (lock) { wake = lock; }).catch(function () {});
+                }
+            }
+
+            {{-- On the document, not on the door: after a tap on its white ground nothing in it
+                 has focus, and keys heard only inside it were not heard at all. --}}
+            function doorKeys(e) {
+                if (e.key === 'Escape') { closeDoor(); return; }
+                if (e.key !== 'Tab') { return; }
+                var stops = door.querySelectorAll('button, a[href]');
+                var first = stops[0], last = stops[stops.length - 1];
+                if (! door.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+                else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (! e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+
+            {{-- A phone lets go of the wake lock when the page is hidden, and the holder of a
+                 ticket at a door switches away and back. --}}
+            function doorSeen() {
+                if (! document.hidden && ! door.hidden) { keepAwake(); }
+            }
+
             function closeDoor() {
                 door.hidden = true;
                 document.documentElement.style.overflow = '';
+                document.removeEventListener('keydown', doorKeys);
+                document.removeEventListener('visibilitychange', doorSeen);
                 if (wake) { try { wake.release(); } catch (e) {} wake = null; }
                 if (opener) { opener.focus(); }
             }
@@ -683,20 +755,12 @@
                         door.hidden = false;
                         document.documentElement.style.overflow = 'hidden';
                         door.querySelector('[data-door-close]').focus();
-                        if (navigator.wakeLock && navigator.wakeLock.request) {
-                            navigator.wakeLock.request('screen').then(function (lock) { wake = lock; }).catch(function () {});
-                        }
+                        document.addEventListener('keydown', doorKeys);
+                        document.addEventListener('visibilitychange', doorSeen);
+                        keepAwake();
                     });
                 });
                 door.querySelector('[data-door-close]').addEventListener('click', closeDoor);
-                door.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') { closeDoor(); return; }
-                    if (e.key !== 'Tab') { return; }
-                    var stops = door.querySelectorAll('button, a[href]');
-                    var first = stops[0], last = stops[stops.length - 1];
-                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-                    else if (! e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-                });
             }
 
             {{-- A button that shows or hides the block it controls. --}}
@@ -725,59 +789,53 @@
                 });
             });
 
-            {{-- Invite friends: the phone's own share sheet, or the event's link on the clipboard. --}}
+            {{-- Invite friends: the phone's own share sheet, or the event's link on the clipboard,
+                 or (where a browser gives neither, as inside a frame on another site) the link
+                 itself, shown and selected. Closing the share sheet is not a failure. --}}
             each('[data-invite]', function (button) {
-                button.addEventListener('click', function () {
-                    var url = button.getAttribute('data-url');
-                    if (navigator.share) {
-                        navigator.share({ title: button.getAttribute('data-title'), url: url }).catch(function () {});
-                        return;
-                    }
-                    var label = button.querySelector('[data-invite-label]');
-                    var was = label.textContent;
-                    var done = function () {
+                var url = button.getAttribute('data-url');
+                var label = button.querySelector('[data-invite-label]');
+                var was = label.textContent;
+                var byHand = function () {
+                    var box = document.getElementById('ticket-invite');
+                    if (! box) { return; }
+                    box.hidden = false;
+                    var field = box.querySelector('input');
+                    field.focus();
+                    field.select();
+                };
+                var copy = function () {
+                    if (! (navigator.clipboard && navigator.clipboard.writeText)) { byHand(); return; }
+                    navigator.clipboard.writeText(url).then(function () {
                         label.textContent = button.getAttribute('data-copied');
                         setTimeout(function () { label.textContent = was; }, 2000);
-                    };
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(url).then(done).catch(function () {});
-                    }
+                    }).catch(byHand);
+                };
+                button.addEventListener('click', function () {
+                    if (! navigator.share) { copy(); return; }
+                    navigator.share({ title: button.getAttribute('data-title'), url: url }).catch(function (error) {
+                        if (! error || error.name !== 'AbortError') { copy(); }
+                    });
                 });
             });
 
-            {{-- Arriving after a payment that needed a moment (see below): show it once. --}}
+            {{-- Arriving after a payment that needed a moment (ticket/partials/confirming-script
+                 leaves the note): show it once, on the ticket the note is for. --}}
             var hero = document.querySelector('[data-hero]');
+            var arrived = 'es_ticket_arrived_' + document.getElementById('main-content').getAttribute('data-ticket');
             try {
-                if (hero && sessionStorage.getItem('es_ticket_arrived')) {
-                    sessionStorage.removeItem('es_ticket_arrived');
-                    hero.hidden = false;
-                    document.getElementById('ticket').classList.add('gk-ticket-fresh');
+                if (sessionStorage.getItem(arrived)) {
+                    sessionStorage.removeItem(arrived);
+                    if (hero) {
+                        hero.hidden = false;
+                        document.getElementById('ticket').classList.add('gk-ticket-fresh');
+                    }
                 }
             } catch (e) {}
-
-            {{-- Back from the payment provider before its confirmation reached us: ask again every
-                 four seconds, ten times, and then show whatever is true. --}}
-            if (document.querySelector('[data-confirming]')) {
-                var tries = 0;
-                var settle = function (status) {
-                    try { if (status === 'paid') { sessionStorage.setItem('es_ticket_arrived', '1'); } } catch (e) {}
-                    window.location.reload();
-                };
-                var ask = function () {
-                    tries++;
-                    fetch(window.location.href, { credentials: 'same-origin', cache: 'no-store' })
-                        .then(function (response) { return response.ok ? response.text() : ''; })
-                        .then(function (html) {
-                            var match = html.match(/data-sale-status="([a-z_]+)"/);
-                            if (match && match[1] !== 'unpaid') { settle(match[1]); }
-                            else if (tries >= 10) { settle('unpaid'); }
-                            else { setTimeout(ask, 4000); }
-                        })
-                        .catch(function () { if (tries >= 10) { settle('unpaid'); } else { setTimeout(ask, 4000); } });
-                };
-                setTimeout(ask, 4000);
-            }
         } catch (e) {}
     })();
     </script>
+    @if ($confirming)
+      @include('ticket.partials.confirming-script')
+    @endif
 </x-app-layout>

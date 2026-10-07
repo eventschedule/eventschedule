@@ -604,6 +604,45 @@ abstract class PaymentGatewayDriver
     }
 
     /**
+     * The buyer has just been sent back from a payment page to these sales' tickets.
+     *
+     * Kept in the session for a minute and a half, not flashed for one request: the ticket says
+     * "Confirming your payment" while a confirmation is on its way (awaitsConfirmation()), and a
+     * flash was gone on the first reload and never reached a ticket opened from the order page of
+     * a several-event checkout. Both showed NOT PAID across a code that had just been paid for.
+     */
+    public const LANDED_SESSION = 'purchase_landed';
+
+    public const LANDED_SECONDS = 90;
+
+    public static function markLanded(Sale $sale): void
+    {
+        // now(), not time(): a test moves the clock to see the seconds run out.
+        $now = now()->getTimestamp();
+        $landed = array_filter(
+            (array) session(self::LANDED_SESSION, []),
+            fn ($at) => is_int($at) && $now - $at < self::LANDED_SECONDS
+        );
+
+        foreach ($sale->orderLegs() as $leg) {
+            $landed[$leg->id] = $now;
+        }
+
+        session([self::LANDED_SESSION => $landed]);
+    }
+
+    /**
+     * How much longer this sale's ticket may say it is confirming: 0 when it never landed here,
+     * or did longer ago than a confirmation takes.
+     */
+    public static function landedSecondsLeft(Sale $sale): int
+    {
+        $at = ((array) session(self::LANDED_SESSION, []))[$sale->id] ?? null;
+
+        return is_int($at) ? max(0, self::LANDED_SECONDS - (now()->getTimestamp() - $at)) : 0;
+    }
+
+    /**
      * The signal, if it is for this event (event/partials/payment-cancelled, event/tickets).
      *
      * @return array{event_id: string, charge_unknown: bool}|null
@@ -753,6 +792,7 @@ abstract class PaymentGatewayDriver
     protected function redirectToPurchaseLanding(Sale $sale, Event $event, bool $isEmbed = false): Response
     {
         GuestFunnel::countCheckoutDone(request(), $sale);
+        self::markLanded($sale);
 
         session()->flash('cart_purchased', $sale->orderLegs()->map(fn (Sale $leg) => [
             'subdomain' => $leg->subdomain,

@@ -2871,6 +2871,15 @@ class Event extends Model
 
         $rows = $this->tickets->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable());
         $onSale = $rows->filter(fn ($ticket) => ! $ticket->isSalesEnded() && ! $ticket->isSalesNotStarted());
+        // "From $10" has to be a price somebody can still pay: an early-bird type that sold out
+        // with no end date is still "on sale" by its dates. ticketSale() asks the same of stock.
+        // When every type is gone the page says Sold out, and the prices stay as they were.
+        $inStock = $onSale->filter(function ($ticket) use ($date) {
+            $available = $ticket->availableQuantity($date);
+
+            return $available === null || $available > 0;
+        });
+        $onSale = $inStock->isNotEmpty() ? $inStock : $onSale;
         $shown = $onSale->isNotEmpty() ? $onSale : ($this->show_unavailable_tickets ? $rows : collect());
 
         if ($shown->isEmpty()) {
@@ -2886,7 +2895,8 @@ class Event extends Model
             'min' => $prices->min(),
             'from' => $prices->min() < $prices->max(),
             'currency' => $this->ticket_currency_code,
-            'low' => $left !== null && $left > 0 && $this->ticketSaleState($date) === 'open'
+            // "Few left" is about what has gone: a room of two with nothing sold is not running out.
+            'low' => $left !== null && $left > 0 && $left < $capacity && $this->ticketSaleState($date) === 'open'
                 && $left <= min(10, max(2, (int) floor($capacity * 0.1))),
         ];
     }

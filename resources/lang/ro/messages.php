@@ -888,7 +888,7 @@ return [
     'ticket_invite_friends' => 'Invită prieteni',
     'directions' => 'Indicații',
     'ticket_save_code' => 'Salvează codul',
-    'ticket_brightness_hint' => 'Mărește luminozitatea ecranului dacă nu este citit.',
+    'ticket_brightness_hint' => 'Dacă codul nu este citit, mărește luminozitatea ecranului.',
     'ticket_contact_organizer' => 'Ceva nu e în regulă? Contactează :name',
     'ticket_keep' => 'Îmi păstrez locul',
     'ticket_confirming_payment' => 'Se confirmă plata',

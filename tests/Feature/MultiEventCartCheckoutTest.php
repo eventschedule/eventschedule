@@ -191,6 +191,35 @@ class MultiEventCartCheckoutTest extends TestCase
             ->assertSee($eventB->name);
     }
 
+    public function test_a_card_order_says_its_payment_is_being_confirmed_on_the_order_and_on_each_ticket(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+        $this->checkout([$this->leg($eventA, $ticketA), $this->leg($eventB, $ticketB)]);
+
+        // Back from the card page ahead of the confirmation: both legs still unpaid, and the
+        // landing has just been noted in the session (PaymentGatewayDriver::markLanded()).
+        $legs = Sale::where('email', 'cart@example.com')->orderBy('id')->get();
+        Sale::whereIn('id', $legs->pluck('id'))->update(['status' => 'unpaid', 'payment_method' => 'stripe']);
+        $primary = $legs->first()->fresh();
+        \App\Services\Payments\PaymentGatewayDriver::markLanded($primary);
+
+        $order = $this->get(route('ticket.order', ['order_id' => UrlUtils::encodeId($primary->id), 'secret' => $primary->secret]))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/data-ticket-state="confirming" role="status"\s+data-confirming="\d+"\s+data-status-url="\/ticket\/status\//', $order), 'the order page used to say nothing about the payment');
+        $this->assertStringContainsString(__('messages.ticket_confirming_payment'), $order);
+
+        // And a ticket opened FROM the order page says the same, not NOT PAID: the note is for
+        // every leg, and no longer a flash the order page had already used up.
+        $second = $legs->last();
+        $ticket = $this->get(route('ticket.view', ['event_id' => UrlUtils::encodeId($second->event_id), 'secret' => $second->secret]))->assertOk()->getContent();
+        $this->assertStringContainsString('data-ticket-state="confirming"', $ticket);
+        $this->assertStringNotContainsString('gk-tk-stamp', substr($ticket, strpos($ticket, '<main'), strpos($ticket, '</main>') - strpos($ticket, '<main')));
+
+        // Once it is paid the order page says nothing of the kind.
+        Sale::whereIn('id', $legs->pluck('id'))->update(['status' => 'paid']);
+        $this->get(route('ticket.order', ['order_id' => UrlUtils::encodeId($primary->id), 'secret' => $primary->secret]))
+            ->assertOk()->assertDontSee(__('messages.ticket_confirming_payment'));
+    }
+
     public function test_the_order_page_refuses_a_wrong_secret(): void
     {
         [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();

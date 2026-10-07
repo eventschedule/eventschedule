@@ -6,8 +6,10 @@
   all self-service through the failed-charge email would leave the healthy buyer - who has the
   ticket page bookmarked from their confirmation email - with nothing.
 
-  Expects: $plan (SaleInstallmentPlan), $variant ('dark' on the ticket page, 'light' on the pay
-  page). Both hosts pass a plan that the URL secret has already authenticated.
+  Expects: $plan (SaleInstallmentPlan), $variant ('dark' on the ticket and on the pay page, which
+  wears the ticket's dress; 'light' elsewhere) and $showCard (the pay page only: whether the card
+  on file is named; it defaults to the light variant). Both hosts pass a plan that the URL secret
+  has already authenticated.
 --}}
 @php
     $variant = $variant ?? 'dark';
@@ -87,7 +89,7 @@
              authenticated Stripe session, but the card brand and last four are payment details
              that nobody at the door needs to see. The plan page is reached with the PLAN's secret,
              which is the buyer's. --}}
-        @if (! $dark && $plan->card_brand && $plan->card_last4)
+        @if (($showCard ?? ! $dark) && $plan->card_brand && $plan->card_last4)
             <p class="text-[12px] {{ $muted }} mt-[2px]">
                 {{ __('messages.installment_card_on_file', ['brand' => ucfirst($plan->card_brand), 'last4' => $plan->card_last4]) }}
             </p>

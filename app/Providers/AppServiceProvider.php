@@ -276,6 +276,14 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by('guest-count|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
         });
 
+        // GET /ticket/status (a ticket waiting on its payment confirmation asks about eight times
+        // in a minute and a half). Per visitor AND per ticket, for the same reasons as above.
+        RateLimiter::for('ticket_status', function ($request) {
+            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+
+            return Limit::perMinute(30)->by('ticket-status|'.hash_hmac('sha256', $ip.'|'.$request->route('secret'), (string) config('app.key')));
+        });
+
         // GET /api/internal/growth (app:pull-growth). Keyed on the real client IP for the same
         // reason as the beacon above: the positional `throttle:N,M,x` form keys on $request->ip(),
         // which on hosted is a Cloudflare edge address, so every caller in the world would share

@@ -65,7 +65,9 @@
                 </div>
               @endif
 
-              @include('partials.installment-plan-panel', ['plan' => $plan, 'variant' => 'dark'])
+              {{-- showCard: this page is opened with the PLAN's secret, which is the buyer's own,
+                   so the card on file is shown here and never on the ticket, which a door scans. --}}
+              @include('partials.installment-plan-panel', ['plan' => $plan, 'variant' => 'dark', 'showCard' => true])
             @endif
           </div>
         </section>

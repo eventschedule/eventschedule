@@ -935,7 +935,7 @@ return [
     'scan_for_entry' => 'Сканировать для входа',
     'ticket_you_are_going' => 'Вы идёте',
     'ticket_show_at_door' => 'Покажите этот код на входе',
-    'ticket_admits' => 'Вход для :count',
+    'ticket_admits' => 'Вход: :count чел.',
     'ticket_enlarge_code' => 'Увеличить код',
     'ticket_invite_friends' => 'Пригласить друзей',
     'directions' => 'Как добраться',

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\MarketingDailyStat;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Services\DemoService;
 use App\Utils\GuestFunnel;
 use App\Utils\UrlUtils;
@@ -48,7 +49,12 @@ class GuestFunnelTest extends TestCase
             'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120 Safari/537.36',
             'HTTP_ACCEPT' => $document ? 'text/html,application/xhtml+xml' : '*/*',
             'HTTP_ACCEPT_LANGUAGE' => 'en-GB,en;q=0.9',
+            // Both, so a visitor is the same visitor whatever the machine's .env says about
+            // IS_HOSTED: the header is read on the hosted install only, the address elsewhere.
+            // With the header alone this file passed on CI and failed on a selfhost-configured
+            // machine, where every "other visitor" was the same 127.0.0.1.
             'HTTP_CF_CONNECTING_IP' => $ip,
+            'REMOTE_ADDR' => $ip,
         ];
     }
 
@@ -149,7 +155,7 @@ class GuestFunnelTest extends TestCase
             $this->beacon($this->body($stage))->assertNoContent();
             $this->assertSame(1, $this->stat($column), $stage.': the same visitor, twice');
 
-            $this->beacon($this->body($stage), ['HTTP_CF_CONNECTING_IP' => '203.0.113.77'])->assertNoContent();
+            $this->beacon($this->body($stage), ['HTTP_CF_CONNECTING_IP' => '203.0.113.77', 'REMOTE_ADDR' => '203.0.113.77'])->assertNoContent();
             $this->assertSame(2, $this->stat($column), $stage);
         }
     }
@@ -242,6 +248,30 @@ class GuestFunnelTest extends TestCase
         $this->assertSame(0, $done(['status' => 'unpaid', 'payment_method' => 'paypal']), 'back from PayPal with nothing captured');
         $this->assertSame(0, $done(['status' => 'expired', 'payment_method' => 'paypal']), 'refused, and expired on the spot');
         $this->assertSame(0, $done(['status' => 'cancelled']), 'cancelled');
+    }
+
+    public function test_the_end_of_a_checkout_reads_the_sale_as_it_stands_not_as_the_caller_last_saw_it(): void
+    {
+        $ticket = $this->createTicket($this->event, ['price' => 20, 'quantity' => 50]);
+        $count = function (Sale $stale, string $ip) {
+            $before = $this->stat('gp_checkouts_done');
+            GuestFunnel::countCheckoutDone(Request::create('/payments/x/return/1', 'GET', server: $this->browser($ip)), $stale);
+
+            return $this->stat('gp_checkouts_done') - $before;
+        };
+
+        // A gateway that gives up expires a locked copy and lands the buyer with the one it was
+        // handed, which still says unpaid (Payfast, with its credentials gone).
+        $refused = $this->createSale($this->event, $this->role, ['status' => 'unpaid', 'payment_method' => 'payfast', 'email' => 'r@gmail.com'], $ticket);
+        Sale::whereKey($refused->id)->update(['status' => 'expired']);
+        $this->assertSame('unpaid', $refused->status, 'fixture: the model in hand is stale');
+        $this->assertSame(0, $count($refused, '203.0.113.201'), 'an order that was just expired is not an order');
+
+        // PayPal marks an order pending with a raw update the model in hand never sees.
+        $pending = $this->createSale($this->event, $this->role, ['status' => 'unpaid', 'payment_method' => 'paypal', 'email' => 'p@gmail.com'], $ticket);
+        Sale::whereKey($pending->id)->update(['paypal_pending_at' => now()]);
+        $this->assertNull($pending->paypal_pending_at, 'fixture: the model in hand is stale');
+        $this->assertSame(1, $count($pending, '203.0.113.202'), 'an order whose payment is on its way is one');
     }
 
     public function test_a_checkout_counts_its_start_and_its_end(): void

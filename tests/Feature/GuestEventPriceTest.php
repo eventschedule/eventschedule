@@ -100,6 +100,29 @@ class GuestEventPriceTest extends TestCase
         $this->assertNull($this->priceRow($hidden));
     }
 
+    public function test_from_is_a_price_somebody_can_still_pay(): void
+    {
+        $date = now()->addDays(7)->format('Y-m-d');
+
+        // An early bird with no end date that has sold out is still "on sale" by its dates.
+        $event = $this->event();
+        $early = $this->createTicket($event, ['type' => 'Early bird', 'price' => 10, 'quantity' => 2]);
+        $this->createTicket($event, ['type' => 'Regular', 'price' => 20, 'quantity' => 50]);
+        $this->createSale($event, $this->role, ['status' => 'paid', 'event_date' => $date], $early, 2);
+
+        $summary = $event->fresh()->ticketPriceSummary($date);
+        $this->assertSame(20.0, $summary['min'], 'not "From $10", which nobody can buy');
+        $this->assertFalse($summary['from'], 'and one price left is that price');
+        $this->assertStringContainsString('$20', $this->priceRow($event));
+        $this->assertStringNotContainsString('$10', $this->priceRow($event));
+
+        // Everything gone: the page says Sold out, and the prices stay as they were.
+        $gone = $this->event();
+        $only = $this->createTicket($gone, ['price' => 15, 'quantity' => 1]);
+        $this->createSale($gone, $this->role, ['status' => 'paid', 'event_date' => $date], $only, 1);
+        $this->assertSame(15.0, $gone->fresh()->ticketPriceSummary($date)['min']);
+    }
+
     public function test_few_left_is_said_without_a_number_and_only_when_it_is_true(): void
     {
         $date = now()->addDays(7)->format('Y-m-d');
@@ -120,6 +143,11 @@ class GuestEventPriceTest extends TestCase
         $open = $this->event();
         $this->createTicket($open, ['price' => 20, 'quantity' => 0]);
         $this->assertFalse($open->fresh()->ticketPriceSummary($date)['low']);
+
+        // A room of two with nothing sold yet is small, not running out.
+        $small = $this->event();
+        $this->createTicket($small, ['price' => 20, 'quantity' => 2]);
+        $this->assertFalse($small->fresh()->ticketPriceSummary($date)['low']);
 
         // Sold out is said by the button, not as "few left".
         $gone = $this->event();

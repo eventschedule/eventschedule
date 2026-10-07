@@ -715,12 +715,23 @@ class Sale extends Model
      * handed Event::role(), which is the event's performer and nothing else, so a ticket sold by a
      * venue or a curator had no schedule at all and showed no logo. The event's own schedule, then
      * its performer, are the fallbacks for a sale whose schedule has since been renamed or removed.
+     *
+     * The name on the sale is the one the buyer was on that day and is never rewritten, and a
+     * schedule that renames itself frees its old name for anyone. So the name alone proves
+     * nothing: it is taken only while the schedule holding it still has this event on it.
+     * Otherwise a stranger who registered the old name would be on every ticket sold under it,
+     * in the tab, the logo, the colours and "Contact ...".
      */
     public function sellingRole(): ?Role
     {
+        $event = $this->event;
         $role = $this->subdomain ? Role::where('subdomain', $this->subdomain)->where('is_deleted', false)->first() : null;
 
-        return $role ?? $this->event?->creatorRole ?? $this->event?->role();
+        if ($role && $event && $role->id !== $event->creator_role_id && ! $event->roles->contains('id', $role->id)) {
+            $role = null;
+        }
+
+        return $role ?? $event?->creatorRole ?? $event?->role();
     }
 
     public function toApiData($includeSecret = false)

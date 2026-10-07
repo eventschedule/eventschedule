@@ -226,7 +226,10 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
       `gp_form_opens`, `gp_calendar_adds`) arrive by a beacon and miss a visitor whose browser
       blocks it, while the other four are counted on the server and miss nobody.
     - `gp_checkouts_done / gp_checkout_starts` is the cleanest of the three, both counted on the
-      server. It still loses the buyer who pays and closes the tab before coming back.
+      server. It still loses the buyer who pays and closes the tab before coming back, and
+      every order of an event sold through an Invoice Ninja payment link: that buyer is sent to
+      Invoice Ninja's own purchase page and its return does not pass through here, so those
+      starts never have an end.
     - "Visitor" is an address and a browser. Phones on one venue's wifi, or behind one carrier,
       are one visitor, and that thins the first stage more than the last, so the ratios read a
       little high.

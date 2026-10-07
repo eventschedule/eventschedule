@@ -202,4 +202,16 @@ final class GuestTheme
         // second, and an owner's own `body { --es-accent: ... }`, printed later, outranks both.
         return $selector.' { '.$body($light).' }'."\n".':where(.dark) '.$selector.' { '.$body($dark).' }';
     }
+
+    /**
+     * The dark values alone, for a surface that is dark in both modes (the ticket). Without it a
+     * visitor in light mode got the fill made for a white panel on the ticket's near-black card:
+     * a black, white or grey accent drew "Complete payment" as a label with no button around it.
+     */
+    public function darkCss(string $selector): string
+    {
+        [, $dark] = $this->tokens();
+
+        return $selector.' { '.implode(' ', array_map(fn ($name, $value) => $name.': '.$value.';', array_keys($dark), $dark)).' }';
+    }
 }

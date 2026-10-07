@@ -118,6 +118,13 @@ class GuestFunnel
     public static function countCheckoutDone(Request $request, Sale $sale, bool $placed = false): void
     {
         try {
+            // As it stands in the database, not as the caller last saw it. A gateway that gives
+            // up expires a LOCKED copy of the sale and then lands the buyer with the stale one
+            // (Payfast without credentials: an order that had just been expired was counted), and
+            // PayPal marks an order pending with a raw update the model in hand never sees (an
+            // order that was on its way was not).
+            $sale = $sale->fresh() ?? $sale;
+
             $done = $placed
                 || $sale->status === 'paid'
                 || ($sale->status === 'unpaid' && (

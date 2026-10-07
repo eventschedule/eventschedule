@@ -682,7 +682,7 @@ class AppController extends Controller
      *    manage page, its cancel and pay actions, its payment return, its calendar file and its
      *    reschedule page;
      *  - /gift-card/view/ and /installment/view/: a gift card and a payment plan;
-     *  - /ticket/view/, /ticket/qr_code/, /ticket/wallet/ and /ticket/order/: a ticket, its QR
+     *  - /ticket/view/, /ticket/status/, /ticket/qr_code/, /ticket/wallet/ and /ticket/order/: a ticket, its QR
      *    code, its wallet pass and an order;
      *  - /sub/c/, /sub/m/, /sub/u/ and /int/u/: an audience subscription's confirm, manage and
      *    unsubscribe links, and an event-interest unsubscribe;
@@ -702,7 +702,7 @@ class AppController extends Controller
         '/appointment/view/', '/appointment/cancel/', '/appointment/pay/', '/appointment/checkout/',
         '/appointment/ical/', '/appointment/reschedule/',
         '/gift-card/view/', '/installment/view/',
-        '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
+        '/ticket/view/', '/ticket/status/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
         '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
         '/nl/o/', '/nl/c/', '/nl/u/',
         '/ne/c/', '/ne/u/',

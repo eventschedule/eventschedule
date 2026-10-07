@@ -41,7 +41,7 @@ class RobotsTxtTest extends TestCase
         '/appointment/view/', '/appointment/cancel/', '/appointment/pay/', '/appointment/checkout/',
         '/appointment/ical/', '/appointment/reschedule/',
         '/gift-card/view/', '/installment/view/',
-        '/ticket/view/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
+        '/ticket/view/', '/ticket/status/', '/ticket/qr_code/', '/ticket/wallet/', '/ticket/order/',
         '/sub/c/', '/sub/m/', '/sub/u/', '/int/u/',
         '/nl/o/', '/nl/c/', '/nl/u/',
         '/ne/c/', '/ne/u/',

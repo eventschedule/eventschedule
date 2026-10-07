@@ -11,6 +11,9 @@
      The door view is NOT inside .gk-ticket: that element has a filter, which would make it the
      containing block of a fixed child and un-fix it. --}}
 <style {!! nonce_attr() !!}>
+    {{-- The ticket is dark in light mode too, so its buttons take the schedule's DARK values
+         whatever the visitor's mode (GuestTheme::darkCss()). $themeRole is the including page's. --}}
+    {!! \App\Utils\GuestTheme::for(($themeRole ?? null) ? \App\Utils\GuestTheme::lookRole($themeRole, null, null) : null)->darkCss('.gk-tkpage') !!}
     .gk-tkpage {
         --tk-ink: #ffffff;
         --tk-ink-2: #c3c6d4;
@@ -131,9 +134,14 @@
     .gk-tk-menu { display: grid; gap: .375rem; margin: .5rem 1.25rem 0; padding: .5rem; border: 1px solid var(--tk-line); border-radius: .875rem; background: var(--tk-well); }
     .gk-tk-menu a { display: flex; align-items: center; min-height: 2.75rem; padding: 0 .75rem; border-radius: .625rem; color: var(--tk-ink); font-weight: 600; text-decoration: none; }
     .gk-tk-menu a:hover { background: rgb(255 255 255 / .09); }
+    .gk-tk-menu input { width: 100%; min-height: 2.75rem; padding: 0 .75rem; border: 1px solid var(--tk-line); border-radius: .625rem; background: rgb(0 0 0 / .3); color: var(--tk-ink); font: inherit; font-size: .875rem; }
+    .gk-tk-center { display: flex; justify-content: center; }
 
     .gk-tk-facts { display: grid; gap: 1.125rem; margin: 0; padding: 1.5rem 1.25rem .5rem; }
-    .gk-tk-fact { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: .875rem; align-items: center; }
+    {{-- A row is a term and its descriptions and nothing else, so it is a real description list.
+         The icon rides in the term, set to the side of both. --}}
+    .gk-tk-fact { position: relative; display: flex; flex-direction: column; justify-content: center; min-height: 2.75rem; padding-inline-start: 3.625rem; }
+    .gk-tk-fact dt .gk-tk-ico { position: absolute; inset-block: 0; inset-inline-start: 0; margin-block: auto; }
     .gk-tk-ico { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: .875rem; }
     .gk-tk-ico svg { width: 1.375rem; height: 1.375rem; }
     .gk-tk-ico-a { background: rgb(var(--es-glow) / .2); color: var(--es-glow-ink); }
@@ -166,6 +174,7 @@
     .gk-tk-confirm div { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
     .gk-tk-foot { display: grid; margin: 0 1.25rem; padding: .375rem 0 .625rem; border-top: 1px solid rgb(255 255 255 / .09); font-size: .90625rem; }
     .gk-tk-foot a, .gk-tk-foot span { display: inline-flex; align-items: center; justify-self: start; min-height: 2.75rem; color: var(--tk-ink-2); font-weight: 500; overflow-wrap: anywhere; }
+    .gk-tk-foot .gk-tk-foot-addr { min-height: 0; margin-top: -.5rem; padding-bottom: .5rem; font-size: .8125rem; color: var(--tk-ink-3); }
     .gk-tk-foot a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgb(255 255 255 / .35); }
 
     {{-- The ticket's sibling pages (an order of several events, a payment plan): the same ground
@@ -193,7 +202,7 @@
     .gk-tkpage .glass { background: var(--tk-well); border: 1px solid var(--tk-line); }
 
     {{-- The door: a white screen with the code as large as the screen allows. --}}
-    .gk-door { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .875rem; padding: 4.5rem 1.25rem 1.5rem; overflow-y: auto; background: #ffffff; color: #111318; text-align: center; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .gk-door { position: fixed; inset: 0; z-index: 60; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .875rem; padding: 4.5rem 1.25rem 1.5rem; overflow-y: auto; background: #ffffff; color: #111318; text-align: center; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     .gk-door[hidden] { display: none; }
     .gk-door :focus-visible { outline: 2px solid #111318; outline-offset: 2px; }
     .gk-door-close { position: absolute; top: .875rem; inset-inline-end: .875rem; min-width: 5.5rem; height: 3.5rem; border: 1px solid #d5d8de; border-radius: .875rem; background: #ffffff; color: #111318; font: inherit; font-size: 1.0625rem; font-weight: 800; cursor: pointer; }
@@ -232,5 +241,10 @@
         .gk-tk-msg, .gk-tk-pill { background: #ffffff; color: #000000; border: 1px solid #94a3b8; }
         .gk-tk-good { color: #000000; }
         .gk-tk-back, .gk-tk-btn, .gk-tk-tiles, .gk-tk-menu, .gk-tk-actions, .gk-tk-confirm, .gk-tk-book button, .gk-door, .gk-tk-noprint { display: none; }
+        {{-- The payment plan's panel is written in white-on-dark utility classes. --}}
+        .gk-tkpage .glass [class*="text-white"] { color: #000000; }
+        .gk-tkpage .glass [class*="border-white"] { border-color: #cbd5e1; }
+        {{-- A link on paper is only its words: say where the terms are. --}}
+        .gk-tk-foot a[href^="http"]::after { content: ' (' attr(href) ')'; font-weight: 400; overflow-wrap: anywhere; }
     }
 </style>

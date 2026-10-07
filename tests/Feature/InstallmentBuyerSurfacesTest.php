@@ -228,6 +228,25 @@ class InstallmentBuyerSurfacesTest extends TestCase
         $this->assertArrayNotHasKey('payment_status', $response->json());
     }
 
+    public function test_the_pay_page_names_the_card_on_file_and_the_ticket_does_not(): void
+    {
+        [, , $event, $sale, $plan] = $this->scaffold();
+        $card = __('messages.installment_card_on_file', ['brand' => 'Visa', 'last4' => '4242']);
+
+        // Opened with the PLAN's secret, which is the buyer's own. The page took the ticket's
+        // dark dress and lost this line with it: the panel read "dark" as "this is the ticket".
+        $this->get(route('installment.view', [
+            'plan_id' => UrlUtils::encodeId($plan->id),
+            'secret' => $plan->secret,
+        ]))->assertOk()->assertSee($card);
+
+        // The ticket is what a door scans, and whoever it was forwarded to opens.
+        $this->get(route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $sale->secret,
+        ]))->assertOk()->assertSee(__('messages.payment_plan'))->assertDontSee('4242');
+    }
+
     // ---- The buyer's ticket page ----
 
     public function test_the_ticket_page_shows_the_plan(): void

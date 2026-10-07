@@ -2549,6 +2549,7 @@ class TicketController extends Controller
     private function redirectToPurchaseLanding($sale, $event, bool $isEmbed = false)
     {
         GuestFunnel::countCheckoutDone(request(), $sale);
+        \App\Services\Payments\PaymentGatewayDriver::markLanded($sale);
 
         session()->flash('cart_purchased', $sale->orderLegs()->map(fn ($leg) => [
             'subdomain' => $leg->subdomain,
@@ -3113,6 +3114,23 @@ class TicketController extends Controller
         $passPolicyTicket = $passBookable ? $bookingService->passSaleTicket($sale)?->ticket : null;
 
         return view('ticket.view', compact('event', 'sale', 'role', 'passBookable', 'bookedOccurrences', 'bookableOccurrences', 'passPolicyTicket'));
+    }
+
+    /**
+     * Where a sale stands, for a ticket that is waiting on a payment confirmation.
+     *
+     * The waiting ticket used to ask for its own whole page every four seconds. That is a page
+     * render per ask, and every ask landed in the one counter the unprefixed guest routes share
+     * (see the note above /release_tickets), which on hosted is shared by every visitor behind an
+     * edge address: a few card buyers in the same minute could have 429'd ticket pages, their
+     * codes and PayPal returns. This answers with one word and has a counter of its own. Same
+     * {event_id}/{secret} credential the ticket page takes, so it tells nothing new.
+     */
+    public function status($eventId, $secret)
+    {
+        $sale = Sale::where('event_id', UrlUtils::decodeId($eventId))->where('secret', $secret)->firstOrFail();
+
+        return response()->json(['status' => $sale->status])->header('Cache-Control', 'no-store, private');
     }
 
     public function handleAction(Request $request, $sale_id)

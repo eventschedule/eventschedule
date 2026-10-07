@@ -501,6 +501,9 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
+// What a ticket waiting on its payment asks while it waits. A named limiter of its own (keyed on
+// the real visitor and the ticket), so the asking never spends the counter the routes around it share.
+Route::get('/ticket/status/{event_id}/{secret}', [TicketController::class, 'status'])->name('ticket.status')->middleware('throttle:ticket_status');
 // "Add to Google Wallet". Redirects to a freshly signed pay.google.com save link rather than
 // embedding one in the page, so the ticket page and the confirmation email carry a short stable
 // URL of ours and the call to Google happens on tap, never during page or mail rendering. Same
