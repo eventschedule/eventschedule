@@ -231,6 +231,19 @@ const mountSetupGuide = () => {
         .catch(() => {});
 };
 
+// The venue map on a schedule's guest page (components/venue-map.blade.php). A chunk of its own
+// for the same reason: this file is on every page and the map is on a few. If the chunk fails to
+// load, the band is simply not drawn and the page is whole without it.
+const mountVenueMap = () => {
+    if (! document.getElementById('es-venue-map-host')) {
+        return;
+    }
+
+    import('./venue-map-boot.js')
+        .then((module) => module.mountVenueMap())
+        .catch(() => {});
+};
+
 const mountVueWidgets = () => {
     mountAccessibilityWidget();
     // Each bails out immediately when its host element is absent, so this stays cheap on
@@ -238,6 +251,7 @@ const mountVueWidgets = () => {
     mountStay22Map();
     mountConsentEmbeds();
     mountSetupGuide();
+    mountVenueMap();
 };
 
 if (document.readyState === 'loading') {

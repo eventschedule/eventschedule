@@ -74,6 +74,64 @@ if (! function_exists('google_analytics_enabled')) {
     }
 }
 
+if (! function_exists('map_provider_name')) {
+    /**
+     * The name a visitor is told for a map service: "OpenStreetMap" for its own hosts, otherwise
+     * the host itself, which is always true whatever an operator points the setting at.
+     */
+    function map_provider_name(?string $url): string
+    {
+        $host = strtolower((string) parse_url((string) $url, PHP_URL_HOST));
+
+        if ($host === 'openstreetmap.org' || str_ends_with($host, '.openstreetmap.org')) {
+            return 'OpenStreetMap';
+        }
+
+        return $host !== '' ? $host : (string) $url;
+    }
+}
+
+if (! function_exists('map_lookup')) {
+    /**
+     * The address search the venue map places its pins with, or null when this install has none
+     * (and so has no venue map at all).
+     *
+     * Config-only, like google_analytics_enabled(): the privacy policy's row for it is printed
+     * from this, in edge-cached HTML. Separate from map_tiles() because an operator may point the
+     * two at different services, and each sees something different: this one is sent venue
+     * addresses from the server, never anything about a visitor.
+     *
+     * @return array{url: string, name: string}|null
+     */
+    function map_lookup(): ?array
+    {
+        $url = trim((string) config('services.map.geocoder_url'));
+
+        return $url === '' ? null : ['url' => $url, 'name' => map_provider_name($url)];
+    }
+}
+
+if (! function_exists('map_tiles')) {
+    /**
+     * Where a visitor's browser fetches the venue map's street images, or null when this install
+     * shows pins on a plain ground. The service sees the visitor's IP address, so nothing is
+     * fetched from it before the visitor has allowed marketing cookies or pressed the control
+     * beside the sentence that names it.
+     *
+     * @return array{url: string, name: string, attribution: string}|null
+     */
+    function map_tiles(): ?array
+    {
+        $url = trim((string) config('services.map.tile_url'));
+
+        return $url === '' ? null : [
+            'url' => $url,
+            'name' => map_provider_name($url),
+            'attribution' => (string) config('services.map.attribution'),
+        ];
+    }
+}
+
 if (! function_exists('consent_required')) {
     /**
      * Whether this install has anything a visitor must consent to.

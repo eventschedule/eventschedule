@@ -56,6 +56,9 @@ class AdminAlertService
         // promises realtime page views are deleted about an hour after last activity, and rows
         // twice that old mean neither cron rail is running realtime:prune.
         'realtime_prune_stalled',
+        // Amber, beside it: no page is broken, but owners who switched a venue map on are
+        // waiting for one that cannot be finished while the address search does not answer.
+        'venue_map_lookups_failing',
         // Above subscriptions_unrecognized: that customer at least still has the schedule they
         // are paying for. This one is being charged for a schedule that no longer exists, and
         // nothing left in the app lets them stop it.
@@ -223,6 +226,19 @@ class AdminAlertService
                 } catch (\Throwable) {
                     return 0;
                 }
+            },
+
+            // A flag: the venue map's address search (PlaceLookupService) has not given an answer
+            // for an hour. The mark is set by the first failure in transit and cleared by the next
+            // answer, so a single timeout never shows here.
+            'venue_map_lookups_failing' => function () {
+                if (! \App\Services\PlaceLookupService::enabled()) {
+                    return 0;
+                }
+
+                $since = \Illuminate\Support\Facades\Cache::get(\App\Services\PlaceLookupService::FAILING_SINCE_KEY);
+
+                return is_numeric($since) && $since <= now()->subHour()->timestamp ? 1 : 0;
             },
 
             // A live subscription whose stripe_price is none of the four configured IDs.
@@ -502,6 +518,7 @@ class AdminAlertService
             'jobs_stalled' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],
+            'venue_map_lookups_failing' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],
             // Its own anchor, not #amount-mismatch: that block is a table of mismatched SALES,
             // and landing there would scroll past the thing the row is about.
             'subscriptions_orphaned' => ['insights', 'revenue', 'admin.revenue', [], '#orphaned-subscriptions', 'red', __('messages.revenue')],

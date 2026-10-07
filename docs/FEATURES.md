@@ -212,6 +212,23 @@ its own affiliate ID - custom domains.
 | Keep your own commission | `roles.stay22_aid` | Free on all tiers, deliberately not Pro-gated. Blank means the commission goes to the instance operator, which the settings page discloses |
 | Operator fallback ID | `Setting stay22_aid`, `/admin/settings` | Used for schedules that enabled the map without their own ID. Never used on a customer's custom domain |
 
+## Venue Map (operator-enabled)
+
+Off by default and **not a plan tier feature**: it exists only when the instance operator sets
+`MAP_GEOCODER_URL` (and, for street images, `MAP_TILE_URL`). Free on every plan once it does.
+Never offered to a venue schedule, which is one place.
+
+Pins come from an OpenStreetMap-based address search (`place_lookups`, keyed by address), never
+from `roles.geo_lat` / `geo_lon`: those are Google's, and Google's terms allow them on a Google map
+only. Street images load after the visitor has allowed marketing cookies or pressed Show map beside
+the sentence naming the service. Not in embeds, not in `?graphic=1`.
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Venue map on the schedule page | `VenueMap::offeredTo()` + `venue_map_settings.enabled` | Free on all tiers. Per-schedule toggle in Engagement > Venue map, off by default. The band appears once every venue has been looked up and two have a position (`VenueMap::band()`) |
+| Open the map on arrival | `venue_map_settings.starts_open` | Larger screens, visitors who allowed cookies. Not offered on an install with street images and no cookie banner |
+| Venue status list | `VenueMap::status()` | In the same row: On the map, Approximate position, Waiting, No street address, Address not found |
+
 ## Paid Ticket Selling
 
 Selling a ticket that has a PRICE is Pro/Enterprise. The gate is `Event::canSellPaidTickets()`,

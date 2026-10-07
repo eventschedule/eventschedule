@@ -6393,6 +6393,35 @@ class RoleController extends Controller
             ]);
         }
 
+        // A venue map that has not had its first pass: note its venues' addresses now, and ask
+        // about them from the queue, a second apart, so the map is on the page in under a minute.
+        // Never inside this request: on the sync driver the job would run right here, and the
+        // every-minute app:place-venues does the same work four addresses at a time.
+        //
+        // The two switches are stored here and not by the fill above: the map's settings have a
+        // table of their own, because `roles` cannot take another column. Only on a save that
+        // carries the switch, so a save from anywhere else leaves the map as it was.
+        $venueMapWasOn = \App\Services\VenueMap::enabledFor($role);
+
+        if ($request->has('show_venues_map') && \App\Services\VenueMap::offeredTo($role)) {
+            \App\Services\VenueMap::saveSettings($role, $request->boolean('show_venues_map'), $request->boolean('venues_map_open'));
+        }
+
+        // Nothing is looked up here: the addresses are noted, and asked about by the queued job
+        // (one a second) or, where the queue runs inline, by app:place-venues on the timer. A map
+        // whose addresses are all known already is ready on the spot.
+        if (\App\Services\VenueMap::enabledFor($role) && ! \App\Services\VenueMap::refreshReady($role)) {
+            if (config('queue.default') !== 'sync') {
+                \App\Jobs\PlaceScheduleVenues::dispatch($role->id);
+            }
+        }
+
+        // The owner lands on the schedule's admin page, so that is where a map just switched on,
+        // or still being prepared, says how far it is (role/show-admin-schedule).
+        if (\App\Services\VenueMap::enabledFor($role) && (! $venueMapWasOn || ! \App\Services\VenueMap::ready($role))) {
+            $redirect->with('venue_map_saved', true);
+        }
+
         // A new event animation is the moment the page looks its best, so the schedule tab opens
         // with an invitation to share it. Only for a schedule with a public page to share.
         if ($role->listAnimation() !== 'none' && $role->listAnimation() !== $oldListAnimation && $role->getGuestUrl()) {

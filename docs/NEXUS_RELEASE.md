@@ -202,6 +202,8 @@ two `2026_09_30_*` support chat migrations.
 
 ### Env vars
 
+- **`MAP_GEOCODER_URL`** and **`MAP_TILE_URL`** are new and optional. Unset, the venue map does
+  not exist (no row in the schedule form, no band). See "Venue map" below before setting them.
 - **`GROWTH_DATA_TOKEN`** is new and optional. Unset, `/api/internal/growth` answers 404 (checklist
   step 8).
 - **`GROWTH_DATA_URL`** belongs in a developer's `.env`, never on the app spec.
@@ -212,7 +214,9 @@ All run on both rails:
 - `app-send-activation-nudges`, hourly (live since 2026-09-28);
 - `app-send-owner-digests`, hourly (live since 2026-09-28);
 - `realtime-prune`, every five minutes;
-- `app-prune-cache`, hourly.
+- `app-prune-cache`, hourly;
+- `app-place-venues`, every minute (four address lookups a run at most; does nothing while
+  `MAP_GEOCODER_URL` is unset).
 
 ### GDPR (2026-10-04)
 
@@ -491,6 +495,57 @@ table, and old code runs on the new schema.
 3. **Open the Requests tab**: the card shows the place.
 
 **Undo:** revert and redeploy. The migration's `down()` drops only its two columns.
+
+### Venue map and the sponsors switch (2026-10-07)
+
+**What ships:**
+- A switch that hides a schedule's sponsors section without deleting anything (`roles.show_sponsors`,
+  default on). Nothing changes for anyone until an owner switches it off.
+- A map of a schedule's venues on its public page, each with its logo on its pin, off until an
+  owner switches it on AND off on this install until the two env vars below are set.
+- Three migrations: `2026_10_07_000003_add_show_sponsors_to_roles_table` (one `boolean default 1`
+  column), `2026_10_07_000004_create_place_lookups_table` and
+  `2026_10_07_000005_create_venue_map_settings_table` (new tables).
+
+**`roles` is full.** `show_sponsors` took the last byte of MySQL's 65,535-byte row: one more
+column of any size fails with error 1118 ("Row size too large"). That is why the map's settings
+are a table of their own. The `show_sponsors` migration ran on the dev database and on fresh test
+schemas; production has the same columns, so it fits there too, but if the deploy's `migrate`
+stops on it with 1118, that is this limit and nothing else. Before the NEXT column on `roles`,
+move a long `varchar` to `TEXT` (the four `varchar(500)` columns `slug_pattern`,
+`ai_style_instructions`, `ai_content_instructions` and `agenda_ai_prompt` hold 2,002 bytes each).
+
+**To switch the map on for eventschedule.com**, add to the app spec (both components, web and
+worker, since the worker asks the address search):
+
+```
+MAP_GEOCODER_URL=https://nominatim.openstreetmap.org/search
+MAP_TILE_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
+```
+
+Both services are OpenStreetMap's own and free, and both have a usage policy:
+- the address search allows one request a second at the very most, four a minute for a script on
+  a timer, and blocks a client that repeats a query. The code keeps to all three (one runner at a
+  time across both rails and the queue, answers kept by address, a miss asked again after 30
+  days). At a few hundred venues this is well inside it. If the map is taken up widely, move to a
+  hosted Nominatim or run one: only the URL changes.
+- the tile servers are best-effort and forbid bulk fetching. Tiles are fetched by visitors'
+  browsers only, on their own request, never by the server.
+
+Leave them unset and nothing about this ships to anyone: the feature stays dark.
+
+**After the deploy (with the vars set):**
+- `/admin/queue`'s Scheduler card lists `app-place-venues` with a recent run.
+- On a curator schedule, Engagement > Venue map is there. Switch it on and save: the schedule's
+  admin page shows "Your venue map is being prepared" with a count that moves, then "Your venue map
+  is on your page". In a private window the schedule page shows the band, and the Network tab
+  shows NO request to `tile.openstreetmap.org` until Show map is pressed.
+- `select status, count(*) from place_lookups group by status`: mostly `found`, some
+  `approximate` (villages without street names), some `missing`. All `pending` an hour after a map
+  was switched on means the worker cannot reach the address search; `/admin`'s Needs attention
+  list says so after an hour of failures.
+- The privacy policy at `/privacy` lists the two services by itself once the vars are set (clause
+  on embedded content and the provider table). Nothing to edit.
 
 ### Guest page counts (2026-10-07)
 

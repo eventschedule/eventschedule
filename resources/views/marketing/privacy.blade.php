@@ -782,13 +782,31 @@
 
         // The date of the last change to what this policy says. A fact about the document: move it
         // only in a commit that changes a clause.
-        $lastUpdated = 'October 6, 2026';
+        $lastUpdated = 'October 7, 2026';
 
         // The AI providers this install actually calls (GeminiUtils, OpenAIUtils).
         $aiProviders = array_values(array_filter([
             config('services.google.gemini_key') ? 'Google (Gemini)' : null,
             config('services.openai.api_key') ? 'OpenAI' : null,
         ]));
+
+        // The map of venues on a schedule page (App\Services\VenueMap) uses two services, and an
+        // operator may point them at different providers, so each is named from its own helper
+        // and only where this install has it set: map_lookup() is the address search our servers
+        // ask, map_tiles() is where a visitor's browser fetches street images. One row when both
+        // are the same provider. Both helpers read config only, which is what makes them safe in
+        // this edge-cached page.
+        $mapLookup = map_lookup();
+        $mapTiles = map_tiles();
+        $mapLookupLine = 'Our servers send it the address of a venue to find where it is, and nothing about you.';
+        $mapTilesLine = 'Your browser fetches the street images from it, so it sees your IP address, and only if you allow marketing cookies or press the button that shows the map.';
+        $mapProcessors = match (true) {
+            $mapLookup && $mapTiles && $mapLookup['name'] === $mapTiles['name'] => [[$mapLookup['name'], 'The map of venues on a schedule page. '.$mapLookupLine.' '.$mapTilesLine]],
+            default => array_values(array_filter([
+                $mapLookup ? [$mapLookup['name'], 'Address search for the map of venues on a schedule page. '.$mapLookupLine] : null,
+                $mapTiles ? [$mapTiles['name'], 'Street images for the map of venues on a schedule page. '.$mapTilesLine] : null,
+            ])),
+        };
 
         // Clause 10. A row appears only where this install can actually send that provider data,
         // read from the same predicate the feature itself uses, so the schedule describes what this
@@ -838,6 +856,7 @@
                 ? ['OneSignal', 'Push notifications, only for a browser that has turned them on. Nothing is sent to OneSignal from a browser that has not.']
                 : null,
             ['Stay22', 'Accommodation search, on event pages where the schedule has enabled the accommodation map, and only once the map has been loaded'],
+            ...$mapProcessors,
             config('app.growth_data_token')
                 ? ['Anthropic', 'Help analyzing product usage statistics that carry no names, email addresses, IP addresses or anything you wrote.']
                 : null,

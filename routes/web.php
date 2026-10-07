@@ -107,6 +107,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
             ->withoutMiddleware('web');
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
+        // The venue map's venues (App\Services\VenueMap). Its own named bucket: an unnamed throttle
+        // shares one with every other throttled route on the host.
+        Route::get('/api/venue-map', [\App\Http\Controllers\VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
         // Claiming a schedule the app created while somebody entered an event, and the other
@@ -778,6 +781,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/subscription/swap', [SubscriptionController::class, 'swap'])->name('subscription.swap');
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
+    // How a schedule's venues are placed on its venue map, for its editors.
+    Route::get('/{subdomain}/venue-map/status', [\App\Http\Controllers\VenueMapController::class, 'status'])->name('role.venue_map.status');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
     Route::post('/{subdomain}/notification-email/resend', [NotificationEmailController::class, 'resend'])->name('role.notification_email.resend')->middleware('throttle:5,1');
     Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');
@@ -2216,6 +2221,7 @@ if (! config('app.hosted') || config('app.is_testing')) {
         ->withoutMiddleware('web');
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
+    Route::get('/{subdomain}/api/venue-map', [\App\Http\Controllers\VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/claim', [RoleController::class, 'claimStart'])->name('role.claim.start')->middleware('throttle:20,1,schedule_claim');

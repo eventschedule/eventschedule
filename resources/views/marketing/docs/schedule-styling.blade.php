@@ -508,6 +508,8 @@
                     <tr><td><code class="doc-inline-code">#gp-below-bar</code></td><td>The description and contact strip under the compact header</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-video-carousel</code></td><td>The strip of videos from upcoming events</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-sponsors</code></td><td>The sponsor logo grid (also on event pages)</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-map</code></td><td>The venue map: its band and the map it opens</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-map-sheet</code></td><td>The full-window venue map, on a phone and when a visitor enlarges it</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-events</code></td><td>Everything from the events heading down, including the calendar</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-next-event</code></td><td>The card above the month calendar that shows your next event</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-calendar</code></td><td>The calendar or event list panel on its own</td></tr>

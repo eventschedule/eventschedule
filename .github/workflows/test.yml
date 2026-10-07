@@ -193,6 +193,9 @@ jobs:
           sed -i 's/CACHE_STORE=.*/CACHE_STORE=database/' .env
           echo "" >> .env && echo "IS_NEXUS=true" >> .env
           echo "DEBUGBAR_ENABLED=false" >> .env
+          # The venue map exists only where an address search is named (VenueMapJourneyTest).
+          # The discard port: the journey writes every position itself and nothing is asked.
+          echo "MAP_GEOCODER_URL=http://127.0.0.1:9/search" >> .env
 
       - name: Generate application key
         run: php artisan key:generate

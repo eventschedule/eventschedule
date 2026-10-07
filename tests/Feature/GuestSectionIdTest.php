@@ -31,8 +31,12 @@ class GuestSectionIdTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
-    /** Blade files that may declare a gp-* id. Keep in step with the docs table. */
+    /**
+     * Files that may declare a gp-* id: the guest Blade views, and the one guest component whose
+     * markup is a Vue template (the venue map). Keep in step with the docs table.
+     */
     private const GUEST_VIEWS = [
+        'resources/js/components/VenueMap.vue',
         'resources/views/role/show-guest.blade.php',
         'resources/views/event/show-guest.blade.php',
         'resources/views/event/partials/interest-capture.blade.php',

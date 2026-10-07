@@ -36,6 +36,7 @@
             <x-doc-nav-link href="#engagement-feedback">Feedback</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-carpool">Carpool</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-sponsors">Sponsors</x-doc-nav-link>
+            <x-doc-nav-link href="#engagement-venue-map">Venue map</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-accommodation">Accommodation</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#event-sources">Event Sources</x-doc-nav-link>
@@ -1143,6 +1144,43 @@
         <div class="doc-callout doc-callout-tip mt-4">
             <div class="doc-callout-title">Tip</div>
             <p>You can also override sponsors for individual events. See <a href="{{ route('marketing.docs.creating_events') }}#sponsors" class="doc-link">Per-Event Sponsors</a>.</p>
+        </div>
+
+        <!-- Venue map -->
+        <h3 id="engagement-venue-map" class="doc-subheading">Venue map</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Show the venues of your events as pins on a map on your public schedule page, each with the venue's logo on its pin. A visitor presses a venue to see what is coming up there, get directions and find what else is nearby.
+        </p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show a map of venues</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Off by default. Switch it on and save. Each venue's address is then looked up once, a few at a time, and your schedule's admin page shows how far that is. The map is put on your page when every venue has been looked up, and needs at least two venues with a position.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Open the map on arrival</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The map is a band above your events that a visitor opens. With this on, it starts open on larger screens for visitors who have allowed cookies. On a phone it always starts closed, and a visitor who hides it keeps it hidden.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Which venues are on it</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The venues of your public events from the last 60 days onward. A venue with nothing coming up is a small grey dot. Events that are a draft, cancelled, unlisted or behind a password do not count, and neither does a venue that declined the event. A recurring event keeps its venue on the map for as long as the series runs. An online event whose location is a meeting link is not a place and is left out. On a sub-schedule's page the map holds that sub-schedule's venues.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venues</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Once the map is on, this list names every venue and where it stands: <strong class="text-gray-900 dark:text-white">On the map</strong>, <strong class="text-gray-900 dark:text-white">Approximate position</strong>, <strong class="text-gray-900 dark:text-white">Waiting</strong>, <strong class="text-gray-900 dark:text-white">No street address</strong> or <strong class="text-gray-900 dark:text-white">Address not found</strong>, with the venues that need attention first. A venue with a town and no street is placed at the centre of a small town or village and marked approximate. In a larger town it is left off, because the centre of a town would put it in the wrong place. To fix a venue, correct its address: a changed address is looked up again.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Seeing a venue's events</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A venue's panel lists its next three events. Where it has more, <strong class="text-gray-900 dark:text-white">See all events here</strong> sets the venue filter of the event list below the map, the same filter a visitor can choose there. The button is offered while that list is holding events for the venue, so in the month view it appears for venues with an event in the month on screen.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Visitor privacy</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The street images come from a map service, which sees the address of whoever loads them. They are not loaded when the page opens. A visitor who has allowed cookies gets them when opening the map. Anyone else is told on the band which service they come from, and pressing <strong class="text-gray-900 dark:text-white">Show map</strong> beside that sentence loads them; <strong class="text-gray-900 dark:text-white">Open without streets</strong> shows the pins on a plain ground instead. The venue addresses are sent to the address search by the server, and nothing about a visitor is.</p>
+            </div>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Availability</div>
+            <p>This row only appears if the operator of your Event Schedule instance has set up a map service, and never on a venue schedule, which is one place. It is available on <strong class="text-gray-900 dark:text-white">all plans</strong>, including Free.</p>
         </div>
 
         <!-- Accommodation -->

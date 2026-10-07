@@ -130,6 +130,19 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * As for Google's Geocoding API above, for the venue map's address search. It is free, and it blocks a client that
+     * asks too often or repeats itself: with the operator's own MAP_GEOCODER_URL live, every test
+     * that draws a venue map would send its fixtures' addresses there. Empty is also what an
+     * install without a venue map looks like, so no other test meets the feature by accident.
+     */
+    public function test_no_fixture_can_reach_the_venue_maps_address_search(): void
+    {
+        $this->assertSame('', (string) config('services.map.geocoder_url'), 'phpunit.xml must pin MAP_GEOCODER_URL empty.');
+        $this->assertSame('', (string) config('services.map.tile_url'), 'phpunit.xml must pin MAP_TILE_URL empty.');
+        $this->assertFalse(\App\Services\VenueMap::available());
+    }
+
+    /**
      * The third harness split only CI could disprove, and the one that hid longest.
      *
      * preg_match() returns FALSE - not 0 - when PCRE runs out of JIT stack, and

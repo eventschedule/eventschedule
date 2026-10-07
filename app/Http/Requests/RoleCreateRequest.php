@@ -74,6 +74,8 @@ class RoleCreateRequest extends FormRequest
             // renders both toggles, and a junk value would otherwise reach a NOT NULL column.
             'show_subscribe_panel' => ['sometimes', 'boolean'],
             'show_sponsors' => ['sometimes', 'boolean'],
+            'show_venues_map' => ['sometimes', 'boolean'],
+            'venues_map_open' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],
         ];
     }

@@ -4381,6 +4381,17 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * The schedule's venue map settings (Engagement > Venue map). Not columns here because this
+     * table is at MySQL's row-size limit; a schedule with no row has its map off, which the
+     * default model says. Read through App\Services\VenueMap, which also knows whether the
+     * install has a map at all.
+     */
+    public function venueMapSetting()
+    {
+        return $this->hasOne(VenueMapSetting::class)->withDefault(['enabled' => false, 'starts_open' => false, 'ready_at' => null]);
+    }
+
+    /**
      * The schedule's sponsors as a guest page shows them: none while the owner has the section
      * switched off (roles.show_sponsors). The stored list is untouched, so switching it back on
      * shows them again. The schedule form, a newsletter's sponsors block and getSponsorLogos()

@@ -116,6 +116,13 @@
              there), and tests load .env. Pinned empty so it can never back a test request: the
              endpoint tests set their own. -->
         <env name="GROWTH_DATA_TOKEN" value="" force="true"/>
+        <!-- The venue map's address search and tile server (config services.map). The operator's
+             own may be set in their .env, and with the search live every test that draws a map
+             would send a venue fixture's address to a real, rate-limited service. Empty is also
+             what switches the venue map off, so a test that wants one sets
+             config(['services.map.geocoder_url' => ...]) together with Http::fake(). -->
+        <env name="MAP_GEOCODER_URL" value="" force="true"/>
+        <env name="MAP_TILE_URL" value="" force="true"/>
         <!-- The operator's real Google backend key lives in their .env, and Role's saving hook
              geocodes any schedule that has an address whenever one is configured. With it live,
              every fixture that sets a city or a street made a real, BILLED request to the

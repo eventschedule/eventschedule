@@ -43,6 +43,23 @@ return [
         ],
     ],
 
+    // The venue map on a schedule's guest page (App\Services\VenueMap). Two addresses, and the
+    // map is OFF until both kinds of service are named: geocoder_url is the address search that
+    // places a venue's pin (asked from this server, a few venues a minute), tile_url is where a
+    // visitor's browser fetches street images once they have asked for them. Unset geocoder_url
+    // means no map at all; unset tile_url means pins on a plain ground. OpenStreetMap's own, for
+    // an install that wants them: https://nominatim.openstreetmap.org/search and
+    // https://tile.openstreetmap.org/{z}/{x}/{y}.png (both have usage policies; see the selfhost
+    // guide). Never Google's coordinates: its terms allow those only on a Google map.
+    'map' => [
+        'geocoder_url' => env('MAP_GEOCODER_URL') ?: null,
+        'tile_url' => env('MAP_TILE_URL') ?: null,
+        // The credit on the map, and where it leads. The pins' positions are the search
+        // service's data, so the credit is shown with or without street images.
+        'attribution' => env('MAP_ATTRIBUTION') ?: '© OpenStreetMap contributors',
+        'attribution_url' => env('MAP_ATTRIBUTION_URL') ?: 'https://www.openstreetmap.org/copyright',
+    ],
+
     'google' => [
         'backend' => env('BACKEND_GOOGLE_KEY'),
         'maps' => env('MAPS_API_KEY'),

@@ -188,6 +188,16 @@ class AppController extends Controller
                 report($e);
             }
 
+            // The venue map's address lookups: at most four a call, a no-op with no address
+            // search configured. After the queue, so it never delays mail. Keep in sync with
+            // routes/console.php; the lock the two rails share is inside the service.
+            try {
+                \Artisan::call('app:place-venues');
+            } catch (\Throwable $e) {
+                \Log::error('Scheduled command app:place-venues failed: '.$e->getMessage());
+                report($e);
+            }
+
             // === EVERY 5 MINUTES ===
             if (! Cache::has('td_5min')) {
                 Cache::put('td_5min', true, now()->addMinutes(5));

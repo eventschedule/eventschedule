@@ -1103,6 +1103,8 @@
             'carpool' => __('messages.carpool'),
             'sponsors' => __('messages.sponsors'),
             'sponsors_hidden' => __('messages.sponsors_hidden'),
+            'venue_map' => __('messages.venue_map'),
+            'venue_map_starts_open' => __('messages.venue_map_starts_open'),
             'require_approval' => __('messages.require_approval'),
             'custom_css' => __('messages.custom_css'),
             'email' => __('messages.email'),
@@ -4800,6 +4802,88 @@
                         </div>
                         <!-- End Tab Content: Sponsors -->
 
+                        <!-- Tab Content: Venue map -->
+                        {{-- A map of the schedule's venues on its guest page (App\Services\VenueMap). Not for
+                             a venue schedule, which is one place, nor on an install with no address search
+                             (services.map.geocoder_url), nor before the schedule exists. Free on every plan.
+                             The two switches are not columns of the schedule: RoleController::update()
+                             hands them to VenueMap::saveSettings(). --}}
+                        @if ($role->exists && \App\Services\VenueMap::offeredTo($role))
+                        @php
+                            $venueMapStored = \App\Services\VenueMap::enabledFor($role);
+                            $venueMapOn = (bool) old('show_venues_map', $venueMapStored);
+                            $venueMapStatus = $venueMapStored ? \App\Services\VenueMap::status($role) : null;
+                            $venueMapStates = [
+                                \App\Services\VenueMap::PLACED => __('messages.venue_map_placed'),
+                                \App\Services\VenueMap::APPROXIMATE => __('messages.venue_map_approx'),
+                                \App\Services\VenueMap::WAITING => __('messages.venue_map_waiting'),
+                                \App\Services\VenueMap::NO_ADDRESS => __('messages.venue_map_no_address'),
+                                \App\Services\VenueMap::NOT_FOUND => __('messages.venue_map_address_not_found'),
+                            ];
+                        @endphp
+                        <x-form-row group="engagement" tab="map" :title="__('messages.venue_map')" class="engagement-tab" />
+                        <div id="engagement-tab-map" class="event-subrow-body engagement-tab-content" hidden>
+
+                        <div class="mb-6">
+                            <x-toggle name="show_venues_map"
+                                label="{{ __('messages.show_venues_map') }}"
+                                checked="{{ $venueMapOn }}"
+                                help="{{ __('messages.show_venues_map_help', ['provider' => e(map_lookup()['name'])]) }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('show_venues_map')" />
+                        </div>
+
+                        {{-- A map that starts open is for visitors who have allowed cookies. On an install
+                             that fetches street images and shows no cookie banner nobody can, so the
+                             switch would do nothing and is not drawn. --}}
+                        @if (! (map_tiles() && ! consent_required()))
+                        <div class="mb-6" id="venues-map-open-row" @if (! $venueMapOn) hidden @endif>
+                            <x-toggle name="venues_map_open"
+                                label="{{ __('messages.venues_map_open') }}"
+                                checked="{{ old('venues_map_open', \App\Services\VenueMap::startsOpen($role)) }}"
+                                help="{{ __('messages.venues_map_open_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('venues_map_open')" />
+                        </div>
+                        @endif
+
+                        {{-- Every venue the map would hold and where each stands, problems first. Drawn
+                             once the map is switched on and saved: before that nothing has been asked. --}}
+                        @if ($venueMapStatus)
+                        <div id="venue-map-venues" class="mb-6" @if (! $venueMapOn) hidden @endif>
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.venues') }}</h3>
+                            @if (! count($venueMapStatus['venues']))
+                                <p class="event-hint">{{ __('messages.venue_map_no_venues') }}</p>
+                            @else
+                                <p class="event-hint">{{ __('messages.venue_map_venues_help') }}</p>
+                                <ul class="divide-y divide-gray-200 dark:divide-gray-700 border-y border-gray-200 dark:border-gray-700">
+                                    @foreach ($venueMapStatus['venues'] as $mapVenue)
+                                    @php
+                                        $mapVenueFix = match (true) {
+                                            $mapVenue['why'] === 'no_country' => __('messages.venue_map_fix_no_country'),
+                                            $mapVenue['state'] === \App\Services\VenueMap::NO_ADDRESS => __('messages.venue_map_fix_no_address'),
+                                            $mapVenue['state'] === \App\Services\VenueMap::NOT_FOUND => __('messages.venue_map_fix_not_found'),
+                                            default => null,
+                                        };
+                                        $mapVenueOnMap = in_array($mapVenue['state'], [\App\Services\VenueMap::PLACED, \App\Services\VenueMap::APPROXIMATE], true);
+                                    @endphp
+                                    <li class="py-2.5" data-venue-state="{{ $mapVenue['state'] }}">
+                                        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100 min-w-0 break-words"><bdi>{{ $mapVenue['name'] }}</bdi></span>
+                                            <span class="event-status {{ $mapVenueOnMap ? 'is-on' : '' }}">{{ $venueMapStates[$mapVenue['state']] }}</span>
+                                        </div>
+                                        @if ($mapVenueFix)
+                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $mapVenueFix }}</p>
+                                        @endif
+                                    </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                        @endif
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Venue map -->
+
                         <!-- Tab Content: Accommodation -->
                         @if (\App\Services\Stay22Service::isEnabled())
                         <x-form-row group="engagement" tab="accommodation" :title="__('messages.accommodation')" class="engagement-tab" />
@@ -7617,6 +7701,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target && e.target.name === 'show_sponsors') { syncSponsorsShown(); }
     });
     syncSponsorsShown();
+
+    // "Open the map on arrival" and the list of venues are about a map that is switched on.
+    function syncVenueMapRows() {
+        var on = kit.on('show_venues_map');
+        ['venues-map-open-row', 'venue-map-venues'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { el.hidden = ! on; }
+        });
+    }
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.name === 'show_venues_map') { syncVenueMapRows(); }
+    });
     kit.summary('engagement:requests', function() {
         if (! kit.on('accept_requests')) {
             return { text: words.disabled, empty: true };
@@ -7643,6 +7739,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return sponsorsShown() ? String(count) : kit.join([String(count), words.sponsors_hidden]);
     });
+    kit.summary('engagement:map', function() {
+        if (! kit.on('show_venues_map')) {
+            return { text: words.disabled, empty: true };
+        }
+        return kit.on('venues_map_open') ? kit.join([words.enabled, words.venue_map_starts_open]) : words.enabled;
+    });
     kit.summary('engagement:accommodation', function() {
         return kit.on('stay22_enabled') ? words.enabled : { text: words.disabled, empty: true };
     });
@@ -7653,6 +7755,7 @@ document.addEventListener('DOMContentLoaded', function() {
             kit.on('feedback_enabled') ? words.feedback : '',
             kit.on('carpool_enabled') ? words.carpool : '',
             sponsorCount() ? words.sponsors : '',
+            kit.on('show_venues_map') ? words.venue_map : '',
         ].filter(Boolean);
         return on.length ? on.join(', ') : { text: words.disabled, empty: true };
     });

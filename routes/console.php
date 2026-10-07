@@ -363,6 +363,16 @@ Schedule::call(function () {
     Artisan::call('app:prune-cache');
 })->hourly()->name('app-prune-cache')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// The venue map's address lookups (App\Services\PlaceLookupService): at most four a run, which
+// is the search service's limit for a script on a timer, and a no-op on an install with no
+// address search configured. Ungated, on both rails. Registered after the mail and the queue so
+// it never delays them. The rails and the queued job share one lock inside the service, because
+// withoutOverlapping() only serialises this rail against itself. Keep in sync with
+// AppController::translateData().
+Schedule::call(function () {
+    Artisan::call('app:place-venues');
+})->everyMinute()->name('app-place-venues')->withoutOverlapping(2)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Nexus only: the blog is the marketing site's. Keep in sync with AppController::translateData().
 Schedule::call(function () {
     if (config('app.is_nexus')) {

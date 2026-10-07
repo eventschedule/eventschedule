@@ -226,6 +226,111 @@ document.addEventListener('click', function (e) {
 </div>
 @endif
 
+{{-- Flashed by RoleController::update() when a venue map was just switched on, or is still on its
+     first pass: the form's save lands here, so this is where the owner is told how far it is.
+     Each venue's address is asked about once, a second apart (App\Services\PlaceLookupService),
+     and the band is not on the guest page until all of them have been. The card asks
+     role.venue_map.status until then and redraws itself; every wording it can show is printed
+     here, so the script holds no text. --}}
+@if (session('venue_map_saved') && \App\Services\VenueMap::enabledFor($role))
+@php
+    $venueMapNotice = \App\Services\VenueMap::status($role);
+    $venueMapGuestUrl = $role->getGuestUrl() ? $role->getGuestUrl().'#gp-map' : null;
+@endphp
+<div class="pb-4">
+    <div class="ap-card rounded-xl p-6" role="status" id="venue-map-notice"
+         data-status-url="{{ route('role.venue_map.status', ['subdomain' => $role->subdomain]) }}"
+         data-ready="{{ $venueMapNotice['ready'] ? '1' : '0' }}"
+         data-total="{{ $venueMapNotice['total'] }}" data-asked="{{ $venueMapNotice['asked'] }}" data-placed="{{ $venueMapNotice['placed'] }}"
+         data-title-preparing="{{ __('messages.venue_map_preparing') }}" data-body-preparing="{{ __('messages.venue_map_preparing_help') }}"
+         data-title-live="{{ __('messages.venue_map_live') }}" data-body-live="{{ __('messages.venue_map_live_help') }}"
+         data-title-short="{{ __('messages.venue_map_not_yet') }}" data-body-short="{{ __('messages.venue_map_needs_two') }}">
+        <div class="flex items-start gap-3">
+            <div class="dashboard-icon p-2 rounded-xl shrink-0 bg-blue-50 dark:bg-blue-500/10" style="--icon-glow: rgba(78, 129, 250, 0.35)">
+                <svg class="w-5 h-5 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100" data-map-notice-title></h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" data-map-notice-body></p>
+                <div class="mt-3 flex items-center gap-3" data-map-notice-progress hidden>
+                    <div class="h-1.5 flex-1 max-w-xs rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden" aria-hidden="true">
+                        <div class="h-full rounded-full bg-[var(--brand-button-bg)] transition-all duration-200" data-map-notice-bar style="width: 0%"></div>
+                    </div>
+                    <span class="text-sm tabular-nums text-gray-700 dark:text-gray-300" dir="ltr" data-map-notice-count></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-3" data-map-notice-actions hidden>
+            <x-secondary-link href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#engagement-tab-map">
+                {{ __('messages.venue_map_review') }}
+            </x-secondary-link>
+            @if ($venueMapGuestUrl)
+            <span data-map-notice-view hidden>
+                <x-brand-link href="{{ $venueMapGuestUrl }}" target="_blank">
+                    {{ __('messages.view_map') }}
+                </x-brand-link>
+            </span>
+            @endif
+        </div>
+    </div>
+</div>
+<script {!! nonce_attr() !!}>
+(function() {
+    var card = document.getElementById('venue-map-notice');
+    if (! card) { return; }
+
+    var part = function(name) { return card.querySelector('[data-map-notice-' + name + ']'); };
+    var tries = 0;
+
+    function draw(state) {
+        // Three things it can say: still asking, on the page, or asked and short of two pins.
+        var kind = ! state.ready ? 'preparing' : (state.placed >= 2 ? 'live' : 'short');
+        var body = kind === 'live' && state.placed >= state.total ? '' : card.getAttribute('data-body-' + kind);
+
+        part('title').textContent = card.getAttribute('data-title-' + kind);
+        part('body').textContent = body;
+        part('body').hidden = ! body;
+        part('progress').hidden = kind !== 'preparing' || ! state.total;
+        part('bar').style.width = (state.total ? Math.round(100 * state.asked / state.total) : 0) + '%';
+        part('count').textContent = state.asked + ' / ' + state.total;
+        part('actions').hidden = kind === 'preparing';
+        if (part('view')) { part('view').hidden = kind !== 'live'; }
+
+        return kind !== 'preparing';
+    }
+
+    function ask() {
+        // Five minutes of asking is longer than any first pass: after that the owner has the
+        // list of venues to look at instead of a bar that does not move.
+        if (++tries > 100) {
+            part('actions').hidden = false;
+            return;
+        }
+
+        fetch(card.getAttribute('data-status-url'), { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+            .then(function(response) { return response.ok ? response.json() : null; })
+            .then(function(state) {
+                if (! state || ! draw(state)) { setTimeout(ask, 3000); }
+            })
+            .catch(function() { setTimeout(ask, 6000); });
+    }
+
+    var done = draw({
+        ready: card.getAttribute('data-ready') === '1',
+        total: parseInt(card.getAttribute('data-total'), 10) || 0,
+        asked: parseInt(card.getAttribute('data-asked'), 10) || 0,
+        placed: parseInt(card.getAttribute('data-placed'), 10) || 0,
+    });
+
+    if (! done) { setTimeout(ask, 3000); }
+})();
+</script>
+@endif
+
 {{-- Flashed by RoleController::update() when the owner picks a new event animation: the page
      looks its best right now, so invite them to share it while they are proud of it. --}}
 @php $listAnimationSaved = session('list_animation_saved'); @endphp

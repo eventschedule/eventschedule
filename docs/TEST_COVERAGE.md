@@ -97,6 +97,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Mobile-optimized / responsive design | ✗ | — (non-functional) |
 | Venue location maps (Google Maps) | ✗ | — |
 | Sponsor / partner logos (Pro) | ✓ | `SponsorsTest` (cap, grid density, panel background, load gating), `SponsorsVisibilityTest` (the Show sponsors switch: both guest pages, an event's own list, a lapsed plan, backup), `ScheduleSaveProtectionTest` (a save without the list keeps every sponsor) |
+| Venue map on the schedule page (operator-enabled) | ✓ | `VenueMapTest` (which venues, never Google's coordinates, the band's three conditions, the endpoint, the owner's status), `PlaceLookupTest` (the address sent, one request per address, four a run, one runner, a failure in transit is not a miss, town centres refused), `VenueMapPageTest` (the band on the page, embeds and graphics without it, the form row, the save, what the map reads from the list), `tests/Browser/VenueMapJourneyTest` |
 | Claim page for an auto-created schedule | ✓ | `UnclaimedSchedulePageTest` (page, claim, takedown, root-only, noindex), `UnclaimedScheduleGuardsTest` (no ads, no follow, claim URL) |
 | Claim on sign-up / email verification | ✓ | `ScheduleClaimByEmailTest` (registration, drifted-pivot refusal, pre-approval, one owner row) |
 | Claim invitation email | ✓ | `ClaimInvitationMailTest` (per-recipient addressing, no-talent venue event, links to the page) |

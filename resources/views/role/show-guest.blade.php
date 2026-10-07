@@ -385,6 +385,22 @@ html[data-es-view="list"] #gp-calendar {
       </div>
       @endif
 
+      {{-- The venue map's band (components/venue-map): after the sponsors and above the events,
+           in the same column as both. Only where the owner switched it on, its first pass of
+           address lookups is done and two venues have a position (VenueMap::band()), and never
+           in an embed, which is the list alone, nor in the picture ?graphic=1 renders. --}}
+      @php
+        $venueMapBand = (request()->embed || request()->graphic)
+            ? null
+            : \App\Services\VenueMap::band($role, $selectedGroup ?? null, $upcoming ?? null);
+      @endphp
+      @if ($venueMapBand)
+      <div class="{{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 mx-auto transition-[max-width] duration-300 ease-in-out" data-view-width data-map-wrap
+           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+          <x-venue-map :role="$role" :band="$venueMapBand" :group="$selectedGroup ?? null" />
+      </div>
+      @endif
+
       <section id="gp-events" aria-label="{{ $role->customLabel('events') }}">
       {{-- What is next, said by the server above the MONTH, which names no next event itself
            (in the list view this card stands aside, see the style block at the top): the
@@ -464,7 +480,7 @@ html[data-es-view="list"] #gp-calendar {
         </div>
       @endif
       <div
-        class="calendar-panel-border {{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border {{ (empty($sponsorLogos) && ! $venueMapBand) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="gp-calendar"
         data-view-width
         style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
