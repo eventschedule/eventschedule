@@ -87,6 +87,7 @@ class BackupService
         // The guest sign-up switches. Their defaults differ (panel on, "Notify me" card off), so
         // dropping either would flip whichever one the owner had changed.
         'show_subscribe_panel',
+        'show_sponsors',
         'show_event_interest',
         'feedback_enabled', 'feedback_delay_hours', 'feedback_public', 'fan_comments_enabled',
         'fan_photos_enabled', 'fan_videos_enabled', 'fan_content_require_account',

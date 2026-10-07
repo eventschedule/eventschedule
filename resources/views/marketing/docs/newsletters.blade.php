@@ -213,7 +213,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sponsors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your <a href="{{ route('marketing.docs.creating_schedules') }}#engagement" class="doc-link">sponsor logos</a>, under the section title you set on the schedule.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Your <a href="{{ route('marketing.docs.creating_schedules') }}#engagement" class="doc-link">sponsor logos</a>, under the section title you set on the schedule. The block shows them even while the sponsors section is switched off on your pages: a block is something you placed in this newsletter.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> Sponsor Source (from your schedule settings, or from the first event in the newsletter)</p>
             </div>
             <div class="doc-field">

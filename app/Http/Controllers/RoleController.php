@@ -4542,6 +4542,9 @@ class RoleController extends Controller
         // every schedule made through the UI would start with its sign-up panel hidden. Its
         // sibling show_event_interest defaults to false, which is what a missing attribute paints.
         $role->show_subscribe_panel = true;
+        // And for roles.show_sponsors: its switch is drawn only once a sponsor exists, but a model
+        // that reads as off would hide the first sponsor a new schedule adds.
+        $role->show_sponsors = true;
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';
@@ -6302,8 +6305,11 @@ class RoleController extends Controller
         // can be posted again (AiImageIssuance::consume()).
         AiImageIssuance::consume(...array_values(array_filter($aiImages)));
 
-        // Handle sponsor logos (Pro feature)
-        if ($role->isPro() && ! is_demo_mode()) {
+        // Handle sponsor logos (Pro feature). Only on a save that carries the sponsor list: the
+        // block rebuilds the stored list from existing_sponsors and deletes every logo file the
+        // rebuilt list drops, so read with a default of '[]' a save from anywhere else - an API
+        // client, a form that never drew the Sponsors row - deleted every sponsor and its files.
+        if ($role->isPro() && ! is_demo_mode() && $request->has('existing_sponsors')) {
             $oldSponsors = json_decode($role->getAttributes()['sponsor_logos'] ?? '[]', true) ?: [];
             $oldLogoFiles = array_filter(array_column($oldSponsors, 'logo'));
 

@@ -3676,6 +3676,27 @@ class Event extends Model
         return $role->getSponsorLogos();
     }
 
+    /**
+     * The sponsors this event's guest page shows under $role's address: the event's own list when
+     * it has one, otherwise the schedule's - which its owner can switch off without deleting
+     * (Role::shownSponsorLogos()). An event's own list has an off of its own (sponsor_mode 'none').
+     *
+     * getEffectiveSponsorLogos() stays the unswitched answer on purpose: a newsletter's sponsors
+     * block reads it (NewsletterService), and a block an owner placed by hand is not a page section.
+     */
+    public function guestSponsorLogos($role): array
+    {
+        if ($this->sponsor_mode === 'none') {
+            return [];
+        }
+
+        if ($this->sponsor_mode === 'custom') {
+            return $this->getSponsorLogos();
+        }
+
+        return $role->shownSponsorLogos();
+    }
+
     public function getGuestUrl($subdomain = false, $date = null, $useCustomDomain = false, $includeId = true)
     {
         $data = $this->getGuestUrlData($subdomain, $date, $includeId);

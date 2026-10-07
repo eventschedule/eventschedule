@@ -2498,7 +2498,7 @@
         @endif
 
         @php
-          $eventSponsors = $event->getEffectiveSponsorLogos($role);
+          $eventSponsors = $event->guestSponsorLogos($role);
         @endphp
         @if (!empty($eventSponsors))
           <x-sponsor-grid

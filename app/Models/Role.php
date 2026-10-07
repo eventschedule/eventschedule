@@ -147,6 +147,7 @@ class Role extends Model implements MustVerifyEmail
         'hide_videos',
         'show_accessibility_widget',
         'show_subscribe_panel',
+        'show_sponsors',
         'show_event_interest',
         'promotions_opt_out',
         'stay22_enabled',
@@ -217,6 +218,7 @@ class Role extends Model implements MustVerifyEmail
         'hide_videos' => 'boolean',
         'show_accessibility_widget' => 'boolean',
         'show_subscribe_panel' => 'boolean',
+        'show_sponsors' => 'boolean',
         'show_event_interest' => 'boolean',
         'promotions_opt_out' => 'boolean',
         'stay22_enabled' => 'boolean',
@@ -4376,6 +4378,20 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $value;
+    }
+
+    /**
+     * The schedule's sponsors as a guest page shows them: none while the owner has the section
+     * switched off (roles.show_sponsors). The stored list is untouched, so switching it back on
+     * shows them again. The schedule form, a newsletter's sponsors block and getSponsorLogos()
+     * itself keep reading the whole list.
+     *
+     * `=== false`, as the subscribe panel reads its own switch: only an explicit off hides them,
+     * so a model that never loaded the column still shows its sponsors.
+     */
+    public function shownSponsorLogos(): array
+    {
+        return $this->show_sponsors === false ? [] : $this->getSponsorLogos();
     }
 
     public function getSponsorLogos(): array

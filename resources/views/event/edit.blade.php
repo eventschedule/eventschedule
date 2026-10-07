@@ -5859,7 +5859,9 @@
                                         {{-- Whose and which: the names of the schedule's sponsors, or that it has none.
                                              v-pre: a sponsor's name is its owner's text, inside the Vue mount. --}}
                                         @php $scheduleSponsorNames = collect($role->getSponsorLogos())->pluck('name')->filter()->implode(', '); @endphp
-                                        <span class="event-tile-help" v-pre>{{ $scheduleSponsorNames ?: __('messages.sponsors_same_help').': '.mb_strtolower(__('messages.none')) }}</span>
+                                        {{-- And when the schedule has them switched off (Engagement > Sponsors), the tile says
+                                             so: an event that follows the schedule shows none then. --}}
+                                        <span class="event-tile-help" v-pre>{{ $scheduleSponsorNames ? $scheduleSponsorNames.($role->show_sponsors === false ? ' · '.__('messages.sponsors_hidden') : '') : __('messages.sponsors_same_help').': '.mb_strtolower(__('messages.none')) }}</span>
                                     </button>
                                     <button type="button" class="event-tile" :class="{ 'is-on': event.sponsor_mode === 'none' }" :aria-pressed="event.sponsor_mode === 'none' ? 'true' : 'false'" @click="event.sponsor_mode = 'none'; markTabDirty('section-event-settings')">
                                         <span class="event-tile-title">{{ __('messages.no_sponsors') }}</span>

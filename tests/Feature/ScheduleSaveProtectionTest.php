@@ -453,6 +453,30 @@ class ScheduleSaveProtectionTest extends TestCase
         $this->assertNull($role->getRawOriginal('caldav_settings'));
     }
 
+    public function test_a_save_that_does_not_carry_the_sponsor_list_keeps_every_sponsor(): void
+    {
+        // The sponsor block rebuilds the stored list from existing_sponsors and deletes every logo
+        // file the rebuilt list drops. It read the field with a default of '[]', so a save from
+        // anywhere but the full form on a plan that draws the editor - an API client, a form that
+        // never showed the Sponsors row - emptied the list and deleted the files.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'curator', ['sponsor_logos' => json_encode([
+            ['name' => 'Duff', 'logo' => 'demo_sponsor_1.jpg', 'url' => 'https://duff.test', 'tier' => 'gold'],
+            ['name' => 'Krusty', 'logo' => 'demo_sponsor_2.jpg', 'url' => '', 'tier' => ''],
+        ])]);
+        $this->assertTrue($role->isPro(), 'sanity check: the plan that runs the sponsor block');
+
+        $this->save($owner, $role)->assertSessionHasNoErrors();
+
+        $kept = json_decode((string) $role->fresh()->sponsor_logos, true) ?: [];
+        $this->assertSame(['Duff', 'Krusty'], array_column($kept, 'name'), 'a save that never showed the sponsors must not remove them');
+
+        // And the form's own answer still decides: the list it posts is the list that is stored.
+        $this->save($owner, $role, ['existing_sponsors' => json_encode([$kept[1]])])->assertSessionHasNoErrors();
+
+        $this->assertSame(['Krusty'], array_column(json_decode((string) $role->fresh()->sponsor_logos, true), 'name'));
+    }
+
     public function test_a_new_schedule_takes_no_sponsor_list_from_the_form(): void
     {
         // No form posts sponsor_logos: the list is built from the logos uploaded. Stored as posted,

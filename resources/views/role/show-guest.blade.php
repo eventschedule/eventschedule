@@ -371,7 +371,9 @@ html[data-es-view="list"] #gp-calendar {
         }
       </style>
 
-      @php $sponsorLogos = $role->getSponsorLogos(); @endphp
+      {{-- shownSponsorLogos(), not getSponsorLogos(): the owner can switch the section off without
+           deleting the sponsors (Engagement > Sponsors), and the margin test below reads the same list. --}}
+      @php $sponsorLogos = $role->shownSponsorLogos(); @endphp
 
       @if (!empty($sponsorLogos))
       <div class="mt-2 md:mt-6 mb-6">

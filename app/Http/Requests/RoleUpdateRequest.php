@@ -242,6 +242,7 @@ class RoleUpdateRequest extends FormRequest
             // sometimes, not nullable: both columns are NOT NULL, and the toggle always posts 0 or
             // 1. An empty value used to pass as null and 500 on the UPDATE.
             'show_subscribe_panel' => ['sometimes', 'boolean'],
+            'show_sponsors' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],
             'default_category_id' => ['nullable', 'integer', $allowedDefaultIds ? 'in:'.implode(',', $allowedDefaultIds) : 'in:'.implode(',', array_keys(config('app.event_categories', [])))],
             'event_categories' => ['nullable', 'array', 'max:32'],

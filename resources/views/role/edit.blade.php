@@ -1102,6 +1102,7 @@
             'feedback' => __('messages.feedback'),
             'carpool' => __('messages.carpool'),
             'sponsors' => __('messages.sponsors'),
+            'sponsors_hidden' => __('messages.sponsors_hidden'),
             'require_approval' => __('messages.require_approval'),
             'custom_css' => __('messages.custom_css'),
             'email' => __('messages.email'),
@@ -4593,6 +4594,20 @@
                         <!-- Tab Content: Sponsors -->
                         <x-form-row group="engagement" tab="sponsors" :title="__('messages.sponsors')" :locked="$role->isPro() ? null : 'pro'" class="engagement-tab" />
                         <div id="engagement-tab-sponsors" class="event-subrow-body engagement-tab-content" hidden>
+                        {{-- Above the plan branch on purpose: a guest page prints stored sponsors on any
+                             plan, so a schedule whose plan lapsed must still be able to hide them, and to
+                             show them again. Drawn once there is a sponsor to hide. --}}
+                        @php $storedSponsorCount = count(json_decode($role->sponsor_logos ?? '[]', true) ?: []); @endphp
+                        @if ($storedSponsorCount)
+                            <div class="mb-6">
+                                <x-toggle name="show_sponsors"
+                                    label="{{ __('messages.show_sponsors') }}"
+                                    checked="{{ old('show_sponsors', $role->show_sponsors !== false) }}"
+                                    help="{{ __('messages.show_sponsors_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_sponsors')" />
+                                <p id="sponsors-hidden-note" class="mt-3 ms-14 text-sm font-medium text-gray-700 dark:text-gray-300" hidden>{{ __('messages.sponsors_hidden_notice') }}</p>
+                            </div>
+                        @endif
                         @if ($role->isPro())
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
 
@@ -7580,9 +7595,28 @@ document.addEventListener('DOMContentLoaded', function() {
             kit.on('fan_videos_enabled') ? words.videos_label : '',
         ].filter(Boolean);
     }
+    // The list is drawn only on a plan that can edit it; a schedule whose plan lapsed still has
+    // its stored sponsors on its pages, so the row counts those.
     function sponsorCount() {
-        return all('#sponsors-list .sponsor-item').length;
+        return byId('sponsors-list') ? all('#sponsors-list .sponsor-item').length : {{ (int) $storedSponsorCount }};
     }
+    // Off dims the list and says so beside the switch: the sponsors are kept, only not shown.
+    function sponsorsShown() {
+        var toggle = document.querySelector('input[type="checkbox"][name="show_sponsors"]');
+
+        return ! toggle || toggle.checked;
+    }
+    function syncSponsorsShown() {
+        var note = byId('sponsors-hidden-note');
+        var list = byId('sponsors-list');
+
+        if (note) { note.hidden = sponsorsShown(); }
+        if (list) { list.classList.toggle('opacity-50', ! sponsorsShown()); }
+    }
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.name === 'show_sponsors') { syncSponsorsShown(); }
+    });
+    syncSponsorsShown();
     kit.summary('engagement:requests', function() {
         if (! kit.on('accept_requests')) {
             return { text: words.disabled, empty: true };
@@ -7604,7 +7638,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     kit.summary('engagement:sponsors', function() {
         var count = sponsorCount();
-        return count ? String(count) : { text: words.none, empty: true };
+        if (! count) {
+            return { text: words.none, empty: true };
+        }
+        return sponsorsShown() ? String(count) : kit.join([String(count), words.sponsors_hidden]);
     });
     kit.summary('engagement:accommodation', function() {
         return kit.on('stay22_enabled') ? words.enabled : { text: words.disabled, empty: true };

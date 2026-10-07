@@ -1134,6 +1134,10 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Background</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Shown once you have a sponsor. Choose how the sponsors band blends into your page: the default panel, transparent so your own background shows through, or a color of your choosing. Text colors adjust automatically for readability.</p>
             </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show sponsors</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Shown once you have a sponsor. Switch it off to take the sponsors section off your schedule page and your event pages without deleting anything; switch it back on and the same sponsors return. An event with sponsors of its own keeps showing them, and a sponsors block you place in a newsletter is not affected. The switch stays available on every plan, so sponsors added on a paid plan can always be hidden.</p>
+            </div>
         </div>
 
         <div class="doc-callout doc-callout-tip mt-4">

@@ -35,7 +35,7 @@
                       Hebrew organizer's first schedule would silently be English.
 
     Safe to omit, because the column default and create()'s prefill agree: event_layout,
-    announce_new_events, show_subscribe_panel, accent_color, font_family, font_color, header_style,
+    announce_new_events, show_subscribe_panel, show_sponsors, accent_color, font_family, font_color, header_style,
     list_animation (NULL and the edit form's 'none' both resolve to no animation).
 
     tests/Feature/FirstScheduleFormTest.php compares a schedule saved from here against one saved

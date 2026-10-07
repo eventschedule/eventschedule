@@ -73,6 +73,7 @@ class RoleCreateRequest extends FormRequest
             // store() fills from $request->all(), so these need rules here too: the create page
             // renders both toggles, and a junk value would otherwise reach a NOT NULL column.
             'show_subscribe_panel' => ['sometimes', 'boolean'],
+            'show_sponsors' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],
         ];
     }
