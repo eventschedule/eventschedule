@@ -103,4 +103,22 @@ class GuestSmallTruthsTest extends TestCase
         // One rule for both: clamped by lines, with the button the browser shows only on overflow.
         $this->assertSame(2, preg_match_all('/x-ref="blurb"[^>]*class="[^"]*\bline-clamp-3\b/', $html));
     }
+
+    /**
+     * A heading in an owner's text took its line height from the text around it: 20px lines under
+     * a 29px heading, so a heading that wrapped had its two lines touching. It was hidden behind
+     * "Show more" on the schedule header until the description began showing its real first lines.
+     */
+    public function test_a_heading_in_owner_text_has_a_line_height_that_follows_its_size(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['description' => "# Welcome to the Blue Room\n\nLate jazz and early soul."]);
+
+        $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/\.custom-content h1,[^{]*\.custom-content \[data-es-h1\]\s*\{\s*line-height:\s*1\.25;/',
+            $html,
+            'unitless, so it is a multiple of each heading\'s own size'
+        );
+    }
 }

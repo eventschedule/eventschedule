@@ -31,6 +31,11 @@
     .custom-content h3 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.25rem; }
     .custom-content h4, .custom-content h5, .custom-content h6 { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.25rem; }
 
+    {{-- Unitless, so each heading's lines are spaced by its OWN size. Without it a heading took
+         the line height of the text around it (20px under a 29px heading in a text-sm block), and
+         one that wrapped had its two lines touching. --}}
+    .custom-content h1, .custom-content h2, .custom-content h3, .custom-content h4, .custom-content h5, .custom-content h6, .custom-content [data-es-h1] { line-height: 1.25; }
+
     .custom-content * + h1 { margin-top: 1rem; }
     .custom-content * + h2 { margin-top: 0.75rem; }
     .custom-content * + h3 { margin-top: 0.5rem; }
