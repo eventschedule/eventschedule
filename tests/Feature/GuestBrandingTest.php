@@ -118,6 +118,23 @@ class GuestBrandingTest extends TestCase
         $this->assertStringNotContainsString('utm_medium=footer', $content);
     }
 
+    /**
+     * With no credit under it, the privacy pill is the last thing on the page, and it sat against
+     * the bottom edge of the window: the chip's own padding had been the only room beneath it.
+     */
+    public function test_the_privacy_pill_has_room_under_it_where_no_credit_follows(): void
+    {
+        $this->deploy('nexus');
+        $pill = fn (string $html) => preg_match('/data-privacy-pill class="([^"]*)"/', $html, $m) === 1 ? $m[1] : null;
+
+        $this->assertStringContainsString('pb-8', (string) $pill($this->guestPage($this->paidRole())));
+
+        // The free tier's chip follows it and brings its own room.
+        $free = $pill($this->guestPage($this->freeRole()));
+        $this->assertNotNull($free);
+        $this->assertStringNotContainsString('pb-8', $free);
+    }
+
     // ------------------------------------------------------ selfhosted SaaS
 
     public function test_saas_free_gets_the_strip_instead_of_the_chip(): void

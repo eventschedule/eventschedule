@@ -705,9 +705,13 @@
 
     {{-- The privacy policy that covers this page, and the way back into the cookie banner (GDPR
          Art. 7(3): withdrawing consent must be as easy as giving it). A pill rather than bare
-         text, like the credit chip below, so it stays legible on any schedule background. --}}
+         text, like the credit chip below, so it stays legible on any schedule background.
+
+         It is the last thing on the page wherever no credit chip follows it (a paid schedule on
+         eventschedule.com), and it used to sit against the bottom edge of the window there: the
+         chip's own padding was the only room under it. --}}
     @if (! request()->embed && ! request()->graphic)
-    <nav aria-label="{{ __('messages.privacy_policy') }}" class="flex justify-center px-4 pt-6">
+    <nav aria-label="{{ __('messages.privacy_policy') }}" data-privacy-pill class="flex justify-center px-4 pt-6 {{ $creditReason ? '' : 'pb-8' }}">
         <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur">
             <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 hover:underline">{{ __('messages.privacy_policy') }}</a>
             @if (cookie_banner_visible())
