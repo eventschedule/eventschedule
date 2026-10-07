@@ -248,23 +248,18 @@
     .gk-o8 { order: 8; }
     .gk-o10 { order: 10; }
     {{-- The schedule's other upcoming events, down the event page's left column (event/partials/
-         more-events): a date between two lines, a small card for each event of that day. --}}
-    .gk-up { padding: 1rem; }
-    .gk-up-title { margin: 0 0 .25rem; font-size: .9375rem; font-weight: 600; color: var(--gk-ink); }
-    .gk-up-list { display: flex; flex-direction: column; gap: .625rem; margin: 0; padding: 0; list-style: none; }
-    .gk-up-day { display: flex; align-items: center; gap: .75rem; margin-top: .625rem; font-size: .875rem; font-weight: 600; color: var(--gk-ink); text-align: center; }
-    .gk-up-day::before { content: ""; flex: 1; height: 1px; background: var(--gk-line); }
-    .gk-up-day::after { content: ""; flex: 1; height: 1px; background: var(--gk-line); }
-    .gk-up-card { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-solid); color: var(--gk-ink); text-decoration: none; box-shadow: var(--gk-shadow); transition: box-shadow var(--gk-swap), transform var(--gk-swap); }
-    .gk-up-pictured { grid-template-columns: minmax(0, 1fr) 42%; }
-    .gk-up-card:hover { box-shadow: var(--gk-shadow-lift); transform: translateY(-1px); }
-    .gk-up-card:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
-    .gk-up-body { display: flex; flex-direction: column; gap: .25rem; min-width: 0; padding: .75rem .875rem; }
-    .gk-up-name { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: .9375rem; font-weight: 700; line-height: 1.25; }
-    .gk-up-meta { display: flex; align-items: flex-start; gap: .375rem; font-size: .8125rem; line-height: 1.3; color: var(--gk-ink-3); }
-    .gk-up-meta svg { flex: none; width: .875rem; height: .875rem; margin-top: .0625rem; }
-    .gk-up-img { width: 100%; height: 100%; min-height: 5.5rem; object-fit: cover; }
-    .gk-up-all { display: block; margin-top: .875rem; font-size: .875rem; text-align: center; }
+         more-events): the day panels and rows of the schedule's own phone list (.gk-day, .gk-row),
+         under a slim panel that names them and leads to the whole schedule. --}}
+    .gk-up { display: grid; gap: .875rem; }
+    .gk-up-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .25rem .75rem; padding: .75rem 1rem; }
+    .gk-up-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
+    .gk-up-all { font-size: .875rem; }
+    @media (min-width: 40rem) { .gk-up-head { padding: .75rem 1.25rem; } }
+    {{-- The column is narrow at every width, so its rows stay stacked (the time over the name, the
+         picture beside them) where the schedule's own rows give the time a column from 40rem.
+         Declared after that rule, which it undoes. --}}
+    .gk-row-stack { grid-template-columns: minmax(0, 1fr) 4.75rem; grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; align-items: start; column-gap: .75rem; }
+    .gk-row-stack-bare { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b"; }
     {{-- Wherever the page is ONE column (below 64rem, see .gk-event) the list is at its end, and
          stops after five. Cut below 48rem only, a tablet got all twenty there. --}}
     @media (max-width: 63.99rem) { .gk-up-late { display: none; } }

@@ -15,10 +15,11 @@ use Tests\TestCase;
  * appearance was decided half by the server and half in the browser. It is drawn by the server
  * now, from the schedule's next public events, and the link to the whole schedule is simply
  * there. (For a few days it was three rows across the foot of the page; the column is where it
- * belongs, and it carries on down it as it did.)
+ * belongs, and it carries on down it as it did.) It looks as the schedule's own list does on a
+ * phone: a panel for each day, a row for each event, and what a row there says about tickets.
  *
  * The test that matters for privacy is still here: a draft, cancelled, unlisted or
- * password-protected event must never be one of the cards.
+ * password-protected event must never be one of the rows.
  */
 class GuestEventSidebarLinkTest extends TestCase
 {
@@ -66,18 +67,23 @@ class GuestEventSidebarLinkTest extends TestCase
         $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
         $more = $this->more($html);
 
-        $this->assertSame(20, substr_count($more, '<a class="gk-up-card '), 'twenty, as the column always held');
+        $this->assertSame(20, substr_count($more, '<a class="gk-row gk-row-stack '), 'twenty, as the column always held');
         foreach ([1, 2, 20] as $n) {
             $this->assertStringContainsString('Night Number '.$n.'.', $more);
             $this->assertStringContainsString('href="'.e($others[$n]->fresh()->getGuestUrl($role->subdomain)).'"', $more, 'a real link, not a click handler');
         }
         $this->assertStringNotContainsString('Night Number 21.', $more);
         $this->assertStringNotContainsString('Tonight', $more, 'the event the visitor is already on');
-        // A day is said once, over the events of that day.
-        $this->assertSame(10, substr_count($more, 'class="gk-up-day '));
+        // A panel for each day, its date said once as a heading over the events of that day:
+        // the schedule's own phone list (.gk-day, .gk-row), not a second kind of card.
+        $this->assertSame(10, substr_count($more, 'data-up-day="'));
+        $this->assertSame(10, substr_count($more, '<h3 class="gk-dayhead-title">'));
         $this->assertStringContainsString(\App\Utils\DateUtils::dayLabel(Carbon::now()->addDays(2)), $more);
-        // A phone gets the first five and the way to the rest.
-        $this->assertSame(15, substr_count($more, '<li class="gk-up-late">'));
+        $this->assertStringNotContainsString('gk-up-card', $more);
+        // A phone and a tablet get the first five and the way to the rest: three days (two
+        // events each, the third day's second event is the sixth), then nothing.
+        $this->assertSame(15, substr_count($more, '<li class="gk-row-item gk-up-late">'));
+        $this->assertSame(7, preg_match_all('/class="gk-panel gk-panel-flush gk-day [^"]*gk-up-late"/', $more), 'a day whose events are all past the fifth is put away whole');
 
         // In the LEFT column, after the flyer, the performers and the venue, and not at the
         // foot of the page.
@@ -104,6 +110,59 @@ class GuestEventSidebarLinkTest extends TestCase
         $kit = file_get_contents(resource_path('views/partials/guest-kit-styles.blade.php'));
         $this->assertStringContainsString('@media (max-width: 63.99rem) { .gk-up-late { display: none; } }', $kit);
         $this->assertStringContainsString('@media (min-width: 64rem) {', $kit, 'fixture: where the two columns start');
+    }
+
+    /**
+     * A row says what the schedule's own list says about tickets (partials/guest-ticket-chips):
+     * the price, Free entry, Sold out, Few left. From ONE query for the whole list's tickets:
+     * read lazily it was a query a row.
+     */
+    public function test_a_row_says_what_it_costs_from_one_query_for_the_list(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1), 'creator_role_id' => $role->id]);
+        $night = fn (string $name, int $days, array $attrs = []) => $this->createEvent($role, $attrs + [
+            'name' => $name, 'starts_at' => $this->at($days), 'creator_role_id' => $role->id,
+            'tickets_enabled' => true, 'ticket_currency_code' => 'USD',
+        ]);
+        $day = fn (int $days) => Carbon::now()->addDays($days)->format('Y-m-d');
+
+        $this->createTicket($night('Priced Night', 2), ['price' => 20, 'quantity' => 50]);
+        $this->createTicket($night('Gone Night', 3), ['price' => 20, 'quantity' => 2])->updateSold($day(3), 2);
+        $this->createTicket($night('Free Night', 4), ['price' => 0, 'quantity' => 50]);
+        $this->createTicket($night('Nearly Gone Night', 5), ['price' => 12, 'quantity' => 20])->updateSold($day(5), 18);
+        $night('Plain Night', 6, ['tickets_enabled' => false]);
+
+        $ticketQueries = [];
+        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$ticketQueries) {
+            if (preg_match('/\bfrom [`"]?tickets[`"]?/i', $query->sql)) {
+                $ticketQueries[] = $query->sql;
+            }
+        });
+        $more = $this->more($this->get($this->guestEventUrl($role, $event))->assertOk()->getContent());
+
+        // The page's own event loads its tickets too; the LIST's are one more query, whatever its length.
+        $forTheList = array_filter($ticketQueries, fn ($sql) => preg_match('/event_id[`"]? in \([^)]*,/i', $sql) === 1);
+        $this->assertCount(1, $forTheList, implode(' | ', $ticketQueries));
+        $this->assertLessThanOrEqual(3, count($ticketQueries), 'and not one a row: '.implode(' | ', $ticketQueries));
+
+        $row = function (string $name) use ($more) {
+            foreach (explode('<li class="gk-row-item', $more) as $item) {
+                if (str_contains($item, $name)) {
+                    return $item;
+                }
+            }
+            $this->fail($name.' is not in the list');
+        };
+        $this->assertStringContainsString(\App\Utils\MoneyUtils::format(20, 'USD'), $row('Priced Night'));
+        $this->assertStringContainsString('gk-chip-out', $row('Gone Night'));
+        $this->assertStringContainsString(__('messages.sold_out'), $row('Gone Night'));
+        $this->assertStringContainsString('gk-chip-free', $row('Free Night'));
+        $this->assertStringContainsString('gk-chip-few', $row('Nearly Gone Night'));
+        $this->assertStringContainsString(\App\Utils\MoneyUtils::format(12, 'USD'), $row('Nearly Gone Night'));
+        $this->assertStringNotContainsString('gk-chip', $row('Plain Night'), 'nothing to sell, nothing said');
+        // Never how many are left.
+        $this->assertSame(0, preg_match('/\b(2|18|20|50) (left|remaining)\b/i', $more));
     }
 
     public function test_the_way_to_the_whole_schedule_is_always_there_in_the_owners_words(): void
@@ -135,7 +194,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
         $more = $this->more($html);
 
-        $this->assertSame(1, substr_count($more, '<a class="gk-up-card '));
+        $this->assertSame(1, substr_count($more, '<a class="gk-row gk-row-stack '));
         $this->assertStringContainsString('Open Night', $more);
         foreach (['Draft', 'Cancelled', 'Unlisted', 'Locked', 'Yesterday'] as $hidden) {
             $this->assertStringNotContainsString($hidden.' Night', $html, $hidden.' is nowhere on the page');
@@ -157,7 +216,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $more = $this->more($this->get($url.'?category=3')->assertOk()->getContent());
         $this->assertStringContainsString('Late Concert', $more);
         $this->assertStringNotContainsString('Talk ', $more);
-        $this->assertStringContainsString('category=3', $more, 'and the card carries it on');
+        $this->assertStringContainsString('category=3', $more, 'and the row carries it on');
 
         // ?category[]=x is an array, and casting one was an error page.
         $this->get($url.'?category[]=3')->assertOk();

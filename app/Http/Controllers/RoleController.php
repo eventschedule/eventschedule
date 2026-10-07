@@ -2709,6 +2709,9 @@ class RoleController extends Controller
                 ->when($moreCategory !== '', fn ($rows) => $rows->filter(fn (array $row) => (string) $row['event']->category_id === $moreCategory))
                 ->take(20)
                 ->values();
+            // Their tickets, in ONE query: a row says what it costs and whether any are left
+            // (partials/guest-ticket-chips), and read lazily that was a query a row.
+            \Illuminate\Database\Eloquent\Collection::make($moreEvents->pluck('event')->all())->loadMissing('tickets');
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
             $photoLimitReached = ! $role->canUploadPhoto();
 

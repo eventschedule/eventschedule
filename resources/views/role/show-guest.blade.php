@@ -427,11 +427,6 @@ html[data-es-view="list"] #gp-calendar {
           // reading them: the fifty events of $upcoming are deliberately loaded without theirs
           // (GuestScheduleSchemaTest holds that the list never costs a query an event).
           $leadEvent->loadMissing('tickets');
-          $leadFacts = $leadEvent->cardTicketFields();
-          $leadGone = in_array($leadRow['date'], $leadFacts['sold_out_dates'], true);
-          $leadFree = $leadFacts['ticket_free'] || $leadEvent->rsvp_enabled;
-          // Sold somewhere else at a price the owner typed, as a row says it.
-          $leadElsewhere = $leadEvent->registrationHref() && $leadEvent->ticket_price !== null && ! $leadFree && ! $leadFacts['ticket_from'];
           // The address keeps what the page was narrowed by, as a row's does, so the event's
           // way back returns here.
           $leadQuery = array_filter([
@@ -461,31 +456,7 @@ html[data-es-view="list"] #gp-calendar {
                 @if ($leadTime)<bdi dir="ltr">{{ $leadTime }}</bdi>@endif
                 @if ($leadWhere)<span>{{ $leadWhere }}</span>@endif
               </span>
-              @if ($leadGone || $leadFree || $leadFacts['ticket_from'] || $leadElsewhere)
-                <span class="gk-row-chips">
-                  @if ($leadGone)
-                    <span class="gk-chip gk-chip-out">{{ __('messages.sold_out') }}</span>
-                  @elseif ($leadElsewhere)
-                    @if ((float) $leadEvent->ticket_price == 0.0)
-                      <span class="gk-chip gk-chip-free">{{ $role->customLabel('free_entry') }}</span>
-                    @else
-                      <span class="gk-chip"><bdi>{{ \App\Utils\MoneyUtils::format($leadEvent->ticket_price, $leadEvent->ticket_currency_code) }}</bdi></span>
-                      @if ($leadEvent->coupon_code)
-                        <span class="gk-chip gk-chip-accent">{{ __('messages.coupon_code') }}: <bdi>{{ $leadEvent->coupon_code }}</bdi>@if ($leadEvent->couponDiscountLabel()) (<bdi>{{ $leadEvent->couponDiscountLabel() }}</bdi>)@endif</span>
-                      @endif
-                    @endif
-                  @else
-                    @if ($leadFree)
-                      <span class="gk-chip gk-chip-free">{{ $role->customLabel('free_entry') }}</span>
-                    @elseif ($leadFacts['ticket_from'])
-                      <span class="gk-chip"><bdi>{{ $leadFacts['ticket_from'] }}</bdi></span>
-                    @endif
-                    @if (in_array($leadRow['date'], $leadFacts['low_stock_dates'], true))
-                      <span class="gk-chip gk-chip-few">{{ __('messages.few_left') }}</span>
-                    @endif
-                  @endif
-                </span>
-              @endif
+              @include('partials.guest-ticket-chips', ['chipEvent' => $leadEvent, 'chipDate' => $leadRow['date'], 'chipRole' => $role])
             </span>
           </a>
         </div>
