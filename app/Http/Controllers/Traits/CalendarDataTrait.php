@@ -175,6 +175,18 @@ trait CalendarDataTrait
         return $data;
     }
 
+    /**
+     * The relations a list of events needs before Event::cardTicketFields() is asked of each:
+     * the creator schedule, and on a hosted install its subscription and owner, which the plan
+     * check behind a paid ticket reads (a selfhost install has no plans and reads neither).
+     *
+     * @return string[]
+     */
+    public static function creatorPlanRelations(): array
+    {
+        return config('app.hosted') ? ['creatorRole.subscriptions', 'creatorRole.user'] : ['creatorRole'];
+    }
+
     protected function buildEventsMap($events, Carbon $startOfMonth, Carbon $endOfMonth): array
     {
         $eventsMap = [];
@@ -242,11 +254,17 @@ trait CalendarDataTrait
 
         // Bulk-load creator roles so `Event::resolveCategoryName()` doesn't trigger an N+1
         // lazy-load per event on curator schedules that surface events from many creators.
+        //
+        // And, where there are plans to ask about, what a card's ticket line asks each of them
+        // (Event::cardTicketFields() reaches canSellPaidTickets(): the creator's subscription,
+        // and its owner for the demo check). Read lazily that was up to two queries for EVERY
+        // schedule a curator lists, on each load of its list.
+        $creators = self::creatorPlanRelations();
         if (method_exists($events, 'loadMissing')) {
-            $events->loadMissing('creatorRole');
+            $events->loadMissing($creators);
         }
         if (method_exists($pastEvents, 'loadMissing')) {
-            $pastEvents->loadMissing('creatorRole');
+            $pastEvents->loadMissing($creators);
         }
 
         $displayLang = $displayLang ?: ($role ? $role->displayLanguageCode() : 'en');

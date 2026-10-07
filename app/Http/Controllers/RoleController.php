@@ -2710,8 +2710,11 @@ class RoleController extends Controller
                 ->take(20)
                 ->values();
             // Their tickets, in ONE query: a row says what it costs and whether any are left
-            // (partials/guest-ticket-chips), and read lazily that was a query a row.
-            \Illuminate\Database\Eloquent\Collection::make($moreEvents->pluck('event')->all())->loadMissing('tickets');
+            // (partials/guest-ticket-chips), and read lazily that was a query a row. With them,
+            // what the plan check behind a paid ticket asks each creator schedule, which on a
+            // curator's page is a different schedule a row.
+            \Illuminate\Database\Eloquent\Collection::make($moreEvents->pluck('event')->all())
+                ->loadMissing(['tickets', ...self::creatorPlanRelations()]);
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
             $photoLimitReached = ! $role->canUploadPhoto();
 

@@ -213,7 +213,7 @@
     .gk-row-item { position: relative; }
     {{-- A row of the schedule's list is a card pressed as a whole; its name is the link. --}}
     .gk-row-press { cursor: pointer; }
-    .gk-row-title h3 { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin: 0; font: inherit; }
+    .gk-row-title h3 { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin: 0; font: inherit; overflow-wrap: anywhere; }
     .gk-row-title a { color: inherit; text-decoration: none; }
     .gk-row-title a:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; border-radius: .25rem; }
     .gk-row-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0; font-size: .875rem; color: var(--gk-ink-2); }
@@ -255,11 +255,15 @@
     .gk-up-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
     .gk-up-all { font-size: .875rem; }
     @media (min-width: 40rem) { .gk-up-head { padding: .75rem 1.25rem; } }
-    {{-- The column is narrow at every width, so its rows stay stacked (the time over the name, the
-         picture beside them) where the schedule's own rows give the time a column from 40rem.
-         Declared after that rule, which it undoes. --}}
+    {{-- Its rows stay stacked at every width (the time over the name, the picture beside them),
+         where the schedule's own rows give the time a column from 40rem: from 64rem this list is
+         in a column 23.75rem wide, and below that it is a short list at the end of the page.
+         Declared after that rule, which it undoes. A name is cut at three lines, as a row's
+         heading is, and a word too long for the column breaks rather than running under the
+         picture. --}}
     .gk-row-stack { grid-template-columns: minmax(0, 1fr) 4.75rem; grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; align-items: start; column-gap: .75rem; }
     .gk-row-stack-bare { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b"; }
+    .gk-row-name { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow-wrap: anywhere; }
     {{-- Wherever the page is ONE column (below 64rem, see .gk-event) the list is at its end, and
          stops after five. Cut below 48rem only, a tablet got all twenty there. --}}
     @media (max-width: 63.99rem) { .gk-up-late { display: none; } }

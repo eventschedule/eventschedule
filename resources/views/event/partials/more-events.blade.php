@@ -70,7 +70,7 @@
             <a class="gk-row gk-row-stack {{ $rowImage ? '' : 'gk-row-stack-bare' }}" href="{{ $rowUrl }}">
               <span class="gk-row-time"><bdi dir="ltr">{{ $rowTime }}</bdi></span>
               <span class="gk-row-body">
-                <span class="gk-row-title" dir="{{ content_dir_for_language($rowName, $displayLang) }}">{{ $rowName }}</span>
+                <span class="gk-row-title gk-row-name" dir="{{ content_dir_for_language($rowName, $displayLang) }}">{{ $rowName }}</span>
                 @if ($rowAbout)
                   <span class="gk-row-desc" dir="{{ content_dir_for_language($rowAbout, $displayLang) }}">{{ $rowAbout }}</span>
                 @endif

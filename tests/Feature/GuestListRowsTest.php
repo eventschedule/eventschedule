@@ -580,6 +580,51 @@ class GuestListRowsTest extends TestCase
     }
 
     /**
+     * A curator lists other schedules' events, and what a paid ticket may be sold for is each
+     * creator schedule's plan (its subscription, its owner for the demo check). Read lazily by
+     * the ticket line that was up to two queries for EVERY schedule listed, on each load of
+     * the list; they are loaded for all of them at once.
+     */
+    public function test_a_curators_list_does_not_ask_each_schedule_for_its_plan(): void
+    {
+        config(['app.hosted' => true]);
+        $curator = $this->createRole($this->createOwner(), 'curator', ['name' => 'City Guide']);
+        $when = now()->addDays(7);
+        $url = '/'.$curator->subdomain.'/api/calendar-events?year='.$when->year.'&month='.$when->month;
+        $add = function (int $n) use ($curator, $when) {
+            $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Room '.$n]);
+            $event = $this->createEvent($venue, [
+                'name' => 'Show '.$n, 'starts_at' => $when->copy()->setTime(12, 0)->format('Y-m-d H:i:s'), 'creator_role_id' => $venue->id,
+                'tickets_enabled' => true, 'ticket_currency_code' => 'USD',
+            ]);
+            $this->createTicket($event, ['price' => 10 + $n, 'quantity' => 50]);
+            $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        };
+        $count = function () use ($url) {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $rows = $this->getJson($url)->assertOk()->json('events');
+            $queries = count(DB::getQueryLog());
+            DB::disableQueryLog();
+
+            return [$queries, $rows];
+        };
+
+        $add(1);
+        $add(2);
+        $this->getJson($url)->assertOk();
+        [$two, $rows] = $count();
+        $this->assertCount(2, collect($rows)->whereNotNull('ticket_from'), 'fixture: each row says its price, so each plan was asked');
+
+        foreach (range(3, 6) as $n) {
+            $add($n);
+        }
+        [$six, $rows] = $count();
+        $this->assertCount(6, collect($rows)->whereNotNull('ticket_from'));
+        $this->assertSame($two, $six, 'six schedules ask what two did');
+    }
+
+    /**
      * What a row or a card says about tickets is worked out from what the list already loaded:
      * a longer list asks the database nothing more.
      */

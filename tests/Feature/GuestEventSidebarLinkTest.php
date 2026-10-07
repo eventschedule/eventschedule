@@ -132,6 +132,15 @@ class GuestEventSidebarLinkTest extends TestCase
         $this->createTicket($night('Free Night', 4), ['price' => 0, 'quantity' => 50]);
         $this->createTicket($night('Nearly Gone Night', 5), ['price' => 12, 'quantity' => 20])->updateSold($day(5), 18);
         $night('Plain Night', 6, ['tickets_enabled' => false]);
+        // Two daily series, dated today by the list (it is noon): the morning one has begun,
+        // so its tickets are no longer on sale; the evening one has not.
+        $role->update(['timezone' => 'UTC']);
+        $series = fn (string $name, int $hour) => $night($name, 0, [
+            'starts_at' => Carbon::now()->subDays(5)->setTime($hour, 0)->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111', 'recurring_frequency' => 'daily',
+        ]);
+        $this->createTicket($series('Morning Class', 9), ['price' => 7, 'quantity' => 0]);
+        $this->createTicket($series('Evening Class', 18), ['price' => 9, 'quantity' => 0]);
 
         $ticketQueries = [];
         \Illuminate\Support\Facades\DB::listen(function ($query) use (&$ticketQueries) {
@@ -161,8 +170,56 @@ class GuestEventSidebarLinkTest extends TestCase
         $this->assertStringContainsString('gk-chip-few', $row('Nearly Gone Night'));
         $this->assertStringContainsString(\App\Utils\MoneyUtils::format(12, 'USD'), $row('Nearly Gone Night'));
         $this->assertStringNotContainsString('gk-chip', $row('Plain Night'), 'nothing to sell, nothing said');
-        // Never how many are left.
-        $this->assertSame(0, preg_match('/\b(2|18|20|50) (left|remaining)\b/i', $more));
+        // A series is judged by the occurrence: this morning's has begun and is not selling.
+        $this->assertStringContainsString(\App\Utils\MoneyUtils::format(9, 'USD'), $row('Evening Class'));
+        $this->assertStringNotContainsString('gk-chip', $row('Morning Class'), 'begun at nine, and it is noon');
+    }
+
+    /**
+     * On a curator's page each row can belong to a different schedule, and what a paid ticket
+     * may be sold for is that schedule's plan: its subscription, and its owner for the demo
+     * check. Asked a row at a time that was up to two queries for every schedule listed; they
+     * are loaded for the whole list at once, so six schedules ask what two did.
+     */
+    public function test_a_curators_list_does_not_ask_each_schedule_for_its_plan(): void
+    {
+        config(['app.hosted' => true]);
+        $curator = $this->createRole($this->createOwner(), 'curator', ['name' => 'City Guide']);
+        $add = function (int $n) use ($curator) {
+            $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Room '.$n]);
+            $event = $this->createEvent($venue, [
+                'name' => 'Show '.$n, 'starts_at' => $this->at(1 + $n), 'creator_role_id' => $venue->id,
+                'tickets_enabled' => true, 'ticket_currency_code' => 'USD',
+            ]);
+            $this->createTicket($event, ['price' => 10 + $n, 'quantity' => 50]);
+            $event->roles()->attach($curator->id, ['is_accepted' => true]);
+
+            return $event;
+        };
+        $count = function (\App\Models\Event $on) use ($curator) {
+            \Illuminate\Support\Facades\Cache::flush();
+            \Illuminate\Support\Facades\DB::flushQueryLog();
+            \Illuminate\Support\Facades\DB::enableQueryLog();
+            $html = $this->get($on->fresh()->getGuestUrl($curator->subdomain))->assertOk()->getContent();
+            $queries = count(\Illuminate\Support\Facades\DB::getQueryLog());
+            \Illuminate\Support\Facades\DB::disableQueryLog();
+
+            return [$queries, $this->more($html)];
+        };
+
+        $first = $add(1);
+        $add(2);
+        $add(3);
+        $count($first);
+        [$two, $more] = $count($first);
+        $this->assertSame(2, substr_count($more, 'class="gk-chip"'), 'fixture: each row says its price, so each plan was asked');
+
+        foreach (range(4, 7) as $n) {
+            $add($n);
+        }
+        [$six, $more] = $count($first);
+        $this->assertSame(6, substr_count($more, 'class="gk-chip"'));
+        $this->assertSame($two, $six, 'six schedules ask what two did');
     }
 
     public function test_the_way_to_the_whole_schedule_is_always_there_in_the_owners_words(): void
@@ -216,7 +273,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $more = $this->more($this->get($url.'?category=3')->assertOk()->getContent());
         $this->assertStringContainsString('Late Concert', $more);
         $this->assertStringNotContainsString('Talk ', $more);
-        $this->assertStringContainsString('category=3', $more, 'and the row carries it on');
+        $this->assertSame(1, preg_match('/<a class="gk-row gk-row-stack [^"]*" href="[^"]*category=3"[^>]*>(?:(?!<\/a>).)*Late Concert/s', $more), 'and the row carries it on');
 
         // ?category[]=x is an array, and casting one was an error page.
         $this->get($url.'?category[]=3')->assertOk();
