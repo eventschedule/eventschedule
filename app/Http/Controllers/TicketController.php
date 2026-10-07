@@ -32,6 +32,7 @@ use App\Services\UsageTrackingService;
 use App\Services\Wallet\GoogleWalletService;
 use App\Services\WebhookService;
 use App\Utils\CsvUtils;
+use App\Utils\GuestFunnel;
 use App\Utils\HoneypotUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\QrCodeUtils;
@@ -1325,6 +1326,7 @@ class TicketController extends Controller
         $total = $sale->isOrderPrimary() ? $sale->orderTotalPayment() : $sale->legTotalPayment();
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
+        GuestFunnel::count('checkout_start', $request, $subdomain);
 
         // Dispatch sale.created webhook (outside transaction). One delivery per row, across every
         // leg of the order - a subscriber told only about the anchoring leg never learns the other
@@ -2494,6 +2496,7 @@ class TicketController extends Controller
         }
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
+        GuestFunnel::count('checkout_start', $request, $subdomain);
 
         // Record RSVP sale in analytics (0 revenue)
         AnalyticsEventsDaily::incrementSale($event->id, 0);
@@ -2545,6 +2548,8 @@ class TicketController extends Controller
      */
     private function redirectToPurchaseLanding($sale, $event, bool $isEmbed = false)
     {
+        GuestFunnel::count('checkout_done', request(), $sale->subdomain);
+
         session()->flash('cart_purchased', $sale->orderLegs()->map(fn ($leg) => [
             'subdomain' => $leg->subdomain,
             'event_id' => UrlUtils::encodeId($leg->event_id),

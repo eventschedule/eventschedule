@@ -745,4 +745,6 @@ document.addEventListener('DOMContentLoaded', function() {
     @include('partials.lightbox', ['rtl' => $role->isRtl()])
 @endif
 
+@include('partials.guest-funnel')
+
 </x-app-guest-layout>

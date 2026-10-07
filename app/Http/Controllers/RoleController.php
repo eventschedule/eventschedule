@@ -55,6 +55,7 @@ use App\Utils\CustomFieldUtils;
 use App\Utils\DateUtils;
 use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\GuestFunnel;
 use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
@@ -453,6 +454,7 @@ class RoleController extends Controller
 
         if (! $user->isConnected($role->subdomain)) {
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            GuestFunnel::count('follow', $request, $role);
         }
 
         session()->forget('pending_follow');
@@ -2702,6 +2704,12 @@ class RoleController extends Controller
         // Track view for analytics (non-member visits only, skip embeds)
         if (! request()->embed && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
             app(AnalyticsService::class)->recordView($role, $event, $request);
+        }
+
+        // The first stage of the guest funnel, counted across schedules. It leaves out the same
+        // visits as the line above, and demo schedules too.
+        if ($event) {
+            GuestFunnel::count('event_view', $request, $role);
         }
 
         $myPendingVideos = collect();

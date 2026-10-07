@@ -131,7 +131,7 @@ class GrowthExportTest extends TestCase
         // are saved with), 15 since traffic[] counts the guest "Submit your event" page. Bumping
         // this is deliberate: a reader diffing two pulls needs to know the shape (or the meaning)
         // moved.
-        $this->assertSame(15, $data['meta']['schema_version']);
+        $this->assertSame(16, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);
@@ -2179,6 +2179,8 @@ class GrowthExportTest extends TestCase
         MarketingDailyStat::create([
             'date' => '2026-10-07', 'guest_submit_views' => 40, 'guest_submit_code_requests' => 12, 'guest_submit_submissions' => 9,
             'booking_request_views' => 30, 'booking_request_submissions' => 7,
+            'gp_event_visitors' => 500, 'gp_list_taps' => 210, 'gp_form_opens' => 90, 'gp_checkout_starts' => 40,
+            'gp_checkouts_done' => 31, 'gp_follows' => 12, 'gp_calendar_adds' => 25,
         ]);
 
         $traffic = collect($this->build()['traffic'])->keyBy('month');
@@ -2190,6 +2192,12 @@ class GrowthExportTest extends TestCase
         $this->assertSame(30, $traffic['2026-10']['booking_request_views']);
         $this->assertSame(7, $traffic['2026-10']['booking_request_submissions']);
         $this->assertNull($traffic['2026-09']['booking_request_views']);
+        // And the guest pages' seven (GuestFunnelTest holds how they are written).
+        foreach (['gp_event_visitors' => 500, 'gp_list_taps' => 210, 'gp_form_opens' => 90, 'gp_checkout_starts' => 40,
+            'gp_checkouts_done' => 31, 'gp_follows' => 12, 'gp_calendar_adds' => 25] as $column => $expected) {
+            $this->assertSame($expected, $traffic['2026-10'][$column], $column);
+            $this->assertNull($traffic['2026-09'][$column], $column.' was not counted before October');
+        }
         // A month before the columns existed was not counted, which is not the same as zero.
         $this->assertNull($traffic['2026-09']['guest_submit_views']);
         $this->assertNull($traffic['2026-09']['guest_submit_submissions']);

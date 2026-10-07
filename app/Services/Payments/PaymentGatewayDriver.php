@@ -7,6 +7,7 @@ use App\Models\Sale;
 use App\Models\SaleInstallment;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Utils\GuestFunnel;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -734,6 +735,8 @@ abstract class PaymentGatewayDriver
      */
     protected function redirectToPurchaseLanding(Sale $sale, Event $event, bool $isEmbed = false): Response
     {
+        GuestFunnel::count('checkout_done', request(), $sale->subdomain);
+
         session()->flash('cart_purchased', $sale->orderLegs()->map(fn (Sale $leg) => [
             'subdomain' => $leg->subdomain,
             'event_id' => UrlUtils::encodeId($leg->event_id),

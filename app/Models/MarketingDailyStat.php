@@ -33,6 +33,13 @@ class MarketingDailyStat extends Model
         'guest_submit_submissions',
         'booking_request_views',
         'booking_request_submissions',
+        'gp_event_visitors',
+        'gp_list_taps',
+        'gp_form_opens',
+        'gp_checkout_starts',
+        'gp_checkouts_done',
+        'gp_follows',
+        'gp_calendar_adds',
     ];
 
     protected $casts = [
@@ -77,6 +84,19 @@ class MarketingDailyStat extends Model
         // sendVerificationCode() leaves those out of guest_submit_code_requests.
         'booking_request_views',
         'booking_request_submissions',
+        // What visitors do on guest pages, across every schedule, written through
+        // App\Utils\GuestFunnel (which says what each stage is and who is left out): opened an
+        // event page, tapped from a list into an event, opened the ticket or sign-up form, sent
+        // it, reached their ticket, followed or joined the mailing list, used Add to calendar.
+        // One visitor per day each. NOT part of the marketing funnel above them: these visitors
+        // are a schedule's audience, not prospects for a plan.
+        'gp_event_visitors',
+        'gp_list_taps',
+        'gp_form_opens',
+        'gp_checkout_starts',
+        'gp_checkouts_done',
+        'gp_follows',
+        'gp_calendar_adds',
     ];
 
     /**
@@ -116,6 +136,14 @@ class MarketingDailyStat extends Model
         // 2026_10_06_000003_add_booking_request_counters_to_marketing_daily_stats
         'booking_request_views' => '2026-10-06',
         'booking_request_submissions' => '2026-10-06',
+        // 2026_10_07_000002_add_guest_portal_counters_to_marketing_daily_stats
+        'gp_event_visitors' => '2026-10-07',
+        'gp_list_taps' => '2026-10-07',
+        'gp_form_opens' => '2026-10-07',
+        'gp_checkout_starts' => '2026-10-07',
+        'gp_checkouts_done' => '2026-10-07',
+        'gp_follows' => '2026-10-07',
+        'gp_calendar_adds' => '2026-10-07',
     ];
 
     /**

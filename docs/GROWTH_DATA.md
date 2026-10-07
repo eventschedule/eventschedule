@@ -196,6 +196,22 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     that chose it). One visitor per day each, with the same bot filters. `submissions / views` is
     the page's conversion. An account is optional there, so it has no code stage of its own, and a
     code asked for from it is left out of `guest_submit_code_requests`. Null before 2026-10-06;
+  - `gp_event_visitors`, `gp_list_taps`, `gp_form_opens`, `gp_checkout_starts`,
+    `gp_checkouts_done`, `gp_follows`, `gp_calendar_adds`: what visitors do on guest pages, across
+    every schedule (`App\Utils\GuestFunnel`). In order: opened an event page; went from a
+    schedule's list or month grid into an event; opened the ticket or sign-up form; sent it and an
+    order was created (tickets or a sign-up); was sent on to their ticket or order page at the end
+    (a paid order, a free one, one to pay at the door, and a card payment the provider has not
+    confirmed yet); followed a schedule or joined its mailing list; used Add to calendar. One
+    visitor per day each, with the sign-up counters' bot filters. Left out at every stage: a
+    schedule's own team and admins while signed in, demo schedules, and embeds.
+    `gp_form_opens / gp_event_visitors`, `gp_checkout_starts / gp_form_opens` and
+    `gp_checkouts_done / gp_checkout_starts` are the steps of the purchase. They are this
+    install's guests, not prospects for a plan: never divide them by the marketing counters. A
+    month is a sum of days, so someone who comes on three days counts three times. The three
+    counted in the browser (`gp_list_taps`, `gp_form_opens`, `gp_calendar_adds`) arrive by a
+    beacon and miss a visitor whose browser blocks it; the other four are counted on the server.
+    Null before 2026-10-07;
   - `verified_signups`.
 
   A null is "not tracked yet", never zero.
@@ -505,6 +521,12 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **16** (2026-10-07)
+  - **Seven new `traffic[]` counters** for the guest pages, across every schedule:
+    `gp_event_visitors`, `gp_list_taps`, `gp_form_opens`, `gp_checkout_starts`,
+    `gp_checkouts_done`, `gp_follows`, `gp_calendar_adds`. They are the "before" picture for the
+    guest page redesign and what it is read against afterwards. Null before 2026-10-07; there is
+    no earlier baseline, and the first month is a partial one. Nothing else changed shape.
 - **15** (2026-10-06)
   - **Three new `traffic[]` counters:** `guest_submit_views`, `guest_submit_code_requests`,
     `guest_submit_submissions`, for the public "Submit your event" page, which was rebuilt the same

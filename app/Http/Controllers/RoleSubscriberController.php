@@ -12,6 +12,7 @@ use App\Models\RoleUser;
 use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
+use App\Utils\GuestFunnel;
 use App\Utils\HoneypotUtils;
 use App\Utils\StubAccountUtils;
 use App\Utils\TimezoneUtils;
@@ -246,6 +247,11 @@ class RoleSubscriberController extends Controller
         RateLimiter::hit($rateKey, 3600);
         RateLimiter::hit($roleKey, 86400);
         $this->sendConfirmation($role, $subscriber);
+
+        // A new name on the list, from the schedule's own pages (the embedded form is not counted).
+        if (! $request->attributes->get('subscribe_embed')) {
+            GuestFunnel::count('follow', $request, $role);
+        }
 
         return $this->respond($request, $subdomain, __('messages.subscription_check_your_email'), true);
     }

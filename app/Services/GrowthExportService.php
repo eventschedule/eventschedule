@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 15;
+    public const SCHEMA_VERSION = 16;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -2733,7 +2733,11 @@ class GrowthExportService
                 .'SUM(guest_submit_code_requests) as guest_submit_code_requests, '
                 .'SUM(guest_submit_submissions) as guest_submit_submissions, '
                 .'SUM(booking_request_views) as booking_request_views, '
-                .'SUM(booking_request_submissions) as booking_request_submissions')
+                .'SUM(booking_request_submissions) as booking_request_submissions, '
+                .'SUM(gp_event_visitors) as gp_event_visitors, SUM(gp_list_taps) as gp_list_taps, '
+                .'SUM(gp_form_opens) as gp_form_opens, SUM(gp_checkout_starts) as gp_checkout_starts, '
+                .'SUM(gp_checkouts_done) as gp_checkouts_done, SUM(gp_follows) as gp_follows, '
+                .'SUM(gp_calendar_adds) as gp_calendar_adds')
             ->orderBy('ym')
             ->get()->keyBy('ym');
 
@@ -2811,6 +2815,20 @@ class GrowthExportService
                 'guest_submit_submissions' => $count('guest_submit_submissions'),
                 'booking_request_views' => $count('booking_request_views'),
                 'booking_request_submissions' => $count('booking_request_submissions'),
+                // What visitors do on guest pages, across every schedule (App\Utils\GuestFunnel):
+                // one visitor per day who opened an event page, tapped from a list into an event,
+                // opened the ticket or sign-up form, sent it, reached their ticket, followed or
+                // joined the mailing list, used Add to calendar. A schedule's own audience, not
+                // prospects for a plan, so never divide these by the marketing counters above.
+                // Each month is a SUM OF DAYS: someone who comes on three days is counted three
+                // times, so a stage divided by an earlier one is a rate and neither is a headcount.
+                'gp_event_visitors' => $count('gp_event_visitors'),
+                'gp_list_taps' => $count('gp_list_taps'),
+                'gp_form_opens' => $count('gp_form_opens'),
+                'gp_checkout_starts' => $count('gp_checkout_starts'),
+                'gp_checkouts_done' => $count('gp_checkouts_done'),
+                'gp_follows' => $count('gp_follows'),
+                'gp_calendar_adds' => $count('gp_calendar_adds'),
                 // Queried from users, not a counter column, so this one is tracked all the way
                 // back and is the only column here that never goes null.
                 'verified_signups' => (int) ($signups[$m]->c ?? 0),

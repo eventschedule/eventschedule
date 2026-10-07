@@ -190,6 +190,7 @@ eight are left. Three of them read a large table: the two listed first, and the 
 | `2026_10_01_000000_create_realtime_hits_table` | New table |
 | `2026_10_06_000001_add_guest_submit_counters_to_marketing_daily_stats` | Three `unsigned int default 0` columns on `marketing_daily_stats`, a table with one row a day |
 | `2026_10_06_000003_add_booking_request_counters_to_marketing_daily_stats` | Two `unsigned int default 0` columns on `marketing_daily_stats` |
+| `2026_10_07_000002_add_guest_portal_counters_to_marketing_daily_stats` | Seven `unsigned int default 0` columns on `marketing_daily_stats` |
 | `2026_10_06_000004_add_owner_view_to_realtime_hits_table` | Two `boolean default 0` columns and a `(role_id, last_seen_at)` index on `realtime_hits`, a table that holds about an hour of rows |
 | `2026_10_06_000002_create_user_active_days_table` | Two new tables, then one read of the last 90 days of `audit_logs` (five actions, served by the `(action, created_at)` index) and `insertOrIgnore` in chunks of 1000. No `INSERT ... SELECT`, so nothing is locked on `audit_logs` while the old containers write to it. Both creates are guarded with `Schema::hasTable`, which is the only reason a retry works if the run dies while seeding: do not remove the guards. See "Admin dashboard and active users" |
 

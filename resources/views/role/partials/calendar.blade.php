@@ -724,7 +724,7 @@
                             <a :href="getEventUrl(event, day.date)"
                                 class="flex event-link-popup"
                                 :data-event-id="event.id"
-                                @click.stop @if (isset($embed) && $embed) target="_blank" @endif>
+                                @click.stop="countListTap()" @if (isset($embed) && $embed) target="_blank" @endif>
                                 <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                     <span class="flex items-start gap-1.5">
                                         <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
@@ -808,7 +808,7 @@
                                 <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
                                     class="flex event-link-popup"
                                     :data-event-id="event.id"
-                                    @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
+                                    @click.stop="countListTap()" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto min-w-0 font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} {{ $route == 'admin' ? '' : 'truncate' }}">
                                         <span class="flex items-start gap-1.5">
                                             <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
@@ -4156,6 +4156,17 @@ const calendarApp = createApp({
             if (this.directRegistration && event.registration_url && /^https?:\/\//i.test(event.registration_url)) {
                 e.preventDefault();
                 window.open(event.registration_url, '_blank', 'noopener');
+                return;
+            }
+
+            this.countListTap();
+        },
+        // One of the guest pages' daily counts (App\Utils\GuestFunnel): a visitor went from a
+        // schedule's list or month grid into an event. Only on the schedule's own page, and only
+        // where the page printed the beacon (partials/guest-funnel decides whose visits count).
+        countListTap() {
+            if (this.route === 'guest' && !this.forceMobile && !this.embed && window.esGuestFunnel) {
+                window.esGuestFunnel('list_tap');
             }
         },
         navigateToEvent(event, e) {
@@ -4170,6 +4181,8 @@ const calendarApp = createApp({
 
             const url = this.getEventUrl(event);
             const openInNewTab = this.embed || this.route === 'admin';
+
+            this.countListTap();
 
             if (openInNewTab) {
                 window.open(url, '_blank');

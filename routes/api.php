@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ApiSaleController;
 use App\Http\Controllers\Api\ApiScheduleController;
 use App\Http\Controllers\Api\ApiTranslationSuggestionController;
 use App\Http\Controllers\GrowthDataController;
+use App\Http\Controllers\GuestFunnelBeaconController;
 use App\Http\Controllers\RealtimeBeaconController;
 use App\Http\Middleware\ApiAuthentication;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,13 @@ Route::post('/login', [ApiAuthController::class, 'login']);
 Route::post('/realtime', [RealtimeBeaconController::class, 'store'])
     ->name('realtime.beacon')
     ->middleware('throttle:realtime');
+
+// The guest pages' three browser-side counts (App\Utils\GuestFunnel), sent by partials/guest-funnel.
+// Here for the Realtime beacon's reasons. A plain throttle, not a named limiter: at most three
+// useful posts per visitor per day, so 30 a minute is room for a shared address and no more.
+Route::post('/guest-count', [GuestFunnelBeaconController::class, 'store'])
+    ->name('guest_funnel.beacon')
+    ->middleware('throttle:30,1');
 
 // The growth payload, for `php artisan app:pull-growth` on the operator's machine. Bearer-token
 // auth, hosted only; see GrowthDataController. Here for the same reasons as the beacon: no session,
