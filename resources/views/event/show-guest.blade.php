@@ -15,6 +15,11 @@
     .dark .gp-bottom-sheet-handle { background-color: rgba(255,255,255,0.12); }
     .dark .gp-bottom-sheet-item { color: rgb(var(--ap-ink-2)); }
     .dark .gp-bottom-sheet-item:hover { background-color: rgba(255,255,255,0.08); }
+    /* The laptop buttons of #gp-event-cta. The row itself is drawn on a phone only for the one
+       thing a phone has nowhere else: the carpool link. `contents` keeps these buttons direct
+       children of the row on a laptop, so its layout is what it was. */
+    .gp-cta-wide { display: none; }
+    @media (min-width: 640px) { .gp-cta-wide { display: contents; } }
   </style>
 
   <main>
@@ -46,6 +51,35 @@
             ? ($selectedGroup->role->accent_color ?? '#4E81FA')
             : ($role->accent_color ?? '#4E81FA'));
     $contrastColor = accent_contrast_color($accentColor);
+
+    // What a visitor can do about tickets right now. canSellTickets() says the event is selling;
+    // it does not say there is anything to buy (see Event::ticketSaleState()). The form is only
+    // worth opening when a ticket can be bought, or when it is sold out AND there is a waitlist.
+    $saleState = $event->tickets_enabled ? $event->ticketSaleState($date) : 'open';
+    $saleOffersForm = $saleState === 'open' || ($saleState === 'sold_out' && $event->canOfferWaitlist());
+    $saleStateLabel = [
+        'sold_out' => __('messages.sold_out'),
+        'not_started' => __('messages.sales_not_started'),
+        'ended' => __('messages.ticket_sales_ended'),
+    ][$saleState] ?? '';
+
+    // What the phone bar's main area holds. Worked out ONCE, because the calendar button and the
+    // sheet it opens used to be gated by two different conditions: an event with a registration
+    // link whose sign-up had closed got the button and no sheet behind it, and an event whose
+    // ticket sales had ended or not started got neither (a laptop got Add to calendar).
+    $externalLink = $event->registrationHref() && (! $event->tickets_enabled || $event->blockedByPlanOnly($date)) && ! $event->rsvp_enabled;
+    $phoneBar = $event->is_cancelled ? 'cancelled'
+        : ($event->canAcceptRsvp($date) ? 'rsvp'
+        : ($event->canSellTickets($date) ? ($saleOffersForm ? 'tickets' : 'unavailable')
+        : ($externalLink ? 'external'
+        : ($event->tickets_enabled && ($event->allTicketSalesEnded() || $event->allTicketSalesNotStarted()) ? 'closed' : 'calendar'))));
+    $phoneCalendar = ! $event->is_draft
+        && ($phoneBar === 'calendar' || $phoneBar === 'closed' || ($phoneBar === 'unavailable' && $saleState !== 'sold_out'));
+
+    // The ride board. Decided up here because the row of laptop buttons below is hidden on a
+    // phone unless this link is in it.
+    $carpoolRole = ($role->isPro() && $role->carpool_enabled) ? $role : null;
+    $showCarpool = $carpoolRole && (! $event->days_of_week || $date);
 
     // The organizer's gallery, when the event's owning schedule is on a paid plan. With no flyer
     // it takes the flyer's place at the top of the page, so a phone opens on a photo rather than on
@@ -1071,7 +1105,8 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div id="gp-event-cta" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-cta" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left {{ $showCarpool ? 'inline-flex flex-wrap' : 'hidden sm:inline-flex' }} self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div class="gp-cta-wide">
         @if ($event->is_cancelled)
             <span class="text-base text-red-600 dark:text-red-400 font-medium">{{ __('messages.event_cancelled_guest_notice') }}</span>
         @elseif ($event->canAcceptRsvp($date))
@@ -1086,15 +1121,21 @@
               @endif
             </button>
         @elseif ($event->canSellTickets($date) || ($event->registrationHref() && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
-          @if ($event->canSellTickets($date))
+          @if ($event->canSellTickets($date) && ! $saleOffersForm)
+            {{-- "Selling" with nothing to sell: sold out where there is no waitlist, or every
+                 ticket outside its sales window. Say which. Offering the form here opened one
+                 with no rows, no total and no Cancel. --}}
+            <span class="text-base font-semibold text-gray-700 dark:text-gray-200" data-sale-state="{{ $saleState }}">{{ $saleStateLabel }}</span>
+            @if ($saleState !== 'sold_out')
+              @php $showCalendarPopup = true; @endphp
+            @endif
+          @elseif ($event->canSellTickets($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-              @if ($event->allTicketsSoldOut($date) && $event->canOfferWaitlist())
-                {{-- The waitlist is Pro, so only offer it where it actually leads somewhere.
-                     A free schedule's sold-out event keeps its normal label rather than promising a
-                     waitlist that WaitlistController would refuse. --}}
+              @if ($saleState === 'sold_out')
+                {{-- Only reached where the waitlist exists: $saleOffersForm is false otherwise. --}}
                 {{ __('messages.join_waitlist') }}
               @else
                 {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}
@@ -1186,10 +1227,12 @@
 
         @endif
         {{-- Carpool link --}}
-        @php
-            $carpoolRole = ($role->isPro() && $role->carpool_enabled) ? $role : null;
-        @endphp
-        @if ($carpoolRole && (!$event->days_of_week || $date))
+        </div>
+        {{-- Outside .gp-cta-wide: this is the one button of the row a phone draws. It used to sit
+             in a row that was hidden below 640px, so a phone had no way to the ride board. One
+             link, not a second copy in the phone bar: #gp-event-carpool is a documented id and an
+             owner's rule for it must reach the only one there is. --}}
+        @if ($showCarpool)
         @php
             $carpoolUrl = config('app.hosted')
                 ? route('carpool.index', ['subdomain' => $carpoolRole->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id)])
@@ -1213,6 +1256,7 @@
         @endif
         {{-- Share button --}}
         @if (!$event->is_draft)
+        <div class="gp-cta-wide">
         <button type="button"
                 id="gp-event-share"
                 data-share-title="{{ $eventName }}"
@@ -1236,13 +1280,15 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
           </template>
         </button>
+        </div>
         @endif
         </div>
 
         </div>
 
-        {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
-        @if (!$event->is_draft && !($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registrationHref()))
+        {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile).
+             $phoneCalendar is the same flag the bar's button reads: they come together or not at all. --}}
+        @if ($phoneCalendar)
         <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
           <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
           <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
@@ -2408,14 +2454,23 @@
             @endif
           </button>
       @elseif ($event->canSellTickets($date) || ($event->registrationHref() && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
-        @if ($event->canSellTickets($date))
+        @if ($event->canSellTickets($date) && ! $saleOffersForm)
+          {{-- Same rule as the laptop button above: say what is true, do not open an empty form. --}}
+          <span class="flex-1 text-center text-base font-semibold text-gray-700 dark:text-gray-200 py-3" data-sale-state="{{ $saleState }}">{{ $saleStateLabel }}</span>
+          @if ($phoneCalendar)
+          <button type="button"
+            id="mobile-calendar-cta"
+            class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"
+            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+          {{ $role->customLabel('add_to_calendar') }}
+        </button>
+          @endif
+        @elseif ($event->canSellTickets($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-            @if ($event->allTicketsSoldOut($date) && $event->canOfferWaitlist())
-              {{-- Must match the desktop CTA's condition exactly; the waitlist is Pro, so offering
-                   it here on a free schedule would send the guest to a form that 404s. --}}
+            @if ($saleState === 'sold_out')
               {{ __('messages.join_waitlist') }}
             @else
               {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}
@@ -2438,9 +2493,25 @@
         @endif
       @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.ticket_sales_ended') }}</span>
+        @if ($phoneCalendar)
+        <button type="button"
+            id="mobile-calendar-cta"
+            class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"
+            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+          {{ $role->customLabel('add_to_calendar') }}
+        </button>
+        @endif
       @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.sales_not_started') }}</span>
-      @elseif (!$event->is_draft)
+        @if ($phoneCalendar)
+        <button type="button"
+            id="mobile-calendar-cta"
+            class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"
+            style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+          {{ $role->customLabel('add_to_calendar') }}
+        </button>
+        @endif
+      @elseif ($phoneCalendar)
         <button type="button"
             id="mobile-calendar-cta"
             class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"

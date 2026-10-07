@@ -295,6 +295,9 @@
                  fetch, so this one is bound into Vue rather than submitted with a form. --}}
             <x-honeypot vmodel="website" />
             <div v-if="!waitlistSuccess">
+                {{-- Said before the fields: the button that led here reads "Join waitlist", and
+                     nothing on the form used to say why there was a waitlist at all. --}}
+                <p class="mb-6 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-base font-semibold text-amber-900 dark:text-amber-100" role="status">{{ __('messages.registration_full') }}</p>
                 <div class="mb-6">
                     <label for="waitlist_name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
                     <input type="text" id="waitlist_name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"

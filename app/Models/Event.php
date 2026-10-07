@@ -2772,6 +2772,31 @@ class Event extends Model
         return $this->hasProTicketingPlan();
     }
 
+    /**
+     * What a visitor can do about this event's tickets on $date: 'open', 'sold_out',
+     * 'not_started' or 'ended'.
+     *
+     * canSellTickets() cannot answer this. It is deliberately blind to stock, and while "show
+     * unavailable tickets" is on it is blind to the per-ticket sales windows too, so an event can
+     * be "selling" with nothing to sell. The guest page used to offer Buy tickets in all of those
+     * cases and open a form with no rows, no total and no Cancel. Both buttons and the form read
+     * this now, so they cannot disagree.
+     *
+     * 'not_started' wins over 'ended' when the rows are split between the two: something will go
+     * on sale, which is the more useful thing to be told. A waitlist belongs to 'sold_out' only:
+     * WaitlistController refuses anything else.
+     */
+    public function ticketSaleState($date = null): string
+    {
+        $rows = $this->tickets->where('is_addon', false);
+
+        if ($rows->isNotEmpty() && $rows->every(fn ($ticket) => $ticket->isSalesEnded() || $ticket->isSalesNotStarted())) {
+            return $rows->contains(fn ($ticket) => $ticket->isSalesNotStarted()) ? 'not_started' : 'ended';
+        }
+
+        return $this->allTicketsSoldOut($date) ? 'sold_out' : 'open';
+    }
+
     public function allTicketSalesEnded()
     {
         if ($this->tickets->isEmpty()) {

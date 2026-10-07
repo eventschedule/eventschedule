@@ -60,7 +60,11 @@
                         </div>
                     @endif
                 @elseif ($isRsvpMode)
-                    @if ($event->rsvp_enabled)
+                    {{-- canAcceptRsvp(), the rule TicketController::rsvp() applies, and not
+                         rsvp_enabled alone: the form used to be drawn for a cancelled or finished
+                         event and then refuse what was sent. A FULL event still passes, and the
+                         form shows its waitlist. --}}
+                    @if ($event->canAcceptRsvp($eventDate))
                         @include('event.rsvp', ['accentColor' => $accentColor, 'contrastColor' => $contrastColor])
                     @else
                         <div class="text-center py-8">

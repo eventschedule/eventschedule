@@ -227,6 +227,7 @@
                     scheduleName: @json($role->name),
                     supportEmail: @json($installmentSupportEmail),
                     allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
+                    waitlistOpen: @json($event->canOfferWaitlist() && $event->allTicketsSoldOut($date ?? request()->date)),
                     waitlistSubmitting: false,
                     waitlistMessage: '',
                     waitlistSuccess: false,
@@ -1192,6 +1193,34 @@
         </div>
         @endif
 
+        {{-- Nothing can be bought right now: every ticket is sold, or every ticket is outside its
+             sales window. The rows, the total and the button row below are all hidden in that
+             state, so without this notice the form was a name field and an email field with no
+             way out. The buttons on the event page no longer lead here; an old link, a shared
+             ?tickets=true address or a page left open still can. The wording is the server's
+             (Event::ticketSaleState()), not a guess made from the rows the page was sent. --}}
+        @php
+            $ticketSaleState = $event->ticketSaleState($date ?? request()->date);
+            $ticketSaleStateLabel = [
+                'not_started' => __('messages.sales_not_started'),
+                'ended' => __('messages.ticket_sales_ended'),
+            ][$ticketSaleState] ?? __('messages.sold_out');
+        @endphp
+        <div v-if="isAllSoldOut" v-cloak id="tickets-unavailable" data-sale-state="{{ $ticketSaleState }}" role="status"
+            class="mb-6 flex items-center gap-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3">
+            <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.500-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <p class="flex-1 text-base font-semibold text-amber-900 dark:text-amber-100">{{ $ticketSaleStateLabel }}</p>
+            @if (! request()->embed)
+            {{-- The waitlist block below carries its own Cancel; this is for when there is none. --}}
+            <button type="button" @click="hideForm" v-if="!waitlistOpen"
+                class="whitespace-nowrap rounded-lg px-4 py-2.5 text-base font-semibold text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900/40 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                {{ __('messages.close') }}
+            </button>
+            @endif
+        </div>
+
         @if ($errors->any() && !$errors->has('name') && !$errors->has('email') && !$errors->has('phone') && !$errors->has('password') && !$errors->has('cf-turnstile-response'))
         <div class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
             {{ __('messages.error') }}
@@ -1856,7 +1885,11 @@
              then posted to an endpoint that 404s, surfacing as a bare "Error" - a dead end one
              click past the CTA. Free sold-out events fall through to the plain sold-out state. --}}
         @if ($event->canOfferWaitlist())
-        <div v-if="isAllSoldOut" class="mt-6">
+        {{-- allSoldOut is the SERVER's "every ticket is sold" (Event::allTicketsSoldOut()), the only
+             thing WaitlistController accepts. isAllSoldOut is the page's "nothing is available",
+             which is also true when no ticket is on sale yet: read here, it offered a waitlist the
+             endpoint then answered with "tickets are still available". --}}
+        <div v-if="allSoldOut" data-waitlist-block class="mt-6">
             <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
                 @{{ waitlistMessage }}
             </div>
