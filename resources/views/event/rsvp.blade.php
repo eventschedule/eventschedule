@@ -39,6 +39,7 @@
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
                     turnstileToken: '',
                     turnstileWidgetId: null,
+                    problem: '',
                     isSubmitting: false,
                     rsvpFull: @json($event->isRsvpFull($date ?? $event->saleEventDateFromStartsAt())),
                     showPassword: false,
@@ -173,7 +174,8 @@
                 validateForm(e) {
                     if (this.turnstileEnabled && !this.turnstileToken) {
                         e.preventDefault();
-                        alert(@json(__('messages.turnstile_verification_failed')));
+                        this.problem = @json(__('messages.turnstile_verification_failed'));
+                        this.$nextTick(() => { const el = document.getElementById('rsvp-problem'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
                         return;
                     }
                     this.saveFormState();
@@ -319,21 +321,21 @@
                 <button type="button"
                     @click="hideForm"
                     class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                    {{ strtoupper(__('messages.cancel')) }}
+                    {{ __('messages.cancel') }}
                 </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
                     class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-                    <span v-if="waitlistSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
-                    <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
+                    <span v-if="waitlistSubmitting">{{ __('messages.processing') }}</span>
+                    <span v-else>{{ __('messages.join_waitlist') }}</span>
                 </button>
             </div>
             @if (! request()->embed)
             <div v-else class="flex justify-end pt-2">
                 <button type="button" @click="hideForm" class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                    {{ strtoupper(__('messages.back')) }}
+                    {{ __('messages.back') }}
                 </button>
             </div>
             @endif
@@ -633,12 +635,15 @@
         </div>
         @endif
 
+        {{-- Said in the page, where a browser alert box used to be. --}}
+        <p v-if="problem" v-cloak id="rsvp-problem" role="alert"
+            class="mb-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm font-medium text-amber-900 dark:text-amber-100">@{{ problem }}</p>
         <div class="flex justify-end items-center pt-2 gap-8">
             @if (! request()->embed)
             <button type="button"
                 @click="hideForm"
                 class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                {{ strtoupper(__('messages.cancel')) }}
+                {{ __('messages.cancel') }}
             </button>
             @endif
             <button type="submit"

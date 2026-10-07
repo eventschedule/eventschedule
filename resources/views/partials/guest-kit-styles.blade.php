@@ -106,6 +106,12 @@
     .gk-input:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
     .gk-input-bad { border-color: var(--gk-bad); box-shadow: 0 0 0 1px var(--gk-bad); }
 
+    {{-- The foot of a form: its actions, kept at the bottom of the screen while the form is longer
+         than it. It bleeds to the edges of the panel it sits in (1.25rem of padding on a phone,
+         2rem from a tablet up), so it reads as the panel's own foot. --}}
+    .gk-buybar { position: sticky; bottom: 0; z-index: 5; margin: 1.25rem -1.25rem -1.5rem; padding: .75rem 1.25rem calc(.75rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--gk-line); background: var(--gk-solid); }
+    @media (min-width: 40rem) { .gk-buybar { margin: 1.5rem -2rem -2rem; padding: 1rem 2rem; border-radius: 0 0 1rem 1rem; } }
+
     {{-- A list of events as rows: when, what, where, and a small picture. A row is a link. --}}
     .gk-dayhead { display: flex; align-items: baseline; gap: .5rem; padding: .75rem 1rem; border-bottom: 1px solid var(--gk-line); }
     .gk-dayhead h2 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }

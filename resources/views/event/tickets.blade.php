@@ -216,6 +216,7 @@
                     cartEligible: @json($cartEligible),
                     addedToCart: false,
                     isSubmitting: false,
+                    problem: '',
                     {{-- Installments. payMonthly defaults to FALSE: pay-in-full is the default
                          choice and a credit arrangement is never pre-selected. --}}
                     payMonthly: false,
@@ -319,6 +320,12 @@
                 }
             },
             mounted() {
+                // Back from the payment page by the Back button: a browser restores this page as
+                // it was left, with Checkout still saying "Processing" and refusing to be pressed.
+                window.addEventListener('pageshow', (event) => {
+                    if (event.persisted) { this.isSubmitting = false; }
+                });
+
                 // The picker owns its own seats but this form owns the running total and the
                 // submit validation, so it reports its selection rather than reaching in here.
                 //
@@ -606,6 +613,19 @@
                         maximumFractionDigits: 2,
                     }).format(num);
                 },
+                // What is still missing, said in the page beside the button (#checkout-problem)
+                // and shown: the thing itself is brought into view, and focused if it can be.
+                // A browser alert box named nothing on the page and had to be dismissed first.
+                say(message, elementId) {
+                    this.problem = message;
+                    this.$nextTick(() => {
+                        const el = elementId ? document.getElementById(elementId) : null;
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            if (el.focus) { try { el.focus({ preventScroll: true }); } catch (err) {} }
+                        }
+                    });
+                },
                 validateForm(e) {
                     // The button carries aria-disabled rather than disabled, so the submit still
                     // has to be stopped here. Nothing is lost by trying: claimForSale() refuses
@@ -617,14 +637,23 @@
                     }
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
                         e.preventDefault();
-                        alert(@json(__('messages.please_select_ticket')));
+                        this.say(@json(__('messages.please_select_ticket')), 'ticket-0');
                         return;
                     }
                     if (this.turnstileEnabled && !this.turnstileToken) {
                         e.preventDefault();
-                        alert(@json(__('messages.turnstile_verification_failed')));
+                        this.say(@json(__('messages.turnstile_verification_failed')), 'turnstile-checkout-widget');
                         return;
                     }
+                    // The fields, in the order they are on the page: the browser marks the first
+                    // one that is missing, says what is wrong with it, and brings it into view.
+                    if (e.target && e.target.checkValidity && !e.target.checkValidity()) {
+                        e.preventDefault();
+                        this.problem = '';
+                        e.target.reportValidity();
+                        return;
+                    }
+                    this.problem = '';
                     this.saveFormState();
                     const url = new URL(window.location);
                     url.searchParams.set('tickets', 'true');
@@ -711,6 +740,7 @@
                     }
                 },
                 onTicketChange() {
+                    this.problem = '';
                     this.updateTicketQuantities();
                     this.rebuildGuests();
                     if (this.totalSelectedTickets === 0) {
@@ -1183,7 +1213,11 @@
     @vite('resources/js/seating-picker.js')
 @endif
 <div id="ticket-selector">
-    <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm"
+    {{-- novalidate: the browser's own check runs BEFORE the submit event and stops at the first
+         empty required field in the page, which is now the name, below the tickets. So pressing
+         Checkout with nothing chosen asked for a name. validateForm() asks for a ticket first and
+         then hands the rest back to the browser (reportValidity()). --}}
+    <form action="{{ route('event.checkout', ['subdomain' => $subdomain]) }}" method="post" novalidate v-on:submit="validateForm"
         @if (request()->embed && payment_gateways()->redirectsOffsite($event->payment_method)) target="_top" @endif>
         @csrf
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
@@ -1239,6 +1273,165 @@
         </div>
         @endif
 
+        {{-- ONE picker for the whole venue, full width, above the bands.
+             It used to be one instance per band, mounted in the narrow right-hand cell of a ticket
+             row - which gave the seat map 22% of the screen, and, because each instance posted only
+             its own seats while the server replaces the session's whole selection, made picking in
+             a second band silently release the first. --}}
+        @if ($event->hasAllocatedSeating())
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 w-full seating-picker-mount" :data-props="pickerProps()"></div>
+        @endif
+
+        <template v-for="(ticket, index) in tickets" :key="ticket.id">
+        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended || ticket.sales_not_started)" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600" :class="{'opacity-50': ticket.sales_ended || ticket.sales_not_started}">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
+                    <span v-if="ticket.is_pass" class="inline-flex items-center gap-1 mt-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-semibold text-[var(--brand-blue)]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
+                        <template v-if="ticket.pass_usage_type === 'per_occurrence'">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</template>
+                        <template v-else-if="ticket.pass_usage_type === 'total' && ticket.pass_max_uses">{{ __('messages.subscription') }} &middot; @{{ ticket.pass_max_uses }} {{ __('messages.visits') }}</template>
+                        <template v-else-if="ticket.pass_usage_type === 'unlimited'">{{ __('messages.subscription') }} &middot; {{ __('messages.pass_unlimited_visits') }}</template>
+                        <template v-else>{{ __('messages.subscription') }}</template>
+                    </span>
+                    <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="text-xs text-[var(--brand-blue)] mt-1">{{ __('messages.pass_book_after_purchase') }}</p>
+                    <p v-if="ticket.is_pass && ticket.pass_allow_booking && passCancelPolicyHintText(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ passCancelPolicyHintText(ticket) }}</p>
+                    <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
+                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
+                    <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
+                    {{-- The affordability hook, on the price line where the sticker shock is. This
+                         is what BNPL checkouts put next to a price and the reason the option
+                         converts at all; the decision itself stays down by the total, where the
+                         post-discount figure is finally known. --}}
+                    <p v-if="installmentsTeaserFor(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ installmentsTeaserFor(ticket) }}</p>
+                </div>
+                <div>
+                    <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
+                    <p v-else-if="ticket.sales_not_started" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</p>
+                    <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                    {{-- Allocated bands have no quantity control of their own: the venue map above
+                         owns the whole selection and posts a tickets[] line per band. --}}
+                    <p v-else-if="ticket.is_allocated" class="text-sm text-gray-500 dark:text-gray-400">
+                        @{{ allocatedQtyLabel(ticket) }}
+                    </p>
+                    <p v-else>
+                    <select
+                        v-model="ticket.selectedQty"
+                        @change="onTicketChange"
+                        class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
+                        :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
+                    >
+                        <option :value="0">0</option>
+                        <template v-for="n in getAvailableQuantity(ticket)">
+                            <option :value="n" :selected="ticket.selectedQty === n">@{{ n }}</option>
+                            </template>
+                        </select>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Ticket-level Custom Fields (shown when ticket is selected, hidden when per-guest fields are active) -->
+            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !showGuestForms" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
+                <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
+                    <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
+                        @{{ field.name }}@{{ field.required ? ' *' : '' }}
+                    </label>
+                    <!-- Text input -->
+                    <input v-if="field.type === 'string'" type="text"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    <!-- Multiline text -->
+                    <textarea v-else-if="field.type === 'multiline_string'"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        rows="2"
+                        dir="auto"
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                    <!-- Yes/No switch -->
+                    <div v-else-if="field.type === 'switch'" class="mt-1">
+                        <select :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                            :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                            v-model="ticket.custom_values[fieldKey]"
+                            :required="field.required"
+                            class="block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            <option value="">{{ __('messages.please_select') }}</option>
+                            <option value="Yes">{{ __('messages.yes') }}</option>
+                            <option value="No">{{ __('messages.no') }}</option>
+                        </select>
+                    </div>
+                    <!-- Date picker -->
+                    <input v-else-if="field.type === 'date'" type="date"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    <!-- Dropdown -->
+                    <select v-else-if="field.type === 'dropdown'"
+                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
+                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
+                        v-model="ticket.custom_values[fieldKey]"
+                        :required="field.required"
+                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <option value="">{{ __('messages.please_select') }}</option>
+                        <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
+                    </select>
+                    <!-- Multi-select -->
+                    <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
+                        <input type="hidden" :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`" :value="(ticket.multiselect_values && ticket.multiselect_values[fieldKey] || []).join(', ')">
+                        <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
+                            <input type="checkbox" :value="option.trim()"
+                                v-model="ticket.multiselect_values[fieldKey]"
+                                class="h-4 w-4 border-gray-300 rounded"
+                            style="accent-color: {{ $accentColor }}" />
+                            @{{ option.trim() }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </template>
+
+        <!-- Add-ons -->
+        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
+            <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img v-if="addon.image_url" :src="addon.image_url" :alt="addon.type"
+                            class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-gray-600" />
+                        <div>
+                            <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
+                            <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
+                        </div>
+                    </div>
+                    <div>
+                        <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                        <select v-else
+                            v-model="addon.selectedQty"
+                            class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
+                        >
+                            <option :value="0">0</option>
+                            <template v-for="n in getAvailableQuantity(addon)">
+                                <option :value="n">@{{ n }}</option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" :name="`addons[${addon.id}]`" :value="addon.selectedQty">
+            </div>
+        </div>
+
+        {{-- Who it is for, AFTER what is being bought. The form used to open on a name field, with
+             the tickets and their prices below it: on a phone that was a keyboard over a page that
+             had not yet said what anything cost. --}}
+        <h3 v-if="!isAllSoldOut || waitlistOpen" v-cloak class="mb-4 mt-8 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.your_details') }}</h3>
         {{-- Nobody is asked for a name where there is nothing to give it for: nothing to buy,
              and no waitlist (which reads these same two fields). --}}
         <div v-if="!showGuestForms && (!isAllSoldOut || waitlistOpen)">
@@ -1555,161 +1748,6 @@
             </div>
         </div>
 
-        {{-- ONE picker for the whole venue, full width, above the bands.
-             It used to be one instance per band, mounted in the narrow right-hand cell of a ticket
-             row - which gave the seat map 22% of the screen, and, because each instance posted only
-             its own seats while the server replaces the session's whole selection, made picking in
-             a second band silently release the first. --}}
-        @if ($event->hasAllocatedSeating())
-        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 w-full seating-picker-mount" :data-props="pickerProps()"></div>
-        @endif
-
-        <template v-for="(ticket, index) in tickets" :key="ticket.id">
-        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended || ticket.sales_not_started)" class="mb-6 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4" :class="{'opacity-50': ticket.sales_ended || ticket.sales_not_started}" style="border-inline-start-color: {{ $accentColor }}">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
-                    <span v-if="ticket.is_pass" class="inline-flex items-center gap-1 mt-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-semibold text-[var(--brand-blue)]">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
-                        <template v-if="ticket.pass_usage_type === 'per_occurrence'">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</template>
-                        <template v-else-if="ticket.pass_usage_type === 'total' && ticket.pass_max_uses">{{ __('messages.subscription') }} &middot; @{{ ticket.pass_max_uses }} {{ __('messages.visits') }}</template>
-                        <template v-else-if="ticket.pass_usage_type === 'unlimited'">{{ __('messages.subscription') }} &middot; {{ __('messages.pass_unlimited_visits') }}</template>
-                        <template v-else>{{ __('messages.subscription') }}</template>
-                    </span>
-                    <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="text-xs text-[var(--brand-blue)] mt-1">{{ __('messages.pass_book_after_purchase') }}</p>
-                    <p v-if="ticket.is_pass && ticket.pass_allow_booking && passCancelPolicyHintText(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ passCancelPolicyHintText(ticket) }}</p>
-                    <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
-                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
-                    <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
-                    {{-- The affordability hook, on the price line where the sticker shock is. This
-                         is what BNPL checkouts put next to a price and the reason the option
-                         converts at all; the decision itself stays down by the total, where the
-                         post-discount figure is finally known. --}}
-                    <p v-if="installmentsTeaserFor(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ installmentsTeaserFor(ticket) }}</p>
-                </div>
-                <div>
-                    <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
-                    <p v-else-if="ticket.sales_not_started" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</p>
-                    <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
-                    {{-- Allocated bands have no quantity control of their own: the venue map above
-                         owns the whole selection and posts a tickets[] line per band. --}}
-                    <p v-else-if="ticket.is_allocated" class="text-sm text-gray-500 dark:text-gray-400">
-                        @{{ allocatedQtyLabel(ticket) }}
-                    </p>
-                    <p v-else>
-                    <select
-                        v-model="ticket.selectedQty"
-                        @change="onTicketChange"
-                        class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
-                        :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
-                    >
-                        <option :value="0">0</option>
-                        <template v-for="n in getAvailableQuantity(ticket)">
-                            <option :value="n" :selected="ticket.selectedQty === n">@{{ n }}</option>
-                            </template>
-                        </select>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Ticket-level Custom Fields (shown when ticket is selected, hidden when per-guest fields are active) -->
-            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !showGuestForms" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
-                <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
-                    <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
-                        @{{ field.name }}@{{ field.required ? ' *' : '' }}
-                    </label>
-                    <!-- Text input -->
-                    <input v-if="field.type === 'string'" type="text"
-                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
-                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
-                        v-model="ticket.custom_values[fieldKey]"
-                        :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
-                    <!-- Multiline text -->
-                    <textarea v-else-if="field.type === 'multiline_string'"
-                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
-                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
-                        v-model="ticket.custom_values[fieldKey]"
-                        :required="field.required"
-                        rows="2"
-                        dir="auto"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
-                    <!-- Yes/No switch -->
-                    <div v-else-if="field.type === 'switch'" class="mt-1">
-                        <select :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
-                            :id="`ticket_custom_${ticket.id}_${fieldKey}`"
-                            v-model="ticket.custom_values[fieldKey]"
-                            :required="field.required"
-                            class="block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <option value="">{{ __('messages.please_select') }}</option>
-                            <option value="Yes">{{ __('messages.yes') }}</option>
-                            <option value="No">{{ __('messages.no') }}</option>
-                        </select>
-                    </div>
-                    <!-- Date picker -->
-                    <input v-else-if="field.type === 'date'" type="date"
-                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
-                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
-                        v-model="ticket.custom_values[fieldKey]"
-                        :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
-                    <!-- Dropdown -->
-                    <select v-else-if="field.type === 'dropdown'"
-                        :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
-                        :id="`ticket_custom_${ticket.id}_${fieldKey}`"
-                        v-model="ticket.custom_values[fieldKey]"
-                        :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                        <option value="">{{ __('messages.please_select') }}</option>
-                        <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
-                    </select>
-                    <!-- Multi-select -->
-                    <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
-                        <input type="hidden" :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`" :value="(ticket.multiselect_values && ticket.multiselect_values[fieldKey] || []).join(', ')">
-                        <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
-                            <input type="checkbox" :value="option.trim()"
-                                v-model="ticket.multiselect_values[fieldKey]"
-                                class="h-4 w-4 border-gray-300 rounded"
-                            style="accent-color: {{ $accentColor }}" />
-                            @{{ option.trim() }}
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </template>
-
-        <!-- Add-ons -->
-        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
-            <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-s-4 border-gray-300 dark:border-gray-500">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img v-if="addon.image_url" :src="addon.image_url" :alt="addon.type"
-                            class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-gray-600" />
-                        <div>
-                            <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
-                            <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
-                        </div>
-                    </div>
-                    <div>
-                        <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
-                        <select v-else
-                            v-model="addon.selectedQty"
-                            class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
-                        >
-                            <option :value="0">0</option>
-                            <template v-for="n in getAvailableQuantity(addon)">
-                                <option :value="n">@{{ n }}</option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-                <input type="hidden" :name="`addons[${addon.id}]`" :value="addon.selectedQty">
-            </div>
-        </div>
-
         <!-- Promo Code / Gift Card -->
         @php
             $showPromoField = $event->hasActivePromoCodes();
@@ -1910,21 +1948,21 @@
             <div v-if="!waitlistSuccess" class="flex flex-wrap justify-end items-center pt-2 gap-x-4 gap-y-2">
                 @if (! request()->embed)
                 <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                    {{ strtoupper(__('messages.cancel')) }}
+                    {{ __('messages.cancel') }}
                 </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
                     class="mt-4 whitespace-nowrap text-lg px-6 inline-flex items-center rounded-lg border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
                     style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-                    <span v-if="waitlistSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
-                    <span v-else>{{ strtoupper(__('messages.join_waitlist')) }}</span>
+                    <span v-if="waitlistSubmitting">{{ __('messages.processing') }}</span>
+                    <span v-else>{{ __('messages.join_waitlist') }}</span>
                 </button>
             </div>
             @if (! request()->embed)
             <div v-else class="flex justify-end pt-2">
                 <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                    {{ strtoupper(__('messages.back')) }}
+                    {{ __('messages.back') }}
                 </button>
             </div>
             @endif
@@ -1939,10 +1977,46 @@
             @{{ seatsBlockedReason }}
         </p>
 
-        <div v-if="!isAllSoldOut" class="flex flex-wrap justify-end items-center pt-2 gap-x-4 gap-y-2">
+        @include('partials.guest-privacy-note', ['privacyNoteRole' => $event->creatorRole ?? $role ?? null])
+
+        @if (payment_gateways()->usesPaymentInstructions($event->payment_method) && $event->payment_instructions_html)
+            {{-- v-pre: this user content is inside the #ticket-selector Vue mount; without it a {{ }} in the
+                 payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser.
+                 demoteH1(): this form sits on the event page and in the ticket embed, and each has
+                 its own <h1>, so the owner's "# Heading" prints as an <h2>. --}}
+            <div class="mt-6 custom-content" v-pre>
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($event->payment_instructions_html)) !!}
+            </div>
+        @endif
+
+        @if ($event->expire_unpaid_tickets > 0)
+            {{-- Suppressed on a monthly plan: the sale is marked paid on the first installment,
+                 so "payment must be completed within N hours" is simply untrue there and would
+                 read as a threat to a buyer who has just committed to three more payments. --}}
+            <div class="mt-6 text-sm text-gray-600 dark:text-gray-400" v-if="!(payMonthly && installmentsOffered)">
+                @if ($event->expire_unpaid_tickets == 1)
+                    {{ __('messages.payment_must_be_completed_within_hour') }}
+                @else
+                    {{ __('messages.payment_must_be_completed_within_hours', ['count' => $event->expire_unpaid_tickets]) }}
+                @endif
+            </div>
+        @endif
+
+
+        {{-- The actions stay at the foot of the screen while the form is longer than it (.gk-buybar),
+             so the total and Checkout are never a scroll away from the tickets. --}}
+        <div v-if="!isAllSoldOut" class="gk-buybar flex flex-wrap justify-end items-center gap-x-4 gap-y-2">
+            {{-- Said here, IN the bar, where the alert boxes used to be: what is still missing, one
+                 thing at a time. In the bar because the bar is what stays on screen: said in the
+                 flow of the page it was below the fold of a phone the moment it appeared. --}}
+            <p v-if="problem" v-cloak id="checkout-problem" role="alert"
+                class="w-full flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-sm font-medium text-amber-900 dark:text-amber-100">
+                <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                <span>@{{ problem }}</span>
+            </p>
             @if (! request()->embed)
-            <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
-                {{ strtoupper(__('messages.cancel')) }}
+            <button type="button" @click="hideForm" class="whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                {{ __('messages.cancel') }}
             </button>
             @endif
 
@@ -1955,10 +2029,10 @@
                 v-bind:aria-disabled="seatsBlocked ? 'true' : null"
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
                 v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''"
-                class="mt-4 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
+                class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
                 style="border-color: {{ $accentColor }}; color: {{ $accentColor }};">
-                <span v-if="addedToCart">{{ strtoupper(__('messages.added_to_cart')) }}</span>
-                <span v-else>{{ strtoupper(__('messages.add_to_cart')) }}</span>
+                <span v-if="addedToCart">{{ __('messages.added_to_cart') }}</span>
+                <span v-else>{{ __('messages.add_to_cart') }}</span>
             </button>
             @endif
 
@@ -1977,39 +2051,13 @@
                 v-bind:aria-disabled="seatsBlocked ? 'true' : null"
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
                 v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-sm' : ''"
-                class="mt-4 whitespace-nowrap inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
+                class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
                 style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
-                <span v-if="isSubmitting">{{ strtoupper(__('messages.processing')) }}</span>
+                <span v-if="isSubmitting">{{ __('messages.processing') }}</span>
                 <span v-else-if="payMonthly && installmentsOffered">@{{ payNowLabel }}</span>
-                <span v-else>{{ strtoupper(__('messages.checkout')) }}</span>
+                <span v-else>{{ __('messages.checkout') }}<template v-if="totalAmount > 0"> &middot; <bdi>@{{ formatPrice(totalAmount) }}</bdi></template></span>
             </button>
         </div>
-
-        @include('partials.guest-privacy-note', ['privacyNoteRole' => $event->creatorRole ?? $role ?? null])
-
-        @if (payment_gateways()->usesPaymentInstructions($event->payment_method) && $event->payment_instructions_html)
-            {{-- v-pre: this user content is inside the #ticket-selector Vue mount; without it a {{ }} in the
-                 payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser.
-                 demoteH1(): this form sits on the event page and in the ticket embed, and each has
-                 its own <h1>, so the owner's "# Heading" prints as an <h2>. --}}
-            <div class="mt-8 custom-content" v-pre>
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($event->payment_instructions_html)) !!}
-            </div>
-        @endif
-
-        @if ($event->expire_unpaid_tickets > 0)
-            {{-- Suppressed on a monthly plan: the sale is marked paid on the first installment,
-                 so "payment must be completed within N hours" is simply untrue there and would
-                 read as a threat to a buyer who has just committed to three more payments. --}}
-            <div class="mt-8" v-if="!(payMonthly && installmentsOffered)">
-                @if ($event->expire_unpaid_tickets == 1)
-                    {{ __('messages.payment_must_be_completed_within_hour') }}
-                @else
-                    {{ __('messages.payment_must_be_completed_within_hours', ['count' => $event->expire_unpaid_tickets]) }}
-                @endif
-            </div>
-        @endif
-
 
     </form>
 </div>

@@ -1444,17 +1444,22 @@
 
             var paramKey = form.querySelector('#ticket-selector') ? 'tickets' : 'rsvp';
             var desktopCta = document.getElementById('gp-event-cta');
-            var mobileCta = document.getElementById('gp-mobile-cta');
+
+            // Looked up when it is needed, not once up here: the phone's bar is printed AFTER this
+            // script, at the foot of the document, so a lookup made now always found nothing and
+            // the bar was never hidden. It stayed on screen under the open form, offering Buy
+            // tickets beside the form's own Checkout.
+            function mobileCta() { return document.getElementById('gp-mobile-cta'); }
 
             function hideCta() {
                 if (desktopCta) { desktopCta.style.display = 'none'; }
-                if (mobileCta) { mobileCta.style.display = 'none'; }
+                if (mobileCta()) { mobileCta().style.display = 'none'; }
                 if (window.esUpdateA11yCtaClearance) { window.esUpdateA11yCtaClearance(); }
             }
 
             function showCta() {
                 if (desktopCta) { desktopCta.style.display = ''; }
-                if (mobileCta) { mobileCta.style.display = ''; }
+                if (mobileCta()) { mobileCta().style.display = ''; }
                 if (window.esUpdateA11yCtaClearance) { window.esUpdateA11yCtaClearance(); }
             }
 
@@ -1499,7 +1504,10 @@
                 setTimeout(function() {
                     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     window.dispatchEvent(new CustomEvent('event-form-shown'));
-                    var nameInput = document.getElementById('name');
+                    // The sign-up form opens on its name field, so that takes the keyboard. The
+                    // ticket form opens on the tickets: nothing is focused that would raise a
+                    // keyboard over them.
+                    var nameInput = paramKey === 'rsvp' ? document.getElementById('name') : null;
                     if (nameInput && !nameInput.value.trim()) { nameInput.focus(); }
                 }, 50);
             }
@@ -1527,13 +1535,19 @@
                 form.style.display = '';
                 hideCta();
                 hidePanelsBelow();
+                // Again once the whole page has been read. A form that opens WITH the page runs
+                // this before anything below it exists: the panels after it and the phone's bar
+                // were both left on screen, where a form opened by its button hid them.
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (form.style.display !== 'none') { hideCta(); hidePanelsBelow(); }
+                });
                 requestAnimationFrame(function() {
                     form.style.opacity = '1';
                     form.style.transform = 'none';
                     setTimeout(function() {
                         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         window.dispatchEvent(new CustomEvent('event-form-shown'));
-                        var nameInput = document.getElementById('name');
+                        var nameInput = paramKey === 'rsvp' ? document.getElementById('name') : null;
                         if (nameInput && !nameInput.value.trim()) { nameInput.focus(); }
                     }, 300);
                 });

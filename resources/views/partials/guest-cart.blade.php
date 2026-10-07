@@ -251,11 +251,13 @@
                          widget's own input would be outside Vue's control. --}}
                     <div id="es-cart-turnstile" class="mb-4"></div>
                     <input type="hidden" name="cf-turnstile-response" :value="turnstileToken">
+                    {{-- Said in the page, where a browser alert box used to be. --}}
+                    <p v-if="problem" v-cloak role="alert" class="mb-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm font-medium text-amber-900 dark:text-amber-100">@{{ problem }}</p>
                 @endif
 
                 <button type="submit" dusk="cart-checkout"
                     class="w-full rounded-lg bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold px-4 py-3 transition-all duration-200">
-                    {{ strtoupper(__('messages.checkout')) }}
+                    {{ __('messages.checkout') }}
                 </button>
             </form>
         </div>
@@ -291,6 +293,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 giftCardCode: @json(old('gift_card_code', '')),
                 turnstileToken: '',
                 turnstileWidgetId: null,
+                problem: '',
             };
         },
         computed: {
@@ -524,7 +527,7 @@ window.addEventListener('DOMContentLoaded', function () {
                     size: 'flexible',
                     retry: 'auto',
                     'refresh-expired': 'auto',
-                    callback: function (token) { self.turnstileToken = token; },
+                    callback: function (token) { self.turnstileToken = token; self.problem = ''; },
                     'error-callback': function () {
                         self.turnstileToken = '';
 
@@ -545,7 +548,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 @if (\App\Utils\TurnstileUtils::isActiveForRequest())
                 if (! this.turnstileToken) {
                     event.preventDefault();
-                    window.alert(@json(__('messages.turnstile_verification_failed')));
+                    this.problem = @json(__('messages.turnstile_verification_failed'));
                 }
                 @endif
             },

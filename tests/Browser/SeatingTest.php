@@ -427,7 +427,7 @@ class SeatingTest extends DuskTestCase
             // Add to cart is client-side only, so nothing but this guard would stop it. It stays
             // on its resting label rather than flipping to "ADDED TO CART".
             $browser->scrollIntoView('@add-to-cart')->click('@add-to-cart')->pause(700);
-            $browser->assertSeeIn('@add-to-cart', strtoupper(__('messages.add_to_cart')));
+            $browser->assertSeeIn('@add-to-cart', __('messages.add_to_cart'));
 
             // THE RELOAD. The seats come back; so must the reason.
             $browser->refresh();
