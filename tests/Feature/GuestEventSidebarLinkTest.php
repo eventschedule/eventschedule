@@ -8,13 +8,14 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * "More events" at the foot of the guest event page.
+ * The schedule's other upcoming events, down the left column of the guest event page.
  *
- * It used to be a second copy of the calendar app in the page's side column: a Vue mount that
- * fetched the schedule's events for the viewed event's month, sliced them to twenty cards, and had
- * a footer link whose appearance was decided half by the server and half in the browser. On a
- * phone it was more than half of the page. It is three rows now, drawn by the server from the
- * schedule's next public events, and the link to the whole schedule is simply there.
+ * It used to be a second copy of the calendar app there: a Vue mount that fetched the schedule's
+ * events for the viewed event's month, sliced them to twenty cards, and had a footer link whose
+ * appearance was decided half by the server and half in the browser. It is drawn by the server
+ * now, from the schedule's next public events, and the link to the whole schedule is simply
+ * there. (For a few days it was three rows across the foot of the page; the column is where it
+ * belongs, and it carries on down it as it did.)
  *
  * The test that matters for privacy is still here: a draft, cancelled, unlisted or
  * password-protected event must never be one of the rows.
@@ -52,25 +53,40 @@ class GuestEventSidebarLinkTest extends TestCase
         return substr($html, $start, strpos($html, '</section>', $start) - $start);
     }
 
-    public function test_the_next_three_other_events_are_rows_that_link_to_them(): void
+    public function test_the_other_events_carry_on_down_the_left_column_as_links(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');
         $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
-        $names = ['Second', 'Third', 'Fourth', 'Fifth'];
         $others = [];
-        foreach ($names as $i => $name) {
-            $others[$name] = $this->createEvent($role, ['name' => $name.' Night', 'starts_at' => $this->at(2 + $i)]);
+        foreach (range(1, 23) as $n) {
+            // Two a day, so a day has a heading over more than one card.
+            $others[$n] = $this->createEvent($role, ['name' => 'Night Number '.$n.'.', 'starts_at' => $this->at(2 + intdiv($n - 1, 2))]);
         }
 
-        $more = $this->more($this->get($this->guestEventUrl($role, $event))->assertOk()->getContent());
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+        $more = $this->more($html);
 
-        $this->assertSame(3, substr_count($more, '<a class="gk-row '), 'three, not twenty');
-        foreach (['Second', 'Third', 'Fourth'] as $name) {
-            $this->assertStringContainsString($name.' Night', $more);
-            $this->assertStringContainsString('href="'.e($others[$name]->fresh()->getGuestUrl($role->subdomain)).'"', $more, 'a real link, not a click handler');
+        $this->assertSame(20, substr_count($more, '<a class="gk-up-card '), 'twenty, as the column always held');
+        foreach ([1, 2, 20] as $n) {
+            $this->assertStringContainsString('Night Number '.$n.'.', $more);
+            $this->assertStringContainsString('href="'.e($others[$n]->fresh()->getGuestUrl($role->subdomain)).'"', $more, 'a real link, not a click handler');
         }
-        $this->assertStringNotContainsString('Fifth Night', $more);
+        $this->assertStringNotContainsString('Night Number 21.', $more);
         $this->assertStringNotContainsString('Tonight', $more, 'the event the visitor is already on');
+        // A day is said once, over the events of that day.
+        $this->assertSame(10, substr_count($more, 'class="gk-up-day '));
+        $this->assertStringContainsString(\App\Utils\DateUtils::dayLabel(Carbon::now()->addDays(2)), $more);
+        // A phone gets the first five and the way to the rest.
+        $this->assertSame(15, substr_count($more, '<li class="gk-up-late">'));
+
+        // In the LEFT column, after the flyer, the performers and the venue, and not at the
+        // foot of the page.
+        $side = strpos($html, 'class="gk-event-col gk-event-side"');
+        $main = strpos($html, 'class="gk-event-col gk-event-main"');
+        $here = strpos($html, 'id="gp-upcoming-events"');
+        $this->assertTrue($side < $here && $here < $main, 'inside the left column');
+        $foot = substr($html, strpos($html, 'class="gk-event-foot"'), 400);
+        $this->assertStringNotContainsString('gp-upcoming-events', $foot);
     }
 
     public function test_the_way_to_the_whole_schedule_is_always_there_in_the_owners_words(): void
@@ -102,7 +118,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
         $more = $this->more($html);
 
-        $this->assertSame(1, substr_count($more, '<a class="gk-row '));
+        $this->assertSame(1, substr_count($more, '<a class="gk-up-card '));
         $this->assertStringContainsString('Open Night', $more);
         foreach (['Draft', 'Cancelled', 'Unlisted', 'Locked', 'Yesterday'] as $hidden) {
             $this->assertStringNotContainsString($hidden.' Night', $html, $hidden.' is nowhere on the page');

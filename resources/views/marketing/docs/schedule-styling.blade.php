@@ -536,7 +536,7 @@
                     <tr><td><code class="doc-inline-code">#gp-venue-map</code></td><td>The map at the foot of the venue card</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-accommodation</code></td><td>The places-to-stay map</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-create-your-own</code></td><td>The &ldquo;create your own schedule&rdquo; card</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-upcoming-events</code></td><td>The other events listed at the foot of the page</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-upcoming-events</code></td><td>The schedule's other upcoming events, down the left column</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-details</code></td><td>The main card: title, date, venue, price and buttons</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-back-link</code></td><td>The &ldquo;back to schedule&rdquo; link</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-title</code></td><td>The event title</td></tr>

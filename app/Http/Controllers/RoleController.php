@@ -2695,19 +2695,19 @@ class RoleController extends Controller
             // a schedule's own team, embeds and demo schedules (GuestFunnel::counts()).
             GuestFunnel::count('event_view', $request, $role);
 
-            // Three other events for the foot of the page, from the schedule's list of what is
-            // next (a handful of queries, not a cached answer). Never this event again on
-            // another date: a weekly night's page does not need next week's as "more". Inside
-            // the sub-schedule and the category the visitor is browsing, as the side list this
-            // replaces was: the page's links carry both.
+            // The schedule's other upcoming events, for the page's left column: up to twenty, as
+            // the list there always held, from the schedule's list of what is next (a handful
+            // of queries, not a cached answer). Never this event again on another date: a
+            // weekly night's page does not need next week's as "more". Inside the sub-schedule
+            // and the category the visitor is browsing: the page's links carry both.
             // is_scalar: ?category[]=x arrives as an array, and casting one is an error page.
-            // A category is looked for further down the schedule's list than the plain three
-            // are, or one whose next event is thirteenth in line would have none.
+            // A category is looked for further down the schedule's list than the plain
+            // twenty are, or one whose events come later in line would have none.
             $moreCategory = is_scalar(request('category')) ? (string) request('category') : '';
-            $moreEvents = $this->eventRepo->upcomingForGuest($role, $selectedGroup, $moreCategory !== '' ? 60 : 12)
+            $moreEvents = $this->eventRepo->upcomingForGuest($role, $selectedGroup, $moreCategory !== '' ? 80 : 21)
                 ->reject(fn (array $row) => $row['event']->id === $event->id)
                 ->when($moreCategory !== '', fn ($rows) => $rows->filter(fn (array $row) => (string) $row['event']->category_id === $moreCategory))
-                ->take(3)
+                ->take(20)
                 ->values();
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
             $photoLimitReached = ! $role->canUploadPhoto();

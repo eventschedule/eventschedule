@@ -497,9 +497,9 @@ class CustomFieldFilterTest extends TestCase
         $this->assertStringNotContainsString('viewFullScheduleFooter', $plain, 'the list app and its "earlier events" count are gone from this page');
 
         $filtered = $this->get($url.(str_contains($url, '?') ? '&' : '?').'custom_1=room+a')->assertOk()->getContent();
-        $rows = substr($filtered, strpos($filtered, 'id="gp-upcoming-events"'), 2500);
+        $rows = substr($filtered, strpos($filtered, 'id="gp-upcoming-events"'), 4500);
         $this->assertStringContainsString('href="'.e($soon->fresh()->getGuestUrl($venue->subdomain).'?custom_1=room+a').'"', $rows, 'the row keeps the filter');
         // ...and the page's back link keeps it too.
-        $this->assertSame(1, preg_match('/class="gk-link gk-dayhead-link" href="[^"]*custom_1=room\+a"/', $rows));
+        $this->assertSame(1, preg_match('/class="gk-link gk-up-all" href="[^"]*custom_1=room\+a"/', $rows));
     }
 }

@@ -832,6 +832,10 @@
         </div>
         @endif
 
+        {{-- The schedule's other upcoming events carry on down this column, as they always
+             did (event/partials/more-events says what changed about how). --}}
+        @include('event.partials.more-events')
+
         </div>
       </div>
 
@@ -2529,12 +2533,8 @@
 
     </div>
 
-    {{-- The foot, under both columns: three other events, and the free tier's "create your own".
-         They were the tail of the side column, where a second copy of the calendar app drew up
-         to twenty cards: on a phone that was more than half of the page. --}}
+    {{-- The foot, under both columns: the free tier's "create your own". --}}
     <div class="gk-event-foot">
-      @include('event.partials.more-events')
-
       {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
            the page's free-tier credit (the corner chip on eventschedule.com, an operator's
            footer strip on their own platform), so the two cannot disagree. It used to read

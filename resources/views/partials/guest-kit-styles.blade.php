@@ -156,6 +156,26 @@
     .gk-o5 { order: 5; }
     .gk-o6 { order: 6; }
     .gk-o8 { order: 8; }
+    .gk-o10 { order: 10; }
+    {{-- The schedule's other upcoming events, down the event page's left column (event/partials/
+         more-events): a date between two lines, a small card for each event of that day. --}}
+    .gk-up { padding: 1rem; }
+    .gk-up-title { margin: 0 0 .25rem; font-size: .9375rem; font-weight: 600; color: var(--gk-ink); }
+    .gk-up-list { display: flex; flex-direction: column; gap: .625rem; margin: 0; padding: 0; list-style: none; }
+    .gk-up-day { display: flex; align-items: center; gap: .75rem; margin-top: .625rem; font-size: .875rem; font-weight: 600; color: var(--gk-ink); text-align: center; }
+    .gk-up-day::before { content: ""; flex: 1; height: 1px; background: var(--gk-line); }
+    .gk-up-day::after { content: ""; flex: 1; height: 1px; background: var(--gk-line); }
+    .gk-up-card { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-solid); color: var(--gk-ink); text-decoration: none; box-shadow: var(--gk-shadow); transition: box-shadow var(--gk-swap), transform var(--gk-swap); }
+    .gk-up-pictured { grid-template-columns: minmax(0, 1fr) 42%; }
+    .gk-up-card:hover { box-shadow: var(--gk-shadow-lift); transform: translateY(-1px); }
+    .gk-up-card:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-up-body { display: flex; flex-direction: column; gap: .25rem; min-width: 0; padding: .75rem .875rem; }
+    .gk-up-name { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: .9375rem; font-weight: 700; line-height: 1.25; }
+    .gk-up-meta { display: flex; align-items: flex-start; gap: .375rem; font-size: .8125rem; line-height: 1.3; color: var(--gk-ink-3); }
+    .gk-up-meta svg { flex: none; width: .875rem; height: .875rem; margin-top: .0625rem; }
+    .gk-up-img { width: 100%; height: 100%; min-height: 5.5rem; object-fit: cover; }
+    .gk-up-all { display: block; margin-top: .875rem; font-size: .875rem; text-align: center; }
+    @media (max-width: 47.99rem) { .gk-up-late { display: none; } }
     .gk-event-foot { display: grid; gap: 1rem; margin-top: 1rem; }
     .gk-create { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .875rem 1rem; }
     @media (min-width: 64rem) {

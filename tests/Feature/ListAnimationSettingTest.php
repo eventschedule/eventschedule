@@ -164,7 +164,7 @@ class ListAnimationSettingTest extends TestCase
 
         $html = $this->get($event->getGuestUrl($role->subdomain).'?list_animation=curtain')->assertOk()->getContent();
 
-        $rows = substr($html, strpos($html, 'id="gp-upcoming-events"'), 2500);
+        $rows = substr($html, strpos($html, 'id="gp-upcoming-events"'), 4500);
         $this->assertStringContainsString('Next Week', $rows, 'fixture: the other event is offered');
         $this->assertStringNotContainsString('data-list-anim', $html);
         $this->assertStringNotContainsString('activeListAnimation', $html);
