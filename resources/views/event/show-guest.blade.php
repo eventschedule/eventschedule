@@ -2819,7 +2819,11 @@
     @include('partials.lightbox', ['rtl' => $role->isRtl()])
 @endif
 
-{{-- $formOpen: the same test that opens the form with the page, minus the refused-submit cases. --}}
-@include('partials.guest-funnel', ['formOpen' => ($event->canAcceptRsvp($date) && request()->get('rsvp') === 'true') || (! $event->canAcceptRsvp($date) && $event->canSellTickets($date) && request()->get('tickets') === 'true')])
+{{-- $formCounts: the form can lead to an order (a sign-up with room, a ticket that can be bought).
+     $formOpen: the same test that opens the form with the page, minus the refused-submit cases. --}}
+@include('partials.guest-funnel', [
+    'formCounts' => $event->canAcceptRsvp($date) ? ! $event->isRsvpFull($date) : ($event->canSellTickets($date) && $saleState === 'open'),
+    'formOpen' => ($event->canAcceptRsvp($date) && request()->get('rsvp') === 'true') || (! $event->canAcceptRsvp($date) && $event->canSellTickets($date) && request()->get('tickets') === 'true'),
+])
 
 </x-app-guest-layout>

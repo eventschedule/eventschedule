@@ -9,12 +9,15 @@
      Each stage is sent once per page. Inline and vanilla for the reasons partials/realtime-beacon
      gives, and it must never throw: an error in an inline script is reported against the page.
 
+     $formCounts: the page's form can lead to an order. A waitlist, or a list of tickets none of
+     which can be bought, opens the same panel and is not a step towards one.
      $formOpen: the server already knows the form opens with the page (?tickets=true, ?rsvp=true).
      A Blade comment, not a script one: this text must not reach the browser. --}}
 @if (\App\Utils\GuestFunnel::counts(request(), $role))
 <script {!! nonce_attr() !!}>
 (function () {
     var url = @json(\App\Utils\GuestFunnel::beaconPath());
+    var token = @json(\App\Utils\GuestFunnel::beaconToken());
     var sent = {};
 
     function count(stage) {
@@ -23,14 +26,16 @@
                 return;
             }
             sent[stage] = true;
-            navigator.sendBeacon(url, JSON.stringify({ s: stage }));
+            navigator.sendBeacon(url, JSON.stringify({ s: stage, k: token }));
         } catch (e) {}
     }
 
     window.esGuestFunnel = count;
 
     try {
+        @if (! empty($formCounts))
         window.addEventListener('show-event-form', function () { count('form_open'); });
+        @endif
 
         document.addEventListener('click', function (e) {
             var el = e.target && e.target.closest ? e.target.closest('[data-funnel]') : null;
@@ -39,7 +44,7 @@
             }
         }, true);
 
-        @if (! empty($formOpen))
+        @if (! empty($formCounts) && ! empty($formOpen))
         count('form_open');
         @endif
     } catch (e) {}

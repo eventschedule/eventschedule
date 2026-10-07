@@ -10,6 +10,9 @@ use App\Utils\GuestFunnel;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -64,6 +67,12 @@ class GuestFunnelTest extends TestCase
         return $this->call('POST', '/api/guest-count', [], [], [], $server + $this->browser(document: false), $body);
     }
 
+    /** What partials/guest-funnel posts for a stage: its name and the day's token. */
+    private function body(string $stage, ?string $token = null): string
+    {
+        return json_encode(['s' => $stage, 'k' => $token ?? GuestFunnel::beaconToken()]);
+    }
+
     public function test_every_stage_has_a_counter_that_is_written_and_dated(): void
     {
         $this->assertCount(7, GuestFunnel::STAGES);
@@ -100,6 +109,18 @@ class GuestFunnelTest extends TestCase
         $this->assertSame(0, $this->stat('gp_event_visitors'), 'the owner looking at their own page');
         auth()->logout();
 
+        // An admin of the installation, who is on every schedule's pages for other reasons.
+        $admin = $this->createOwner();
+        $admin->forceFill(['is_admin' => true])->save();
+        $this->actingAs($admin->fresh())->get($this->eventUrl(), $this->browser('203.0.113.11'))->assertOk();
+        $this->assertSame(0, $this->stat('gp_event_visitors'), 'an admin');
+        auth()->logout();
+
+        // Somebody stopped at the password prompt has not been shown the event.
+        $locked = $this->createEvent($this->role, ['name' => 'Members Night', 'event_password' => 'hunter2', 'is_private' => true, 'creator_role_id' => $this->role->id]);
+        $this->get($this->eventUrl($locked), $this->browser('203.0.113.12'));
+        $this->assertSame(0, $this->stat('gp_event_visitors'), 'the password prompt');
+
         // An embed is a different page with different traffic.
         $this->get($this->eventUrl().'?embed=true', $this->browser('203.0.113.2'));
         $this->assertSame(0, $this->stat('gp_event_visitors'), 'an embed');
@@ -124,11 +145,11 @@ class GuestFunnelTest extends TestCase
     public function test_the_beacon_counts_the_three_stages_a_browser_reports(): void
     {
         foreach (['list_tap' => 'gp_list_taps', 'form_open' => 'gp_form_opens', 'calendar_add' => 'gp_calendar_adds'] as $stage => $column) {
-            $this->beacon(json_encode(['s' => $stage]))->assertNoContent();
-            $this->beacon(json_encode(['s' => $stage]))->assertNoContent();
+            $this->beacon($this->body($stage))->assertNoContent();
+            $this->beacon($this->body($stage))->assertNoContent();
             $this->assertSame(1, $this->stat($column), $stage.': the same visitor, twice');
 
-            $this->beacon(json_encode(['s' => $stage]), ['HTTP_CF_CONNECTING_IP' => '203.0.113.77'])->assertNoContent();
+            $this->beacon($this->body($stage), ['HTTP_CF_CONNECTING_IP' => '203.0.113.77'])->assertNoContent();
             $this->assertSame(2, $this->stat($column), $stage);
         }
     }
@@ -137,20 +158,90 @@ class GuestFunnelTest extends TestCase
     {
         // A posted "checkout_done" would be a number anybody could raise.
         foreach (['event_view', 'checkout_start', 'checkout_done', 'follow', 'visitors', ''] as $stage) {
-            $this->beacon(json_encode(['s' => $stage]))->assertStatus(422);
+            $this->beacon($this->body($stage))->assertStatus(422);
         }
         $this->beacon('not json')->assertStatus(422);
         $this->beacon(json_encode(['s' => ['list_tap']]))->assertStatus(422);
-        $this->beacon(json_encode(['s' => 'list_tap', 'pad' => str_repeat('x', 400)]))->assertStatus(422);
+        $this->beacon(json_encode(['s' => 'list_tap', 'k' => GuestFunnel::beaconToken(), 'pad' => str_repeat('x', 400)]))->assertStatus(422);
 
         // Another site making its visitors' browsers post here: answered, not counted.
-        $this->beacon(json_encode(['s' => 'list_tap']), ['HTTP_SEC_FETCH_SITE' => 'cross-site'])->assertNoContent();
+        $this->beacon($this->body('list_tap'), ['HTTP_SEC_FETCH_SITE' => 'cross-site'])->assertNoContent();
         // A crawler.
-        $this->beacon(json_encode(['s' => 'list_tap']), ['HTTP_USER_AGENT' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'])->assertNoContent();
+        $this->beacon($this->body('list_tap'), ['HTTP_USER_AGENT' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'])->assertNoContent();
+        // Something that never loaded a page that counts: no token, a made-up one, a stale one.
+        $this->beacon(json_encode(['s' => 'list_tap']))->assertNoContent();
+        $this->beacon($this->body('list_tap', 'abcdefabcdefabcdefabcdef'))->assertNoContent();
+        $this->beacon($this->body('list_tap', GuestFunnel::beaconToken(2)))->assertNoContent();
+        $this->beacon(json_encode(['s' => 'list_tap', 'k' => ['x']]))->assertNoContent();
 
         foreach (GuestFunnel::STAGES as $column) {
             $this->assertSame(0, $this->stat($column), $column);
         }
+    }
+
+    public function test_a_page_left_open_overnight_still_counts(): void
+    {
+        $this->beacon($this->body('calendar_add', GuestFunnel::beaconToken(1)))->assertNoContent();
+
+        $this->assertSame(1, $this->stat('gp_calendar_adds'), 'yesterday\'s token, from a tab opened before midnight');
+        $this->assertNotSame(GuestFunnel::beaconToken(), GuestFunnel::beaconToken(1));
+    }
+
+    public function test_the_beacon_has_its_own_budget_per_real_visitor_address(): void
+    {
+        // The throttle middleware steps aside under APP_TESTING, so no request here can show a 429.
+        // What can be pinned is what the route asks for and what that limiter keys on.
+        $route = Route::getRoutes()->getByName('guest_funnel.beacon');
+        $this->assertContains('throttle:guest_count', $route->gatherMiddleware(), 'a positional throttle would share one budget with the unsubscribe form, ticket pages and the QR image at the door');
+
+        $limiter = RateLimiter::limiter('guest_count');
+        $this->assertNotNull($limiter);
+
+        config(['app.hosted' => true]);
+        $key = fn (array $server) => $limiter(Request::create('/api/guest-count', 'POST', server: $server))->key;
+
+        $one = $key(['REMOTE_ADDR' => '198.51.100.1', 'HTTP_CF_CONNECTING_IP' => '203.0.113.9']);
+        $other = $key(['REMOTE_ADDR' => '198.51.100.1', 'HTTP_CF_CONNECTING_IP' => '203.0.113.10']);
+        $this->assertNotSame($one, $other, 'two visitors behind the same edge address do not share a budget');
+        $this->assertStringNotContainsString('203.0.113.9', $one, 'and no address is kept in the limiter\'s key');
+        $this->assertStringStartsWith('guest-count|', $one);
+    }
+
+    public function test_an_address_header_is_believed_only_where_the_edge_sets_it(): void
+    {
+        // Off the hosted install nothing strips CF-Connecting-IP, so it is whatever the caller
+        // typed: believed, a fresh value would be a fresh visitor on every post.
+        config(['app.hosted' => false]);
+
+        $this->beacon($this->body('list_tap'), ['HTTP_CF_CONNECTING_IP' => '203.0.113.1']);
+        $this->beacon($this->body('list_tap'), ['HTTP_CF_CONNECTING_IP' => '203.0.113.2']);
+        $this->beacon($this->body('list_tap'), ['HTTP_CF_CONNECTING_IP' => '203.0.113.3']);
+
+        $this->assertSame(1, $this->stat('gp_list_taps'));
+    }
+
+    public function test_the_end_of_a_checkout_is_an_order_not_any_return_from_a_payment_page(): void
+    {
+        $ticket = $this->createTicket($this->event, ['price' => 20, 'quantity' => 50]);
+        $n = 0;
+        $done = function (array $attrs, bool $placed = false) use ($ticket, &$n) {
+            $sale = $this->createSale($this->event, $this->role, $attrs + ['email' => 'b'.(++$n).'@gmail.com'], $ticket);
+            // A different visitor each time, so the once-a-day rule is not what answers.
+            $request = Request::create('/payments/x/return/1', 'GET', server: $this->browser('203.0.113.'.(100 + $n)));
+            $before = $this->stat('gp_checkouts_done');
+            GuestFunnel::countCheckoutDone($request, $sale, $placed);
+
+            return $this->stat('gp_checkouts_done') - $before;
+        };
+
+        $this->assertSame(1, $done(['status' => 'paid']), 'paid');
+        $this->assertSame(1, $done(['status' => 'unpaid', 'payment_method' => 'stripe']), 'paid a moment ago: the confirmation is on its way');
+        $this->assertSame(1, $done(['status' => 'unpaid', 'payment_method' => 'cash']), 'to be paid at the door: placing the order is the end');
+        $this->assertSame(1, $done(['status' => 'unpaid', 'payment_method' => 'invoiceninja'], true), 'an invoice was issued');
+
+        $this->assertSame(0, $done(['status' => 'unpaid', 'payment_method' => 'paypal']), 'back from PayPal with nothing captured');
+        $this->assertSame(0, $done(['status' => 'expired', 'payment_method' => 'paypal']), 'refused, and expired on the spot');
+        $this->assertSame(0, $done(['status' => 'cancelled']), 'cancelled');
     }
 
     public function test_a_checkout_counts_its_start_and_its_end(): void
@@ -215,25 +306,37 @@ class GuestFunnelTest extends TestCase
         $this->assertSame(1, $this->stat('gp_follows'));
         auth()->logout();
 
-        $this->post(route('role.audience.join', ['subdomain' => $this->role->subdomain]), [
+        $this->call('POST', route('role.audience.join', ['subdomain' => $this->role->subdomain]), [
             'name' => 'Reader', 'email' => 'reader@gmail.com',
-        ], $this->browser('203.0.113.51'));
+        ], [], [], $this->browser('203.0.113.51'));
         $this->assertSame(2, $this->stat('gp_follows'), 'a new name on the mailing list');
+
+        // A follow made as the stop on the way to a booking request is not somebody choosing to follow.
+        $booker = $this->createOwner();
+        $this->actingAs($booker)->withSession(['pending_request' => $this->role->subdomain])
+            ->get(route('role.follow', ['subdomain' => $this->role->subdomain]), $this->browser('203.0.113.52'));
+        $this->assertTrue($booker->fresh()->isConnected($this->role->subdomain));
+        $this->assertSame(2, $this->stat('gp_follows'));
     }
 
     public function test_the_page_prints_the_beacon_only_for_a_visit_that_counts(): void
     {
         $html = $this->get($this->eventUrl(), $this->browser())->assertOk()->getContent();
         $this->assertStringContainsString('"\/api\/guest-count"', $html);
-        $this->assertSame(1, substr_count($html, "count('form_open')"), 'only the listener: the form is closed');
+        $this->assertSame(0, substr_count($html, "count('form_open')"), 'this event has no form to open');
+
+        $this->assertStringContainsString(json_encode(GuestFunnel::beaconToken()), $html, 'with the day\'s token to send back');
 
         $list = $this->get('/'.$this->role->subdomain, $this->browser())->assertOk()->getContent();
         $this->assertStringContainsString('"\/api\/guest-count"', $list);
-        $this->assertStringContainsString("window.esGuestFunnel('list_tap')", $list);
+        $this->assertStringContainsString('window.esGuestFunnel = count;', $list, 'what the list calls when a row is tapped');
 
-        // The beacon cannot tell the team from the audience, so their page does not carry it.
+        // The beacon cannot tell the team from the audience, so their pages do not carry it, and
+        // the list's call finds nothing to call.
         $own = $this->actingAs($this->role->user)->get($this->eventUrl(), $this->browser())->assertOk()->getContent();
         $this->assertStringNotContainsString('guest-count', $own);
+        $ownList = $this->actingAs($this->role->user)->get('/'.$this->role->subdomain, $this->browser())->assertOk()->getContent();
+        $this->assertStringNotContainsString('window.esGuestFunnel = count;', $ownList);
     }
 
     public function test_a_form_that_opens_with_the_page_is_counted_by_the_page(): void
@@ -241,20 +344,40 @@ class GuestFunnelTest extends TestCase
         $this->event->update(['tickets_enabled' => true]);
         $this->createTicket($this->event, ['price' => 10, 'quantity' => 50]);
 
+        $closed = $this->get($this->eventUrl(), $this->browser())->assertOk()->getContent();
+        $this->assertSame(1, substr_count($closed, "count('form_open')"), 'the listener for the button');
+
+        $html = $this->get($this->eventUrl().'?tickets=true', $this->browser())->assertOk()->getContent();
+        $this->assertSame(2, substr_count($html, "count('form_open')"), 'the listener, and the call made as the page loads');
+    }
+
+    public function test_a_form_that_cannot_lead_to_an_order_is_not_a_step_towards_one(): void
+    {
+        // Sold out, on a plan with a waitlist: Join waitlist opens the same panel.
+        $this->event->update(['tickets_enabled' => true]);
+        $ticket = $this->createTicket($this->event, ['price' => 10, 'quantity' => 1]);
+        $this->createSale($this->event, $this->role, ['status' => 'paid'], $ticket, 1);
+
         $html = $this->get($this->eventUrl().'?tickets=true', $this->browser())->assertOk()->getContent();
 
-        $this->assertSame(2, substr_count($html, "count('form_open')"), 'the listener, and the call made as the page loads');
+        $this->assertStringContainsString('show-event-form', $html, 'fixture: the page does have a button that opens the panel');
+        $this->assertSame(0, substr_count($html, "count('form_open')"));
     }
 
     public function test_every_add_to_calendar_link_says_what_it_is(): void
     {
         $html = $this->get($this->eventUrl(), $this->browser())->assertOk()->getContent();
 
-        $links = preg_match_all('/<a [^>]*href="[^"]*calendar\.google\.com[^"]*"/', $html, $matches);
-        $this->assertGreaterThan(0, $links, 'the page offers Add to calendar');
+        // All three kinds: Google, Outlook, and Apple (the EVENT's own .ics; the link to the whole
+        // schedule's feed is a subscription, not this event added to a calendar).
+        $kinds = ['calendar\.google\.com', 'outlook\.(live|office)\.com', preg_quote(parse_url($this->eventUrl(), PHP_URL_PATH), '/').'[^"]*\/ical"'];
+        foreach ($kinds as $kind) {
+            $links = preg_match_all('/<a [^>]*href="[^"]*'.$kind.'[^>]*>/', $html, $matches);
+            $this->assertGreaterThan(0, $links, 'the page offers '.$kind);
 
-        foreach ($matches[0] as $tag) {
-            $this->assertStringContainsString('data-funnel="calendar_add"', $tag);
+            foreach ($matches[0] as $tag) {
+                $this->assertStringContainsString('data-funnel="calendar_add"', $tag, $kind);
+            }
         }
     }
 }

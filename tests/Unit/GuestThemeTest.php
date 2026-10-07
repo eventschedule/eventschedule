@@ -28,6 +28,11 @@ class GuestThemeTest extends TestCase
             'white' => ['#ffffff'],
             'a mid grey' => ['#888888'],
             'a slate grey' => ['#64748b'],
+            'an orange' => ['#f97316'],
+            'a green' => ['#16a34a'],
+            'a pale grey' => ['#e5e7eb'],
+            'black with a trace of red' => ['#010000'],
+            'black with a trace of blue' => ['#050510'],
             'three digits' => ['#f0c'],
             'not a colour' => ['javascript:alert(1)'],
             'nothing' => [null],
@@ -35,20 +40,29 @@ class GuestThemeTest extends TestCase
     }
 
     #[DataProvider('accents')]
-    public function test_the_accent_as_text_reads_on_every_panel(?string $accent): void
+    public function test_the_accent_as_text_reads_on_every_ground_the_kit_puts_it_on(?string $accent): void
     {
         $theme = GuestTheme::fromAccent($accent);
 
-        foreach (GuestTheme::LIGHT_PANELS as $panel) {
-            $this->assertGreaterThanOrEqual(4.5, ColorUtils::getContrastRatio($theme->readable, $panel), "{$theme->readable} on {$panel}");
+        // The grounds as the KIT declares them, not as the class lists them: a panel, the page's
+        // gray-50, the kit's well (--gk-well: gray-100, and gray-700 in the dark), and the
+        // accent's own tint, which is the accent chip. Checked against white alone, the default
+        // blue fell to 4.1 on its tint and 3.6 in the dark.
+        $kit = file_get_contents(resource_path('views/partials/guest-kit-styles.blade.php'));
+        $this->assertStringContainsString('--gk-well: rgb(var(--ap-gray-100));', $kit);
+        $this->assertStringContainsString('--gk-well: rgb(var(--ap-gray-700));', $kit);
+        $this->assertStringContainsString('.gk-chip-accent { background: var(--es-accent-tint); color: var(--es-accent-readable); }', $kit);
+
+        foreach (['#ffffff', '#f9fafb', '#f3f4f6', $theme->tint] as $ground) {
+            $this->assertGreaterThanOrEqual(4.5, ColorUtils::getContrastRatio($theme->readable, $ground), "{$theme->readable} on {$ground}");
         }
-        foreach (GuestTheme::DARK_PANELS as $panel) {
-            $this->assertGreaterThanOrEqual(4.5, ColorUtils::getContrastRatio($theme->readableDark, $panel), "{$theme->readableDark} on {$panel}");
+        foreach (['#1e1e1e', '#252526', '#2d2d30', $theme->tintDark] as $ground) {
+            $this->assertGreaterThanOrEqual(4.5, ColorUtils::getContrastRatio($theme->readableDark, $ground), "{$theme->readableDark} on {$ground}");
         }
     }
 
     #[DataProvider('accents')]
-    public function test_the_button_stands_out_from_a_dark_panel_and_its_label_from_the_button(?string $accent): void
+    public function test_the_button_stands_out_from_the_panel_it_sits_on(?string $accent): void
     {
         $theme = GuestTheme::fromAccent($accent);
 
@@ -62,13 +76,29 @@ class GuestThemeTest extends TestCase
             ColorUtils::getContrastRatio($theme->fill, '#ffffff') >= 1.25 || $theme->edge !== 'transparent',
             "{$theme->fill} on white"
         );
-
-        // The label is the black or white the pages have always put on an accent, and it reads
-        // at least as a large bold label must (3:1).
-        foreach ([[$theme->fill, $theme->onFill], [$theme->fillDark, $theme->onFillDark]] as [$fill, $label]) {
-            $this->assertSame(accent_contrast_color($fill), $label);
-            $this->assertGreaterThanOrEqual(3.0, ColorUtils::getContrastRatio($fill, $label), "{$label} on {$fill}");
+        // A grey is never the button as it is, unless it is nearly the opposite of the panel.
+        if ($theme->neutral) {
+            $this->assertGreaterThanOrEqual(7.0, ColorUtils::getContrastRatio($theme->fill, '#ffffff'), "{$theme->fill} as a button on white");
+            $this->assertGreaterThanOrEqual(7.0, ColorUtils::getContrastRatio($theme->fillDark, GuestTheme::DARK_PANELS[0]), "{$theme->fillDark} as a button on the dark panel");
         }
+    }
+
+    public function test_a_grey_is_told_by_its_chroma_not_its_saturation(): void
+    {
+        // HSL saturation runs high near white and near black. By it, a pale grey was a colour (and
+        // stayed a pale grey button, the thing this class exists to prevent) and a black with a
+        // trace of red in it was a red, lifted on the dark panel into a pink.
+        foreach (['#e5e7eb', '#f3f4f6', '#010000', '#050510', '#111111', '#888888'] as $grey) {
+            $this->assertTrue(GuestTheme::fromAccent($grey)->neutral, $grey);
+        }
+        foreach (['#0b1220', '#64748b', '#ffd90f', '#4e81fa'] as $colour) {
+            $this->assertFalse(GuestTheme::fromAccent($colour)->neutral, $colour);
+        }
+
+        $nearBlack = GuestTheme::fromAccent('#010000');
+        $this->assertSame(GuestTheme::PAPER, $nearBlack->fillDark);
+        [, $saturation] = ColorUtils::toHsl($nearBlack->readableDark);
+        $this->assertLessThan(0.05, $saturation, 'a grey is lightened as a grey, not along a hue it does not have');
     }
 
     public function test_a_colour_keeps_its_own_fill(): void
@@ -131,7 +161,7 @@ class GuestThemeTest extends TestCase
 
         // A hex, the word transparent, or three integers: nothing an owner typed is printed.
         $this->assertMatchesRegularExpression(
-            '/^body \{ (--es-[a-z-]+: (#[0-9a-f]{6}|transparent|\d{1,3} \d{1,3} \d{1,3}); ?)+ \}\n\.dark body \{ (--es-[a-z-]+: (#[0-9a-f]{6}|transparent); ?)+ \}$/',
+            '/^body \{ (--es-[a-z-]+: (#[0-9a-f]{6}|transparent|\d{1,3} \d{1,3} \d{1,3}); ?)+ \}\n:where\(\.dark\) body \{ (--es-[a-z-]+: (#[0-9a-f]{6}|transparent); ?)+ \}$/',
             $css
         );
         $this->assertStringContainsString('--es-accent: ', $css);

@@ -2548,7 +2548,7 @@ class TicketController extends Controller
      */
     private function redirectToPurchaseLanding($sale, $event, bool $isEmbed = false)
     {
-        GuestFunnel::count('checkout_done', request(), $sale->subdomain);
+        GuestFunnel::countCheckoutDone(request(), $sale);
 
         session()->flash('cart_purchased', $sale->orderLegs()->map(fn ($leg) => [
             'subdomain' => $leg->subdomain,
@@ -2714,6 +2714,9 @@ class TicketController extends Controller
             null,
             'payment_url',
         );
+
+        // This rail builds its own way to the ticket, so it says for itself that an order got there.
+        GuestFunnel::countCheckoutDone(request(), $sale->fresh() ?? $sale);
 
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         if (request()->boolean('embed')) {

@@ -198,20 +198,49 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
     code asked for from it is left out of `guest_submit_code_requests`. Null before 2026-10-06;
   - `gp_event_visitors`, `gp_list_taps`, `gp_form_opens`, `gp_checkout_starts`,
     `gp_checkouts_done`, `gp_follows`, `gp_calendar_adds`: what visitors do on guest pages, across
-    every schedule (`App\Utils\GuestFunnel`). In order: opened an event page; went from a
-    schedule's list or month grid into an event; opened the ticket or sign-up form; sent it and an
-    order was created (tickets or a sign-up); was sent on to their ticket or order page at the end
-    (a paid order, a free one, one to pay at the door, and a card payment the provider has not
-    confirmed yet); followed a schedule or joined its mailing list; used Add to calendar. One
-    visitor per day each, with the sign-up counters' bot filters. Left out at every stage: a
-    schedule's own team and admins while signed in, demo schedules, and embeds.
-    `gp_form_opens / gp_event_visitors`, `gp_checkout_starts / gp_form_opens` and
-    `gp_checkouts_done / gp_checkout_starts` are the steps of the purchase. They are this
-    install's guests, not prospects for a plan: never divide them by the marketing counters. A
-    month is a sum of days, so someone who comes on three days counts three times. The three
-    counted in the browser (`gp_list_taps`, `gp_form_opens`, `gp_calendar_adds`) arrive by a
-    beacon and miss a visitor whose browser blocks it; the other four are counted on the server.
-    Null before 2026-10-07;
+    every schedule (`App\Utils\GuestFunnel`). One visitor per day each, with the sign-up counters'
+    bot filters. Left out at every stage: a schedule's own team and admins while signed in, demo
+    schedules, and embeds. What each one is:
+    - `gp_event_visitors`: was shown an event page. Past the password prompt, and not somebody a
+      direct-registration link sent straight elsewhere. Every event page counts, with or without
+      anything to buy on it.
+    - `gp_list_taps`: went from a schedule's list, its month grid or its video carousel into an
+      event, in the same tab or a new one.
+    - `gp_form_opens`: opened a ticket or sign-up form that could lead to an order. Not a waitlist,
+      and not a list of tickets none of which can be bought.
+    - `gp_checkout_starts`: sent a form and an order was created (tickets, a sign-up, or a cart).
+    - `gp_checkouts_done`: an order got to its end in the browser. The sale is paid, or it was
+      paid a moment ago and its confirmation is on its way (the card checkout, Payfast, a PayPal
+      capture under review), or it is the kind paid later by the owner's instructions or an
+      invoice, where placing the order is the end. A return from a payment page that captured
+      nothing is not one.
+    - `gp_follows`: followed a schedule, or put a new name on its mailing list. Not a follow made
+      on the way to a booking request.
+    - `gp_calendar_adds`: used Add to calendar on an event page.
+
+    **They are one path only loosely. Read them with these in hand:**
+    - `gp_form_opens / gp_event_visitors` has every event page under it, including the many with
+      nothing to buy. It moves with the mix of events as much as with the page.
+    - `gp_checkout_starts` can EXCEED `gp_form_opens`: a cart is sent from the schedule page with
+      no form opened, and the three stages counted in the browser (`gp_list_taps`,
+      `gp_form_opens`, `gp_calendar_adds`) arrive by a beacon and miss a visitor whose browser
+      blocks it, while the other four are counted on the server and miss nobody.
+    - `gp_checkouts_done / gp_checkout_starts` is the cleanest of the three, both counted on the
+      server. It still loses the buyer who pays and closes the tab before coming back.
+    - "Visitor" is an address and a browser. Phones on one venue's wifi, or behind one carrier,
+      are one visitor, and that thins the first stage more than the last, so the ratios read a
+      little high.
+    - A month is a sum of days: someone who comes on three days counts three times.
+    - They are this install's guests, not prospects for a plan: never divide them by the
+      marketing counters above.
+    - The browser-side three can be raised by anyone willing to load a page and post (the beacon
+      takes a day token the page hands out, its own budget per address, and same-origin posts
+      only, which stops the casual and not the determined), and go quiet without a sign if the
+      edge starts challenging `POST /api/guest-count`. A step in them with no step in the four
+      server-side ones is the beacon, not the guests.
+
+    Null before 2026-10-07, the day the columns were added. They start counting at the deploy
+    that carries them: if that is later, the days between read as zero and are not;
   - `verified_signups`.
 
   A null is "not tracked yet", never zero.

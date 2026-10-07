@@ -266,6 +266,16 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(600)->by('realtime|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
         });
 
+        // POST /api/guest-count, the guest pages' three browser-side counts. Its own budget per
+        // real visitor address, for the reasons the Realtime beacon's has: a positional throttle
+        // would pool it with every unprefixed route and, on hosted, with every visitor. A page
+        // sends three posts at most, so this is room for a household and no more.
+        RateLimiter::for('guest_count', function ($request) {
+            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+
+            return Limit::perMinute(30)->by('guest-count|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
+        });
+
         // GET /api/internal/growth (app:pull-growth). Keyed on the real client IP for the same
         // reason as the beacon above: the positional `throttle:N,M,x` form keys on $request->ip(),
         // which on hosted is a Cloudflare edge address, so every caller in the world would share

@@ -4151,7 +4151,14 @@ const calendarApp = createApp({
         // test is the backstop in the only place it would execute: window.open() runs a
         // javascript: URL on this page.
         onEventLinkClick(event, e) {
-            if (!e || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            if (!e || e.defaultPrevented || e.button !== 0) return;
+
+            // Opened in a new tab or window: the browser follows the link itself, to the event
+            // page. Still a tap into the event, as it is on the month grid's links.
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                this.countListTap();
+                return;
+            }
 
             if (this.directRegistration && event.registration_url && /^https?:\/\//i.test(event.registration_url)) {
                 e.preventDefault();

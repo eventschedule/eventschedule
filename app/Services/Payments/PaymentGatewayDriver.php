@@ -752,7 +752,7 @@ abstract class PaymentGatewayDriver
      */
     protected function redirectToPurchaseLanding(Sale $sale, Event $event, bool $isEmbed = false): Response
     {
-        GuestFunnel::count('checkout_done', request(), $sale->subdomain);
+        GuestFunnel::countCheckoutDone(request(), $sale);
 
         session()->flash('cart_purchased', $sale->orderLegs()->map(fn (Sale $leg) => [
             'subdomain' => $leg->subdomain,

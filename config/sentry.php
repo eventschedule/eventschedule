@@ -62,6 +62,7 @@ return [
         // The /admin/realtime beacon (a heartbeat a minute per open tab) and the page's 10-second
         // poll would otherwise dominate tracing whenever SENTRY_TRACES_SAMPLE_RATE is set.
         '/api/realtime',
+        '/api/guest-count',
         '/admin/realtime/data',
     ],
 

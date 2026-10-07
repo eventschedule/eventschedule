@@ -5,6 +5,7 @@ namespace App\Utils;
 use App\Models\MarketingDailyStat;
 use App\Models\PageView;
 use App\Models\Role;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 
 /**
@@ -21,10 +22,15 @@ use Illuminate\Http\Request;
  *   follow          followed a schedule, or joined its mailing list
  *   calendar_add    used Add to calendar
  *
- * Each is ONE VISITOR PER DAY (PageView::isFirstDailyVisit, the daily-salted IP and user agent
- * hash the submit page's counters use), so they read as "people who did this today" and a later
- * stage can be divided by an earlier one. They are not event counts: someone who buys twice in a
- * day is one checkout_done.
+ * Each is ONE VISITOR PER DAY (PageView::isFirstDailyVisit, the daily-salted address and user
+ * agent hash the submit page's counters use). They are not event counts: someone who buys twice in
+ * a day is one checkout_done. "Visitor" is an address and a browser, so several phones on one
+ * wifi are one, which thins the first stage more than the last.
+ *
+ * They are stages of ONE path only loosely, and docs/GROWTH_DATA.md says where the path leaks:
+ * form_open is counted for a form that can lead to an order (not for a waitlist, nor for a list
+ * of tickets that cannot be bought), but checkout_start also comes from a cart sent from the
+ * schedule page and from a visitor whose browser blocked the beacon, so it can exceed it.
  *
  * Who is left out, at every stage, so the stages stay comparable:
  *   - a schedule's own team and the installation's admins (signed in, on a host where they are);
@@ -65,7 +71,8 @@ class GuestFunnel
      */
     public static function counts(Request $request, Role|string|null $role): bool
     {
-        if (! $role || $request->boolean('embed')) {
+        // Truthiness, as the pages themselves decide whether they are an embed.
+        if (! $role || $request->input('embed')) {
             return false;
         }
 
@@ -89,8 +96,9 @@ class GuestFunnel
     {
         try {
             if (isset(self::STAGES[$stage]) && self::counts($request, $role)) {
-                // A form post and a fetch() do not send a document's Accept header.
-                self::record($stage, $request, $request->isMethod('GET'));
+                // A page is asked for with a document's Accept header; a fetch() is not, and the
+                // mailing list form is sent by one.
+                self::record($stage, $request, in_array($request->method(), ['GET', 'HEAD'], true));
             }
         } catch (\Throwable $e) {
             report($e);
@@ -98,12 +106,42 @@ class GuestFunnel
     }
 
     /**
-     * Count a stage the browser reported. Who may send is decided by the page (see the class note).
+     * The end of a checkout, for the stage that says an order got there.
+     *
+     * Not every return from a payment page is one. A return whose payment failed lands on the same
+     * ticket page, and an order the gateway refused has just been expired. So: the sale is paid;
+     * or it is waiting for a confirmation that is on its way (PaymentGatewayDriver::
+     * awaitsConfirmation()); or it is the kind that is paid later by the owner's own
+     * instructions, where placing the order IS the end ($placed: an invoice that was just sent
+     * says so itself).
      */
-    public static function countFromBeacon(string $stage, Request $request): void
+    public static function countCheckoutDone(Request $request, Sale $sale, bool $placed = false): void
     {
         try {
-            if (in_array($stage, self::BEACON_STAGES, true)) {
+            $done = $placed
+                || $sale->status === 'paid'
+                || ($sale->status === 'unpaid' && (
+                    payment_gateways()->awaitsConfirmation($sale->payment_method, $sale)
+                    || payment_gateways()->usesPaymentInstructions($sale->payment_method)
+                ));
+
+            if ($done) {
+                self::count('checkout_done', $request, $sale->subdomain);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Count a stage the browser reported. Who may send is decided by the page (see the class
+     * note), which is also what hands out the token: a post without today's or yesterday's is
+     * something that never loaded a page that counts.
+     */
+    public static function countFromBeacon(string $stage, ?string $token, Request $request): void
+    {
+        try {
+            if (in_array($stage, self::BEACON_STAGES, true) && self::tokenIsCurrent($token)) {
                 self::record($stage, $request, false);
             }
         } catch (\Throwable $e) {
@@ -119,7 +157,9 @@ class GuestFunnel
             return;
         }
 
-        $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+        // CF-Connecting-IP only where Cloudflare is in front (hosted): anywhere else the header is
+        // whatever the caller typed, and a fresh one would be a fresh visitor every time.
+        $ip = RealtimeTracker::clientIp($request);
 
         if (PageView::isFirstDailyVisit('gp_'.$stage, $ip, $userAgent)) {
             MarketingDailyStat::record(self::STAGES[$stage]);
@@ -133,5 +173,22 @@ class GuestFunnel
     public static function beaconPath(): string
     {
         return parse_url(url('/api/guest-count'), PHP_URL_PATH) ?: '/api/guest-count';
+    }
+
+    /**
+     * What a page that counts gives its beacon to send back. The same for every visitor that day
+     * (it identifies nobody), and tied to this installation's key, so it proves only that the
+     * sender loaded such a page today or yesterday. That is not a lock: anyone can load a page.
+     * It is what keeps a script that has never seen one from raising the numbers.
+     */
+    public static function beaconToken(int $daysAgo = 0): string
+    {
+        return substr(hash_hmac('sha256', 'guest-count|'.now('UTC')->subDays($daysAgo)->toDateString(), (string) config('app.key')), 0, 24);
+    }
+
+    private static function tokenIsCurrent(?string $token): bool
+    {
+        return is_string($token) && $token !== ''
+            && (hash_equals(self::beaconToken(), $token) || hash_equals(self::beaconToken(1), $token));
     }
 }

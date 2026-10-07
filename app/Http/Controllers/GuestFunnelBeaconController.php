@@ -11,9 +11,10 @@ use Illuminate\Http\Response;
  * a tap from a list into an event, a form opened, Add to calendar used.
  *
  * In routes/api.php for the reason the Realtime beacon is: no session, no cookies, no CSRF, and it
- * answers same-origin on every host. The body is {"s": "<stage>"} and nothing else. No identifier
- * is sent or stored: the count is one per visitor per day by the daily-salted hash the page-view
- * counters already use, and what is kept is a number on a row that has one row a day.
+ * answers same-origin on every host. The body is {"s": "<stage>", "k": "<the day's token>"} and
+ * nothing else. No identifier is sent or stored: the token is the same for everybody that day
+ * (GuestFunnel::beaconToken()), the count is one per visitor per day by the daily-salted hash the
+ * page-view counters already use, and what is kept is a number on a row that has one row a day.
  *
  * Always 204 for a well-formed body, counted or not, so the page learns nothing from the answer.
  */
@@ -40,7 +41,8 @@ class GuestFunnelBeaconController extends Controller
         $fetchSite = $request->header('Sec-Fetch-Site');
 
         if ($fetchSite === null || $fetchSite === 'same-origin') {
-            GuestFunnel::countFromBeacon($stage, $request);
+            $token = $data['k'] ?? null;
+            GuestFunnel::countFromBeacon($stage, is_string($token) ? $token : null, $request);
         }
 
         return response()->noContent();

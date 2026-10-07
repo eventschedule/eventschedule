@@ -31,7 +31,9 @@ class GuestKitTest extends TestCase
         $tokens = strpos($html, 'body { --es-accent: #ffd90f; --es-accent-text: #000000;');
         $this->assertNotFalse($tokens, 'the fill and the label on it');
         $this->assertStringContainsString('--es-accent-readable: '.$theme->readable.';', $html, 'a yellow that can be read as text');
-        $this->assertStringContainsString('.dark body { --es-accent: #ffd90f;', $html);
+        // No weight of its own (:where), so an owner's `body { --es-accent: ... }` wins in the dark too.
+        $this->assertStringContainsString(':where(.dark) body { --es-accent: #ffd90f;', $html);
+        $this->assertStringNotContainsString('.dark body { --es-accent', str_replace(':where(.dark) body', '', $html));
 
         $kit = strpos($html, '.gk-btn-primary {');
         $owner = strpos($html, '.owner-rule { color: rebeccapurple; }');
@@ -57,7 +59,7 @@ class GuestKitTest extends TestCase
             foreach (explode(',', $selectorList) as $selector) {
                 $selector = trim($selector);
                 // The style tag itself, the two token blocks, and the print and motion queries' own lines.
-                if ($selector === 'body' || $selector === '.dark body' || ! str_starts_with($selector, '.')) {
+                if ($selector === 'body' || $selector === ':where(.dark) body' || $selector === '.dark .gk-panel' || ! str_starts_with($selector, '.')) {
                     continue;
                 }
                 $this->assertSame(1, preg_match_all('/\.[a-z]/', $selector), 'one class in: '.$selector);
@@ -96,10 +98,13 @@ class GuestKitTest extends TestCase
         $this->assertStringContainsString('class="gk-chip gk-chip-out"', Blade::render('<x-guest.chip tone="out">Sold out</x-guest.chip>'));
         $this->assertStringContainsString('class="gk-chip"', Blade::render('<x-guest.chip>Online</x-guest.chip>'));
 
-        $bad = Blade::render('<x-guest.notice tone="bad">It failed</x-guest.notice>');
-        $this->assertStringContainsString('role="alert"', $bad);
+        // A notice that is part of the page is read in its place; one that answers what the
+        // visitor just did is announced.
+        $bad = Blade::render('<x-guest.notice tone="bad">Sales have ended</x-guest.notice>');
+        $this->assertStringNotContainsString('role=', $bad);
         $this->assertStringContainsString('gk-note gk-note-bad', $bad);
-        $plain = Blade::render('<x-guest.notice>Nothing was charged<x-slot:actions><button>Close</button></x-slot:actions></x-guest.notice>');
+        $this->assertStringContainsString('role="alert"', Blade::render('<x-guest.notice tone="bad" live>It failed</x-guest.notice>'));
+        $plain = Blade::render('<x-guest.notice live>Nothing was charged<x-slot:actions><button>Close</button></x-slot:actions></x-guest.notice>');
         $this->assertStringContainsString('role="status"', $plain);
         $this->assertStringContainsString('<button>Close</button>', $plain);
     }
@@ -113,8 +118,9 @@ class GuestKitTest extends TestCase
         $this->assertTrue($withLook->isClaimed() && $withLook->hasConfiguredBackground());
         $this->assertSame($withLook->id, GuestTheme::lookRole($curator, $withLook)->id);
 
-        // A claimed schedule that never chose a background: the page is the curator's throughout.
-        // The buttons used to take this schedule's colour while the background stayed the curator's.
+        // A claimed schedule that never chose a background: by this rule the page is the
+        // curator's throughout. (The event page's own buttons still ask a looser question until
+        // that page moves onto the kit; this pins the rule it will move to.)
         $noLook = $this->createRole($owner, 'venue', ['accent_color' => '#16a34a']);
         $noLook->forceFill(['background' => 'gradient', 'background_colors' => ''])->save();
         $this->assertFalse($noLook->fresh()->hasConfiguredBackground());

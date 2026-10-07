@@ -2,8 +2,8 @@
      forms (partials/form-kit-styles). Plain CSS on tokens, so no CSS build.
 
      Rules for anything added here:
-       - one class per rule and no !important, so an owner's custom CSS (printed after this)
-         always wins a tie. The ids owners are promised (#gp-...) are not styled here at all.
+       - one class per rule and no !important, so an owner's custom CSS (printed after this,
+         like everything in this slot it follows the app's own stylesheet) wins a tie. The ids owners are promised (#gp-...) are not styled here at all.
        - sizes in rem, so the accessibility widget's text-size steps scale them.
        - colours from the tokens below. The schedule's own colours are the --es-accent family,
          printed by partials/guest-theme; the surfaces and inks are the --gk- family, which
@@ -35,7 +35,7 @@
         --gk-swap: 120ms;
         --gk-open: 220ms;
     }
-    .dark body {
+    :where(.dark) body {
         --gk-panel: rgb(30 30 30 / .95);
         --gk-solid: rgb(var(--ap-gray-900));
         --gk-well: rgb(var(--ap-gray-700));
@@ -96,7 +96,9 @@
     .gk-note-warn { background: var(--gk-warn-bg); border-color: var(--gk-warn-line); color: var(--gk-warn); }
     .gk-note-bad { background: var(--gk-bad-bg); border-color: var(--gk-bad-line); color: var(--gk-bad); }
 
-    .gk-input { min-height: 2.875rem; padding: 0 .75rem; border: 1px solid var(--gk-line); border-radius: var(--gk-radius-ctl); background: var(--gk-solid); color: var(--gk-ink); font-size: 1rem; }
+    {{-- No size or padding here: layouts/app forces both on every text field (the 16px that
+         stops a phone zooming in), and a rule that cannot apply should not be written. --}}
+    .gk-input { min-height: 2.875rem; border: 1px solid var(--gk-line); border-radius: var(--gk-radius-ctl); background: var(--gk-solid); color: var(--gk-ink); }
     .gk-input::placeholder { color: var(--gk-ink-3); }
     .gk-input:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
     .gk-input-bad { border-color: var(--gk-bad); box-shadow: 0 0 0 1px var(--gk-bad); }
@@ -107,7 +109,9 @@
     }
 
     @media print {
-        .gk-panel { background: #ffffff; color: #000000; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #d1d5db; }
+        {{-- .dark as well: a panel that kept its dark:bg- utility would outrank the single class
+             and print black text on a dark ground. --}}
+        .gk-panel, .dark .gk-panel { background: #ffffff; color: #000000; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #d1d5db; }
         .gk-btn { display: none; }
         .gk-note { background: #ffffff; color: #000000; border-color: #9ca3af; }
     }

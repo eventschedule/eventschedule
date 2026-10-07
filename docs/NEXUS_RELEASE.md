@@ -492,6 +492,33 @@ table, and old code runs on the new schema.
 
 **Undo:** revert and redeploy. The migration's `down()` drops only its two columns.
 
+### Guest page counts (2026-10-07)
+
+**What ships:**
+- Seven daily counters on `marketing_daily_stats` for what visitors do on guest pages, across
+  every schedule (`gp_event_visitors`, `gp_list_taps`, `gp_form_opens`, `gp_checkout_starts`,
+  `gp_checkouts_done`, `gp_follows`, `gp_calendar_adds`). They are the "before" picture for the
+  guest page redesign. The growth export carries them from schema 16; `docs/GROWTH_DATA.md` says
+  what each is and where the path between them leaks.
+- `POST /api/guest-count`, a beacon for the three of them only a browser sees. No session, no
+  cookie, nothing about the visitor in the body. Guest pages print its script only for a visit
+  that counts (not the schedule's team, an admin, a demo schedule or an embed).
+
+**Nothing changes for anybody using the app.** No new env vars, no new scheduled entries.
+
+**After the deploy:**
+- Open an event page in a private window, press Add to Calendar and pick one. In the page's
+  Network tab `POST /api/guest-count` answers 204.
+- In Cloudflare **Security > Events**, make sure `POST /api/guest-count` is not being challenged.
+  A challenged beacon fails silently: three of the seven counters would read low with nothing on
+  screen saying so, while the four counted on the server carry on.
+- The next day, `select date, gp_event_visitors, gp_list_taps, gp_form_opens, gp_checkout_starts,
+  gp_checkouts_done from marketing_daily_stats order by date desc limit 3` (or the next
+  `app:pull-growth`): all five should have moved. `gp_event_visitors` moving with the three
+  browser-side ones at zero is the beacon being blocked.
+- The counters read zero for the days between the migration's date (2026-10-07) and this deploy,
+  and those zeros are not measurements. Note the deploy date beside the first pull.
+
 ### Admin dashboard and active users (2026-10-06)
 
 **What ships:**

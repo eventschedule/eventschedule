@@ -454,7 +454,12 @@ class RoleController extends Controller
 
         if (! $user->isConnected($role->subdomain)) {
             $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-            GuestFunnel::count('follow', $request, $role);
+
+            // Not when this is the stop on the way to a booking request (HomeController sends
+            // pending_request through here): that visitor asked to book, not to follow.
+            if (! session()->has('pending_request')) {
+                GuestFunnel::count('follow', $request, $role);
+            }
         }
 
         session()->forget('pending_follow');
@@ -2706,12 +2711,6 @@ class RoleController extends Controller
             app(AnalyticsService::class)->recordView($role, $event, $request);
         }
 
-        // The first stage of the guest funnel, counted across schedules. It leaves out the same
-        // visits as the line above, and demo schedules too.
-        if ($event) {
-            GuestFunnel::count('event_view', $request, $role);
-        }
-
         $myPendingVideos = collect();
         $myPendingComments = collect();
         $myPendingPhotos = collect();
@@ -2777,6 +2776,12 @@ class RoleController extends Controller
             }
 
             $view = 'event/show-guest';
+
+            // The first stage of the guest funnel, counted across schedules. Here, and not beside
+            // the page-view analytics above: this is past the password prompt and the direct
+            // registration redirect, so it counts somebody who was shown the event. It leaves out
+            // a schedule's own team, embeds and demo schedules (GuestFunnel::counts()).
+            GuestFunnel::count('event_view', $request, $role);
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
             $photoLimitReached = ! $role->canUploadPhoto();
 

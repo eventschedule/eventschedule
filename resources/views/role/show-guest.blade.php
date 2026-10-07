@@ -188,7 +188,7 @@ html[data-es-view="list"] #gp-calendar {
 
                     <!-- Event details below video -->
                     <div class="p-4">
-                      <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block">
+                      <a href="{{ $eventData['event']->getGuestUrl($role->subdomain) }}" class="block" data-funnel="list_tap">
                         <h2 class="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-2 line-clamp-1 group-hover/card:text-blue-600 transition-colors duration-200" dir="{{ content_dir_for_language($carouselName, $carouselLang) }}">
                           {{ $carouselName }}
                         </h2>

@@ -29,11 +29,14 @@ Route::post('/realtime', [RealtimeBeaconController::class, 'store'])
     ->middleware('throttle:realtime');
 
 // The guest pages' three browser-side counts (App\Utils\GuestFunnel), sent by partials/guest-funnel.
-// Here for the Realtime beacon's reasons. A plain throttle, not a named limiter: at most three
-// useful posts per visitor per day, so 30 a minute is room for a shared address and no more.
+// Here for the Realtime beacon's reasons, and with a named limiter for them too: a positional
+// `throttle:N,M` keys on $request->ip() with no route in the key, so this would have shared one
+// budget with every other unprefixed route (the unsubscribe form, ticket pages, QR images at the
+// door), and on hosted that address is Cloudflare's, the same for every visitor in the world.
+// A page sends at most three posts per load.
 Route::post('/guest-count', [GuestFunnelBeaconController::class, 'store'])
     ->name('guest_funnel.beacon')
-    ->middleware('throttle:30,1');
+    ->middleware('throttle:guest_count');
 
 // The growth payload, for `php artisan app:pull-growth` on the operator's machine. Bearer-token
 // auth, hosted only; see GrowthDataController. Here for the same reasons as the beacon: no session,

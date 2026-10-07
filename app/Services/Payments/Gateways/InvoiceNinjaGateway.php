@@ -6,6 +6,7 @@ use App\Models\Sale;
 use App\Models\User;
 use App\Services\Payments\CheckoutContext;
 use App\Services\Payments\PaymentGatewayDriver;
+use App\Utils\GuestFunnel;
 use App\Utils\InvoiceNinja;
 use App\Utils\UrlUtils;
 use Symfony\Component\HttpFoundation\Response;
@@ -206,6 +207,10 @@ class InvoiceNinjaGateway extends PaymentGatewayDriver
                 $sale->payment_amount = $invoice['amount'];
             }
             $sale->save();
+
+            // An invoice has been issued: the order is placed, whichever page the buyer sees next.
+            // This rail leaves by its own redirects, so it says so itself.
+            GuestFunnel::countCheckoutDone(request(), $sale, placed: true);
 
             if ($sendEmail) {
                 $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
