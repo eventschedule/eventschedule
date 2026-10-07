@@ -133,17 +133,7 @@ final class EmailTheme
      */
     public static function normalizeHex(?string $hex): ?string
     {
-        if (! is_string($hex) || ! preg_match('/^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', trim($hex), $m)) {
-            return null;
-        }
-
-        $digits = strtolower($m[1]);
-
-        if (strlen($digits) <= 4) {
-            $digits = $digits[0].$digits[0].$digits[1].$digits[1].$digits[2].$digits[2];
-        }
-
-        return '#'.substr($digits, 0, 6);
+        return ColorUtils::normalizeHex($hex);
     }
 
     private static function build(string $voice, ?Role $role, ?string $accent, ?string $appName): self
@@ -305,67 +295,22 @@ final class EmailTheme
         return true;
     }
 
-    /** $colour blended into $base at $weight (0 = all $base, 1 = all $colour). */
+    /**
+     * The colour maths below is ColorUtils', shared with GuestTheme. These names stay so the
+     * rules above read as they always have.
+     */
     private static function mix(string $colour, string $base, float $weight): string
     {
-        $a = self::toRgb($colour);
-        $b = self::toRgb($base);
-
-        return self::hex(array_map(fn ($i) => $a[$i] * $weight + $b[$i] * (1 - $weight), [0, 1, 2]));
-    }
-
-    private static function toRgb(string $hex): array
-    {
-        return [hexdec(substr($hex, 1, 2)), hexdec(substr($hex, 3, 2)), hexdec(substr($hex, 5, 2))];
-    }
-
-    private static function hex(array $rgb): string
-    {
-        return '#'.implode('', array_map(fn ($c) => str_pad(dechex((int) round(max(0, min(255, $c)))), 2, '0', STR_PAD_LEFT), $rgb));
+        return ColorUtils::mix($colour, $base, $weight);
     }
 
     private static function toHsl(string $hex): array
     {
-        [$r, $g, $b] = array_map(fn ($c) => $c / 255, self::toRgb($hex));
-        $max = max($r, $g, $b);
-        $min = min($r, $g, $b);
-        $l = ($max + $min) / 2;
-
-        if ($max === $min) {
-            return [0.0, 0.0, $l];
-        }
-
-        $d = $max - $min;
-        $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
-        $h = match ($max) {
-            $r => ($g - $b) / $d + ($g < $b ? 6 : 0),
-            $g => ($b - $r) / $d + 2,
-            default => ($r - $g) / $d + 4,
-        };
-
-        return [$h / 6, $s, $l];
+        return ColorUtils::toHsl($hex);
     }
 
     private static function fromHsl(float $h, float $s, float $l): string
     {
-        if ($s == 0.0) {
-            return self::hex([$l * 255, $l * 255, $l * 255]);
-        }
-
-        $q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
-        $p = 2 * $l - $q;
-
-        $channel = function (float $t) use ($p, $q): float {
-            $t = $t < 0 ? $t + 1 : ($t > 1 ? $t - 1 : $t);
-
-            return match (true) {
-                $t < 1 / 6 => $p + ($q - $p) * 6 * $t,
-                $t < 1 / 2 => $q,
-                $t < 2 / 3 => $p + ($q - $p) * (2 / 3 - $t) * 6,
-                default => $p,
-            };
-        };
-
-        return self::hex([$channel($h + 1 / 3) * 255, $channel($h) * 255, $channel($h - 1 / 3) * 255]);
+        return ColorUtils::fromHsl($h, $s, $l);
     }
 }

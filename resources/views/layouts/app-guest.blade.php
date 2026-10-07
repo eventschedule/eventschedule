@@ -276,6 +276,11 @@
             @endif
         @endforeach
 
+        {{-- The schedule's colours and the guest kit, BEFORE the block below: it ends with the
+             owner's custom CSS, which must be able to overrule both. --}}
+        @include('partials.guest-theme')
+        @include('partials.guest-kit-styles')
+
         <style {!! nonce_attr() !!}>
         @if (request()->embed)
         html {
