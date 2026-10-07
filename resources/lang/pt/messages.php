@@ -669,6 +669,7 @@ return [
     'show_less' => 'Mostrar menos',
     'previous_month' => 'Mês anterior',
     'today' => 'Hoje',
+    'tomorrow' => 'Amanhã',
     'next_month' => 'Próximo mês',
     'arabic' => 'Árabe',
     'english' => 'Inglês',

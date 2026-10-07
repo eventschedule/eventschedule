@@ -71,6 +71,8 @@ trait CalendarDataTrait
             'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
             ...$imageFields,
+            // What a row may say about tickets (Event::cardTicketFields()): empty for a locked event.
+            ...$event->cardTicketFields(),
             'can_edit' => $canEdit,
             'edit_url' => $canEdit
                 ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))

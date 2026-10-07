@@ -54,6 +54,15 @@
   html[data-es-view] [data-view-width] { transition: none !important; }
   html[data-es-view="calendar"] [data-view-width] { max-width: 200rem !important; }
   html[data-es-view="list"] [data-view-width] { max-width: 56rem !important; }
+  {{-- The next-event card leads the MONTH, which names no next event (the grid on a wide
+       screen, the small month on a phone). In the list view it stands aside: the first thing
+       in the list is the next event already, as a large card from a tablet up and as the
+       first row on a phone, and the card above it said the same event twice. data-view is the
+       server's layout, then whatever the list's app switches to (updateOuterContainers());
+       the other two rules are for the moment before that app has started. --}}
+  [data-lead-wrap][data-view="list"] { display: none; }
+  html[data-es-view="list"] [data-lead-wrap] { display: none; }
+  html[data-es-view="calendar"] [data-lead-wrap] { display: block; }
   html[data-es-view="list"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
   html[data-es-view="list"] #toggle-list-btn { background-color: transparent !important; color: #1e1e1e !important; }
   html[data-es-view="calendar"] #toggle-list-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
@@ -375,6 +384,104 @@ html[data-es-view="list"] #gp-calendar {
       @endif
 
       <section id="gp-events" aria-label="{{ $role->customLabel('events') }}">
+      {{-- What is next, said by the server before the list has loaded: the list is fetched by
+           the page's script, and until it arrived the page had a header and a grey placeholder.
+           The first of the schedule's upcoming events the page already has (EventRepo::
+           upcomingForGuest(), which leaves out anything draft, private or behind a password),
+           inside the category the address names. Not in an embed, which is the list alone.
+
+           Its picture has a box of its own shape from the start, so nothing moves when it
+           arrives, and it does not ask for high priority: the header's picture has that. --}}
+      @php
+        // ?category[]=x is an array, and a cast of it to a string is an error page.
+        $leadCategory = is_scalar(request('category')) ? (string) request('category') : '';
+        // The lead is chosen for the sub-schedule and the category of the address. An address
+        // that narrows by anything else (a shared "Room B" link, ?custom_1=...) gets none: it
+        // would name the schedule's next event whatever room it is in.
+        $leadNarrowed = collect(request()->query())->contains(
+            fn ($value, $key) => str_starts_with((string) $key, 'custom_') && $value !== null && $value !== '' && $value !== []
+        );
+        // Not in an embed, which is the list alone, nor in the picture ?graphic=1 renders.
+        $leadRow = (request()->embed || request()->graphic || $leadNarrowed)
+            ? null
+            : app(\App\Repos\EventRepo::class)->leadOf($upcoming ?? collect(), $leadCategory);
+      @endphp
+      @if ($leadRow)
+        @php
+          $leadEvent = $leadRow['event'];
+          $leadLang = $role->displayLanguageCode();
+          $leadZone = $leadEvent->scheduleTimezone();
+          $leadStart = $leadEvent->getStartDateTime($leadRow['date'], true, $leadZone);
+          $leadToday = \Carbon\Carbon::now($leadZone)->format('Y-m-d');
+          $leadDay = $leadStart->format('Y-m-d');
+          $leadWord = $leadDay === $leadToday ? __('messages.today')
+              : ($leadDay === \Carbon\Carbon::now($leadZone)->addDay()->format('Y-m-d') ? __('messages.tomorrow') : null);
+          $leadName = $leadEvent->nameInLanguage($leadLang, $role);
+          // The place as the rows below name it, unless this IS the place's own schedule.
+          $leadWhere = ($leadEvent->venue && $leadEvent->venue->id === $role->id) ? null : ($leadEvent->getVenueDisplayName(true, $leadLang) ?: null);
+          $leadTime = $leadEvent->getStartEndTime($leadRow['date'], get_use_24_hour_time($role));
+          $leadImage = $leadEvent->flyer_image_url ? $leadEvent->getImageUrl(960) : null;
+          $leadFacts = $leadEvent->cardTicketFields();
+          $leadGone = in_array($leadRow['date'], $leadFacts['sold_out_dates'], true);
+          $leadFree = $leadFacts['ticket_free'] || $leadEvent->rsvp_enabled;
+          // Sold somewhere else at a price the owner typed, as a row says it.
+          $leadElsewhere = $leadEvent->registrationHref() && $leadEvent->ticket_price !== null && ! $leadFree && ! $leadFacts['ticket_from'];
+          // The address keeps what the page was narrowed by, as a row's does, so the event's
+          // way back returns here.
+          $leadQuery = array_filter([
+              'category' => $leadCategory,
+              'schedule' => (isset($selectedGroup) && $selectedGroup) ? $selectedGroup->slug : null,
+              'layout' => requested_event_layout(),
+          ], fn ($value) => $value !== null && $value !== '');
+          $leadUrl = $leadEvent->getGuestUrl($role->subdomain, $leadEvent->days_of_week ? $leadRow['date'] : null);
+          $leadUrl .= $leadQuery ? (str_contains($leadUrl, '?') ? '&' : '?').http_build_query($leadQuery) : '';
+        @endphp
+        <div class="mt-2 md:mt-6 mb-4 px-0 md:px-6 lg:px-16 mx-auto transition-[max-width] duration-300 ease-in-out" data-view-width data-lead-wrap data-view="{{ $role->activeEventLayout() }}"
+             style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+          <a id="gp-next-event" class="gk-panel gk-lead {{ $leadImage ? '' : 'gk-lead-bare' }} bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}"
+             href="{{ $leadUrl }}" data-funnel="list_tap">
+            @if ($leadImage)
+              <img class="gk-lead-img" src="{{ $leadImage }}" alt="" width="960" height="540" decoding="async">
+            @endif
+            <span class="gk-lead-body">
+              <span class="gk-lead-when">
+                @if ($leadWord)<b>{{ $leadWord }}</b>@endif
+                <time datetime="{{ $leadStart->format('Y-m-d\TH:i:sP') }}">{{ \App\Utils\DateUtils::dayLabel($leadStart) }}</time>
+              </span>
+              <span class="gk-lead-title" dir="{{ content_dir_for_language($leadName, $leadLang) }}">{{ $leadName }}</span>
+              <span class="gk-lead-where">
+                @if ($leadTime)<bdi dir="ltr">{{ $leadTime }}</bdi>@endif
+                @if ($leadWhere)<span>{{ $leadWhere }}</span>@endif
+              </span>
+              @if ($leadGone || $leadFree || $leadFacts['ticket_from'] || $leadElsewhere)
+                <span class="gk-row-chips">
+                  @if ($leadGone)
+                    <span class="gk-chip gk-chip-out">{{ __('messages.sold_out') }}</span>
+                  @elseif ($leadElsewhere)
+                    @if ((float) $leadEvent->ticket_price == 0.0)
+                      <span class="gk-chip gk-chip-free">{{ $role->customLabel('free_entry') }}</span>
+                    @else
+                      <span class="gk-chip"><bdi>{{ \App\Utils\MoneyUtils::format($leadEvent->ticket_price, $leadEvent->ticket_currency_code) }}</bdi></span>
+                      @if ($leadEvent->coupon_code)
+                        <span class="gk-chip gk-chip-accent">{{ __('messages.coupon_code') }}: <bdi>{{ $leadEvent->coupon_code }}</bdi>@if ($leadEvent->couponDiscountLabel()) (<bdi>{{ $leadEvent->couponDiscountLabel() }}</bdi>)@endif</span>
+                      @endif
+                    @endif
+                  @else
+                    @if ($leadFree)
+                      <span class="gk-chip gk-chip-free">{{ $role->customLabel('free_entry') }}</span>
+                    @elseif ($leadFacts['ticket_from'])
+                      <span class="gk-chip"><bdi>{{ $leadFacts['ticket_from'] }}</bdi></span>
+                    @endif
+                    @if (in_array($leadRow['date'], $leadFacts['low_stock_dates'], true))
+                      <span class="gk-chip gk-chip-few">{{ __('messages.few_left') }}</span>
+                    @endif
+                  @endif
+                </span>
+              @endif
+            </span>
+          </a>
+        </div>
+      @endif
       <div
         class="calendar-panel-border {{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="gp-calendar"

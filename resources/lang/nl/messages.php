@@ -664,6 +664,7 @@ return [
     'show_less' => 'Toon minder',
     'previous_month' => 'Vorige maand',
     'today' => 'Vandaag',
+    'tomorrow' => 'Morgen',
     'next_month' => 'Volgende maand',
     'arabic' => 'Arabisch',
     'english' => 'Engels',

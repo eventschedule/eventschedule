@@ -884,6 +884,7 @@ return [
     'show_less' => 'הצג פחות',
     'previous_month' => 'חודש קודם',
     'today' => 'היום',
+    'tomorrow' => 'מחר',
     'next_month' => 'חודש הבא',
     'arabic' => 'ערבית',
     'english' => 'אנגלית',

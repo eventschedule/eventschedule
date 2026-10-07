@@ -27,6 +27,11 @@
     $isAdminRoute = $route == 'admin';
     $alwaysShowFilters = in_array($route ?? '', ['guest', 'admin']);
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
+    // Whether this is a guest page that draws the list as rows (the one list, the chips above
+    // it, the month on a phone). Not ?graphic=1: that renders a picture to share, and keeps the
+    // cards it always had.
+    $guestRows = ($route ?? '') === 'guest' && ! request()->graphic;
+    $guestEmbed = (bool) (isset($embed) && $embed);
     // The path this schedule's own page lives at, with no trailing slash: '' when the schedule
     // owns the whole host (hosted subdomains, custom domains) and '/{subdomain}' under selfhost's
     // path-based routing. Built here rather than inline in the Vue data because Blade's @json
@@ -38,8 +43,8 @@
     $firstDay = $role?->first_day_of_week ?? 0;
     // The owner's event animation (resources/css/list-reveal.css), or ?list_animation= when an
     // owner is previewing an unsaved choice. Only on the schedule's own guest page: never in the
-    // admin views, the home dashboard, or the event page's side agenda (force_mobile).
-    $listAnimation = ($route === 'guest' && ! ($force_mobile ?? false) && $role) ? $role->activeListAnimation() : 'none';
+    // admin views or the home dashboard.
+    $listAnimation = ($route === 'guest' && $role) ? $role->activeListAnimation() : 'none';
     $lastDay = ($firstDay + 6) % 7;
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDay);
     $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
@@ -360,7 +365,7 @@
 <div style="--es-accent: {{ $accentColor }}; --es-contrast: {{ $contrastColor }}; --es-date-month: {{ $dateMonthColorLight }}; --es-date-month-dark: {{ $dateMonthColorDark }}">
 
 @if (! request()->graphic)
-<header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
+<header class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
     @if ($route == 'guest')
         :class="currentView === 'list' ? 'pt-0 pb-0' : 'pt-2 pb-4'"
     @else
@@ -395,7 +400,7 @@
         <div class="flex {{ ($tab ?? '') == 'availability' ? 'flex-row flex-wrap items-center' : 'flex-col' }} md:flex-row md:flex-nowrap md:items-center md:ms-auto gap-3">
 
             {{-- Month Navigation Controls --}}
-            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center shadow-sm {{ $route === 'guest' ? 'gp-month-nav rounded-xl' : 'bg-white/95 dark:bg-gray-900/95 rounded-md' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
+            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center shadow-sm {{ $route === 'guest' ? 'gk-phone-off gp-month-nav rounded-xl' : 'bg-white/95 dark:bg-gray-900/95 rounded-md' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
                 @if ($route === 'guest' && !request()->graphic)
                 <button @click="navigateMonth(-1)" class="flex h-11 w-14 items-center justify-center rounded-s-xl border-transparent pe-1 text-gray-400 hover:text-gray-500 focus:relative md:w-11 md:pe-0 transition-all duration-200 gp-month-btn">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
@@ -583,7 +588,7 @@
 </header>
 @endif
 
-@if (! request()->graphic && ! (isset($embed) && $embed) && ! (isset($force_mobile) && $force_mobile))
+@if (! request()->graphic && ! (isset($embed) && $embed))
 {{-- Active filters: what is narrowing the view, each with its own remove button. Without it a
      visitor who opens a shared "Room A" link (or scans one on a door) sees a partial schedule
      with nothing but a badge on the Filters button to explain it. --}}
@@ -627,6 +632,19 @@
         </button>
     </div>
 
+    @if ($guestRows && ! $guestEmbed)
+    {{-- The one filter most visitors want, one press away: the schedule's sub-schedules where
+         it has them, its categories otherwise. Everything else stays behind Filters. The names
+         are the owner's text, drawn by Vue from data (v-text), never compiled. --}}
+    <div v-if="quickChips.length > 1" v-cloak class="gk-pills {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" role="group" aria-label="{{ $label('filters') }}">
+        <button type="button" class="gk-pill" :class="{ 'gk-pill-on': !quickChipValue }" :aria-pressed="!quickChipValue ? 'true' : 'false'" @click="pickQuickChip('', $event)">{{ $label('show_all') }}</button>
+        <button v-for="chip in quickChips" :key="chip.value" type="button" class="gk-pill" :class="{ 'gk-pill-on': quickChipValue === chip.value }"
+                :aria-pressed="quickChipValue === chip.value ? 'true' : 'false'" @click="pickQuickChip(chip.value, $event)">
+            <i v-if="chip.color" class="gk-row-dot" :style="{ backgroundColor: chip.color }"></i><span v-text="chip.name"></span>
+        </button>
+    </div>
+    @endif
+
     <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
 
         @if (request()->graphic)
@@ -634,7 +652,7 @@
         @else
         <div v-if="isLoadingEvents">
             {{-- Desktop skeleton --}}
-            <div class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
+            <div class="hidden md:block border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
                 <div class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700">
                     @for ($i = 0; $i < 7; $i++)
                     <div class="flex justify-center bg-white dark:bg-gray-900 py-2">
@@ -657,7 +675,7 @@
         {{-- The month grid has nothing for the active filters. Offers the two ways out that keep
              them: the list (every upcoming event, not just this month) and the next month. --}}
         <div v-cloak v-if="!isLoadingEvents && !loadFailed && narrowingFilterCount > 0 && monthMatchCount === 0"
-             class="hidden md:flex {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} mb-4 flex-wrap items-center justify-between gap-3 rounded-xl bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700 px-4 py-3">
+             class="{{ ($guestRows && ! $guestEmbed) ? 'flex' : 'hidden md:flex' }} mb-4 flex-wrap items-center justify-between gap-3 rounded-xl bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700 px-4 py-3">
             <span v-pre class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label('no_events_found') }}</span>
             @if ($route === 'guest' && ! (isset($embed) && $embed))
             <div class="flex items-center gap-2">
@@ -682,7 +700,7 @@
             @endif
         </div>
         @endif
-        <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
                 @php
@@ -848,7 +866,7 @@
 
         @if (($tab ?? '') != 'availability')
         {{-- Mobile calendar skeleton --}}
-        <div v-show="currentView === 'calendar' && isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
+        <div v-show="currentView === 'calendar' && isLoadingEvents" class="md:hidden">
             <div class="space-y-3 px-1 py-4 animate-pulse">
                 @for ($i = 0; $i < 5; $i++)
                 <div class="flex items-center bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
@@ -862,7 +880,86 @@
                 @endfor
             </div>
         </div>
-        <div v-show="currentView === 'calendar' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }}">
+        @if ($guestRows)
+        {{-- The month on a phone. A laptop's grid does not fit one, and what stood here was the
+             month's events as a plain list of cards, with nothing to jump to a date by. A small
+             month with a count under each day; picking a day folds it to one line and brings
+             that day's rows up. The rows are the list's own (role/partials/guest-row).
+
+             It reads the month the way the laptop's grid does (getEventsForDate(), from the
+             server's map of the month), so it has the days that are over, the months before
+             this one, and a series as far ahead as the grid shows it; and the filters count
+             the same month it draws (filterScopeIsMonth).
+
+             An embed in a narrow frame is not a phone: it keeps what it always had there, every
+             upcoming event day by day with no month to page through, now as rows.
+
+             v-if, so a laptop and the list view do not carry these rows as well. --}}
+        <div v-if="isNarrow && currentView === 'calendar' && !isLoadingEvents" class="gk-list" data-phone-month>
+            @if (! $guestEmbed)
+            <div class="gk-panel gk-month bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+                <button v-if="phoneDay" type="button" class="gk-month-fold" ref="phoneFold" @click="unfoldPhoneMonth" aria-expanded="false">
+                    <span v-text="formatDateHeader(phoneDay)"></span><span>{{ __('messages.calendar') }}</span>
+                </button>
+                <template v-else>
+                    {{-- Which month this is, and the way to the one before and after: the page's
+                         own month buttons say "This month" and are put away on a phone. --}}
+                    <div class="gk-month-title">
+                        <button type="button" class="gk-month-nav" @click="navigateMonth(-1)" aria-label="{{ __('messages.previous_month') }}">
+                            <svg class="{{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
+                        </button>
+                        <span v-text="phoneMonthTitle" aria-live="polite"></span>
+                        <button type="button" class="gk-month-nav" @click="navigateMonth(1)" aria-label="{{ __('messages.next_month') }}">
+                            <svg class="{{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+                        </button>
+                    </div>
+                    <div class="gk-month-head" aria-hidden="true"><span v-for="(name, index) in phoneWeekdays" :key="'wd-' + index" v-text="name"></span></div>
+                    <div class="gk-month-grid">
+                        <template v-for="cell in phoneMonthCells" :key="cell.key">
+                            <span v-if="!cell.date"></span>
+                            <button v-else type="button" class="gk-month-day" :disabled="cell.count === 0" :data-day="cell.date"
+                                    :class="{ 'gk-month-has': cell.count > 0, 'gk-month-today': cell.today, 'gk-month-past': cell.past }"
+                                    :aria-current="cell.today ? 'date' : null"
+                                    :aria-label="formatDateHeader(cell.date) + (cell.count ? ' (' + cell.count + ')' : '')"
+                                    @click="pickPhoneDay(cell.date)">
+                                <b v-text="cell.day"></b><i v-if="cell.count" v-text="cell.count"></i>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <button v-if="phoneHasEarlierDays && !phoneShowPast" type="button" class="gk-month-earlier" @click="phoneShowPast = true">{{ $label('show_past_events') }}</button>
+            @endif
+            <div v-if="phoneGroups.length" class="gk-days" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}">
+                <section v-for="group in phoneGroups" :key="'pm-' + group.date" :id="'gk-day-' + group.date" class="gk-panel gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" :class="{ 'gk-day-past': group.past }">
+                    <div class="gk-dayhead">
+                        <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
+                        <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></h2>
+                    </div>
+                    <ul class="gk-rows">
+                        <template v-for="event in group.events" :key="'pm-' + event.uniqueKey">
+                            @include('role/partials/guest-row')
+                        </template>
+                    </ul>
+                </section>
+            </div>
+            {{-- Nothing on in THIS month is not an empty schedule: say which, and offer the next.
+                 (With a filter on, the notice above the month says so and offers the ways out.) --}}
+            <div v-else-if="!isLoadingEvents && !loadFailed && (!phoneMonth || narrowingFilterCount === 0)" class="gk-panel gk-pad gk-month-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+                @if ($guestEmbed)
+                <span v-pre>{{ $label('no_scheduled_events') }}</span>
+                @else
+                <span>{{ __('messages.no_events') }}</span>
+                <button type="button" class="gk-pill" @click="navigateMonth(1)">{{ __('messages.next_month') }}</button>
+                @endif
+            </div>
+            @if ($guestEmbed)
+            {{-- The embed's agenda is a cut of every upcoming day, so it has a way on. --}}
+            @include('role/partials/list-more')
+            @endif
+        </div>
+        @else
+        <div v-show="currentView === 'calendar' && !isLoadingEvents" class="md:hidden">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[var(--brand-blue)] font-medium hidden mb-4 w-full text-center">
                     {{ $label('show_past_events') }}
@@ -897,31 +994,7 @@
                     </template>
                 </div>
                 @include('role/partials/list-more')
-                {{-- Only an includer that caps the list opts in, so the schedule's own page never
-                     links to itself. The server half of the condition is baked into the v-if the
-                     way $alwaysShowFilters is: the window gap is known before Vue boots, the
-                     max_events cap only once the payload lands. --}}
-                @if (! empty($view_all_url))
-                <div v-if="{!! ! empty($view_all_has_earlier) ? 'true' : 'hasMoreEventsThanShown' !!}" id="viewFullScheduleFooter" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
-                    {{-- es-date-month, not a raw inline accent: it resolves --es-date-month /
-                         --es-date-month-dark, which ColorUtils::readableAccentColor already
-                         contrast-corrects per theme. A pale accent is unreadable on this panel,
-                         and an inline style cannot vary by dark: at all. That correction falls back
-                         to plain ink when an accent fails contrast, which costs the link its only
-                         colour cue - hence the resting underline rather than hover:underline. --}}
-                    <a href="{{ $view_all_url }}"
-                       class="es-date-month inline-flex items-center gap-1 rounded-lg px-4 py-3 text-sm font-medium underline underline-offset-4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--es-accent)]">
-                        {{ $label('view_full_schedule') }}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 {{ ($role && $role->isRtl()) ? 'rotate-180' : '' }}" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
-                </div>
-                @endif
             </div>
-            {{-- Not on the event page (force_mobile): its side agenda has no filter UI, and a Clear
-                 there would change the sub-schedule and rewrite the event page's own address. --}}
-            @if (! (isset($force_mobile) && $force_mobile))
             <div v-else-if="!isLoadingEvents && !loadFailed && narrowingFilterCount > 0" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div v-pre class="text-xl text-gray-500 dark:text-gray-400">
@@ -935,7 +1008,6 @@
                     @endif
                 </div>
             </div>
-            @endif
             <div v-else-if="!isLoadingEvents && !loadFailed && {{ $tab != 'availability' ? 'true' : 'false' }}" class="pb-4 text-center">
                 <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 py-12 px-8">
                     <div class="text-xl text-gray-500 dark:text-gray-400">
@@ -945,11 +1017,22 @@
             </div>
         </div>
         @endif
+        @endif
     </div>
 
+{{-- The list from a tablet up: a card for each event, under a date set between two lines.
 
+     A guest page used to carry BOTH lists whatever the width, this one and the phone's further
+     down, one of them hidden by CSS: every event was in the page twice, and a busy schedule's
+     page was 62,000 elements. There it is now v-if on the width ($guestRows): the cards from a
+     tablet up, the rows on a phone, never both. (For a short while in October 2026 the rows
+     were the list at every width. They read as a table on a wide screen and lost what the cards
+     have: the big title, the date tile, the performers and the fan buttons. The cards came
+     back; what the rows had learnt to say, the price and whether any are left, came with them
+     as role/partials/card-ticket-badge.) The admin and the dashboard keep both lists and the
+     CSS switch, as before. --}}
 {{-- List View Skeleton (Desktop) --}}
-        <div v-if="currentView === 'list' && isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} space-y-4 animate-pulse">
+        <div v-if="currentView === 'list' && isLoadingEvents" class="hidden md:block space-y-4 animate-pulse">
             {{-- Date Header Skeleton (matches the real header's centered translucent pill) --}}
             <div class="flex items-center gap-4">
                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
@@ -997,7 +1080,7 @@
         </div>
 
 {{-- List View (Desktop) --}}
-        <div v-show="currentView === 'list' && !isLoadingEvents" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListGroups.length" class="space-y-8">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-d-' + group.date">
@@ -1024,6 +1107,9 @@
                              role="heading" aria-level="2">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                             <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 text-center" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}>
+                                @if ($guestRows)
+                                <span v-if="dayWord(group.date)" class="me-2 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400" v-text="dayWord(group.date)"></span>
+                                @endif
                                 <span class="font-semibold text-xl text-gray-900 dark:text-gray-100" v-text="formatDateHeader(group.date)"></span>
                                 <span class="ms-2 text-sm font-normal text-gray-500 dark:text-gray-400">
                                     &middot; <span v-text="group.events.length"></span>&nbsp;<span v-if="group.events.length === 1">{{ __('messages.event') }}</span><span v-else>{{ __('messages.events') }}</span>
@@ -1102,6 +1188,8 @@
                                                 <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $label('free_entry') }}</span>
                                             </div>
                                         </div>
+
+                                        @includeWhen($guestRows, 'role/partials/card-ticket-badge')
 
                                         {{-- Ticket Price Badge --}}
                                         <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
@@ -1463,6 +1551,8 @@
                                         </div>
                                     </div>
 
+                                    @includeWhen($guestRows, 'role/partials/card-ticket-badge')
+
                                     {{-- Ticket Price Badge --}}
                                     <div v-if="!event.rsvp_enabled && event.registration_url && event.ticket_price != null && !event.is_password_protected" class="flex items-center gap-4">
                                         <div data-reveal-tile class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
@@ -1792,7 +1882,7 @@
         </div>
 
         {{-- List View Skeleton (Mobile) --}}
-        <div v-if="currentView === 'list' && isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? '' : 'md:hidden' }} animate-pulse">
+        <div v-if="currentView === 'list' && isLoadingEvents" class="{{ $guestRows ? 'gk-list md:hidden' : 'md:hidden' }} animate-pulse">
             {{-- Date Header Skeleton --}}
             <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                 <div class="px-4 pb-5 pt-3 flex items-center gap-4">
@@ -1831,7 +1921,45 @@
         </div>
 
         {{-- List View (Mobile) --}}
-        <div v-show="currentView === 'list' && !isLoadingEvents" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        {{-- v-if on a guest page, and only on a phone: a list that is not the one on screen is
+             not in the page at all (the cards above are the list from a tablet up). --}}
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+            @if ($guestRows)
+            {{-- The guest list on a phone: a panel for each day, a row for each event
+                 (partials/guest-kit-styles: .gk-day, .gk-row).
+
+                 A row says when, what and where, and nothing that needs a second request or a
+                 second look: performers, the agenda, polls and the fan buttons are on the
+                 event's own page. data-reveal-* are the hooks the schedule's list animation
+                 uses (resources/css/list-reveal.css). --}}
+            <div v-if="allListGroups.length > 0" class="gk-days">
+                <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
+                    {{-- The end of the upcoming rows, which is above the past ones. --}}
+                    <template v-if="groupIndex === firstPastGroupIndex">
+                        @include('role/partials/list-more')
+                    </template>
+                    {{-- Past Events Divider --}}
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))" class="gk-days-past">
+                        <span>{{ $label('past_events') }}</span>
+                    </div>
+                    <section v-if="group.events.some(e => isEventVisible(e))" class="gk-panel gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" :class="{ 'gk-day-past': group.events.every(e => e._isPast) }">
+                        {{-- The dateless group has no heading, so it never says "Invalid Date". --}}
+                        <div v-if="group.date && group.date !== 'no-date'" class="gk-dayhead">
+                            {{-- "Today" and "Tomorrow" by the schedule's clock, not the visitor's:
+                                 a day is a day because of where it happens. --}}
+                            <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
+                            {{-- A heading, as the day and the event were on the cards these rows replace. --}}
+                            <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></h2>
+                        </div>
+                        <ul class="gk-rows">
+                            <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
+                                @include('role/partials/guest-row')
+                            </template>
+                        </ul>
+                    </section>
+                </template>
+            </div>
+            @else
             {{-- All events grouped by date --}}
             <div v-if="allListGroups.length > 0" class="space-y-6">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
@@ -1870,6 +1998,7 @@
                     </div>
                 </template>
             </div>
+            @endif
 
             {{-- No past rows drawn: the end of the upcoming rows is the end of the list. --}}
             <template v-if="firstPastGroupIndex === -1">
@@ -2060,7 +2189,7 @@
              visitor could not otherwise type); Done, the forward action, stays last. --}}
         <div class="px-6 py-4 flex gap-3">
             @if (! (isset($embed) && $embed))
-            <button v-if="hasShareableFilter && (route === 'admin' || (route === 'guest' && !forceMobile))"
+            <button v-if="hasShareableFilter && (route === 'admin' || route === 'guest')"
                     type="button" @click="copyFilterLink"
                     class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -2222,7 +2351,7 @@
                  visitor could not otherwise type); Done, the forward action, stays last. --}}
             <div class="px-6 py-4 flex gap-3">
                 @if (! (isset($embed) && $embed))
-                <button v-if="hasShareableFilter && (route === 'admin' || (route === 'guest' && !forceMobile))"
+                <button v-if="hasShareableFilter && (route === 'admin' || route === 'guest')"
                         type="button" @click="copyFilterLink"
                         class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -2491,7 +2620,6 @@ const calendarApp = createApp({
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
             use24Hour: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
             hidePastEvents: {{ (isset($hide_past_events) && $hide_past_events) ? 'true' : 'false' }},
-            maxEvents: {{ isset($max_events) ? $max_events : 0 }},
             // How many upcoming rows the list draws. It was a fixed 200 with nothing after it;
             // "Show more" raises it (role/partials/list-more).
             listRowLimit: 200,
@@ -2525,6 +2653,16 @@ const calendarApp = createApp({
                  above uses: these compare against occurrenceDate, which is the SCHEDULE's calendar
                  date, so a viewer-anchored today hides an event that is still running. --}}
             userTimezone: '{{ $calendarTimezone }}',
+            dayWords: { today: @json(__('messages.today')), tomorrow: @json(__('messages.tomorrow')) },
+            leadFilterKeyAtLoad: null,
+            // The phone's month: the day that was picked (the month is folded to a line while
+            // one is), and whether the days of this month that are over are shown.
+            phoneDay: '',
+            phoneShowPast: false,
+            // A guest page's month on a phone (not the embed, which keeps the agenda there).
+            phoneMonth: @json($guestRows && ! $guestEmbed),
+            // What the list was left as, when this page is come back to (see the watcher).
+            listToRestore: null,
             popupTimeout: null,
             showFiltersDrawer: false,
             showDesktopFiltersModal: false,
@@ -2532,7 +2670,6 @@ const calendarApp = createApp({
             selectedVenue: '',
             showFreeOnly: false,
             currentView: '{{ $eventLayout ?? "calendar" }}',
-            forceMobile: {{ (isset($force_mobile) && $force_mobile) ? 'true' : 'false' }},
             pastEvents: @json($pastEventsForVue ?? []),
             hasMorePastEvents: {{ isset($hasMorePastEvents) && $hasMorePastEvents ? 'true' : 'false' }},
             loadingPastEvents: false,
@@ -2660,6 +2797,11 @@ const calendarApp = createApp({
             if (this.isSearching) count++;
             return count;
         },
+        // Everything the visitor can choose that changes which events the list shows.
+        leadFilterKey() {
+            return [this.selectedGroup, this.selectedCategory, this.showOnlineOnly, this.selectedVenue, this.showFreeOnly,
+                this.isSearching, JSON.stringify(this.selectedCustomFields)].join('|');
+        },
         // The filters that narrow the page the visitor is on. A sub-schedule is left out: it is
         // the page itself (/schedule/kids), so on its own it gets no chips row and keeps the
         // plain "No scheduled events" message. The hero badge still counts it, as before.
@@ -2709,7 +2851,9 @@ const calendarApp = createApp({
         // only this month's rooms would hide a room that is in use next month from the very
         // list it filters.
         filterScopeIsMonth() {
-            return this.currentView === 'calendar' && !this.forceMobile && !this.isNarrow;
+            // A guest page's phone month is a month too (phoneMonth): its chips, counts and
+            // "N events" are about the month it draws, as the laptop grid's are.
+            return this.currentView === 'calendar' && (!this.isNarrow || this.phoneMonth);
         },
         eventCountByGroup() {
             // Filter by other active filters (except sub-schedule and category)
@@ -2751,6 +2895,97 @@ const calendarApp = createApp({
         // grid's "nothing matches" notice, which is about that grid whatever eventsForFilters is.
         monthMatchCount() {
             return this.allEvents.filter(e => this.eventIdsInViewedMonth.includes(e.id) && this.passesFilters(e)).length;
+        },
+        phoneMonthTitle() {
+            return new Date(this.pageYear, this.pageMonth - 1, 1).toLocaleDateString(this.languageCode, { month: 'long', year: 'numeric' });
+        },
+        // The phone's month. Seven narrow weekday names from the schedule's first day.
+        phoneWeekdays() {
+            return [0, 1, 2, 3, 4, 5, 6].map(step => new Date(2023, 0, 1 + ((this.firstDayOfWeek + step) % 7))
+                .toLocaleDateString(this.languageCode, { weekday: 'narrow' }));
+        },
+        // The month being shown, by day, read as the laptop's grid reads it: the server's map
+        // of the month (getEventsForDate), which has the days that are over, any month paged
+        // to and a series for as long as it runs. Each occurrence is a row of its own day.
+        phoneMonthByDay() {
+            if (!this.phoneMonth) { return {}; }
+            const prefix = this.pageYear + '-' + String(this.pageMonth).padStart(2, '0') + '-';
+            const today = this.scheduleDay(0);
+            const days = {};
+            Object.keys(this.eventsMap || {}).filter(date => date.startsWith(prefix)).forEach(date => {
+                const rows = this.getEventsForDate(date).map(event => {
+                    const row = { ...event, occurrenceDate: date, uniqueKey: event.id + '-' + date, _isPast: date < today };
+                    // A one-time event over several days is listed on each of them: say which
+                    // day this is, and keep the day its tickets are sold under (rowDate).
+                    if (event.is_multi_day && event.local_date && event.local_end_date && !(event.days_of_week && event.days_of_week.length)) {
+                        const day = 86400000, at = text => { const [y, m, d] = text.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+                        row._originalOccurrenceDate = event.local_date;
+                        row._multiDayNum = Math.round((at(date) - at(event.local_date)) / day) + 1;
+                        row._multiDayTotal = Math.round((at(event.local_end_date) - at(event.local_date)) / day) + 1;
+                    }
+                    return row;
+                });
+                if (rows.length) { days[date] = rows; }
+            });
+            return days;
+        },
+        phoneMonthCells() {
+            const year = this.pageYear, month = this.pageMonth;
+            const lead = (new Date(year, month - 1, 1).getDay() - this.firstDayOfWeek + 7) % 7;
+            const count = new Date(year, month, 0).getDate();
+            const today = this.scheduleDay(0);
+            const cells = [];
+            for (let gap = 0; gap < lead; gap++) cells.push({ key: 'gap-' + gap });
+            for (let day = 1; day <= count; day++) {
+                const date = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                cells.push({ key: date, date, day, count: (this.phoneMonthByDay[date] || []).length, today: date === today, past: date < today });
+            }
+            return cells;
+        },
+        // Whether the month has days that are over AND days that are not: only then is there
+        // something to put away. A month that is wholly past is simply shown.
+        phoneHasEarlierDays() {
+            const today = this.scheduleDay(0);
+            const dates = Object.keys(this.phoneMonthByDay);
+            return dates.some(date => date < today) && dates.some(date => date >= today);
+        },
+        phoneMonthGroups() {
+            const today = this.scheduleDay(0);
+            const all = this.phoneShowPast || !this.phoneHasEarlierDays;
+            return Object.keys(this.phoneMonthByDay).sort()
+                .filter(date => all || date >= today)
+                .map(date => ({ date, events: this.phoneMonthByDay[date], past: date < today }));
+        },
+        // What stands under the phone's month: the month's days. In an embed too narrow for a
+        // grid there is no month, and it is every upcoming day, as it always was there.
+        phoneGroups() {
+            if (this.phoneMonth) { return this.phoneMonthGroups; }
+            return this.eventsGroupedByDate
+                .map(group => ({ date: group.date, past: false, events: group.events.filter(event => this.isEventVisible(event)) }))
+                .filter(group => group.events.length);
+        },
+        // The chips above the guest list: sub-schedules where the schedule has them, its
+        // categories otherwise (the same two lists the Filters window offers).
+        quickChipKind() {
+            if (this.groups && this.groups.length > 1) return 'group';
+            return this.availableCategories.length > 1 ? 'category' : '';
+        },
+        quickChips() {
+            if (this.quickChipKind === 'group') {
+                return this.groups.map(group => ({ value: String(group.slug), name: group.name, color: group.color || null }));
+            }
+            if (this.quickChipKind === 'category') {
+                // A category's colour is carried by its events (category_color), as its name is.
+                return this.availableCategories.map(category => ({
+                    value: String(category.id),
+                    name: category.name,
+                    color: (this.eventsForFilters.find(event => String(event.category_id) === String(category.id)) || {}).category_color || null,
+                }));
+            }
+            return [];
+        },
+        quickChipValue() {
+            return String((this.quickChipKind === 'group' ? this.selectedGroup : this.selectedCategory) || '');
         },
         availableCategories() {
             // Get events filtered only by group (not by category) to show all available categories
@@ -2948,8 +3183,8 @@ const calendarApp = createApp({
             return query ? url + '?' + query : url;
         },
         // Every upcoming occurrence the loaded payload can project, UNSLICED. Split out of
-        // mobileEventsList so the widget can tell whether its own max_events cap hid anything -
-        // the cap is applied below, and a computed that has already sliced cannot report that.
+        // mobileEventsList so "Show more" can tell whether the cut hid anything, and so the
+        // phone's month can count a day past it: a computed that has already sliced cannot.
         allMobileOccurrences() {
             // Create a mobile-friendly events list that includes all upcoming occurrences
             const mobileEvents = [];
@@ -3109,38 +3344,25 @@ const calendarApp = createApp({
                 return this.compareSameDay(a, b, a.occurrenceDate);
             });
         },
-        // An includer's max_events wins; otherwise the number "Show more" raises.
+        // How many rows the list draws: the number "Show more" raises.
         listRowCap() {
-            return this.maxEvents || this.listRowLimit;
+            return this.listRowLimit;
         },
         mobileEventsList() {
             return this.allMobileOccurrences.slice(0, this.listRowCap);
         },
-        // Whether "Show more" has anything to show: a visible occurrence past the cut. Same
-        // reasoning as hasMoreEventsThanShown below, for the list that is NOT capped by its
-        // includer.
+        // Whether "Show more" has anything to show: a visible occurrence past the cut. The list
+        // drawn is by construction a PREFIX of allMobileOccurrences, so "more visible than
+        // shown" is "any visible occurrence past the cut", which stops at the first one instead
+        // of walking every occurrence twice. Visibility matters because the filters gate each
+        // row, and a plain count would offer more when everything past the cut is filtered out.
         hasMoreListRows() {
-            if (this.maxEvents) {
-                return false;
-            }
             return this.allMobileOccurrences.slice(this.listRowLimit).some(e => this.isEventVisible(e));
         },
         // Where the past rows begin in allListGroups (-1: none are drawn). "Show more" belongs at
         // the end of the upcoming rows, which is above the past ones.
         firstPastGroupIndex() {
             return this.allListGroups.findIndex(group => group.events.every(e => e._isPast));
-        },
-        // Whether the max_events cap is hiding occurrences the widget would otherwise render.
-        // mobileEventsList is by construction a PREFIX of allMobileOccurrences, so "more visible
-        // than shown" is just "any visible occurrence past the cap" - which short-circuits instead
-        // of walking every occurrence twice. Visibility matters because ?category= and ?schedule=
-        // reach this partial and each card is gated on isEventVisible(), so a raw length comparison
-        // would claim there is more to see when every extra occurrence is filtered out anyway.
-        hasMoreEventsThanShown() {
-            if (! this.maxEvents) {
-                return false;
-            }
-            return this.allMobileOccurrences.slice(this.maxEvents).some(e => this.isEventVisible(e));
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -3306,15 +3528,40 @@ const calendarApp = createApp({
         }
     },
     watch: {
+        // Back from an event: the list is as it was left. Its rows are fetched after the page
+        // has loaded, so the browser's own return to where the visitor had scrolled finds a
+        // page too short to scroll and stays at the top; and how far "Show more" had reached
+        // and the day picked on a phone's month were simply forgotten. What was left is
+        // noted as the page is put away (rememberList(), on pagehide) and put back here, once,
+        // when the rows are in.
+        isLoadingEvents(loading) {
+            if (loading || !this.listToRestore) { return; }
+            const left = this.listToRestore;
+            this.listToRestore = null;
+            this.listRowLimit = Math.max(this.listRowLimit, left.limit || 0);
+            this.phoneShowPast = !!left.past;
+            this.phoneDay = left.day || '';
+            this.$nextTick(() => requestAnimationFrame(() => window.scrollTo(0, left.y || 0)));
+        },
+        // The next event above the list was chosen by the server for the page as it was asked
+        // for (its sub-schedule and category included; an address that filters by anything
+        // else gets no lead at all, see role/show-guest). Once the visitor changes what the
+        // list shows it may not be among it, so it steps aside until the list is back as it
+        // loaded: leadFilterKeyAtLoad, read in created() before anything can have changed.
+        // Compared by what is chosen, not by how many filters are on: going from one
+        // sub-schedule to another leaves the count at one.
+        leadFilterKey(key) {
+            const lead = this.route === 'guest' ? document.getElementById('gp-next-event') : null;
+            // Its wrapper goes with it, or the room it stood in stays.
+            if (lead) { (lead.closest('[data-lead-wrap]') || lead).hidden = key !== this.leadFilterKeyAtLoad; }
+        },
         selectedGroup(newGroupSlug) {
             // Back/Forward (readFiltersFromUrl) restores the sub-schedule AND the category the
             // address names together: neither re-writes the address nor second-guesses them.
             if (this.restoringFiltersFromUrl) {
                 return;
             }
-            // Not on the event page (forceMobile): its side agenda is not the schedule page, and
-            // pushing the schedule's path there would reload onto a different page.
-            if (this.route === 'guest' && !this.embed && !this.forceMobile) {
+            if (this.route === 'guest' && !this.embed) {
                 this.updateUrlWithGroup(newGroupSlug);
             }
             // Reset category selection when group changes, as available categories may change
@@ -3546,6 +3793,36 @@ const calendarApp = createApp({
         showMoreListRows() {
             this.listRowLimit += 200;
         },
+        // Where the list is being left: how far down, how many rows, the phone month's day.
+        // Kept for this tab only, under this page's own address (filters are in the address).
+        listMemoryKey() {
+            return 'es_list_' + window.location.pathname + window.location.search;
+        },
+        rememberList() {
+            try {
+                // A venue, Free, Online and a search are not in the address, so Back returns
+                // the list WITHOUT them: a place measured in the narrowed list would land
+                // somewhere else in the full one. Then nothing is kept and Back opens at the top.
+                if (this.selectedVenue || this.showFreeOnly || this.showOnlineOnly || this.isSearching) {
+                    sessionStorage.removeItem(this.listMemoryKey());
+                    return;
+                }
+                sessionStorage.setItem(this.listMemoryKey(), JSON.stringify({
+                    y: Math.round(window.scrollY), limit: this.listRowLimit, day: this.phoneDay, past: this.phoneShowPast, at: Date.now(),
+                }));
+            } catch (e) {}
+        },
+        // Only when the page is come BACK to (the browser's Back or Forward), never on a fresh
+        // visit or a reload, and only for half an hour.
+        recallList() {
+            try {
+                const entry = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+                const left = JSON.parse(sessionStorage.getItem(this.listMemoryKey()) || 'null');
+                if (entry && entry.type === 'back_forward' && left && Date.now() - left.at < 30 * 60 * 1000) {
+                    this.listToRestore = left;
+                }
+            } catch (e) {}
+        },
         // Try the load again: the button on the failed-load notice, and the browser's `online`
         // event. The same choice mounted() makes between the list's payload and the month's.
         retryLoad() {
@@ -3608,6 +3885,10 @@ const calendarApp = createApp({
         },
         updateOuterContainers(view, animate = true) {
             const maxWidth = view === 'list' ? '56rem' : '200rem';
+            // The next-event card above the list (role/show-guest) is told which view is on:
+            // over the cards of a wide list it would say the first card twice.
+            const leadWrap = document.querySelector('[data-lead-wrap]');
+            if (leadWrap) { leadWrap.dataset.view = view; }
             document.querySelectorAll('[data-view-width]').forEach(el => {
                 const prevMaxWidth = el.style.maxWidth;
                 el.style.maxWidth = maxWidth;
@@ -3815,7 +4096,7 @@ const calendarApp = createApp({
         // keeps navigateMonth()'s { month, year } for the popstate handler. The sub-schedule is
         // the path and is written by updateUrlWithGroup().
         syncFiltersToUrl() {
-            if (this.route !== 'guest' || this.embed || this.forceMobile || this.restoringFiltersFromUrl) {
+            if (this.route !== 'guest' || this.embed || this.restoringFiltersFromUrl) {
                 return;
             }
             const url = new URL(window.location);
@@ -3977,6 +4258,117 @@ const calendarApp = createApp({
         },
         isEventVisible(event) {
             return this.passesFilters(event);
+        },
+        // A day of the phone's month: fold the month to a line and bring that day's rows up.
+        pickPhoneDay(date) {
+            if (date < this.scheduleDay(0)) { this.phoneShowPast = true; }
+            this.phoneDay = date;
+            // The pressed day is gone with the month it was in: focus goes to the line the
+            // month folded to, which is what brings the month back.
+            this.$nextTick(() => {
+                if (this.$refs.phoneFold) { this.$refs.phoneFold.focus({ preventScroll: true }); }
+                const panel = document.getElementById('gk-day-' + date);
+                if (panel) { panel.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+            });
+        },
+        // The month again, with focus on the day that had been picked.
+        unfoldPhoneMonth() {
+            const date = this.phoneDay;
+            this.phoneDay = '';
+            this.$nextTick(() => {
+                const day = date ? document.querySelector('[data-phone-month] [data-day="' + date + '"]') : null;
+                if (day) { day.focus({ preventScroll: true }); }
+            });
+        },
+        pickQuickChip(value, clickEvent) {
+            if (this.quickChipKind === 'group') {
+                this.selectedGroup = value;
+            } else {
+                this.selectedCategory = value;
+            }
+            // The chosen chip is brought into view: in a row that scrolls sideways, one picked
+            // at its edge was half off the screen.
+            const chip = clickEvent && clickEvent.currentTarget;
+            if (chip && chip.scrollIntoView) {
+                this.$nextTick(() => chip.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }));
+            }
+        },
+        // Today's date, or a day from it, where the schedule is (userTimezone is the schedule's
+        // zone, the one the rows are bucketed into days by), read as the heading is drawn.
+        scheduleDay(offset) {
+            const there = this.userTimezone ? new Date(new Date().toLocaleString('en-US', { timeZone: this.userTimezone })) : new Date();
+            there.setDate(there.getDate() + offset);
+            return there.getFullYear() + '-' + String(there.getMonth() + 1).padStart(2, '0') + '-' + String(there.getDate()).padStart(2, '0');
+        },
+        dayWord(dateStr) {
+            if (dateStr === this.scheduleDay(0)) return this.dayWords.today;
+            if (dateStr === this.scheduleDay(1)) return this.dayWords.tomorrow;
+            return '';
+        },
+        // The day a row's tickets are sold under. A series: the occurrence, and for one that
+        // runs over several days the day it BEGAN, not the day it is listed on while it runs.
+        // Anything else has one day, whatever day its row stands under.
+        rowDate(event) {
+            if (event.days_of_week && event.days_of_week.length) {
+                return event._originalOccurrenceDate || event.occurrenceDate || null;
+            }
+            return event.local_date || null;
+        },
+        // 'YYYY-MM-DD HH:MM' where the schedule is.
+        scheduleNow() {
+            const there = this.userTimezone ? new Date(new Date().toLocaleString('en-US', { timeZone: this.userTimezone })) : new Date();
+            const two = number => String(number).padStart(2, '0');
+            return there.getFullYear() + '-' + two(there.getMonth() + 1) + '-' + two(there.getDate()) + ' ' + two(there.getHours()) + ':' + two(there.getMinutes());
+        },
+        // Whether our own tickets for this row can no longer be bought because the night has
+        // begun (or, for an event that sells after it starts, ended): Event::passesSellingWindow()
+        // on the list's clock. The server already leaves the price off a one-day event that
+        // has begun; this is for a series, which has a different answer each day, and for a
+        // page left open across the start.
+        rowSalesOver(event) {
+            const date = this.rowDate(event);
+            const time = (event.local_starts_at || '').slice(11, 16);
+            if (!date || !time) { return false; }
+            const now = this.scheduleNow();
+            if (!event.sells_after_start && !event.is_multi_day) { return now >= date + ' ' + time; }
+            // Until it ends: a length in hours, or the end of its day where it has none.
+            if (!event.duration) { return now.slice(0, 10) > date; }
+            const [y, m, d] = date.split('-').map(Number), [h, min] = time.split(':').map(Number);
+            const end = new Date(y, m - 1, d, h, min + Math.round(event.duration * 60));
+            const two = number => String(number).padStart(2, '0');
+            return now >= end.getFullYear() + '-' + two(end.getMonth() + 1) + '-' + two(end.getDate()) + ' ' + two(end.getHours()) + ':' + two(end.getMinutes());
+        },
+        rowSoldOut(event) {
+            const date = this.rowDate(event);
+            return !!date && !this.rowSalesOver(event) && (event.sold_out_dates || []).includes(date);
+        },
+        rowLow(event) {
+            const date = this.rowDate(event);
+            return !!date && !this.rowSalesOver(event) && (event.low_stock_dates || []).includes(date);
+        },
+        // What our own tickets cost, while they can be bought.
+        rowPrice(event) {
+            return event.ticket_from && !this.rowSalesOver(event) ? event.ticket_from : null;
+        },
+        // A card's own ticket line (role/partials/card-ticket-badge): our tickets, never beside
+        // the sign-up badge or the owner's typed price, which have lines of their own.
+        cardHasTickets(event) {
+            if (event._isPast || event.is_password_protected || event.rsvp_enabled) return false;
+            return !!(this.rowSoldOut(event) || this.rowPrice(event) || (event.ticket_free && !this.rowSalesOver(event)));
+        },
+        rowHasChips(event) {
+            if (event.is_internal || event.is_draft) return true;
+            if (event._isPast) return false;
+            return !!(this.rowFree(event) || this.rowPrice(event) || this.rowSoldOut(event) || this.rowSoldElsewhere(event));
+        },
+        // Free tickets of ours, or a sign-up, which costs nothing by its nature.
+        rowFree(event) {
+            return !!((event.ticket_free && !this.rowSalesOver(event)) || (event.rsvp_enabled && !event.is_password_protected));
+        },
+        // Sold somewhere else, at a price the owner typed: not beside a price of our own.
+        rowSoldElsewhere(event) {
+            return !!(event.registration_url && event.ticket_price != null && !event.is_password_protected
+                && !event.ticket_free && !event.rsvp_enabled && !event.ticket_from);
         },
         getEventUrl(event, occurrenceDate = null) {
             let url = event.guest_url;  // Already has /{subdomain}/{slug}/{id}
@@ -4172,7 +4564,7 @@ const calendarApp = createApp({
         // schedule's list or month grid into an event. Only on the schedule's own page, and only
         // where the page printed the beacon (partials/guest-funnel decides whose visits count).
         countListTap() {
-            if (this.route === 'guest' && !this.forceMobile && !this.embed && window.esGuestFunnel) {
+            if (this.route === 'guest' && !this.embed && window.esGuestFunnel) {
                 window.esGuestFunnel('list_tap');
             }
         },
@@ -4672,6 +5064,8 @@ const calendarApp = createApp({
 
             this.pageMonth = newMonth;
             this.pageYear = newYear;
+            this.phoneDay = '';
+            this.phoneShowPast = false;
             this.listDataLoaded = false;
             this.isLoadingEvents = true;
 
@@ -4870,12 +5264,19 @@ const calendarApp = createApp({
             window.history.pushState({}, '', currentUrl.toString());
         }
     },
+    created() {
+        this.leadFilterKeyAtLoad = this.leadFilterKey;
+    },
     mounted() {
+        if (this.route === 'guest') {
+            this.recallList();
+            window.addEventListener('pagehide', () => this.rememberList());
+        }
         // Check localStorage for saved view preference. Skipped when ?layout= asked for a
         // specific view, and inside an embed: the embedding site chooses the layout, there
         // is no toggle in the frame to change it, and without this a preference the visitor
         // saved on the schedule's own page would silently override every embed of it.
-        if (this.subdomain && this.route !== 'admin' && !this.forceMobile && !this.embed && !this.layoutFromUrl) {
+        if (this.subdomain && this.route !== 'admin' && !this.embed && !this.layoutFromUrl) {
             try {
                 const saved = localStorage.getItem('es_view_' + this.subdomain);
                 if (saved && ['calendar', 'list'].includes(saved)) {
@@ -4945,11 +5346,13 @@ const calendarApp = createApp({
             if (month !== this.pageMonth || year !== this.pageYear) {
                 this.pageMonth = month;
                 this.pageYear = year;
+                this.phoneDay = '';
+                this.phoneShowPast = false;
                 this.listDataLoaded = false;
                 this.isLoadingEvents = true;
                 this.fetchCalendarEventsForMonth(month, year);
             }
-            if (!this.embed && !this.forceMobile) {
+            if (!this.embed) {
                 this.readFiltersFromUrl();
             }
         });

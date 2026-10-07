@@ -123,6 +123,7 @@ class GuestSectionIdTest extends TestCase
             'gp-header-body-desktop',
             'gp-sponsors',
             'gp-events',
+            'gp-next-event',
             'gp-calendar',
             'gp-subscribe',
             'gp-videos',

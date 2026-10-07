@@ -345,7 +345,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phones and computers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Phones always list your events, so they always show the animation. On a computer it plays in the list layout; if your <a href="#event-layout" class="doc-link">default layout</a> is Calendar, visitors see it after switching to the list. The setting offers a one-click switch to the list layout.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A phone lists your events in both layouts (in the Calendar layout, under a small month that jumps to a day), so it always shows the animation. On a computer it plays in the list layout; if your <a href="#event-layout" class="doc-link">default layout</a> is Calendar, visitors see it after switching to the list. The setting offers a one-click switch to the list layout.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">After you save a new style, the Schedule tab shows your link with a Copy button (and Share, where the device supports it), ready to send to your audience.</p>
@@ -509,6 +509,7 @@
                     <tr><td><code class="doc-inline-code">#gp-video-carousel</code></td><td>The strip of videos from upcoming events</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-sponsors</code></td><td>The sponsor logo grid (also on event pages)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-events</code></td><td>Everything from the events heading down, including the calendar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-next-event</code></td><td>The card above the list that shows your next event</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-calendar</code></td><td>The calendar or event list panel on its own</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-subscribe</code></td><td>The follow and subscribe panel (also on event pages)</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-gallery</code></td><td>Your photo gallery (also on event pages, for an event's own gallery)</td></tr>

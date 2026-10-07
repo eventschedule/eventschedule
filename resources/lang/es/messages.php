@@ -205,6 +205,7 @@ return [
     'show_less' => 'Mostrar menos',
     'previous_month' => 'Mes anterior',
     'today' => 'Hoy',
+    'tomorrow' => 'Mañana',
     'next_month' => 'Mes siguiente',
     'language' => 'Idioma',
     'language_help' => 'El idioma en el que escribes tu calendario y tus eventos.',

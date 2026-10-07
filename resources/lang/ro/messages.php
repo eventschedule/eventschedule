@@ -221,6 +221,7 @@ return [
     'show_less' => 'Arată mai puțin',
     'previous_month' => 'Luna anterioară',
     'today' => 'Astăzi',
+    'tomorrow' => 'Mâine',
     'next_month' => 'Luna următoare',
     'language' => 'Limbă',
     'language_help' => 'Limba în care îți scrii programul și evenimentele.',

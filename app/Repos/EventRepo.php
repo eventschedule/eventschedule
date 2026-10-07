@@ -2793,6 +2793,58 @@ class EventRepo
     public const UPCOMING_SERIES_LIMIT = 30;
 
     /**
+     * The event a schedule page leads with, from upcomingForGuest()'s rows: the next one that
+     * has not begun, inside $category when one is named.
+     *
+     * The first row is not always that. A series is dated by its next occurrence from TODAY,
+     * and today's still counts once it has started (the list shows the day), so the first row
+     * can be this morning's class, hours over, ahead of tonight's show. Such a series is asked
+     * for the occurrence after it and takes its place by that. A one-off that has begun and is
+     * still on (a festival in its second day) leads only when nothing else is to come.
+     *
+     * The rows are in order, so the walk ends at the first one that has not begun: nothing
+     * after it can be sooner, except a series met on the way.
+     *
+     * @param  \Illuminate\Support\Collection<int, array{event: Event, date: string}>  $upcoming
+     * @return array{event: Event, date: string}|null
+     */
+    public function leadOf(\Illuminate\Support\Collection $upcoming, string $category = ''): ?array
+    {
+        $rows = $upcoming
+            ->filter(fn (array $row) => $category === '' || (string) $row['event']->category_id === $category)
+            ->take(40)
+            ->values();
+
+        $ahead = [];
+        foreach ($rows as $row) {
+            $event = $row['event'];
+            $zone = $event->scheduleTimezone();
+            $starts = $event->getStartDateTime($row['date'], true, $zone);
+            $begun = $starts->lte(Carbon::now($zone));
+
+            if ($begun && $event->days_of_week) {
+                $next = $event->occurrencesAfter(null, 1)[0] ?? null;
+                if ($next) {
+                    $ahead[] = ['event' => $event, 'date' => $next, 'at' => $event->getStartDateTime($next, true, $zone)->getTimestamp()];
+                }
+
+                continue;
+            }
+
+            if (! $begun) {
+                $ahead[] = ['event' => $event, 'date' => $row['date'], 'at' => $starts->getTimestamp()];
+
+                break;
+            }
+        }
+
+        usort($ahead, fn (array $a, array $b) => $a['at'] <=> $b['at']);
+        $lead = $ahead[0] ?? $rows->first();
+
+        return $lead ? ['event' => $lead['event'], 'date' => $lead['date']] : null;
+    }
+
+    /**
      * The public events coming up on a schedule's guest page, soonest first, each with the date
      * it next happens on: [['event' => Event, 'date' => 'Y-m-d'], ...].
      *

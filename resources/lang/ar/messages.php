@@ -179,6 +179,7 @@ return [
     'show_less' => 'عرض أقل',
     'previous_month' => 'الشهر السابق',
     'today' => 'اليوم',
+    'tomorrow' => 'غدًا',
     'next_month' => 'الشهر القادم',
     'language' => 'اللغة',
     'language_help' => 'اللغة التي تكتب بها جدولك وفعالياتك.',

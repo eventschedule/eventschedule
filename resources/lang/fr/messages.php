@@ -209,6 +209,7 @@ return [
     'show_less' => 'Afficher moins',
     'previous_month' => 'Mois précédent',
     'today' => 'Aujourd\'hui',
+    'tomorrow' => 'Demain',
     'next_month' => 'Mois suivant',
     'language' => 'Langue',
     'language_help' => 'La langue dans laquelle vous rédigez votre calendrier et vos événements.',

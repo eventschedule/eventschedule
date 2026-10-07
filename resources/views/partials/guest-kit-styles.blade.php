@@ -133,9 +133,98 @@
     .gk-row-time { grid-area: t; font-size: .84375rem; font-weight: 700; color: var(--gk-ink-2); font-variant-numeric: tabular-nums; }
     .gk-row-time span { margin-inline-start: .375rem; font-weight: 500; color: var(--gk-ink-3); }
     .gk-row-body { grid-area: b; display: flex; flex-direction: column; gap: .1875rem; min-width: 0; }
-    .gk-row-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 1.03125rem; font-weight: 700; line-height: 1.25; }
-    .gk-row-where { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .875rem; color: var(--gk-ink-3); }
-    .gk-row-img { grid-area: i; align-self: center; width: 4.75rem; height: 4.75rem; border-radius: .625rem; object-fit: cover; }
+    .gk-row-title { font-size: 1.03125rem; font-weight: 700; line-height: 1.25; }
+    .gk-row-where { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0; font-size: .875rem; color: var(--gk-ink-3); }
+    .gk-row-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    {{-- From a tablet up the time has a column of its own, so a day reads down its left edge. --}}
+    @media (min-width: 40rem) {
+        .gk-row { grid-template-columns: 9.5rem minmax(0, 1fr) 4.75rem; grid-template-areas: "t b i"; grid-template-rows: auto; align-items: center; column-gap: 1rem; padding: .875rem 1.25rem; }
+        .gk-row-bare { grid-template-columns: 9.5rem minmax(0, 1fr); grid-template-areas: "t b"; }
+        .gk-row-time span { display: block; margin-inline-start: 0; }
+        .gk-dayhead { padding: .75rem 1.25rem; }
+    }
+
+    {{-- The schedule's next event, above its list (role/show-guest). One link: a picture in a
+         box of its own shape, then when, what and where. --}}
+    .gk-lead { display: grid; overflow: hidden; max-width: 46rem; margin-inline: auto; color: var(--gk-ink); text-decoration: none; transition: box-shadow var(--gk-swap, 120ms) ease; }
+    .gk-lead:hover { box-shadow: var(--gk-shadow-lift); }
+    .gk-lead:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-lead[hidden] { display: none; }
+    .gk-lead-img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+    .gk-lead-body { display: flex; flex-direction: column; gap: .3125rem; min-width: 0; padding: 1rem; }
+    .gk-lead-when { font-size: .875rem; font-weight: 600; color: var(--gk-ink-2); }
+    .gk-lead-when b { margin-inline-end: .375rem; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--es-accent-readable); }
+    .gk-lead-title { font-size: 1.375rem; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+    .gk-lead-where { display: flex; flex-wrap: wrap; column-gap: .625rem; font-size: .9375rem; color: var(--gk-ink-3); }
+    @media (min-width: 40rem) {
+        .gk-lead { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; }
+        .gk-lead-bare { grid-template-columns: minmax(0, 1fr); }
+        .gk-lead-img { height: 100%; aspect-ratio: 4 / 3; }
+        .gk-lead-body { padding: 1.25rem 1.5rem; }
+        .gk-lead-title { font-size: 1.625rem; }
+    }
+
+    {{-- The month on a phone (role/partials/calendar): seven columns of days, a count under a
+         day that has events. Picking one folds the month to a single line. --}}
+    .gk-month { margin-bottom: .875rem; padding: .625rem; }
+    .gk-month-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: .375rem; font-size: 1rem; font-weight: 700; color: var(--gk-ink); }
+    .gk-month-nav { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border: 0; border-radius: .625rem; background: none; color: var(--gk-ink-2); cursor: pointer; }
+    .gk-month-nav svg { width: 1.5rem; height: 1.5rem; }
+    .gk-month-nav:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: -2px; }
+    {{-- Put away on a phone, where the month panel has its own (the laptop's month buttons). --}}
+    @media (max-width: 47.99rem) { .gk-phone-off { display: none; } }
+    .gk-month-head { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin-bottom: .25rem; font-size: .6875rem; font-weight: 700; text-align: center; text-transform: uppercase; color: var(--gk-ink-3); }
+    .gk-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .125rem; }
+    .gk-month-day { display: grid; place-items: center; align-content: center; gap: .0625rem; min-height: 2.75rem; padding: 0; border: 0; border-radius: .625rem; background: none; color: var(--gk-ink-3); font: inherit; }
+    .gk-month-day b { font-size: .9375rem; font-weight: 600; line-height: 1.1; }
+    .gk-month-day i { font-size: .625rem; font-style: normal; font-weight: 800; line-height: 1; color: var(--es-accent-readable); }
+    .gk-month-day:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: -2px; }
+    .gk-month-has { background: var(--es-accent-tint); color: var(--gk-ink); cursor: pointer; }
+    .gk-month-today { box-shadow: inset 0 0 0 2px var(--es-accent-readable); }
+    .gk-month-past { opacity: .55; }
+    .gk-month-fold { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; min-height: 2.75rem; padding: 0 .375rem; border: 0; background: none; color: var(--gk-ink); font: inherit; font-weight: 700; text-align: start; cursor: pointer; }
+    .gk-month-fold span + span { font-size: .8125rem; font-weight: 600; color: var(--gk-ink-3); text-decoration: underline; text-underline-offset: 3px; }
+    .gk-month-earlier { display: block; margin: 0 auto .875rem; padding: .375rem .875rem; border: 0; border-radius: 999px; background: var(--gk-solid); color: var(--gk-ink-2); font: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; }
+
+    {{-- The chips above the schedule's list. One row that scrolls sideways on a phone, and
+         never wraps into a block that pushes the first event down the page. --}}
+    .gk-pills { display: flex; gap: .5rem; overflow-x: auto; max-width: 46rem; margin: 0 auto .75rem; padding: .125rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .gk-pills::-webkit-scrollbar { display: none; }
+    .gk-pills[v-cloak] { display: none; }
+    .gk-pill { display: inline-flex; flex: none; align-items: center; min-height: 2.25rem; padding: 0 .875rem; border: 1px solid var(--gk-line); border-radius: 999px; background: var(--gk-solid); color: var(--gk-ink); font: inherit; font-size: .875rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color var(--gk-swap, 120ms) ease, color var(--gk-swap, 120ms) ease; }
+    .gk-pill:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-pill-on { border-color: var(--es-accent-edge, transparent); background: var(--es-accent); color: var(--es-accent-text); }
+
+    {{-- The schedule's list: one column of day panels, a row for each event (role/partials/
+         calendar, guest route). The same rows as the event page's "more events". --}}
+    .gk-list { max-width: 46rem; margin-inline: auto; }
+    .gk-days { display: grid; gap: .875rem; }
+    {{-- Rounded at every width (the list sits inside the page's own gutters), and clipped, so a
+         row's hover tint keeps to the panel's corners. --}}
+    .gk-day { overflow: hidden; }
+    .gk-dayhead-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
+    .gk-month-none { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; color: var(--gk-ink-2); }
+    .gk-row-where a { color: inherit; text-decoration: underline; text-decoration-color: var(--gk-line); text-underline-offset: 2px; }
+    .gk-dayhead-word { font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--es-accent-readable); }
+    .gk-days-past { display: flex; align-items: center; gap: 1rem; padding: .25rem 1rem; font-size: .875rem; font-weight: 600; color: var(--gk-ink-2); }
+    .gk-days-past::before { content: ''; flex: 1; height: 1px; background: var(--gk-line); }
+    .gk-days-past::after { content: ''; flex: 1; height: 1px; background: var(--gk-line); }
+    .gk-row-item { position: relative; }
+    {{-- A row of the schedule's list is a card pressed as a whole; its name is the link. --}}
+    .gk-row-press { cursor: pointer; }
+    .gk-row-title h3 { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin: 0; font: inherit; }
+    .gk-row-title a { color: inherit; text-decoration: none; }
+    .gk-row-title a:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; border-radius: .25rem; }
+    .gk-row-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0; font-size: .875rem; color: var(--gk-ink-2); }
+    .gk-row-media { grid-area: i; align-self: center; overflow: hidden; width: 4.75rem; height: 4.75rem; border-radius: .625rem; }
+    .gk-row-media a { display: block; width: 100%; height: 100%; }
+    .gk-row-dot { display: inline-block; width: .5rem; height: .5rem; margin-inline-end: .375rem; border-radius: 999px; vertical-align: .0625rem; }
+    .gk-row-lock { display: inline-block; width: 1rem; height: 1rem; margin-inline-end: .375rem; vertical-align: -.125rem; color: var(--gk-ink-3); }
+    .gk-row-chips { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .125rem; }
+    .gk-row-edit { display: inline-block; margin: -.25rem 1rem .625rem; font-size: .8125rem; color: var(--gk-ink-3); text-decoration: underline; text-underline-offset: 3px; }
+    {{-- A day that is over is quieter, and its pictures lose their colour, as they always did. --}}
+    :where(.gk-day-past) .gk-row-img { filter: grayscale(1); }
+    :where(.gk-day-past) .gk-row-title { color: var(--gk-ink-2); }
 
     {{-- The event page's frame. Two columns from a laptop up, as the page has always been: pictures,
          performers and the venue beside the facts and the story. On a phone the two columns are

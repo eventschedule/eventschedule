@@ -70,13 +70,22 @@ class GuestListEndsTest extends TestCase
 
         $this->assertStringNotContainsString('this.maxEvents || 200', $html, 'a fixed cut with nothing after it');
 
-        // One under each of the three lists the page holds: the phone's agenda in the calendar
-        // layout, and the list layout as a laptop and as a phone draw it.
-        $this->assertGreaterThanOrEqual(3, substr_count($html, 'data-list-more'));
+        // At both places each of a guest page's two lists can end (the cards from a tablet up,
+        // the rows on a phone; only one of them is in the page at a time): above its past
+        // rows, and at its foot when it has none. The phone's month is a whole month read
+        // from the server's map of it, with the next month one press away, so it has no cut
+        // to raise and none to explain.
+        $this->assertSame(4, substr_count($html, 'data-list-more'));
+        $this->assertSame(4, substr_count($html, 'data-list-truncated'), 'where the server cut what it sent, each end of each list says so');
         $this->assertStringContainsString('@click.stop="showMoreListRows"', $html);
 
-        // And where the server cut the payload, the end of the list says so.
-        $this->assertGreaterThanOrEqual(3, substr_count($html, 'data-list-truncated'));
+        // An embed too narrow for a month grid lists every upcoming day instead, which IS a
+        // cut list, so it has the way on and the note as well.
+        $role = $this->createRole($this->createOwner());
+        $embed = $this->get('/'.$role->subdomain.'?embed=true')->assertOk()->getContent();
+        $this->assertSame(5, substr_count($embed, 'data-list-more'));
+        $this->assertSame(5, substr_count($embed, 'data-list-truncated'));
+
         $this->assertStringContainsString(__('messages.later_events_not_listed'), $html);
         $this->assertStringContainsString('this.listTruncated = !!data.truncated', $html);
     }
@@ -99,7 +108,9 @@ class GuestListEndsTest extends TestCase
         // No empty state may be drawn while the load has failed: every one is a statement about
         // the schedule ("No scheduled events", "No events found").
         preg_match_all('/v-(?:else-)?if="(!isLoadingEvents && [^"]*)"/', $html, $matches);
-        $this->assertGreaterThanOrEqual(7, count($matches[1]), 'the three lists\' empty states and the month grid\'s');
+        // Six on a guest page: two for the cards, two for the phone's rows, the phone month's
+        // and the month grid's.
+        $this->assertSame(6, count($matches[1]), 'the two lists\' empty states, the phone month\'s and the month grid\'s');
         foreach ($matches[1] as $condition) {
             $this->assertStringContainsString('!loadFailed', $condition, 'empty state shown on a failed load: '.$condition);
         }

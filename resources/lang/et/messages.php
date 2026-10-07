@@ -221,6 +221,7 @@ return [
     'show_less' => 'Näita vähem',
     'previous_month' => 'Eelmine kuu',
     'today' => 'Täna',
+    'tomorrow' => 'Homme',
     'next_month' => 'Järgmisel kuul',
     'language' => 'Keel',
     'language_help' => 'Keel, milles kirjutad oma ajakava ja sündmusi.',

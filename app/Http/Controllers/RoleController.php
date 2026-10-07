@@ -3160,6 +3160,8 @@ class RoleController extends Controller
             'dir' => content_dir_for_language($eventName, $dirLang),
             'venue_name' => $venueName,
             'venue_dir' => content_dir_for_language($venueName, $event->venue?->language_code ?: $dirLang),
+            // As the month's payload carries it: a row leaves the place out on the venue's own schedule.
+            'venue_subdomain' => $event->venue?->subdomain ?: null,
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
             'local_starts_at' => $event->localStartsAt(),
@@ -3167,6 +3169,10 @@ class RoleController extends Controller
             'utc_date' => $event->starts_at ? $event->getStartDateTime(null, false)->format('Y-m-d') : null,
             'guest_url' => $event->getGuestUrl($subdomain ?? '', ''),
             ...$imageFields,
+            // The keys a row's ticket chips read, with nothing in them: these are past events
+            // (the list's "load more"), whose rows say nothing about tickets, and this query
+            // does not load the ticket rows that Event::cardTicketFields() would read.
+            ...Event::NO_CARD_TICKET_FIELDS,
             'can_edit' => auth()->user() && auth()->user()->canEditEvent($event),
             'edit_url' => auth()->user() && auth()->user()->canEditEvent($event)
                 ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))

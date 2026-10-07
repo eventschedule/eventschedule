@@ -220,6 +220,7 @@ return [
     'show_less' => 'Show less',
     'previous_month' => 'Previous month',
     'today' => 'Today',
+    'tomorrow' => 'Tomorrow',
     'next_month' => 'Next month',
     'language' => 'Language',
     'language_help' => 'The language you write your schedule and events in.',

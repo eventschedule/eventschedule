@@ -179,6 +179,7 @@ return [
     'show_less' => 'Weniger anzeigen',
     'previous_month' => 'Vorheriger Monat',
     'today' => 'Heute',
+    'tomorrow' => 'Morgen',
     'next_month' => 'Nächster Monat',
     'language' => 'Sprache',
     'language_help' => 'Die Sprache, in der Sie Ihren Kalender und Ihre Veranstaltungen verfassen.',
