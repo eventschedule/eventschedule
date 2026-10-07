@@ -1164,14 +1164,28 @@
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ __('messages.you_are_registered') }}
+            @php
+              // How many places that is. A buyer's own sale counts its whole party; a guest's
+              // row counts itself, unless the party's buyer is this same visitor and has
+              // already counted it.
+              $userPrimaryGroups = $userSales->filter(fn ($s) => $s->group_id && $s->isPrimarySale())->pluck('group_id');
+              $userTicketCount = (int) $userSales->sum(fn ($s) => $s->isRsvp() ? 0
+                  : ($s->isPrimarySale() ? $s->legTotalQuantity() : ($userPrimaryGroups->contains($s->group_id) ? 0 : $s->quantity())));
+            @endphp
+            <span class="text-lg font-semibold text-gray-900 dark:text-white" data-user-tickets="{{ $userTicketCount }}">
+              {{-- "You're registered" said nothing of how many, to somebody deciding whether to
+                   get one more. A sign-up has no tickets to count. --}}
+              {{ $userTicketCount > 0 ? trans_choice('messages.you_have_tickets', $userTicketCount, ['count' => $userTicketCount]) : __('messages.you_are_registered') }}
             </span>
-            <x-link href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
-               target="_blank"
-               class="text-sm font-medium">
-              {{ __('messages.view_ticket') }}
-            </x-link>
+            <span class="flex flex-wrap gap-x-3 gap-y-1">
+              @foreach ($userSales as $userSaleIndex => $oneSale)
+                <x-link href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $oneSale->secret]) }}"
+                   target="_blank"
+                   class="text-sm font-medium">
+                  {{ __('messages.view_ticket') }}@if ($userSales->count() > 1) {{ $userSaleIndex + 1 }}@endif
+                </x-link>
+              @endforeach
+            </span>
           </div>
         </div>
         @endif

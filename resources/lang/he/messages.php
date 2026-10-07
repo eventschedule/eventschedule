@@ -3519,6 +3519,7 @@ return [
     'spots_remaining' => ':count מקומות נותרו',
     'registered' => 'רשום',
     'you_are_registered' => 'אתה רשום!',
+    'you_have_tickets' => '{1} יש לך כרטיס אחד|[2,*] יש לך :count כרטיסים',
     'registration_full' => 'ההרשמה מלאה',
     'cancel_registration' => 'בטל הרשמה',
 

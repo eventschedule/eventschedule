@@ -254,7 +254,7 @@ class DemoResetTest extends TestCase
 
         // Both surfaces show it before the reset, or the checks after it prove nothing.
         $this->actingAs($demoUser)->get(route('tickets'))->assertOk()->assertSee('Harbor Jazz');
-        $this->get($this->guestEventUrl($venue, $event))->assertOk()->assertSee(__('messages.you_are_registered'));
+        $this->get($this->guestEventUrl($venue, $event))->assertOk()->assertSee('data-user-tickets=', false);
 
         $this->reset($svc);
 
@@ -263,7 +263,7 @@ class DemoResetTest extends TestCase
         $this->assertFalse(Sale::whereKey($demoSale->id)->exists(), 'a purchase on a demo event survived the reset');
 
         $this->get(route('tickets'))->assertOk()->assertDontSee('Harbor Jazz');
-        $this->get($this->guestEventUrl($venue, $event))->assertOk()->assertDontSee(__('messages.you_are_registered'));
+        $this->get($this->guestEventUrl($venue, $event))->assertOk()->assertDontSee('data-user-tickets=', false);
     }
 
     /**

@@ -2722,6 +2722,7 @@ class RoleController extends Controller
         $avgRating = 0;
         $photoLimitReached = false;
         $userSale = null;
+        $userSales = collect();
 
         $embed = request()->embed;
         $view = 'role/show-guest';
@@ -2811,7 +2812,10 @@ class RoleController extends Controller
                     ->where('is_approved', false)
                     ->get();
 
-                $userSale = \App\Models\Sale::where('event_id', $event->id)
+                // Every one of them, newest first: somebody who bought two tickets and then one
+                // more has two ticket pages, and the page used to know about one of them.
+                $userSales = \App\Models\Sale::with('saleTickets.ticket')
+                    ->where('event_id', $event->id)
                     ->where('status', 'paid')
                     ->where('is_deleted', false)
                     ->where(function ($q) {
@@ -2833,7 +2837,10 @@ class RoleController extends Controller
                         }
                     })
                     ->when($date, fn ($q, $d) => $q->where('event_date', $d))
-                    ->first();
+                    ->orderByDesc('id')
+                    ->limit(6)
+                    ->get();
+                $userSale = $userSales->first();
             }
 
             if ($role->isPro() && $role->feedback_enabled && $role->feedback_public && $event->isFeedbackEnabled($role)) {
@@ -2902,6 +2909,7 @@ class RoleController extends Controller
                 'myPendingPhotos',
                 'photoLimitReached',
                 'userSale',
+                'userSales',
                 'publicFeedbacks',
                 'feedbackCount',
                 'avgRating',

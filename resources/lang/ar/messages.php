@@ -3524,6 +3524,7 @@ return [
     'spots_remaining' => ':count أماكن متبقية',
     'registered' => 'مسجّل',
     'you_are_registered' => 'أنت مسجّل!',
+    'you_have_tickets' => '{1} لديك تذكرة واحدة|{2} لديك تذكرتان|[3,10] لديك :count تذاكر|[11,*] لديك :count تذكرة',
     'registration_full' => 'التسجيل ممتلئ',
     'cancel_registration' => 'إلغاء التسجيل',
 

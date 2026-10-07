@@ -3462,6 +3462,7 @@ return [
     'spots_remaining' => ':count plaatsen beschikbaar',
     'registered' => 'Geregistreerd',
     'you_are_registered' => 'Je bent geregistreerd!',
+    'you_have_tickets' => 'Je hebt :count ticket|Je hebt :count tickets',
     'registration_full' => 'Registratie vol',
     'cancel_registration' => 'Registratie annuleren',
 

@@ -3459,6 +3459,7 @@ return [
     'spots_remaining' => ':count kohta jäänud',
     'registered' => 'Registreeritud',
     'you_are_registered' => 'Oled registreeritud!',
+    'you_have_tickets' => 'Sul on :count pilet|Sul on :count piletit',
     'registration_full' => 'Registreerimine täis',
     'cancel_registration' => 'Tühista registreerimine',
 

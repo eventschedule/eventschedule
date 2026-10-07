@@ -3462,6 +3462,7 @@ return [
     'spots_remaining' => ':count vagas restantes',
     'registered' => 'Inscrito',
     'you_are_registered' => 'Você está inscrito!',
+    'you_have_tickets' => 'Você tem :count ingresso|Você tem :count ingressos',
     'registration_full' => 'Inscrições esgotadas',
     'cancel_registration' => 'Cancelar inscrição',
 

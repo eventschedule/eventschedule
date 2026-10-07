@@ -3522,6 +3522,7 @@ return [
     'spots_remaining' => ':count мест осталось',
     'registered' => 'Зарегистрирован',
     'you_are_registered' => 'Вы зарегистрированы!',
+    'you_have_tickets' => 'У вас :count билет|У вас :count билета|У вас :count билетов',
     'registration_full' => 'Регистрация заполнена',
     'cancel_registration' => 'Отменить регистрацию',
 

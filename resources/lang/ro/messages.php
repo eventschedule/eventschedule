@@ -3480,6 +3480,7 @@ return [
     'spots_remaining' => ':count locuri rămase',
     'registered' => 'Înregistrat',
     'you_are_registered' => 'Ești înregistrat!',
+    'you_have_tickets' => 'Ai :count bilet|Ai :count bilete',
     'registration_full' => 'Înregistrare completă',
     'cancel_registration' => 'Anulare înregistrare',
 

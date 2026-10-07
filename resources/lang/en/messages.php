@@ -3903,6 +3903,7 @@ return [
     'spots_remaining' => ':count spots remaining',
     'registered' => 'Registered',
     'you_are_registered' => 'You\'re registered!',
+    'you_have_tickets' => 'You have :count ticket|You have :count tickets',
     'registration_full' => 'Registration Full',
     'cancel_registration' => 'Cancel Registration',
 

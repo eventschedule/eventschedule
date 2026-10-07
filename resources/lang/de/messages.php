@@ -3462,6 +3462,7 @@ return [
     'spots_remaining' => ':count Plätze verbleibend',
     'registered' => 'Registriert',
     'you_are_registered' => 'Du bist registriert!',
+    'you_have_tickets' => 'Du hast :count Ticket|Du hast :count Tickets',
     'registration_full' => 'Registrierung voll',
     'cancel_registration' => 'Registrierung stornieren',
 
