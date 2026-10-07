@@ -8,8 +8,15 @@
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#filters">Filters</x-doc-nav-link>
         <x-doc-nav-group label="Web Analytics" href="#web-analytics">
+            <x-doc-nav-link href="#web-counting">What Counts as a View</x-doc-nav-link>
             <x-doc-nav-link href="#web-stats">Stats Cards</x-doc-nav-link>
             <x-doc-nav-link href="#web-charts">Charts</x-doc-nav-link>
+        </x-doc-nav-group>
+        <x-doc-nav-group label="Realtime" href="#realtime">
+            <x-doc-nav-link href="#realtime-traffic">Live Traffic</x-doc-nav-link>
+            <x-doc-nav-link href="#realtime-door">At the Door Today</x-doc-nav-link>
+            <x-doc-nav-link href="#realtime-activity">Activity</x-doc-nav-link>
+            <x-doc-nav-link href="#realtime-privacy">Who Is Counted</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Revenue" href="#revenue">
             <x-doc-nav-link href="#revenue-stats">Stats Cards</x-doc-nav-link>
@@ -20,7 +27,6 @@
             <x-doc-nav-link href="#checkins-charts">Charts</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#no-data">No Data State</x-doc-nav-link>
-        <x-doc-nav-link href="#realtime">Realtime</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
 
@@ -34,29 +40,51 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The Analytics dashboard shows how your schedule pages are performing. Open it by clicking <strong>Analytics</strong> in the main navigation. The dashboard is built in, so there is nothing to install and no third-party tracking script to add.
+            Analytics shows how your schedule pages are performing. Open it by clicking <strong>Analytics</strong> in the sidebar. It is built in and on every plan, so there is nothing to install and no third-party tracking script to add.
         </p>
 
-        <x-doc-screenshot id="analytics--dashboard" alt="Analytics dashboard" loading="eager" />
+        <x-doc-screenshot id="analytics--dashboard" alt="The Analytics page: the schedule and date range filters, four stats cards, and the Views Over Time and Device Breakdown charts" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The dashboard is organized into three tabs, which appear in this order:
+            The <a href="#filters" class="doc-link">filters</a> sit at the top of the page, and under them the tabs, in this order:
         </p>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Web Analytics</strong> - Page views over time, device breakdown, top events, broken links, traffic sources, referrers, UTM parameters, visitor locations and social link clicks. This is the default tab.</li>
-            <li><strong class="text-gray-900 dark:text-white">Revenue</strong> - Total revenue, conversion rate, revenue per view, promo code performance, boost and newsletter funnels, and top events by revenue.</li>
-            <li><strong class="text-gray-900 dark:text-white">Check-Ins</strong> - Tickets sold, attendance rate, no-shows, arrival times, attendance by ticket type, and a per-event breakdown.</li>
-        </ul>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">What each tab needs</div>
-            <p>Web Analytics is available on every plan and starts collecting as soon as someone visits a schedule page. The Revenue tab fills in once you have a completed sale, a boost campaign or a newsletter send in the range, and selling a ticket that carries a price is a Pro feature (free registration and ticket types priced at zero are unlimited on every plan, but neither brings in revenue to report). The Check-Ins tab fills in once you have sold tickets for an event in the range, but its attendance figures only become meaningful once you scan tickets at the door. Scanning itself is free on every plan; the live check-in dashboard with its running count is the Pro half.</p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Tab</th>
+                        <th>What it shows</th>
+                        <th>Has data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="#web-analytics" class="doc-link font-semibold sm:whitespace-nowrap">Web Analytics</a></td>
+                        <td>Page views over time, device breakdown, top events, broken links, traffic sources, referrers, UTM parameters, visitor locations and social link clicks. This is the tab the page opens on.</td>
+                        <td>As soon as someone visits a schedule page</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#realtime" class="doc-link font-semibold sm:whitespace-nowrap">Realtime</a></td>
+                        <td>The traffic to your pages as it happens, what people did on your schedules in the last 24 hours, and arrivals at an event that is on</td>
+                        <td>At once. The tab is there when the site offers it: on eventschedule.com, and on a selfhosted site once its administrator switches it on.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#revenue" class="doc-link font-semibold sm:whitespace-nowrap">Revenue</a></td>
+                        <td>Total revenue, conversion rate, revenue per view, promo code performance, boost and newsletter funnels, and top events by revenue</td>
+                        <td>Once the range holds a completed sale, a boost campaign or a newsletter send. Selling a ticket that carries a price is a Pro feature; free registration and ticket types priced at zero are unlimited on every plan, but neither brings in revenue to report.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#checkins" class="doc-link font-semibold sm:whitespace-nowrap">Check-Ins</a></td>
+                        <td>Tickets sold, attendance rate, no-shows, arrival times, attendance by ticket type, and a per-event breakdown</td>
+                        <td>Once tickets are sold for an event dated in the range. The attendance figures need tickets scanned at the door: scanning is free on every plan, and the live check-in dashboard with its running count is the Pro half.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Tip</div>
-            <p>Counting is immediate, but every metric is stored as a daily total, so a visit always lands on the day it happened. Today's figures keep climbing until midnight.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300">
+            A page view is counted the moment it happens and stored in that day's total, so today's figures keep climbing until midnight. For the last half hour, minute by minute, use the Realtime tab.
+        </p>
     </section>
 
     <!-- Filters -->
@@ -68,7 +96,7 @@
             Filters
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The controls above the tabs decide which data is shown. Every filter is stored in the page URL, so you can bookmark a view or share it with a team member who has access to the same schedule.
+            The controls above the tabs decide which data is shown. Every filter is stored in the page URL, so you can bookmark a view or share it with a team member who has access to the same schedule. The <a href="#realtime" class="doc-link">Realtime</a> tab always covers the last half hour of every page, so there only the schedule selector is shown.
         </p>
 
         <div class="doc-fields">
@@ -78,11 +106,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event selector</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Appears once a single schedule is selected, and narrows every tab to one event. It is searchable and lists published events that start in the last 30 days or later; drafts are never listed. On a curator schedule, only events the curator created are listed. Choose <strong>All events</strong> to clear it.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Appears once a single schedule is selected, and narrows Web Analytics, Revenue and Check-Ins to one event. It is searchable and lists events that start in the last 30 days or later, and recurring events that are still running; drafts are never listed. On a curator schedule, Web Analytics lists the events the curator created or accepted, while Revenue and Check-Ins list only the ones it created, because sales belong to the schedule that created the event. Choose <strong>All events</strong> to clear it.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Date range</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Last 7 days, Last 30 days, Last 90 days, This month, Last month, This year, or All time. The default is Last 30 days. All time reaches back ten years.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Last 7 Days, Last 30 Days, Last 90 Days, This Month, Last Month, This Year or All Time. The default is Last 30 Days, which is today and the 29 days before it. All Time reaches back ten years.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Daily / Weekly / Monthly</h4>
@@ -92,7 +120,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">The date range means something different on each tab</div>
-            <p>On Web Analytics it filters page views by the day of the visit. On Revenue it filters sales by the date the purchase was made. On Check-Ins it filters by the <em>event date</em> the ticket is for, not by the purchase or scan date, so a ticket bought in January for a March event lands in March. There, only Last month has an end date: every other range also takes in events still to come, so an upcoming show appears as soon as it has sold a ticket.</p>
+            <p>On Web Analytics it filters page views by the day of the visit. On Revenue it filters sales by the date the purchase was made. On Check-Ins it filters by the <em>event date</em> the ticket is for, not by the purchase or scan date, so a ticket bought in January for a March event lands in March. There, only Last Month has an end date: every other range also takes in events still to come, so an upcoming show appears as soon as it has sold a ticket.</p>
         </div>
     </section>
 
@@ -108,17 +136,17 @@
             The Web Analytics tab is the default tab. It shows page view trends, device and traffic breakdowns, and your top-performing content. Views are counted on your public schedule and event pages and stored as daily totals.
         </p>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">What counts as a view</div>
-            <p>Analytics is deliberately conservative, so its numbers are usually lower than a raw server log. A visit is <strong>not</strong> counted when:</p>
-            <ul class="doc-list mb-0">
-                <li>The visitor is a known bot, crawler, preview generator or automated tool.</li>
-                <li>You or one of your team members is signed in to that schedule, or a site administrator is signed in.</li>
-                <li>The page was loaded inside an <a href="{{ route('marketing.docs.sharing') }}#embed" class="doc-link">embedded calendar</a>.</li>
-                <li>The same visitor has already been counted 10 times on that schedule that day. Their later visits stop adding to the schedule's totals, traffic sources, locations and UTM figures until midnight, though each event they open still counts for that event.</li>
-                <li>The same visitor has already viewed that event 3 times that day. Each event keeps this count separately.</li>
-            </ul>
-        </div>
+        <h3 id="web-counting" class="doc-subheading">What Counts as a View</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Analytics is deliberately conservative, so its numbers are usually lower than a raw server log. A visit is <strong>not</strong> counted when:
+        </p>
+        <ul class="doc-list mb-6">
+            <li>The visitor is a known bot, crawler, preview generator or automated tool.</li>
+            <li>You or one of your team members is signed in to that schedule, or a site administrator is signed in.</li>
+            <li>The page was loaded inside an <a href="{{ route('marketing.docs.sharing') }}#embed" class="doc-link">embedded calendar</a>.</li>
+            <li>The same visitor has already been counted 10 times on that schedule that day. Their later visits stop adding to the schedule's totals, traffic sources, locations and UTM figures until midnight, though each event they open still counts for that event.</li>
+            <li>The same visitor has already viewed that event 3 times that day. Each event keeps this count separately.</li>
+        </ul>
 
         <h3 id="web-stats" class="doc-subheading">Stats Cards</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -142,18 +170,18 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Views in Period</span></td>
-                        <td>Views inside the selected date range. On All time this card falls back to the current calendar month.</td>
+                        <td>Views inside the selected date range. On All Time this card falls back to the current calendar month.</td>
                         <td>Always</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Previous Period</span></td>
                         <td>Views in the equivalent range immediately before the one you selected</td>
-                        <td>Every range except All time</td>
+                        <td>Every range except All Time</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">vs Previous 30 Days</span></td>
                         <td>Percentage change against that previous period, green when up and red when down. The card label follows the range you picked, so it also reads vs Previous 7 Days, vs Last Month, vs Last Year and so on.</td>
-                        <td>Every range except All time</td>
+                        <td>Every range except All Time</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Appearance Views</span></td>
@@ -174,7 +202,7 @@
             Below the stats cards the tab lays out its charts in the order shown here. A chart is hidden entirely when it has no data for the selected filters, so an empty dashboard is normal on a new schedule.
         </p>
 
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Views Over Time</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">A line chart of page views grouped daily, weekly or monthly according to the period buttons. Hover a point to see the exact number. If you run <a href="{{ route('marketing.docs.boost') }}" class="doc-link">boost campaigns</a> or send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a>, extra dashed lines plot the views attributed to each of them against the same timeline, so you can see how much of a spike each one accounts for.</p>
@@ -226,6 +254,194 @@
         </div>
     </section>
 
+    <!-- Realtime -->
+    <section id="realtime" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.008H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Realtime <x-doc-badge plan="free" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The <strong class="text-gray-900 dark:text-white">Realtime</strong> tab shows the traffic to your own schedule and event pages as it happens and, beside it, what people did on your schedules in the last 24 hours, so there is something to read on a quiet afternoon too. It is the second tab of Analytics, beside Web Analytics, and the <strong class="text-gray-900 dark:text-white">Realtime</strong> tile on your dashboard opens it. It is free on every plan.
+        </p>
+
+        <x-doc-screenshot id="analytics--realtime" alt="The Realtime tab: page views in the last 5 minutes and visitors now, a bar for each of the last 30 minutes, the Visitors list, and Activity with its counts and latest sales" />
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The tab covers every schedule you own, and each one you run as an admin for somebody else while that schedule is on the Enterprise plan, the plan that includes team members. A notice at the top names any schedule left out for that reason. With several schedules, the schedule selector at the top of the page narrows the tab to one. The event selector and the date range do not apply here and are not shown.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            The traffic refreshes every 15 seconds while the browser tab is in view, and once a minute while it is hidden, for up to half an hour. Activity and the door card refresh every minute while the tab is in view, and within about 15 seconds of a sale or a registration made on your pages. Everything catches up at once when you come back to the tab. If an update fails, <strong class="text-gray-900 dark:text-white">Reconnecting</strong> takes the place of <strong class="text-gray-900 dark:text-white">Live</strong> and the page keeps trying; if the next one fails too, a line at the top says so as well. If you have been signed out, or the tab is no longer yours to see, it says <strong class="text-gray-900 dark:text-white">This page stopped updating.</strong> and offers <strong class="text-gray-900 dark:text-white">Reload</strong>.
+        </p>
+
+        <h3 id="realtime-traffic" class="doc-subheading">Live Traffic</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The first card and the lists under it cover the last 30 minutes of visits to your pages.
+        </p>
+        <div class="doc-fields doc-fields--grouped">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Right now</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Two figures, because they answer two questions. <em>Page views, last 5 minutes</em> counts everybody. <em>Visitors on your pages now</em> counts the people who have a page open and whose cookie choice lets them be listed (see <a href="#realtime-privacy" class="doc-link">Who is counted</a>): a visitor who declined sends one page view and nothing after it, so whether they are still there cannot be known. When nobody has visited in half an hour the card says <strong>Quiet right now</strong> instead and, if you have one schedule, shows its address with a <strong>Copy Link</strong> button.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Last 30 minutes</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A short ledger beside the two figures. <em>Page views</em> is always there. <em>Embedded calendar views</em> appears when your calendar was viewed on another website, and is counted apart. <em>Last page view</em> appears once nobody has opened a page for five minutes. While someone is buying there are two more lines: <em>Checkouts started</em> (ticket checkouts begun in the half hour that cost something; a cash order is complete when it is placed, so it is not one) and <em>Checkouts paid</em> (how many of those are paid by now). In a very busy half hour a line says the figures cover the newest 5,000 page views.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Page views per minute</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A bar for each of the last 30 minutes. A green dot on a minute means a sale or a registration came in during it; point at the dot to see how many of each. A sale taken at the box office, a cash order you marked as paid and an imported attendee are never a dot, because nobody on a page made them.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Visitors</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">One row for each visitor who may be listed: a country, a device type, the page they have open and how long they have been on it. Under <em>Earlier in the last 30 minutes</em> come the ones who have left, with how long ago. The card lists up to 50 people who are here now and the 10 who left most recently, and says so when there are more. No name, email address or account is ever shown, and a row does not open into anything.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top pages, Countries and Devices</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Page views of the last 30 minutes. Each card lists its six largest rows and folds the rest into an <em>Other</em> row, along with any view whose country is not known, so every card adds up to the page views above. A green "3 now" beside a page is how many of the visitors who can be listed have it open at this moment.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sources</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Counts visits, not page views: each visit is counted once, by where it began. A row is the site the visit came from with its kind beside it (Search, Social, Email, AI assistants, Paid, Campaign or Other websites), or Direct when it came from nowhere.</p>
+            </div>
+        </div>
+
+        <h3 id="realtime-door" class="doc-subheading">At the Door Today</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            This card appears only while one of your events is on: from the start of its day until it ends. An event with no length set stays for six hours after it starts. A late show stays after midnight, and a festival through its last day. Only events that sell tickets or take registrations are listed, up to four of them, soonest first, with a line saying how many more are on today. On a phone the card is the first thing on the tab.
+        </p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Line</th>
+                        <th>What it shows</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Checked in</span></td>
+                        <td>Ticket holders scanned so far out of the tickets sold for that date, with a bar</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Last 30 minutes</span></td>
+                        <td>How many of them arrived in the last half hour</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Sold</span></td>
+                        <td>Tickets sold out of the capacity, when the event has a limit</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Pressing an event opens <a href="{{ route('marketing.docs.tickets') }}#checkin-dashboard" class="doc-link">Check-In</a> on it. A registration has nothing to scan, and the check-in dashboard is a Pro feature, so for an event that takes registrations, or on the Free plan, the card shows a single line, <strong class="text-gray-900 dark:text-white">Registered</strong> or <strong class="text-gray-900 dark:text-white">Sold</strong>, and opens Sales.
+        </p>
+
+        <h3 id="realtime-activity" class="doc-subheading">Activity</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Activity lists what people did on your schedules in the last 24 hours, newest first. It is read from your own sales, followers and requests and not from the traffic, so it does not depend on anyone's cookie choice. The counts above the list are buttons that filter it: <strong class="text-gray-900 dark:text-white">Sales</strong>, <strong class="text-gray-900 dark:text-white">Registrations</strong>, <strong class="text-gray-900 dark:text-white">Bookings</strong> (only on a day that has one), <strong class="text-gray-900 dark:text-white">Followers</strong> and <strong class="text-gray-900 dark:text-white">Requests</strong>. The list holds the newest 20 rows and says when there are more; below a laptop's width it starts at five, with <strong class="text-gray-900 dark:text-white">Show all</strong>.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            No row shows a name. A row says what happened and to which event or schedule, and opens the page where the person is:
+        </p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>What it is</th>
+                        <th>Opens</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Sale</span></td>
+                        <td>A purchase that took money, with the amount and the number of tickets. A box office sale and a cash order you marked as paid are listed too.</td>
+                        <td>Sales</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Registration</span></td>
+                        <td>A free registration, or tickets that came to nothing to pay</td>
+                        <td>Sales</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Booking</span></td>
+                        <td>An appointment booking, named by its appointment type and never by its guest, with the time that was booked</td>
+                        <td>The schedule's Appointments tab</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">New follower, New newsletter subscriber</span></td>
+                        <td>Someone followed the schedule, or confirmed a sign-up for its emails</td>
+                        <td>The schedule's Followers tab</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Event request</span></td>
+                        <td>An event made in the last 24 hours and sent to your schedule, which still waits for your answer. It leaves the list once you accept or decline it.</td>
+                        <td>The schedule's Requests tab</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Waitlist</span></td>
+                        <td>Someone joined an event's waitlist</td>
+                        <td>Waitlist</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Wants to hear about tickets</span></td>
+                        <td>Someone confirmed an address on an event's interest list</td>
+                        <td>Nothing</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Comment, Photo, Video</span></td>
+                        <td>Sent in by your audience, and marked <em>Waiting for approval</em> while it waits for you. What you post yourself is not listed.</td>
+                        <td>The Engagement tab of the event</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Imported attendees are never listed: an import is not a sale.
+        </p>
+
+        <h3 id="realtime-privacy" class="doc-subheading">Who Is Counted, and Who Is Listed</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Page views count every visit except the ones in the first row below. A person is a row under Visitors, and one of the <em>visitors on your pages now</em>, only when their own cookie choice covers it.
+        </p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Visit</th>
+                        <th>Who</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Not counted</span></td>
+                        <td>You and your team while signed in, site administrators, and known bots. On a custom domain nobody is signed in, so a visit you make to your own page there counts like anyone's.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Counted, never listed</span></td>
+                        <td>A visitor who declined cookies, has not answered, or whose browser sends Global Privacy Control. So is one who accepted on a notice that did not say a schedule's organizer sees visits to its pages, which includes anyone who answered an earlier notice.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Listed, without a name</span></td>
+                        <td>A visitor who accepted analytics cookies on a notice that said so. The row is a country, a device type, a page and a time: never a name, an email address, an account, a browser or a history. Its id means nothing outside your own sign-in session, so it cannot follow a visitor from one day or one device to another.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A visitor who has left stays under Earlier for up to half an hour, and the record of a visit is deleted about an hour after the visitor's last activity. Activity is your own sales, followers and requests, which stay where they always were. For daily totals over weeks and months, use the <a href="#web-analytics" class="doc-link">Web Analytics</a> tab.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Nothing on the tab names anyone, but it sits beside records that do. On a quiet schedule, one unnamed visitor on an event's page followed by a sale for that event is very likely the buyer, whose name is in Sales as it always was.
+        </p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Selfhost</div>
+            <p>The tab appears for schedule owners once the site's administrator has switched on both <strong>Record live page views</strong> and <strong>Show schedule owners live traffic to their own pages</strong>. See the <a href="{{ route('marketing.docs.selfhost.admin') }}#realtime-owner-view" class="doc-link">admin guide</a>.</p>
+        </div>
+    </section>
+
     <!-- Revenue -->
     <section id="revenue" class="doc-section">
         <h2 class="doc-heading">
@@ -238,14 +454,18 @@
             The Revenue tab tracks ticket sales performance: how much you earned, how well views convert to purchases, how your promo codes did, and what your boost and newsletter campaigns returned. It counts paid sales by the date of purchase.
         </p>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Note</div>
-            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling a ticket</a> that carries a price is a Pro feature, so ticket revenue appears once you are on Pro or Enterprise. The tab itself is on every plan and is not empty on Free: a paid appointment booking is a sale and counts here. Free registration and ticket types priced at zero stay unlimited on the Free plan, and neither produces revenue to report. The Boost Funnel below also needs Pro, because boost campaigns are a Pro feature. Paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> are sales too, so they count in the revenue figures here alongside tickets. They are left out of the conversion rate, because a booking is not made from an event page.</p>
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">The tab is on every plan; taking money is Pro</div>
+            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling a ticket</a> that carries a price is a Pro feature, and so is taking payment for an <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment</a>, so revenue appears once you are on Pro or Enterprise. Free registration and ticket types priced at zero stay unlimited on the Free plan: they are completed sales, so the cards below still appear, with revenue at zero. The Boost Funnel also needs Pro, because boost campaigns are a Pro feature.</p>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Paid appointment bookings are sales, so they count in the revenue figures alongside tickets. They are left out of the conversion rate, because a booking is not made from an event page.
+        </p>
 
         <h3 id="revenue-stats" class="doc-subheading">Stats Cards</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Three cards summarise the period. They appear only once there is at least one paid sale in the selected range.
+            Three cards summarise the period. They appear only once there is at least one completed sale in the selected range, and a free registration is one.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -258,7 +478,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Total Revenue</span></td>
-                        <td>What the paid sales made during the period took, by purchase date. It is not net of refunds: a partially refunded sale stays paid and counts in full, and only a fully refunded sale drops out. If your sales span more than one currency, each currency is listed on its own line rather than added together.</td>
+                        <td>What the paid sales made during the period took, by purchase date. It is not net of refunds: a partially refunded sale stays paid and counts in full, and only a fully refunded or deleted sale drops out. If your sales span more than one currency, each currency is listed on its own line rather than added together.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Conversion Rate</span></td>
@@ -350,8 +570,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">A bar chart of check-ins by hour of the day, from 12 AM to 11 PM, in the schedule's own timezone. Use it to see when the queue actually forms and to staff the door accordingly. It is not measured relative to each event's start time, so it is most useful when your events start at a consistent hour.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Attendance Rate by ticket type</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Check-in rates broken down by ticket type, so you can see which types turn up. Shown only when the period contains more than one ticket type.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Attendance Rate</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A chart with the same name as the card above it: check-in rates broken down by ticket type, so you can see which types turn up. Shown only when the period contains more than one ticket type.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
@@ -369,11 +589,11 @@
             No Data State
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Each tab shows its own empty state when it has nothing to display: "No analytics data available yet", "No revenue data available yet" or "No check-in data". Common causes:
+            Each tab shows its own empty state when it has nothing to display: "No analytics data available yet", "No revenue data available yet", "No check-in data" or, on Realtime, "Quiet right now". Common causes:
         </p>
         <ul class="doc-list mb-6">
             <li>The schedule is new and has not been visited yet.</li>
-            <li>The selected date range contains no recorded activity. All time is the quickest way to rule this out.</li>
+            <li>The selected date range contains no recorded activity. All Time is the quickest way to rule this out.</li>
             <li>You are filtering by a schedule or an event with no traffic.</li>
             <li>You have only been checking the page yourself while signed in. Your own visits, and those of your team members and site administrators, are never counted.</li>
             <li>Your only traffic so far came through an embedded calendar, which is not counted, or from bots, which are filtered out.</li>
@@ -385,38 +605,11 @@
             If the dashboard still looks empty, work through these in order:
         </p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Set the date range to <strong>All time</strong> and clear the schedule and event filters.</li>
-            <li>Open your public schedule page in a private or logged-out browser window and reload it, then check again the following day - views are stored as daily totals.</li>
+            <li>Set the date range to <strong>All Time</strong> and clear the schedule and event filters.</li>
+            <li>Open your public schedule page in a private or logged-out browser window, then reload Analytics. The visit is counted at once: it is in today's total on Web Analytics, and on the Realtime tab within seconds.</li>
             <li>Confirm the events you expect traffic on are published rather than drafts.</li>
             <li><a href="{{ route('marketing.docs.sharing') }}" class="doc-link">Share your schedule link</a> so real visitors start arriving.</li>
         </ol>
-    </section>
-
-    <!-- Realtime -->
-    <section id="realtime" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.008H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-            Realtime
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Realtime</strong>, in the sidebar, shows the traffic to your own schedule and event pages as it happens. It is free on every plan and updates itself every 15 seconds. It covers every schedule you own, and each one you help run for somebody else while that schedule's plan includes team members. With several schedules, a menu narrows it to one.</p>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Right now</strong> - two numbers. <em>Page views, last 5 minutes</em> counts everybody. <em>Visitors on your pages now</em> counts the people who have a page open and who accepted cookies: a visitor who declined sends one page view and nothing after it, so whether they are still there cannot be known</li>
-            <li><strong class="text-gray-900 dark:text-white">Last 30 minutes</strong> - page views, views of your calendar embedded on other websites (counted apart), and, when it has been quiet for five minutes, when the last page view was</li>
-            <li><strong class="text-gray-900 dark:text-white">Page views per minute</strong> - a bar for each of the last 30 minutes</li>
-            <li><strong class="text-gray-900 dark:text-white">Visitors</strong> - each visitor who accepted cookies as a row: a country, a device type, the page they have open and for how long, then the ones who left earlier in the half hour. No name, email address or account is ever shown, and a row does not open into a history</li>
-            <li><strong class="text-gray-900 dark:text-white">Top pages, Countries, Devices</strong> - page views for the last 30 minutes; each list adds up to the total, with an "Other" row for the smaller entries and for a view whose country is not known</li>
-            <li><strong class="text-gray-900 dark:text-white">Sources</strong> - where visits to your pages began: a search engine, a social network, a link from another site, or direct</li>
-        </ul>
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Who is not counted</div>
-            <p>Your own visits and your team's while signed in, and site administrators. On a custom domain nobody is signed in, so a visit you make to your own page there counts like anyone's. Visitors are listed only if the cookie notice they accepted said that a schedule's organizer sees visits to its pages; everyone else, including anyone who accepted an earlier notice, is in the page views. A visitor who has left stays under Earlier for up to half an hour. Records are deleted about an hour after a visitor's last activity. For daily totals over weeks and months, use the <a href="#web-analytics" class="doc-link">Web Analytics</a> tab.</p>
-        </div>
-        <div class="doc-callout doc-callout-info mt-6">
-            <div class="doc-callout-title">Selfhost</div>
-            <p>Realtime appears for schedule owners when the site's administrator has switched on both Realtime and the owners' view. See the <a href="{{ route('marketing.docs.selfhost.admin') }}#realtime-owner-view" class="doc-link">admin guide</a>.</p>
-        </div>
     </section>
 
     <!-- See Also -->

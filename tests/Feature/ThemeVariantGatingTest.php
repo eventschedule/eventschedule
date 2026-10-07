@@ -71,8 +71,9 @@ class ThemeVariantGatingTest extends TestCase
             'the first-run schedule form must follow the palette too'
         );
 
-        // The site-admin newsletter templates page, the only one of its seven siblings that
-        // renders through the bare shell.
+        // The site-admin newsletter templates page used to be the only one of its seven siblings
+        // that rendered through the bare shell. It goes through app-admin now, and still has to
+        // answer with the palettes (ApNewsletterPagesTest holds its sidebar and navigation).
         $admin = $this->createOwner(admin: true);
 
         $this->assertStringContainsString(

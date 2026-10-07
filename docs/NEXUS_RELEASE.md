@@ -101,7 +101,7 @@ commits since then ship under the same number. Production has run `dcf7bd8b6` si
 2026-09-30 deploy, so everything committed up to then is **already live**: the conversion, churn
 and owner-email batch (its emails have been sending since 2026-09-28), the photo gallery, the
 homepage headline test, guest support chat, list animations on schedule pages, per-schedule custom
-field values on shared events, and 14 of this version's 18 migrations. Their "before the deploy"
+field values on shared events, and 14 of this version's 32 migrations. Their "before the deploy"
 steps below are now overdue rather than ahead.
 
 Still to ship: realtime, the growth data pull, the get-started and email-design rework of
@@ -178,9 +178,12 @@ checklist:
 
 ### Migrations
 
-Twenty-two, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys; these
-eight are left. Three of them read a large table: the two listed first, and the last one, which reads
-90 days of `audit_logs`:
+Thirty-two, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys;
+eighteen are left: the eleven below, three under GDPR and two under Event import (each in its own
+section), and the two `2026_10_05_*`, which add one guarded nullable column each to `users`
+(`setup_guide`, `suggestions_off_at`). Five of the eleven below read a large table: the two listed
+first, the `user_active_days` one, which reads 90 days of `audit_logs`, and the two index builds
+on `role_user` and `sales`:
 
 | Migration | What it does |
 |---|---|
@@ -193,6 +196,8 @@ eight are left. Three of them read a large table: the two listed first, and the 
 | `2026_10_07_000002_add_guest_portal_counters_to_marketing_daily_stats` | Seven `unsigned int default 0` columns on `marketing_daily_stats` |
 | `2026_10_06_000004_add_owner_view_to_realtime_hits_table` | Two `boolean default 0` columns and a `(role_id, last_seen_at)` index on `realtime_hits`, a table that holds about an hour of rows |
 | `2026_10_06_000002_create_user_active_days_table` | Two new tables, then one read of the last 90 days of `audit_logs` (five actions, served by the `(action, created_at)` index) and `insertOrIgnore` in chunks of 1000. No `INSERT ... SELECT`, so nothing is locked on `audit_logs` while the old containers write to it. Both creates are guarded with `Schema::hasTable`, which is the only reason a retry works if the run dies while seeding: do not remove the guards. See "Admin dashboard and active users" |
+| `2026_10_07_000000_add_role_created_index_to_role_user_table` | Online index build on `role_user (role_id, created_at)`, for the Realtime tab's "new followers" read. It reads the whole table once (every member and follower of every schedule); guarded, so a second run is a no-op |
+| `2026_10_07_000001_add_status_paid_at_index_to_sales_table` | Online index build on `sales (status, paid_at)`: the Realtime tab's "what was paid in the last half hour" read, asked every 15 seconds per open tab, had no index that begins with time. It reads the whole of `sales` once and waits at most 10 seconds for its lock, so on a busy table the deploy fails and retries rather than queue checkouts. Measured on a copy with 500,000 sales: a 5,000-event account's read went from 166 ms to 43 ms. Guarded, so a second run is a no-op |
 
 Already run: `2026_09_25_000001_add_signup_code_invalid_to_marketing_daily_stats`,
 `2026_09_25_000002_canonicalize_timezone_aliases`, `2026_09_27_000000_add_list_animation_to_roles_table`,
@@ -687,8 +692,10 @@ they must ship together - do not deploy the code without them.
 `ANALYTICS_ID` is set in the app spec, the banner is already shown and nothing changes; otherwise
 this release starts showing it (never inside embedded calendars).
 
-**Three migrations:** a new `realtime_hits` table (instant), two columns and an index on it for
-the schedule owners' view below (instant, the table holds an hour of rows), and an
+**Five migrations:** a new `realtime_hits` table (instant), two columns and an index on it for
+the schedule owners' view below (instant, the table holds an hour of rows), a
+`(role_id, created_at)` index on `role_user` and a `(status, paid_at)` index on `sales` for the
+owners' Activity rail (each reads its table once, online), and an
 `(action, created_at)` index on `audit_logs` for the Activity card. The index build reads the whole table inside the start
 command's `migrate --force`, so first run `SELECT COUNT(*) FROM audit_logs` (it is pruned to 90
 days, apart from the few actions now kept for good). If it is large, run
@@ -718,9 +725,9 @@ hours.
   a challenged beacon fails silently and the page just looks empty.
 - After an hour, `realtime_hits` should hold roughly an hour of rows and no more.
 
-**Schedule owners get their part of it (`/realtime`).** A second switch on the same settings card,
-on by default here: everyone who manages a schedule gets a Realtime entry in the sidebar and a
-Realtime tile on their dashboard, showing live traffic to their own pages and never who anyone is
+**Schedule owners get their part of it (the Realtime tab of `/analytics`).** A second switch on the
+same settings card, on by default here: everyone who manages a schedule gets a Realtime tab (the second) on their
+Analytics page and a Realtime tile on their dashboard, showing live traffic to their own pages and never who anyone is
 (`App\Services\ScheduleRealtime`). What changes for visitors is one sentence: the cookie banner's
 first line, and the privacy policy, now say that the organizer of a schedule page sees visits to
 it. A choice made on a banner that carries that sentence is recorded as such (an `org` token in
@@ -731,11 +738,29 @@ Everyone who answered the banner before this release is counted for owners and n
 they choose again. So on the day of the deploy an owner's Visitors list is short and its page-view
 numbers are complete; that is the design, not a fault.
 
+**The same tab also lists what people did (Activity, the door card, sale marks).** Beside the
+traffic an owner now sees their own last 24 hours: sales, registrations, bookings, followers,
+requests, waitlist joins and audience comments, with no names, read from their own records
+(`App\Services\ScheduleActivity`) and never from `realtime_hits`; how many have checked in at an event
+that is on; and a mark on the traffic chart on a minute a sale came in. One migration ships with
+it, an index on `role_user (role_id, created_at)`, which the rail's "new followers" read needs; it
+is an index only and guarded, so a second run is a no-op. The rail has its own poll
+(`/analytics/realtime/activity`, once a minute per open tab and again when a sale lands) and its
+own throttle bucket. Privacy policy clauses 06 and 12 are reworded and gain a sentence each (06 gains two): a visitor who buys or
+follows while on a schedule's page may be identifiable to its organizer from the unnamed visit
+beside the sale. That is a second material change in the same notice.
+
 Check after Deploy, the same hour as the realtime checks above:
 
-- As a schedule owner (not an admin, not the demo account), open `/realtime`: page views arrive
+- As a schedule owner (not an admin, not the demo account), open Analytics and its Realtime tab
+  (`/analytics?tab=realtime`; the old `/realtime` redirects there): page views arrive
   from a private window on that schedule's page; the visitor is listed only after accepting cookies
   in that window, and your own signed-in visit to the page is not counted at all.
+- On that tab, buy a ticket in the private window: within about fifteen seconds a green dot
+  appears on the chart and a "Sale" row at the top of Activity, with the event and the amount and
+  no name. On the day of an event, the door card shows the same checked-in number as `/checkin`.
+- `SHOW INDEX FROM role_user` lists `role_user_role_id_created_at_index` (the Scheduler card and
+  `/up` say nothing about a missing index; the rail would only be slow on a large schedule).
 - `/privacy` clauses 04 (the legal bases), 06 and 12 say what an organizer sees. If either still says owners never
   see the live view, the release is half deployed.
 - The policy promises notice of a material change. This is one: send it.
@@ -744,9 +769,8 @@ Check after Deploy, the same hour as the realtime checks above:
 
 Switch it off at `/admin/settings#realtime`. That deletes every row at once, and beacons from
 pages still cached at the edge are dropped by the endpoint. To keep Realtime and take it away from
-schedule owners only, switch off the second toggle: their page, tile and sidebar entry go, the
-banner and the policy stop naming organizers within ten minutes (the edge cache), and if it is
-switched on again later the stamp moves to that moment.
+schedule owners only, switch off the second toggle: their tab (Activity and the door card with it) and their tile go,
+and the banner and the policy stop naming organizers within ten minutes (the edge cache).
 
 With Google Analytics off as well, Realtime is all that the cookie banner's Analytics line and
 privacy policy clause 12 describe. Neither follows this switch, so switching Realtime off then

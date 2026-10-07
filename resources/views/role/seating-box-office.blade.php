@@ -1,4 +1,4 @@
-<x-app-admin-layout>
+<x-app-admin-layout wide>
     @php
         // Built here, not inline in the directive: a multi-line array literal inside a Blade
         // directive does not parse. Fully qualified rather than a `use` - this block is inside a

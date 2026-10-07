@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * What a schedule's own Realtime page (/realtime, App\Services\ScheduleRealtime) needs from a
+     * What a schedule's own Realtime tab (/analytics, App\Services\ScheduleRealtime) needs from a
      * row that /admin/realtime never did.
      *
      *  - is_team: the page view was made by a signed-in member of the schedule the page belongs to.

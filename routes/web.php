@@ -618,13 +618,23 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/waitlist/remove/{id}', [WaitlistController::class, 'remove'])->name('waitlist.remove');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
-    // A schedule owner's live view of their own guest pages (not /admin/realtime, which is the
-    // operator's and about the whole install). 404 where the install does not offer it. The two
-    // JSON routes are polled, so they carry their own bucket: a page left open must not spend the
-    // budget of anything else, and the prefix form needs no named limiter.
-    Route::get('/realtime', [RealtimeController::class, 'index'])->name('realtime');
-    Route::get('/realtime/data', [RealtimeController::class, 'data'])->name('realtime.data')->middleware('throttle:60,1,realtime_poll');
-    Route::get('/realtime/summary', [RealtimeController::class, 'summary'])->name('realtime.summary')->middleware('throttle:60,1,realtime_poll');
+    // The polls behind a schedule owner's live view of their own guest pages, which is the
+    // Realtime tab of /analytics (not /admin/realtime, which is the operator's and about the
+    // whole install). 404 where the install does not offer it. Under /analytics because the view
+    // has no page of its own. They are polled, so they carry their own bucket: a tab left open
+    // must not spend the budget of anything else, and the prefix form needs no named limiter.
+    Route::get('/analytics/realtime/data', [RealtimeController::class, 'data'])->name('analytics.realtime.data')->middleware('throttle:60,1,realtime_poll');
+    Route::get('/analytics/realtime/summary', [RealtimeController::class, 'summary'])->name('analytics.realtime.summary')->middleware('throttle:60,1,realtime_poll');
+    // The Activity rail has a bucket of its own: it is asked for once a minute and again when a
+    // sale lands, and a busy night must not spend the traffic poll's budget.
+    Route::get('/analytics/realtime/activity', [RealtimeController::class, 'activity'])->name('analytics.realtime.activity')->middleware('throttle:60,1,realtime_activity');
+    // The view had a page of its own at /realtime when it first landed on main (2026-10-06),
+    // before it became a tab. Kept as a way in for a bookmark or a dashboard left open since, so the name stays
+    // in Role::RESERVED_SUBDOMAINS. The old `?schedule=` is the Analytics page's `role_id`.
+    Route::get('/realtime', fn (\Illuminate\Http\Request $request) => redirect()->route('analytics', array_filter([
+        'tab' => 'realtime',
+        'role_id' => is_string($request->query('schedule')) ? $request->query('schedule') : null,
+    ])));
 
     // Newsletter routes (flat, like analytics - schedule selected via ?role_id= query param)
     Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletter.index');

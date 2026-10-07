@@ -1,73 +1,84 @@
 <x-app-admin-layout>
 
     <x-slot name="head">
+        @include('newsletter.partials._styles')
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
     </x-slot>
 
-    <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.segments') }}</h2>
-            <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </a>
+    {{-- The Segments tab: the segments this schedule has, then the form that adds one. The page
+         used to open on the form with the segments above it as loose panels and no word saying
+         what they were. --}}
+    <div class="page-shell">
+        @include('newsletter.partials._section', ['tab' => 'segments'])
+
+        <div class="page-head">
+            <p class="page-lead">{{ __('messages.newsletter_segments_lead') }}</p>
         </div>
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
-
-        {{-- Existing Segments --}}
-        @if ($segments->count())
-        <div class="space-y-4 mb-8">
-            @foreach ($segments as $segment)
-            <div class="ap-card sm:rounded-xl p-6">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 min-w-0">{{ $segment->name }}</h3>
-                    <div class="shrink-0 space-x-3">
-                        <a href="{{ route('newsletter.segment.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                            class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ __('messages.edit') }}</a>
-                        <form method="POST" action="{{ route('newsletter.segment.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                            class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
-                        </form>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ __('messages.type') }}: {{ \App\Models\NewsletterSegment::typeLabel($segment->type) }}
-                </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('messages.recipients') }}: {{ number_format($segment->recipient_count) }}
-                </p>
-                @if ($segment->type === 'manual')
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ __('messages.manual_entries') }}: {{ $segment->segment_users_count }}
-                </p>
-                @endif
+        <div class="news-block">
+            @if ($segments->count())
+            <div class="ap-card rounded-xl overflow-hidden">
+                <table class="page-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ __('messages.name') }}</th>
+                            <th scope="col">{{ __('messages.type') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.recipients') }}</th>
+                            <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($segments as $segment)
+                        @php $segmentParams = ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]; @endphp
+                        <tr>
+                            <td class="c-main c-strong">
+                                <a href="{{ route('newsletter.segment.edit', $segmentParams) }}" class="event-link"><bdi>{{ $segment->name }}</bdi></a>
+                            </td>
+                            <td>
+                                {{ \App\Models\NewsletterSegment::typeLabel($segment->type) }}
+                                @if ($segment->type === 'manual')
+                                <span class="c-sub">{{ __('messages.manual_entries') }}: {{ number_format($segment->segment_users_count) }}</span>
+                                @endif
+                            </td>
+                            <td class="c-num" data-label="{{ __('messages.recipients') }}">{{ number_format($segment->recipient_count) }}</td>
+                            <td class="c-actions">
+                                <a href="{{ route('newsletter.segment.edit', $segmentParams) }}" class="event-link">{{ __('messages.edit') }}</a>
+                                <form method="POST" action="{{ route('newsletter.segment.delete', $segmentParams) }}" class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="event-link is-danger">{{ __('messages.delete') }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-            @endforeach
+            @else
+            <div class="ap-card rounded-xl">
+                <x-page-empty
+                    :title="__('messages.no_segments')"
+                    :text="__('messages.default_all_followers')"
+                    icon="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </div>
+            @endif
         </div>
-        @endif
 
-        {{-- Create New Segment --}}
-        <div class="ap-card sm:rounded-xl p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.create_segment') }}</h3>
-
+        {{-- The form is a Vue island of its own: the type decides which of its fields show, and
+             the event picker inside it is a Vue component. --}}
+        <x-page-card beside class="news-block" :title="__('messages.create_segment')">
             <div id="create-segment-app">
                 <form method="POST" action="{{ route('newsletter.segment.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     @csrf
-                    <div class="space-y-4">
+                    <div class="page-form-fields">
                         <div>
                             <x-input-label for="segment_name" :value="__('messages.name')" />
                             <x-text-input id="segment_name" name="name" type="text" class="mt-1 block w-full" required />
                         </div>
 
                         <div>
-                            <x-input-label :value="__('messages.type')" />
-                            <select name="type" v-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            <x-input-label for="segment_type" :value="__('messages.type')" />
+                            <select id="segment_type" name="type" v-model="segmentType" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 <option value="all_followers">{{ __('messages.all_followers') }}</option>
                                 <option value="all_subscribers">{{ __('messages.all_subscribers') }}</option>
                                 <option value="ticket_buyers">{{ __('messages.ticket_buyers') }}</option>
@@ -87,31 +98,32 @@
                         </div>
 
                         <div v-if="segmentType === 'group'">
-                            <x-input-label :value="__('messages.subschedule')" />
-                            <select name="filter_criteria[group_id]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            <x-input-label for="segment_group" :value="__('messages.subschedule')" />
+                            {{-- A sub-schedule's name is somebody's own text and an option's label
+                                 is a text node this mount would compile: v-pre on each. --}}
+                            <select id="segment_group" name="filter_criteria[group_id]" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                 @foreach ($groups as $group)
-                                <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                <option value="{{ $group->id }}" v-pre>{{ $group->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div v-if="segmentType === 'manual'">
-                            <x-input-label :value="__('messages.email_list')" />
-                            <textarea name="emails" rows="6"
+                            <x-input-label for="segment_emails" :value="__('messages.email_list')" />
+                            <textarea id="segment_emails" name="emails" rows="6"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                 placeholder="{{ __('messages.email_list_placeholder') }}"></textarea>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.email_list_help') }}</p>
                         </div>
+                    </div>
 
-                        <div class="flex justify-end">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)]">
-                                {{ __('messages.create_segment') }}
-                            </button>
-                        </div>
+                    <div class="page-form-actions">
+                        <x-brand-button type="submit">{{ __('messages.create_segment') }}</x-brand-button>
                     </div>
                 </form>
             </div>
-        </div>
+        </x-page-card>
+    </div>
 
     <script {!! nonce_attr() !!}>
         document.addEventListener('DOMContentLoaded', function() {
@@ -157,14 +169,6 @@
                 }
             }).mount('#create-segment-app');
         });
-
-        document.addEventListener('submit', function(e) {
-            var form = e.target.closest('.js-confirm-form');
-            if (form) {
-                if (!confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
-                }
-            }
-        });
     </script>
+    @include('newsletter.partials._list-script')
 </x-app-admin-layout>

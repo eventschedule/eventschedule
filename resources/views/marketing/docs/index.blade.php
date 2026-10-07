@@ -19,7 +19,7 @@
         ['term' => 'Newsletter', 'def' => 'An email you write and send to a segment. The monthly allowance counts recipients rather than sends: 10 free, 100 on Pro, 1,000 on Enterprise, and unlimited on selfhost or with your own mail server.'],
         ['term' => 'Segment', 'def' => 'A saved audience for newsletters: all followers, ticket buyers, a ticket waitlist, buyers from one sub-schedule, or a list you enter by hand.'],
         ['term' => 'Embed', 'def' => 'Your schedule shown on another website inside an iframe. The calendar embed and the RSVP form are free; embedding the ticket purchase widget needs Pro.'],
-        ['term' => 'Admin Panel', 'def' => 'The management side of one schedule, where you add events, change settings and read your analytics. Not the selfhost admin panel at /admin, which manages a whole install.'],
+        ['term' => 'Admin Panel', 'def' => 'The management side of one schedule, opened from its name in the sidebar: a row of tabs where you add events, answer requests and manage your team, with its settings behind Edit Schedule. Not the selfhost admin panel at /admin, which manages a whole install.'],
     ];
 
     // Full class strings - interpolated Tailwind colour classes do not

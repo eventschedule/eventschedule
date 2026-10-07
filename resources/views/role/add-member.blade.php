@@ -1,64 +1,53 @@
 <x-app-admin-layout>
 
-    <h2 class="text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
-        {{ $title }}
-    </h2>
+    {{-- One small form that hangs from the schedule's Team tab: the way back names the schedule,
+         and the form ends with Cancel and then the button that goes on. --}}
+    @php $teamUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']); @endphp
 
-    <form method="post" action="{{ route('role.store_member', ['subdomain' => $role->subdomain]) }}"
-        class="mt-6 space-y-4">
-        @csrf
-        @method('post')
+    <div class="page-shell page-col is-narrow">
+        <x-page-header :title="$title" :lead="__('messages.team_lead')" :back="$teamUrl" :back-label="$role->name" />
 
-        <div class="py-5">
-            <div class="max-w-7xl mx-auto space-y-4">
-                <div class="ap-card p-4 sm:p-8 sm:rounded-xl">
-                    <div class="max-w-xl">
+        <form method="post" action="{{ route('role.store_member', ['subdomain' => $role->subdomain]) }}">
+            @csrf
+            @method('post')
 
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">
-                            {{ __('messages.details') }}
-                        </h2>
+            <div class="ap-card rounded-xl page-card">
+                <div class="page-form-fields">
+                    <div>
+                        <x-input-label for="name" :value="__('messages.name') . ' *'" />
+                        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
+                            :value="old('name')" required autofocus autocomplete="name" />
+                        <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                    </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="name" :value="__('messages.name') . ' *'" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                :value="old('name')" required autofocus autocomplete="name" />
-                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                        </div>
+                    <div>
+                        <x-input-label for="email" :value="__('messages.email') . ' *'" />
+                        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
+                            :value="old('email')" required autocomplete="username" />
+                        <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                    </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="email" :value="__('messages.email') . ' *'" />
-                            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                                :value="old('email')" required autocomplete="username" />
-                            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-                        </div>
+                    <div>
+                        <x-input-label for="phone" :value="__('messages.phone_number')" />
+                        <x-phone-input name="phone" :value="old('phone')" :country="$role->country_code ?? 'us'" />
+                        <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                    </div>
 
-                        <div class="mb-6">
-                            <x-input-label for="phone" :value="__('messages.phone_number')" />
-                            <x-phone-input name="phone" :value="old('phone')" :country="$role->country_code ?? 'us'" />
-                            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
-                        </div>
-
-                        <div class="mb-6">
-                            <x-input-label for="level" :value="__('messages.role')" />
-                            <select id="level" name="level" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                <option value="admin" {{ old('level', 'admin') == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
-                                <option value="viewer" {{ old('level') == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
-                            </select>
-                        </div>
-
+                    <div>
+                        <x-input-label for="level" :value="__('messages.role')" />
+                        <select id="level" name="level" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            <option value="admin" {{ old('level', 'admin') == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
+                            <option value="viewer" {{ old('level') == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
+                        </select>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="max-w-7xl mx-auto space-y-4">
-            <div class="flex items-center gap-4">
-                <x-primary-button>{{ __('messages.save') }}</x-primary-button>
-
-                <x-cancel-button></x-cancel-button>
+            <div class="page-form-actions">
+                <x-secondary-link :href="$teamUrl">{{ __('messages.cancel') }}</x-secondary-link>
+                <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
             </div>
-        </div>
-
-    </form>
+        </form>
+    </div>
 
 </x-app-admin-layout>

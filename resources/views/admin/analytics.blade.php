@@ -1,187 +1,154 @@
 <x-app-admin-layout>
+    @include('admin.partials._navigation', ['active' => 'analytics'])
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'analytics'])
+    @php
+        $deviceTotal = $desktopViews + $mobileViews + $tabletViews;
+        // A share is marked left-to-right, as on the dashboard: in a right-to-left language the
+        // percent sign otherwise lands on the wrong side of the number.
+        $pct = fn ($part, $whole) => new \Illuminate\Support\HtmlString('<span dir="ltr">'.($whole > 0 ? round(($part / $whole) * 100, 1) : 0).'%</span>');
+        $ltr = fn ($text) => new \Illuminate\Support\HtmlString('<span dir="ltr">'.e($text).'</span>');
+        $sourceTotal = $directViews + $searchViews + $socialViews + $emailViews + $newsletterViews + $otherViews;
+        // The same colours the two charts draw each series in.
+        $devices = [
+            [__('messages.desktop'), $desktopViews, 'var(--brand-blue)'],
+            [__('messages.mobile'), $mobileViews, '#10B981'],
+            [__('messages.tablet'), $tabletViews, '#8B5CF6'],
+        ];
+        $sources = [
+            [__('messages.direct'), $directViews],
+            [__('messages.search'), $searchViews],
+            [__('messages.social'), $socialViews],
+            [__('messages.email'), $emailViews],
+            [__('messages.newsletter_source'), $newsletterViews],
+            [__('messages.other'), $otherViews],
+        ];
+        // One colour for every bar: they were six colours that meant nothing.
+        $features = [
+            [__('messages.google_calendar_integration'), $googleCalendarPercent, $googleCalendarEnabled],
+            [__('messages.stripe_payments'), $stripeEventsPercent, $stripeEvents],
+            [__('messages.custom_domain'), $customDomainPercent, $customDomainEnabled],
+            [__('messages.custom_css'), $customCssPercent, $customCssEnabled],
+            [__('messages.newsletter'), $newsletterPercent, $newsletterEnabled],
+            [__('messages.boost'), $boostPercent, $boostEnabled],
+        ];
+    @endphp
 
-        @include('admin.partials._date-range-filter', ['range' => $range])
-
-        {{-- Traffic Overview --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {{-- Device Breakdown --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.device_breakdown') (@lang('messages.selected_period'))</h3>
-                <div class="flex items-center gap-6">
-                    <div class="w-48 h-48">
-                        <canvas id="deviceChart"></canvas>
-                    </div>
-                    <div class="flex-1 space-y-3">
-                        @php
-                            $deviceTotal = $desktopViews + $mobileViews + $tabletViews;
-                            $desktopPercent = $deviceTotal > 0 ? round(($desktopViews / $deviceTotal) * 100, 1) : 0;
-                            $mobilePercent = $deviceTotal > 0 ? round(($mobileViews / $deviceTotal) * 100, 1) : 0;
-                            $tabletPercent = $deviceTotal > 0 ? round(($tabletViews / $deviceTotal) * 100, 1) : 0;
-                        @endphp
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-blue-500 me-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.desktop')</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($desktopViews) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $desktopPercent }}%)</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-green-500 me-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.mobile')</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($mobileViews) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $mobilePercent }}%)</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-purple-500 me-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.tablet')</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($tabletViews) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $tabletPercent }}%)</span>
-                            </div>
-                        </div>
-                        <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                @lang('messages.total'): {{ number_format($totalPageViews) }} @lang('messages.page_views')
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Traffic Sources --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.traffic_sources') (@lang('messages.selected_period'))</h3>
-                <div class="h-48">
-                    <canvas id="trafficSourcesChart"></canvas>
-                </div>
-                <div class="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
-                    <div>
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($directViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.direct')</p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($searchViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.search')</p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($socialViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.social')</p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($emailViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($newsletterViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.newsletter_source')</p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($otherViews) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">@lang('messages.other')</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Feature Adoption --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.feature_adoption')</h3>
-            <div class="space-y-4">
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.google_calendar_integration')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $googleCalendarPercent }}% ({{ number_format($googleCalendarEnabled) }} @lang('messages.schedules'))</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ min($googleCalendarPercent, 100) }}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.stripe_payments')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $stripeEventsPercent }}% ({{ number_format($stripeEvents) }} @lang('messages.schedules'))</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ min($stripeEventsPercent, 100) }}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.custom_domain')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $customDomainPercent }}% ({{ number_format($customDomainEnabled) }} @lang('messages.schedules'))</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-purple-600 h-2.5 rounded-full" style="width: {{ min($customDomainPercent, 100) }}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.custom_css')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $customCssPercent }}% ({{ number_format($customCssEnabled) }} @lang('messages.schedules'))</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-amber-600 h-2.5 rounded-full" style="width: {{ min($customCssPercent, 100) }}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.newsletter')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $newsletterPercent }}% ({{ number_format($newsletterEnabled) }} @lang('messages.schedules'))</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-cyan-600 h-2.5 rounded-full" style="width: {{ min($newsletterPercent, 100) }}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@lang('messages.boost')</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $boostPercent }}% ({{ number_format($boostEnabled) }} @lang('messages.schedules'))</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-red-600 h-2.5 rounded-full" style="width: {{ min($boostPercent, 100) }}%"></div>
-                    </div>
-                </div>
-            </div>
-            <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                @lang('messages.based_on_total_schedules', ['count' => number_format($totalSchedules)])
-            </p>
-        </div>
-
-        {{-- Stripe Funnel --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.stripe_funnel')</h3>
-            <div class="h-48">
-                <canvas id="stripeFunnelChart"></canvas>
-            </div>
-            <div class="mt-4 flex items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                <span>{{ number_format($stripeConnected) }}</span>
-                <span>&rarr; {{ $stripeConnected > 0 ? round(($stripeOnboarded / $stripeConnected) * 100) : 0 }}%</span>
-                <span>{{ number_format($stripeOnboarded) }}</span>
-                <span>&rarr; {{ $stripeOnboarded > 0 ? round(($stripeEvents / $stripeOnboarded) * 100) : 0 }}%</span>
-                <span>{{ number_format($stripeEvents) }}</span>
-            </div>
-        </div>
-
-        {{-- Top Schedules by Events --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_schedules_by_events')</h3>
-            <div class="h-64">
-                <canvas id="topSchedulesChart"></canvas>
-            </div>
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_analytics_lead') }}</p>
+        <div class="page-actions">
+            @include('admin.partials._date-range-filter', ['range' => $range])
         </div>
     </div>
+
+    <div class="page-shell page-stack">
+        {{-- Traffic to schedule pages in the period. A chart with nothing to draw keeps its
+             canvas (the script below draws on it by id) and is covered by a line saying so. --}}
+        <div class="page-grid2">
+            <x-page-card :title="__('messages.device_breakdown')">
+                <x-slot name="aside"><span class="insight-when">@lang('messages.selected_period')</span></x-slot>
+                <div class="insight-donut" @if ($deviceTotal === 0) hidden @endif>
+                    <div class="insight-donut-chart">
+                        <canvas id="deviceChart"></canvas>
+                    </div>
+                    <dl class="page-kv">
+                        @foreach ($devices as [$label, $views, $color])
+                        <div>
+                            <dt><span class="insight-dot" style="background: {{ $color }}"></span>{{ $label }}</dt>
+                            <dd>{{ number_format($views) }}<small>{{ $pct($views, $deviceTotal) }}</small></dd>
+                        </div>
+                        @endforeach
+                    </dl>
+                </div>
+                @if ($deviceTotal === 0)
+                <x-page-empty compact :title="__('messages.no_data_for_period')" />
+                @else
+                <x-slot name="foot">
+                    <p class="mt-4">@lang('messages.total'): {{ number_format($totalPageViews) }} @lang('messages.page_views')</p>
+                </x-slot>
+                @endif
+            </x-page-card>
+
+            <x-page-card flush :title="__('messages.traffic_sources')">
+                <x-slot name="aside"><span class="insight-when">@lang('messages.selected_period')</span></x-slot>
+                <div class="insight-pad" @if ($sourceTotal === 0) hidden @endif>
+                    <div class="h-48">
+                        <canvas id="trafficSourcesChart"></canvas>
+                    </div>
+                </div>
+                @if ($sourceTotal === 0)
+                <x-page-empty compact :title="__('messages.no_data_for_period')" />
+                @else
+                <div class="page-stats is-auto insight-strip-top">
+                    @foreach ($sources as [$label, $views])
+                    <div class="page-stat">
+                        <div class="page-stat-value">{{ number_format($views) }}</div>
+                        <div class="page-stat-label">{{ $label }}</div>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </x-page-card>
+        </div>
+
+        <div class="page-grid2">
+            <x-page-card :title="__('messages.feature_adoption')">
+                <div class="insight-bars">
+                    @foreach ($features as [$label, $percent, $count])
+                    <div>
+                        <div class="insight-bar-head">
+                            <span class="insight-bar-name">{{ $label }}</span>
+                            <span class="insight-bar-figure"><b>{{ $ltr($percent.'%') }}</b> ({{ number_format($count) }} @lang('messages.schedules'))</span>
+                        </div>
+                        <div class="insight-bar"><i style="width: {{ min($percent, 100) }}%"></i></div>
+                    </div>
+                    @endforeach
+                </div>
+                <x-slot name="foot">
+                    <p class="mt-4">@lang('messages.based_on_total_schedules', ['count' => number_format($totalSchedules)])</p>
+                </x-slot>
+            </x-page-card>
+
+            {{-- From a connected account to a finished one to an event that takes payment. The
+                 share under a step is of the step before it; it was a line of bare numbers and
+                 arrows under the chart. --}}
+            <x-page-card flush :title="__('messages.stripe_funnel')">
+                <div class="insight-pad">
+                    <div class="h-48">
+                        <canvas id="stripeFunnelChart"></canvas>
+                    </div>
+                </div>
+                <div class="page-stats insight-strip-top">
+                    <div class="page-stat">
+                        <div class="page-stat-value">{{ number_format($stripeConnected) }}</div>
+                        <div class="page-stat-label">@lang('messages.stripe_connected')</div>
+                    </div>
+                    <div class="page-stat">
+                        <div class="page-stat-value">{{ number_format($stripeOnboarded) }}</div>
+                        <div class="page-stat-label">@lang('messages.stripe_onboarded')</div>
+                        <div class="page-stat-sub">@lang('messages.conversion_rate') {{ $ltr(($stripeConnected > 0 ? round(($stripeOnboarded / $stripeConnected) * 100) : 0).'%') }}</div>
+                    </div>
+                    <div class="page-stat">
+                        <div class="page-stat-value">{{ number_format($stripeEvents) }}</div>
+                        <div class="page-stat-label">@lang('messages.stripe_events')</div>
+                        <div class="page-stat-sub">@lang('messages.conversion_rate') {{ $ltr(($stripeOnboarded > 0 ? round(($stripeEvents / $stripeOnboarded) * 100) : 0).'%') }}</div>
+                    </div>
+                </div>
+            </x-page-card>
+        </div>
+
+        <x-page-card :title="__('messages.top_schedules_by_events')">
+            <div class="h-64" @if ($topSchedulesByEvents->isEmpty()) hidden @endif>
+                <canvas id="topSchedulesChart"></canvas>
+            </div>
+            @if ($topSchedulesByEvents->isEmpty())
+            <x-page-empty compact :title="__('messages.no_data_available')" />
+            @endif
+        </x-page-card>
+    </div>
+
+    <x-slot name="head">
+        @include('admin.partials._insight-styles')
+    </x-slot>
 
     {{-- Chart.js --}}
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
@@ -193,12 +160,18 @@
                 return;
             }
 
-            // Dark mode detection
-            const isDarkMode = document.documentElement.classList.contains('dark') ||
-                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
+            // The portal's own palette, read from its tokens. This used to ask the operating
+            // system whether it was dark, so a light portal on a dark machine drew its charts
+            // with black gridlines; and a hex could not follow the six palettes.
+            const apStyle = getComputedStyle(document.documentElement);
+            const apColor = (token, fallback) => {
+                const value = apStyle.getPropertyValue(token).trim();
+                return value ? 'rgb(' + value.split(/\s+/).join(', ') + ')' : fallback;
+            };
+            const isDarkMode = document.documentElement.classList.contains('dark');
 
-            const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
-            const gridColor = isDarkMode ? '#2d2d30' : '#E5E7EB';
+            const textColor = apColor('--ap-ink-3', isDarkMode ? '#9CA3AF' : '#6B7280');
+            const gridColor = apColor('--ap-border', isDarkMode ? '#2d2d30' : '#E5E7EB');
             const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
 
             // Device Breakdown Chart
@@ -210,7 +183,7 @@
                     datasets: [{
                         data: [{{ $desktopViews }}, {{ $mobileViews }}, {{ $tabletViews }}],
                         backgroundColor: [brandBlue, '#10B981', '#8B5CF6'],
-                        borderColor: isDarkMode ? '#252526' : '#FFFFFF',
+                        borderColor: apColor('--ap-surface', isDarkMode ? '#252526' : '#FFFFFF'),
                         borderWidth: 2
                     }]
                 },

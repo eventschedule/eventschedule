@@ -1,46 +1,39 @@
 <x-app-admin-layout>
-    <div class="space-y-4">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_newsletter') }}</h2>
-            <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </a>
-        </div>
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+        @include('newsletter.partials._builder-styles')
+    </x-slot>
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
+    {{-- A draft or a scheduled newsletter in the builder. --}}
+    <div class="page-shell">
+        @php
+            $roleParam = \App\Utils\UrlUtils::encodeId($role->id);
+            $newsletterParams = ['role_id' => $roleParam, 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)];
+        @endphp
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+        <x-page-header
+            :title="__('messages.edit_newsletter')"
+            :back="route('newsletter.index', ['role_id' => $roleParam])"
+            :back-label="__('messages.newsletters')">
+            <x-slot name="actions">@include('newsletter.partials._usage-meter')</x-slot>
+        </x-page-header>
 
+        @include('newsletter.partials._notices')
         @include('newsletter.partials._verification-warning')
 
-        @include('newsletter.partials._usage-meter')
-
         @if ($newsletter->status === 'scheduled')
-        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <div class="flex justify-between items-center">
-                <p class="text-yellow-700 dark:text-yellow-300">
-                    {{ __('messages.scheduled_for') }}: {{ $newsletter->scheduled_at->timezone(auth()->user()->timezone ?? $role->timezone ?? 'UTC')->format(get_use_24_hour_time($role) ? 'M j, Y H:i' : 'M j, Y g:i A') }}
-                </p>
-                <form method="POST" action="{{ route('newsletter.cancel', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}" class="inline">
+        <x-page-notice tone="info" class="news-notice">
+            {{ __('messages.scheduled_for') }}: {{ $newsletter->scheduled_at->timezone(auth()->user()->timezone ?? $role->timezone ?? 'UTC')->translatedFormat(get_use_24_hour_time($role) ? 'M j, Y H:i' : 'M j, Y g:i A') }}
+            <x-slot name="action">
+                <form method="POST" action="{{ route('newsletter.cancel', $newsletterParams) }}">
                     @csrf
-                    <button type="submit" class="text-sm text-yellow-700 dark:text-yellow-300 underline hover:text-yellow-900 dark:hover:text-yellow-100">
-                        {{ __('messages.cancel_schedule') }}
-                    </button>
+                    <button type="submit" class="event-link">{{ __('messages.cancel_schedule') }}</button>
                 </form>
-            </div>
-        </div>
+            </x-slot>
+        </x-page-notice>
         @endif
 
-        <form method="POST" action="{{ route('newsletter.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]) }}">
+        <form method="POST" action="{{ route('newsletter.update', $newsletterParams) }}">
             @csrf
             @method('PUT')
             @include('newsletter.partials._builder')

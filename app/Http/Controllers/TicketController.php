@@ -437,12 +437,15 @@ class TicketController extends Controller
             ->filter(fn ($r) => $r['month'])
             ->groupBy(fn ($r) => $r['currency'].'|'.$r['month'])
             ->map(fn ($group) => [
+                'month' => $group->first()['month'],
                 'label' => $group->first()['label'],
                 'currency' => $group->first()['currency'],
                 'amount' => $group->sum('amount'),
                 'count' => $group->count(),
             ])
-            ->sortBy('label')
+            // By the month itself. Sorted by its label, "Dec 2026" came before "Nov 2026" and
+            // "Jan 2027" before both: the forecast read in the order of the alphabet.
+            ->sortBy(fn ($r) => $r['month'].'|'.$r['currency'])
             ->values();
 
         return [

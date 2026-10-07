@@ -2,145 +2,249 @@
 
     <x-slot name="head">
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+
+        {{-- This page is used standing at a door, on a phone: the picker, three figures, the box
+             to look somebody up, the last arrivals. What the page kit does not have is the bar
+             that says how full the room is. --}}
+        <style {!! nonce_attr() !!}>
+            .door-pickers {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 0.625rem;
+              max-width: 48rem;
+              margin: 0 0 1rem;
+            }
+            .door-pickers > :first-child {
+              flex: 1 1 16rem;
+              min-width: 0;
+            }
+            .door-pickers > select {
+              flex: 0 1 14rem;
+            }
+            .door-bar {
+              height: 0.5rem;
+              border-radius: 999px;
+              background: var(--ap-tint-2);
+              overflow: hidden;
+            }
+            .door-bar > i {
+              display: block;
+              height: 100%;
+              border-radius: 999px;
+              background: var(--brand-button-bg);
+              transition: width 0.5s;
+            }
+            .door-progress {
+              display: flex;
+              align-items: center;
+              gap: 0.75rem;
+              border-top: 1px solid rgb(var(--ap-border));
+              padding: 0.75rem 1.25rem;
+              font-size: 0.8125rem;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink-3));
+            }
+            .door-progress .door-bar {
+              flex: 1;
+            }
+            .door-types .door-bar {
+              min-width: 6rem;
+            }
+            .door-types .c-bar {
+              width: 40%;
+            }
+            .door-search input {
+              display: block;
+              width: 100%;
+              max-width: 48rem;
+            }
+            .door-hits {
+              margin: 0.75rem -1.25rem -1.25rem;
+              border-top: 1px solid rgb(var(--ap-border));
+            }
+            .door-note {
+              margin: 0.75rem 0 0;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .door-loading {
+              padding: 4rem 0;
+              text-align: center;
+            }
+            @media (max-width: 639.98px) {
+              .door-pickers > select {
+                flex: 1 1 100%;
+              }
+              .door-progress {
+                padding-inline: 0.75rem;
+              }
+              .door-types .c-bar {
+                flex: 1 1 0;
+                width: auto;
+              }
+            }
+        </style>
     </x-slot>
 
-    <div id="app" class="max-w-3xl mx-auto px-4">
+    <div class="page-shell">
+        <x-page-header :title="__('messages.checkin_dashboard')" :lead="__('messages.checkin_lead')"
+                       :back="route('sales')" :back-label="__('messages.sales')">
+            <x-slot name="actions">
+                <x-brand-link :href="route('ticket.scan')" class="gap-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+                    </svg>
+                    {{ __('messages.scan_ticket') }}
+                </x-brand-link>
+            </x-slot>
+        </x-page-header>
 
         @include('partials.team-access-notice', ['roles' => $planBlockedRoles])
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('messages.checkin_dashboard') }}</h2>
-            <div class="flex gap-2">
-                <a href="{{ route('sales') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-[#3d3d40] transition-colors">
-                    <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/></svg>
-                    {{ __('messages.sales') }}
-                </a>
-                <a href="{{ route('ticket.scan') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                    <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 24 24"><path d="M4,4H10V10H4V4M20,4V10H14V4H20M14,15H16V13H14V11H16V13H18V11H20V13H18V15H20V18H18V20H16V18H13V20H11V16H14V15M16,15V18H18V15H16M4,20V14H10V20H4M6,6V8H8V6H6M16,6V8H18V6H16M6,16V18H8V16H6M2,2V6H0V2A2,2 0 0,1 2,0H6V2H2M22,0A2,2 0 0,1 24,2V6H22V2H18V0H22M2,18V22H6V24H2A2,2 0 0,1 0,22V18H2M22,22V18H24V22A2,2 0 0,1 22,24H18V22H22Z"/></svg>
-                    {{ __('messages.scan_ticket') }}
-                </a>
-            </div>
-        </div>
+        <div id="app">
 
-        <!-- Selectors -->
-        <div class="flex flex-col sm:flex-row gap-3 mb-6">
-            <div class="flex-1">
+            {{-- Which event, and which of its dates --}}
+            <div class="door-pickers" v-if="events.length">
                 <x-event-selector />
+                <select v-if="availableDates.length > 0" v-model="selectedDate" @change="fetchStats" aria-label="{{ __('messages.date') }}"
+                    class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <option v-for="date in availableDates" :key="date" :value="date">@{{ prettyDate(date) }}</option>
+                </select>
             </div>
-            <select v-if="availableDates.length > 0" v-model="selectedDate" @change="fetchStats" class="sm:w-48 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                <option v-for="date in availableDates" :key="date" :value="date">@{{ date }}</option>
-            </select>
-        </div>
 
-        <!-- Empty state -->
-        <div v-if="!selectedEventId" class="text-center py-16">
-            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-            </svg>
-            <p class="mt-4 text-gray-500 dark:text-gray-400">{{ __('messages.select_event') }}</p>
-        </div>
+            {{-- Nothing to count: no event on a plan that includes check-in --}}
+            <div v-if="!events.length" class="ap-card rounded-xl">
+                <x-page-empty :title="__('messages.no_events')" :text="__('messages.checkin_no_events_help')"
+                    icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </div>
 
-        <!-- Loading -->
-        <div v-if="selectedEventId && loading" class="text-center py-16">
-            <svg class="animate-spin mx-auto h-8 w-8 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-            </svg>
-        </div>
+            {{-- No event chosen yet --}}
+            <div v-else-if="!selectedEventId" class="ap-card rounded-xl">
+                <x-page-empty :title="__('messages.select_event')"
+                    icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </div>
 
-        <!-- Dashboard -->
-        <div v-if="stats && !loading">
+            <div v-if="selectedEventId && loading" class="door-loading" role="status">
+                <svg class="animate-spin mx-auto h-8 w-8 text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span class="sr-only">{{ __('messages.loading') }}</span>
+            </div>
 
-            <!-- Overall progress -->
-            <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('messages.checked_in') }}</h3>
-                    <span class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                        @{{ stats.total_checked_in }} / @{{ stats.total_sold }}
-                    </span>
+            <div v-if="stats && !loading" class="page-stack">
+
+                {{-- Nobody holds a ticket for this date (a pass booked in advance is somebody) --}}
+                <div v-if="stats.total_sold === 0 && !(stats.pass_reserved > 0) && !stats.recent_checkins.length" class="ap-card rounded-xl">
+                    <x-page-empty :title="__('messages.no_sales_yet')"
+                        icon="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
-                    <div class="bg-[var(--brand-button-bg)] h-4 rounded-full transition-all duration-500"
-                        :style="{ width: progressPercent + '%' }"></div>
-                </div>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">@{{ progressPercent }}%</p>
-                <p v-if="stats.total_admitted > stats.total_checked_in" class="mt-1 text-sm text-gray-500 dark:text-gray-400">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</p>
-                <p v-if="stats.pass_reserved > 0" class="mt-1 text-sm text-[var(--brand-blue)]">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</p>
-            </div>
 
-            <!-- Per ticket type cards -->
-            <div v-if="stats.tickets.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div v-for="ticket in stats.tickets" :key="ticket.type"
-                    class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-medium text-gray-700 dark:text-gray-300">@{{ ticket.type }}</h4>
-                        <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                            @{{ ticket.checked_in }} / @{{ ticket.sold }}
-                        </span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div class="bg-[var(--brand-button-bg)] h-2.5 rounded-full transition-all duration-500"
-                            :style="{ width: ticketPercent(ticket) + '%' }"></div>
-                    </div>
-                    <p v-if="ticket.admitted > ticket.checked_in" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</p>
-                </div>
-            </div>
-
-            <!-- No check-ins yet -->
-            <div v-if="stats.total_checked_in === 0 && stats.total_sold > 0" class="text-center py-8 mb-6">
-                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_checkins_yet') }}</p>
-            </div>
-
-            <!-- Find somebody at the door.
-                 This screen had no search of ANY kind - not by name, not by seat, not by order -
-                 only a rear-view feed of the last ten arrivals. So "is C14 here yet", and "they say
-                 they booked but the scanner will not read their phone", had no answer here. -->
-            <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                <label for="checkin-search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.checkin_search') }}</label>
-                <input id="checkin-search" v-model="searchQuery" @input="onSearch" type="search"
-                    :placeholder="@json(__('messages.checkin_search_placeholder'))"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
-
-                <p v-if="searchQuery.length >= 2 && !searching && !searchResults.length"
-                   class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.checkin_search_none') }}</p>
-
-                <div v-if="searchResults.length" class="mt-3 divide-y divide-gray-100 dark:divide-gray-700">
-                    <div v-for="(hit, i) in searchResults" :key="i" class="flex items-center justify-between py-2">
-                        <div class="min-w-0">
-                            <p class="font-medium text-gray-800 dark:text-gray-200 truncate">@{{ hit.name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                @{{ hit.seat }}<template v-if="hit.ticket_type"> &middot; @{{ hit.ticket_type }}</template>
-                            </p>
+                <template v-else>
+                    {{-- The three figures a door asks for, on one line at every width, and how
+                         full the room is under them. --}}
+                    <div class="ap-card rounded-xl overflow-hidden">
+                        <div class="page-stats">
+                            <div class="page-stat">
+                                <div class="page-stat-value" :class="{ 'is-good': stats.total_checked_in > 0 }">@{{ stats.total_checked_in }}</div>
+                                <div class="page-stat-label">{{ __('messages.checked_in') }}</div>
+                                <div v-if="stats.total_admitted > stats.total_checked_in" class="page-stat-sub">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</div>
+                            </div>
+                            <div class="page-stat">
+                                <div class="page-stat-value">@{{ Math.max(0, stats.total_sold - stats.total_checked_in) }}</div>
+                                <div class="page-stat-label">{{ __('messages.checkin_still_to_come') }}</div>
+                            </div>
+                            <div class="page-stat">
+                                <div class="page-stat-value">@{{ stats.total_sold }}</div>
+                                <div class="page-stat-label">{{ __('messages.tickets_sold') }}</div>
+                                <div v-if="stats.pass_reserved > 0" class="page-stat-sub">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</div>
+                            </div>
                         </div>
-                        <span class="shrink-0 ms-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                              :class="hit.arrived
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'">
-                            @{{ hit.arrived ? @json(__('messages.checked_in')) : @json(__('messages.checkin_not_yet')) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent activity -->
-            <div v-if="stats.recent_checkins.length > 0"
-                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ __('messages.recent_checkins') }}</h3>
-                <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                    <div v-for="(checkin, index) in stats.recent_checkins" :key="index"
-                        class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                        <div>
-                            <p class="font-medium text-gray-800 dark:text-gray-300">@{{ checkin.name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">@{{ checkin.ticket_type }}<span v-if="checkin.seat_label"> &middot; @{{ checkin.seat_label }}</span></p>
+                        <div class="door-progress">
+                            <div class="door-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progressPercent" aria-label="{{ __('messages.checked_in') }}"><i :style="{ width: progressPercent + '%' }"></i></div>
+                            <span>@{{ progressPercent }}%</span>
                         </div>
-                        <span class="text-sm text-gray-400 dark:text-gray-400 whitespace-nowrap ms-4">@{{ relativeTime(checkin.timestamp) }}</span>
                     </div>
-                </div>
-            </div>
 
-            <!-- No sales -->
-            <div v-if="stats.total_sold === 0" class="text-center py-8">
-                <p class="text-gray-500 dark:text-gray-400">{{ __('messages.no_sales_yet') }}</p>
+                    {{-- Find somebody at the door.
+                         This screen had no search of ANY kind - not by name, not by seat, not by order -
+                         only a rear-view feed of the last ten arrivals. So "is C14 here yet", and "they say
+                         they booked but the scanner will not read their phone", had no answer here. --}}
+                    <section class="ap-card rounded-xl page-card door-search">
+                        <label for="checkin-search" class="page-card-title block mb-2">{{ __('messages.checkin_search') }}</label>
+                        {{-- A plain attribute. It was bound to a JSON string, whose own quotes closed
+                             the attribute, so the box never showed what can be typed into it. --}}
+                        <input id="checkin-search" v-model="searchQuery" @input="onSearch" type="search" autocomplete="off"
+                            placeholder="{{ __('messages.checkin_search_placeholder') }}"
+                            class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+
+                        <p v-if="searchQuery.length >= 2 && !searching && !searchResults.length" class="door-note" role="status">{{ __('messages.checkin_search_none') }}</p>
+
+                        <div v-if="searchResults.length" class="door-hits">
+                            <table class="page-table is-compact">
+                                <tbody>
+                                    <tr v-for="(hit, i) in searchResults" :key="i">
+                                        <td class="c-main c-strong">
+                                            <bdi>@{{ hit.name }}</bdi>
+                                            {{-- A seat, or (an order with no seat to its name) how many
+                                                 tickets of which kind: "2 x General". --}}
+                                            <span class="c-sub"><template v-if="hit.seat">@{{ hit.seat }}<template v-if="hit.ticket_type"> &middot; </template></template><template v-if="! hit.seat && hit.quantity > 1">@{{ hit.quantity }} &times; </template>@{{ hit.ticket_type }}</span>
+                                        </td>
+                                        <td class="c-actions">
+                                            {{-- An order of several tickets can be partly in: said
+                                                 as a count, in amber, never as "checked in". --}}
+                                            <span v-if="hit.arrived" class="event-status is-on"><template v-if="hit.quantity > 1">@{{ hit.arrived_count }}/@{{ hit.quantity }} </template>{{ __('messages.checked_in') }}</span>
+                                            <span v-else-if="hit.arrived_count" class="event-status is-warn">@{{ hit.arrived_count }}/@{{ hit.quantity }} {{ __('messages.checked_in') }}</span>
+                                            <span v-else class="event-status">{{ __('messages.checkin_not_yet') }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    {{-- Each kind of ticket: how many of it are in --}}
+                    <div v-if="stats.tickets.length > 1" class="ap-card rounded-xl overflow-hidden">
+                        <table class="page-table door-types">
+                            <thead>
+                                <tr>
+                                    <th scope="col">{{ __('messages.ticket_type') }}</th>
+                                    <th scope="col" class="c-bar"><span class="sr-only">{{ __('messages.checked_in') }}</span></th>
+                                    <th scope="col" class="c-num">{{ __('messages.checked_in') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="ticket in stats.tickets" :key="ticket.type">
+                                    <td class="c-main c-strong">
+                                        <bdi>@{{ ticket.type }}</bdi>
+                                        <span v-if="ticket.admitted > ticket.checked_in" class="c-sub">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</span>
+                                    </td>
+                                    <td class="c-bar"><div class="door-bar"><i :style="{ width: ticketPercent(ticket) + '%' }"></i></div></td>
+                                    <td class="c-num">@{{ ticket.checked_in }} / @{{ ticket.sold }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{-- The last people through the door --}}
+                    <x-page-card :title="__('messages.recent_checkins')" flush>
+                        <table v-if="stats.recent_checkins.length > 0" class="page-table is-compact">
+                            <tbody>
+                                <tr v-for="(checkin, index) in stats.recent_checkins" :key="index">
+                                    <td class="c-main c-strong">
+                                        <bdi>@{{ checkin.name }}</bdi>
+                                        <span class="c-sub">@{{ checkin.ticket_type }}<span v-if="checkin.seat_label"> &middot; @{{ checkin.seat_label }}</span></span>
+                                    </td>
+                                    <td class="c-actions c-date">@{{ relativeTime(checkin.timestamp) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div v-else>
+                            <x-page-empty compact :title="__('messages.no_checkins_yet')" />
+                        </div>
+                    </x-page-card>
+                </template>
             </div>
         </div>
     </div>
@@ -204,6 +308,17 @@
                         this.searchResults = [];
                     } finally {
                         this.searching = false;
+                    }
+                },
+                // A date of a recurring event, as the reader's language writes it: the picker
+                // listed them as 2026-01-04.
+                prettyDate(date) {
+                    const day = new Date(date + 'T12:00:00');
+                    if (isNaN(day)) return date;
+                    try {
+                        return day.toLocaleDateString(window.appLocale || undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+                    } catch (e) {
+                        return date;
                     }
                 },
                 ticketPercent(ticket) {

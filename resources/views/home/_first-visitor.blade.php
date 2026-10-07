@@ -46,7 +46,7 @@
     </div>
 
     <div class="mt-auto px-4 sm:px-5 py-3 flex items-center justify-end gap-3" style="border-top: 1px solid var(--ap-hairline)">
-        <x-link :href="route('realtime')" class="inline-flex items-center gap-1 text-sm font-medium whitespace-nowrap">
+        <x-link :href="route('analytics', ['tab' => 'realtime'])" class="inline-flex items-center gap-1 text-sm font-medium whitespace-nowrap">
             {{ __('messages.dash_open_realtime') }}
             <svg class="w-3.5 h-3.5 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
         </x-link>

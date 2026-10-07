@@ -1,178 +1,151 @@
 <x-app-admin-layout>
+    <x-slot name="head">
+        <style {!! nonce_attr() !!}>
+            /* On a phone the action leads the row and the details take a line of their own: the
+               table used to run off the edge with the action cut at "auth.log". */
+            @media (max-width: 639.98px) {
+              .page-table .c-lead {
+                order: -1;
+              }
+              .page-table .c-line {
+                flex: 1 1 100%;
+              }
+            }
+        </style>
+    </x-slot>
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'audit-log'])
+    @include('admin.partials._navigation', ['active' => 'audit-log'])
 
-        {{-- Summary Stats --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-gray-100 dark:bg-gray-500/10"
-                         style="--icon-glow: rgba(107, 114, 128, 0.15)">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_entries')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalEntries) }}</p>
+    {{-- Who did what on this installation, newest first. The figures are one strip, as on the
+         Queue and Logs pages beside it; the filters are one row; the list is the kit's, a stack
+         of rows on a phone. --}}
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_audit_log_lead') }}</p>
+    </div>
+
+    <div class="page-shell page-stack">
+        <div class="ap-card rounded-xl page-stats is-auto">
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($totalEntries) }}</div>
+                <div class="page-stat-label">{{ __('messages.total_entries') }}</div>
             </div>
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
-                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
-                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.entries_today')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($entriesToday) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($entriesToday) }}</div>
+                <div class="page-stat-label">{{ __('messages.entries_today') }}</div>
             </div>
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl {{ $failedAuthToday > 0 ? 'bg-red-50 dark:bg-red-500/10' : 'bg-gray-100 dark:bg-gray-500/10' }}"
-                         style="--icon-glow: {{ $failedAuthToday > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(107, 114, 128, 0.15)' }}">
-                        <svg class="w-5 h-5 {{ $failedAuthToday > 0 ? 'text-red-500' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_auth_today')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold {{ $failedAuthToday > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} text-center">{{ number_format($failedAuthToday) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value {{ $failedAuthToday > 0 ? 'is-bad' : '' }}">{{ number_format($failedAuthToday) }}</div>
+                <div class="page-stat-label">{{ __('messages.failed_auth_today') }}</div>
             </div>
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10"
-                         style="--icon-glow: rgba(99, 102, 241, 0.15)">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.unique_ips_today')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($uniqueIpsToday) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($uniqueIpsToday) }}</div>
+                <div class="page-stat-label">{{ __('messages.unique_ips_today') }}</div>
             </div>
         </div>
 
-        {{-- Filters --}}
-        <form method="GET" action="{{ route('admin.audit_log') }}" class="ap-card rounded-xl shadow p-4">
-            <div class="flex flex-col lg:flex-row gap-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-0">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.category')</label>
-                        <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                            <option value="">@lang('messages.all')</option>
-                            @foreach ($categories as $cat)
-                                @php
-                                    $catLabel = match($cat) {
-                                        'api' => 'API',
-                                        'google_calendar' => 'Google Calendar',
-                                        default => ucfirst($cat),
-                                    };
-                                @endphp
-                                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $catLabel }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.from')</label>
-                        <input type="text" name="from" value="{{ request('from') }}" class="datepicker-filter w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="@lang('messages.from')" autocomplete="off">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.to')</label>
-                        <input type="text" name="to" value="{{ request('to') }}" class="datepicker-filter w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="@lang('messages.to')" autocomplete="off">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@lang('messages.search')</label>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                    </div>
-                </div>
-                <div class="flex items-end gap-2 shrink-0">
-                    <x-brand-button type="submit">
-                        @lang('messages.filter')
-                    </x-brand-button>
-                    <x-secondary-link :href="route('admin.audit_log')">
-                        @lang('messages.clear')
-                    </x-secondary-link>
-                </div>
+        @php
+            $filtered = request()->filled('category') || request()->filled('from') || request()->filled('to') || request()->filled('search') || request()->filled('user_id');
+            $fieldClass = 'rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm';
+        @endphp
+        <form method="GET" action="{{ route('admin.audit_log') }}" class="page-filters">
+            <label class="page-filter">
+                <span>{{ __('messages.category') }}</span>
+                <select name="category" class="{{ $fieldClass }}">
+                    <option value="">{{ __('messages.all') }}</option>
+                    @foreach ($categories as $cat)
+                        @php
+                            // The categories that have a word in the reader's language use it;
+                            // the rest are the log's own names for a kind of entry.
+                            $catLabel = match($cat) {
+                                'api' => 'API',
+                                'google_calendar' => 'Google Calendar',
+                                'admin' => __('messages.admin'),
+                                'boost' => __('messages.boost'),
+                                'event' => __('messages.event'),
+                                'sale' => __('messages.sales'),
+                                'schedule' => __('messages.schedule'),
+                                'subscription' => __('messages.subscription'),
+                                default => ucfirst(str_replace('_', ' ', $cat)),
+                            };
+                        @endphp
+                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $catLabel }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <div class="page-filter-pair">
+                <label class="page-filter">
+                    <span>{{ __('messages.from') }}</span>
+                    <input type="text" name="from" value="{{ request('from') }}" class="datepicker-filter w-36 {{ $fieldClass }}" placeholder="{{ __('messages.from') }}" autocomplete="off">
+                </label>
+                <label class="page-filter">
+                    <span>{{ __('messages.to') }}</span>
+                    <input type="text" name="to" value="{{ request('to') }}" class="datepicker-filter w-36 {{ $fieldClass }}" placeholder="{{ __('messages.to') }}" autocomplete="off">
+                </label>
+            </div>
+            <label class="page-filter is-grow">
+                <span>{{ __('messages.search') }}</span>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_audit_log') }}" class="w-full {{ $fieldClass }}">
+            </label>
+            <div class="is-end">
+                @if ($filtered)
+                <x-secondary-link :href="route('admin.audit_log')">{{ __('messages.clear') }}</x-secondary-link>
+                @endif
+                <x-brand-button type="submit">{{ __('messages.filter') }}</x-brand-button>
             </div>
         </form>
 
-        {{-- Results --}}
-        <div class="ap-card rounded-xl shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900">
-                        <tr>
-                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.time')</x-sortable-header>
-                            <x-sortable-header column="user_id" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.user')</x-sortable-header>
-                            <x-sortable-header column="action" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.action')</x-sortable-header>
-                            <x-sortable-header column="ip_address" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.ip_address')</x-sortable-header>
-                            <x-sortable-header column="metadata" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">@lang('messages.details')</x-sortable-header>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse ($logs as $log)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                {{ $log->created_at->format('M j, Y H:i:s') }}
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                                @if ($log->user)
-                                    {{ $log->user->name }}
-                                @else
-                                    <span class="text-gray-400 dark:text-gray-500">-</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap">
-                                @php
-                                    $actionColor = match(explode('.', $log->action)[0] ?? '') {
-                                        'auth' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-                                        'profile' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-                                        'api' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-                                        'schedule' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                        'event' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
-                                        'sale' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-                                        'admin' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-                                        'stripe' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
-                                        default => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
-                                    };
-                                @endphp
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $actionColor }}">
-                                    {{ $log->action }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap font-mono">
-                                {{ $log->ip_address }}
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                                @if ($log->metadata)
-                                    {{ Str::limit($log->metadata, 80) }}
-                                @elseif ($log->model_type)
-                                    {{ class_basename($log->model_type) }} #{{ $log->model_id }}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                @lang('messages.no_audit_log_entries')
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if ($logs->hasPages())
-            <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                {{ $logs->links() }}
-            </div>
-            @endif
+        @if ($logs->isEmpty())
+        <div class="ap-card rounded-xl">
+            <x-page-empty :title="__('messages.no_audit_log_entries')"
+                icon="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z">
+                @if ($filtered)
+                <x-secondary-link :href="route('admin.audit_log')">{{ __('messages.clear') }}</x-secondary-link>
+                @endif
+            </x-page-empty>
         </div>
+        @else
+        <div class="ap-card rounded-xl overflow-hidden">
+            <table class="page-table">
+                <thead>
+                    <tr>
+                        <x-page-sort column="created_at" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.time') }}</x-page-sort>
+                        <x-page-sort column="user_id" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.user') }}</x-page-sort>
+                        <x-page-sort column="action" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.action') }}</x-page-sort>
+                        <x-page-sort column="ip_address" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.ip_address') }}</x-page-sort>
+                        <x-page-sort column="metadata" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.details') }}</x-page-sort>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($logs as $log)
+                    @php
+                        // A dot and the action's own name: what an operator searches the log for.
+                        // The pill used to be coloured by CATEGORY (auth blue, api orange, sale
+                        // yellow...), so a failed sign-in wore the same blue as a good one. Now
+                        // only what went wrong is coloured.
+                        $actionTone = preg_match('/fail|denied|blocked|locked|invalid/', $log->action) ? 'is-bad' : '';
+                    @endphp
+                    <tr>
+                        <td class="c-date">{{ $log->created_at->format('M j, Y H:i:s') }}</td>
+                        <td class="c-strong whitespace-nowrap">
+                            @if ($log->user)
+                                <bdi>{{ $log->user->name }}</bdi>
+                            @else
+                                <span class="c-quiet">-</span>
+                            @endif
+                        </td>
+                        <td class="c-main c-lead c-mono"><span class="event-status {{ $actionTone }}"><bdi dir="ltr">{{ $log->action }}</bdi></span></td>
+                        <td class="c-quiet c-mono"><bdi dir="ltr">{{ $log->ip_address }}</bdi></td>
+                        <td class="c-quiet c-wrap c-line">@if ($log->metadata)<bdi>{{ Str::limit($log->metadata, 160) }}</bdi>@elseif ($log->model_type){{ class_basename($log->model_type) }} #{{ $log->model_id }}@endif</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        @if ($logs->hasPages())
+        <div class="page-pager">{{ $logs->links() }}</div>
+        @endif
+        @endif
     </div>
 
     <script {!! nonce_attr() !!}>
@@ -198,6 +171,8 @@
                 var sortBy = header.getAttribute('data-sort');
                 url.searchParams.set('sort_by', sortBy);
                 url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                // A new order starts at its first page: page 3 of the old order is no place in the new one.
+                url.searchParams.delete('page');
                 window.location.href = url.toString();
             }
         });

@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Models\Event;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
@@ -15,47 +16,75 @@ use Illuminate\Support\Collection;
  * consecutive cards from one festival, showing the same flyer four times, because that schedule
  * had published a per-day event twice, once per language.
  *
- * This DEMOTES rather than drops: an event past its schedule's quota moves to the tail of the
- * same list instead of leaving it. The count a caller gets back is therefore what it is today or
- * better, which matters because three consumers shrink badly - the poster wall pads itself with
- * demo flyers below 25 real events, the rail drops its pinned scroll animation below 4, and
- * /for-talent hides its whole section below 4. That is the one real difference from
+ * There are two steps and both are needed. candidates() decides WHICH rows are looked at: the
+ * soonest, but only a few from any one schedule. spread() decides the ORDER they are shown in.
+ * Until 2026-10 there was only the second, run over the 100 soonest rows, and one schedule that
+ * had synced a work calendar (74 upcoming meetings, every one wearing the same profile photo) was
+ * most of those 100. Thirteen schedules reached the walk, eleven of them with one event each, so
+ * the other ten places on the homepage wall went back to the two that had more: nine of its 25
+ * posters were that one photo. A quota cannot share out a list that one schedule already owns.
+ *
+ * This DEMOTES rather than drops: an event past its schedule's quota moves down the same list
+ * instead of leaving it, and a pool that the per-schedule limit leaves short is topped up with
+ * the rows it passed over. The count a caller gets back is therefore what it would be with no
+ * spreading at all, which matters because three consumers shrink badly - the poster wall pads
+ * itself with demo flyers below 25 real events, the rail drops its pinned scroll animation below
+ * 4, and /for-talent hides its whole section below 4. That is the one real difference from
  * GraphicController::applyPerScheduleCap(), which drops, and is why the two are separate: that
  * one also keys on every linked talent and venue minus the schedule the graphic is for, which has
  * no analogue here. Neither should be bent into the other.
  *
- * The order out is "the kept events in date order, then the demoted ones in date order". It is
+ * The order out is by turns: every schedule's first events in date order, then every schedule's
+ * next ones, and so on, with anything that repeats a card already shown after all of those. It is
  * deliberately NOT re-sorted back into pure date order at the end: the homepage rail renders the
  * first 12 of the collection, so restoring the date order would float the demoted duplicates
  * straight back to the top and undo the whole thing on exactly the corpus that needed it. When
- * there are enough distinct schedules to fill the head, nothing is demoted into the visible range
- * and the output is in date order anyway.
+ * there are enough distinct schedules to fill the list in the first turn, nothing is demoted into
+ * the visible range and the output is in date order anyway.
  */
 class DiscoveryUtils
 {
     /**
-     * How many events one schedule may contribute before the rest are demoted.
+     * How many events one schedule may contribute to a turn before the rest wait for the next.
      *
-     * Two rather than one so an active schedule can still show it runs more than one thing.
-     * Do not lower this without re-running the homepage tests in tests/Feature/ImageVariantsTest.php:
-     * several of them create two events on a single schedule and assume both render.
+     * Two rather than one so an active schedule can still show it runs more than one thing. The
+     * homepage asks for one (MarketingController::discoverWallEvents()), because its wall is
+     * pictures with no names under them and two posters from one schedule are very often the
+     * same profile photo twice.
      */
     public const MAX_PER_SCHEDULE = 2;
 
     /**
      * Rows to consider so the quota has somewhere to backfill from.
      *
-     * Flat rather than a multiple of the display limit because the extra rows are close to free:
-     * all four queries order by a CASE expression, which the plain events.starts_at index cannot
-     * satisfy, so MySQL already filters and filesorts the whole qualifying set before applying
-     * any LIMIT. Widening it grows model hydration and the roles eager load, not the scan. The
-     * flat number also stops the smallest surface (/search, 12) from getting the narrowest pool,
-     * which is the one most likely to be asking about a single busy schedule.
+     * Flat rather than a multiple of the display limit, so the smallest surface (/search, 12)
+     * does not get the narrowest pool: it is the one most likely to be asking about a single busy
+     * schedule.
      */
     public const CANDIDATE_POOL = 100;
 
     /**
-     * The LIMIT a discovery query should ask for, given what it intends to display.
+     * How many of one schedule's events may enter the pool, as a multiple of its quota.
+     *
+     * More than the quota itself, because a schedule's soonest rows can be each other's
+     * duplicates (a translated copy of every day) and it then needs something different to put
+     * forward. Few enough that the pool always holds the schedules a full list needs: a pool of
+     * 100 at three per schedule is at least 34 schedules for the homepage's 25 places, and at six
+     * it is at least 17 for the 12 that /browse needs to fill 24 two at a time.
+     */
+    public const POOL_DEPTH = 3;
+
+    /**
+     * How many qualifying rows candidates() reads the keys of.
+     *
+     * Two integers a row, so this bounds a transfer, not the work: every discovery query orders
+     * by a CASE expression, which the plain events.starts_at index cannot satisfy, so MySQL
+     * filters and sorts the whole qualifying set whatever the LIMIT says.
+     */
+    public const CANDIDATE_SCAN = 5000;
+
+    /**
+     * How many rows a discovery pool holds, given what the surface intends to display.
      */
     public static function poolLimit(int $limit): int
     {
@@ -63,15 +92,89 @@ class DiscoveryUtils
     }
 
     /**
+     * The events a discovery list is chosen from: the soonest, but only a few per schedule.
+     *
+     * Hand it the query with its filters and its ORDER BY and no LIMIT. It reads the id and the
+     * owning schedule of the qualifying rows in that order, keeps the first few of each schedule
+     * until the pool is full, and loads those. A plain `LIMIT 100` is what this replaced: the
+     * soonest hundred rows are whoever publishes most, so the schedules with one event next month
+     * never reached spread() at all.
+     *
+     * The schedule here is the one that OWNS the event (creator_role_id, which every way of
+     * creating an event sets), not the one spread() counts against, which is the schedule the
+     * card credits and takes the loaded roles to work out. The two differ for a curator listing
+     * other people's events, and the owner is the right key for this half: it is the one whose
+     * volume fills a pool. An old row with no owner is counted against the person who made it.
+     *
+     * A pool the limit leaves short is topped up with the rows it passed over, soonest first, so
+     * a search that only one schedule answers still gets every one of its events.
+     */
+    public static function candidates(Builder $ordered, int $limit, int $perSchedule = self::MAX_PER_SCHEDULE): EloquentCollection
+    {
+        $size = self::poolLimit($limit);
+
+        if ($perSchedule < 1) {
+            return (clone $ordered)->limit($size)->get();
+        }
+
+        $each = $perSchedule * self::POOL_DEPTH;
+
+        $rows = (clone $ordered)
+            ->toBase()
+            ->limit(self::CANDIDATE_SCAN)
+            ->get(['events.id', 'events.creator_role_id', 'events.user_id']);
+
+        $taken = [];
+        $picked = [];
+        $passedOver = [];
+
+        foreach ($rows as $row) {
+            $key = match (true) {
+                (bool) $row->creator_role_id => 'r'.$row->creator_role_id,
+                (bool) $row->user_id => 'u'.$row->user_id,
+                default => 'e'.$row->id,
+            };
+
+            if (($taken[$key] ?? 0) < $each) {
+                $taken[$key] = ($taken[$key] ?? 0) + 1;
+                $picked[] = $row->id;
+
+                if (count($picked) >= $size) {
+                    break;
+                }
+            } elseif (count($passedOver) < $size) {
+                $passedOver[] = $row->id;
+            }
+        }
+
+        $ids = array_slice(array_merge($picked, $passedOver), 0, $size);
+
+        if (! $ids) {
+            return $ordered->getModel()->newCollection();
+        }
+
+        // The same query again, narrowed to the chosen rows: it carries the eager loads the
+        // cards need and its ORDER BY puts the pool back in the order spread() walks.
+        return (clone $ordered)->whereIn('events.id', $ids)->get();
+    }
+
+    /**
      * Reorder a discovery list so no schedule owns the top of it, then cut it to $limit.
      *
-     * Walks in the order given, which is the order the SQL returned. An event joins the head
-     * while its schedule is under quota and it does not look like something that schedule has
-     * already shown; everything else goes to the tail. Head, then tail, then take.
+     * Walks in the order given, which is the order the SQL returned, as many times as it takes.
+     * On each turn an event is placed while its schedule is under quota for THAT turn and it
+     * does not look like something that schedule has already shown; the rest wait for the next
+     * turn. So the list opens with up to $perSchedule from every schedule, and what follows is
+     * shared out the same way instead of going to whoever has the most.
      *
-     * To fill L head slots at the default quota you need ceil(L / 2) distinct schedules in the
-     * pool. Below that the tail backfills and the quota becomes a preference rather than a
-     * guarantee, which is the price of never shrinking the list.
+     * To fill L places in the first turn at the default quota you need ceil(L / 2) distinct
+     * schedules in the pool. Below that the later turns backfill and the quota becomes a
+     * preference rather than a guarantee, which is the price of never shrinking the list.
+     *
+     * An event that repeats a card already placed (see duplicateFingerprints()) waits until a
+     * turn places nothing, which is when everything still waiting is such a repeat. The record of
+     * what has been shown is cleared then and the repeats are shared out by the same turns, so a
+     * day published twice appears twice only after every other day has appeared once.
      */
     public static function spread(Collection $events, int $limit, int $perSchedule = self::MAX_PER_SCHEDULE): Collection
     {
@@ -88,46 +191,64 @@ class DiscoveryUtils
             $events->loadMissing('roles');
         }
 
-        $counts = [];
-        $seen = [];
-        $head = [];
-        $tail = [];
+        // Worked out once, because a turn can pass over the same event many times.
+        $waiting = [];
 
         foreach ($events as $event) {
             $key = self::scheduleKey($event);
-            $prints = self::duplicateFingerprints($event, $key);
+            $waiting[] = [$event, $key, self::duplicateFingerprints($event, $key)];
+        }
 
-            $overQuota = ($counts[$key] ?? 0) >= $perSchedule;
-            $looksDuplicate = false;
+        $placed = [];
+        $seen = [];
 
-            foreach ($prints as $print) {
-                if (isset($seen[$print])) {
-                    $looksDuplicate = true;
+        while ($waiting && count($placed) < $limit) {
+            $counts = [];
+            $held = [];
+            $before = count($placed);
 
-                    break;
+            foreach ($waiting as $entry) {
+                [$event, $key, $prints] = $entry;
+
+                $overQuota = ($counts[$key] ?? 0) >= $perSchedule;
+                $looksDuplicate = false;
+
+                foreach ($prints as $print) {
+                    if (isset($seen[$print])) {
+                        $looksDuplicate = true;
+
+                        break;
+                    }
                 }
+
+                if ($overQuota || $looksDuplicate) {
+                    $held[] = $entry;
+
+                    continue;
+                }
+
+                $counts[$key] = ($counts[$key] ?? 0) + 1;
+
+                foreach ($prints as $print) {
+                    $seen[$print] = true;
+                }
+
+                $placed[] = $event;
             }
 
-            if ($overQuota || $looksDuplicate) {
-                $tail[] = $event;
-
-                continue;
+            // Nothing placed: every event still waiting repeats one already shown. Forget what
+            // was shown, and the next turn places the first of them at least.
+            if (count($placed) === $before) {
+                $seen = [];
             }
 
-            $counts[$key] = ($counts[$key] ?? 0) + 1;
-
-            foreach ($prints as $print) {
-                $seen[$print] = true;
-            }
-
-            $head[] = $event;
+            $waiting = $held;
         }
 
         // take(0) rather than collect() so an Eloquent collection stays one. concat() rather
         // than merge(), which on an Eloquent collection would key on the model id.
         return $events->take(0)
-            ->concat($head)
-            ->concat($tail)
+            ->concat($placed)
             ->take($limit)
             ->values();
     }

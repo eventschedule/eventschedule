@@ -28,6 +28,8 @@ foreach ([
     'SESSION_LIFETIME',
     'GROWTH_DATA_TOKEN',
     'BACKEND_GOOGLE_KEY',
+    'DO_API_TOKEN',
+    'DO_APP_ID',
     'ADMIN_REQUIRE_2FA',
 ] as $pinned) {
     if (array_key_exists($pinned, $_ENV)) {

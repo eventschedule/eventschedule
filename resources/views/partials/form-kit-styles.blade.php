@@ -799,6 +799,24 @@
         min-width: 7.5rem;
       }
     }
+    /* The bar keeps its reach past the gutters at every width: that is what covers a card,
+       shadow and all, as it scrolls under. Its line does not: where the page's frame has stopped
+       growing (layouts/app-admin: 84rem beside the 18rem sidebar) a line a gutter longer than
+       the page on each side, and still short of the window, belonged to neither. From there the
+       bar's own border goes clear and the line is drawn at the frame's width. */
+    @media (min-width: 102rem) {
+      .event-save-bar {
+        border-top-color: transparent;
+      }
+      .event-save-bar::before {
+        content: "";
+        position: absolute;
+        inset-inline: 2rem;
+        top: -1px;
+        border-top: 1px solid rgb(var(--ap-border));
+        pointer-events: none;
+      }
+    }
 
     .section-nav-link.validation-error {
       border-inline-start-color: #dc2626 !important;

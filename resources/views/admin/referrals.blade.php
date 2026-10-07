@@ -1,121 +1,105 @@
 <x-app-admin-layout>
+    @include('admin.partials._navigation', ['active' => 'referrals'])
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'referrals'])
+    @php
+        // The states a referral moves through, with the word and the mark each one wears. Amber is
+        // the one that asks for something: qualified, and its credit not yet given.
+        $statuses = [
+            'pending' => [__('messages.pending'), '', $pending],
+            'subscribed' => [__('messages.status_subscribed'), 'is-info', $subscribed],
+            'qualified' => [__('messages.qualified'), 'is-warn', $qualified],
+            'credited' => [__('messages.credited'), 'is-on', $credited],
+            'expired' => [__('messages.expired'), 'is-bad', $expired],
+        ];
+    @endphp
 
-        {{-- Stats --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div class="ap-card rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.total_referrals') }}</div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $totalReferrals }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pending') }}</div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $pending }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.status_subscribed') }}</div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $subscribed }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.qualified') }}</div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $qualified }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.credited') }}</div>
-                <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 text-center">{{ $credited }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.conversion_rate') }}</div>
-                <div class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ $conversionRate }}%</div>
-            </div>
-        </div>
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_referrals_lead') }}</p>
+    </div>
 
-        {{-- Filter --}}
-        <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.filter') }}:</span>
-            <a href="{{ route('admin.referrals') }}"
-                class="px-3 py-1 rounded-full text-sm {{ !$statusFilter ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                {{ __('messages.all') }}
-            </a>
-            @foreach (['pending', 'subscribed', 'qualified', 'credited', 'expired'] as $status)
-            <a href="{{ route('admin.referrals', ['status' => $status]) }}"
-                class="px-3 py-1 rounded-full text-sm {{ $statusFilter === $status ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                {{ __('messages.' . $status) }}
-            </a>
+    <div class="page-shell page-stack">
+        {{-- One strip for the figures that were six boxes, and the seventh state the list could
+             already be narrowed to but the boxes never counted. --}}
+        <div class="ap-card rounded-xl page-stats is-auto insight-strip">
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($totalReferrals) }}</div>
+                <div class="page-stat-label">{{ __('messages.total_referrals') }}</div>
+            </div>
+            @foreach ($statuses as [$label, $tone, $count])
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($count) }}</div>
+                <div class="page-stat-label">{{ $label }}</div>
+            </div>
             @endforeach
+            <div class="page-stat">
+                <div class="page-stat-value"><span dir="ltr">{{ $conversionRate }}%</span></div>
+                <div class="page-stat-label">{{ __('messages.conversion_rate') }}</div>
+            </div>
         </div>
 
-        {{-- Table --}}
-        <div class="ap-card rounded-lg border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900/50">
+        <div>
+            <nav class="page-filters" aria-label="{{ __('messages.filter') }}">
+                <span class="event-chips-label">{{ __('messages.status') }}</span>
+                <a href="{{ route('admin.referrals') }}" class="page-pill" @if (! $statusFilter) aria-current="true" @endif>{{ __('messages.all') }}</a>
+                @foreach ($statuses as $status => [$label, $tone, $count])
+                <a href="{{ route('admin.referrals', ['status' => $status]) }}" class="page-pill" @if ($statusFilter === $status) aria-current="true" @endif>{{ $label }}</a>
+                @endforeach
+            </nav>
+
+            @if ($referrals->count() > 0)
+            <div class="ap-card rounded-xl overflow-hidden page-scroll">
+                <table class="page-table is-wide">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.date') }}</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.referrer') }}</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.referred_user') }}</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.plan_tier') }}</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.status') }}</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('messages.credited_to') }}</th>
+                            <th scope="col">{{ __('messages.referred_user') }}</th>
+                            <th scope="col">{{ __('messages.referrer') }}</th>
+                            <th scope="col">{{ __('messages.plan_tier') }}</th>
+                            <th scope="col">{{ __('messages.status') }}</th>
+                            <th scope="col">{{ __('messages.credited_to') }}</th>
+                            <th scope="col">{{ __('messages.date') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse ($referrals as $referral)
+                    <tbody>
+                        @foreach ($referrals as $referral)
                         <tr>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ $referral->created_at->format('M j, Y') }}
+                            <td class="c-main c-wrap">
+                                <span class="c-strong"><bdi>{{ $referral->referredUser->name ?? '-' }}</bdi></span>
+                                <span class="c-sub" dir="ltr">{{ $referral->referredUser->email ?? '' }}</span>
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {{ $referral->referrer->name ?? '-' }}
-                                <div class="text-xs text-gray-400">{{ $referral->referrer->email ?? '' }}</div>
+                            <td class="c-wrap" data-label="{{ __('messages.referrer') }}">
+                                <bdi>{{ $referral->referrer->name ?? '-' }}</bdi>
+                                <span class="c-sub" dir="ltr">{{ $referral->referrer->email ?? '' }}</span>
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {{ $referral->referredUser->name ?? '-' }}
-                                <div class="text-xs text-gray-400">{{ $referral->referredUser->email ?? '' }}</div>
-                            </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                @if ($referral->plan_type)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $referral->plan_type === 'enterprise' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' }}">
-                                    {{ ucfirst($referral->plan_type) }}
-                                </span>
-                                @else
-                                <span class="text-sm text-gray-400">-</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                @if ($referral->status === 'pending')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">{{ __('messages.pending') }}</span>
-                                @elseif ($referral->status === 'subscribed')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">{{ __('messages.status_subscribed') }}</span>
-                                @elseif ($referral->status === 'qualified')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">{{ __('messages.qualified') }}</span>
-                                @elseif ($referral->status === 'credited')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">{{ __('messages.credited') }}</span>
-                                @elseif ($referral->status === 'expired')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">{{ __('messages.expired') }}</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {{ $referral->creditedRole->name ?? '-' }}
-                            </td>
+                            <td>@if ($referral->plan_type)<span class="event-chip">{{ in_array($referral->plan_type, ['pro', 'enterprise'], true) ? __('messages.'.$referral->plan_type) : ucfirst($referral->plan_type) }}</span>@endif</td>
+                            <td>@isset($statuses[$referral->status])<span class="event-status {{ $statuses[$referral->status][1] }}">{{ $statuses[$referral->status][0] }}</span>@endisset</td>
+                            <td class="c-wrap" data-label="{{ __('messages.credited_to') }}">@if ($referral->creditedRole)<bdi>{{ $referral->creditedRole->name }}</bdi>@endif</td>
+                            <td class="c-date">{{ $referral->created_at->format('M j, Y') }}</td>
                         </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                {{ __('messages.no_referrals_found') }}
-                            </td>
-                        </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+
             @if ($referrals->hasPages())
-            <div class="px-4 py-4 border-t border-gray-200">
+            <div class="page-pager">
                 {{ $referrals->links() }}
+            </div>
+            @endif
+            @else
+            <div class="ap-card rounded-xl">
+                <x-page-empty :title="__('messages.no_referrals_found')"
+                    icon="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z">
+                    @if ($statusFilter)
+                    <x-secondary-link :href="route('admin.referrals')">{{ __('messages.clear_filter') }}</x-secondary-link>
+                    @endif
+                </x-page-empty>
             </div>
             @endif
         </div>
     </div>
+
+    <x-slot name="head">
+        @include('admin.partials._insight-styles')
+    </x-slot>
 
 </x-app-admin-layout>

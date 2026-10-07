@@ -28,8 +28,12 @@
 
     {{-- data-now: the server's clock, for the "new since your last visit" marks. A row's time is
          the server's, so the visit it is compared with has to be too. --}}
+    {{-- Ahead of the stack, not inside it: as the stack's second child (after its hidden heading)
+         the navigation took the stack's 1rem gap, and the tabs stood 16px lower on this page and
+         on Realtime than on every other admin page, so they jumped as you moved between them. --}}
+    @include('admin.partials._navigation', ['active' => 'dashboard'])
+
     <div class="space-y-4" id="admin-dashboard" data-now="{{ now()->getTimestamp() }}">
-        @include('admin.partials._navigation', ['active' => 'dashboard'])
 
         {{-- Everything waiting on an admin, from AdminAlertService, as chips beside the live line.
              Only there when there is something to do. --}}

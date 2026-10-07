@@ -24,7 +24,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Scan Agenda points your phone camera at a printed agenda, flyer, program or setlist and uses AI to turn each line into an <strong class="text-gray-900 dark:text-white">event part</strong>. You review the parsed list on screen, fix anything the AI misread, and save it to one of your events. Parsing runs on whichever AI provider the installation is configured for, Google Gemini by default or OpenAI.
+            Scan Agenda points your phone camera at a printed agenda, flyer, program or setlist and uses AI to turn each line into an <strong class="text-gray-900 dark:text-white">event part</strong>. You review the parsed list on screen, fix anything the AI misread, and save it to one of your events. It opens from the <strong class="text-gray-900 dark:text-white">Actions</strong> menu of a schedule's page in the admin panel, on a phone or tablet, and needs an Enterprise plan. Parsing runs on whichever AI provider the installation is configured for, Google Gemini by default or OpenAI.
         </p>
 
         <x-doc-screenshot id="scan-agenda--page" alt="Scan agenda page" loading="eager" />
@@ -32,7 +32,7 @@
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Scanning is Enterprise, the agenda itself is not</div>
             <p>
-                <x-doc-badge plan="free" /> Event parts are a free feature. Every plan can add, name, time, describe, reorder and delete agenda parts by hand in the <strong class="text-gray-900 dark:text-white">Agenda</strong> section of the event form.
+                <x-doc-badge plan="free" /> Event parts are a free feature. Every plan can add, name, time, describe, reorder and delete agenda parts by hand on the <strong class="text-gray-900 dark:text-white">Agenda</strong> tab of the event form.
             </p>
             <p class="mt-2">
                 <x-doc-badge plan="enterprise" /> Only the AI that reads an agenda for you requires an Enterprise plan. A selfhosted install counts as Enterprise, so nothing here is held back there.
@@ -55,23 +55,23 @@
                         <td><x-doc-badge plan="free" /></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Show times / Show description</span></td>
-                        <td>Event form &rarr; Agenda, and they apply to the whole schedule</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Show times</span></td>
+                        <td>Event form &rarr; Agenda. The choice is remembered for the schedule's next event</td>
                         <td><x-doc-badge plan="free" /></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Import from Image / Import from Text</span></td>
-                        <td>Event form &rarr; Agenda</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Read This Text / Or Choose a Photo</span></td>
+                        <td>Event form &rarr; Agenda &rarr; Import row</td>
                         <td><x-doc-badge plan="enterprise" /></td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Scan Agenda (live camera)</span></td>
-                        <td>Schedule page &rarr; Actions menu, on phone-sized screens only</td>
+                        <td>Schedule page &rarr; Actions menu, in a window narrower than 1024 pixels (a phone or a tablet)</td>
                         <td><x-doc-badge plan="enterprise" /></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Save agenda image on the event page</span></td>
-                        <td>Scan screen, or Event form &rarr; Agenda</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Keep the agenda photo on the event page</span></td>
+                        <td>Scan screen (<strong>Save agenda image</strong>), or Event form &rarr; Agenda &rarr; Import row (<strong>Keep the photo</strong>)</td>
                         <td><x-doc-badge plan="enterprise" /></td>
                     </tr>
                 </tbody>
@@ -90,14 +90,14 @@
         <h3 class="doc-subheading">What you need</h3>
         <ul class="doc-list mb-6">
             <li>An <strong class="text-gray-900 dark:text-white">Enterprise</strong> plan on the schedule you are scanning for, or a selfhosted install</li>
-            <li>A Google Gemini or OpenAI key configured on the installation. Without one the menu entry is hidden and the event form's Agenda section drops its AI controls, which matters mainly for selfhosted deployments</li>
+            <li>A Google Gemini or OpenAI key configured on the installation. Without one the menu entry is hidden and the event form's Agenda tab has no <strong class="text-gray-900 dark:text-white">Import</strong> row, which matters mainly for selfhosted deployments</li>
             <li>A device with a camera, and camera permission granted to the browser. The scan screen has no file picker</li>
             <li>At least one event on the schedule that does not have agenda parts yet</li>
         </ul>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Daily limit</div>
-            <p>On the hosted service each schedule can run <strong class="text-gray-900 dark:text-white">10 agenda parses per day</strong>, and the allowance is shared with <strong class="text-gray-900 dark:text-white">Import from Image</strong> and <strong class="text-gray-900 dark:text-white">Import from Text</strong> in the event form, since all three call the same parser. It is counted separately from the <a href="{{ route('marketing.docs.ai_import') }}#ai-import" class="doc-link">AI import</a> allowance for whole events, so scanning an agenda never uses up an import, or the other way round. Once the day's allowance is used, a parse is refused with "You have reached your daily limit of 10 AI requests. Please try again tomorrow." Selfhosted installs have no limit.</p>
+            <p>On the hosted service each schedule can run <strong class="text-gray-900 dark:text-white">10 agenda parses per day</strong>, and the allowance is shared with the <strong class="text-gray-900 dark:text-white">Import</strong> row on the event form's Agenda tab (<strong class="text-gray-900 dark:text-white">Read This Text</strong> and <strong class="text-gray-900 dark:text-white">Or Choose a Photo</strong>), since all three call the same parser. It is counted separately from the <a href="{{ route('marketing.docs.ai_import') }}#ai-import" class="doc-link">AI import</a> allowance for whole events, so scanning an agenda never uses up an import, or the other way round. Once the day's allowance is used, a parse is refused with "You have reached your daily limit of 10 AI requests. Please try again tomorrow." Selfhosted installs have no limit.</p>
         </div>
     </section>
 
@@ -114,17 +114,17 @@
         </p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open the schedule in the admin panel</li>
-            <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu at the top of the page</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu at the end of the schedule's title row</li>
             <li>Choose <strong class="text-gray-900 dark:text-white">Scan Agenda</strong></li>
         </ol>
 
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">It is a phone-sized entry</div>
-            <p>Because the flow drives the device camera, <strong class="text-gray-900 dark:text-white">Scan Agenda</strong> is listed in the Actions menu only on small screens. In a desktop-width window it is hidden. To work from an agenda file on a computer, open the event and use <strong class="text-gray-900 dark:text-white">Import from Image</strong> in the Agenda section instead.</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">The entry is hidden in a desktop-width window</div>
+            <p>Because the flow drives the device camera, <strong class="text-gray-900 dark:text-white">Scan Agenda</strong> is listed in the Actions menu only in a window narrower than 1024 pixels: a phone, a tablet, or a narrowed browser window. To work from a photo already on a computer, open the event, go to its <strong class="text-gray-900 dark:text-white">Agenda</strong> tab, open the <strong class="text-gray-900 dark:text-white">Import</strong> row and click <strong class="text-gray-900 dark:text-white">Or Choose a Photo</strong> instead.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            The entry only appears for schedule owners and editors on an Enterprise plan. On the hosted service, other plans see an upgrade prompt in its place.
+            The entry is there for a schedule's owner and its admins on an Enterprise plan, not for a viewer. On the hosted service, other plans see the same entry, and it opens an upgrade prompt. The scan screen is titled <strong class="text-gray-900 dark:text-white">Scan Agenda</strong>, and the link above the title, named after your schedule, takes you back to it.
         </p>
 
         <h3 class="doc-subheading">Choosing the event</h3>
@@ -142,7 +142,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Events that already have an agenda</div>
-            <p>An event that already has parts is not offered in the selector. To rebuild its agenda from a photo, remove the existing parts in the event form first, or use <strong class="text-gray-900 dark:text-white">Import from Image</strong> there, which appends the parsed parts to the ones already listed.</p>
+            <p>An event that already has parts is not offered in the selector. To rebuild its agenda from a photo, remove the existing parts in the event form first, or use <strong class="text-gray-900 dark:text-white">Or Choose a Photo</strong> in the <strong class="text-gray-900 dark:text-white">Import</strong> row of its Agenda tab, which adds the parsed parts to the ones already listed.</p>
         </div>
     </section>
 
@@ -158,7 +158,7 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li><strong class="text-gray-900 dark:text-white">Confirm the event</strong> - Check the event shown in the selector at the top, or pick another one</li>
             <li><strong class="text-gray-900 dark:text-white">Start Camera</strong> - Tap the button and allow camera access. If the device offers more than one camera you choose it in the <strong class="text-gray-900 dark:text-white">Select Camera</strong> dialog; the choice is remembered on that device, and <strong class="text-gray-900 dark:text-white">Change Camera</strong> switches later. Once you have granted access the camera starts on its own the next time you open the screen on that device</li>
-            <li><strong class="text-gray-900 dark:text-white">Set the options</strong> - Below the preview, <strong class="text-gray-900 dark:text-white">Edit Prompt</strong> adds instructions for the AI and <strong class="text-gray-900 dark:text-white">Save agenda image</strong> keeps the photo and shows it on the public event page above the agenda</li>
+            <li><strong class="text-gray-900 dark:text-white">Set the options</strong> - Below the preview, <strong class="text-gray-900 dark:text-white">Edit Prompt</strong> adds instructions for the AI and <strong class="text-gray-900 dark:text-white">Save agenda image</strong> keeps the photo and shows it on the public event page above the agenda. The photo is stored on the event as soon as it is read, before you tap Save, and a later scan with the option on replaces it. To take it off again, open the event's Agenda tab and remove it in the <strong class="text-gray-900 dark:text-white">Import</strong> row</li>
             <li><strong class="text-gray-900 dark:text-white">Capture</strong> - Tap the round shutter button under the preview. The frame is sent for parsing, so line the agenda up before you tap</li>
             <li><strong class="text-gray-900 dark:text-white">AI reads the photo</strong> - Each agenda line comes back as one part, in the original order</li>
             <li><strong class="text-gray-900 dark:text-white">Review and edit</strong> - Every part is a card you can retype. The X button at the end of a card removes it, and <strong class="text-gray-900 dark:text-white">+ Add</strong> appends an empty one for anything the AI missed</li>
@@ -196,18 +196,16 @@
             </table>
         </div>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            On the review screen the two time boxes are plain text fields rather than pickers, so you can retype a time straight over what the AI read. The event form's Agenda tab gives the same parts a time picker if you would rather correct them there.
+        </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            On the review screen the two time boxes are plain text fields rather than pickers, so you can retype a time straight over what the AI read. The event form's Agenda section gives the same parts a time picker if you would rather correct them there.
+            The time boxes follow the schedule's <strong class="text-gray-900 dark:text-white">Show times</strong> choice, the switch beside the title of the event form's Agenda tab, which is remembered from one event to the next. While it is off the time boxes are not shown here and the parts are saved without times, even if the AI read some.
         </p>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Saving replaces the agenda</div>
             <p>Save writes the list on screen as the event's complete agenda: any parts the event already had are replaced, and parts do not accumulate across scans. Scan the whole agenda in one photo where you can, and add anything left over by hand in the event form.</p>
-        </div>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Times and descriptions follow the schedule's settings</div>
-            <p>The time and description fields appear on the review screen only when <strong class="text-gray-900 dark:text-white">Show times</strong> and <strong class="text-gray-900 dark:text-white">Show description</strong> are enabled for the schedule, in the event form's Agenda section. When one is off, that field is hidden here and saved empty, even if the AI read a value for it.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -249,10 +247,10 @@
 
         <h3 class="doc-subheading">Where the prompt is stored</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Save as default</strong> stores the prompt on the schedule, so it is prefilled for later scans and for AI imports in the event form. It stores the <strong class="text-gray-900 dark:text-white">Save agenda image</strong> setting on the schedule at the same time</li>
+            <li><strong class="text-gray-900 dark:text-white">Save as default</strong> stores the prompt on the schedule, so it is prefilled for later scans and in the Import row of the event form's Agenda tab. It stores the <strong class="text-gray-900 dark:text-white">Save agenda image</strong> setting on the schedule at the same time</li>
             <li>Every scan also stores the prompt on the event you scanned, whether or not you saved it as the default</li>
             <li>The scan screen opens with the selected event's own prompt when it has one, and falls back to the schedule default. "No prompt set" means neither exists yet</li>
-            <li>The same <strong class="text-gray-900 dark:text-white">AI Prompt</strong> field, with the same 500-character limit and the same <strong class="text-gray-900 dark:text-white">Save as default</strong> box, sits in the event form's Agenda section</li>
+            <li>The same <strong class="text-gray-900 dark:text-white">AI Prompt</strong> box, with the same 500-character limit, opens from <strong class="text-gray-900 dark:text-white">+ Instructions for the AI</strong> in the Import row of the event form's Agenda tab. There the switch that stores it on the schedule is called <strong class="text-gray-900 dark:text-white">Use these instructions for every event</strong></li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300">
             The prompt only shapes what the AI reads. It has no effect on parts you type in by hand.
@@ -279,10 +277,9 @@
             <li><strong class="text-gray-900 dark:text-white">Complex layouts</strong> - For multi-column programs or handwriting, describe the layout in the prompt before you shoot</li>
         </ul>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">The scan is a starting point</div>
-            <p>A missed line or a mistyped time costs seconds to fix on the review screen, and everything stays editable afterwards in the event form's Agenda section. Treat the scan as the draft that saves you the typing, not as the final word.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            The scan is a starting point. A missed line or a mistyped time costs seconds to fix on the review screen, and everything stays editable afterwards on the event form's Agenda tab.
+        </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Camera blocked?</div>

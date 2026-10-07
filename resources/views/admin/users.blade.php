@@ -1,111 +1,160 @@
 <x-app-admin-layout>
+    @include('admin.partials._navigation', ['active' => 'users'])
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'users'])
+    {{-- Who signed up, how far they got and where they came from, in that order: the four
+         headline numbers, the onboarding funnel with its three, then where sign-ups come from,
+         then the people themselves. What each figure counts is the controller's and
+         GrowthExportService's to say; nothing here works a number out again. --}}
+    @php
+        $isNexus = (bool) config('app.is_nexus');
+        // Filtered here rather than in GrowthExportService, so the export keeps one shape.
+        // Marketing visitors are counted only on the nexus, the one install with a marketing
+        // site, so off it 'visited' is a bar that can never fill. The plan stages are about
+        // buying a plan, which a plain selfhost has none of. Both sit at an end of the funnel
+        // with no step ratio drawn across them, so dropping them changes no other bar.
+        $funnelStages = array_values(array_filter($funnel['stages'], fn ($stage) => ! (
+            (! $isNexus && $stage['key'] === 'visited')
+            || (! config('app.hosted') && $stage['group'] === 'plan')
+        )));
+        $funnelStageLabel = fn ($key) => __('messages.funnel_stage_' . $key);
+        $biggestDropToKey = $funnel['biggest_drop']['to_key'] ?? null;
+        // Sign-up page views are tracked on every install, so off the nexus too a missing bar
+        // means the window starts before tracking did, not that nothing is tracked.
+        $trafficNote = null;
+        if (! $funnel['traffic_tracked']) {
+            $trafficNote = $funnel['tracking_started_at']
+                ? __('messages.funnel_tracking_began', ['date' => \Illuminate\Support\Carbon::parse($funnel['tracking_started_at'])->format('M j, Y')])
+                : __('messages.funnel_tracking_pending');
+        }
 
-        @include('admin.partials._date-range-filter', ['range' => $range])
+        $icons = \App\Utils\RealtimeIcons::PATHS;
+        $bolt = 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z';
+        $figure = 'dashboard-stat-value text-3xl font-bold text-center text-gray-900 dark:text-white';
+        $caption = 'mt-0.5 text-xs text-gray-500 dark:text-gray-400 text-center';
+        // A signed figure or a percentage is marked left-to-right, as on the dashboard: in a
+        // right-to-left language the sign otherwise lands after the number.
+        $ltr = fn ($text) => new \Illuminate\Support\HtmlString('<span dir="ltr">'.e($text).'</span>');
+        $signed = fn ($value, $unit = '') => $ltr(($value >= 0 ? '+' : '').$value.$unit);
+        $tone = fn ($value) => $value >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400';
 
-        {{-- ===================== Onboarding Funnel ===================== --}}
-        @php
-            $isNexus = (bool) config('app.is_nexus');
-            // Filtered here rather than in GrowthExportService, so the export keeps one shape.
-            // Marketing visitors are counted only on the nexus, the one install with a marketing
-            // site, so off it 'visited' is a bar that can never fill. The plan stages are about
-            // buying a plan, which a plain selfhost has none of. Both sit at an end of the funnel
-            // with no step ratio drawn across them, so dropping them changes no other bar.
-            $funnelStages = array_values(array_filter($funnel['stages'], fn ($stage) => ! (
-                (! $isNexus && $stage['key'] === 'visited')
-                || (! config('app.hosted') && $stage['group'] === 'plan')
-            )));
-            $funnelStageLabel = fn ($key) => __('messages.funnel_stage_' . $key);
-            $biggestDropToKey = $funnel['biggest_drop']['to_key'] ?? null;
-            // Sign-up page views are tracked on every install, so off the nexus too a missing bar
-            // means the window starts before tracking did, not that nothing is tracked.
-            $trafficNote = null;
-            if (! $funnel['traffic_tracked']) {
-                $trafficNote = $funnel['tracking_started_at']
-                    ? __('messages.funnel_tracking_began', ['date' => \Illuminate\Support\Carbon::parse($funnel['tracking_started_at'])->format('M j, Y')])
-                    : __('messages.funnel_tracking_pending');
-            }
-        @endphp
+        $signupTotal = $emailUsers + $googleUsers + $hybridUsers;
+        $share = fn ($part, $whole) => $ltr(($whole > 0 ? round(($part / $whole) * 100, 1) : 0).'%');
+        // The colours the two sign-up charts draw each method in.
+        $methods = [
+            [__('messages.email'), $emailUsers, $emailUsersInPeriod, 'var(--brand-blue)'],
+            [__('messages.google'), $googleUsers, $googleUsersInPeriod, '#EF4444'],
+            [__('messages.hybrid'), $hybridUsers, $hybridUsersInPeriod, '#F59E0B'],
+        ];
+        $signupsInPeriod = $usersWithUtmInPeriod + $usersWithoutUtmInPeriod;
+    @endphp
 
-        <div class="flex items-center gap-3 pt-2">
-            <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10" style="--icon-glow: rgba(59, 130, 246, 0.15)">
-                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 8h12M9 12h6M11 16h2" />
-                </svg>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.funnel_onboarding_title')</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $isNexus ? __('messages.funnel_onboarding_subtitle') : __('messages.funnel_onboarding_subtitle_signup') }}</p>
-            </div>
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_users_lead') }}</p>
+        <div class="page-actions">
+            @include('admin.partials._date-range-filter', ['range' => $range])
+        </div>
+    </div>
+
+    <div class="page-shell page-stack">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+            <x-admin-stat-tile :label="__('messages.total_users')" :icon="$icons['users']"
+                tint="bg-blue-50 dark:bg-blue-500/10" ink="text-blue-500" glow="rgba(59, 130, 246, 0.15)">
+                <div class="flex flex-col items-center">
+                    <span class="{{ $figure }}">{{ number_format($totalUsers) }}</span>
+                    <span class="{{ $caption }}">{{ $signed(number_format($usersInPeriod)) }} @lang('messages.in_period')</span>
+                </div>
+                <x-slot:footer>
+                    <span class="font-medium {{ $tone($usersChangePercent) }}">{{ $signed($usersChangePercent, '%') }}</span> @lang('messages.vs_previous_period')
+                </x-slot:footer>
+            </x-admin-stat-tile>
+
+            {{-- The record ActiveDays keeps, as on the dashboard. "Estimate" while the window still
+                 reaches back before counting began: those days are sign-ins and event edits only,
+                 and run low. --}}
+            <x-admin-stat-tile :label="__('messages.active_users_7_days')" :icon="$bolt"
+                tint="bg-green-50 dark:bg-green-500/10" ink="text-green-500" glow="rgba(34, 197, 94, 0.15)">
+                <span class="{{ $figure }}">{{ number_format($activeUsers7Days) }}</span>
+                @if ($activeUsers7Estimate)
+                    <x-slot:footer>@lang('messages.admin_dash_estimate')</x-slot:footer>
+                @endif
+            </x-admin-stat-tile>
+
+            <x-admin-stat-tile :label="__('messages.active_users_30_days')" :icon="$bolt"
+                tint="bg-emerald-50 dark:bg-emerald-500/10" ink="text-emerald-500" glow="rgba(16, 185, 129, 0.15)">
+                <span class="{{ $figure }}">{{ number_format($activeUsers30Days) }}</span>
+                @if ($activeUsers30Estimate)
+                    <x-slot:footer>@lang('messages.admin_dash_estimate')</x-slot:footer>
+                @endif
+            </x-admin-stat-tile>
+
+            <x-admin-stat-tile :label="__('messages.newsletter_subscribers')" :icon="$icons['email']"
+                tint="bg-purple-50 dark:bg-purple-500/10" ink="text-purple-500" glow="rgba(168, 85, 247, 0.15)">
+                <div class="flex flex-col items-center">
+                    <span class="{{ $figure }}">{{ number_format($newsletterSubscribed) }}</span>
+                    <span class="{{ $caption }}">{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</span>
+                </div>
+            </x-admin-stat-tile>
         </div>
 
-        {{-- Hero KPIs: north-star, biggest leak, overall. The overall one starts from marketing
-             visitors, so it exists on the nexus only. --}}
+        {{-- ===================== Onboarding Funnel ===================== --}}
+        <div class="page-subhead">
+            <h2>@lang('messages.funnel_onboarding_title')</h2>
+            <p>{{ $isNexus ? __('messages.funnel_onboarding_subtitle') : __('messages.funnel_onboarding_subtitle_signup') }}</p>
+        </div>
+
+        {{-- North-star, biggest leak, overall. The overall one starts from marketing visitors,
+             so it exists on the nexus only. --}}
         <div class="grid grid-cols-1 {{ $isNexus ? 'sm:grid-cols-3' : 'sm:grid-cols-2' }} gap-4">
             {{-- North-star: Signup to first event, with period-over-period change --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10" style="--icon-glow: rgba(16, 185, 129, 0.15)">
-                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_north_star')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ $funnel['first_event_conv'] === null ? __('messages.funnel_na') : $funnel['first_event_conv'] . '%' }}</p>
-                <div class="mt-4 flex items-center text-sm w-full">
+            <x-admin-stat-tile :label="__('messages.funnel_north_star')" :icon="$icons['events']"
+                tint="bg-green-50 dark:bg-green-500/10" ink="text-green-500" glow="rgba(16, 185, 129, 0.15)">
+                <span class="{{ $figure }}">{{ $funnel['first_event_conv'] === null ? __('messages.funnel_na') : $ltr($funnel['first_event_conv'].'%') }}</span>
+                <x-slot:footer>
                     @if($funnel['first_event_conv_change'] !== null)
-                        <span class="{{ $funnel['first_event_conv_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                            {{ $funnel['first_event_conv_change'] >= 0 ? '+' : '' }}{{ $funnel['first_event_conv_change'] }} @lang('messages.funnel_pts')
-                        </span>
-                        <span class="text-gray-500 dark:text-gray-400 ms-2">@lang('messages.vs_previous_period')</span>
+                        <span class="font-medium {{ $tone($funnel['first_event_conv_change']) }}">{{ $signed($funnel['first_event_conv_change']) }} @lang('messages.funnel_pts')</span>
+                        @lang('messages.vs_previous_period')
                     @else
-                        <span class="text-gray-500 dark:text-gray-400">{{ number_format($funnel['cohort_size']) }} @lang('messages.signups_total')</span>
+                        {{ number_format($funnel['cohort_size']) }} @lang('messages.signups_total')
                     @endif
-                </div>
-            </div>
+                </x-slot:footer>
+            </x-admin-stat-tile>
 
-            {{-- Biggest onboarding leak --}}
-            <x-stat-panel label="{{ __('messages.funnel_biggest_leak') }}" color="amber">
+            {{-- Biggest onboarding leak. Amber, as the same step is in the funnel below. --}}
+            <x-admin-stat-tile :label="__('messages.funnel_biggest_leak')" :icon="$icons['funnel']"
+                tint="bg-amber-50 dark:bg-amber-500/10" ink="text-amber-500" glow="rgba(245, 158, 11, 0.15)">
                 @if($funnel['biggest_drop'])
-                    -{{ $funnel['biggest_drop']['drop_pct'] }}%
-                    <x-slot:subtitle>
-                        {{ $funnelStageLabel($funnel['biggest_drop']['from_key']) }} &rarr; {{ $funnelStageLabel($funnel['biggest_drop']['to_key']) }}<br>
-                        {{ number_format($funnel['biggest_drop']['lost']) }} @lang('messages.funnel_users_lost')
-                    </x-slot:subtitle>
+                    <div class="flex flex-col items-center">
+                        <span class="{{ $figure }} funnel-leak-figure">{{ $ltr('-'.$funnel['biggest_drop']['drop_pct'].'%') }}</span>
+                        <span class="{{ $caption }}">{{ $funnelStageLabel($funnel['biggest_drop']['from_key']) }} <span class="insight-arrow" aria-hidden="true">&rarr;</span> {{ $funnelStageLabel($funnel['biggest_drop']['to_key']) }}</span>
+                    </div>
+                    <x-slot:footer>{{ number_format($funnel['biggest_drop']['lost']) }} @lang('messages.funnel_users_lost')</x-slot:footer>
                 @else
-                    {{ __('messages.funnel_na') }}
-                    <x-slot:subtitle>@lang('messages.funnel_no_leak')</x-slot:subtitle>
+                    <div class="flex flex-col items-center">
+                        <span class="{{ $figure }}">{{ __('messages.funnel_na') }}</span>
+                        <span class="{{ $caption }}">@lang('messages.funnel_no_leak')</span>
+                    </div>
                 @endif
-            </x-stat-panel>
+            </x-admin-stat-tile>
 
             {{-- Overall visitor to first event --}}
             @if ($isNexus)
-            <x-stat-panel label="{{ __('messages.funnel_visitor_to_event') }}">
-                {{ $funnel['visitor_to_event_conv'] === null ? __('messages.funnel_na') : $funnel['visitor_to_event_conv'] . '%' }}
-                @if($funnel['visitor_to_event_conv'] === null && $trafficNote)
-                    <x-slot:subtitle>{{ $trafficNote }}</x-slot:subtitle>
-                @endif
-            </x-stat-panel>
+            <x-admin-stat-tile :label="__('messages.funnel_visitor_to_event')" :icon="$icons['wp']"
+                tint="bg-blue-50 dark:bg-blue-500/10" ink="text-blue-500" glow="rgba(59, 130, 246, 0.15)">
+                <div class="flex flex-col items-center">
+                    <span class="{{ $figure }}">{{ $funnel['visitor_to_event_conv'] === null ? __('messages.funnel_na') : $ltr($funnel['visitor_to_event_conv'].'%') }}</span>
+                    @if($funnel['visitor_to_event_conv'] === null && $trafficNote)
+                        <span class="{{ $caption }}">{{ $trafficNote }}</span>
+                    @endif
+                </div>
+            </x-admin-stat-tile>
             @endif
         </div>
 
-        {{-- Funnel bars + conversion-over-time chart --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {{-- Funnel form --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.funnel_stages_title')</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                    @if($funnel['cohort_size'] > 0)
-                        @lang('messages.funnel_cohort_of', ['count' => number_format($funnel['cohort_size'])])
-                    @else
-                        @lang('messages.funnel_no_signups_period')
-                    @endif
-                </p>
-
-                <div class="space-y-1">
+        {{-- The funnel beside what explains it: how its rates moved, and how people signed up. --}}
+        <div class="page-grid2">
+            <x-page-card :title="__('messages.funnel_stages_title')"
+                :lead="$funnel['cohort_size'] > 0 ? __('messages.funnel_cohort_of', ['count' => number_format($funnel['cohort_size'])]) : __('messages.funnel_no_signups_period')">
+                <div class="funnel">
                     @php $prevGroup = null; @endphp
                     @foreach($funnelStages as $i => $stage)
                         @php
@@ -121,9 +170,9 @@
                         {{-- Drop connector (users lost from the previous stage) --}}
                         @if($stage['drop_count'] !== null && $stage['drop_count'] > 0)
                             @php $isBiggest = $biggestDropToKey === $stage['key']; @endphp
-                            <div class="text-center text-xs {{ $isBiggest ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-400 dark:text-gray-500' }}">
+                            <div class="funnel-drop {{ $isBiggest ? 'is-biggest' : '' }}">
                                 &darr; {{ number_format($stage['drop_count']) }} @lang('messages.funnel_lost')
-                                @if($stage['step_conv'] !== null)({{ round(max(0, 100 - $stage['step_conv']), 1) }}%)@endif
+                                @if($stage['step_conv'] !== null)<span dir="ltr">({{ round(max(0, 100 - $stage['step_conv']), 1) }}%)</span>@endif
                                 @if($isBiggest) &middot; @lang('messages.funnel_biggest_leak') @endif
                             </div>
                         @endif
@@ -135,50 +184,45 @@
                              connector above: a "N lost" line measures the transition INTO this
                              group, so it belongs above the heading, not under it. --}}
                         @if($stage['group'] !== $prevGroup)
-                            <div class="flex items-center gap-2 pb-1 {{ $prevGroup === null ? '' : 'pt-3' }}">
-                                <span class="text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">@lang('messages.funnel_group_' . $stage['group'])</span>
-                                <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
-                            </div>
+                            <div class="funnel-group {{ $prevGroup === null ? '' : 'is-next' }}">@lang('messages.funnel_group_' . $stage['group'])</div>
                         @endif
                         @php $prevGroup = $stage['group']; @endphp
 
                         {{-- Stage: label + count above, bar (track + fill) below --}}
                         <div>
-                            <div class="flex items-center justify-between text-sm mb-1">
-                                <span class="font-medium text-gray-800 dark:text-gray-200">
+                            <div class="funnel-stage-head">
+                                <span class="funnel-stage-name">
                                     {{ $label }}
                                     @if($stage['group'] === 'email_code')
-                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_email_code') }}">&#9432;</span>
+                                        <span class="funnel-info" title="{{ __('messages.funnel_tooltip_email_code') }}">&#9432;</span>
                                     @elseif($isTraffic)
-                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_traffic') }}">&#9432;</span>
+                                        <span class="funnel-info" title="{{ __('messages.funnel_tooltip_traffic') }}">&#9432;</span>
                                     @elseif($stage['key'] === 'account')
-                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_cohort') }}">&#9432;</span>
+                                        <span class="funnel-info" title="{{ __('messages.funnel_tooltip_cohort') }}">&#9432;</span>
                                     @elseif(in_array($stage['key'], ['reached_schedule', 'reached_event'], true))
-                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_click_steps') }}">&#9432;</span>
+                                        <span class="funnel-info" title="{{ __('messages.funnel_tooltip_click_steps') }}">&#9432;</span>
                                     @endif
                                 </span>
-                                <span class="text-gray-900 dark:text-white font-semibold whitespace-nowrap">
+                                <span class="funnel-stage-count">
                                     {{ $ariaCount }}
                                     @if($stage['step_conv'] !== null)
-                                        <span class="text-gray-400 dark:text-gray-500 font-normal">({{ $stage['step_conv'] }}%)</span>
+                                        <small dir="ltr">({{ $stage['step_conv'] }}%)</small>
                                     @endif
                                 </span>
                             </div>
-                            <div class="h-8 w-full rounded-lg bg-gray-200 dark:bg-gray-700 overflow-hidden" role="img"
+                            <div class="funnel-track" role="img"
                                  aria-label="{{ $label }}: {{ $ariaCount }}{{ $stage['step_conv'] !== null ? ' (' . $stage['step_conv'] . '%)' : '' }}">
                                 @if($count === null)
-                                    <div class="h-full w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 px-2 text-center">{{ $stage['group'] === 'email_code' ? __('messages.funnel_na') : ($trafficNote ?? __('messages.funnel_na')) }}</span>
-                                    </div>
+                                    <div class="funnel-none">{{ $stage['group'] === 'email_code' ? __('messages.funnel_na') : ($trafficNote ?? __('messages.funnel_na')) }}</div>
                                 @else
-                                    <div class="h-full rounded-lg transition-all duration-200"
+                                    <div class="funnel-fill"
                                          style="width: {{ $barWidth }}%; {{ $isTraffic ? 'background: var(--brand-blue-light);' : 'background: linear-gradient(90deg, var(--brand-button-bg-light), var(--brand-button-bg));' }}"></div>
                                 @endif
                             </div>
 
                             {{-- Verified attendee-intent signups (follow/ticket/...) excluded from the cohort --}}
                             @if($stage['key'] === 'account' && ! empty($funnel['excluded_intents']) && $funnel['excluded_intents']->isNotEmpty())
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                <p class="funnel-note">
                                     @lang('messages.funnel_excluded_intents'):
                                     {{ $funnel['excluded_intents']->map(fn ($total, $intent) => number_format($total) . ' ' . __('messages.signup_intent_' . $intent))->implode(', ') }}
                                 </p>
@@ -186,157 +230,73 @@
                         </div>
                     @endforeach
                 </div>
-            </div>
+            </x-page-card>
 
-            {{-- Conversion over time --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.funnel_over_time')</h3>
-                @if(count($funnelTrend['labels']) >= 2)
-                    <div class="h-64">
-                        <canvas id="onboardingFunnelChart"></canvas>
+            <div class="page-stack users-beside-funnel {{ count($funnelTrend['labels']) >= 2 ? 'has-chart' : '' }}">
+                {{-- Conversion over time --}}
+                <x-page-card :title="__('messages.funnel_over_time')">
+                    @if(count($funnelTrend['labels']) >= 2)
+                        <div class="h-64 users-over-time">
+                            <canvas id="onboardingFunnelChart"></canvas>
+                        </div>
+                        <x-slot name="foot">
+                            <p class="mt-3">@lang('messages.funnel_period_in_progress')</p>
+                        </x-slot>
+                    @else
+                        <x-page-empty compact :title="__('messages.funnel_not_enough_history')" />
+                    @endif
+                </x-page-card>
+
+                {{-- Signup Method in Period --}}
+                <x-page-card flush :title="__('messages.signups_by_method')">
+                    <x-slot name="aside"><span class="insight-when">@lang('messages.selected_period')</span></x-slot>
+                    <div class="insight-pad">
+                        <div class="h-48">
+                            <canvas id="signupMethodTrendChart"></canvas>
+                        </div>
                     </div>
-                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">@lang('messages.funnel_period_in_progress')</p>
-                @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.funnel_not_enough_history')</p>
-                @endif
+                    <div class="page-stats insight-strip-top">
+                        @foreach ($methods as [$label, $allTime, $inPeriod, $color])
+                        <div class="page-stat">
+                            <div class="page-stat-value">{{ number_format($inPeriod) }}</div>
+                            <div class="page-stat-label"><span class="insight-dot" style="background: {{ $color }}"></span>{{ $label }}</div>
+                        </div>
+                        @endforeach
+                    </div>
+                </x-page-card>
+
+                {{-- Signup Method Donut Chart --}}
+                <x-page-card :title="__('messages.signup_method_breakdown')">
+                    <x-slot name="aside"><span class="insight-when">@lang('messages.all_time')</span></x-slot>
+                    <div class="insight-donut">
+                        <div class="insight-donut-chart">
+                            <canvas id="signupMethodChart"></canvas>
+                        </div>
+                        <dl class="page-kv">
+                            @foreach ($methods as [$label, $allTime, $inPeriod, $color])
+                            <div>
+                                <dt><span class="insight-dot" style="background: {{ $color }}"></span>{{ $label }}</dt>
+                                <dd>{{ number_format($allTime) }}<small>{{ $share($allTime, $signupTotal) }}</small></dd>
+                            </div>
+                            @endforeach
+                        </dl>
+                    </div>
+                    <x-slot name="foot">
+                        <p class="mt-4">@lang('messages.hybrid') = @lang('messages.hybrid_description')</p>
+                    </x-slot>
+                </x-page-card>
             </div>
         </div>
 
-        {{-- User Count with Period Comparison --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
-                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
-                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.total_users')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($totalUsers) }}</p>
-                <div class="mt-4 flex items-center text-sm w-full">
-                    <span class="{{ $usersChangePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                        {{ $usersChangePercent >= 0 ? '+' : '' }}{{ $usersChangePercent }}%
-                    </span>
-                    <span class="text-gray-500 dark:text-gray-400 ms-2">
-                        +{{ number_format($usersInPeriod) }} @lang('messages.in_period')
-                    </span>
-                </div>
-            </div>
-
-            {{-- The record ActiveDays keeps, as on the dashboard. "Estimate" while the window still
-                 reaches back before counting began: those days are sign-ins and event edits only,
-                 and run low. --}}
-            <x-stat-panel label="{{ __('messages.active_users_7_days') }}">
-                {{ number_format($activeUsers7Days) }}
-                @if ($activeUsers7Estimate)
-                    <x-slot:subtitle>@lang('messages.admin_dash_estimate')</x-slot:subtitle>
-                @endif
-            </x-stat-panel>
-
-            <x-stat-panel label="{{ __('messages.active_users_30_days') }}">
-                {{ number_format($activeUsers30Days) }}
-                @if ($activeUsers30Estimate)
-                    <x-slot:subtitle>@lang('messages.admin_dash_estimate')</x-slot:subtitle>
-                @endif
-            </x-stat-panel>
-
-            <x-stat-panel label="{{ __('messages.newsletter_subscribers') }}">
-                {{ number_format($newsletterSubscribed) }}
-                <x-slot:subtitle>{{ number_format($newsletterUnsubscribed) }} @lang('messages.unsubscribed')</x-slot:subtitle>
-            </x-stat-panel>
-        </div>
-
-        {{-- User Signup Method Breakdown --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {{-- Signup Method Donut Chart --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signup_method_breakdown') (@lang('messages.all_time'))</h3>
-                <div class="flex items-center gap-6">
-                    <div class="w-48 h-48">
-                        <canvas id="signupMethodChart"></canvas>
-                    </div>
-                    <div class="flex-1 space-y-3">
-                        @php
-                            $signupTotal = $emailUsers + $googleUsers + $hybridUsers;
-                            $emailPercent = $signupTotal > 0 ? round(($emailUsers / $signupTotal) * 100, 1) : 0;
-                            $googlePercent = $signupTotal > 0 ? round(($googleUsers / $signupTotal) * 100, 1) : 0;
-                            $hybridPercent = $signupTotal > 0 ? round(($hybridUsers / $signupTotal) * 100, 1) : 0;
-                        @endphp
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-blue-500 me-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.email')</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($emailUsers) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $emailPercent }}%)</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-red-500 me-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.google')</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($googleUsers) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $googlePercent }}%)</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <span class="w-3 h-3 rounded-full bg-amber-500 me-2"></span>
-                                <span class="text-sm text-gray-600 dark:text-gray-400">@lang('messages.hybrid')</span>
-                            </div>
-                            <div class="text-end">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($hybridUsers) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 ms-1">({{ $hybridPercent }}%)</span>
-                            </div>
-                        </div>
-                        <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                @lang('messages.hybrid') = @lang('messages.hybrid_description')
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Signup Method in Period --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.signups_by_method') (@lang('messages.selected_period'))</h3>
-                <div class="h-48">
-                    <canvas id="signupMethodTrendChart"></canvas>
-                </div>
-                <div class="mt-4 grid grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($emailUsersInPeriod) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.email')</p>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ number_format($googleUsersInPeriod) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.google')</p>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ number_format($hybridUsersInPeriod) }}</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.hybrid')</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- UTM Attribution Section --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {{-- UTM Summary Card + Bar Chart --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.utm_attribution') (@lang('messages.selected_period'))</h3>
-
-                @if($usersWithUtmInPeriod + $usersWithoutUtmInPeriod > 0)
+        {{-- Where sign-ups came from --}}
+        <div class="page-grid2">
+            <x-page-card :title="__('messages.utm_attribution')">
+                <x-slot name="aside"><span class="insight-when">@lang('messages.selected_period')</span></x-slot>
+                @if($signupsInPeriod > 0)
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         {{ number_format($usersWithUtmInPeriod) }} @lang('messages.from_campaigns')
-                        ({{ $usersWithUtmInPeriod + $usersWithoutUtmInPeriod > 0 ? round(($usersWithUtmInPeriod / ($usersWithUtmInPeriod + $usersWithoutUtmInPeriod)) * 100, 1) : 0 }}%
-                        @lang('messages.of') {{ number_format($usersWithUtmInPeriod + $usersWithoutUtmInPeriod) }} @lang('messages.signups_total'))
+                        ({{ $share($usersWithUtmInPeriod, $signupsInPeriod) }}
+                        @lang('messages.of') {{ number_format($signupsInPeriod) }} @lang('messages.signups_total'))
                     </p>
 
                     @if($utmSourcesInPeriod->count() > 0)
@@ -344,194 +304,337 @@
                             <canvas id="utmSourcesChart"></canvas>
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_utm_data')</p>
+                        <x-page-empty compact :title="__('messages.no_utm_data')" />
                     @endif
                 @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_utm_data')</p>
+                    <x-page-empty compact :title="__('messages.no_utm_data')" />
                 @endif
-            </div>
+            </x-page-card>
 
-            {{-- Top Campaigns Table --}}
-            <div class="ap-card rounded-xl shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_campaigns') (@lang('messages.all_time'))</h3>
-
+            <x-page-card flush :title="__('messages.top_campaigns')">
+                <x-slot name="aside"><span class="insight-when">@lang('messages.all_time')</span></x-slot>
                 @if($topUtmCampaigns->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
-                                    <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
-                                    <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
-                                    <th class="text-end py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.users')</th>
+                    <table class="page-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">@lang('messages.campaign')</th>
+                                <th scope="col">@lang('messages.source')</th>
+                                <th scope="col">@lang('messages.medium')</th>
+                                <th scope="col" class="c-num">@lang('messages.users')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($topUtmCampaigns as $campaign)
+                                <tr>
+                                    <td class="c-main c-strong c-wrap"><bdi>{{ $campaign->utm_campaign }}</bdi></td>
+                                    <td class="c-wrap"><bdi>{{ $campaign->utm_source }}</bdi></td>
+                                    <td class="c-quiet c-wrap"><bdi>{{ $campaign->utm_medium }}</bdi></td>
+                                    <td class="c-num c-strong" data-label="{{ __('messages.users') }}">{{ number_format($campaign->count) }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($topUtmCampaigns as $campaign)
-                                    <tr class="border-b border-gray-100 dark:border-gray-700/50">
-                                        <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $campaign->utm_source ?? '-' }}</td>
-                                        <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_medium ?? '-' }}</td>
-                                        <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $campaign->utm_campaign }}</td>
-                                        <td class="py-2 text-end font-medium text-gray-900 dark:text-white">{{ number_format($campaign->count) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            @endforeach
+                        </tbody>
+                    </table>
                 @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_utm_data')</p>
+                    <x-page-empty compact :title="__('messages.no_utm_data')" />
                 @endif
-            </div>
+            </x-page-card>
         </div>
 
-        {{-- Top UTM Sources & Top Referrers (All Time) --}}
+        {{-- Top UTM Sources & Top Referrers (All Time). Either may have nothing to draw, and the
+             one that is left takes the row. --}}
         @if($topUtmSources->count() > 0 || $topReferrerDomains->count() > 0)
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="page-grid2">
             @if($topUtmSources->count() > 0)
-                <div class="ap-card rounded-xl shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_sources') (@lang('messages.all_time'))</h3>
+                <x-page-card :title="__('messages.top_sources')">
+                    <x-slot name="aside"><span class="insight-when">@lang('messages.all_time')</span></x-slot>
                     <div class="h-64">
                         <canvas id="utmTopSourcesChart"></canvas>
                     </div>
-                </div>
+                </x-page-card>
             @endif
 
             @if($topReferrerDomains->count() > 0)
-                <div class="ap-card rounded-xl shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_referrers') (@lang('messages.all_time'))</h3>
+                <x-page-card :title="__('messages.top_referrers')">
+                    <x-slot name="aside"><span class="insight-when">@lang('messages.all_time')</span></x-slot>
                     <div class="h-64">
                         <canvas id="topReferrersChart"></canvas>
                     </div>
-                </div>
+                </x-page-card>
             @endif
         </div>
         @endif
 
         {{-- Onboarding progress (per-user work queue) --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.onboarding_progress_title')</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">@lang('messages.onboarding_progress_subtitle')</p>
-
+        <x-page-card flush :title="__('messages.onboarding_progress_title')" :lead="__('messages.onboarding_progress_subtitle')">
             @if($onboardingProgress->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_signed_up')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_progress')</th>
-                                <th class="text-start py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_furthest')</th>
+                <table class="page-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">@lang('messages.name')</th>
+                            <th scope="col">@lang('messages.funnel_progress')</th>
+                            <th scope="col">@lang('messages.funnel_furthest')</th>
+                            <th scope="col">@lang('messages.funnel_signed_up')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($onboardingProgress as $u)
+                            @php
+                                $steps = [
+                                    'account' => true,
+                                    'reached_schedule' => $u->schedule_form_viewed_at !== null || $u->schedules_count > 0,
+                                    'saved_schedule' => $u->schedules_count > 0,
+                                    'reached_event' => $u->event_form_viewed_at !== null || $u->events_count > 0,
+                                    'saved_event' => $u->events_count > 0,
+                                ];
+                                $furthestKey = 'account';
+                                foreach ($steps as $stepKey => $reached) {
+                                    if ($reached) { $furthestKey = $stepKey; }
+                                }
+                                $isStuck = $u->schedules_count > 0 && $u->events_count == 0;
+                            @endphp
+                            <tr class="{{ $isStuck ? 'is-flagged' : '' }}">
+                                <td class="c-main c-strong c-wrap">
+                                    <a href="mailto:{{ $u->email }}" class="event-link" title="{{ $u->email }}"><bdi>{{ $u->name ?: $u->email }}</bdi></a>
+                                </td>
+                                <td>
+                                    <span class="onboard-steps" role="img" aria-label="{{ __('messages.funnel_stage_' . $furthestKey) }}">
+                                        @foreach($steps as $stepKey => $reached)
+                                            <i class="{{ $reached ? 'is-on' : '' }}"
+                                               title="{{ __('messages.funnel_stage_' . $stepKey) }}{{ $reached ? '' : ' (' . __('messages.funnel_not_reached') . ')' }}"></i>
+                                        @endforeach
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ __('messages.funnel_stage_' . $furthestKey) }}
+                                    @if($isStuck)
+                                        <span class="event-status is-warn ms-2">@lang('messages.onboarding_stuck')</span>
+                                    @endif
+                                </td>
+                                <td class="c-date">{{ $u->created_at->diffForHumans() }}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($onboardingProgress as $u)
-                                @php
-                                    $steps = [
-                                        'account' => true,
-                                        'reached_schedule' => $u->schedule_form_viewed_at !== null || $u->schedules_count > 0,
-                                        'saved_schedule' => $u->schedules_count > 0,
-                                        'reached_event' => $u->event_form_viewed_at !== null || $u->events_count > 0,
-                                        'saved_event' => $u->events_count > 0,
-                                    ];
-                                    $furthestKey = 'account';
-                                    foreach ($steps as $stepKey => $reached) {
-                                        if ($reached) { $furthestKey = $stepKey; }
-                                    }
-                                    $isStuck = $u->schedules_count > 0 && $u->events_count == 0;
-                                @endphp
-                                <tr class="border-b border-gray-100 dark:border-gray-700/50 {{ $isStuck ? 'bg-amber-50/60 dark:bg-amber-500/5' : '' }}">
-                                    <td class="py-2 pe-4">
-                                        <a href="mailto:{{ $u->email }}" class="text-[var(--brand-blue)] hover:underline" title="{{ $u->email }}">{{ $u->name ?: $u->email }}</a>
-                                    </td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $u->created_at->diffForHumans() }}</td>
-                                    <td class="py-2 pe-4">
-                                        <div class="flex items-center gap-1" role="img" aria-label="{{ __('messages.funnel_stage_' . $furthestKey) }}">
-                                            @foreach($steps as $stepKey => $reached)
-                                                <span class="w-6 h-2 rounded-full {{ $reached ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700' }}"
-                                                      title="{{ __('messages.funnel_stage_' . $stepKey) }}{{ $reached ? '' : ' (' . __('messages.funnel_not_reached') . ')' }}"></span>
-                                            @endforeach
-                                        </div>
-                                    </td>
-                                    <td class="py-2 whitespace-nowrap">
-                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.funnel_stage_' . $furthestKey) }}</span>
-                                        @if($isStuck)
-                                            <span class="ms-1 text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">@lang('messages.onboarding_stuck')</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
 
-                <div class="mt-4">
-                    {{ $onboardingProgress->links() }}
-                </div>
+                @if ($onboardingProgress->hasPages())
+                <x-slot name="foot">{{ $onboardingProgress->links() }}</x-slot>
+                @endif
             @else
-                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_data')</p>
+                <x-page-empty compact :title="__('messages.no_data_available')" />
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Recent Signups --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.recent_signups')</h3>
-
+        {{-- Recent Signups. A sign-up with no campaign leaves those cells empty, so the ones that
+             do carry one can be found; what the person came to do sits under their name, the
+             medium under its source, and the content and the term under their campaign. Ten
+             columns ran off the side of a laptop; these six fit one. --}}
+        <x-page-card flush :title="__('messages.recent_signups')">
             @if($recentSignups->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
+                <div class="page-scroll">
+                    <table class="page-table is-wide">
                         <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.signup_intent')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.campaign')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.content')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.term')</th>
-                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.referrer')</th>
-                                <th class="text-start py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.landing_page')</th>
+                            <tr>
+                                <th scope="col">@lang('messages.name')</th>
+                                <th scope="col">@lang('messages.source')</th>
+                                <th scope="col">@lang('messages.campaign')</th>
+                                <th scope="col">@lang('messages.referrer')</th>
+                                <th scope="col">@lang('messages.landing_page')</th>
+                                <th scope="col">@lang('messages.date')</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($recentSignups as $signup)
-                                <tr class="border-b border-gray-100 dark:border-gray-700/50">
-                                    <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
-                                    <td class="py-2 pe-4">
+                                @php
+                                    $campaignExtra = collect([$signup->utm_content, $signup->utm_term])->filter()->implode(' · ');
+                                    $referrerHost = $signup->referrer_url ? parse_url($signup->referrer_url, PHP_URL_HOST) : null;
+                                @endphp
+                                <tr>
+                                    <td class="c-main c-wrap">
+                                        <span class="c-strong"><bdi>{{ $signup->name }}</bdi></span>
                                         @if($signup->signup_intent)
-                                            <span class="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 whitespace-nowrap">{{ __('messages.signup_intent_' . $signup->signup_intent) }}</span>
-                                        @else
-                                            <span class="text-gray-600 dark:text-gray-400">-</span>
+                                        <span class="c-sub"><span class="event-chip" title="{{ __('messages.signup_intent') }}">{{ __('messages.signup_intent_' . $signup->signup_intent) }}</span></span>
                                         @endif
                                     </td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $signup->created_at->format('M j, Y') }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_campaign ?? '-' }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_content ?? '-' }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_term ?? '-' }}</td>
-                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400" title="{{ $signup->referrer_url }}">
-                                        @if($signup->referrer_url)
-                                            {{ parse_url($signup->referrer_url, PHP_URL_HOST) ?? '-' }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td class="py-2 text-gray-600 dark:text-gray-400" title="{{ $signup->landing_page }}">{{ Str::limit($signup->landing_page ?? '-', 30) }}</td>
+                                    <td data-label="{{ __('messages.source') }}">@if($signup->utm_source || $signup->utm_medium)<bdi>{{ $signup->utm_source }}</bdi><span class="c-sub"><bdi>{{ $signup->utm_medium }}</bdi></span>@endif</td>
+                                    <td data-label="{{ __('messages.campaign') }}">@if($signup->utm_campaign || $campaignExtra)<bdi>{{ $signup->utm_campaign }}</bdi><span class="c-sub"><bdi>{{ $campaignExtra }}</bdi></span>@endif</td>
+                                    <td class="c-quiet" data-label="{{ __('messages.referrer') }}" title="{{ $signup->referrer_url }}" dir="ltr">{{ $referrerHost }}</td>
+                                    <td class="c-quiet c-mono" data-label="{{ __('messages.landing_page') }}" title="{{ $signup->landing_page }}" dir="ltr">{{ Str::limit($signup->landing_page ?? '', 30) }}</td>
+                                    <td class="c-date">{{ $signup->created_at->format('M j, Y') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
 
-                <div class="mt-4">
-                    {{ $recentSignups->links() }}
-                </div>
+                @if ($recentSignups->hasPages())
+                <x-slot name="foot">{{ $recentSignups->links() }}</x-slot>
+                @endif
             @else
-                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_data')</p>
+                <x-page-empty compact :title="__('messages.no_data_available')" />
             @endif
-        </div>
+        </x-page-card>
     </div>
+
+    <x-slot name="head">
+        @include('admin.partials._insight-styles')
+        <style {!! nonce_attr() !!}>
+            /* The funnel's section opens inside the page's stack, which already keeps its blocks
+               apart. */
+            .page-stack > .page-subhead {
+              margin: 0.75rem 0 -0.25rem;
+            }
+            /* The funnel: a stage's name and count, then its bar. A bar's width is the stage's
+               share and nothing else; the track behind it is the whole. */
+            .funnel {
+              display: grid;
+              gap: 0.375rem;
+            }
+            .funnel-group {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding-bottom: 0.125rem;
+              font-size: 0.6875rem;
+              font-weight: 600;
+              letter-spacing: 0.04em;
+              text-transform: uppercase;
+              color: rgb(var(--ap-ink-3));
+            }
+            .funnel-group.is-next {
+              padding-top: 0.75rem;
+            }
+            .funnel-group::after {
+              content: "";
+              flex: 1;
+              height: 1px;
+              background: rgb(var(--ap-border));
+            }
+            .funnel-drop {
+              font-size: 0.75rem;
+              text-align: center;
+              color: rgb(var(--ap-ink-3));
+            }
+            /* The one drop the page calls the biggest leak, in the colour its tile wears. */
+            .funnel-drop.is-biggest,
+            .funnel-leak-figure {
+              font-weight: 600;
+              color: #b45309 !important;
+            }
+            .dark .funnel-drop.is-biggest,
+            .dark .funnel-leak-figure {
+              color: #fbbf24 !important;
+            }
+            .funnel-leak-figure {
+              font-weight: 700;
+            }
+            .funnel-stage-head {
+              display: flex;
+              align-items: baseline;
+              justify-content: space-between;
+              gap: 1rem;
+              margin-bottom: 0.25rem;
+              font-size: 0.875rem;
+            }
+            .funnel-stage-name {
+              min-width: 0;
+              font-weight: 500;
+              color: rgb(var(--ap-ink));
+            }
+            .funnel-stage-count {
+              flex: none;
+              font-weight: 600;
+              font-variant-numeric: tabular-nums;
+              white-space: nowrap;
+              color: rgb(var(--ap-ink));
+            }
+            .funnel-stage-count small {
+              font-size: 0.8125rem;
+              font-weight: 400;
+              color: rgb(var(--ap-ink-3));
+            }
+            .funnel-info {
+              color: rgb(var(--ap-ink-4));
+              cursor: help;
+            }
+            .funnel-track {
+              height: 1.5rem;
+              overflow: hidden;
+              border-radius: 0.5rem;
+              background: var(--ap-tint-2);
+            }
+            .funnel-fill {
+              height: 100%;
+              border-radius: 0.5rem;
+            }
+            /* A stage nothing was counted for is not a stage at zero: it has no bar at all. */
+            .funnel-none {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100%;
+              border: 1px dashed rgb(var(--ap-border-strong));
+              border-radius: 0.5rem;
+              padding: 0 0.5rem;
+              background: rgb(var(--ap-surface));
+              font-size: 0.75rem;
+              text-align: center;
+              color: rgb(var(--ap-ink-3));
+            }
+            .funnel-note {
+              margin: 0.25rem 0 0;
+              font-size: 0.75rem;
+              color: rgb(var(--ap-ink-3));
+            }
+
+            /* Beside the funnel, which is the tall one: the first chart takes the height the
+               other two cards leave, so no card ends in an empty half. Its canvas is taken out of
+               the flow, or the chart's own height would be what the card is measured by. */
+            @media (min-width: 1024px) {
+              /* With no chart to grow yet, the three keep their own heights. */
+              .users-beside-funnel {
+                align-content: start;
+              }
+              .users-beside-funnel.has-chart {
+                grid-template-rows: minmax(0, 1fr) auto auto;
+                align-content: stretch;
+              }
+              .users-beside-funnel.has-chart > .page-card:first-child {
+                display: flex;
+                flex-direction: column;
+              }
+              .users-beside-funnel .users-over-time {
+                position: relative;
+                flex: 1 1 16rem;
+                height: auto;
+                min-height: 16rem;
+              }
+              .users-beside-funnel .users-over-time canvas {
+                position: absolute;
+                inset: 0;
+              }
+            }
+
+            /* How far one person got: five steps, the ones reached filled. */
+            .onboard-steps {
+              display: inline-flex;
+              gap: 0.25rem;
+              vertical-align: middle;
+            }
+            .onboard-steps i {
+              width: 1.5rem;
+              height: 0.5rem;
+              border-radius: 999px;
+              background: var(--ap-tint-2);
+            }
+            .onboard-steps i.is-on {
+              background: var(--brand-button-bg);
+            }
+            /* The amber rows the card's own line promises: a schedule, and no event yet. */
+            .page-table tr.is-flagged {
+              background: rgba(245, 158, 11, 0.08);
+            }
+        </style>
+    </x-slot>
 
     {{-- Chart.js --}}
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
@@ -543,12 +646,18 @@
                 return;
             }
 
-            // Dark mode detection
-            const isDarkMode = document.documentElement.classList.contains('dark') ||
-                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.classList.contains('light'));
+            // The portal's own palette, read from its tokens. This used to ask the operating
+            // system whether it was dark, so a light portal on a dark machine drew its charts
+            // with black gridlines; and a hex could not follow the six palettes.
+            const apStyle = getComputedStyle(document.documentElement);
+            const apColor = (token, fallback) => {
+                const value = apStyle.getPropertyValue(token).trim();
+                return value ? 'rgb(' + value.split(/\s+/).join(', ') + ')' : fallback;
+            };
+            const isDarkMode = document.documentElement.classList.contains('dark');
 
-            const textColor = isDarkMode ? '#9CA3AF' : '#6B7280';
-            const gridColor = isDarkMode ? '#2d2d30' : '#E5E7EB';
+            const textColor = apColor('--ap-ink-3', isDarkMode ? '#9CA3AF' : '#6B7280');
+            const gridColor = apColor('--ap-border', isDarkMode ? '#2d2d30' : '#E5E7EB');
             const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
 
             // Signup Method Donut Chart
@@ -560,7 +669,7 @@
                     datasets: [{
                         data: [{{ $emailUsers }}, {{ $googleUsers }}, {{ $hybridUsers }}],
                         backgroundColor: [brandBlue, '#EF4444', '#F59E0B'],
-                        borderColor: isDarkMode ? '#252526' : '#FFFFFF',
+                        borderColor: apColor('--ap-surface', isDarkMode ? '#252526' : '#FFFFFF'),
                         borderWidth: 2
                     }]
                 },

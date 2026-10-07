@@ -7,9 +7,16 @@ class HelpUtils
     private static array $mappings = [
         // Newsletter routes (flat, must be checked before {subdomain}/* patterns
         // because {subdomain} resolves to * on flat routes and */edit would match newsletters/{hash}/edit)
+        // The builder and a sent newsletter's statistics, ahead of the list they hang from.
+        'newsletters/create' => '/docs/newsletters#newsletter-builder',
+        'newsletters/*/edit' => '/docs/newsletters#newsletter-builder',
+        'newsletters/*/stats' => '/docs/newsletters#analytics',
         'newsletters*' => '/docs/newsletters',
-        'newsletter-segments*' => '/docs/newsletters#recipients',
-        'newsletter-import*' => '/docs/newsletters',
+        'newsletter-segments*' => '/docs/newsletters#managing-segments',
+        'newsletter-import*' => '/docs/newsletters#importing-emails',
+        // Without this the template editor (newsletter-templates/{hash}/edit) fell through to
+        // {subdomain}/edit below and Help opened the Creating Schedules guide.
+        'newsletter-templates*' => '/docs/newsletters#saved-templates',
 
         // Pages with section-level anchor mapping
         '{subdomain}/edit' => [
@@ -44,7 +51,7 @@ class HelpUtils
                 'engagement-tab-sponsors' => '/docs/creating-schedules#engagement-sponsors',
                 'engagement-tab-map' => '/docs/creating-schedules#engagement-venue-map',
                 'engagement-tab-accommodation' => '/docs/creating-schedules#engagement-accommodation',
-                'section-gift-cards' => '/docs/gift-cards',
+                'section-gift-cards' => '/docs/gift-cards#setup',
                 'section-sources' => '/docs/creating-schedules#event-sources',
                 'section-auto-import' => '/docs/creating-schedules#auto-import',
                 'section-integrations' => '/docs/creating-schedules#integrations',
@@ -71,13 +78,13 @@ class HelpUtils
                 'section-agenda' => '/docs/creating-events#agenda',
                 'section-schedules' => '/docs/creating-events#schedules',
                 'section-google-calendar' => '/docs/creating-events#google-calendar',
-                'section-microsoft-calendar' => '/docs/creating-schedules#integrations-microsoft',
+                'section-microsoft-calendar' => '/docs/creating-events#google-calendar',
                 'section-tickets' => '/docs/tickets#general',
                 'ticket-mode-external' => '/docs/tickets#external',
                 'ticket-mode-rsvp' => '/docs/tickets#registration',
                 'ticket-mode-tickets' => '/docs/tickets#ticketing',
                 'ticket-tab-tickets' => '/docs/tickets#ticketing',
-                'ticket-tab-payment' => '/docs/tickets#payment',
+                'ticket-tab-payment' => '/docs/tickets#payment-row',
                 'ticket-tab-options' => '/docs/tickets#options',
                 'ticket-tab-promo_codes' => '/docs/tickets#promo-codes',
                 'ticket-tab-add_ons' => '/docs/tickets#add-ons',
@@ -107,13 +114,13 @@ class HelpUtils
                 'section-agenda' => '/docs/creating-events#agenda',
                 'section-schedules' => '/docs/creating-events#schedules',
                 'section-google-calendar' => '/docs/creating-events#google-calendar',
-                'section-microsoft-calendar' => '/docs/creating-schedules#integrations-microsoft',
+                'section-microsoft-calendar' => '/docs/creating-events#google-calendar',
                 'section-tickets' => '/docs/tickets#general',
                 'ticket-mode-external' => '/docs/tickets#external',
                 'ticket-mode-rsvp' => '/docs/tickets#registration',
                 'ticket-mode-tickets' => '/docs/tickets#ticketing',
                 'ticket-tab-tickets' => '/docs/tickets#ticketing',
-                'ticket-tab-payment' => '/docs/tickets#payment',
+                'ticket-tab-payment' => '/docs/tickets#payment-row',
                 'ticket-tab-options' => '/docs/tickets#options',
                 'ticket-tab-promo_codes' => '/docs/tickets#promo-codes',
                 'ticket-tab-add_ons' => '/docs/tickets#add-ons',
@@ -176,7 +183,12 @@ class HelpUtils
         // The seating tab, the designer and the box office console. No ticket-tab-* entry to go
         // with these: the plan picker lives on the Tickets tab itself, which already maps to
         // #ticketing, and there is no seating tab in that strip to key on.
-        '{subdomain}/seating' => '/docs/allocated-seating#build',
+        '{subdomain}/seating' => '/docs/allocated-seating#plans-tab',
+        // Ahead of the two below, whose wildcards cross slashes: the one-date designer
+        // (seating/occurrence/{hash}/design) matched "seating/*/design", and the report
+        // (seating/box-office/{event}/report) matched "seating/box-office/*".
+        '{subdomain}/seating/occurrence/*' => '/docs/allocated-seating#one-date',
+        '{subdomain}/seating/box-office/*/report*' => '/docs/allocated-seating#report',
         '{subdomain}/seating/*/design' => '/docs/allocated-seating#build',
         '{subdomain}/seating/box-office/*' => '/docs/allocated-seating#box-office',
         '{subdomain}/requests' => '/docs/managing-schedules#requests',
@@ -190,7 +202,7 @@ class HelpUtils
         'my-carpools' => '/docs/creating-schedules#engagement-carpool',
         '{subdomain}/import' => '/docs/ai-import',
         '{subdomain}/import/ai' => '/docs/ai-import',
-        '{subdomain}/import/eventbrite' => '/docs/ai-import',
+        '{subdomain}/import/eventbrite' => '/docs/ai-import#eventbrite-import',
         '{subdomain}/scan-agenda' => '/docs/scan-agenda',
         '{subdomain}/events-graphic*' => '/docs/event-graphics',
         'events' => '/docs/getting-started',
@@ -199,7 +211,7 @@ class HelpUtils
         // route parameter. Kept so the mapping survives if that fallback ever tightens, and so
         // the page is not silently relying on it.
         'following/merge-venues*' => '/docs/creating-schedules#merge',
-        'following' => '/docs/sharing',
+        'following' => '/docs/sharing#followers',
         'tickets' => '/docs/tickets',
         // /sales carries six tabs covering four different doc pages, so a flat mapping sent the
         // Help button to "Managing Sales" from the Installments, Subscriptions and Gift Cards
@@ -208,53 +220,70 @@ class HelpUtils
         'sales' => [
             'doc' => '/docs/tickets#managing-sales',
             'anchors' => [
-                'tab-sales' => '/docs/tickets#managing-sales',
+                'tab-sales' => '/docs/tickets#sales-list',
                 'tab-waitlist' => '/docs/tickets#waitlist',
-                'tab-feedback' => '/docs/tickets#feedback',
-                'tab-subscriptions' => '/docs/subscriptions',
-                'tab-installments' => '/docs/tickets#installments',
-                'tab-gift-cards' => '/docs/gift-cards',
+                'tab-feedback' => '/docs/tickets#feedback-tab',
+                'tab-subscriptions' => '/docs/subscriptions#monitoring',
+                'tab-installments' => '/docs/tickets#installments-tracking',
+                'tab-gift-cards' => '/docs/gift-cards#managing',
             ],
         ],
         'sales.import' => '/docs/tickets#importing-attendees',
-        // The signed-in dashboard, and a schedule owner's own live view (not /admin/realtime,
-        // which is the operator's and has its own entry below).
+        // The signed-in dashboard.
         'dashboard' => '/docs/getting-started#dashboard',
-        'realtime' => '/docs/analytics#realtime',
+        // Realtime is the second tab here: a schedule owner's own live view (not /admin/realtime,
+        // which is the operator's and has its own entry below).
         'analytics' => [
             'doc' => '/docs/analytics',
             'anchors' => [
                 'tab-web' => '/docs/analytics',
                 'tab-revenue' => '/docs/analytics#revenue',
                 'tab-checkins' => '/docs/analytics#checkins',
+                'tab-realtime' => '/docs/analytics#realtime',
             ],
         ],
         // Buying an on-network promotion lives under /promotions, so the boost* pattern below
         // never matches it. Without this the Help button on the purchase form would open the
         // Facebook/Instagram docs, which describe a different product entirely.
         'promotions*' => '/docs/boost#on-network',
+        'boost/create*' => '/docs/boost#quick-mode',
         'boost*' => '/docs/boost',
         'scan' => '/docs/tickets#check-in',
-        'checkin' => '/docs/tickets#check-in',
+        'checkin' => '/docs/tickets#checkin-dashboard',
         'waitlist' => '/docs/tickets#waitlist',
         'referrals' => '/docs/referral-program',
         'admin/dashboard*' => '/docs/selfhost/admin#dashboard',
         'admin/realtime*' => '/docs/selfhost/admin#realtime',
+        // The pages of the Insights, Manage and System tabs, in the navigation's own order
+        // (admin/partials/_navigation). Each one opened the guide's front page until 2026-10.
+        'admin/users*' => '/docs/selfhost/admin#insights-users',
+        'admin/revenue*' => '/docs/selfhost/admin#insights-revenue',
+        'admin/analytics*' => '/docs/selfhost/admin#insights-analytics',
+        'admin/usage*' => '/docs/selfhost/admin#insights-usage',
+        'admin/growth*' => '/docs/selfhost/admin#insights-growth',
+        // Not the organizer's Boost guide: 'boost*' above does not match this path.
+        'admin/boost*' => '/docs/selfhost/admin#manage-boost',
         'admin/schedules*' => '/docs/selfhost/admin#manage-plans',
+        // Hosted only, and the operator's own walkthrough is on the SaaS side of the guide.
+        'admin/domains*' => '/docs/saas/custom-domains#admin-management',
+        'admin/referrals*' => '/docs/selfhost/admin#manage-referrals',
+        'admin/newsletter*' => '/docs/selfhost/admin#manage-newsletters',
+        'admin/blog*' => '/docs/selfhost/admin#manage-blog',
+        'admin/audit-log*' => '/docs/selfhost/admin#system-audit-log',
         'admin/queue*' => '/docs/selfhost/admin#system-queue',
+        'admin/logs*' => '/docs/selfhost/admin#system-logs',
         'admin/support' => '/docs/saas#support-chat',
-        // Growth continues the onboarding funnel documented under Users (Insights), so it
-        // points there rather than at a section of its own.
-        'admin/growth*' => '/docs/selfhost/admin#insights-users',
         'admin/app-update*' => '/docs/selfhost/admin#system-app-update',
         'admin/translations*' => '/docs/selfhost/admin#system-translations',
         'admin/legal*' => '/docs/selfhost/admin#system-legal-pages',
         // Federation is mirrored into both docs trees; point the AP Help button at the
         // selfhost copy, which is the one every non-nexus install can act on.
-        // Deliberately not mapping admin/settings: federation is one card on a page
-        // that is mostly about header/footer code, so that would mislead.
+        // admin/settings goes to the admin guide's own Settings section, not to this one:
+        // federation is one card on a page that is mostly about header and footer code.
         'admin/federation*' => '/docs/selfhost/federation',
-        'new/*' => '/docs/creating-schedules',
+        'admin/settings*' => '/docs/selfhost/admin#system-settings',
+        // The short form a new schedule starts on, which is what Getting Started describes.
+        'new/*' => '/docs/getting-started#create-schedule',
     ];
 
     public static function getDocUrl(): string

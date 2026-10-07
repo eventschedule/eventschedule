@@ -1,105 +1,122 @@
-<div class="mt-8 flow-root">
-    @if($entries->count() > 0)
-    <!-- Desktop Table View -->
-    <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
-                            <x-sortable-header column="email" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.email') }}</x-sortable-header>
-                            <x-sortable-header column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.event') }}</x-sortable-header>
-                            <x-sortable-header column="event_date" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-sortable-header>
-                            <x-sortable-header column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-sortable-header>
-                            <x-sortable-header column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.created_at') }}</x-sortable-header>
-                            <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
-                                <span class="sr-only">{{ __('messages.actions') }}</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
-                        @foreach($entries as $entry)
-                        <tr>
-                            <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                {{ $entry->name }}
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $entry->email }}
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $entry->event?->name }}
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $entry->event_date }}
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm">
-                                @if($entry->status === 'waiting')
-                                    <span class="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">{{ __('messages.waiting') }}</span>
-                                @elseif($entry->status === 'notified')
-                                    <span class="inline-flex items-center rounded-full bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-300">{{ __('messages.notified') }}</span>
-                                @elseif($entry->status === 'purchased')
-                                    <span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300">{{ __('messages.purchased') }}</span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('messages.expired') }}</span>
-                                @endif
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $entry->created_at->format('M j, Y g:ia') }}
-                            </td>
-                            <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($entry->id) }}"
-                                    class="js-waitlist-remove text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-                                    {{ __('messages.remove') }}
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+{{-- The people waiting for a place at a sold-out event.
+
+     WaitlistController::index() answers /waitlist with this view either way. Fetched by the
+     Waitlist tab of ticket/sales (X-Requested-With), it is the list alone. VISITED, it used to be
+     the same bare fragment: a table with no stylesheet, no sidebar and no way back, which is what
+     anyone typing the address (and the route-load tests) got. A visit now gets a whole page, which
+     draws this view a second time for its list. --}}
+@if (! request()->ajax() && empty($embedded))
+<x-app-admin-layout>
+    <div class="page-shell">
+        <x-page-header :title="__('messages.waitlist')" :lead="__('messages.waitlist_lead')"
+                       :back="route('sales')" :back-label="__('messages.sales')">
+            <x-slot name="actions">
+                <a href="{{ request()->fullUrlWithQuery(['include_past' => request()->query('include_past') == 1 ? null : 1, 'page' => null]) }}" class="page-tool">
+                    {{ request()->query('include_past') == 1 ? __('messages.hide_past_events') : __('messages.show_past_events') }}
+                </a>
+            </x-slot>
+        </x-page-header>
+
+        <div id="waitlist-table">
+            @include('ticket.waitlist_table', ['embedded' => true])
         </div>
     </div>
 
-    <!-- Mobile Card View -->
-    <div class="md:hidden space-y-4">
-        @foreach($entries as $entry)
-        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div class="flex justify-between items-start mb-2">
-                <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $entry->name }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $entry->email }}</p>
-                </div>
-                @if($entry->status === 'waiting')
-                    <span class="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">{{ __('messages.waiting') }}</span>
-                @elseif($entry->status === 'notified')
-                    <span class="inline-flex items-center rounded-full bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-300">{{ __('messages.notified') }}</span>
-                @elseif($entry->status === 'purchased')
-                    <span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300">{{ __('messages.purchased') }}</span>
-                @else
-                    <span class="inline-flex items-center rounded-full bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('messages.expired') }}</span>
-                @endif
-            </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $entry->event?->name }} - {{ $entry->event_date }}</p>
-            <div class="flex justify-between items-center mt-3">
-                <p class="text-xs text-gray-400 dark:text-gray-500">{{ $entry->created_at->format('M j, Y g:ia') }}</p>
-                <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($entry->id) }}"
-                    class="js-waitlist-remove text-sm text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-                    {{ __('messages.remove') }}
-                </button>
-            </div>
-        </div>
-        @endforeach
-    </div>
+    <script {!! nonce_attr() !!}>
+    // A page of its own reloads where the tab re-fetches: sorting is an address, and removing
+    // someone brings the page back without them.
+    document.addEventListener('click', function(e) {
+        var header = e.target.closest('[data-sort]');
+        if (header) {
+            var url = new URL(window.location.href);
+            var sortBy = header.getAttribute('data-sort');
+            var same = (url.searchParams.get('sort_by') || 'created_at') === sortBy;
+            url.searchParams.set('sort_dir', same && (url.searchParams.get('sort_dir') || 'desc') === 'asc' ? 'desc' : 'asc');
+            url.searchParams.set('sort_by', sortBy);
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+            return;
+        }
 
-    @if($entries instanceof \Illuminate\Pagination\LengthAwarePaginator && $entries->hasPages())
-    <div class="mt-4">
-        {{ $entries->links() }}
+        var remove = e.target.closest('.js-waitlist-remove');
+        if (! remove || ! confirm(@json(__('messages.are_you_sure')))) {
+            return;
+        }
+        remove.disabled = true;
+        fetch(@json(url('/waitlist/remove')) + '/' + remove.getAttribute('data-id'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(function(response) {
+            if (! response.ok) throw new Error('Request failed');
+            window.location.reload();
+        })
+        .catch(function() {
+            remove.disabled = false;
+            alert(@json(__('messages.an_error_occurred')));
+        });
+    });
+    </script>
+</x-app-admin-layout>
+@elseif ($entries->count() > 0)
+<div class="ap-card rounded-xl overflow-hidden">
+    <div class="page-scroll">
+        {{-- Six columns where there were seven: the address sits under the name, as it does in
+             every other list of the Sales page, so the list fits a laptop without scrolling. --}}
+        <table class="page-table is-hover">
+            <thead>
+                <tr>
+                    <x-page-sort column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.name') }}</x-page-sort>
+                    <x-page-sort column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.event') }}</x-page-sort>
+                    <x-page-sort column="event_date" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-page-sort>
+                    <x-page-sort column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-page-sort>
+                    <x-page-sort column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.created_at') }}</x-page-sort>
+                    <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($entries as $entry)
+                @php
+                    $waitlistTone = ['waiting' => 'is-info', 'notified' => 'is-warn', 'purchased' => 'is-on'][$entry->status] ?? '';
+                    $waitlistWord = in_array($entry->status, ['waiting', 'notified', 'purchased']) ? $entry->status : 'expired';
+                    // event_date is the day as the venue counts it, stored as text.
+                    try {
+                        $waitlistDay = $entry->event_date ? \Carbon\Carbon::parse($entry->event_date)->translatedFormat('M j, Y') : '';
+                    } catch (\Exception $waitlistDayError) {
+                        $waitlistDay = $entry->event_date;
+                    }
+                @endphp
+                <tr>
+                    <td class="c-main">
+                        <span class="c-strong"><bdi>{{ $entry->name }}</bdi></span>
+                        <span class="c-sub"><a href="mailto:{{ $entry->email }}" class="event-link sm:whitespace-nowrap" dir="ltr">{{ $entry->email }}</a></span>
+                    </td>
+                    <td class="c-wrap"><bdi>{{ $entry->event?->name }}</bdi></td>
+                    <td class="c-date">{{ $waitlistDay }}</td>
+                    <td><span class="event-status {{ $waitlistTone }}">{{ __('messages.'.$waitlistWord) }}</span></td>
+                    <td class="c-date" data-label="{{ __('messages.created_at') }}">{{ $entry->created_at->translatedFormat('M j, Y g:ia') }}</td>
+                    <td class="c-actions">
+                        <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($entry->id) }}" class="event-link is-danger js-waitlist-remove">{{ __('messages.remove') }}</button>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-    @endif
-    @else
-    <div class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">{{ __('messages.waitlist_empty') }}</p>
-    </div>
-    @endif
 </div>
+
+@if ($entries instanceof \Illuminate\Pagination\LengthAwarePaginator && $entries->hasPages())
+<div class="page-pager">
+    {{ $entries->links() }}
+</div>
+@endif
+@else
+<div class="ap-card rounded-xl">
+    <x-page-empty :title="__('messages.waitlist_empty')" :text="request()->query('include_past') == 1 ? null : __('messages.waitlist_empty_upcoming')"
+        icon="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+</div>
+@endif

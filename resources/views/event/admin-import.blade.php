@@ -1,44 +1,10 @@
 <x-app-admin-layout>
 
-    <div class="flex justify-between items-center gap-6 pb-6">
-        @if (is_rtl())
-            <!-- RTL Layout: Cancel button on left, title on right -->
-            <div class="flex items-center gap-3">
-                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    {{ __('messages.back') }}
-                </button>
-            </div>
-            
-            <div class="flex items-center text-end">
-                @if ($role->profile_image_url)
-                    <div class="pe-4">
-                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                    </div>
-                @endif
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ __('messages.import_events') }}
-                </h2>
-            </div>
-        @else
-            <!-- LTR Layout: Title on left, cancel button on right -->
-            <div class="flex items-center">
-                @if ($role->profile_image_url)
-                    <div class="pe-4">
-                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                    </div>
-                @endif
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ __('messages.import_events') }}
-                </h2>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    {{ __('messages.back') }}
-                </button>
-            </div>
-        @endif
-    </div>
+    {{-- The way back is the schedule, by name. It carries js-back-btn so the script below can ask
+         before unsaved events are left behind, and send someone who has just added events to the
+         page that shows them. --}}
+    <x-page-header :title="__('messages.import_events')" :image="$role->profile_image_url ?: null"
+        :back="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])" :back-label="$role->name" back-class="js-back-btn" />
 
     {{-- The import before this one, while it can still be taken back. Outside the Vue mount. --}}
     @if (! empty($lastImportCount))
@@ -59,23 +25,21 @@
 
         document.addEventListener('click', function(e) {
             if (e.target.closest('.js-back-btn')) {
-                if (hasUnsavedImportChanges() && !confirm(@json(__('messages.unsaved_changes_warning')))) return;
-                // With events added, Back means "show me": through the route that counts them
-                // and shows the panel. history.back() would land on whatever was open before,
-                // and after a trip to Google that is Google. `addedAny` and not the list of
-                // saved rows: "Clear" empties that list, and what was added is still added.
+                if (hasUnsavedImportChanges() && !confirm(@json(__('messages.unsaved_changes_warning')))) {
+                    e.preventDefault();
+                    return;
+                }
+                // With events added, the way back means "show me": through the route that counts
+                // them and shows the panel. `addedAny` and not the list of saved rows: "Clear"
+                // empties that list, and what was added is still added. Otherwise the link goes
+                // where it says, the schedule: it used to be history.back(), which after a trip
+                // to Google's permission screen was Google.
                 var app = window.__importApp;
                 if (app && app.addedAny) {
+                    e.preventDefault();
                     window.location.href = @json(route('event.import_done', ['subdomain' => $role->subdomain]));
-                    return;
                 }
-                // Straight from Google's permission screen, the page before this one is Google's.
-                if (new URLSearchParams(window.location.search).has('source')
-                    || (document.referrer && document.referrer.indexOf(window.location.origin) !== 0)) {
-                    window.location.href = @json(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']));
-                    return;
-                }
-                history.back();
+                return;
             }
             // Leaving for another way to import throws the preview away, like Back.
             var leaving = e.target.closest('.js-leave-import');

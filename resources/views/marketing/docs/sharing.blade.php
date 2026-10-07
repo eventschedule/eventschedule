@@ -7,8 +7,11 @@
     <x-slot:toc>
         <x-doc-nav-link href="#schedule-url">Your Schedule URL</x-doc-nav-link>
         <x-doc-nav-link href="#embed">Embedding on Your Website</x-doc-nav-link>
+        <x-doc-nav-link href="#embed-parameters" sub>URL Parameters</x-doc-nav-link>
+        <x-doc-nav-link href="#embed-subscribe-form" sub>Embedding a Signup Form</x-doc-nav-link>
         <x-doc-nav-link href="#social">Social Media Sharing</x-doc-nav-link>
         <x-doc-nav-link href="#followers">Building Followers</x-doc-nav-link>
+        <x-doc-nav-link href="#managing-followers" sub>Managing Followers</x-doc-nav-link>
         <x-doc-nav-link href="#calendar-feeds">Calendar Subscriptions</x-doc-nav-link>
         <x-doc-nav-link href="#qr-code">QR Codes</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Embed Troubleshooting</x-doc-nav-link>
@@ -23,28 +26,19 @@
             </svg>
             Your Schedule URL
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Every schedule gets a unique, shareable URL. This is the primary way people will find and view your events.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule has a public page with its own address. It is how people find and view your events, and everything else on this page (embeds, followers, feeds, the QR code) starts from it.</p>
 
-        <x-doc-screenshot id="sharing--guest-portal" alt="Public schedule page" loading="eager" />
+        <x-doc-screenshot id="sharing--guest-portal" alt="A public schedule page, as a visitor sees it" loading="eager" />
 
-        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Your schedule URL format:</p>
-            <code class="doc-inline-code">{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}</code>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The address has the form <code class="doc-inline-code">{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}</code>. On eventschedule.com the schedule's name comes in front of the site's address; on a selfhosted install it follows it.</p>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Share this link anywhere:</p>
-        <ul class="doc-list">
-            <li>Your website or bio</li>
-            <li>Social media profiles</li>
-            <li>Email signatures</li>
-            <li>Printed materials</li>
-        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You do not have to work it out. In the admin panel the address is shown under the schedule's name, at the top of every tab of that schedule, with two links beside it: <strong class="text-gray-900 dark:text-white">Copy</strong> puts the full address on your clipboard, and <strong class="text-gray-900 dark:text-white">View</strong> opens the page in a new tab once the schedule's email address has been confirmed. Paste it into your website or bio, your social profiles, an email signature, or printed material.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Every event also has its own permanent URL underneath the schedule URL, and every sub-schedule has one too, so you can point people at one strand of your programme instead of the whole calendar.</p>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Enterprise Feature: Custom Domain</div>
-            <p>With an Enterprise plan, you can use your own domain (e.g. <code class="doc-inline-code">events.yourdomain.com</code>) for a more professional look. Configure this in <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Schedule Settings</a>. Once a custom domain is live it becomes the canonical address, so it is the one your QR code and your feed URLs point at.</p>
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">Your own domain <x-doc-badge plan="enterprise" /></div>
+            <p>With an Enterprise plan the schedule can live on your own domain, such as <code class="doc-inline-code">events.yourdomain.com</code>. Set it up under <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Edit Schedule &rarr; Settings</a>. Once the domain is live it is the address shown under the schedule's name, and the one your <a href="#qr-code" class="doc-link">QR code</a> and follow link point at.</p>
         </div>
     </section>
 
@@ -59,10 +53,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Add your schedule directly to your website with an iframe. It loads live from Event Schedule, so your events update on your site without any extra work. Embedding the calendar is available on every plan, including Free.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">See our <a href="{{ marketing_url('/features/embed-calendar') }}" class="doc-link">embed calendar feature page</a> for a full overview and demo.</p>
 
-        <h3 class="doc-subheading">Getting the Embed Code</h3>
+        <h3 class="doc-subheading" id="embed-code">Getting the Embed Code</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open your schedule in the admin portal</li>
-            <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu and choose <strong class="text-gray-900 dark:text-white">Embed Schedule</strong></li>
+            <li>Open your schedule in the admin portal. Any of its tabs will do</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Actions</strong> menu beside the schedule's name and choose <strong class="text-gray-900 dark:text-white">Embed Schedule</strong>. A dialog opens over the page</li>
             <li>Leave <strong class="text-gray-900 dark:text-white">Widget</strong> on <strong class="text-gray-900 dark:text-white">Calendar</strong>. The other option, <strong class="text-gray-900 dark:text-white">Signup form</strong>, is covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a> below</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Theme</strong>. <strong class="text-gray-900 dark:text-white">Match the visitor's device</strong> follows each visitor's light or dark setting; choose Light or Dark to match your website instead</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Layout</strong>. Leave it on <strong class="text-gray-900 dark:text-white">Schedule default</strong> to follow your schedule's own Default Layout, or choose Calendar or List to pin this one frame</li>
@@ -71,16 +65,15 @@
             <li>Paste it into your website where you want the schedule to appear</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The theme and layout pickers only rewrite the code you copy. They never change your schedule's own Default Layout setting.</p>
+        <x-doc-screenshot id="sharing--embed-dialog" alt="The Embed Schedule dialog: the Widget, Theme and Layout pickers, the Embed URL, the Iframe Code and a preview" />
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Free Plans Get a Credit Line</div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The theme and layout pickers only rewrite the code you copy. They never change your schedule's own Default Layout setting.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A single event can be embedded too, as a purchase or RSVP form. The RSVP form embed is free on every plan; the ticket purchase widget is a Pro feature. See the <a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="doc-link">Embed Widget</a> section in the Selling Tickets guide.</p>
+
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">Free plans get a credit line <x-doc-badge plan="free" /></div>
             <p>On a Free hosted plan the copied snippet includes a small "Powered by Event Schedule" line underneath the iframe. It sits outside the frame, so you can see exactly what you are pasting. <a href="{{ route('marketing.docs.schedule_styling') }}#remove-branding" class="doc-link">Removing branding</a> is a Pro feature. Selfhosted installs never add the line.</p>
-        </div>
-
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Embed Tickets Too</div>
-            <p>An individual event URL can also be embedded as a purchase or RSVP form. The RSVP form embed is free on every plan; the ticket purchase widget is a Pro feature. See the <a href="{{ route('marketing.docs.tickets') }}#embed-widget" class="doc-link">Embed Widget</a> section in the Selling Tickets guide.</p>
         </div>
 
         <h3 class="doc-subheading" id="embed-parameters">URL Parameters</h3>
@@ -124,7 +117,7 @@
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">lang=xx</code></td>
-                        <td>Switch the frame to your schedule's second language, the one set by <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Details. Any other language code is dropped and the frame falls back to your schedule's own language</td>
+                        <td>Switch the frame to your schedule's second language, the one set by <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Details &rarr; Language and time</a>. Any other language code is dropped and the frame falls back to your schedule's own language</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">month=3</code> &amp; <code class="doc-inline-code">year=2027</code></td>
@@ -154,10 +147,7 @@
         width="100%" height="800" frameborder="0" style="border: none;"&gt;&lt;/iframe&gt;</code></pre>
         </div>
 
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Give the Calendar Room</div>
-            <p>The month calendar needs about 768px of frame width to render as a grid. Below that it falls back to a day-by-day agenda, which looks much like the list. If you are putting two frames side by side in narrow columns, expect both to show the agenda.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Give the calendar room. The month calendar needs about 768px of frame width to render as a grid. Below that it falls back to a day-by-day agenda, which looks much like the list. If you are putting two frames side by side in narrow columns, expect both to show the agenda.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Which Layout Wins</div>
@@ -176,7 +166,7 @@
         <h3 class="doc-subheading" id="embed-subscribe-form">Embedding a Signup Form</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">You can also put your <a href="#followers" class="doc-link">email sign-up</a> form on your own website, so visitors can ask to hear about your new events without leaving it. People who sign up there join the same list as those who sign up on your schedule page. Like the calendar embed, it is free on every plan.</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab and click <strong class="text-gray-900 dark:text-white">Embed Signup Form</strong>, or open <strong class="text-gray-900 dark:text-white">Actions &rarr; Embed Schedule</strong> and set <strong class="text-gray-900 dark:text-white">Widget</strong> to <strong class="text-gray-900 dark:text-white">Signup form</strong></li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab and click <strong class="text-gray-900 dark:text-white">Embed Signup Form</strong>, beside the QR Code button at the top, or open <strong class="text-gray-900 dark:text-white">Actions &rarr; Embed Schedule</strong> from any tab and set <strong class="text-gray-900 dark:text-white">Widget</strong> to <strong class="text-gray-900 dark:text-white">Signup form</strong>. Both open the same dialog. The second way is the one to use on a selfhosted install that has no subscribers yet, where the Followers tab is not shown</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Theme</strong> that suits your website, and check the preview</li>
             <li>Copy the code and paste it into your website where you want the form to appear</li>
         </ol>
@@ -184,14 +174,14 @@
             <li><strong class="text-gray-900 dark:text-white">It sizes itself.</strong> The code is an iframe plus one short script that lets the frame fit the form, the error message and the "check your email" note. If your website builder removes scripts, the frame keeps a fixed height of 520 pixels, which fits the form even on a phone</li>
             <li><strong class="text-gray-900 dark:text-white">It sits on your page.</strong> The form is a card on a clear background, in your schedule's accent colour, rather than on your schedule's background image</li>
             <li><strong class="text-gray-900 dark:text-white">It asks for confirmation.</strong> Everyone who signs up gets an email with a confirmation link, exactly as on your schedule page, and is emailed nothing else until they open it</li>
-            <li><strong class="text-gray-900 dark:text-white">You can see it working.</strong> People who signed up through the embedded form carry a <strong class="text-gray-900 dark:text-white">Website</strong> badge on the Followers tab</li>
+            <li><strong class="text-gray-900 dark:text-white">You can see it working.</strong> People who signed up through the embedded form carry a <strong class="text-gray-900 dark:text-white">Website</strong> chip beside their name on the Followers tab</li>
             <li><strong class="text-gray-900 dark:text-white">It shows even with the panel off.</strong> Turning off <strong class="text-gray-900 dark:text-white">Show Sign-Up Panel</strong> hides the panel on your schedule page, not the form you embedded</li>
             <li><code class="doc-inline-code">lang=</code> and <code class="doc-inline-code">dark=</code> work here too, as in the <a href="#embed-parameters" class="doc-link">table above</a></li>
         </ul>
 
-        <div class="doc-callout doc-callout-warning">
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Keep New-Event Emails On</div>
-            <p>What subscribers get automatically is the digest of your new public events, sent at most once every few days. It is controlled by <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Settings &rarr; Notifications</a>. With it off, people can still sign up but will only hear from you when you send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>, so the embed dialog warns you. On eventschedule.com, digests to more than 50 subscribers also need a verified phone number or your own SMTP settings, and the dialog warns about that too.</p>
+            <p>What subscribers get automatically is the digest of your new public events, sent at most once every few days. It is controlled by <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Edit Schedule &rarr; Settings &rarr; Notifications</a>. With it off, people can still sign up but will only hear from you when you send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>, so the embed dialog says so in an amber notice with a link to the setting. On eventschedule.com, digests to more than 50 subscribers also need a verified phone number or your own SMTP settings, and the dialog warns about that too.</p>
         </div>
     </section>
 
@@ -236,15 +226,36 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Your audience is everyone who asked to hear from you: people who follow your schedule with an account, and people who signed up with their name and email address. Together they are who your newsletters go to, and the list builds up over time.</p>
 
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Following and Subscribing Are Different Lists</div>
-            <p>Somebody who leaves their name and email address on your page and confirms it is a <strong class="text-gray-900 dark:text-white">subscriber</strong>, and subscribers are sent a digest automatically when you publish new public events, batched and no more often than once every few days. Somebody signed in who presses Follow is an <strong class="text-gray-900 dark:text-white">account follower</strong>, and pressing Follow on its own reaches them only when you write and send a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a>. Confirming a sign-up does both: it starts the digest and sets up an account that follows your schedule, so they are listed once, under Email subscribers, with an Account badge. If someone wants your events on their own calendar with no email at all, point them at the <a href="#calendar-feeds" class="doc-link">calendar feed</a> instead.</p>
+        <h3 class="doc-subheading" id="followers-two-lists">Subscribers and Followers Are Different Lists</h3>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Who</th>
+                        <th>How they join</th>
+                        <th>What reaches them</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Email subscriber</span></td>
+                        <td>Leaves a name and email address on your page, or in your embedded form, and opens the confirmation link</td>
+                        <td>A digest sent automatically when you publish new public events, batched and no more often than once every few days, plus any newsletter you send</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Account follower</span></td>
+                        <td>Presses Follow while signed in</td>
+                        <td>Only a <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a> you write and send. Pressing Follow on its own starts nothing automatic</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Confirming a sign-up does both: it starts the digest and sets up an account that follows your schedule, so that person is listed once, under Email subscribers, with an Account chip. If someone wants your events on their own calendar with no email at all, point them at the <a href="#calendar-feeds" class="doc-link">calendar feed</a> instead.</p>
 
         <h3 class="doc-subheading">How Following Works</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Follow</strong> button on your schedule page, and beside each act on an event page that runs its own schedule, does one of two things:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Signed in:</strong> a short dialog tells them the schedule will be able to see their name and email, and they can tick <strong class="text-gray-900 dark:text-white">Don't ask me again when I follow other schedules</strong>. Your schedule then appears on their <strong class="text-gray-900 dark:text-white">Following</strong> page, where they can copy your iCal or RSS feed, sync the schedule into their own Google Calendar, or unfollow at any time</li>
+            <li><strong class="text-gray-900 dark:text-white">Signed in:</strong> a short dialog tells them the schedule will be able to see their name and email, and they can tick <strong class="text-gray-900 dark:text-white">Don't ask me again when I follow other schedules</strong>. Your schedule then appears on their <strong class="text-gray-900 dark:text-white">Following</strong> page, in the sidebar of their own account, where the <strong class="text-gray-900 dark:text-white">Actions</strong> menu on your row lets them copy your iCal or RSS feed, sync the schedule into their own Google Calendar once they have connected one, or unfollow at any time</li>
             <li><strong class="text-gray-900 dark:text-white">Signed out:</strong> the same dialog asks for their email and name instead, and works exactly like the sign-up panel below. Nobody is sent away to create an account first</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Follow button is part of the hosted version at eventschedule.com. On a selfhosted install, the sign-up panel is how people join.</p>
@@ -260,23 +271,29 @@
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">For the details of the checkout opt-in and the digest, see <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">Email Subscribers</a>.</p>
 
-        <h3 class="doc-subheading">Managing Followers</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal. The tab label carries the running total, so you can see how big your audience is without opening it. Inside you get:</p>
-        <ul class="doc-list">
-            <li>Three panels counting your audience: <strong class="text-gray-900 dark:text-white">Can be emailed</strong>, <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> and <strong class="text-gray-900 dark:text-white">Newsletter only</strong></li>
-            <li>Your email subscribers, each with a status, an <strong class="text-gray-900 dark:text-white">Account</strong> badge on those who have an account, and a <strong class="text-gray-900 dark:text-white">Website</strong> badge on those who signed up through your <a href="#embed-subscribe-form" class="doc-link">embedded signup form</a></li>
-            <li>A table of account followers: name, email, their own schedule if they run one, and the date they followed you</li>
-            <li>Sortable columns, newest first by default, and paging once the list grows</li>
-            <li>An <strong class="text-gray-900 dark:text-white">Embed Signup Form</strong> button, covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a></li>
-            <li>A <strong class="text-gray-900 dark:text-white">QR Code</strong> button, covered in <a href="#qr-code" class="doc-link">QR Codes</a> below</li>
-        </ul>
-        <p class="text-gray-600 dark:text-gray-300 mt-4 mb-4">Everything on the tab is covered in <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Managing Schedules: Followers</a>.</p>
+        <h3 class="doc-subheading" id="managing-followers">Managing Followers</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab of your schedule in the admin portal. The tab label carries the running total, so you can see how big your audience is without opening it. On a selfhosted install the tab appears once you have your first email subscriber. From top to bottom it holds:</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4>Three figures and two buttons</h4>
+                <p><strong class="text-gray-900 dark:text-white">Can be emailed</strong>, <strong class="text-gray-900 dark:text-white">Get new-event emails</strong> and <strong class="text-gray-900 dark:text-white">Newsletter only</strong> count your audience in one strip. Beside it are <strong class="text-gray-900 dark:text-white">Embed Signup Form</strong>, covered in <a href="#embed-subscribe-form" class="doc-link">Embedding a Signup Form</a>, and <strong class="text-gray-900 dark:text-white">QR Code</strong>, covered in <a href="#qr-code" class="doc-link">QR Codes</a> below.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Email subscribers</h4>
+                <p>One row per address, with the total and a line breaking it down into confirmed, awaiting confirmation and unsubscribed. Each row gives the name and email, a status (<strong class="text-gray-900 dark:text-white">Confirmed</strong>, <strong class="text-gray-900 dark:text-white">Awaiting confirmation</strong> or <strong class="text-gray-900 dark:text-white">Unsubscribed</strong>), the date, and <strong class="text-gray-900 dark:text-white">Delete</strong> for the owner and admins. An <strong class="text-gray-900 dark:text-white">Account</strong> chip marks those who have an account, and a <strong class="text-gray-900 dark:text-white">Website</strong> chip those who signed up through your <a href="#embed-subscribe-form" class="doc-link">embedded signup form</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Followers</h4>
+                <p>The account followers: name and email, their own schedule if they run one, and the date they followed you. Click <strong class="text-gray-900 dark:text-white">Name</strong> or <strong class="text-gray-900 dark:text-white">Date</strong> to sort; the list starts newest first.</p>
+            </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A list that is empty is left out, and each one pages once it grows. Before anyone has joined, the tab shows the two buttons and <strong class="text-gray-900 dark:text-white">Your follow link</strong> instead. Everything on the tab is covered in <a href="{{ route('marketing.docs.managing_schedules') }}#followers" class="doc-link">Managing Schedules: Followers</a>.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> to your followers to keep them engaged and promote upcoming events. Newsletters are available on every plan, and the monthly allowance counts recipients rather than sends: a newsletter to 100 followers uses 100 of the allowance.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Privacy</div>
-            <p>Followers and subscribers are both told, before they join, that the schedule will see the name and email they give. You and your team see them on the Followers tab and the newsletter pages; they never appear on your public pages, your embeds or your public stats, and Event Schedule never sells or shares them.</p>
+            <p>Followers and subscribers are both told, before they join, that the schedule will see the name and email they give, and whether they open its newsletters and click the links in them. You and your team see them on the Followers tab, on the newsletter pages and in the recent activity on your dashboard; they never appear on your public pages, your embeds or your public stats. Their details are shared with your schedule only, and Event Schedule never sells them.</p>
         </div>
     </section>
 
@@ -295,9 +312,9 @@
         <ul class="doc-list mb-4">
             <li>On an event page, the <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu ends with <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule. The menu is there, on a phone as well as a computer, whenever the event is not selling tickets, taking registrations or sending buyers to an outside ticket link</li>
             <li>The <strong class="text-gray-900 dark:text-white">Stay up to date</strong> sign-up panel, shown to signed-out visitors on your schedule page and your event pages, ends with the same link and the line "Adds a live calendar that updates itself when dates change."</li>
-            <li>Your followers can use <strong class="text-gray-900 dark:text-white">Copy iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">Copy RSS Feed</strong> on their own <strong class="text-gray-900 dark:text-white">Following</strong> page</li>
+            <li>Your followers can use <strong class="text-gray-900 dark:text-white">Copy iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">Copy RSS Feed</strong> in the Actions menu of your row on their own <strong class="text-gray-900 dark:text-white">Following</strong> page</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">To copy the addresses yourself, edit your schedule in the admin portal and open <strong class="text-gray-900 dark:text-white">Integrations &rarr; Advanced</strong>. The <strong class="text-gray-900 dark:text-white">iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">RSS Feed</strong> fields each have a copy button.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To copy the addresses yourself, choose <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>, open the <strong class="text-gray-900 dark:text-white">Integrations</strong> tab and then its last row, <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-advanced" class="doc-link">Calendar text and feeds</a>. The <strong class="text-gray-900 dark:text-white">iCal Feed</strong> and <strong class="text-gray-900 dark:text-white">RSS Feed</strong> fields each have a copy button.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -343,12 +360,14 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Generate a QR code for your schedule to use in printed materials, posters, or at your venue. It is available on every plan, including Free.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab in the admin portal</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">QR Code</strong>. The image downloads straight away as <code class="doc-inline-code">qr-code.png</code>, a PNG about 300 pixels square with a quiet margin already around it</li>
+            <li>Open the <strong class="text-gray-900 dark:text-white">Followers</strong> tab of your schedule in the admin portal</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">QR Code</strong>, at the top of the tab beside Embed Signup Form. The image downloads straight away as <code class="doc-inline-code">qr-code.png</code>, a PNG about 300 pixels square with a quiet margin already around it</li>
             <li>Use it on flyers, posters, table tents, or anywhere else</li>
         </ol>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">When scanned, the QR code opens your schedule with the sign-up form ready: for anyone not signed in, the page scrolls straight to the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel, so they can sign up on the spot. That works even if you have turned the panel off for everyone else. Until your first follower or subscriber arrives, the Followers tab also shows <strong class="text-gray-900 dark:text-white">Your follow link</strong>, which opens the same place. If you have an Enterprise custom domain set up, both point at that domain rather than the eventschedule.com address.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When scanned, the QR code opens your schedule with the sign-up form ready: for anyone not signed in, the page scrolls straight to the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel, so they can sign up on the spot. That works even if you have turned the panel off for everyone else. Until your first follower or subscriber arrives, the Followers tab also shows <strong class="text-gray-900 dark:text-white">Your follow link</strong> with a copy button, which opens the same place. If you have an Enterprise custom domain set up, both point at that domain rather than the eventschedule.com address.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install the Followers tab is shown once the schedule has its first email subscriber, so the button is not there before that. What the QR code holds is the schedule's address with <code class="doc-inline-code">?subscribe=1</code> on the end, so until the tab appears you can share that link, or make a code from it with any QR generator.</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">A Different QR Code from Ticket Check-In</div>
@@ -367,9 +386,9 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Common issues when embedding your schedule and how to fix them.</p>
 
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">The frame is empty or the browser refuses to load it</h3>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The frame is empty or the browser refuses to load it</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Almost always a missing <code class="doc-inline-code">?embed=true</code>. Every other Event Schedule URL is served with framing switched off, so a plain schedule link inside an iframe is refused by the browser. Copy the Embed URL out of the Embed Schedule dialog rather than out of your address bar. Privacy extensions that block third-party frames are the other, rarer cause; test in a private window.</p>
             </div>
             <div class="doc-field">
@@ -390,11 +409,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong theme</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add <code class="doc-inline-code">&amp;dark=true</code> to the embed URL to force dark mode. See <a href="#embed-parameters" class="doc-link">URL Parameters</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Pick <strong class="text-gray-900 dark:text-white">Light</strong> or <strong class="text-gray-900 dark:text-white">Dark</strong> under Theme in the Embed Schedule dialog and copy the code again, or add <code class="doc-inline-code">&amp;dark=true</code> or <code class="doc-inline-code">&amp;dark=false</code> to the embed URL yourself. See <a href="#embed-parameters" class="doc-link">URL Parameters</a>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Embed shows the wrong language</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><code class="doc-inline-code">&amp;lang=</code> only accepts your schedule's second language. Any other code is dropped and the frame falls back to your schedule's own language. Turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Details first.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><code class="doc-inline-code">&amp;lang=</code> only accepts your schedule's second language. Any other code is dropped and the frame falls back to your schedule's own language. Turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> under Edit Schedule &rarr; Details &rarr; Language and time first.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">An event is missing from the embed</h4>
@@ -402,9 +421,14 @@
             </div>
         </div>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Responsive Embed Code</div>
-            <pre class="text-xs text-gray-600 dark:text-gray-300 mt-2 overflow-x-auto"><code>&lt;div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;"&gt;
+        <h3 class="doc-subheading" id="responsive-embed">Responsive Embed Code</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To keep the frame in proportion to the column it sits in, wrap it in a container that sets the height from the width:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>A frame that keeps a 4:3 shape</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>&lt;div style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;"&gt;
 &lt;iframe src="{{ route('role.view_guest', ['subdomain' => 'your-schedule-name']) }}?embed=true"
 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
 frameborder="0"&gt;&lt;/iframe&gt;
@@ -468,7 +492,7 @@ frameborder="0"&gt;&lt;/iframe&gt;
                 {
                     "@type": "HowToStep",
                     "name": "Offer a Calendar Feed",
-                    "text": "Guests can subscribe to all your events as a live calendar feed from the Add to Calendar menu on an event page or from the sign-up panel, and a date you move updates in their calendar on its own. Copy the iCal and RSS feed URLs from Integrations, Advanced in the admin portal.",
+                    "text": "Guests can subscribe to all your events as a live calendar feed from the Add to Calendar menu on an event page or from the sign-up panel, and a date you move updates in their calendar on its own. Copy the iCal and RSS feed URLs from the Calendar text and feeds row of the Integrations tab when you edit your schedule.",
                     "url": "{{ url(route('marketing.docs.sharing')) }}#calendar-feeds"
                 }
             ]

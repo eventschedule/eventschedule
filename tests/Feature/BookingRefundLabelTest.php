@@ -9,10 +9,11 @@ use Tests\Feature\Concerns\FakesStripeRefunds;
 use Tests\TestCase;
 
 /**
- * The desktop Sales menu's refund label for an appointment booking.
+ * The Sales menu's refund label for an appointment booking.
  *
- * A booking is not a ticket, and the phone menu already says plain "Refund" for it. The desktop
- * menu said "Refund Ticket" for every gateway refund.
+ * A booking is not a ticket, so its refund reads plain "Refund"; the menu said "Refund Ticket"
+ * for every gateway refund. (The list is one for every width since the 2026-10 redesign; the
+ * phone used to have a menu of its own, which is why the helper below is named for the desktop.)
  */
 class BookingRefundLabelTest extends TestCase
 {

@@ -1608,46 +1608,9 @@
         </script>
     </x-slot>
 
-    <!-- Header with Back Button -->
-    <div class="flex justify-between items-center gap-6 pb-6">
-        @if (is_rtl())
-            <div class="flex items-center gap-3">
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    {{ __('messages.back') }}
-                </a>
-            </div>
-
-            <div class="flex items-center text-right">
-                @if ($role->profile_image_url)
-                    <div class="pe-4">
-                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                    </div>
-                @endif
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ __('messages.events_graphic') }}
-                </h2>
-            </div>
-        @else
-            <div class="flex items-center">
-                @if ($role->profile_image_url)
-                    <div class="pe-4">
-                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                    </div>
-                @endif
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ __('messages.events_graphic') }}
-                </h2>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']) }}"
-                   class="inline-flex items-center justify-center rounded-md bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    {{ __('messages.back') }}
-                </a>
-            </div>
-        @endif
-    </div>
+    {{-- Reached from the schedule's own page, so the way back is the schedule, by name. --}}
+    <x-page-header :title="__('messages.events_graphic')" :image="$role->profile_image_url ?: null"
+        :back="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])" :back-label="$role->name" />
 
     @if (!empty($timezoneMismatchCount))
     <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 mb-6">

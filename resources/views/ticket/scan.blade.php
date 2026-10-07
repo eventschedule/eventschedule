@@ -5,6 +5,10 @@
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
         <script src="{{ asset('js/html5-qrcode.min.js') }}" {!! nonce_attr() !!}></script>
 
+        {{-- The scanner (html5-qrcode) draws its own buttons inside #reader, so they are dressed
+             from here by the ids it gives them. Plain CSS: the two rules for Start and Stop were
+             written with a Tailwind directive that only a CSS build understands, in a block no
+             build ever reads, so those buttons were the browser's own grey ones. --}}
         <style {!! nonce_attr() !!}>
             #reader {
                 border: none !important;
@@ -14,143 +18,202 @@
                 border-radius: 1rem !important;
             }
             #html5-qrcode-button-camera-permission {
-                background-color: var(--brand-button-bg); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.15s;
+                border-radius: 0.5rem;
+                padding: 0.75rem 1.25rem;
+                background-color: var(--brand-button-bg);
+                font-size: 1rem;
+                font-weight: 600;
+                color: #fff;
+                transition: background-color 0.15s;
             }
             #html5-qrcode-button-camera-permission:hover {
                 background-color: var(--brand-button-bg-hover);
             }
             #html5-qrcode-button-camera-start,
-            #html5-qrcode-button-camera-stop {
-                @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors mt-2;
-            }
-            .dark #html5-qrcode-button-camera-start,
-            .dark #html5-qrcode-button-camera-stop {
-                background-color: rgb(var(--ap-border));
+            #html5-qrcode-button-camera-stop,
+            #html5-qrcode-button-torch {
+                margin-top: 0.5rem;
+                border: 1px solid rgb(var(--ap-border-strong));
+                border-radius: 0.5rem;
+                padding: 0.625rem 1rem;
+                background-color: rgb(var(--ap-surface));
+                font-size: 0.9375rem;
+                font-weight: 500;
                 color: rgb(var(--ap-ink-2));
+                transition: background-color 0.15s;
             }
-            .dark #html5-qrcode-button-camera-start:hover,
-            .dark #html5-qrcode-button-camera-stop:hover {
-                background-color: #3d3d40;
+            #html5-qrcode-button-camera-start:hover,
+            #html5-qrcode-button-camera-stop:hover,
+            #html5-qrcode-button-torch:hover {
+                background-color: rgb(var(--ap-surface-hover));
             }
             .html5-qrcode-element {
-                @apply mb-4;
+                margin-bottom: 1rem;
+            }
+            /* What the scanner writes around its buttons follows the palette too. */
+            #reader,
+            #reader span,
+            #reader select {
+                color: rgb(var(--ap-ink-2));
+            }
+            .dark #reader img {
+                filter: invert(0.85);
+            }
+
+            .scan-picker {
+                margin-bottom: 1.25rem;
+            }
+            .scan-note {
+                margin: 0.375rem 0 0;
+                font-size: 0.8125rem;
+                color: rgb(var(--ap-ink-3));
+            }
+            .scan-note b {
+                font-weight: 500;
+                color: rgb(var(--ap-ink-2));
+            }
+            .scan-result {
+                border-width: 1px;
+                border-radius: 0.75rem;
+                padding: 1.25rem;
+            }
+            .scan-seat {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 3rem;
+                border-width: 1px;
+                border-radius: 0.5rem;
+                font-weight: 600;
             }
         </style>
-    
+
     </x-slot>
 
-    <div id="app" class="max-w-2xl mx-auto px-4">
+    <div class="page-shell page-col is-narrow">
+        <x-page-header :title="__('messages.scan_ticket')" :lead="__('messages.scan_lead')"
+                       :back="route('sales')" :back-label="__('messages.sales')">
+            <x-slot name="actions">
+                <x-secondary-link :href="route('checkin.index')">{{ __('messages.checkin_dashboard') }}</x-secondary-link>
+            </x-slot>
+        </x-page-header>
 
         @include('partials.team-access-notice', ['roles' => $planBlockedRoles])
-        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-none dark:border dark:border-gray-700 p-6">
-            <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">{{ __('messages.scan_ticket') }}</h2>
 
-            <!-- Event context: which event the operator is scanning at (governs subscription redemption) -->
-            @if (!empty($events) && count($events) > 0)
-            <div class="mb-5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('messages.scanning_at_event') }}</label>
-                <x-event-selector />
-                <p v-if="selectedEvent" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('messages.scanning_at') }}: <span class="font-medium text-gray-700 dark:text-gray-300">@{{ selectedEvent.name }}</span><template v-if="selectedEvent.starts_at"> &middot; @{{ selectedEvent.starts_at }}</template>
-                </p>
-            </div>
-            @endif
+        <div id="app">
+            <div class="ap-card rounded-xl page-card">
 
-            <div id="reader" class="max-w-md mx-auto"></div>
-            
-            <div v-if="scanResult" class="mt-6 text-center">
-                <div :class="['border rounded-lg p-4', toneBoxClass]">
-                    <div class="flex flex-col items-center justify-center">
-                        <!-- Success Icon -->
-                        <svg v-if="resultTone === 'success'" class="w-12 h-12 text-green-600 dark:text-green-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2,4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"></path>
-                        </svg>
-                        <!-- Warning Icon -->
-                        <svg v-else-if="resultTone === 'warning'" class="w-12 h-12 text-orange-600 dark:text-orange-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        <!-- Info Icon -->
-                        <svg v-else-if="resultTone === 'info'" class="w-12 h-12 text-blue-600 dark:text-blue-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <!-- Error Icon -->
-                        <svg v-else class="w-12 h-12 text-red-600 dark:text-red-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
+                {{-- Event context: which event the operator is scanning at (governs subscription redemption) --}}
+                @if (!empty($events) && count($events) > 0)
+                <div class="scan-picker">
+                    <p class="page-card-title mb-2">{{ __('messages.scanning_at_event') }}</p>
+                    <x-event-selector />
+                    <p v-if="selectedEvent" class="scan-note">
+                        {{ __('messages.scanning_at') }}: <b>@{{ selectedEvent.name }}</b><template v-if="selectedEvent.starts_at"> &middot; @{{ selectedEvent.starts_at }}</template>
+                    </p>
+                </div>
+                @endif
 
-                        <!-- Season Pass badge -->
-                        <span v-if="isPass" class="mb-2 inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-xs font-semibold text-[var(--brand-blue)]">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
-                            @{{ passBadgeLabel }}
-                        </span>
+                <div id="reader" class="max-w-md mx-auto"></div>
 
-                        <p :class="['font-medium text-center', toneTextClass]">
-                            <template v-if="paymentStatus === 'overdue'">@{{ overdueTitle }}</template>
-                            <template v-else-if="errorMessage">@{{ errorMessage }}</template>
-                            <template v-else-if="isPass">@{{ passTitle }}</template>
-                            <template v-else>{{ __('messages.ticket_scanned_successfully') }}</template>
-                        </p>
-                        <p v-if="paymentStatus === 'overdue'" :class="['text-sm text-center mt-1', toneTextClass]">
-                            @{{ overdueSub }}
-                        </p>
-                    </div>
+                <div v-if="scanResult" class="text-center" role="status" aria-live="assertive">
+                    <div :class="['scan-result', toneBoxClass]">
+                        <div class="flex flex-col items-center justify-center">
+                            {{-- Success --}}
+                            <svg v-if="resultTone === 'success'" class="w-12 h-12 text-green-600 dark:text-green-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{-- Admit, but look at this --}}
+                            <svg v-else-if="resultTone === 'warning'" class="w-12 h-12 text-orange-600 dark:text-orange-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            {{-- Something to know --}}
+                            <svg v-else-if="resultTone === 'info'" class="w-12 h-12 text-blue-600 dark:text-blue-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{-- Not admitted --}}
+                            <svg v-else class="w-12 h-12 text-red-600 dark:text-red-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
 
-                    <div v-if="eventDetails && !errorMessage" class="mt-4 text-start">
-                        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">@{{ eventDetails.event }}</h3>
-                        <p v-if="eventDetails.date" class="text-gray-600 dark:text-gray-400 mt-1">
-                            <span v-if="isPass && passStatus === 'no_event_today'" class="font-medium">{{ __('messages.pass_next_event') }}: </span>@{{ eventDetails.date }}
-                        </p>
+                            {{-- Season pass or subscription --}}
+                            <span v-if="isPass" class="mb-2 inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-xs font-semibold text-[var(--brand-blue)]">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
+                                @{{ passBadgeLabel }}
+                            </span>
 
-                        <div class="mt-6 pb-2 text-gray-700 dark:text-gray-300">
-                            <p><span class="font-medium">{{ __('messages.attendee') }}:</span> @{{ eventDetails.attendee }}</p>
+                            <p :class="['text-lg font-semibold text-center', toneTextClass]">
+                                <template v-if="paymentStatus === 'overdue'">@{{ overdueTitle }}</template>
+                                <template v-else-if="errorMessage">@{{ errorMessage }}</template>
+                                <template v-else-if="isPass">@{{ passTitle }}</template>
+                                <template v-else>{{ __('messages.ticket_scanned_successfully') }}</template>
+                            </p>
+                            <p v-if="paymentStatus === 'overdue'" :class="['text-sm text-center mt-1', toneTextClass]">
+                                @{{ overdueSub }}
+                            </p>
                         </div>
 
-                        <!-- Pass / subscription: redemption context -->
-                        <template v-if="isPass">
-                            <div class="mt-2 text-gray-700 dark:text-gray-300 space-y-1">
-                                <p v-if="passStatus === 'already_today' && eventDetails.checked_in_at">{{ __('messages.pass_entered_at') }} @{{ eventDetails.checked_in_at }}</p>
-                                <p v-if="passStatus === 'too_early' && eventDetails.check_in_opens">{{ __('messages.pass_check_in_opens_at') }} @{{ eventDetails.check_in_opens }}</p>
-                                <p v-if="passUsesLabel" class="text-sm font-medium">@{{ passUsesLabel }}</p>
-                                <template v-if="admitsPerEvent > 1 && (passStatus === 'valid' || passStatus === 'already_today')">
-                                    <p v-if="admitsLabel" class="text-sm font-semibold">@{{ admitsLabel }}</p>
-                                    <p v-if="passStatus === 'valid' && admitsRemaining > 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_scan_again_for_guest') }}</p>
-                                    <p v-else-if="passStatus === 'valid' && admitsRemaining === 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_all_guests_admitted') }}</p>
-                                </template>
-                                <p v-if="eventDetails.valid_until" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.pass_valid_until') }} @{{ eventDetails.valid_until }}</p>
-                            </div>
-                        </template>
+                        <div v-if="eventDetails && !errorMessage" class="mt-4 text-start">
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100"><bdi>@{{ eventDetails.event }}</bdi></h2>
+                            <p v-if="eventDetails.date" class="text-gray-600 dark:text-gray-400 mt-1">
+                                <span v-if="isPass && passStatus === 'no_event_today'" class="font-medium">{{ __('messages.pass_next_event') }}: </span>@{{ eventDetails.date }}
+                            </p>
 
-                        <!-- Standard ticket: seat grid -->
-                        <template v-else>
-                            <div class="mt-4">
-                                <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
-                                    <h4 class="font-medium text-gray-700 dark:text-gray-300">@{{ ticket.type }} {{ __('messages.ticket') }}</h4>
-                                    <div class="flex flex-wrap gap-2 mt-2">
-                                        <div v-for="(status, seat, index) in ticket.seats"
-                                             :key="seat"
-                                             :class="[
-                                                 'h-12 rounded-lg flex items-center justify-center font-medium border',
-                                                 seatLabel(ticket, index) ? 'min-w-12 px-3 text-sm' : 'w-12',
-                                                 status ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800' : 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
-                                             ]">
-                                            @{{ seatLabel(ticket, index) || seat }}
+                            <p class="mt-4 pb-2 text-gray-700 dark:text-gray-300">
+                                <span class="font-medium">{{ __('messages.attendee') }}:</span> <bdi>@{{ eventDetails.attendee }}</bdi>
+                            </p>
+
+                            {{-- Pass / subscription: redemption context --}}
+                            <template v-if="isPass">
+                                <div class="mt-2 text-gray-700 dark:text-gray-300 space-y-1">
+                                    <p v-if="passStatus === 'already_today' && eventDetails.checked_in_at">{{ __('messages.pass_entered_at') }} @{{ eventDetails.checked_in_at }}</p>
+                                    <p v-if="passStatus === 'too_early' && eventDetails.check_in_opens">{{ __('messages.pass_check_in_opens_at') }} @{{ eventDetails.check_in_opens }}</p>
+                                    <p v-if="passUsesLabel" class="text-sm font-medium">@{{ passUsesLabel }}</p>
+                                    <template v-if="admitsPerEvent > 1 && (passStatus === 'valid' || passStatus === 'already_today')">
+                                        <p v-if="admitsLabel" class="text-sm font-semibold">@{{ admitsLabel }}</p>
+                                        <p v-if="passStatus === 'valid' && admitsRemaining > 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_scan_again_for_guest') }}</p>
+                                        <p v-else-if="passStatus === 'valid' && admitsRemaining === 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_all_guests_admitted') }}</p>
+                                    </template>
+                                    <p v-if="eventDetails.valid_until" class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.pass_valid_until') }} @{{ eventDetails.valid_until }}</p>
+                                </div>
+                            </template>
+
+                            {{-- Standard ticket: seat grid --}}
+                            <template v-else>
+                                <div class="mt-4">
+                                    <div v-for="ticket in eventDetails.tickets" :key="ticket.type" class="mb-3">
+                                        <h3 class="font-medium text-gray-700 dark:text-gray-300">@{{ ticket.type }} {{ __('messages.ticket') }}</h3>
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <div v-for="(status, seat, index) in ticket.seats"
+                                                 :key="seat"
+                                                 :class="[
+                                                     'scan-seat',
+                                                     seatLabel(ticket, index) ? 'min-w-12 px-3 text-sm' : 'w-12',
+                                                     status ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800' : 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
+                                                 ]">
+                                                @{{ seatLabel(ticket, index) || seat }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <p v-if="hasUsedSeats" class="text-red-500 dark:text-red-400 font-medium text-center py-2">{{ __('messages.warning_ticket_used') }}</p>
-                        </template>
+                                <p v-if="hasUsedSeats" class="text-red-600 dark:text-red-400 font-medium text-center py-2">{{ __('messages.warning_ticket_used') }}</p>
+                            </template>
+                        </div>
+
                     </div>
 
+                    {{-- What to do next, the one that goes on at the end: a thumb's width each on
+                         a phone. --}}
+                    <div class="page-form-actions">
+                        <button v-if="isPass && passStatus === 'valid' && admitsRemaining > 0" v-on:click="admitNextGuest" type="button"
+                                class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                            {{ __('messages.pass_admit_guest') }} (@{{ admitsRemaining }})
+                        </button>
+                        <x-brand-button v-on:click="startNewScan">
+                            {{ __('messages.scan_another_ticket') }}
+                        </x-brand-button>
+                    </div>
                 </div>
-
-                <button v-if="isPass && passStatus === 'valid' && admitsRemaining > 0" @click="admitNextGuest"
-                        class="mt-6 me-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                        {{ __('messages.pass_admit_guest') }} (@{{ admitsRemaining }})
-                </button>
-                <button @click="startNewScan" class="mt-6 bg-[var(--brand-button-bg)] text-white px-4 py-2 rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                        {{ __('messages.scan_another_ticket') }}
-                </button>
             </div>
         </div>
     </div>

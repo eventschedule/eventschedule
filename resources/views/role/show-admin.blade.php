@@ -2,8 +2,6 @@
 <x-app-admin-layout>
 
     <x-slot name="head">
-        @include('partials.form-kit-styles')
-        @include('partials.admin-page-styles')
         @if ($tab == 'availability')
         <style {!! nonce_attr() !!}>
             .day-x {
@@ -432,7 +430,9 @@
         </nav>
     </div>
 
-    <div class="{{ in_array($tab, ['schedule', 'availability', 'appointments'], true) ? '' : 'page-col' }}">
+    {{-- Every tab is the layout's frame. The list tabs kept to a 64rem column here while the
+         header above them and the calendar tabs ran the full width. --}}
+    <div>
     @if ($tab == 'schedule')
     @include('role.show-admin-schedule')
     @elseif ($tab == 'templates')

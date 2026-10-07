@@ -278,7 +278,7 @@ class RouteLoadTest extends DuskTestCase
                 '/tickets',
                 '/sales',
                 '/analytics',
-                '/realtime',
+                '/analytics?tab=realtime',
                 '/newsletters',
                 '/newsletters/create',
                 '/newsletter-segments',

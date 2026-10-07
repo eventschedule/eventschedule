@@ -1,5 +1,59 @@
-{{-- Subdomain Autocomplete --}}
+{{-- The schedule picker under a search or subdomain box: type two letters and it offers the
+     schedules that match. Included by three pages (schedules, domains, boost), each of which
+     writes the box ([data-subdomain-autocomplete]) and an empty list beside it
+     ([data-subdomain-dropdown]) inside one positioned wrapper.
+
+     The list's look lives here, on the attribute, so the three pages cannot drift: the one on
+     /admin/boost had no background at all and the campaigns showed through it. --}}
+<style {!! nonce_attr() !!}>
+    [data-subdomain-dropdown] {
+      z-index: 50;
+      max-height: 15rem;
+      overflow-y: auto;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      background: rgb(var(--ap-surface));
+      box-shadow: var(--ap-shadow-dropdown);
+      text-align: start;
+    }
+    .subdomain-option {
+      display: block;
+      width: 100%;
+      border: 0;
+      border-radius: 0.5rem;
+      padding: 0.4375rem 0.625rem;
+      background: none;
+      text-align: start;
+      cursor: pointer;
+    }
+    .subdomain-option:hover,
+    .subdomain-option:focus-visible {
+      background: var(--ap-tint-1);
+      outline: none;
+    }
+    .subdomain-option-name {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: rgb(var(--ap-ink));
+      overflow-wrap: anywhere;
+    }
+    .subdomain-option-city {
+      margin-inline-start: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: rgb(var(--ap-ink-4));
+    }
+    .subdomain-option-sub {
+      display: block;
+      font-size: 0.75rem;
+      color: rgb(var(--ap-ink-3));
+    }
+</style>
+
 <script {!! nonce_attr() !!}>
+    // Kept for any page script that still calls it; the list below is built from text nodes.
     function escapeHtml(str) {
         if (!str) return '';
         var div = document.createElement('div');
@@ -9,6 +63,9 @@
 
     document.querySelectorAll('[data-subdomain-autocomplete]').forEach(function(input) {
         var dropdown = input.parentElement.querySelector('[data-subdomain-dropdown]');
+        if (!dropdown) {
+            return;
+        }
         var debounceTimer = null;
         // Extra query string for this one input. This partial is included by three pages
         // (schedules, domains, boost), so the params cannot be hardcoded in the fetch below:
@@ -16,13 +73,17 @@
         // exactly what its table can return, while the other two keep the plain default.
         var extraParams = input.getAttribute('data-subdomain-params') || 'admin_listable=1';
 
+        function close() {
+            dropdown.classList.add('hidden');
+            dropdown.textContent = '';
+        }
+
         input.addEventListener('input', function() {
             var q = this.value.trim();
             clearTimeout(debounceTimer);
 
             if (q.length < 2) {
-                dropdown.classList.add('hidden');
-                dropdown.innerHTML = '';
+                close();
                 return;
             }
 
@@ -35,28 +96,71 @@
                 })
                 .then(function(res) { return res.json(); })
                 .then(function(results) {
-                    dropdown.innerHTML = '';
+                    dropdown.textContent = '';
                     if (results.length === 0) {
                         dropdown.classList.add('hidden');
                         return;
                     }
                     results.forEach(function(item) {
-                        var row = document.createElement('div');
-                        row.className = 'px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
-                        var nameText = item.name || item.subdomain;
-                        var cityText = item.city ? ' <span class="text-xs text-gray-400">' + escapeHtml(item.city) + '</span>' : '';
-                        row.innerHTML = '<div class="font-medium text-sm text-gray-900 dark:text-gray-100">' + escapeHtml(nameText) + cityText + '</div>'
-                            + '<div class="text-xs text-gray-500 dark:text-gray-400">' + escapeHtml(item.subdomain) + '</div>';
+                        // A button, so the list can be reached and chosen from with the keyboard.
+                        var row = document.createElement('button');
+                        row.type = 'button';
+                        row.className = 'subdomain-option';
+
+                        var name = document.createElement('span');
+                        name.className = 'subdomain-option-name';
+                        name.dir = 'auto';
+                        name.appendChild(document.createTextNode(item.name || item.subdomain));
+                        if (item.city) {
+                            var city = document.createElement('span');
+                            city.className = 'subdomain-option-city';
+                            city.appendChild(document.createTextNode(item.city));
+                            name.appendChild(city);
+                        }
+
+                        var sub = document.createElement('span');
+                        sub.className = 'subdomain-option-sub';
+                        sub.dir = 'ltr';
+                        sub.appendChild(document.createTextNode(item.subdomain));
+
+                        row.appendChild(name);
+                        row.appendChild(sub);
                         row.addEventListener('click', function() {
                             input.value = item.subdomain;
-                            dropdown.classList.add('hidden');
-                            dropdown.innerHTML = '';
+                            close();
+                            input.focus();
                         });
                         dropdown.appendChild(row);
                     });
                     dropdown.classList.remove('hidden');
+                })
+                .catch(function() {
+                    close();
                 });
             }, 300);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                close();
+            } else if (e.key === 'ArrowDown' && dropdown.firstElementChild) {
+                e.preventDefault();
+                dropdown.firstElementChild.focus();
+            }
+        });
+
+        dropdown.addEventListener('keydown', function(e) {
+            var current = document.activeElement;
+            if (e.key === 'Escape') {
+                close();
+                input.focus();
+            } else if (e.key === 'ArrowDown' && current.nextElementSibling) {
+                e.preventDefault();
+                current.nextElementSibling.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                (current.previousElementSibling || input).focus();
+            }
         });
     });
 
@@ -64,7 +168,7 @@
         document.querySelectorAll('[data-subdomain-dropdown]').forEach(function(dropdown) {
             if (!dropdown.parentElement.contains(e.target)) {
                 dropdown.classList.add('hidden');
-                dropdown.innerHTML = '';
+                dropdown.textContent = '';
             }
         });
     });

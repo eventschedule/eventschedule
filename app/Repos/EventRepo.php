@@ -1634,8 +1634,15 @@ class EventRepo
         // would auto-accept every guest submission onto the schedule it was sent to.
         $actingUser = auth()->user() ? $user : null;
 
+        // Schedules the caller carried over rather than named. Api\ApiEventController::update()
+        // lists everything an event is already on, so that an update which mentions none of it
+        // does not detach it, and this loop would then ANSWER for each one: a venue or a
+        // performer that had turned the event down was accepted again by a rename. Nothing else
+        // sends the key, and all it can do is leave an answer as it is.
+        $acceptanceKeptFor = array_map('intval', (array) $request->input('acceptance_kept_for', []));
+
         foreach ($roles as $role) {
-            if ($role->autoAcceptsEventFrom($actingUser, $currentRole)) {
+            if (! in_array((int) $role->id, $acceptanceKeptFor, true) && $role->autoAcceptsEventFrom($actingUser, $currentRole)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             }
 

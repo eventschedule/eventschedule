@@ -31,6 +31,13 @@ use Tests\TestCase;
  * demo flyers below 25 real events, the rail drops its pinned animation below 4, and
  * /for-talent hides its whole section below 4. A cap that shortened these lists would trade a
  * repetitive rail for a fake one.
+ *
+ * The second bug, 2026-10: nine of the 25 posters above the fold on the homepage were one
+ * schedule's profile photo. The walk was doing what it says, over a pool it was never going to
+ * win with: the 100 soonest rows, 74 of them one schedule's synced work calendar, so thirteen
+ * schedules reached it and the places they could not fill went back to the busiest. The pool is
+ * now drawn a few per schedule (candidates()), the walk shares what is left over in turns, and
+ * the homepage takes one per schedule before anybody's second.
  */
 class DiscoveryPerScheduleCapTest extends TestCase
 {
@@ -64,6 +71,65 @@ class DiscoveryPerScheduleCapTest extends TestCase
         ], range(1, 6)));
 
         $this->assertCount(6, DiscoveryUtils::spread($events, 25));
+    }
+
+    public function test_what_the_first_turn_leaves_is_shared_out_too(): void
+    {
+        // Head-then-tail used to hand every place the quota could not fill to whoever came next
+        // by date, which is the schedule with the most events: [1, 1, 2, 2, 3, 1, 1, 1, 2, 2].
+        $events = $this->fakeEvents([
+            ['schedule' => 1, 'image' => 'a.png', 'at' => '2026-10-01 19:00:00'],
+            ['schedule' => 1, 'image' => 'b.png', 'at' => '2026-10-02 19:00:00'],
+            ['schedule' => 1, 'image' => 'c.png', 'at' => '2026-10-03 19:00:00'],
+            ['schedule' => 1, 'image' => 'd.png', 'at' => '2026-10-04 19:00:00'],
+            ['schedule' => 1, 'image' => 'e.png', 'at' => '2026-10-05 19:00:00'],
+            ['schedule' => 2, 'image' => 'f.png', 'at' => '2026-10-06 19:00:00'],
+            ['schedule' => 2, 'image' => 'g.png', 'at' => '2026-10-07 19:00:00'],
+            ['schedule' => 2, 'image' => 'h.png', 'at' => '2026-10-08 19:00:00'],
+            ['schedule' => 2, 'image' => 'i.png', 'at' => '2026-10-09 19:00:00'],
+            ['schedule' => 3, 'image' => 'j.png', 'at' => '2026-10-10 19:00:00'],
+        ]);
+
+        $this->assertSame(
+            [1, 1, 2, 2, 3, 1, 1, 2, 2, 1],
+            $this->schedules(DiscoveryUtils::spread($events, 10))
+        );
+    }
+
+    public function test_one_per_schedule_puts_every_schedule_before_anybodys_second(): void
+    {
+        // What the homepage asks for. The busy schedule is first by date three times over.
+        $events = $this->fakeEvents([
+            ['schedule' => 1, 'image' => 'a.png', 'at' => '2026-10-01 19:00:00'],
+            ['schedule' => 1, 'image' => 'b.png', 'at' => '2026-10-02 19:00:00'],
+            ['schedule' => 1, 'image' => 'c.png', 'at' => '2026-10-03 19:00:00'],
+            ['schedule' => 2, 'image' => 'd.png', 'at' => '2026-10-04 19:00:00'],
+            ['schedule' => 2, 'image' => 'e.png', 'at' => '2026-10-05 19:00:00'],
+            ['schedule' => 3, 'image' => 'f.png', 'at' => '2026-10-06 19:00:00'],
+        ]);
+
+        $this->assertSame(
+            [1, 2, 3, 1, 2, 1],
+            $this->schedules(DiscoveryUtils::spread($events, 6, 1))
+        );
+    }
+
+    public function test_a_repeat_waits_for_everything_that_is_not_one(): void
+    {
+        // The second copy of a poster is the least useful card a schedule has, so it follows
+        // the schedule's other events rather than taking the first place the quota frees.
+        $events = $this->fakeEvents([
+            ['schedule' => 1, 'image' => 'same.png', 'at' => '2026-10-01 19:00:00'],
+            ['schedule' => 1, 'image' => 'same.png', 'at' => '2026-10-02 19:00:00'],
+            ['schedule' => 1, 'image' => 'b.png', 'at' => '2026-10-03 19:00:00'],
+            ['schedule' => 1, 'image' => 'c.png', 'at' => '2026-10-04 19:00:00'],
+            ['schedule' => 1, 'image' => 'd.png', 'at' => '2026-10-05 19:00:00'],
+        ]);
+
+        $this->assertSame(
+            ['same.png', 'b.png', 'c.png', 'd.png', 'same.png'],
+            $this->flyerNames(DiscoveryUtils::spread($events, 5))
+        );
     }
 
     public function test_the_same_flyer_twice_on_one_schedule_is_demoted(): void
@@ -201,9 +267,83 @@ class DiscoveryPerScheduleCapTest extends TestCase
         ]);
 
         $this->assertSame(
-            ['loud1.png', 'loud2.png', 'quiet.png', 'loud3.png', 'loud4.png'],
+            ['loud1.png', 'quiet.png', 'loud2.png', 'loud3.png', 'loud4.png'],
             $this->flyers($this->get('/')->assertOk(), 'discoverEvents'),
-            'Two from the festival, then the other schedule, then the demoted pair'
+            'One from each schedule, then the rest of the festival: the wall is pictures only'
+        );
+    }
+
+    public function test_a_busy_schedule_does_not_keep_the_others_out_of_the_pool(): void
+    {
+        // The pool used to be the 100 soonest rows. One schedule with more upcoming events than
+        // that (a synced calendar: a meeting every morning) WAS the pool, and no ordering of a
+        // pool can show a schedule that is not in it. Built the way production builds them:
+        // every way of creating an event sets the schedule that owns it.
+        $busy = $this->createRole($this->createOwner(), 'talent', [
+            'name' => 'Busy Calendar',
+            'profile_image_url' => 'busy.png',
+        ]);
+
+        foreach (range(1, DiscoveryUtils::CANDIDATE_POOL + 5) as $i) {
+            $this->createEvent($busy, [
+                'name' => 'Morning Call '.$i,
+                'creator_role_id' => $busy->id,
+                'starts_at' => now()->addDays($i)->setTime(7, 30)->format('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $quiet = $this->createRole($this->createOwner(), 'venue', ['name' => 'Quiet Room']);
+        $this->createEvent($quiet, [
+            'name' => 'Quiet Night',
+            'creator_role_id' => $quiet->id,
+            'flyer_image_url' => 'quiet.png',
+            // After every one of the calls, so it is past the hundredth row by date.
+            'starts_at' => now()->addDays(DiscoveryUtils::CANDIDATE_POOL + 50)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        $wall = $this->get('/')->assertOk()->viewData('discoverEvents');
+
+        $this->assertSame(
+            ['Morning Call 1', 'Quiet Night', 'Morning Call 2'],
+            $wall->take(3)->map(fn ($e) => $e->name)->all()
+        );
+        $this->assertCount(25, $wall, 'A pool cut to a few per schedule is topped up, never left short');
+
+        $browse = $this->get('/browse')->assertOk()->viewData('events');
+
+        $this->assertSame(
+            ['Morning Call 1', 'Morning Call 2', 'Quiet Night'],
+            $browse->take(3)->map(fn ($e) => $e->name)->all()
+        );
+        $this->assertCount(24, $browse);
+    }
+
+    public function test_an_event_with_no_owning_schedule_is_counted_against_its_author(): void
+    {
+        // creator_role_id is nullable and old rows lack it. Each of them in a bucket of its own
+        // would bring the crowding back for exactly those rows.
+        $busy = $this->createRole($this->createOwner(), 'talent', [
+            'name' => 'Busy Calendar',
+            'profile_image_url' => 'busy.png',
+        ]);
+
+        foreach (range(1, DiscoveryUtils::CANDIDATE_POOL + 5) as $i) {
+            $this->createEvent($busy, [
+                'name' => 'Morning Call '.$i,
+                'starts_at' => now()->addDays($i)->setTime(7, 30)->format('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $quiet = $this->createRole($this->createOwner(), 'venue', ['name' => 'Quiet Room']);
+        $this->createEvent($quiet, [
+            'name' => 'Quiet Night',
+            'flyer_image_url' => 'quiet.png',
+            'starts_at' => now()->addDays(DiscoveryUtils::CANDIDATE_POOL + 50)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        $this->assertContains(
+            'Quiet Night',
+            $this->get('/browse')->assertOk()->viewData('events')->map(fn ($e) => $e->name)->all()
         );
     }
 
@@ -232,7 +372,7 @@ class DiscoveryPerScheduleCapTest extends TestCase
         $this->createEvent($quiet, [
             'name' => 'Quiet Night',
             'flyer_image_url' => 'quiet.png',
-            // Last by date, so only the spread can lift it above the festival's third night.
+            // Last by date, so only the spread can lift it above the festival's second night.
             'starts_at' => now()->addDays(9)->setTime(9, 30)->format('Y-m-d H:i:s'),
         ]);
 
@@ -242,7 +382,7 @@ class DiscoveryPerScheduleCapTest extends TestCase
 
         $this->assertNotNull($cached, 'The homepage wall must be cached');
         $this->assertSame(
-            ['loud1.png', 'loud2.png', 'quiet.png', 'loud3.png'],
+            ['loud1.png', 'quiet.png', 'loud2.png', 'loud3.png'],
             $this->flyerNames($cached),
             'The cached collection must already be spread, not the raw candidate pool'
         );

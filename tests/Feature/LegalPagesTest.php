@@ -506,9 +506,9 @@ class LegalPagesTest extends TestCase
     }
 
     /**
-     * The Legal link lives in the System dropdown, so the System tab has to read as active
-     * while you are on the page it contains. $systemActive in _navigation.blade.php is a
-     * literal list of section keys, and 'legal' was simply never added to it.
+     * Legal pages is a page of the System group, so the System tab has to read as the one you
+     * are in while you are on it, and the group's second row has to say which page this is. The
+     * groups are one list in _navigation.blade.php; 'legal' was once simply missing from it.
      */
     public function test_the_admin_page_marks_the_system_tab_active(): void
     {
@@ -516,21 +516,16 @@ class LegalPagesTest extends TestCase
 
         $content = $this->get(route('admin.legal'))->assertOk()->getContent();
 
-        // The System <button>'s own class attribute. [^>] is load-bearing: it cannot cross the
-        // tag boundary, so this cannot accidentally match the active styling on a dropdown ITEM
-        // further down - which is what made the first version of this test pass either way.
-        $matched = preg_match(
-            '/openDropdown === \'system\' \? null : \'system\'"[^>]*class="([^"]*)"/',
-            $content,
-            $m
-        );
+        // The System tab's own tag. [^>] is load-bearing: it cannot cross the tag boundary, so
+        // this cannot accidentally match the mark on a page of the second row further down,
+        // which is what made the first version of this test pass either way.
+        $this->assertSame(1, preg_match('/<a [^>]*data-admin-group="system"[^>]*>/', $content, $tab), 'Could not find the System tab in the admin nav');
+        $this->assertStringContainsString('aria-current="true"', $tab[0], 'The System tab should read as current on /admin/legal');
 
-        $this->assertSame(1, $matched, 'Could not find the System tab button in the admin nav');
-        $this->assertStringContainsString(
-            'border-[var(--brand-blue)]',
-            $m[1],
-            'The System tab should be styled active on /admin/legal'
-        );
+        $this->assertSame(1, preg_match('/<a [^>]*data-admin-group="insights"[^>]*>/', $content, $other));
+        $this->assertStringNotContainsString('aria-current', $other[0], 'and no other group does');
+
+        $this->assertSame(1, preg_match('/<a href="[^"]*"\s+class="ap-subtab"\s+aria-current="page"\s*>\s*'.preg_quote(__('messages.legal_pages'), '/').'/', $content), 'the second row names the page');
     }
 
     public function test_a_legal_document_keeps_its_own_direction_regardless_of_the_viewers_locale(): void

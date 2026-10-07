@@ -25,386 +25,745 @@
 
     <style {!! nonce_attr() !!}>
         /* ==============================================================
-           For-ai-agents "The Console" styles.
+           For-ai-agents "The Man Page" styles.
 
-           THE CONCEPT IS THE REQUEST/RESPONSE LEDGER, NOT A TERMINAL
-           WINDOW. /selfhost already owns the terminal, and a fake shell
-           with three traffic lights is a costume anyway. What a
-           developer actually reads is a transaction: a method, a path,
-           a body, a status code, a body back. So every claim on this
-           page is made in that form, and the page's structure is the
-           ledger itself - a status line per section, a 27-row endpoint
-           table, four exchanges, and a final exchange that hands you a
-           key.
+           The page has two readers, a developer and the agent the
+           developer will point at it, so it is set the way a manual
+           page is set: one fixed-pitch face, one size, and every edge
+           on the character grid. Columns are measured in ch, rows in
+           the 1.5rem line, and the only other sizes are whole
+           multiples of the base (2x for a section's sentence, 4x for
+           the name) so that large letters still land on cells.
 
-           MATERIAL: every code-bearing surface (.es-cons-term) is
-           ALWAYS DARK, in both colour modes, exactly as the product's
-           own docs shell renders code. That is the page's fixed
-           physical object: pin it and verify with
-           --bands=.es-cons-term,.es-cons-band (expect 0 diffs). Its
-           inks are .es-cons-bright / .es-cons-dim / .es-cons-lit and
-           carry no `dark:` variant, by design.
+           By day it is the printed manual: paper, ink and one signal
+           orange. By night it is an amber terminal. The syntax inks
+           are spent as meaning, never as decoration: teal is an
+           identifier or a read, green a value or a success, amber a
+           number or an update, red a failure or a removal.
 
-           COLOUR: the page keeps its existing cyan + emerald family,
-           but spends it SEMANTICALLY rather than decoratively. Cyan is
-           an identifier (keys, paths, GET), emerald is a value or a
-           success (strings, 2xx, POST), amber is a mutation (PUT,
-           numbers), red is a removal (DELETE, 4xx). Those four are the
-           same four the API reference uses for its method dots, so the
-           page and the docs are already the same system.
-
-           NEVER text-gray-500 on this ground: #6b7280 measures 4.83 on
-           pure white but only ~4.4 on #f2f4f5. Use .es-cons-muted
-           (#4a545b, 7.02 on the light ground, 7.75 on a white card).
+           Everything is scoped under #ax. The shared reveal system
+           (marketing.css, marketing-home.js) still times the entrances.
            ============================================================== */
 
-        /* --- Ground and ink --- */
-        .es-cons-page { background-color: #f2f4f5; color: #0f1417; }
-        .dark .es-cons-page { background-color: #080c0e; color: #e6eef1; }
-        .es-cons-ink { color: #0f1417; }
-        .dark .es-cons-ink { color: #e6eef1; }
-        .es-cons-muted { color: #4a545b; }
-        .dark .es-cons-muted { color: #93a3aa; }
-        .es-cons-key { color: #155e75; }
-        .dark .es-cons-key { color: #67e8f9; }
-
-        /* Inks for the ALWAYS-DARK surfaces. No `dark:` twin: these must
-           read the same with .dark on and off. */
-        .es-cons-bright { color: #e6eef1; }
-        .es-cons-dim { color: #9fb0b7; }
-        .es-cons-lit { color: #67e8f9; }
-        .es-cons-lit-ok { color: #6ee7b7; }
-
-        .es-cons-mono {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-            font-variant-numeric: tabular-nums;
+        @property --ax-pct {
+            syntax: '<integer>';
+            inherits: true;
+            initial-value: 0;
         }
 
-        /* --- The status line: this page's section mark. A solid block
-               cursor, the section label, then a hairline to the edge. --- */
-        .es-cons-mark {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: #4a545b;
-        }
-        .dark .es-cons-mark { color: #93a3aa; }
-        .es-cons-mark::before {
-            content: "";
-            flex: none;
-            width: 0.5rem;
-            height: 0.95rem;
-            border-radius: 1px;
-            background: #155e75;
-        }
-        .dark .es-cons-mark::before { background: #67e8f9; }
-        .es-cons-mark::after {
-            content: "";
-            flex: 1 1 auto;
-            height: 1px;
-            background: rgba(15, 20, 23, 0.14);
-        }
-        .dark .es-cons-mark::after { background: rgba(230, 238, 241, 0.14); }
-
-        /* Section rules. A page-local class rather than an arbitrary
-           `border-[rgba(...)]` utility, because Tailwind generates
-           arbitrary values at BUILD time and this page ships no build. */
-        .es-cons-hr { border-color: rgba(15, 20, 23, 0.08); }
-        .dark .es-cons-hr { border-color: rgba(230, 238, 241, 0.08); }
-
-        /* --- Cards on the mode-following ground --- */
-        .es-cons-card {
-            background: #ffffff;
-            border: 1px solid rgba(15, 20, 23, 0.12);
-            border-radius: 0.9rem;
-        }
-        .dark .es-cons-card {
-            background: rgba(230, 238, 241, 0.045);
-            border-color: rgba(230, 238, 241, 0.12);
-        }
-
-        /* --- THE CONSOLE SURFACE. Identical in both colour modes. --- */
-        .es-cons-term {
-            background-color: #0b1113;
-            background-image: linear-gradient(180deg, #101719 0%, #0a1012 62%, #080d0f 100%);
-            border: 1px solid rgba(230, 238, 241, 0.13);
-            border-radius: 0.9rem;
-            box-shadow: inset 0 1px 0 rgba(230, 238, 241, 0.06), 0 18px 40px -24px rgba(0, 0, 0, 0.55);
-        }
-        .es-cons-bar {
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
-            flex-wrap: wrap;
-            padding: 0.6rem 0.9rem;
-            background: rgba(230, 238, 241, 0.03);
-            border-bottom: 1px solid rgba(230, 238, 241, 0.1);
-        }
-        .es-cons-rule { border-top: 1px solid rgba(230, 238, 241, 0.1); }
-        .es-cons-pre {
-            margin: 0;
-            padding: 0.9rem;
-            overflow-x: auto;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-            font-size: 0.76rem;
-            line-height: 1.65;
-            color: #e6eef1;
-            white-space: pre;
-            tab-size: 2;
-        }
-        /* JSON tokens. Dark-surface only, so no mode twin. */
-        .es-cons-t-key { color: #67e8f9; }
-        .es-cons-t-str { color: #6ee7b7; }
-        .es-cons-t-num { color: #fcd34d; }
-        .es-cons-t-pun { color: #8fa1a8; }
-
-        /* --- Method chips. Dark-surface only. --- */
-        .es-cons-m {
-            display: inline-flex;
-            align-items: center;
-            flex: none;
-            padding: 0.14rem 0.42rem;
-            border-radius: 0.28rem;
-            border: 1px solid transparent;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.62rem;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-            white-space: nowrap;
-        }
-        .es-cons-m-get { color: #67e8f9; background: rgba(34, 211, 238, 0.13); border-color: rgba(103, 232, 249, 0.3); }
-        .es-cons-m-post { color: #6ee7b7; background: rgba(52, 211, 153, 0.13); border-color: rgba(110, 231, 183, 0.3); }
-        .es-cons-m-put { color: #fcd34d; background: rgba(251, 191, 36, 0.13); border-color: rgba(252, 211, 77, 0.3); }
-        .es-cons-m-del { color: #fca5a5; background: rgba(248, 113, 113, 0.13); border-color: rgba(252, 165, 165, 0.32); }
-
-        /* --- Status-code chips. Dark-surface only. --- */
-        .es-cons-sc {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.34rem;
-            flex: none;
-            padding: 0.14rem 0.46rem;
-            border-radius: 0.28rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.62rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            white-space: nowrap;
-            color: #6ee7b7;
-            background: rgba(52, 211, 153, 0.12);
-            border: 1px solid rgba(110, 231, 183, 0.3);
-        }
-        .es-cons-sc::before {
-            content: "";
-            width: 5px;
-            height: 5px;
-            border-radius: 9999px;
-            background: currentColor;
-        }
-        .es-cons-sc-err { color: #fca5a5; background: rgba(248, 113, 113, 0.12); border-color: rgba(252, 165, 165, 0.32); }
-
-        /* --- The exchange: request pane, a flowing hairline, response pane. --- */
-        .es-cons-flow {
+        #ax {
+            --ax-bg: #f7f5ef;
+            --ax-bg-2: #efece3;
+            --ax-ink: #191816;
+            --ax-ink-2: #45423b;
+            --ax-dim: #6a665c;
+            --ax-line: rgba(25, 24, 22, 0.24);
+            --ax-line-2: rgba(25, 24, 22, 0.1);
+            --ax-sig: #b93d0a;
+            --ax-hot: #d9480f;
+            --ax-key: #0f6b6b;
+            --ax-str: #2d6a1e;
+            --ax-num: #8a5a00;
+            --ax-err: #b3261e;
+            --ax-solid: #191816;
+            --ax-on-solid: #f7f5ef;
+            --ax-solid-dim: #b9b4a6;
+            --ax-solid-sig: #ff9a5c;
+            --ax-on-tag: #f7f5ef;
+            --ax-l: 1.5rem;
+            --ax-mono: ui-monospace, 'SF Mono', SFMono-Regular, 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', monospace;
             position: relative;
-            overflow: hidden;
-            height: 1px;
-            background: rgba(230, 238, 241, 0.12);
+            background: var(--ax-bg);
+            color: var(--ax-ink);
+            font-family: var(--ax-mono);
+            font-size: 1rem;
+            line-height: var(--ax-l);
+            font-variant-ligatures: none;
+            font-feature-settings: "liga" 0, "calt" 0;
+            tab-size: 2;
+            counter-reset: ax-sec;
         }
-        .es-cons-flow::after {
-            content: "";
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 18%;
-            height: 3px;
-            border-radius: 2px;
-            background: linear-gradient(90deg, rgba(34, 211, 238, 0), #22d3ee, #34d399, rgba(52, 211, 153, 0));
-            animation: es-cons-run 2.8s linear infinite;
-        }
-        @keyframes es-cons-run {
-            from { transform: translateX(-120%); }
-            to { transform: translateX(600%); }
-        }
-
-        /* --- Blinking block cursor after the headline. Stepped, so it
-               reads as a cursor rather than a soft pulse. --- */
-        .es-cons-caret {
-            display: inline-block;
-            width: 0.56ch;
-            height: 0.88em;
-            margin-left: 0.12em;
-            vertical-align: -0.05em;
-            border-radius: 1px;
-            background: #155e75;
-            animation: es-cons-blink 1.1s steps(1) infinite;
-        }
-        .dark .es-cons-caret { background: #67e8f9; }
-        @keyframes es-cons-blink {
-            0%, 50% { opacity: 1; }
-            50.01%, 100% { opacity: 0; }
+        .dark #ax {
+            --ax-bg: #0c0c0b;
+            --ax-bg-2: #161614;
+            --ax-ink: #ecdfc6;
+            --ax-ink-2: #d3c5a8;
+            --ax-dim: #9c9381;
+            --ax-line: rgba(255, 180, 84, 0.3);
+            --ax-line-2: rgba(255, 180, 84, 0.13);
+            --ax-sig: #ffb454;
+            --ax-hot: #ffb454;
+            --ax-key: #7fd4cf;
+            --ax-str: #9bdc8f;
+            --ax-num: #f2cc60;
+            --ax-err: #ff8f85;
+            --ax-solid: #ffb454;
+            --ax-on-solid: #0c0c0b;
+            --ax-solid-dim: #4a3410;
+            --ax-solid-sig: #0c0c0b;
+            --ax-on-tag: #0c0c0b;
         }
 
-        /* --- Ledger rows. The table gets a floor width so the three
-               columns never crush; its wrapper scrolls, not the page. --- */
-        .es-cons-table { min-width: 38rem; }
-        .es-cons-tr { border-top: 1px solid rgba(230, 238, 241, 0.08); }
-        .es-cons-tr:hover { background: rgba(230, 238, 241, 0.035); }
-        .es-cons-grp { background: rgba(230, 238, 241, 0.05); }
+        /* The bar above takes the manual's stock, so the page reads as one sheet. */
+        body > header.sticky {
+            background-color: rgba(247, 245, 239, 0.9);
+            border-bottom-color: rgba(25, 24, 22, 0.18);
+        }
+        .dark body > header.sticky {
+            background-color: rgba(12, 12, 11, 0.9);
+            border-bottom-color: rgba(255, 180, 84, 0.22);
+        }
 
-        /* --- Plan tags on the mode-following ground --- */
-        .es-cons-plan {
+        #ax ::selection { background: var(--ax-solid); color: var(--ax-on-solid); }
+        #ax a:focus-visible,
+        #ax summary:focus-visible,
+        #ax input:focus-visible {
+            outline: 2px solid var(--ax-hot);
+            outline-offset: 2px;
+        }
+
+        .ax-wrap { position: relative; width: min(100% - 3ch, 128ch); margin-inline: auto; }
+
+        /* ---------------------------------------------------------------
+           The voices. One size; weight and ink do the rest.
+           --------------------------------------------------------------- */
+        #ax h1, #ax h2, #ax h3 { font-family: inherit; font-weight: 700; }
+        #ax .ax-k { color: var(--ax-key); }
+        #ax .ax-s { color: var(--ax-str); }
+        #ax .ax-n { color: var(--ax-num); }
+        #ax .ax-p { color: var(--ax-dim); }
+        .ax-dim { color: var(--ax-dim); }
+        .ax-em { color: var(--ax-hot); }
+        .dark .ax-em,
+        .dark .ax-h1,
+        .dark .ax-h2 { text-shadow: 0 0 0.9em rgba(255, 180, 84, 0.22); }
+        .ax-link {
+            color: var(--ax-sig);
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 0.2em;
+        }
+        .ax-link:hover { text-decoration-thickness: 2px; }
+        /* A link on a line of its own is as tall as its glyphs, 19px. Padding on an inline box
+           makes the target taller without moving a line. */
+        p > .ax-link,
+        .ax-ref a { padding-block: 0.25rem; }
+        .ax-prose { max-width: 72ch; text-wrap: pretty; color: var(--ax-ink-2); }
+        .ax-prose + .ax-prose { margin-top: var(--ax-l); }
+        .ax-prose strong { color: var(--ax-ink); font-weight: 700; }
+
+        .ax-h2 {
+            max-width: 46ch;
+            font-size: 2rem;
+            line-height: 3rem;
+            text-wrap: balance;
+        }
+        .ax-h2 + .ax-prose { margin-top: var(--ax-l); }
+        @media (max-width: 760px) {
+            .ax-h2 { font-size: 1.5rem; line-height: 2.25rem; }
+        }
+
+        /* Plan tags, in brackets, the way a manual marks an option. */
+        .ax-tag { color: var(--ax-dim); white-space: nowrap; }
+        .ax-tag::before { content: "["; }
+        .ax-tag::after { content: "]"; }
+        .ax-tag-pro { color: var(--ax-sig); font-weight: 700; }
+        .ax-tag-free { color: var(--ax-str); font-weight: 700; }
+        .ax-chips { display: flex; flex-wrap: wrap; gap: 0.75rem 1ch; margin-top: var(--ax-l); }
+        .ax-chip { padding-inline: 1ch; box-shadow: inset 0 0 0 1px var(--ax-line); color: var(--ax-ink-2); white-space: nowrap; }
+
+        /* Keys. The solid one is reverse video; the plain one is in brackets. */
+        .ax-btn {
             display: inline-flex;
             align-items: center;
-            flex: none;
-            padding: 0.1rem 0.42rem;
-            border-radius: 0.25rem;
-            border: 1px solid rgba(21, 94, 117, 0.42);
-            color: #155e75;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.58rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-        .dark .es-cons-plan { border-color: rgba(103, 232, 249, 0.42); color: #67e8f9; }
-        .es-cons-plan-pro { border-color: rgba(15, 20, 23, 0.32); color: #0f1417; }
-        .dark .es-cons-plan-pro { border-color: rgba(230, 238, 241, 0.35); color: #e6eef1; }
-        /* A plan tag can also sit on an ALWAYS-DARK console surface, where the
-           light-mode inks would be invisible (#0f1417 on #0b1113 measures 1.03).
-           Pin both, after the .dark rules so source order settles the tie. */
-        .es-cons-term .es-cons-plan { border-color: rgba(103, 232, 249, 0.42); color: #67e8f9; }
-        .es-cons-term .es-cons-plan-pro { border-color: rgba(230, 238, 241, 0.35); color: #e6eef1; }
-
-        /* --- Chips --- */
-        .es-cons-chip {
-            display: inline-flex;
-            align-items: center;
-            white-space: nowrap;
-            padding: 0.3rem 0.72rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(15, 20, 23, 0.14);
-            background: rgba(255, 255, 255, 0.75);
-            color: #4a545b;
-            font-size: 0.7rem;
+            gap: 1ch;
+            padding: 0.75rem 2ch;
+            background: var(--ax-solid);
+            color: var(--ax-on-solid);
             font-weight: 700;
-            letter-spacing: 0.05em;
+            white-space: nowrap;
+            box-shadow: inset 0 0 0 1px var(--ax-solid);
+            transition: background-color 0.12s steps(2), color 0.12s steps(2);
         }
-        .dark .es-cons-chip {
-            border-color: rgba(230, 238, 241, 0.16);
-            background: rgba(230, 238, 241, 0.05);
-            color: #b0bcc2;
+        .ax-btn:hover { background: transparent; color: var(--ax-sig); }
+        .ax-btn-alt { background: transparent; color: var(--ax-ink); box-shadow: none; padding-inline: 0; }
+        .ax-btn-alt::before { content: "["; color: var(--ax-dim); }
+        .ax-btn-alt::after { content: "]"; color: var(--ax-dim); }
+        .ax-btn-alt:hover { color: var(--ax-sig); }
+        .ax-btn i { font-style: normal; transition: translate 0.15s ease; }
+        .ax-btn:hover i { translate: 0.5ch 0; }
+        .ax-btn-alt:hover i { translate: 0 0.2rem; }
+
+        /* ---------------------------------------------------------------
+           Sections: a flush-left name, an indented body, a number.
+           --------------------------------------------------------------- */
+        .ax-sec {
+            padding-block: calc(var(--ax-l) * 2) calc(var(--ax-l) * 4);
+            border-top: 1px solid var(--ax-line);
+            counter-increment: ax-sec;
+            scroll-margin-top: 4rem;
+        }
+        .ax-sec-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 2ch;
+            margin-bottom: calc(var(--ax-l) * 2);
+        }
+        .ax-name { display: block; font-weight: 700; color: var(--ax-ink); }
+        .ax-ref { color: var(--ax-dim); white-space: nowrap; }
+        .ax-ref a:hover { color: var(--ax-sig); }
+        .ax-ref::after { content: "  \00a7" counter(ax-sec); }
+        .ax-body { padding-inline-start: 8ch; }
+        .ax-gap { margin-top: calc(var(--ax-l) * 2); }
+        .ax-gap-1 { margin-top: var(--ax-l); }
+        @media (max-width: 900px) {
+            .ax-body { padding-inline-start: 0; }
+            .ax-sec { padding-block: var(--ax-l) calc(var(--ax-l) * 3); }
+            .ax-sec-head { margin-bottom: var(--ax-l); }
         }
 
-        /* --- Gradient accent word. Light stops on the light ground
-               (6.59 and 4.97), bright stops only in dark. --- */
-        .es-cons-grad {
-            background-image: linear-gradient(100deg, #155e75, #047857);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
+        /* ---------------------------------------------------------------
+           Code. Each line is its own span, so it can carry a number and
+           arrive on its own.
+           --------------------------------------------------------------- */
+        .ax-box { background: var(--ax-bg-2); box-shadow: inset 0 0 0 1px var(--ax-line); min-width: 0; }
+        .ax-box-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0 2ch;
+            padding: 0.75rem 2ch;
+            box-shadow: inset 0 -1px 0 var(--ax-line);
         }
-        .dark .es-cons-grad { background-image: linear-gradient(100deg, #67e8f9, #6ee7b7); }
+        .ax-box-head > .ax-right { margin-inline-start: auto; color: var(--ax-dim); }
+        .ax-path { font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
+        .ax-param { color: var(--ax-sig); }
+        #ax .ax-code {
+            margin: 0;
+            padding: 0.75rem 2ch;
+            overflow-x: auto;
+            white-space: pre;
+            font: inherit;
+            color: var(--ax-ink);
+            background: none;
+            counter-reset: ax-ln;
+        }
+        .ax-num .ax-ln::before {
+            counter-increment: ax-ln;
+            content: counter(ax-ln);
+            display: inline-block;
+            width: 2ch;
+            margin-inline-end: 2ch;
+            text-align: end;
+            color: var(--ax-dim);
+            opacity: 0.75;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .ax-arrow { color: var(--ax-dim); }
+        .ax-verb {
+            display: inline-block;
+            width: 8ch;
+            text-align: center;
+            font-weight: 700;
+            background: var(--ax-v, var(--ax-ink));
+            color: var(--ax-on-tag);
+        }
+        .ax-get { --ax-v: var(--ax-key); }
+        .ax-post { --ax-v: var(--ax-str); }
+        .ax-put { --ax-v: var(--ax-num); }
+        .ax-del { --ax-v: var(--ax-err); }
+        .ax-sc { padding-inline: 1ch; font-weight: 700; color: var(--ax-str); box-shadow: inset 0 0 0 1px currentColor; white-space: nowrap; }
+        .ax-sc-err { color: var(--ax-err); }
 
-        /* --- Links and buttons --- */
-        .es-cons-link { color: #0e7490; }
-        .es-cons-link:hover { color: #0f1417; }
-        .dark .es-cons-link { color: #67e8f9; }
-        .dark .es-cons-link:hover { color: #e6eef1; }
+        .ax-caret {
+            display: inline-block;
+            width: 1ch;
+            height: 1em;
+            margin-inline-start: 0.25ch;
+            vertical-align: -0.12em;
+            background: var(--ax-hot);
+            animation: ax-blink 1.1s steps(1) infinite;
+        }
+        @keyframes ax-blink { 50% { opacity: 0; } }
 
-        /* The button carries its own ink, in CSS rather than as a
-           `dark:text-[...]` utility, so the fill and the text can never
-           disagree. White on #0e7490 is 5.36; #06222a on #22d3ee is 10.8. */
-        .es-cons-btn {
-            background-color: #0e7490;
-            color: #ffffff;
-            box-shadow: 0 18px 36px -14px rgba(14, 116, 144, 0.5);
+        /* Streaming: a block marked data-reveal="stream" shows its frame at once
+           and lets its lines in one at a time. With no JavaScript, or with
+           motion turned down, every line is simply there. */
+        html.es-anim #ax [data-reveal="stream"]:not(.is-revealed) { opacity: 1; }
+        html.es-anim #ax [data-reveal="stream"]:not(.is-revealed) .ax-ln,
+        html.es-anim #ax [data-reveal="stream"]:not(.is-revealed) .ax-late { opacity: 0; }
+        html.es-anim #ax [data-reveal="stream"].is-revealed { transition: none; }
+        html.es-anim #ax [data-reveal="stream"].is-revealed .ax-ln {
+            transition: opacity 0s linear calc(var(--i, 0) * 55ms + 120ms);
         }
-        .es-cons-btn:hover { background-color: #155e75; box-shadow: 0 22px 44px -14px rgba(14, 116, 144, 0.6); }
-        .dark .es-cons-btn { background-color: #22d3ee; color: #06222a; }
-        .dark .es-cons-btn:hover { background-color: #67e8f9; }
+        html.es-anim #ax [data-reveal="stream"].is-revealed .ax-late {
+            transition: opacity 0.3s ease calc(var(--i, 0) * 55ms + 200ms);
+        }
+        /* The hero is on screen at load, so its lines run on a clock instead. */
+        html.es-anim #ax .ax-hero .ax-ln { animation: ax-arrive 0.08s linear calc(var(--i, 0) * 60ms + 1.9s) both; }
+        html.es-anim #ax .ax-hero .ax-late { animation: ax-arrive 0.3s ease calc(var(--i, 0) * 60ms + 2s) both; }
+        @keyframes ax-arrive { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- Hover accents on FAQ and related cards --- */
-        .es-cons-hover:hover { border-color: rgba(14, 116, 144, 0.5); }
-        .dark .es-cons-hover:hover { border-color: rgba(103, 232, 249, 0.45); }
-        .es-cons-hover:hover .es-cons-hover-t { color: #0e7490; }
-        .dark .es-cons-hover:hover .es-cons-hover-t { color: #67e8f9; }
+        /* ---------------------------------------------------------------
+           1. The head of the page
+           --------------------------------------------------------------- */
+        .ax-hero { position: relative; overflow: clip; padding-block: var(--ax-l) calc(var(--ax-l) * 4); }
+        .ax-guides {
+            position: absolute;
+            inset: calc(var(--ax-l) * 3) 0 0 0;
+            pointer-events: none;
+            background: repeating-linear-gradient(90deg,
+                transparent 0 calc(9.5ch - 0.5px),
+                var(--ax-line-2) calc(9.5ch - 0.5px) calc(9.5ch + 0.5px),
+                transparent calc(9.5ch + 0.5px) 10ch);
+            -webkit-mask-image: linear-gradient(to bottom, black, transparent 78%);
+            mask-image: linear-gradient(to bottom, black, transparent 78%);
+        }
+        .ax-manhead { position: relative; display: flex; justify-content: space-between; gap: 2ch; font-weight: 700; white-space: nowrap; }
+        .ax-manhead span:nth-child(2) { color: var(--ax-dim); font-weight: 400; }
+        .ax-ruler { position: relative; overflow: hidden; white-space: nowrap; color: var(--ax-dim); opacity: 0.7; -webkit-user-select: none; user-select: none; }
+        @media (max-width: 760px) {
+            .ax-manhead span:nth-child(2) { display: none; }
+        }
+        .ax-hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--ax-l) * 2) 4ch; margin-top: calc(var(--ax-l) * 2); }
+        @media (min-width: 1260px) {
+            .ax-hero-grid { grid-template-columns: 68ch minmax(0, 1fr); }
+        }
+        .ax-h1 { font-size: 2rem; line-height: 3rem; }
+        @media (min-width: 760px) { .ax-h1 { font-size: 3rem; line-height: 4.5rem; } }
+        @media (min-width: 1260px) { .ax-h1 { font-size: 4rem; line-height: 4.5rem; } }
+        #ax .ax-eyebrow {
+            display: block;
+            margin-block: var(--ax-l);
+            font-family: var(--ax-mono);
+            font-size: 1rem;
+            line-height: var(--ax-l);
+            color: var(--ax-ink-2);
+        }
+        #ax .ax-eyebrow::before { content: "eventschedule - "; color: var(--ax-dim); }
+        .ax-type { display: block; white-space: nowrap; }
+        html.es-anim #ax .ax-type-1 { animation: ax-typing 0.75s steps(17) 0.25s backwards; }
+        html.es-anim #ax .ax-type-2 { animation: ax-typing 0.75s steps(17) 1.05s backwards; }
+        @keyframes ax-typing { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+        .ax-hero-desc .ax-name { display: block; margin-bottom: var(--ax-l); }
+        .ax-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 3ch; margin-top: calc(var(--ax-l) * 2); }
+        .ax-synopsis { position: relative; margin-top: calc(var(--ax-l) * 2.5); }
+        .ax-synopsis > .ax-name { display: block; margin-bottom: var(--ax-l); }
+        .ax-exchange { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--ax-l) 2ch; align-items: start; }
+        /* Side by side from the width where the answer's longest line (its url) fits beside the
+           call. From 1100 to 1260 that line was cut by its own box. */
+        @media (min-width: 1260px) {
+            .ax-exchange { grid-template-columns: 50ch minmax(0, 1fr); }
+        }
+        .ax-exchange-back { min-width: 0; }
+        .ax-synopsis .ax-prose { margin-top: var(--ax-l); max-width: 72ch; }
 
-        /* --- The fixed-dark band. Same in both modes, like .es-cons-term. --- */
-        .es-cons-band {
-            background-color: #070b0d;
-            background-image: radial-gradient(120% 100% at 50% 0%, #101a1d 0%, #0a1114 55%, #050809 100%);
-            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(230, 238, 241, 0.05);
+        /* ---------------------------------------------------------------
+           2. Conventions: four facts, set as a manual sets its options
+           --------------------------------------------------------------- */
+        .ax-facts { display: grid; gap: var(--ax-l) 0; max-width: 100ch; }
+        .ax-fact { display: grid; grid-template-columns: minmax(0, 1fr); }
+        .ax-fact dt { font-weight: 700; color: var(--ax-key); }
+        .ax-fact dd strong { display: block; font-weight: 700; }
+        .ax-fact dd p { max-width: 72ch; color: var(--ax-ink-2); text-wrap: pretty; }
+        @media (min-width: 760px) {
+            .ax-fact { grid-template-columns: 20ch minmax(0, 1fr); }
         }
-        /* Shared classes that flip with the colour mode. Pin them, or the
-           band stops being the same object in light and dark. */
-        .es-cons-band .grid-overlay {
-            background-image:
-                linear-gradient(rgba(230, 238, 241, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(230, 238, 241, 0.05) 1px, transparent 1px);
+        .ax-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--ax-l) 2ch; align-items: start; }
+        /* Side by side only where both fit, and not as halves: the failure envelope's longest
+           line is four characters wider than half the measure, and was cut by its own box. */
+        @media (min-width: 1280px) {
+            .ax-two { grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); }
         }
-        .es-cons-band .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            background-size: 200% 100%;
-        }
-        .es-cons-band .es-claim:focus-within {
-            border-color: rgba(103, 232, 249, 0.75);
-            box-shadow: 0 0 0 4px rgba(103, 232, 249, 0.22);
-        }
-        .es-cons-band .es-cons-mark { color: #9fb0b7; }
-        .es-cons-band .es-cons-mark::before { background: #67e8f9; }
-        .es-cons-band .es-cons-mark::after { background: rgba(230, 238, 241, 0.14); }
-        .es-cons-band .es-cons-card {
-            background: rgba(230, 238, 241, 0.05);
-            border-color: rgba(230, 238, 241, 0.13);
-        }
-        .es-cons-band .es-cons-link { color: #67e8f9; }
-        .es-cons-band .es-cons-link:hover { color: #e6eef1; }
-        .es-cons-band .es-cons-btn { background-color: #0e7490; color: #ffffff; }
-        .es-cons-band .es-cons-btn:hover { background-color: #155e75; }
 
-        /* --- Shared-system recolours (brand blue by default) --- */
-        .es-hero .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(14, 116, 144, 0.13), transparent 60%);
-        }
-        .dark .es-hero .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(34, 211, 238, 0.11), transparent 60%);
-        }
-        .es-dot:hover .es-dot-pip { background-color: rgba(14, 116, 144, 0.6); }
-        .dark .es-dot:hover .es-dot-pip { background-color: rgba(103, 232, 249, 0.6); }
-        .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #0e7490, #047857); }
-        .dark .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #67e8f9, #6ee7b7); }
+        /* ---------------------------------------------------------------
+           3. The ledger. A real table laid out on a grid, so the three
+           columns hold across every group, a group's head stays under
+           the site bar while its rows pass, and a narrow container
+           re-lays each row as two lines. The method filter is radio
+           inputs read with :has(); the count is a CSS counter, and a
+           row that is not displayed does not count.
+           --------------------------------------------------------------- */
+        .ax-ledger { container-type: inline-size; }
+        .ax-ledger-in { counter-reset: ax-row; }
+        .ax-filter { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem 2ch; margin: 0 0 var(--ax-l); padding: 0; border: 0; min-width: 0; }
+        .ax-filter legend { float: left; padding: 0; margin-inline-end: 2ch; color: var(--ax-dim); }
+        .ax-filter label { position: relative; padding-inline: 1ch; box-shadow: inset 0 0 0 1px var(--ax-line); cursor: pointer; white-space: nowrap; }
+        #ax .ax-filter input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+        .ax-filter b { font-weight: 700; color: var(--ax-v, var(--ax-ink)); }
+        .ax-filter label:has(input:checked) { background: var(--ax-solid); color: var(--ax-on-solid); box-shadow: none; }
+        .ax-filter label:has(input:checked) b { color: inherit; }
+        .ax-filter label:has(input:focus-visible) { outline: 2px solid var(--ax-hot); outline-offset: 2px; }
 
-        /* --- Focus rings. No border-radius here: setting it would change
-               the element's own shape on focus. --- */
-        #es-cons-page a:focus-visible,
-        #es-cons-page summary:focus-visible,
-        #es-cons-page input:focus-visible,
-        #es-cons-page button:focus-visible {
-            outline: 2px solid #0e7490;
-            outline-offset: 3px;
+        .ax-table { display: grid; grid-template-columns: 10ch max-content minmax(0, 1fr); width: 100%; }
+        .ax-table thead,
+        .ax-table tbody,
+        .ax-table tr { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; }
+        .ax-table th,
+        .ax-table td { padding: 0.375rem 0; text-align: start; font-weight: 400; vertical-align: top; }
+        .ax-table thead th { padding-block: 0 0.75rem; color: var(--ax-dim); font-weight: 700; box-shadow: inset 0 -1px 0 var(--ax-ink); }
+        .ax-grp { position: sticky; top: calc(4rem + 1px); z-index: 2; background: var(--ax-bg); box-shadow: inset 0 -1px 0 var(--ax-line); }
+        .ax-table .ax-grp th { grid-column: 1 / -1; padding-block: 1.125rem 0.375rem; }
+        .ax-grp b { display: inline-block; min-width: 16ch; font-weight: 700; text-transform: uppercase; }
+        .ax-grp span { color: var(--ax-dim); }
+        .ax-row { counter-increment: ax-row; }
+        .ax-row:nth-child(odd) { background: var(--ax-bg-2); }
+        .ax-table .ax-row th { padding-inline-end: 3ch; font-weight: 700; white-space: nowrap; }
+        .ax-row td:last-child { color: var(--ax-ink-2); padding-inline-end: 1ch; }
+        .ax-row:hover { box-shadow: inset 0 0 0 1px var(--ax-line); }
+        .ax-ledger-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 2ch; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--ax-ink); color: var(--ax-dim); }
+        .ax-count::before { content: counter(ax-row); }
+
+        #ax .ax-ledger:has(#ax-v-get:checked) .ax-row:not([data-verb="GET"]),
+        #ax .ax-ledger:has(#ax-v-post:checked) .ax-row:not([data-verb="POST"]),
+        #ax .ax-ledger:has(#ax-v-put:checked) .ax-row:not([data-verb="PUT"]),
+        #ax .ax-ledger:has(#ax-v-del:checked) .ax-row:not([data-verb="DELETE"]),
+        #ax .ax-ledger:has(#ax-v-get:checked) tbody:not(:has([data-verb="GET"])),
+        #ax .ax-ledger:has(#ax-v-post:checked) tbody:not(:has([data-verb="POST"])),
+        #ax .ax-ledger:has(#ax-v-put:checked) tbody:not(:has([data-verb="PUT"])),
+        #ax .ax-ledger:has(#ax-v-del:checked) tbody:not(:has([data-verb="DELETE"])) { display: none; }
+
+        @container (max-width: 96ch) {
+            .ax-table,
+            .ax-table thead,
+            .ax-table tbody,
+            .ax-table tr,
+            .ax-table th,
+            .ax-table td { display: block; }
+            .ax-table thead th { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; box-shadow: none; }
+            .ax-table .ax-row { display: grid; grid-template-columns: 9ch minmax(0, 1fr); padding: 0.375rem 1ch; }
+            .ax-table .ax-row th { white-space: normal; overflow-wrap: anywhere; padding: 0; }
+            .ax-table .ax-row td { padding: 0; }
+            .ax-table .ax-row td:last-child { grid-column: 1 / -1; padding-top: 0.375rem; }
+            .ax-table .ax-grp th { padding-inline: 1ch; }
+            .ax-grp b { display: block; }
         }
-        .dark #es-cons-page a:focus-visible,
-        .dark #es-cons-page summary:focus-visible,
-        .dark #es-cons-page input:focus-visible,
-        .dark #es-cons-page button:focus-visible {
-            outline-color: #67e8f9;
+
+        /* ---------------------------------------------------------------
+           4. Files: a tree, drawn with borders that sit on the grid
+           --------------------------------------------------------------- */
+        .ax-tree { max-width: 104ch; }
+        .ax-tree-root { font-weight: 700; }
+        .ax-tree li { position: relative; padding: 0 0 var(--ax-l) 5ch; }
+        .ax-tree li::before { content: ""; position: absolute; inset: 0 auto 0 1ch; border-inline-start: 1px solid var(--ax-ink); }
+        .ax-tree li::after { content: ""; position: absolute; inset: 0.75rem auto auto 1ch; width: 3ch; border-top: 1px solid var(--ax-ink); }
+        .ax-tree li:last-child { padding-bottom: 0; }
+        .ax-tree li:last-child::before { bottom: auto; height: 0.75rem; }
+        .ax-file { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2ch; }
+        .ax-file a { font-weight: 700; color: var(--ax-sig); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; overflow-wrap: anywhere; }
+        .ax-file a:hover { text-decoration-thickness: 2px; }
+        .ax-file .ax-fill { flex: 1; min-width: 2ch; height: 0; align-self: center; border-top: 1px dotted var(--ax-line); }
+        .ax-file .ax-meta { color: var(--ax-ink); white-space: nowrap; }
+        .ax-tree p { max-width: 86ch; margin-top: 0.375rem; color: var(--ax-ink-2); text-wrap: pretty; }
+
+        /* ---------------------------------------------------------------
+           5. Examples: one session, three tool calls
+           --------------------------------------------------------------- */
+        .ax-session-head { display: flex; flex-wrap: wrap; gap: 0 2ch; padding: 0.75rem 2ch; background: var(--ax-solid); color: var(--ax-on-solid); font-weight: 700; }
+        .ax-session-head span:last-child { margin-inline-start: auto; font-weight: 400; color: var(--ax-solid-dim); }
+        .ax-session { box-shadow: inset 0 0 0 1px var(--ax-line); padding: var(--ax-l) 2ch; }
+        .ax-plan { color: var(--ax-dim); }
+        .ax-plan b { color: var(--ax-sig); font-weight: 700; }
+        .ax-call { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--ax-l) 4ch; align-items: start; margin-top: calc(var(--ax-l) * 2); }
+        @media (min-width: 1100px) {
+            .ax-call { grid-template-columns: 62ch minmax(0, 1fr); }
         }
-        .es-cons-band a:focus-visible,
-        .es-cons-band summary:focus-visible,
-        .es-cons-band input:focus-visible,
-        .es-cons-band button:focus-visible {
-            outline-color: #67e8f9 !important;
+        .ax-call-io { display: grid; gap: 0.75rem; min-width: 0; }
+        .ax-call-note { color: var(--ax-ink-2); max-width: 72ch; }
+        .ax-call-note::before { content: "# note " counter(ax-call); display: block; color: var(--ax-dim); }
+        .ax-session { counter-reset: ax-call; }
+        .ax-call { counter-increment: ax-call; }
+        @media (min-width: 760px) {
+            .ax-call { position: relative; padding-inline-start: 4ch; }
+            .ax-call::before { content: "\25CF"; position: absolute; inset: 0.75rem auto auto 0; width: 2ch; text-align: center; color: var(--ax-sig); }
+            .ax-call::after { content: ""; position: absolute; inset: 2.625rem auto calc(var(--ax-l) * -2 + 0.375rem) 1ch; border-inline-start: 1px solid var(--ax-line); }
+            .ax-call:last-of-type::after { bottom: 0; }
+        }
+        .ax-aside { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.375rem 2ch; max-width: 104ch; }
+        @media (min-width: 900px) {
+            .ax-aside { grid-template-columns: 22ch minmax(0, 1fr); }
+        }
+
+        /* ---------------------------------------------------------------
+           6. Signals
+           --------------------------------------------------------------- */
+        .ax-band { background: var(--ax-bg-2); }
+        .ax-band .ax-box { background: var(--ax-bg); }
+        .ax-sig-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--ax-l) * 2) 4ch; align-items: start; }
+        @media (min-width: 1100px) {
+            .ax-sig-grid { grid-template-columns: 56ch minmax(0, 1fr); }
+        }
+        .ax-signal-box { max-width: 112ch; }
+        .ax-signals { counter-reset: ax-signal; }
+        .ax-signals li { display: grid; grid-template-columns: 4ch minmax(0, 1fr); padding: 0.375rem 2ch; counter-increment: ax-signal; }
+        .ax-signals li + li { box-shadow: inset 0 1px 0 var(--ax-line-2); }
+        .ax-signals li::before { content: counter(ax-signal, decimal-leading-zero); color: var(--ax-dim); }
+        .ax-signals li > span { display: grid; grid-template-columns: minmax(0, 1fr); }
+        .ax-signals b { font-weight: 700; color: var(--ax-str); }
+        .ax-signals i { font-style: normal; color: var(--ax-ink-2); }
+        @media (min-width: 700px) {
+            .ax-signals li > span { grid-template-columns: 27ch minmax(0, 1fr); }
+        }
+
+        /* ---------------------------------------------------------------
+           7. Notes
+           --------------------------------------------------------------- */
+        .ax-notes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 6ch; }
+        @media (min-width: 1100px) {
+            .ax-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        .ax-note { padding-block: var(--ax-l) calc(var(--ax-l) * 1.5); border-top: 1px solid var(--ax-line); min-width: 0; }
+        .ax-note-tags { display: flex; flex-wrap: wrap; gap: 0 1ch; }
+        .ax-note h3 { margin-top: 0.375rem; }
+        .ax-note h3::before { content: "-- "; color: var(--ax-dim); font-weight: 400; }
+        .ax-note > p { margin-top: 0.75rem; color: var(--ax-ink-2); max-width: 72ch; }
+        .ax-note .ax-box { margin-top: var(--ax-l); }
+        .ax-exit { margin-top: var(--ax-l); }
+        .ax-exit > span { display: block; color: var(--ax-dim); }
+        .ax-exit dl div { display: grid; grid-template-columns: 6ch minmax(0, 1fr); padding-block: 0.1875rem; }
+        .ax-exit dt { font-weight: 700; color: var(--ax-err); }
+        .ax-exit dd { color: var(--ax-ink-2); }
+
+        /* ---------------------------------------------------------------
+           8. Callers, 9. Quick start, 10. See also
+           --------------------------------------------------------------- */
+        .ax-callers { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--ax-l) * 1.5) 4ch; counter-reset: ax-caller; }
+        @media (min-width: 760px) { .ax-callers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1180px) { .ax-callers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .ax-caller { display: grid; grid-template-columns: 4ch minmax(0, 1fr); align-content: start; counter-increment: ax-caller; }
+        .ax-caller::before { content: "[" counter(ax-caller) "]"; color: var(--ax-sig); font-weight: 700; }
+        .ax-caller p { margin-top: 0.375rem; color: var(--ax-ink-2); }
+        .ax-caller a { display: inline-block; margin-top: 0.375rem; }
+
+        .ax-steps { max-width: 112ch; border-bottom: 1px solid var(--ax-line); }
+        .ax-step { display: grid; grid-template-columns: 4ch minmax(0, 1fr); gap: 0.75rem 0; align-items: start; padding-block: var(--ax-l); border-top: 1px solid var(--ax-line); }
+        .ax-step-no { color: var(--ax-sig); font-weight: 700; }
+        .ax-step p { margin-top: 0.375rem; max-width: 62ch; color: var(--ax-ink-2); }
+        .ax-step .ax-box { grid-column: 2; }
+        @media (min-width: 1100px) {
+            .ax-step { grid-template-columns: 4ch minmax(0, 1fr) 46ch; gap: 0 4ch; }
+            .ax-step .ax-box { grid-column: 3; }
+        }
+        #ax .ax-step .ax-code { color: var(--ax-str); white-space: pre-wrap; overflow-wrap: anywhere; }
+        .ax-step .ax-code::before { content: "> "; color: var(--ax-dim); }
+
+        .ax-also { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--ax-l) * 2) 6ch; }
+        @media (min-width: 1000px) { .ax-also { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .ax-also h2 { font-size: 1rem; line-height: var(--ax-l); margin-bottom: 0.75rem; }
+        .ax-also li a { display: grid; grid-template-columns: minmax(0, 1fr); padding: 0.375rem 1ch; margin-inline: -1ch; }
+        .ax-also li + li a { box-shadow: inset 0 1px 0 var(--ax-line-2); }
+        .ax-also li a:hover { background: var(--ax-solid); color: var(--ax-on-solid); }
+        .ax-also li a:hover * { color: inherit; }
+        .ax-also b { font-weight: 700; color: var(--ax-sig); }
+        .ax-also b small { font-size: 1em; font-weight: 400; color: var(--ax-dim); }
+        .ax-also li span { color: var(--ax-ink-2); }
+        @media (min-width: 640px) {
+            .ax-also li a { grid-template-columns: 22ch minmax(0, 1fr); }
+            .ax-also .ax-pages li a { grid-template-columns: minmax(0, 1fr) auto; }
+        }
+        .ax-also .ax-more { margin-top: var(--ax-l); }
+
+        /* ---------------------------------------------------------------
+           The plan band and the closing strip are shared partials. They
+           keep their words and their prices; only the print changes.
+           --------------------------------------------------------------- */
+        #ax .ax-plans { counter-increment: ax-sec; border-top: 1px solid var(--ax-line); padding-top: calc(var(--ax-l) * 2); }
+        #ax .ax-plans .ax-sec-head { margin-bottom: 0; }
+        #ax .ax-plans > section { background: var(--ax-bg); padding-top: calc(var(--ax-l) * 2); }
+        #ax .ax-plans * { font-family: var(--ax-mono); letter-spacing: 0; }
+        #ax .ax-plans h2 { font-size: 2rem; line-height: 3rem; font-weight: 700; color: var(--ax-ink); }
+        #ax .ax-plans h2 + p { color: var(--ax-ink-2); font-size: 1rem; }
+        #ax .ax-plans .grid > div { background: var(--ax-bg-2); border: 0; border-radius: 0; box-shadow: inset 0 0 0 1px var(--ax-line); color: var(--ax-ink); }
+        #ax .ax-plans .grid > div:hover { transform: none; box-shadow: inset 0 0 0 1px var(--ax-ink); }
+        #ax .ax-plans .grid > div:nth-child(2) { box-shadow: inset 0 0 0 2px var(--ax-sig); }
+        #ax .ax-plans .grid > div span,
+        #ax .ax-plans .grid > div p,
+        #ax .ax-plans .grid > div li { color: var(--ax-ink-2); font-size: 1rem; line-height: var(--ax-l); }
+        #ax .ax-plans .grid > div .text-3xl { font-size: 2rem; line-height: 3rem; font-weight: 700; color: var(--ax-ink); }
+        #ax .ax-plans .grid > div .uppercase { color: var(--ax-ink); font-size: 1rem; }
+        #ax .ax-plans .grid > div .rounded-full { background: var(--ax-solid); color: var(--ax-on-solid); border-radius: 0; font-size: 1rem; padding: 0 1ch; }
+        #ax .ax-plans .grid > div svg { color: var(--ax-str); }
+        #ax .ax-plans a.font-medium { color: var(--ax-sig); text-decoration: underline; text-underline-offset: 0.2em; }
+        #ax .ax-plans a.rounded-2xl { background: var(--ax-solid); color: var(--ax-on-solid); border-radius: 0; box-shadow: inset 0 0 0 1px var(--ax-solid); font-weight: 700; }
+        #ax .ax-plans a.rounded-2xl:hover { transform: none; background: transparent; color: var(--ax-sig); }
+
+        #ax .ax-keep > section { background: var(--ax-bg-2); border-top: 1px solid var(--ax-line); }
+        #ax .ax-keep * { font-family: var(--ax-mono); letter-spacing: 0; }
+        #ax .ax-keep h2 { font-size: 2rem; line-height: 3rem; font-weight: 700; color: var(--ax-ink); }
+        #ax .ax-keep p.uppercase { color: var(--ax-sig); font-weight: 700; font-size: 1rem; }
+        #ax .ax-keep .grid > a { background: var(--ax-bg); border: 0; border-radius: 0; box-shadow: inset 0 0 0 1px var(--ax-line); }
+        #ax .ax-keep .grid > a:hover { transform: none; box-shadow: inset 0 0 0 1px var(--ax-ink); }
+        #ax .ax-keep .grid > a > span:first-child { display: none; }
+        #ax .ax-keep .grid > a h3 { color: var(--ax-ink); font-size: 1rem; }
+        #ax .ax-keep .grid > a p { color: var(--ax-ink-2); font-size: 1rem; line-height: var(--ax-l); }
+        #ax .ax-keep .grid > a > span:last-child,
+        #ax .ax-keep a.self-start { color: var(--ax-sig); font-size: 1rem; }
+
+        /* ---------------------------------------------------------------
+           11. Questions
+           --------------------------------------------------------------- */
+        .ax-qa { max-width: 104ch; counter-reset: ax-q; border-top: 1px solid var(--ax-ink); }
+        .ax-qa details { counter-increment: ax-q; border-bottom: 1px solid var(--ax-line); }
+        .ax-qa summary { display: grid; grid-template-columns: 5ch minmax(0, 1fr) 3ch; gap: 0 1ch; padding-block: 0.75rem; cursor: pointer; }
+        .ax-qa summary::before { content: "Q" counter(ax-q, decimal-leading-zero); color: var(--ax-sig); font-weight: 700; }
+        .ax-qa summary::after { content: "[+]"; color: var(--ax-dim); }
+        .ax-qa details[open] summary::after { content: "[-]"; color: var(--ax-sig); }
+        .ax-qa summary:hover h3 { color: var(--ax-sig); }
+        .ax-qa details p { padding: 0 4ch var(--ax-l) 6ch; max-width: 86ch; color: var(--ax-ink-2); text-wrap: pretty; }
+        @media (max-width: 700px) {
+            .ax-qa details p { padding-inline: 0; }
+        }
+
+        /* ---------------------------------------------------------------
+           12. Run: reverse video, as a pager sets its last line
+           --------------------------------------------------------------- */
+        .ax-run-sec { background: var(--ax-solid); color: var(--ax-on-solid); border-top: 0; }
+        .ax-run-sec .ax-name { color: var(--ax-on-solid); }
+        .ax-run-sec .ax-ref,
+        .ax-run-sec .ax-dim { color: var(--ax-solid-dim); }
+        .ax-run-sec .ax-ref a:hover { color: var(--ax-on-solid); }
+        .ax-run-sec .ax-h2,
+        .dark .ax-run-sec .ax-h2,
+        .dark .ax-run-sec .ax-em { text-shadow: none; }
+        .ax-run-sec .ax-em { color: var(--ax-solid-sig); }
+        .dark .ax-run-sec .ax-em { text-decoration: underline; text-decoration-thickness: 0.12em; text-underline-offset: 0.16em; }
+        .ax-run-sec .ax-prose { color: var(--ax-on-solid); }
+        .ax-run-sec .ax-link { color: var(--ax-on-solid); font-weight: 700; }
+        #ax .ax-run-sec a:focus-visible { outline-color: var(--ax-on-solid); }
+        .ax-run-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--ax-l) * 2) 4ch; align-items: start; }
+        @media (min-width: 1180px) {
+            .ax-run-grid { grid-template-columns: minmax(0, 1fr) 52ch; }
+        }
+        .ax-run-line { margin-top: calc(var(--ax-l) * 1.5); }
+        #ax .ax-run-sec .ax-code { padding-inline: 1ch; }
+        .ax-run-sec .ax-box-head,
+        .ax-run-sec .ax-box-note { padding-inline: 1ch; }
+        .ax-run { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.75rem 2ch; }
+        #ax .ax-claim {
+            display: flex;
+            align-items: baseline;
+            flex: 1 1 39ch;
+            min-width: 0;
+            max-width: 62ch;
+            padding: 0.75rem 2ch;
+            background: var(--ax-bg);
+            color: var(--ax-ink);
+            border: 0;
+            border-radius: 0;
+            box-shadow: inset 0 0 0 1px var(--ax-bg);
+        }
+        #ax .ax-claim:focus-within { border-color: transparent; box-shadow: inset 0 0 0 2px var(--ax-hot); }
+        .ax-claim .ax-prompt { flex: none; color: var(--ax-dim); white-space: pre; -webkit-user-select: none; user-select: none; }
+        .ax-claim .ax-prompt b { color: var(--ax-sig); font-weight: 700; }
+        .ax-claim .ax-host { flex: none; color: var(--ax-dim); -webkit-user-select: none; user-select: none; }
+        #ax .ax-claim input {
+            flex: 1 1 11ch;
+            min-width: 11ch;
+            margin: -0.75rem 0;
+            padding: 0.75rem 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            outline: none;
+            font: inherit;
+            font-weight: 700;
+            color: var(--ax-ink);
+            caret-color: var(--ax-hot);
+            text-align: end;
+        }
+        #ax .ax-claim input::placeholder { color: var(--ax-dim); font-weight: 400; opacity: 1; }
+        /* Where the browser can size a field to what is typed in it, the address
+           reads as one unbroken command. */
+        @supports (field-sizing: content) {
+            #ax .ax-claim input { flex: 0 1 auto; field-sizing: content; min-width: 2ch; max-width: 31ch; text-align: start; }
+            .ax-claim .ax-host { flex: 1 1 auto; }
+        }
+        @media (max-width: 640px) {
+            .ax-claim .ax-prompt span { display: none; }
+        }
+        .ax-run .ax-btn { background: var(--ax-bg); color: var(--ax-ink); box-shadow: inset 0 0 0 1px var(--ax-bg); }
+        .ax-run .ax-btn:hover { background: transparent; color: var(--ax-on-solid); box-shadow: inset 0 0 0 1px var(--ax-on-solid); }
+        .ax-run .ax-btn kbd { font: inherit; color: var(--ax-sig); }
+        .ax-run .ax-btn:hover kbd { color: inherit; }
+        .ax-run-sec .ax-box { background: var(--ax-bg); color: var(--ax-ink); box-shadow: none; }
+        .ax-run-sec .ax-box .ax-dim,
+        .ax-run-sec .ax-box .ax-right { color: var(--ax-dim); }
+        .ax-run-sec .ax-box-note { padding: 0.75rem 2ch; box-shadow: inset 0 1px 0 var(--ax-line); color: var(--ax-ink-2); }
+        .ax-manfoot { display: flex; justify-content: space-between; gap: 2ch; margin-top: calc(var(--ax-l) * 3); font-weight: 700; white-space: nowrap; }
+        .ax-manfoot span:nth-child(2) { font-weight: 400; color: var(--ax-solid-dim); }
+        @media (max-width: 760px) {
+            .ax-manfoot span:nth-child(2) { display: none; }
+        }
+
+        /* ---------------------------------------------------------------
+           The pager's last line: where you are, and how far down. The
+           box that holds it is clipped to the page, so the fixed line
+           never rides over the site footer. The figure and the cells
+           are one registered integer, driven by the scroll.
+           --------------------------------------------------------------- */
+        .ax-pin { display: none; }
+        @media (min-width: 1280px) {
+            .ax-pin { display: block; position: absolute; inset: 0; z-index: 30; clip-path: inset(0); pointer-events: none; }
+            .ax-status {
+                position: fixed;
+                inset: auto 0 0 0;
+                display: flex;
+                align-items: baseline;
+                gap: 3ch;
+                padding: 0.1875rem 2ch;
+                background: var(--ax-solid);
+                color: var(--ax-on-solid);
+                box-shadow: 0 -1px 0 var(--ax-bg);
+                white-space: nowrap;
+                pointer-events: auto;
+            }
+            .ax-status-name { font-weight: 700; }
+            .ax-status ol { display: flex; gap: 0 1ch; min-width: 0; }
+            #ax .ax-status a { display: block; padding: 0 1ch; margin: 0; color: var(--ax-solid-dim); }
+            #ax .ax-status a:hover { color: var(--ax-on-solid); }
+            #ax .ax-status a.is-active { background: var(--ax-bg); color: var(--ax-ink); font-weight: 700; }
+            #ax .ax-status a:focus-visible { outline-color: var(--ax-on-solid); outline-offset: -2px; }
+            .ax-status-pos { display: none; margin-inline-start: auto; }
+        }
+        @supports (animation-timeline: scroll()) {
+            @media (min-width: 1280px) {
+                .ax-status { animation: ax-pct linear both; animation-timeline: scroll(root block); }
+                .ax-status-pos { display: flex; align-items: center; gap: 1ch; }
+                .ax-bar {
+                    position: relative;
+                    width: 20ch;
+                    height: 0.75rem;
+                    background: repeating-linear-gradient(90deg, var(--ax-solid-dim) 0 calc(1ch - 2px), transparent calc(1ch - 2px) 1ch);
+                    opacity: 0.9;
+                }
+                .ax-bar i {
+                    position: absolute;
+                    inset: 0 auto 0 0;
+                    width: calc(var(--ax-pct) * 0.2ch);
+                    width: calc(round(down, var(--ax-pct) / 5, 1) * 1ch);
+                    background: repeating-linear-gradient(90deg, var(--ax-on-solid) 0 calc(1ch - 2px), var(--ax-solid) calc(1ch - 2px) 1ch);
+                }
+                .ax-pct { display: inline-block; min-width: 4ch; text-align: end; font-weight: 700; }
+                /* Safari interpolates the registered integer without rounding it, and a fraction
+                   is no value for a counter: the figure read 0% all the way down. calc() in an
+                   integer's place rounds. */
+                .ax-pct::after { counter-reset: ax-pct calc(var(--ax-pct) * 1); content: counter(ax-pct) "%"; }
+            }
+        }
+        @keyframes ax-pct { from { --ax-pct: 0; } to { --ax-pct: 100; } }
+        /* The name and the cells need about 162ch beside the section names: 1560px in Chrome,
+           1620 in Safari, whose fixed-pitch face is wider. Under that, RUN ran into the cells. */
+        @media (min-width: 1280px) and (max-width: 1639px) {
+            #ax .ax-status-name,
+            #ax .ax-bar { display: none; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-cons-caret { animation: none; opacity: 1; }
-            .es-cons-flow::after { animation: none; opacity: 0.55; }
+            .ax-caret { animation: none; }
+            .ax-btn, .ax-btn i { transition: none; }
         }
     </style>
 
@@ -583,897 +942,943 @@
         ];
     @endphp
 
-    <div id="es-cons-page" class="es-cons-page">
+    @php
+        // ---------------------------------------------------------------
+        // The page's own furniture. Nothing above this line was changed.
+        // ---------------------------------------------------------------
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: the signature exchange                              -->
-    <!-- ============================================================ -->
-    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(14, 116, 144, 0.24), rgba(14, 116, 144, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(4, 120, 87, 0.2), rgba(4, 120, 87, 0) 65%);"></div>
-            <div class="es-spot absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+        $axVerb = ['GET' => 'ax-get', 'POST' => 'ax-post', 'PUT' => 'ax-put', 'DELETE' => 'ax-del'];
+
+        // The manual's name for each section, beside the label the section nav already had.
+        $axNames = [
+            'top' => 'NAME', 'contract' => 'CONVENTIONS', 'ledger' => 'ENDPOINTS', 'discovery' => 'FILES',
+            'calls' => 'EXAMPLES', 'push' => 'SIGNALS', 'rest' => 'NOTES', 'who' => 'CALLERS',
+            'start' => 'QUICK START', 'faq' => 'QUESTIONS', 'claim' => 'RUN',
+        ];
+
+        // A column ruler, the kind printed across the top of a listing.
+        $axRuler = '';
+        for ($axCol = 1; $axCol <= 13; $axCol++) {
+            $axRuler .= '----+----'.($axCol % 10);
+        }
+
+        // One span per line of code, so a line can carry a number and arrive on its own.
+        // The newline between spans stays in the markup: the text of the block is unchanged.
+        $axLines = function (string $html, int $from = 0): string {
+            $out = [];
+            foreach (explode("\n", $html) as $n => $line) {
+                $out[] = '<span class="ax-ln" style="--i: '.($from + $n).';">'.$line.'</span>';
+            }
+
+            return implode("\n", $out);
+        };
+
+        // A path with its parameters tinted and a break allowed before each slash.
+        $axPath = fn (string $path) => preg_replace(
+            '/\{[a-z_]+\}/',
+            '<span class="ax-param">$0</span>',
+            ltrim(str_replace('/', '<wbr>/', e($path)), '<wbr>')
+        );
+
+        $axArrow = '<i aria-hidden="true">&rarr;</i>';
+
+        // Every code sample on the page, character for character as it was.
+        $axPre = [
+            'hero_req' => <<<'HTML'
+<span class="ax-p">{</span>
+  <span class="ax-k">"name"</span><span class="ax-p">:</span> <span class="ax-s">"Analog Night"</span><span class="ax-p">,</span>
+  <span class="ax-k">"starts_at"</span><span class="ax-p">:</span> <span class="ax-s">"2026-08-14 20:00:00"</span><span class="ax-p">,</span>
+  <span class="ax-k">"duration"</span><span class="ax-p">:</span> <span class="ax-n">3</span><span class="ax-p">,</span>
+  <span class="ax-k">"tickets_enabled"</span><span class="ax-p">:</span> <span class="ax-n">true</span><span class="ax-p">,</span>
+  <span class="ax-k">"tickets"</span><span class="ax-p">: [{</span>
+    <span class="ax-k">"type"</span><span class="ax-p">:</span> <span class="ax-s">"Advance"</span><span class="ax-p">,</span>
+    <span class="ax-k">"price"</span><span class="ax-p">:</span> <span class="ax-n">18</span><span class="ax-p">,</span>
+    <span class="ax-k">"quantity"</span><span class="ax-p">:</span> <span class="ax-n">120</span>
+  <span class="ax-p">}]</span>
+<span class="ax-p">}</span>
+HTML,
+            'hero_res' => <<<'HTML'
+<span class="ax-p">{ </span><span class="ax-k">"data"</span><span class="ax-p">: {</span>
+  <span class="ax-k">"id"</span><span class="ax-p">:</span> <span class="ax-s">"Kd3Vq7"</span><span class="ax-p">,</span>
+  <span class="ax-k">"url"</span><span class="ax-p">:</span> <span class="ax-s">"https://synth-lab.eventschedule.com/analog-night/Kd3Vq7"</span><span class="ax-p">,</span>
+  <span class="ax-k">"tickets"</span><span class="ax-p">: [{</span> <span class="ax-k">"id"</span><span class="ax-p">:</span> <span class="ax-s">"9pR3vB"</span><span class="ax-p">,</span> <span class="ax-k">"type"</span><span class="ax-p">:</span> <span class="ax-s">"Advance"</span> <span class="ax-p">}]</span>
+<span class="ax-p">}, </span><span class="ax-k">"meta"</span><span class="ax-p">: {</span> <span class="ax-k">"message"</span><span class="ax-p">:</span> <span class="ax-s">"Event created successfully"</span> <span class="ax-p">} }</span>
+HTML,
+            'env_ok' => <<<'HTML'
+<span class="ax-p">{</span>
+  <span class="ax-k">"data"</span><span class="ax-p">: [ ... ],</span>
+  <span class="ax-k">"meta"</span><span class="ax-p">: {</span> <span class="ax-k">"current_page"</span><span class="ax-p">:</span> <span class="ax-n">1</span><span class="ax-p">,</span> <span class="ax-k">"total"</span><span class="ax-p">:</span> <span class="ax-n">50</span> <span class="ax-p">}</span>
+<span class="ax-p">}</span>
+HTML,
+            'env_err' => <<<'HTML'
+<span class="ax-p">{</span>
+  <span class="ax-k">"error"</span><span class="ax-p">:</span> <span class="ax-s">"Validation failed"</span><span class="ax-p">,</span>
+  <span class="ax-k">"errors"</span><span class="ax-p">: {</span> <span class="ax-k">"starts_at"</span><span class="ax-p">: [</span><span class="ax-s">"must match Y-m-d H:i:s"</span><span class="ax-p">] }</span>
+<span class="ax-p">}</span>
+HTML,
+            'read_req' => <<<'HTML'
+<span class="ax-p">?</span><span class="ax-k">subdomain</span><span class="ax-p">=</span><span class="ax-s">synth-lab</span>
+<span class="ax-p">&amp;</span><span class="ax-k">starts_after</span><span class="ax-p">=</span><span class="ax-s">2026-08-01</span>
+<span class="ax-p">&amp;</span><span class="ax-k">tickets_enabled</span><span class="ax-p">=</span><span class="ax-n">1</span>
+<span class="ax-p">&amp;</span><span class="ax-k">per_page</span><span class="ax-p">=</span><span class="ax-n">50</span>
+HTML,
+            'read_res' => <<<'HTML'
+<span class="ax-k">"meta"</span><span class="ax-p">: {</span>
+  <span class="ax-k">"current_page"</span><span class="ax-p">:</span> <span class="ax-n">1</span><span class="ax-p">,</span>
+  <span class="ax-k">"last_page"</span><span class="ax-p">:</span> <span class="ax-n">2</span><span class="ax-p">,</span>
+  <span class="ax-k">"total"</span><span class="ax-p">:</span> <span class="ax-n">63</span>
+<span class="ax-p">}</span>
+HTML,
+            'recur_req' => <<<'HTML'
+<span class="ax-k">"schedule_type"</span><span class="ax-p">:</span> <span class="ax-s">"recurring"</span><span class="ax-p">,</span>
+<span class="ax-k">"recurring_frequency"</span><span class="ax-p">:</span> <span class="ax-s">"weekly"</span><span class="ax-p">,</span>
+<span class="ax-k">"days_of_week"</span><span class="ax-p">:</span> <span class="ax-s">"0111110"</span><span class="ax-p">,</span>
+<span class="ax-k">"recurring_end_type"</span><span class="ax-p">:</span> <span class="ax-s">"after_events"</span><span class="ax-p">,</span>
+<span class="ax-k">"recurring_end_value"</span><span class="ax-p">:</span> <span class="ax-s">"14"</span>
+HTML,
+            'recur_res' => <<<'HTML'
+<span class="ax-k">"schedule_type"</span><span class="ax-p">:</span> <span class="ax-s">"recurring"</span><span class="ax-p">,</span>
+<span class="ax-k">"days_of_week"</span><span class="ax-p">:</span> <span class="ax-s">"0111110"</span>
+HTML,
+            'sale_req' => <<<'HTML'
+<span class="ax-p">{</span> <span class="ax-k">"action"</span><span class="ax-p">:</span> <span class="ax-s">"mark_paid"</span> <span class="ax-p">}</span>
+HTML,
+            'sale_res' => <<<'HTML'
+<span class="ax-k">"status"</span><span class="ax-p">:</span> <span class="ax-s">"paid"</span><span class="ax-p">,</span>
+<span class="ax-k">"payment_amount"</span><span class="ax-p">:</span> <span class="ax-n">36</span><span class="ax-p">,</span>
+<span class="ax-k">"total_quantity"</span><span class="ax-p">:</span> <span class="ax-n">2</span><span class="ax-p">,</span>
+<span class="ax-k">"tickets"</span><span class="ax-p">: [{</span> <span class="ax-k">"type"</span><span class="ax-p">:</span> <span class="ax-s">"Advance"</span> <span class="ax-p">}]</span>
+HTML,
+            'hook' => <<<'HTML'
+<span class="ax-k">X-Webhook-Event</span><span class="ax-p">:</span> <span class="ax-s">sale.paid</span>
+<span class="ax-k">X-Webhook-Signature</span><span class="ax-p">:</span> <span class="ax-s">sha256=&lt;hex&gt;</span>
+<span class="ax-k">X-Webhook-Timestamp</span><span class="ax-p">:</span> <span class="ax-s">2026-08-14T20:11:04+00:00</span>
+<span class="ax-k">User-Agent</span><span class="ax-p">:</span> <span class="ax-s">EventSchedule-Webhook/1.0</span>
+
+<span class="ax-p">{</span> <span class="ax-k">"event"</span><span class="ax-p">:</span> <span class="ax-s">"sale.paid"</span><span class="ax-p">,</span> <span class="ax-k">"data"</span><span class="ax-p">: {</span> ... <span class="ax-p">} }</span>
+HTML,
+            'flyer' => <<<'HTML'
+curl -X POST <span class="ax-s">.../api/events/flyer/Kd3Vq7</span> \
+  -H <span class="ax-s">"X-API-Key: $KEY"</span> \
+  -F <span class="ax-s">"flyer_image=@night.jpg"</span>
+HTML,
+            'reg_req' => <<<'HTML'
+<span class="ax-p">{</span>
+  <span class="ax-k">"name"</span><span class="ax-p">:</span> <span class="ax-s">"Your Agent"</span><span class="ax-p">,</span>
+  <span class="ax-k">"email"</span><span class="ax-p">:</span> <span class="ax-s">"you@example.com"</span><span class="ax-p">,</span>
+  <span class="ax-k">"password"</span><span class="ax-p">:</span> <span class="ax-s">"..."</span>
+<span class="ax-p">}</span>
+HTML,
+            'reg_res' => <<<'HTML'
+<span class="ax-p">{ </span><span class="ax-k">"data"</span><span class="ax-p">: {</span>
+  <span class="ax-k">"api_key"</span><span class="ax-p">:</span> <span class="ax-s">"your_new_api_key"</span><span class="ax-p">,</span>
+  <span class="ax-k">"api_key_expires_at"</span><span class="ax-p">:</span> <span class="ax-s">"2027-07-30T00:00:00Z"</span>
+<span class="ax-p">} }</span>
+HTML,
+        ];
+    @endphp
+
+    <div id="ax">
+
+        {{-- The pager's last line. Wide screens only; the box is clipped to this page. --}}
+        <div class="ax-pin">
+            <nav class="ax-status es-dotnav" aria-label="Page sections">
+                <span class="ax-status-name" aria-hidden="true">eventschedule(1)</span>
+                <ol>
+                    @foreach ($dotSections as [$sectionId, $sectionLabel])
+                        <li><a href="#{{ $sectionId }}" class="es-dot" title="{{ $sectionLabel }}">{{ $axNames[$sectionId] }}</a></li>
+                    @endforeach
+                </ol>
+                <span class="ax-status-pos" aria-hidden="true"><span class="ax-bar"><i></i></span><span class="ax-pct"></span></span>
+            </nav>
         </div>
 
-        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
-                <div>
-                    <h1 class="es-balance es-cons-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
-                            <svg aria-hidden="true" class="h-5 w-5 text-[#0e7490] dark:text-[#67e8f9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                            </svg>
-                            <span class="es-cons-muted text-sm font-medium tracking-wide">An API for AI agents and developers</span>
-                        </x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">One POST, and the</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">show is <span class="es-cons-grad">on sale.</span><span class="es-cons-caret" aria-hidden="true"></span></span></span>
-                    </h1>
+        <!-- ============================================================ -->
+        <!-- 1. NAME, DESCRIPTION, SYNOPSIS                               -->
+        <!-- ============================================================ -->
+        <section id="top" class="ax-hero" style="scroll-margin-top: 4rem;">
+            <div class="ax-wrap">
+                <div class="ax-guides" aria-hidden="true"></div>
+                <p class="ax-manhead" aria-hidden="true"><span>EVENTSCHEDULE(1)</span><span>Event Schedule API Manual</span><span>EVENTSCHEDULE(1)</span></p>
+                <p class="ax-ruler" aria-hidden="true">{{ $axRuler }}</p>
 
-                    <p class="es-fade-up es-d-2 es-cons-muted mb-6 max-w-xl text-lg sm:text-xl">
-                        {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-four behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, feedback and fan content. JSON in, JSON out, one header.
-                    </p>
-                    <p class="es-fade-up es-d-2 es-cons-muted mb-10 max-w-xl text-base">
-                        An OpenAPI 3.0 spec, <span class="es-cons-mono es-cons-key">llms.txt</span> and <span class="es-cons-mono es-cons-key">agents.json</span> ship with it, so an agent can discover this API and drive it without a human reading the docs first.
-                    </p>
+                <div class="ax-hero-grid">
+                    <div>
+                        <span class="ax-name" aria-hidden="true">NAME</span>
+                        <h1 class="ax-h1" dir="ltr">
+                            <x-marketing.hero-eyebrow class="ax-eyebrow es-fade-up es-d-1">An API for AI agents and developers</x-marketing.hero-eyebrow>
+                            <span class="ax-type ax-type-1">One POST, and the</span>
+                            <span class="ax-type ax-type-2">show is <span class="ax-em">on sale.</span><span class="ax-caret" aria-hidden="true"></span></span>
+                        </h1>
+                        <div class="ax-cta es-fade-up es-d-3">
+                            <a href="{{ route('marketing.docs.developer.api') }}" class="ax-btn">
+                                Read the API reference
+                                {!! $axArrow !!}
+                            </a>
+                            <a href="#ledger" class="ax-btn ax-btn-alt">
+                                See all {{ $endpointCount }} endpoints
+                                <i aria-hidden="true">&darr;</i>
+                            </a>
+                        </div>
+                    </div>
 
-                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
-                        <a href="#ledger" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                            See all {{ $endpointCount }} endpoints
-                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                        </a>
-                        <a href="{{ route('marketing.docs.developer.api') }}" class="es-cons-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                            Read the API reference
-                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
+                    <div class="ax-hero-desc">
+                        <span class="ax-name" aria-hidden="true">DESCRIPTION</span>
+                        <p class="ax-prose es-fade-up es-d-2">
+                            {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-four behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, feedback and fan content. JSON in, JSON out, one header.
+                        </p>
+                        <p class="ax-prose es-fade-up es-d-2">
+                            An OpenAPI 3.0 spec, <span class="ax-k">llms.txt</span> and <span class="ax-k">agents.json</span> ship with it, so an agent can discover this API and drive it without a human reading the docs first.
+                        </p>
                     </div>
                 </div>
 
-                <!-- The exchange. Request pane, flowing hairline, response pane. -->
-                <div class="es-fade-up es-d-4" data-reveal>
-                    <div class="es-cons-term overflow-hidden">
-                        <div class="es-cons-bar">
-                            <span class="es-cons-m es-cons-m-post">POST</span>
-                            <span class="es-cons-mono es-cons-lit truncate text-xs">/api/events/synth-lab</span>
-                            <span class="es-cons-mono es-cons-dim ms-auto text-[0.625rem]">X-API-Key</span>
+                <!-- The signature exchange: one call out, one answer back. -->
+                <div class="ax-synopsis">
+                    <span class="ax-name" aria-hidden="true">SYNOPSIS</span>
+                    <div class="ax-exchange">
+                        <div class="ax-box es-fade-up es-d-3">
+                            <div class="ax-box-head" dir="ltr">
+                                <span class="ax-arrow" aria-hidden="true">&#9656;</span>
+                                <span class="ax-verb ax-post">POST</span>
+                                <span class="ax-path">/api/events/synth-lab</span>
+                                <span class="ax-right">X-API-Key</span>
+                            </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['hero_req']) !!}</pre>
                         </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{</span>
-  <span class="es-cons-t-key">"name"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Analog Night"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"starts_at"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"2026-08-14 20:00:00"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"duration"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">3</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"tickets_enabled"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">true</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"tickets"</span><span class="es-cons-t-pun">: [{</span>
-    <span class="es-cons-t-key">"type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Advance"</span><span class="es-cons-t-pun">,</span>
-    <span class="es-cons-t-key">"price"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">18</span><span class="es-cons-t-pun">,</span>
-    <span class="es-cons-t-key">"quantity"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">120</span>
-  <span class="es-cons-t-pun">}]</span>
-<span class="es-cons-t-pun">}</span></pre>
-                        <div class="es-cons-flow" aria-hidden="true"></div>
-                        <div class="es-cons-bar">
-                            <span class="es-cons-sc">201 CREATED</span>
-                            <span class="es-cons-mono es-cons-dim text-[0.625rem]">application/json</span>
+                        <div class="ax-exchange-back">
+                            <div class="ax-box es-fade-up es-d-4">
+                                <div class="ax-box-head" dir="ltr">
+                                    <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                    <span class="ax-sc">201 CREATED</span>
+                                    <span class="ax-right">application/json</span>
+                                </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['hero_res'], 12) !!}</pre>
+                            </div>
+                            <p class="ax-prose es-fade-up es-d-5">
+                                That one call also writes the event to Google, Outlook or CalDAV if the schedule is connected to one, and fires an <span class="ax-s">event.created</span> webhook.
+                            </p>
                         </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{ </span><span class="es-cons-t-key">"data"</span><span class="es-cons-t-pun">: {</span>
-  <span class="es-cons-t-key">"id"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Kd3Vq7"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"url"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"https://synth-lab.eventschedule.com/analog-night/Kd3Vq7"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"tickets"</span><span class="es-cons-t-pun">: [{</span> <span class="es-cons-t-key">"id"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"9pR3vB"</span><span class="es-cons-t-pun">,</span> <span class="es-cons-t-key">"type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Advance"</span> <span class="es-cons-t-pun">}]</span>
-<span class="es-cons-t-pun">}, </span><span class="es-cons-t-key">"meta"</span><span class="es-cons-t-pun">: {</span> <span class="es-cons-t-key">"message"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Event created successfully"</span> <span class="es-cons-t-pun">} }</span></pre>
-                        <p class="es-cons-rule es-cons-dim px-4 py-3 text-xs">
-                            That one call also writes the event to Google, Outlook or CalDAV if the schedule is connected to one, and fires an <span class="es-cons-mono es-cons-lit-ok">event.created</span> webhook.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 2. CONVENTIONS: the contract                                 -->
+        <!-- ============================================================ -->
+        <section id="contract" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">CONVENTIONS</span>
+                    <span class="ax-ref"><a href="#contract">#contract</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Four facts, and you can <span class="ax-em">start writing.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        No SDK to install, no OAuth dance, no sandbox to request. The whole surface behaves the same way, which is the only property an agent really needs.
+                    </p>
+
+                    <dl class="ax-facts ax-gap" data-reveal-group="70">
+                        <div class="ax-fact" data-reveal>
+                            <dt>X-API-Key</dt>
+                            <dd>
+                                <strong>One header</strong>
+                                <p>Register, generate a key in your settings, or log in when you have none. Keys last a year. Nothing else is required.</p>
+                            </dd>
+                        </div>
+                        <div class="ax-fact" data-reveal>
+                            <dt>300 / 30</dt>
+                            <dd>
+                                <strong>Requests a minute</strong>
+                                <p>300 reads and 30 writes a minute, per IP. Over the line you get a 429, not a silent drop.</p>
+                            </dd>
+                        </div>
+                        <div class="ax-fact" data-reveal>
+                            <dt>per_page &le; 500</dt>
+                            <dd>
+                                <strong>The big lists paginate</strong>
+                                <p>100 by default, 500 at most, with a <span class="ax-k">meta</span> block carrying the page, the total and the bounds. Categories and sub-schedules come back whole.</p>
+                            </dd>
+                        </div>
+                        <div class="ax-fact" data-reveal>
+                            <dt>Kd3Vq7</dt>
+                            <dd>
+                                <strong>IDs are opaque strings</strong>
+                                <p>Never a sequential integer, and an event's is the same string that appears in its public URL, so you can build a link from a response.</p>
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <!-- The envelope: success and failure, side by side. -->
+                    <div class="ax-two ax-gap">
+                        <div class="ax-box" data-reveal="stream">
+                            <div class="ax-box-head" dir="ltr">
+                                <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                <span class="ax-sc">2xx</span>
+                                <span class="ax-right">the success envelope</span>
+                            </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['env_ok']) !!}</pre>
+                        </div>
+                        <div class="ax-box" data-reveal="stream">
+                            <div class="ax-box-head" dir="ltr">
+                                <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                <span class="ax-sc ax-sc-err">422</span>
+                                <span class="ax-right">field-level errors, always in the same place</span>
+                            </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['env_err'], 3) !!}</pre>
+                        </div>
+                    </div>
+                    <p class="ax-prose ax-gap-1" data-reveal>
+                        401 for a bad key, 403 when the plan or the permission is missing, 404, 409 when a key is already live or a refund's outcome is not yet confirmed, 422 with the offending fields named, 429 when throttled. A model can branch on that without guessing.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. ENDPOINTS: every endpoint, in one table                   -->
+        <!-- ============================================================ -->
+        <section id="ledger" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">ENDPOINTS</span>
+                    <span class="ax-ref"><a href="#ledger">#ledger</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        The entire surface, <span class="ax-em">on one page.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        {{ $endpointCount }} endpoints. Not a summary of them, all of them. Everything past <span class="ax-k">/api/login</span> needs the key header, and API access is part of the Pro plan.
+                    </p>
+
+                    <div class="ax-ledger ax-gap">
+                        <div class="ax-ledger-in">
+                        <fieldset class="ax-filter">
+                            <legend>Colour is the verb</legend>
+                            <label><input type="radio" name="ax-verb" id="ax-v-all" checked> all</label>
+                            <label class="ax-get"><input type="radio" name="ax-verb" id="ax-v-get"> <b>GET</b> read</label>
+                            <label class="ax-post"><input type="radio" name="ax-verb" id="ax-v-post"> <b>POST</b> create</label>
+                            <label class="ax-put"><input type="radio" name="ax-verb" id="ax-v-put"> <b>PUT</b> update</label>
+                            <label class="ax-del"><input type="radio" name="ax-verb" id="ax-v-del"> <b>DELETE</b> remove</label>
+                        </fieldset>
+
+                        <table class="ax-table" role="table" dir="ltr">
+                            <caption class="sr-only">Every Event Schedule API endpoint, grouped by resource, with its HTTP method, path and behaviour</caption>
+                            <thead role="rowgroup">
+                                <tr role="row">
+                                    <th scope="col" role="columnheader">Method</th>
+                                    <th scope="col" role="columnheader">Path</th>
+                                    <th scope="col" role="columnheader">Behaviour</th>
+                                </tr>
+                            </thead>
+                            @foreach ($ledger as [$groupName, $groupNote, $rows])
+                                <tbody role="rowgroup">
+                                    <tr class="ax-grp" role="row">
+                                        <th scope="colgroup" colspan="3" role="columnheader"><b>{{ $groupName }}</b> <span>{{ $groupNote }}</span></th>
+                                    </tr>
+                                    @foreach ($rows as [$rMethod, $rPath, $rNote])
+                                        <tr class="ax-row" role="row" data-verb="{{ $rMethod }}">
+                                            <td role="cell"><span class="ax-verb {{ $axVerb[$rMethod] }}">{{ $rMethod }}</span></td>
+                                            <th scope="row" role="rowheader">{!! $axPath($rPath) !!}</th>
+                                            <td role="cell">{{ $rNote }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            @endforeach
+                        </table>
+                        <p class="ax-ledger-foot" aria-hidden="true">
+                            <span><span class="ax-count"></span> of {{ $endpointCount }} shown</span>
+                            <span>(END)</span>
+                        </p>
+                        </div>
+                    </div>
+                    <p class="ax-prose ax-gap-1" data-reveal>
+                        Full documentation for each one, with a cURL example and a response body, is in the <a href="{{ route('marketing.docs.developer.api') }}" class="ax-link">API reference</a>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 4. FILES: discovery                                          -->
+        <!-- ============================================================ -->
+        <section id="discovery" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">FILES</span>
+                    <span class="ax-ref"><a href="#discovery">#discovery</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Four files an agent can <span class="ax-em">read first.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        Documentation written for a person is a bad input for a model. These four are written for the model, live at fixed paths, and are served from any installation, hosted or your own.
+                    </p>
+
+                    <div class="ax-tree ax-gap">
+                        <p class="ax-tree-root" aria-hidden="true">/</p>
+                        <ul data-reveal-group="80">
+                            @foreach ($discovery as [$dName, $dHref, $dMeta, $dDesc])
+                                <li data-reveal>
+                                    <div class="ax-file" dir="ltr">
+                                        <a href="{{ $dHref }}">{{ $dName }}</a>
+                                        <span class="ax-fill" aria-hidden="true"></span>
+                                        <span class="ax-meta">{{ $dMeta }}</span>
+                                    </div>
+                                    <p>{{ $dDesc }}</p>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 5. EXAMPLES: three exchanges, as one session                 -->
+        <!-- ============================================================ -->
+        <section id="calls" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">EXAMPLES</span>
+                    <span class="ax-ref"><a href="#calls">#calls</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Three calls you will <span class="ax-em">actually write.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        Filtering a calendar, standing up a weekly residency, and settling a sale. Everything else is a variation on these.
+                    </p>
+
+                    <div class="ax-gap">
+                        <p class="ax-session-head" aria-hidden="true"><span>session</span><span>synth-lab</span><span>3 tool calls</span></p>
+                        <div class="ax-session">
+                            <p class="ax-plan" aria-hidden="true"><b>plan</b> 1 filter the calendar &nbsp; 2 stand up the residency &nbsp; 3 settle the sale</p>
+
+                            <!-- a. Filtered read -->
+                            <div class="ax-call">
+                                <div class="ax-call-io" data-reveal="stream">
+                                    <div class="ax-box">
+                                        <div class="ax-box-head" dir="ltr">
+                                            <span class="ax-arrow" aria-hidden="true">&#9656; http.request</span>
+                                            <span class="ax-verb ax-get">GET</span>
+                                            <span class="ax-path">/api/events</span>
+                                        </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['read_req']) !!}</pre>
+                                    </div>
+                                    <div class="ax-box">
+                                        <div class="ax-box-head ax-late" dir="ltr" style="--i: 5;">
+                                            <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                            <span class="ax-sc">200 OK</span>
+                                        </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['read_res'], 6) !!}</pre>
+                                    </div>
+                                </div>
+                                <p class="ax-call-note" data-reveal>
+                                    Ten filters on the events list, including whether tickets or RSVP are switched on, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
+                                </p>
+                            </div>
+
+                            <!-- b. Recurrence as data -->
+                            <div class="ax-call">
+                                <div class="ax-call-io" data-reveal="stream">
+                                    <div class="ax-box">
+                                        <div class="ax-box-head" dir="ltr">
+                                            <span class="ax-arrow" aria-hidden="true">&#9656; http.request</span>
+                                            <span class="ax-verb ax-post">POST</span>
+                                            <span class="ax-path">/api/events/synth-lab</span>
+                                        </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['recur_req']) !!}</pre>
+                                    </div>
+                                    <div class="ax-box">
+                                        <div class="ax-box-head ax-late" dir="ltr" style="--i: 6;">
+                                            <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                            <span class="ax-sc">201 CREATED</span>
+                                            <span class="ax-right">one event, fourteen dates</span>
+                                        </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['recur_res'], 7) !!}</pre>
+                                    </div>
+                                </div>
+                                <p class="ax-call-note" data-reveal>
+                                    A seven-character mask, Sunday first, so Monday to Friday is <span class="ax-k">"0111110"</span>. Frequency is one of daily, weekly, every_n_weeks, monthly_date, monthly_weekday or yearly, and a run can end never, on a date, or after a set number of occurrences.
+                                </p>
+                            </div>
+
+                            <!-- c. Settle a sale -->
+                            <div class="ax-call">
+                                <div class="ax-call-io" data-reveal="stream">
+                                    <div class="ax-box">
+                                        <div class="ax-box-head" dir="ltr">
+                                            <span class="ax-arrow" aria-hidden="true">&#9656; http.request</span>
+                                            <span class="ax-verb ax-put">PUT</span>
+                                            <span class="ax-path">/api/sales/7bQx2m</span>
+                                        </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['sale_req']) !!}</pre>
+                                    </div>
+                                    <div class="ax-box">
+                                        <div class="ax-box-head ax-late" dir="ltr" style="--i: 2;">
+                                            <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                            <span class="ax-sc">200 OK</span>
+                                        </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['sale_res'], 3) !!}</pre>
+                                    </div>
+                                </div>
+                                <p class="ax-call-note" data-reveal>
+                                    Three actions, and which ones are legal depends on where the sale is: <span class="ax-k">mark_paid</span> from unpaid, <span class="ax-k">refund</span> from paid, <span class="ax-k">cancel</span> from either. On a Stripe or PayPal sale, <span class="ax-k">refund</span> sends the money back before the status moves, and an <span class="ax-k">amount</span> makes it partial, which leaves the sale paid. You can also create a sale outright for a buyer who paid you off-platform.
+                                </p>
+                            </div>
+
+                            <p class="ax-plan ax-gap" aria-hidden="true"><b>done</b> 3 of 3<span class="ax-caret"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="ax-aside ax-gap" data-reveal>
+                        <span class="ax-tag ax-tag-pro">how matching works</span>
+                        <p class="ax-prose">
+                            You can name a venue or a performer instead of looking up an ID: send <span class="ax-k">venue_name</span> with <span class="ax-k">venue_address1</span>, or <span class="ax-k">members</span> as a list of names and emails, and the API resolves them to schedules on your account. To be exact about what that is: it matches an existing schedule you own or follow, and returns a 422 naming the one it could not find. It does not invent a venue for you. Categories work the same way: send <span class="ax-k">category</span> as a name and it is matched against that schedule's category list.
                         </p>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Ticker: every path on the surface, on the console rail. -->
-            <div class="es-fade-up es-d-4 mt-14">
-                <div class="es-cons-term overflow-hidden py-3">
-                    <div class="es-marquee-mask">
-                        <div class="es-marquee" data-marquee="1" aria-hidden="true">
-                            <div class="es-marquee-track">
-                                @for ($copy = 0; $copy < 2; $copy++)
-                                    @foreach ($ticker as [$tMethod, $tPath])
-                                        <span class="inline-flex flex-none items-center gap-2">
-                                            <span class="es-cons-m {{ $methodClass[$tMethod] }}">{{ $tMethod }}</span>
-                                            <span class="es-cons-mono es-cons-dim text-xs">{{ $tPath }}</span>
-                                        </span>
-                                    @endforeach
-                                @endfor
-                            </div>
-                        </div>
-                    </div>
+        <!-- ============================================================ -->
+        <!-- 6. SIGNALS: push, not poll                                   -->
+        <!-- ============================================================ -->
+        <section id="push" class="ax-sec ax-band">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">SIGNALS</span>
+                    <span class="ax-ref"><a href="#push">#push</a></span>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. The contract                                              -->
-    <!-- ============================================================ -->
-    <section id="contract" class="scroll-mt-24 es-cons-hr border-y py-20 lg:py-24">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>02 &middot; the contract</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Four facts, and you can <span class="es-cons-grad">start writing.</span>
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    No SDK to install, no OAuth dance, no sandbox to request. The whole surface behaves the same way, which is the only property an agent really needs.
-                </p>
-            </div>
-
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="80">
-                <div class="es-cons-card flex flex-col p-6" data-reveal>
-                    <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">X-API-Key</div>
-                    <p class="es-cons-ink mb-2 text-sm font-semibold">One header</p>
-                    <p class="es-cons-muted mt-auto text-sm">Register, generate a key in your settings, or log in when you have none. Keys last a year. Nothing else is required.</p>
-                </div>
-                <div class="es-cons-card flex flex-col p-6" data-reveal>
-                    <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">300 / 30</div>
-                    <p class="es-cons-ink mb-2 text-sm font-semibold">Requests a minute</p>
-                    <p class="es-cons-muted mt-auto text-sm">300 reads and 30 writes a minute, per IP. Over the line you get a 429, not a silent drop.</p>
-                </div>
-                <div class="es-cons-card flex flex-col p-6" data-reveal>
-                    <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">per_page &le; 500</div>
-                    <p class="es-cons-ink mb-2 text-sm font-semibold">The big lists paginate</p>
-                    <p class="es-cons-muted mt-auto text-sm">100 by default, 500 at most, with a <span class="es-cons-mono">meta</span> block carrying the page, the total and the bounds. Categories and sub-schedules come back whole.</p>
-                </div>
-                <div class="es-cons-card flex flex-col p-6" data-reveal>
-                    <div class="es-cons-mono es-cons-key mb-3 text-sm font-bold">Kd3Vq7</div>
-                    <p class="es-cons-ink mb-2 text-sm font-semibold">IDs are opaque strings</p>
-                    <p class="es-cons-muted mt-auto text-sm">Never a sequential integer, and an event's is the same string that appears in its public URL, so you can build a link from a response.</p>
-                </div>
-            </div>
-
-            <!-- The envelope: success and failure, side by side. -->
-            <div class="mt-4 grid gap-4 lg:grid-cols-2" data-reveal-group="80">
-                <div class="es-cons-term overflow-hidden" data-reveal>
-                    <div class="es-cons-bar">
-                        <span class="es-cons-sc">2xx</span>
-                        <span class="es-cons-mono es-cons-dim text-[0.625rem]">the success envelope</span>
-                    </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{</span>
-  <span class="es-cons-t-key">"data"</span><span class="es-cons-t-pun">: [ ... ],</span>
-  <span class="es-cons-t-key">"meta"</span><span class="es-cons-t-pun">: {</span> <span class="es-cons-t-key">"current_page"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">1</span><span class="es-cons-t-pun">,</span> <span class="es-cons-t-key">"total"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">50</span> <span class="es-cons-t-pun">}</span>
-<span class="es-cons-t-pun">}</span></pre>
-                </div>
-                <div class="es-cons-term overflow-hidden" data-reveal>
-                    <div class="es-cons-bar">
-                        <span class="es-cons-sc es-cons-sc-err">422</span>
-                        <span class="es-cons-mono es-cons-dim text-[0.625rem]">field-level errors, always in the same place</span>
-                    </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{</span>
-  <span class="es-cons-t-key">"error"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Validation failed"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"errors"</span><span class="es-cons-t-pun">: {</span> <span class="es-cons-t-key">"starts_at"</span><span class="es-cons-t-pun">: [</span><span class="es-cons-t-str">"must match Y-m-d H:i:s"</span><span class="es-cons-t-pun">] }</span>
-<span class="es-cons-t-pun">}</span></pre>
-                </div>
-            </div>
-            <p class="es-cons-muted mt-4 text-sm" data-reveal>
-                401 for a bad key, 403 when the plan or the permission is missing, 404, 409 when a key is already live or a refund's outcome is not yet confirmed, 422 with the offending fields named, 429 when throttled. A model can branch on that without guessing.
-            </p>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. The ledger: every endpoint, in one table                  -->
-    <!-- ============================================================ -->
-    <section id="ledger" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>03 &middot; the ledger</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    The entire surface, <span class="es-cons-grad">on one page.</span>
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    {{ $endpointCount }} endpoints. Not a summary of them, all of them. Everything past <span class="es-cons-mono es-cons-key">/api/login</span> needs the key header, and API access is part of the Pro plan.
-                </p>
-            </div>
-
-            <div class="es-cons-term overflow-hidden" data-reveal="panel">
-                <div class="overflow-x-auto">
-                    <table class="es-cons-table w-full border-collapse text-left">
-                        <caption class="sr-only">Every Event Schedule API endpoint, grouped by resource, with its HTTP method, path and behaviour</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col" class="es-cons-mono es-cons-dim px-4 py-3 text-[0.625rem] font-bold uppercase tracking-[0.2em]">Method</th>
-                                <th scope="col" class="es-cons-mono es-cons-dim px-4 py-3 text-[0.625rem] font-bold uppercase tracking-[0.2em]">Path</th>
-                                <th scope="col" class="es-cons-mono es-cons-dim px-4 py-3 text-[0.625rem] font-bold uppercase tracking-[0.2em]">Behaviour</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($ledger as [$groupName, $groupNote, $rows])
-                                <tr class="es-cons-grp es-cons-tr">
-                                    <th scope="colgroup" colspan="3" class="px-4 py-2.5">
-                                        <span class="es-cons-mono es-cons-lit text-[0.6875rem] font-bold uppercase tracking-[0.2em]">{{ $groupName }}</span>
-                                        <span class="es-cons-dim ms-3 text-xs font-normal">{{ $groupNote }}</span>
-                                    </th>
-                                </tr>
-                                @foreach ($rows as [$rMethod, $rPath, $rNote])
-                                    <tr class="es-cons-tr">
-                                        <td class="px-4 py-3 align-top"><span class="es-cons-m {{ $methodClass[$rMethod] }}">{{ $rMethod }}</span></td>
-                                        <th scope="row" class="es-cons-mono es-cons-bright px-4 py-3 align-top text-xs font-semibold">{{ $rPath }}</th>
-                                        <td class="es-cons-dim px-4 py-3 align-top text-xs">{{ $rNote }}</td>
-                                    </tr>
-                                @endforeach
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="es-cons-rule flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
-                    <span class="es-cons-mono es-cons-dim text-[0.625rem] font-bold uppercase tracking-[0.2em]">Colour is the verb</span>
-                    <span class="es-cons-m es-cons-m-get">GET</span><span class="es-cons-dim text-xs">read</span>
-                    <span class="es-cons-m es-cons-m-post">POST</span><span class="es-cons-dim text-xs">create</span>
-                    <span class="es-cons-m es-cons-m-put">PUT</span><span class="es-cons-dim text-xs">update</span>
-                    <span class="es-cons-m es-cons-m-del">DELETE</span><span class="es-cons-dim text-xs">remove</span>
-                </div>
-            </div>
-            <p class="es-cons-muted mt-4 text-sm" data-reveal>
-                Full documentation for each one, with a cURL example and a response body, is in the <a href="{{ route('marketing.docs.developer.api') }}" class="es-cons-link font-medium hover:underline">API reference</a>.
-            </p>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Discovery files                                           -->
-    <!-- ============================================================ -->
-    <section id="discovery" class="scroll-mt-24 es-cons-hr border-t py-20 lg:py-28">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>04 &middot; discovery</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Four files an agent can <span class="es-cons-grad">read first.</span>
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Documentation written for a person is a bad input for a model. These four are written for the model, live at fixed paths, and are served from any installation, hosted or your own.
-                </p>
-            </div>
-
-            <div class="space-y-3" data-reveal-group="80">
-                @foreach ($discovery as [$dName, $dHref, $dMeta, $dDesc])
-                    <a href="{{ $dHref }}" data-reveal class="es-cons-hover es-cons-card group flex flex-col gap-4 p-6 transition-all duration-200 hover:shadow-md sm:flex-row sm:items-start">
-                        <div class="flex-none sm:w-52">
-                            <div class="es-cons-hover-t es-cons-mono es-cons-key text-sm font-bold transition-colors">{{ $dName }}</div>
-                            <div class="es-cons-mono es-cons-muted mt-1 text-xs">{{ $dMeta }}</div>
-                        </div>
-                        <p class="es-cons-muted flex-1 text-sm leading-relaxed">{{ $dDesc }}</p>
-                        <svg aria-hidden="true" class="es-cons-hover-t es-cons-muted h-5 w-5 flex-none transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. Three exchanges you will actually write                    -->
-    <!-- ============================================================ -->
-    <section id="calls" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>05 &middot; exchanges</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Three calls you will <span class="es-cons-grad">actually write.</span>
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Filtering a calendar, standing up a weekly residency, and settling a sale. Everything else is a variation on these.
-                </p>
-            </div>
-
-            <div class="grid gap-4 lg:grid-cols-3" data-reveal-group="90">
-
-                <!-- a. Filtered read -->
-                <div class="flex flex-col" data-reveal>
-                    <div class="es-cons-term flex-1 overflow-hidden">
-                        <div class="es-cons-bar">
-                            <span class="es-cons-m es-cons-m-get">GET</span>
-                            <span class="es-cons-mono es-cons-lit truncate text-xs">/api/events</span>
-                        </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">?</span><span class="es-cons-t-key">subdomain</span><span class="es-cons-t-pun">=</span><span class="es-cons-t-str">synth-lab</span>
-<span class="es-cons-t-pun">&amp;</span><span class="es-cons-t-key">starts_after</span><span class="es-cons-t-pun">=</span><span class="es-cons-t-str">2026-08-01</span>
-<span class="es-cons-t-pun">&amp;</span><span class="es-cons-t-key">tickets_enabled</span><span class="es-cons-t-pun">=</span><span class="es-cons-t-num">1</span>
-<span class="es-cons-t-pun">&amp;</span><span class="es-cons-t-key">per_page</span><span class="es-cons-t-pun">=</span><span class="es-cons-t-num">50</span></pre>
-                        <div class="es-cons-flow" aria-hidden="true"></div>
-                        <div class="es-cons-bar">
-                            <span class="es-cons-sc">200 OK</span>
-                        </div>
-<pre class="es-cons-pre"><span class="es-cons-t-key">"meta"</span><span class="es-cons-t-pun">: {</span>
-  <span class="es-cons-t-key">"current_page"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">1</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"last_page"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">2</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"total"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">63</span>
-<span class="es-cons-t-pun">}</span></pre>
-                    </div>
-                    <p class="es-cons-muted mt-4 text-sm">
-                        Ten filters on the events list, including whether tickets or RSVP are switched on, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
-                    </p>
-                </div>
-
-                <!-- b. Recurrence as data -->
-                <div class="flex flex-col" data-reveal>
-                    <div class="es-cons-term flex-1 overflow-hidden">
-                        <div class="es-cons-bar">
-                            <span class="es-cons-m es-cons-m-post">POST</span>
-                            <span class="es-cons-mono es-cons-lit truncate text-xs">/api/events/synth-lab</span>
-                        </div>
-<pre class="es-cons-pre"><span class="es-cons-t-key">"schedule_type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"recurring"</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"recurring_frequency"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"weekly"</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"days_of_week"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"0111110"</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"recurring_end_type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"after_events"</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"recurring_end_value"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"14"</span></pre>
-                        <div class="es-cons-flow" aria-hidden="true"></div>
-                        <div class="es-cons-bar">
-                            <span class="es-cons-sc">201 CREATED</span>
-                            <span class="es-cons-mono es-cons-dim text-[0.625rem]">one event, fourteen dates</span>
-                        </div>
-<pre class="es-cons-pre"><span class="es-cons-t-key">"schedule_type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"recurring"</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"days_of_week"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"0111110"</span></pre>
-                    </div>
-                    <p class="es-cons-muted mt-4 text-sm">
-                        A seven-character mask, Sunday first, so Monday to Friday is <span class="es-cons-mono es-cons-key">"0111110"</span>. Frequency is one of daily, weekly, every_n_weeks, monthly_date, monthly_weekday or yearly, and a run can end never, on a date, or after a set number of occurrences.
-                    </p>
-                </div>
-
-                <!-- c. Settle a sale -->
-                <div class="flex flex-col" data-reveal>
-                    <div class="es-cons-term flex-1 overflow-hidden">
-                        <div class="es-cons-bar">
-                            <span class="es-cons-m es-cons-m-put">PUT</span>
-                            <span class="es-cons-mono es-cons-lit truncate text-xs">/api/sales/7bQx2m</span>
-                        </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{</span> <span class="es-cons-t-key">"action"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"mark_paid"</span> <span class="es-cons-t-pun">}</span></pre>
-                        <div class="es-cons-flow" aria-hidden="true"></div>
-                        <div class="es-cons-bar">
-                            <span class="es-cons-sc">200 OK</span>
-                        </div>
-<pre class="es-cons-pre"><span class="es-cons-t-key">"status"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"paid"</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"payment_amount"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">36</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"total_quantity"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-num">2</span><span class="es-cons-t-pun">,</span>
-<span class="es-cons-t-key">"tickets"</span><span class="es-cons-t-pun">: [{</span> <span class="es-cons-t-key">"type"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Advance"</span> <span class="es-cons-t-pun">}]</span></pre>
-                    </div>
-                    <p class="es-cons-muted mt-4 text-sm">
-                        Three actions, and which ones are legal depends on where the sale is: <span class="es-cons-mono es-cons-key">mark_paid</span> from unpaid, <span class="es-cons-mono es-cons-key">refund</span> from paid, <span class="es-cons-mono es-cons-key">cancel</span> from either. On a Stripe or PayPal sale, <span class="es-cons-mono es-cons-key">refund</span> sends the money back before the status moves, and an <span class="es-cons-mono es-cons-key">amount</span> makes it partial, which leaves the sale paid. You can also create a sale outright for a buyer who paid you off-platform.
-                    </p>
-                </div>
-            </div>
-
-            <div class="es-cons-card mt-6 p-6" data-reveal>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
-                    <span class="es-cons-plan es-cons-plan-pro mt-1">how matching works</span>
-                    <p class="es-cons-muted flex-1 text-sm leading-relaxed">
-                        You can name a venue or a performer instead of looking up an ID: send <span class="es-cons-mono es-cons-key">venue_name</span> with <span class="es-cons-mono es-cons-key">venue_address1</span>, or <span class="es-cons-mono es-cons-key">members</span> as a list of names and emails, and the API resolves them to schedules on your account. To be exact about what that is: it matches an existing schedule you own or follow, and returns a 422 naming the one it could not find. It does not invent a venue for you. Categories work the same way: send <span class="es-cons-mono es-cons-key">category</span> as a name and it is matched against that schedule's category list.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. Push, not poll (fixed-dark band)                          -->
-    <!-- ============================================================ -->
-    <section id="push" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
-        <div class="es-cons-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-4 py-16 sm:px-8 lg:px-12 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-6xl">
-                <div class="mb-12 max-w-3xl">
-                    <div class="es-cons-mark mb-5" data-reveal><span>06 &middot; webhooks</span></div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                        Or stop asking, and <span class="es-cons-lit">get told.</span>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Or stop asking, and <span class="ax-em">get told.</span>
                     </h2>
-                    <p class="es-cons-dim text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
                         Polling a sales endpoint every minute is a waste of both our time. Register an endpoint and the traffic reverses: we POST to you, signed, the moment something happens.
                     </p>
-                </div>
 
-                <div class="grid gap-4 lg:grid-cols-[1fr_1.05fr]" data-reveal-group="90">
-                    <!-- the delivery -->
-                    <div data-reveal>
-                        <div class="es-cons-term overflow-hidden">
-                            <div class="es-cons-bar">
-                                <span class="es-cons-m es-cons-m-post">POST</span>
-                                <span class="es-cons-mono es-cons-lit truncate text-xs">https://your-app.example/hooks</span>
+                    <div class="ax-sig-grid ax-gap">
+                        <!-- the delivery -->
+                        <div class="ax-box" data-reveal="stream">
+                            <div class="ax-box-head" dir="ltr">
+                                <span class="ax-arrow" aria-hidden="true">&#9666; incoming</span>
+                                <span class="ax-verb ax-post">POST</span>
+                                <span class="ax-path">https://your-app.example/hooks</span>
                             </div>
-<pre class="es-cons-pre"><span class="es-cons-t-key">X-Webhook-Event</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">sale.paid</span>
-<span class="es-cons-t-key">X-Webhook-Signature</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">sha256=&lt;hex&gt;</span>
-<span class="es-cons-t-key">X-Webhook-Timestamp</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">2026-08-14T20:11:04+00:00</span>
-<span class="es-cons-t-key">User-Agent</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">EventSchedule-Webhook/1.0</span>
-
-<span class="es-cons-t-pun">{</span> <span class="es-cons-t-key">"event"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"sale.paid"</span><span class="es-cons-t-pun">,</span> <span class="es-cons-t-key">"data"</span><span class="es-cons-t-pun">: {</span> ... <span class="es-cons-t-pun">} }</span></pre>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['hook']) !!}</pre>
                         </div>
-                        <div class="es-cons-card mt-4 p-5">
-                            <p class="es-cons-dim text-sm leading-relaxed">
-                                The signature is an HMAC-SHA256 of the raw body, keyed on a secret shown once when you add the hook. Verify it before you trust the payload. <span class="es-cons-bright font-semibold">Key on <span class="es-cons-mono">data.id</span> plus the event type</span>, because a delivery can repeat and one sale fires several types. There is a delivery log in your settings when something goes wrong.
+                        <div>
+                            <p class="ax-prose" data-reveal>
+                                The signature is an HMAC-SHA256 of the raw body, keyed on a secret shown once when you add the hook. Verify it before you trust the payload. <strong>Key on <span class="ax-k">data.id</span> plus the event type</strong>, because a delivery can repeat and one sale fires several types. There is a delivery log in your settings when something goes wrong.
                             </p>
-                            <p class="mt-4 text-sm">
-                                <a href="{{ route('marketing.docs.developer.webhooks') }}" class="es-cons-link font-medium hover:underline">Webhook reference, with verification snippets</a>
+                            <p class="ax-gap-1" data-reveal>
+                                <a href="{{ route('marketing.docs.developer.webhooks') }}" class="ax-link">Webhook reference, with verification snippets</a>
                             </p>
                         </div>
                     </div>
 
                     <!-- the fourteen types -->
-                    <div data-reveal>
-                        <div class="es-cons-term overflow-hidden">
-                            <div class="es-cons-bar">
-                                <span class="es-cons-mono es-cons-lit text-xs font-bold uppercase tracking-[0.2em]">Fourteen event types</span>
-                                <span class="es-cons-plan es-cons-plan-pro ms-auto">pro</span>
-                            </div>
-                            <ul>
-                                @foreach ($webhookEvents as [$wName, $wDesc])
-                                    <li class="@if (! $loop->first) es-cons-tr @endif flex flex-col gap-1 px-4 py-2.5 sm:flex-row sm:items-baseline sm:gap-4">
-                                        <span class="es-cons-mono es-cons-lit-ok flex-none text-xs font-semibold sm:w-40">{{ $wName }}</span>
-                                        <span class="es-cons-dim text-xs">{{ $wDesc }}</span>
-                                    </li>
-                                @endforeach
-                            </ul>
+                    <div class="ax-box ax-signal-box ax-gap" data-reveal>
+                        <div class="ax-box-head">
+                            <strong>Fourteen event types</strong>
+                            <span class="ax-tag ax-tag-pro ax-right">pro</span>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. Everything else: bento                                     -->
-    <!-- ============================================================ -->
-    <section id="rest" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>07 &middot; the rest</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    The parts that make it <span class="es-cons-grad">safe to automate.</span>
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Details that only matter once your code is running unattended, which is exactly when they matter most.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
-
-                <!-- 1 -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner es-cons-card relative flex h-full flex-col overflow-hidden p-7 lg:p-9">
-                        <div class="mb-4 flex flex-wrap items-center gap-2">
-                            <span class="es-cons-plan">free and pro</span>
-                            <span class="es-cons-chip">open source</span>
-                        </div>
-                        <h3 class="es-cons-ink mb-3 text-2xl font-bold tracking-tight lg:text-3xl">Your own install, same API</h3>
-                        <p class="es-cons-muted mb-6 text-base leading-relaxed lg:text-lg">
-                            Event Schedule is open source, and the API does not change when you host it yourself: same routes, same OpenAPI spec, same discovery files, served from your own domain. On a selfhosted install the Pro gate returns true unconditionally, so no endpoint is held back and no key talks to anyone else's server.
-                        </p>
-                        <div class="mt-auto flex flex-wrap gap-2">
-                            <span class="es-cons-chip">docker or bare metal</span>
-                            <span class="es-cons-chip">your database</span>
-                            <span class="es-cons-chip">no outbound calls required</span>
-                        </div>
-                        <p class="mt-5 text-sm">
-                            <a href="{{ marketing_url('/selfhost') }}" class="es-cons-link font-medium hover:underline">How selfhosting works</a>
-                        </p>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- 2 -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner es-cons-card relative flex h-full flex-col overflow-hidden p-7">
-                        <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
-                        <h3 class="es-cons-ink mb-3 text-xl font-bold">Flyers, as a second call</h3>
-                        <p class="es-cons-muted mb-5 text-sm leading-relaxed">
-                            Artwork is multipart, so it gets its own request. Create the event, then POST a <span class="es-cons-mono es-cons-key">flyer_image</span> to the flyer endpoint with the returned ID.
-                        </p>
-                        <div class="es-cons-term mt-auto overflow-hidden">
-<pre class="es-cons-pre">curl -X POST <span class="es-cons-t-str">.../api/events/flyer/Kd3Vq7</span> \
-  -H <span class="es-cons-t-str">"X-API-Key: $KEY"</span> \
-  -F <span class="es-cons-t-str">"flyer_image=@night.jpg"</span></pre>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- 3 -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner es-cons-card relative flex h-full flex-col overflow-hidden p-7">
-                        <span class="es-cons-plan mb-4 self-start">free and pro</span>
-                        <h3 class="es-cons-ink mb-3 text-xl font-bold">Languages, made explicit</h3>
-                        <p class="es-cons-muted mb-5 text-sm leading-relaxed">
-                            Set <span class="es-cons-mono es-cons-key">language_code</span> on a schedule and its pages are served in that language; twelve are supported. A schedule can also nominate one translation target, and its own copy is machine-translated into it on a scheduled pass.
-                        </p>
-                        <div class="mt-auto flex flex-wrap gap-1.5">
-                            @foreach (['ar', 'de', 'en', 'es', 'et', 'fr', 'he', 'it', 'nl', 'pt', 'ro', 'ru'] as $lc)
-                                <span class="es-cons-mono es-cons-chip px-2 py-0.5 text-[0.6875rem] uppercase">{{ $lc }}</span>
+                        <ul class="ax-signals" dir="ltr">
+                            @foreach ($webhookEvents as [$wName, $wDesc])
+                                <li><span><b>{{ $wName }}</b> <i>{{ $wDesc }}</i></span></li>
                             @endforeach
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
+                        </ul>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- 4 -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner es-cons-card relative flex h-full flex-col overflow-hidden p-7 lg:p-9">
-                        <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
-                        <h3 class="es-cons-ink mb-3 text-2xl font-bold tracking-tight lg:text-3xl">Money, without a middleman</h3>
-                        <p class="es-cons-muted mb-6 text-base leading-relaxed lg:text-lg">
-                            Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast for rand prices, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="es-cons-mono es-cons-key">sale.paid</span> webhooks, with the ticket lines attached, and a Stripe or PayPal refund goes back through the provider.
-                        </p>
-                        <div class="mt-auto flex flex-wrap gap-2">
-                            <span class="es-cons-chip">stripe</span>
-                            <span class="es-cons-chip">paypal</span>
-                            <span class="es-cons-chip">payfast</span>
-                            <span class="es-cons-chip">invoiceninja</span>
-                            <span class="es-cons-chip">payment_url</span>
-                            <span class="es-cons-chip">cash</span>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
+        <!-- ============================================================ -->
+        <!-- 7. NOTES: everything else                                    -->
+        <!-- ============================================================ -->
+        <section id="rest" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">NOTES</span>
+                    <span class="ax-ref"><a href="#rest">#rest</a></span>
                 </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        The parts that make it <span class="ax-em">safe to automate.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        Details that only matter once your code is running unattended, which is exactly when they matter most.
+                    </p>
 
-                <!-- 5 -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner es-cons-card relative flex h-full flex-col overflow-hidden p-7">
-                        <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
-                        <h3 class="es-cons-ink mb-3 text-xl font-bold">Read-only feeds</h3>
-                        <p class="es-cons-muted mb-5 text-sm leading-relaxed">
-                            Two endpoints exist purely so you can pull audience content somewhere else: post-event ratings and comments, and approved fan photos, videos and comments. Fan submissions carry a display name only; the ratings feed names the attendee, so treat it as owner-facing.
-                        </p>
-                        <p class="es-cons-muted mt-auto text-xs leading-relaxed">
-                            Each kind of fan submission has its own ID sequence, so key on <span class="es-cons-mono es-cons-key">type</span> and <span class="es-cons-mono es-cons-key">id</span> together when you store a row.
-                        </p>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
+                    <div class="ax-notes ax-gap" data-reveal-group="70">
 
-                <!-- 6 -->
-                <div class="es-bento group relative lg:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner es-cons-card relative flex h-full flex-col overflow-hidden p-7 lg:p-9">
-                        <span class="es-cons-plan es-cons-plan-pro mb-4 self-start">pro</span>
-                        <h3 class="es-cons-ink mb-3 text-2xl font-bold tracking-tight lg:text-3xl">Partial writes that keep their nerve</h3>
-                        <p class="es-cons-muted mb-6 text-base leading-relaxed lg:text-lg">
-                            <span class="es-cons-mono es-cons-key">PUT</span> takes the same body as create and applies only what you send. Recurrence configuration, ticket types and agenda parts are preserved when they are absent, so an agent that only knows the new start time cannot quietly erase a run's ticket tiers. Every write is scoped to the schedules the key's owner owns or administers, and anything outside that returns 403 rather than silently doing nothing.
-                        </p>
-                        <div class="mt-auto grid gap-3 sm:grid-cols-3">
-                            <div class="es-cons-term p-4">
-                                <div class="es-cons-mono es-cons-lit text-xs font-bold">401</div>
-                                <p class="es-cons-dim mt-1 text-xs">Key missing, wrong or expired.</p>
+                        <!-- 1 -->
+                        <article class="ax-note" data-reveal>
+                            <div class="ax-note-tags">
+                                <span class="ax-tag ax-tag-free">free and pro</span>
+                                <span class="ax-tag">open source</span>
                             </div>
-                            <div class="es-cons-term p-4">
-                                <div class="es-cons-mono es-cons-lit text-xs font-bold">403</div>
-                                <p class="es-cons-dim mt-1 text-xs">Not your schedule, or the plan does not cover it.</p>
+                            <h3>Your own install, same API</h3>
+                            <p>
+                                Event Schedule is open source, and the API does not change when you host it yourself: same routes, same OpenAPI spec, same discovery files, served from your own domain. On a selfhosted install the Pro gate returns true unconditionally, so no endpoint is held back and no key talks to anyone else's server.
+                            </p>
+                            <div class="ax-chips">
+                                <span class="ax-chip">docker or bare metal</span>
+                                <span class="ax-chip">your database</span>
+                                <span class="ax-chip">no outbound calls required</span>
                             </div>
-                            <div class="es-cons-term p-4">
-                                <div class="es-cons-mono es-cons-lit text-xs font-bold">429</div>
-                                <p class="es-cons-dim mt-1 text-xs">Throttled. Back off and retry.</p>
+                            <p>
+                                <a href="{{ marketing_url('/selfhost') }}" class="ax-link">How selfhosting works</a>
+                            </p>
+                        </article>
+
+                        <!-- 2 -->
+                        <article class="ax-note" data-reveal>
+                            <div class="ax-note-tags">
+                                <span class="ax-tag ax-tag-pro">pro</span>
                             </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
+                            <h3>Flyers, as a second call</h3>
+                            <p>
+                                Artwork is multipart, so it gets its own request. Create the event, then POST a <span class="ax-k">flyer_image</span> to the flyer endpoint with the returned ID.
+                            </p>
+                            <div class="ax-box">
+<pre class="ax-code" dir="ltr" data-clip-ok>{!! $axPre['flyer'] !!}</pre>
+                            </div>
+                        </article>
+
+                        <!-- 3 -->
+                        <article class="ax-note" data-reveal>
+                            <div class="ax-note-tags">
+                                <span class="ax-tag ax-tag-free">free and pro</span>
+                            </div>
+                            <h3>Languages, made explicit</h3>
+                            <p>
+                                Set <span class="ax-k">language_code</span> on a schedule and its pages are served in that language; twelve are supported. A schedule can also nominate one translation target, and its own copy is machine-translated into it on a scheduled pass.
+                            </p>
+                            <div class="ax-chips" dir="ltr">
+                                @foreach (['ar', 'de', 'en', 'es', 'et', 'fr', 'he', 'it', 'nl', 'pt', 'ro', 'ru'] as $lc)
+                                    <span class="ax-chip">{{ $lc }}</span>
+                                @endforeach
+                            </div>
+                        </article>
+
+                        <!-- 4 -->
+                        <article class="ax-note" data-reveal>
+                            <div class="ax-note-tags">
+                                <span class="ax-tag ax-tag-pro">pro</span>
+                            </div>
+                            <h3>Money, without a middleman</h3>
+                            <p>
+                                Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast for rand prices, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="ax-s">sale.paid</span> webhooks, with the ticket lines attached, and a Stripe or PayPal refund goes back through the provider.
+                            </p>
+                            <div class="ax-chips" dir="ltr">
+                                <span class="ax-chip">stripe</span>
+                                <span class="ax-chip">paypal</span>
+                                <span class="ax-chip">payfast</span>
+                                <span class="ax-chip">invoiceninja</span>
+                                <span class="ax-chip">payment_url</span>
+                                <span class="ax-chip">cash</span>
+                            </div>
+                        </article>
+
+                        <!-- 5 -->
+                        <article class="ax-note" data-reveal>
+                            <div class="ax-note-tags">
+                                <span class="ax-tag ax-tag-pro">pro</span>
+                            </div>
+                            <h3>Read-only feeds</h3>
+                            <p>
+                                Two endpoints exist purely so you can pull audience content somewhere else: post-event ratings and comments, and approved fan photos, videos and comments. Fan submissions carry a display name only; the ratings feed names the attendee, so treat it as owner-facing.
+                            </p>
+                            <p>
+                                Each kind of fan submission has its own ID sequence, so key on <span class="ax-k">type</span> and <span class="ax-k">id</span> together when you store a row.
+                            </p>
+                        </article>
+
+                        <!-- 6 -->
+                        <article class="ax-note" data-reveal>
+                            <div class="ax-note-tags">
+                                <span class="ax-tag ax-tag-pro">pro</span>
+                            </div>
+                            <h3>Partial writes that keep their nerve</h3>
+                            <p>
+                                <span class="ax-k">PUT</span> takes the same body as create and applies only what you send. Recurrence configuration, ticket types and agenda parts are preserved when they are absent, so an agent that only knows the new start time cannot quietly erase a run's ticket tiers. Every write is scoped to the schedules the key's owner owns or administers, and anything outside that returns 403 rather than silently doing nothing.
+                            </p>
+                            <div class="ax-exit" dir="ltr">
+                                <span aria-hidden="true">EXIT STATUS</span>
+                                <dl>
+                                <div>
+                                    <dt>401</dt>
+                                    <dd>Key missing, wrong or expired.</dd>
+                                </div>
+                                <div>
+                                    <dt>403</dt>
+                                    <dd>Not your schedule, or the plan does not cover it.</dd>
+                                </div>
+                                <div>
+                                    <dt>429</dt>
+                                    <dd>Throttled. Back off and retry.</dd>
+                                </div>
+                                </dl>
+                            </div>
+                        </article>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 8. What people build with it                                  -->
-    <!-- ============================================================ -->
-    <section id="who" class="scroll-mt-24 es-cons-hr border-t py-20 lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>08 &middot; callers</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    What people point at <span class="es-cons-grad">this API.</span>
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    An HTTP API has no opinion about what is calling it, which is the point.
-                </p>
-            </div>
+        <!-- ============================================================ -->
+        <!-- 8. CALLERS: what people build with it                        -->
+        <!-- ============================================================ -->
+        <section id="who" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">CALLERS</span>
+                    <span class="ax-ref"><a href="#who">#who</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        What people point at <span class="ax-em">this API.</span>
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        An HTTP API has no opinion about what is calling it, which is the point.
+                    </p>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                <x-sub-audience-card
-                    name="AI Assistants"
-                    description="Turn a conversation into a published event. Register, create the schedule and create the event in three calls, then hand back the URL from the response."
-                    icon-color="cyan"
-                    blog-slug="for-ai-assistants"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Developer Tools & Scripts"
-                    description="A cron job, a CLI, a one-off migration. Generate a client from the OpenAPI spec and the whole surface is typed for you."
-                    icon-color="teal"
-                    blog-slug="for-developer-tools"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Community Bots"
-                    description="A Discord, Slack or Telegram bot that creates the event when someone announces it in the channel, and posts the ticket link back."
-                    icon-color="emerald"
-                    blog-slug="for-community-bots"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Booking Platforms"
-                    description="Keep your own front end and let Event Schedule hold the events, the ticket types and the sales. Webhooks push each paid sale straight back to you."
-                    icon-color="sky"
-                    blog-slug="for-booking-platforms"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Calendar Aggregators"
-                    description="Pull a date window with the events filters, or take the iCal feed and skip the API entirely. Both come off the same schedule."
-                    icon-color="blue"
-                    blog-slug="for-calendar-aggregators"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Custom Integrations"
-                    description="Anything that speaks HTTP and JSON. If you would rather not write the client, the OpenAPI spec will write it for you."
-                    icon-color="amber"
-                    blog-slug="for-custom-integrations"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 9. Three steps                                               -->
-    <!-- ============================================================ -->
-    <section id="start" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 max-w-3xl">
-                <div class="es-cons-mark mb-5" data-reveal><span>09 &middot; first run</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Three requests from nothing to <span class="es-cons-grad">a live page.</span>
-                </h2>
-            </div>
-
-            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($steps as [$sNum, $sTitle, $sDesc, $sCode])
-                    <div class="es-cons-card flex flex-col p-6" data-reveal>
-                        <div class="es-cons-mono es-cons-key mb-4 text-sm font-bold">{{ $sNum }}</div>
-                        <h3 class="es-cons-ink mb-2 text-lg font-bold">{{ $sTitle }}</h3>
-                        <p class="es-cons-muted mb-5 text-sm leading-relaxed">{!! $sDesc !!}</p>
-                        <div class="es-cons-term mt-auto overflow-hidden">
-                            <div class="es-cons-mono es-cons-lit-ok overflow-x-auto whitespace-pre px-3 py-2.5 text-[0.7rem]">{{ $sCode }}</div>
-                        </div>
+                    @php
+                        $axCallers = [
+                            ['AI Assistants', 'Turn a conversation into a published event. Register, create the schedule and create the event in three calls, then hand back the URL from the response.', 'for-ai-assistants'],
+                            ['Developer Tools & Scripts', 'A cron job, a CLI, a one-off migration. Generate a client from the OpenAPI spec and the whole surface is typed for you.', 'for-developer-tools'],
+                            ['Community Bots', 'A Discord, Slack or Telegram bot that creates the event when someone announces it in the channel, and posts the ticket link back.', 'for-community-bots'],
+                            ['Booking Platforms', 'Keep your own front end and let Event Schedule hold the events, the ticket types and the sales. Webhooks push each paid sale straight back to you.', 'for-booking-platforms'],
+                            ['Calendar Aggregators', 'Pull a date window with the events filters, or take the iCal feed and skip the API entirely. Both come off the same schedule.', 'for-calendar-aggregators'],
+                            ['Custom Integrations', 'Anything that speaks HTTP and JSON. If you would rather not write the client, the OpenAPI spec will write it for you.', 'for-custom-integrations'],
+                        ];
+                    @endphp
+                    <div class="ax-callers ax-gap" data-reveal-group="60">
+                        @foreach ($axCallers as [$axWho, $axWhat, $axSlug])
+                            @php $axPost = get_sub_audience_blog($axSlug); @endphp
+                            <article class="ax-caller" data-reveal>
+                                <div>
+                                    <h3>{{ $axWho }}</h3>
+                                    <p>{{ $axWhat }}</p>
+                                    @if ($axPost)
+                                        <a href="{{ blog_url('/' . $axPost->slug) }}" class="ax-link" aria-label="Learn more about Event Schedule for {{ $axWho }}">Learn more {!! $axArrow !!}</a>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
                     </div>
-                @endforeach
+                </div>
             </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 9. QUICK START: three steps                                  -->
+        <!-- ============================================================ -->
+        <section id="start" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">QUICK START</span>
+                    <span class="ax-ref"><a href="#start">#start</a></span>
+                </div>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Three requests from nothing to <span class="ax-em">a live page.</span>
+                    </h2>
+
+                    <ol class="ax-steps ax-gap" data-reveal-group="90">
+                        @foreach ($steps as [$sNum, $sTitle, $sDesc, $sCode])
+                            <li class="ax-step" data-reveal>
+                                <span class="ax-step-no" aria-hidden="true">{{ $sNum }}</span>
+                                <div>
+                                    <h3>{{ $sTitle }}</h3>
+                                    <p>{!! str_replace('es-cons-mono es-cons-key', 'ax-k', $sDesc) !!}</p>
+                                </div>
+                                <div class="ax-box">
+<pre class="ax-code" dir="ltr" data-clip-ok>{{ $sCode }}</pre>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 10. SEE ALSO: related features and pages                     -->
+        <!-- ============================================================ -->
+        <section class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">SEE ALSO</span>
+                    <span class="ax-ref" aria-hidden="true"></span>
+                </div>
+                <div class="ax-body ax-also">
+                    <div data-reveal>
+                        <h2>Related features</h2>
+                        @php
+                            $axFeatures = [
+                                ['Ticketing', 'Ticket types, QR check-in and zero platform fees', marketing_url('/features/ticketing')],
+                                ['Calendar Sync', 'Two-way Google, Outlook and CalDAV sync on every plan', marketing_url('/features/calendar-sync')],
+                                ['Embed Calendar', 'Put the schedule on the site you already run', marketing_url('/features/embed-calendar')],
+                                ['Analytics', 'Page views, devices and traffic sources, free on every plan', marketing_url('/features/analytics')],
+                            ];
+                        @endphp
+                        <ul>
+                            @foreach ($axFeatures as [$axFeature, $axFeatureDesc, $axFeatureUrl])
+                                <li>
+                                    <a href="{{ $axFeatureUrl }}">
+                                        <b>{{ $axFeature }}<small aria-hidden="true">(7)</small></b>
+                                        <span>{{ $axFeatureDesc }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="ax-more">
+                            <a href="{{ marketing_url('/features') }}" class="ax-link">See all features {!! $axArrow !!}</a>
+                        </p>
+                    </div>
+
+                    <div class="ax-pages" data-reveal style="--reveal-delay: 0.08s;">
+                        <h2>Related pages</h2>
+                        <ul>
+                            @foreach ([['/for-webinars', 'Webinars'], ['/for-virtual-conferences', 'Virtual Conferences'], ['/for-curators', 'Curators'], ['/for-online-classes', 'Online Classes']] as [$relHref, $relName])
+                                <li>
+                                    <a href="{{ marketing_url($relHref) }}">
+                                        <b>For {{ $relName }}</b>
+                                        <span>Read more {!! $axArrow !!}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="ax-more">
+                            <a href="{{ marketing_url('/use-cases') }}" class="ax-link">See all use cases {!! $axArrow !!}</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="ax-plans">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">PLANS</span>
+                    <span class="ax-ref" aria-hidden="true"></span>
+                </div>
+            </div>
+            @include('marketing.partials.pricing-nudge')
         </div>
-    </section>
 
-    <!-- ============================================================ -->
-    <!-- 10. Key features                                             -->
-    <!-- ============================================================ -->
-    <section class="es-cons-hr border-t py-20">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-cons-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Ticket types, QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
+        <!-- ============================================================ -->
+        <!-- 11. QUESTIONS                                                -->
+        <!-- ============================================================ -->
+        <x-seo.faq-schema :items="$faqs" />
+
+        <section id="faq" class="ax-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">QUESTIONS</span>
+                    <span class="ax-ref"><a href="#faq">#faq</a></span>
                 </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way Google, Outlook and CalDAV sync on every plan" :url="marketing_url('/features/calendar-sync')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
-                    </x-feature-link-card>
+                <div class="ax-body">
+                    <h2 class="ax-h2" data-reveal>
+                        Frequently asked questions
+                    </h2>
+                    <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
+                        What developers ask before they write the first request.
+                    </p>
+
+                    <div class="ax-qa ax-gap" data-reveal>
+                        @foreach ($faqs as $faqIndex => $faq)
+                            <details name="faq">
+                                <summary>
+                                    <h3>{{ $faq['q'] }}</h3>
+                                </summary>
+                                <p>{{ $faq['a'] }}</p>
+                            </details>
+                        @endforeach
+                    </div>
                 </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed Calendar" description="Put the schedule on the site you already run" :url="marketing_url('/features/embed-calendar')" icon-color="teal">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 12. RUN: the exchange that hands you a key                   -->
+        <!-- ============================================================ -->
+        <section id="claim" class="ax-sec ax-run-sec">
+            <div class="ax-wrap">
+                <div class="ax-sec-head">
+                    <span class="ax-name" aria-hidden="true">RUN</span>
+                    <span class="ax-ref"><a href="#claim">#claim</a></span>
                 </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Page views, devices and traffic sources, free on every plan" :url="marketing_url('/features/analytics')" icon-color="cyan">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-cons-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    @include('marketing.partials.pricing-nudge')
-
-    <!-- ============================================================ -->
-    <!-- 11. Related pages                                            -->
-    <!-- ============================================================ -->
-    <section class="es-cons-hr border-t py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-cons-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
-                @foreach ([['/for-webinars', 'Webinars'], ['/for-virtual-conferences', 'Virtual Conferences'], ['/for-curators', 'Curators'], ['/for-online-classes', 'Online Classes']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" class="es-cons-hover es-cons-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-cons-hover-t es-cons-ink mb-3 text-sm font-semibold transition-colors">For {{ $relName }}</span>
-                        <span class="es-cons-muted mt-auto inline-flex items-center gap-1 text-xs font-medium">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-            <div class="mt-8 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-cons-link inline-flex items-center font-medium hover:underline">
-                    See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 12. FAQ                                                      -->
-    <!-- ============================================================ -->
-    <x-seo.faq-schema :items="$faqs" />
-
-    <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12">
-                <div class="es-cons-mark mb-5" data-reveal><span>10 &middot; questions</span></div>
-                <h2 class="es-balance es-cons-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Frequently asked questions
-                </h2>
-                <p class="es-cons-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    What developers ask before they write the first request.
-                </p>
-            </div>
-
-            <div class="space-y-3" data-reveal-group="80">
-                @foreach ($faqs as $faqIndex => $faq)
-                    <details name="faq" class="es-cons-hover es-cons-card group p-6 transition-all duration-200" data-reveal>
-                        <summary class="es-cons-ink flex cursor-pointer items-start gap-3 font-semibold">
-                            <span class="es-cons-mono es-cons-key flex-none text-sm font-bold" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                            <span class="es-cons-hover-t flex-1 transition-colors">{{ $faq['q'] }}</span>
-                            <svg aria-hidden="true" class="es-cons-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <p class="faq-answer es-cons-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 13. Finale: the exchange that hands you a key                -->
-    <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-cons-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 shadow-2xl sm:px-12 lg:py-20" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
-
-                <div class="relative z-10 grid items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
+                <div class="ax-body ax-run-grid">
                     <div>
-                        <div class="es-cons-mark mb-5"><span>11 &middot; your key</span></div>
-                        <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-white md:text-5xl">
-                            The last call is the <span class="es-cons-lit">first one.</span>
+                        <h2 class="ax-h2" data-reveal>
+                            The last call is the <span class="ax-em">first one.</span>
                         </h2>
-                        <p class="es-cons-dim mb-10 max-w-xl text-lg">
+                        <p class="ax-prose" data-reveal style="--reveal-delay: 0.06s;">
                             Pick a name and start, or register straight from your code. Publishing a schedule and its dates is free forever, and so is free registration; the API and any ticket with a price on it are {{ plan_price($proMonthly) }} a month, and Event Schedule takes nothing from the door.
                         </p>
 
-                        <div class="flex max-w-2xl flex-col items-stretch gap-3 sm:flex-row">
-                            <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                            <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                                <input id="es-claim-input" type="text" placeholder="your-agent" autocomplete="off" spellcheck="false" maxlength="30"
-                                    class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
-                                <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
-                            </div>
-                            <a href="{{ app_url('/sign_up') }}" class="es-cons-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                                <span class="relative z-10 flex items-center gap-2">
+                        <div class="ax-run-line">
+                            <div class="ax-run" data-reveal style="--reveal-delay: 0.12s;">
+                                <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                                <div dir="ltr" class="es-claim ax-claim">
+                                    <span class="ax-prompt" aria-hidden="true"><b>$</b> <span>open </span></span>
+                                    <input id="es-claim-input" type="text" placeholder="your-agent" autocomplete="off" spellcheck="false" maxlength="30">
+                                    <span class="ax-host">.eventschedule.com</span>
+                                </div>
+                                <a href="{{ app_url('/sign_up') }}" class="ax-btn">
                                     Get started free
-                                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                </span>
-                                <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                            </a>
-                        </div>
+                                    <kbd aria-hidden="true">&crarr;</kbd>
+                                </a>
+                            </div>
 
-                        <p class="es-cons-dim mt-6 text-sm">
-                            No card to start. Or go straight to the <a href="{{ route('marketing.docs.developer.api') }}" class="es-cons-link font-medium hover:underline">API reference</a> and the <a href="/api/openapi.json" class="es-cons-link font-medium hover:underline">OpenAPI spec</a>.
-                        </p>
+                            <p class="ax-prose ax-gap-1" data-reveal style="--reveal-delay: 0.18s;">
+                                No card to start. Or go straight to the <a href="{{ route('marketing.docs.developer.api') }}" class="ax-link">API reference</a> and the <a href="/api/openapi.json" class="ax-link">OpenAPI spec</a>.
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="es-cons-term overflow-hidden">
-                        <div class="es-cons-bar">
-                            <span class="es-cons-m es-cons-m-post">POST</span>
-                            <span class="es-cons-mono es-cons-lit text-xs">/api/register</span>
-                            <span class="es-cons-mono es-cons-dim ms-auto text-[0.625rem]">no key required</span>
+                    <div class="ax-call-io" data-reveal="stream">
+                        <div class="ax-box">
+                            <div class="ax-box-head" dir="ltr">
+                                <span class="ax-arrow" aria-hidden="true">&#9656;</span>
+                                <span class="ax-verb ax-post">POST</span>
+                                <span class="ax-path">/api/register</span>
+                                <span class="ax-right">no key required</span>
+                            </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['reg_req']) !!}</pre>
                         </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{</span>
-  <span class="es-cons-t-key">"name"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"Your Agent"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"email"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"you@example.com"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"password"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"..."</span>
-<span class="es-cons-t-pun">}</span></pre>
-                        <div class="es-cons-flow" aria-hidden="true"></div>
-                        <div class="es-cons-bar">
-                            <span class="es-cons-sc">201 CREATED</span>
+                        <div class="ax-box">
+                            <div class="ax-box-head ax-late" dir="ltr" style="--i: 6;">
+                                <span class="ax-arrow" aria-hidden="true">&#9666;</span>
+                                <span class="ax-sc">201 CREATED</span>
+                            </div>
+<pre class="ax-code ax-num" dir="ltr" data-clip-ok>{!! $axLines($axPre['reg_res'], 7) !!}</pre>
+                            <p class="ax-box-note">
+                                In hosted mode, <span class="ax-k">POST /api/register/send-code</span> mails a six-digit code first, and you pass it as <span class="ax-k">verification_code</span>.
+                            </p>
                         </div>
-<pre class="es-cons-pre"><span class="es-cons-t-pun">{ </span><span class="es-cons-t-key">"data"</span><span class="es-cons-t-pun">: {</span>
-  <span class="es-cons-t-key">"api_key"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"your_new_api_key"</span><span class="es-cons-t-pun">,</span>
-  <span class="es-cons-t-key">"api_key_expires_at"</span><span class="es-cons-t-pun">:</span> <span class="es-cons-t-str">"2027-07-30T00:00:00Z"</span>
-<span class="es-cons-t-pun">} }</span></pre>
-                        <p class="es-cons-rule es-cons-dim px-4 py-3 text-xs">
-                            In hosted mode, <span class="es-cons-mono es-cons-lit">POST /api/register/send-code</span> mails a six-digit code first, and you pass it as <span class="es-cons-mono es-cons-lit">verification_code</span>.
-                        </p>
                     </div>
                 </div>
+
+                <p class="ax-manfoot" aria-hidden="true"><span>Event Schedule</span><span>REST API</span><span>EVENTSCHEDULE(1)</span></p>
             </div>
+        </section>
+
+        <div class="ax-keep">
+            <x-marketing.related-pages />
         </div>
-    </section>
-
-    <!-- Desktop dot nav -->
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#0f0f14] dark:text-gray-300">{{ $sectionLabel }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
-
     </div>
 
-    <x-marketing.related-pages />
-
-    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

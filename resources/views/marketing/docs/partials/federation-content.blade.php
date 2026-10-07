@@ -15,7 +15,7 @@
     </h2>
     <p>
         Federation is an optional network that shares your public events with the listings on
-        <a href="https://eventschedule.com/browse" target="_blank" rel="noopener">eventschedule.com</a>.
+        <a href="https://eventschedule.com/browse" target="_blank" rel="noopener noreferrer" class="doc-link">eventschedule.com</a>.
         Every listing links straight back to the event on your own site, so the discovery traffic
         comes to you rather than staying somewhere else.
     </p>
@@ -24,12 +24,33 @@
         you run a single schedule for yourself or a multi-tenant SaaS for customers. It is free,
         off by default, and can be switched off again at any time.
     </p>
-
-    <div class="doc-callout doc-callout-info">
-        <p><strong>What gets shared.</strong> Public, upcoming events, online and in person. Events set
-        to Draft, Internal or Unlisted are never sent, and neither are cancelled or password-protected
-        ones, or events from schedules that have opted out or have not opted in.</p>
+    <p>Two switches decide what is shared, and both have to say yes:</p>
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th scope="col">Switch</th>
+                    <th scope="col">Where it is, and who sets it</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>The install</td>
+                    <td><strong>Admin</strong> &rarr; <strong>System</strong> &rarr; <strong>Settings</strong>, in the <strong>Event Schedule network</strong> card. An administrator sets it once, and eventschedule.com then reviews the install, also once</td>
+                </tr>
+                <tr>
+                    <td>Each schedule</td>
+                    <td><strong>Edit Schedule</strong> &rarr; <strong>Settings</strong> &rarr; <strong>Advanced</strong>, under <strong>List this schedule on the network</strong>, or the one-click prompt on the dashboard. The schedule's owner sets it, or anyone who can edit the schedule</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
+    <p>
+        What is shared is public, upcoming events, online and in person. Events set to Draft,
+        Internal or Unlisted are never sent, and neither are cancelled or password-protected ones,
+        or events from schedules that have opted out or have not opted in. The full list of
+        conditions is under <a href="#what-qualifies" class="doc-link">Which events are listed</a>.
+    </p>
 </section>
 
 <!-- Turning it on -->
@@ -41,33 +62,110 @@
         </svg>
         Turning it on
     </h2>
-    <ol>
-        <li>Sign in as an administrator and open <strong>Admin &rarr; System &rarr; Settings</strong>.</li>
+    <ol class="doc-list doc-list-numbered">
+        <li>Sign in as an administrator and open <strong>Admin &rarr; System &rarr; Settings</strong>. The switch is in the <strong>Event Schedule network</strong> card.</li>
         <li>Switch on <strong>Share events with the network</strong>.</li>
-        <li>Add a contact email. It is shown to the team at eventschedule.com who review your
+        <li>Add a <strong>Contact email</strong>. It is shown to the team at eventschedule.com who review your
         install, and used to email you their decision and the steps to get listed. It is never
         published. It starts filled in with your own address.</li>
         <li>Under <strong>Also list these schedules</strong>, untick any of your own schedules that
         should stay off the network. It lists the schedules you own that are still <em>Not decided
         yet</em>, already ticked, each with the number of its upcoming public events that would be
         shared.</li>
-        <li>Save.</li>
+        <li>Click <strong>Save</strong>.</li>
     </ol>
     <p>
-        The page lists exactly which events would be shared, so you can see what leaves your install
-        rather than having to trust a description of it. Once sharing is on, each event is marked
-        <em>Sent</em>, <em>Next sync</em>, <em>Needs an image</em> or <em>Not accepted</em>, so an
-        event that is not on the network yet says why.
+        An administrator who has not switched it on is also offered it: once the install has a
+        public upcoming event that would be shared, a suggestion appears on the dashboard and on a
+        schedule's page, and its <strong>Open settings</strong> button goes straight to the card.
+        <strong>Dismiss</strong> hides the suggestion for that administrator for good.
     </p>
+
+    <h3 id="review" class="doc-subheading">What saving does</h3>
     <p>
         Saving registers your install with the network and puts it in a review queue. Nothing is
         published until the team at eventschedule.com approves it, which is a one-time step for the
         whole install. Events from the schedules you listed are sent ahead of that, so the reviewer
-        can see them, and go live as soon as you are approved. The connection status at the top of
-        the card shows where you stand: <em>Pending</em>, <em>Approved</em> (with how many of your
-        events are on the network, and a link to see them), <em>Suspended</em>, or <em>Not
-        connected</em> while a retry is due.
+        can see them, and go live as soon as you are approved. The <strong>Connection</strong> line
+        at the top of the card shows where you stand, beside the time of the last sync:
     </p>
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th scope="col">Status</th>
+                    <th scope="col">What it means</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pending</td>
+                    <td>Waiting for review at eventschedule.com. Events from listed schedules are already being sent, and go live once you are approved</td>
+                </tr>
+                <tr>
+                    <td>Approved</td>
+                    <td>Your events are being listed. The card says how many have been sent, with a link to <strong>See your listings on eventschedule.com</strong></td>
+                </tr>
+                <tr>
+                    <td>Suspended</td>
+                    <td>Your events are hidden from the network, and nobody on the install is asked to list a schedule</td>
+                </tr>
+                <tr>
+                    <td>Not connected</td>
+                    <td>The network has not answered yet. A retry is due on the next hourly sync</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        The same status, the last sync, the number of events shared and the number of schedules
+        still not decided are on the <strong>Federation</strong> card of
+        <strong>Admin &rarr; Dashboard</strong>.
+    </p>
+
+    <h3 id="preview" class="doc-subheading">The preview on the card</h3>
+    <p>
+        Under the switch the card lists exactly what would go out, so you can see what leaves your
+        install rather than having to trust a description of it: first
+        <strong>Schedules that will be listed</strong>, then the events under
+        <strong>What will be shared</strong>. Once sharing is on, each event carries a mark, so an
+        event that is not on the network yet says why:
+    </p>
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th scope="col">Mark</th>
+                    <th scope="col">What it means</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sent</td>
+                    <td>Delivered to the network</td>
+                </tr>
+                <tr>
+                    <td>Next sync</td>
+                    <td>Goes out on the next hourly run</td>
+                </tr>
+                <tr>
+                    <td>Needs an image</td>
+                    <td>The event has no picture, so it cannot be listed. It goes out on the next run once it has one</td>
+                </tr>
+                <tr>
+                    <td>Not accepted</td>
+                    <td>The network refused it, and it has not changed since. Editing the event sends it again</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        Two lines under the list explain a preview that is shorter than you expected: how many
+        schedules are held back until their email or phone is verified, and how many schedules
+        owned by other people are not listed yet.
+    </p>
+
+    <h3 id="emails" class="doc-subheading">What the network emails you</h3>
     <p>
         Once your install is approved you get a welcome email with the steps to get your events
         listed. A suspension, or approval again after one, gets a short email instead. If you add or
@@ -86,38 +184,73 @@
         Per-schedule control
     </h2>
     <p>
-        Once the network is on for the install, each schedule gets its own setting under
-        <strong>Settings</strong> on the schedule edit page, <strong>List this schedule on the
-        network</strong>, with three choices: <em>Not decided yet</em>, <em>Listed on the network</em>
-        and <em>Not listed</em>.
+        Once the network is on for the install, each schedule gets its own setting,
+        <strong>List this schedule on the network</strong>, under
+        <strong>Edit Schedule &rarr; Settings &rarr; Advanced</strong>. It has three choices:
     </p>
-    <p>
-        Every schedule starts at <em>Not decided yet</em>, which keeps its events off the network, and
-        it is opted in when its owner, or anyone who can edit it, chooses <em>Listed on the
-        network</em>, so a customer is never carried onto the network by your decision alone. That includes schedules that existed before the
-        feature: an update reset them all to <em>Not decided yet</em> rather than enrolling them
-        silently. The settings page lists your own schedules still waiting on that decision, with a
-        checkbox each, and counts everyone else's, which is the usual reason the preview is shorter
-        than you expected.
-    </p>
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th scope="col">Choice</th>
+                    <th scope="col">What it does</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Not decided yet</td>
+                    <td>Where every schedule starts. Its events stay off the network, but it does not hold back an event it shares with a listed schedule</td>
+                </tr>
+                <tr>
+                    <td>Listed on the network</td>
+                    <td>The schedule's public events are shared, together with its name and the address of its public page</td>
+                </tr>
+                <tr>
+                    <td>Not listed</td>
+                    <td>Nothing from this schedule is shared, and every event it is attached to stays off the network, whoever else is on it</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <p>
         The setting only appears after you have enabled the network for the whole install, so on a
         multi-tenant deployment your customers never see an option you have not opted into.
     </p>
+
+    <h3 id="who-decides" class="doc-subheading">Who decides</h3>
     <p>
-        Nobody has to go looking for it. Once the network is on, a schedule owner is asked on their
-        dashboard, as soon as one of their schedules has an upcoming public event with an image:
-        <strong>List on the network</strong> lists the schedules they tick, a few at a time, and
-        every schedule it would list is named first. The same prompt appears on a schedule's own page for anyone who can edit that
-        schedule. Dismissing it leaves the schedules at <em>Not decided yet</em> and is remembered
-        per schedule, so a schedule created later is still asked. A schedule that is listed shows
-        <strong>Listed on the network</strong> on its page, which links straight to the setting.
+        A schedule is opted in when its owner, or anyone who can edit it, chooses <em>Listed on the
+        network</em>, so a customer is never carried onto the network by your decision alone. That
+        includes schedules that existed before the feature: an update reset them all to <em>Not
+        decided yet</em> rather than enrolling them silently.
     </p>
     <p>
         The checklist on the settings page and the dashboard prompt only ever offer schedules you
-        own, and a schedule is only listed after someone who can edit it chooses to, so switching the
-        network on for your install never lists a customer's schedule on its own.
+        own. The settings page lists your own schedules still waiting on that decision, with a
+        checkbox each, and counts everyone else's, which is the usual reason the preview is shorter
+        than you expected.
     </p>
+
+    <h3 id="listing-prompt" class="doc-subheading">The prompt on the dashboard</h3>
+    <p>
+        Nobody has to go looking for the setting. Once the network is on, a schedule owner is asked
+        on their dashboard, as soon as one of their schedules has an upcoming public event with an
+        image:
+    </p>
+    <ul class="doc-list">
+        <li><strong>List on the network</strong> lists the schedules they tick. Every schedule it would list is named first, up to 20 at a time.</li>
+        <li>The same prompt appears on a schedule's own page, for that one schedule and for anyone who can edit it.</li>
+        <li><strong>Dismiss</strong> leaves the schedules at <em>Not decided yet</em> and is remembered per schedule, so a schedule created later is still asked.</li>
+        <li>The prompt is not shown to someone who has chosen <strong>Turn off suggestions</strong>, or while the network has the install suspended.</li>
+        <li>A schedule that is listed shows <strong>Listed on the network</strong> on its page, which links straight to the setting.</li>
+    </ul>
+    <p>
+        Listing says what happens next: on an approved install the events appear on eventschedule.com
+        within a couple of hours, on a pending one once the install is approved, and a schedule
+        with no verified email or phone stays off the network until it has one.
+    </p>
+
+    <h3 id="co-listed" class="doc-subheading">Events with more than one schedule</h3>
     <p>
         On an event with more than one schedule attached, a talent and a venue for instance, any one
         of them choosing <em>Not listed</em> is enough to keep the event off the network: a listing names the venue,
@@ -140,18 +273,26 @@
         </svg>
         What a listing looks like
     </h2>
+
+    <h3 id="what-qualifies" class="doc-subheading">Which events are listed</h3>
+    <p>An event is shared when all of these hold:</p>
+    <ul class="doc-list">
+        <li>It is public and upcoming. A recurring event counts, and so does an event of a day or more that has not ended yet.</li>
+        <li>It is not a Draft, Internal or Unlisted event, not cancelled, and has no password.</li>
+        <li>It is accepted on at least one schedule that is <em>Listed on the network</em> and has a verified email address or phone number.</li>
+        <li>No schedule attached to it has chosen <em>Not listed</em>.</li>
+        <li>It has a picture: the event flyer, or failing that the profile image of its talent or its venue. An event without one is marked <em>Needs an image</em> in the settings preview, and goes out on the next run once it has one. This matches the bar applied to eventschedule.com's own events.</li>
+        <li>Its name is not a placeholder such as "Test event".</li>
+    </ul>
+
+    <h3 id="browse-page" class="doc-subheading">On the browse page</h3>
     <p>
         Listings appear in their own section on the eventschedule.com browse page, badged with your
         site's address and filterable by country and language. Clicking one goes straight to the
         event on your site: there is no copy of the event page on eventschedule.com, and the link is
         a normal followable link rather than a tracking redirect. It points at the event's address on
-        your install itself, never at a custom domain a schedule may have.
-    </p>
-    <p>
-        An event needs a picture to be listed, matching the bar applied to eventschedule.com's own
-        events. That can be the event flyer or the profile image of a talent or venue schedule
-        attached to it. An event without one is marked <em>Needs an image</em> in the settings
-        preview, and goes out on the next run once it has one.
+        your install itself, never at a custom domain a schedule may have. eventschedule.com counts
+        how often a listing is clicked, without changing the link.
     </p>
     <p>
         Recurring events are listed with their next three dates within 120 days, and times are shown in the event's own
@@ -169,29 +310,85 @@
     </h2>
     <p>
         Sharing runs hourly on your existing scheduler, so it needs no extra setup beyond the cron
-        entry Event Schedule already requires. Edits appear within the hour, and an event that stops
-        qualifying, because it went back to Draft, was made Internal or Unlisted, was cancelled, or
-        the schedule listing it opted out or was deleted, is removed from the listings on the next run.
+        entry Event Schedule already requires. New events and edits are sent within the hour, and a
+        new listing shows once the network has copied its picture, so allow a couple of hours. An
+        event that stops qualifying, because it went back to Draft, was made Internal or Unlisted,
+        was cancelled, or the schedule listing it opted out or was deleted, is removed from the
+        listings on the next run.
     </p>
     <p>
         You can also run it by hand:
     </p>
     <div class="doc-code-block">
+        <div class="doc-code-header">
+            <span>Terminal</span>
+            <button class="doc-copy-btn">Copy</button>
+        </div>
         <pre><code>php artisan federation:push</code></pre>
     </div>
     <p>
-        The settings page records the last successful sync, and shows a warning if the most recent
-        attempt did not complete. Failures retry automatically. If the network stops recognising
-        your install, for example because it was removed while it was waiting for review, the next
-        run registers it again, and it goes back into review before its events are listed.
+        The network keeps up to 5,000 listings for one install, and a first sync on an install with
+        many events sends them 500 an hour until it has caught up.
     </p>
 
-    <div class="doc-callout doc-callout-warning">
-        <p><strong>Schedules must be verified.</strong> Only schedules with a verified email address
+    <div class="doc-callout doc-callout-info">
+        <div class="doc-callout-title">Schedules must be verified</div>
+        <p>Only schedules with a verified email address
         or phone number are shared, matching the rule eventschedule.com applies to its own listings.
         On a multi-tenant install this is the usual reason a particular customer's events do not
         appear. The settings page shows how many schedules are being held back for this reason.</p>
     </div>
+
+    <h3 id="sync-errors" class="doc-subheading">When a sync does not complete</h3>
+    <p>
+        The settings page records the last successful sync, and shows a notice in the card if the
+        most recent attempt did not complete:
+    </p>
+    <div class="doc-table-wrap">
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th scope="col">Notice</th>
+                    <th scope="col">What to do</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>The network could not be reached</td>
+                    <td>Nothing. It retries on the next hourly run. If it stays, check that your server can make outbound HTTPS requests to eventschedule.com</td>
+                </tr>
+                <tr>
+                    <td>The network did not recognise this install</td>
+                    <td>Nothing at first: the next run registers the install again, and it goes back into review before its events are listed. This happens, for example, when an install was removed while it was waiting for review. If the notice stays, contact the eventschedule.com team</td>
+                </tr>
+                <tr>
+                    <td>This install has reached the network listing limit</td>
+                    <td>The network already holds 5,000 listings from you. New events are listed as older ones pass</td>
+                </tr>
+                <tr>
+                    <td>The network is not accepting listings right now</td>
+                    <td>Nothing. It retries on the next hourly run</td>
+                </tr>
+                <tr>
+                    <td>The network could not read the last batch</td>
+                    <td>Check for an app update: the install is likely sending a format the network no longer reads</td>
+                </tr>
+                <tr>
+                    <td>The last sync did not complete</td>
+                    <td>Nothing. It retries on the next hourly run</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        If your install's address (<code class="doc-inline-code">APP_URL</code>) changes, the network
+        does not take the new address on trust. A listing's link has to be on the address the
+        install registered with, so events sent from the new one are refused, and show as
+        <em>Not accepted</em>, until the team at eventschedule.com has confirmed the change.
+        Registering again from the new address, with
+        <code class="doc-inline-code">php artisan federation:push --register</code>, puts an
+        approved install back into review first.
+    </p>
 </section>
 
 <!-- Privacy -->
@@ -248,7 +445,7 @@
                     <td>Sent, but not currently shown anywhere</td>
                 </tr>
                 <tr>
-                    <td>Street address, postal code, coordinates, country</td>
+                    <td>Street address, state, postal code, coordinates, country</td>
                     <td>When the event has a venue</td>
                     <td>Not shown. The country drives the country filter</td>
                 </tr>
@@ -287,6 +484,16 @@
                     <td>When you join, and when you change the contact email</td>
                     <td>Not shown. Decides the language of the emails the network sends you</td>
                 </tr>
+                <tr>
+                    <td>Identifiers: a random id for your install, and an id for each event</td>
+                    <td>Every request</td>
+                    <td>Not shown. They tell installs apart and match an update or a removal to its listing</td>
+                </tr>
+                <tr>
+                    <td>A signing key your install generates</td>
+                    <td>When you join, and when the install reconnects</td>
+                    <td>Not shown. Every later request is signed with it, so nobody else can send listings in your name</td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -300,10 +507,14 @@
         Pictures are copied and stored by eventschedule.com rather than loaded from your server, so
         visitors browsing the listings never make requests to your site until they click through.
     </p>
+
+    <h3 id="turning-off" class="doc-subheading">Turning it off</h3>
     <p>
         Turning the setting off stops sharing immediately and takes your existing listings down with
         it: switching off tells the network to drop everything it holds from your install, there and
         then. If it cannot be reached at that moment, the request is retried on the next hourly run
-        until it lands, unless you switch sharing back on first.
+        until it lands, unless you switch sharing back on first. Switching it back on later does not
+        start a new review: an install that was approved stays approved, and events from listed
+        schedules return within a couple of hours.
     </p>
 </section>

@@ -64,7 +64,7 @@
     {{-- Sticky action bar. This form is seven cards long, so Save was previously only reachable from
          the very bottom. Sits under the layout header (sticky top-0, h-16) and carries the page
          background so content scrolls cleanly beneath it. --}}
-    <div class="sticky top-16 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3
+    <div class="sticky top-16 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 ap-frame-bleed py-3
                 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700
                 flex items-center gap-3">
         {{-- Hidden below sm: with the heading in, the toggle plus both buttons wrap to a second row

@@ -246,6 +246,51 @@ class EventFormTemplateInjectionTest extends TestCase
     }
 
     /**
+     * A different way for a name to break the form, with no Vue in it: inside a script block the
+     * characters `<!--<script` put the HTML parser in a state where the block's own closing tag
+     * no longer ends it, so the script runs on into the markup after it, fails to parse, and the
+     * form never starts. Checked in a browser with two static files, one per encoding.
+     *
+     * The form prints three names somebody else can write into its script: the event's own, the
+     * schedule's sub-schedules, and its last 200 events (a guest's request, a curator's listing, a
+     * calendar feed). Each was handed to the json directive as an expression with a comma in it,
+     * which the directive reads as its own options, and so printed without the escaping of tags.
+     * One event with that name stopped the form for every event of the schedule.
+     */
+    public function test_a_name_cannot_swallow_the_script_it_is_printed_in(): void
+    {
+        $name = 'Jazz <!--<script night';
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+
+        $group = new Group;
+        $group->role_id = $venue->id;
+        $group->name = 'Room '.$name;
+        $group->slug = 'room';
+        $group->save();
+
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id, 'name' => $name]);
+        $other = $this->createEvent($venue, ['creator_role_id' => $venue->id, 'name' => 'An ordinary evening']);
+
+        foreach ([$event, $other] as $opened) {
+            $html = $this->actingAs($owner)
+                ->get(route('event.edit', ['subdomain' => $venue->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($opened->id)]))
+                ->assertOk()
+                ->getContent();
+
+            // Nowhere on the page as written: escaped as HTML where it is text, as JSON where it
+            // is script.
+            $this->assertStringNotContainsString('<!--<script night', $html, $opened->name);
+            $this->assertStringContainsString('"name":"Jazz \u003C!--\u003Cscript night"', $html, 'in the list of events');
+            $this->assertStringContainsString('"name":"Room Jazz \u003C!--\u003Cscript night"', $html, 'in the list of sub-schedules');
+
+            if ($opened->is($event)) {
+                $this->assertStringContainsString('eventName: "Jazz \u003C!--\u003Cscript night"', $html, 'as the name of the event being edited');
+            }
+        }
+    }
+
+    /**
      * The ticket currency is a free string on the event (varchar 255; the form posted whatever it
      * was given), and the Payment row prints it in a notice when no connected gateway can take it.
      * That notice is read by every admin of every schedule the event is listed on.

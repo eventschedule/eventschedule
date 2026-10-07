@@ -4,7 +4,7 @@ namespace App\Utils;
 
 /**
  * The arithmetic two Realtime pages share: /admin/realtime (App\Services\RealtimeDashboard) and a
- * schedule's own /realtime (App\Services\ScheduleRealtime).
+ * schedule's own Realtime tab on /analytics (App\Services\ScheduleRealtime).
  *
  * The two services read the same table through different queries on purpose (the owner's must
  * never be able to return a row that is not theirs), which leaves "who is here right now" and

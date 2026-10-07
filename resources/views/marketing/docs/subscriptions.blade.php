@@ -40,11 +40,12 @@
             <li><strong class="text-gray-900 dark:text-white">A normal ticket</strong> gets one person into <em>one</em> event.</li>
             <li><strong class="text-gray-900 dark:text-white">A subscription</strong> gets one person into <em>many</em> events - you decide how many visits it's worth and which events it covers.</li>
         </ul>
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">Two different things are called a subscription</div>
-            <p><strong class="text-gray-900 dark:text-white">This page is about the pass you sell to guests.</strong> The buyer pays once. Event Schedule never bills them again - a pass here is a multi-use ticket, not an auto-renewing card on file. When it runs out of visits or expires, they simply buy another.</p>
-            <p class="mt-2"><strong class="text-gray-900 dark:text-white">Your own plan is also called a subscription.</strong> That is what you pay Event Schedule for Pro or Enterprise, and it is managed on the <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan tab</a> of your schedule, not here. Nothing on this page changes your billing.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A pass is made on the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab of an event, as a ticket type with one switch turned on. It is scanned with <strong class="text-gray-900 dark:text-white">Scan Ticket</strong> on the Sales page like any ticket, and its use is tracked on the Sales page's <strong class="text-gray-900 dark:text-white">Subscriptions</strong> tab.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Two different things are called a subscription:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">The pass you sell to guests</strong>, which this page is about. The buyer pays once and Event Schedule never bills them again: a pass is a multi-use ticket, not an auto-renewing card on file. When it runs out of visits or expires, they buy another.</li>
+            <li><strong class="text-gray-900 dark:text-white">Your own plan</strong>, which is what you pay Event Schedule for Pro or Enterprise. It is managed on the <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan tab</a> of your schedule, not here. Nothing on this page changes your billing.</li>
+        </ul>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Passes need a Pro plan</div>
             <p><x-doc-badge plan="pro" /> A pass always carries a price, so it needs <strong class="text-gray-900 dark:text-white">Pro</strong> twice over: <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">selling a ticket that costs money</a> is a Pro feature in its own right, and the pass switch is another. Free registration and scanning a QR code at the door are on every plan.</p>
@@ -67,9 +68,7 @@
             <li><strong class="text-gray-900 dark:text-white">Your staff scan the QR</strong> at each event - the first scan of the day at an event records one visit.</li>
             <li><strong class="text-gray-900 dark:text-white">You watch the usage</strong> on the <strong class="text-gray-900 dark:text-white">Subscriptions</strong> tab of the Sales page.</li>
         </ol>
-        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-2">
-            <p class="text-sm text-gray-600 dark:text-gray-300 mb-0">Buy once &rarr; scan at Event A <span class="text-gray-600 dark:text-gray-400">(visit 1)</span> &rarr; scan at Event B <span class="text-gray-600 dark:text-gray-400">(visit 2)</span> &rarr; &hellip; until the visit limit or the expiry date is reached.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300">In short: buy once, scan at Event A (visit 1), scan at Event B (visit 2), and so on until the visit limit or the expiry date is reached.</p>
     </section>
 
     <!-- Worked example -->
@@ -83,10 +82,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Meet <strong class="text-gray-900 dark:text-white">Maria</strong>, who runs a yoga studio with classes most days. She wants to sell a <strong class="text-gray-900 dark:text-white">10-Class Pass</strong> for $120 instead of charging per class. Here's how she uses subscriptions:</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Maria creates an event called <strong class="text-gray-900 dark:text-white">"Class Passes"</strong> just to sell the pass on.</li>
-            <li>On that event she adds a ticket, sets its <strong class="text-gray-900 dark:text-white">Type</strong> to "10-Class Pass" and its <strong class="text-gray-900 dark:text-white">Price</strong> to $120, then turns on <strong class="text-gray-900 dark:text-white">"This is a pass or subscription (multi-use)"</strong>.</li>
+            <li>On that event's <strong class="text-gray-900 dark:text-white">Tickets</strong> tab she presses <strong class="text-gray-900 dark:text-white">Sell tickets</strong>, sets the ticket type's <strong class="text-gray-900 dark:text-white">Type</strong> to "10-Class Pass" and its <strong class="text-gray-900 dark:text-white">Price</strong> to $120, then turns on <strong class="text-gray-900 dark:text-white">"This is a pass or subscription (multi-use)"</strong>.</li>
             <li>She picks the type <strong class="text-gray-900 dark:text-white">Visit pass (fixed number of visits)</strong>, sets <strong class="text-gray-900 dark:text-white">Number of visits</strong> to 10, sets <strong class="text-gray-900 dark:text-white">Valid for (days)</strong> to 90, leaves <strong class="text-gray-900 dark:text-white">Admissions per event</strong> at 1, and sets <strong class="text-gray-900 dark:text-white">Covered events</strong> to <strong class="text-gray-900 dark:text-white">All events in this schedule</strong>.</li>
             <li>A student buys the pass once and gets a QR code by email.</li>
-            <li>At each class the front desk opens the scanner, sets <strong class="text-gray-900 dark:text-white">Scanning at event</strong> to that class, and scans the student's QR. The screen reads <strong class="text-green-700 dark:text-green-400">"Welcome - checked in"</strong> with <strong class="text-gray-900 dark:text-white">"1 of 10 visits used"</strong>, then "2 of 10 visits used", and so on. After ten classes it reads <strong class="text-red-700 dark:text-red-400">"All visits used"</strong>.</li>
+            <li>At each class the front desk opens <strong class="text-gray-900 dark:text-white">Scan Ticket</strong> on the Sales page, sets <strong class="text-gray-900 dark:text-white">Scanning at event</strong> to that class, and scans the student's QR. The screen reads <strong class="text-green-700 dark:text-green-400">"Welcome - checked in"</strong> with <strong class="text-gray-900 dark:text-white">"1 of 10 visits used"</strong>, then "2 of 10 visits used", and so on. After ten classes it reads <strong class="text-red-700 dark:text-red-400">"All visits used"</strong>.</li>
             <li>Maria opens <strong class="text-gray-900 dark:text-white">Sales &rarr; Subscriptions</strong> any time to see who bought a pass and how many classes they've attended.</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300">That's the whole feature in one story. The sections below explain each choice.</p>
@@ -104,16 +103,15 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Edit the event you want to sell the pass on and open the <strong class="text-gray-900 dark:text-white">Tickets</strong> tab.</li>
             <li>Press <strong class="text-gray-900 dark:text-white">Sell tickets</strong> (the middle choice, between Free registration and Tickets elsewhere). The ticket types are right under it.</li>
-            <li>Add a ticket type and set its <strong class="text-gray-900 dark:text-white">Price</strong>. Leave <strong class="text-gray-900 dark:text-white">Quantity</strong> blank to sell an unlimited number of passes, or enter a number to cap the run. A ticket's name lives in the <strong class="text-gray-900 dark:text-white">Type</strong> field, which the form shows once the event carries more than one ticket type.</li>
-            <li>Turn on <strong class="text-gray-900 dark:text-white">"This is a pass or subscription (multi-use)"</strong>. It opens on <strong class="text-gray-900 dark:text-white">Season pass</strong> if the event repeats and <strong class="text-gray-900 dark:text-white">Visit pass</strong> if it does not.</li>
+            <li>Fill in a ticket type: its <strong class="text-gray-900 dark:text-white">Price</strong>, and its name in the <strong class="text-gray-900 dark:text-white">Type</strong> field (required once the event carries more than one ticket type). Leave <strong class="text-gray-900 dark:text-white">Quantity</strong> blank to sell an unlimited number of passes, or enter a number to cap the run.</li>
+            <li>Turn on <strong class="text-gray-900 dark:text-white">"This is a pass or subscription (multi-use)"</strong>, under the ticket type. It opens on <strong class="text-gray-900 dark:text-white">Season pass</strong> if the event repeats and <strong class="text-gray-900 dark:text-white">Visit pass</strong> if it does not. Below Pro the switch is locked, with a <strong class="text-gray-900 dark:text-white">See what Pro adds</strong> link under it.</li>
             <li>Pick the <strong class="text-gray-900 dark:text-white">Subscription type</strong> you want, then fill in the fields below it: <strong class="text-gray-900 dark:text-white">Admissions per event</strong>, <strong class="text-gray-900 dark:text-white">Number of visits</strong>, <strong class="text-gray-900 dark:text-white">Valid for (days)</strong> and <strong class="text-gray-900 dark:text-white">Covered events</strong>.</li>
             <li>Optionally turn on <strong class="text-gray-900 dark:text-white">"Let holders book seats in advance"</strong> and set its cancellation rules.</li>
             <li>Save the event.</li>
         </ol>
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">A pass has one stock pool, not one per date</div>
-            <p>On a normal ticket, <strong class="text-gray-900 dark:text-white">Quantity</strong> is the number available <em>on each date</em>. A pass is not tied to a date, so its quantity is a single pool across the whole run: set it to 50 and you sell 50 passes in total, however many events they cover.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">A pass has one stock pool, not one per date.</strong> On a normal ticket, <strong class="text-gray-900 dark:text-white">Quantity</strong> is the number available <em>on each date</em>. A pass is not tied to a date, so its quantity is a single pool across the whole run: set it to 50 and you sell 50 passes in total, however many events they cover.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">One pass per order.</strong> A pass is a single redeemable unit: one QR code with one visit counter. Event Schedule fixes <strong class="text-gray-900 dark:text-white">Max Per Order</strong> at 1 on any pass ticket, so the buyer cannot select more than one and you never need to set that field yourself. To buy passes as gifts, place a separate order for each.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A pass also cannot share an order with normal single-date tickets. Trying it shows "A season pass cannot be purchased together with single-date tickets", so buy them in separate orders.</p>
 
         <h3 id="types" class="doc-subheading">Subscription types</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The type decides how many times the pass can be used:</p>
@@ -192,12 +190,7 @@
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">The "pass shop" pattern</div>
             <p>The tidiest way to sell a pass is to create one event just for it - for example "Memberships" or "Class Passes" - put the pass ticket there, and set its coverage to your real events.</p>
-            <p class="mt-2">To keep that selling event off your public calendar, set <strong class="text-gray-900 dark:text-white">Visibility</strong> to <strong class="text-gray-900 dark:text-white">Unlisted</strong> in the event's <strong class="text-gray-900 dark:text-white">Details</strong> section: unlisted events are not listed on your schedule, but anyone with the link can still open the page and buy (you can add an optional password). <x-doc-badge plan="enterprise" /> Unlisted needs an Enterprise plan. Do not use <strong class="text-gray-900 dark:text-white">Draft</strong> or <strong class="text-gray-900 dark:text-white">Internal</strong> here: both are members-only, so guests could not reach the page to buy the pass at all.</p>
-        </div>
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">One pass per order</div>
-            <p>A pass is a single redeemable unit: one QR code with one visit counter. Event Schedule enforces that for you by fixing <strong class="text-gray-900 dark:text-white">Max Per Order</strong> at 1 on any pass ticket, so the buyer cannot select more than one and you never need to set that field yourself. To buy passes as gifts, place a separate order for each.</p>
-            <p class="mt-2">A pass also cannot share an order with normal single-date tickets. Trying it shows "A season pass cannot be purchased together with single-date tickets", so buy them in separate orders.</p>
+            <p class="mt-2">To keep that selling event off your public calendar, set <strong class="text-gray-900 dark:text-white">Visibility</strong> to <strong class="text-gray-900 dark:text-white">Unlisted</strong> on the event's <strong class="text-gray-900 dark:text-white">Listing</strong> tab: unlisted events are not listed on your schedule, but anyone with the link can still open the page and buy (you can add an optional password). <x-doc-badge plan="enterprise" /> Unlisted needs an Enterprise plan. Do not use <strong class="text-gray-900 dark:text-white">Draft</strong> or <strong class="text-gray-900 dark:text-white">Internal</strong> here: both are members-only, so guests could not reach the page to buy the pass at all.</p>
         </div>
     </section>
 
@@ -298,7 +291,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Because a pass can be valid across many events, the scanner needs to know <em>which</em> event you're checking people into right now.</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> on your phone and tap <strong class="text-gray-900 dark:text-white">Scan Ticket</strong>.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> on your phone and tap <strong class="text-gray-900 dark:text-white">Scan Ticket</strong>, at the end of the page's title row.</li>
             <li>At the top, check <strong class="text-gray-900 dark:text-white">Scanning at event</strong> and set it to the event happening now. It arrives pre-selected (an event with sales today, otherwise one running today, otherwise your most recent), it remembers your last choice on that device, and it shows the choice back to you as "Scanning at: &hellip;". The list holds your 100 most recent events, whether or not they sell tickets of their own.</li>
             <li>Point the camera at the guest's QR code. A visit is recorded and the result appears.</li>
         </ol>
@@ -387,14 +380,14 @@
             </svg>
             Step 4 - Track usage
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and choose the <strong class="text-gray-900 dark:text-white">Subscriptions</strong> tab, which carries the number of passes sold. The page covers every schedule you own, and a summary line at the top counts the passes and the visits redeemed across them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and choose the <strong class="text-gray-900 dark:text-white">Subscriptions</strong> tab, which carries the number of passes sold. The tab is there on Pro, and on any account once a pass has been sold. It covers the events of every schedule you manage, and two figures at the top count the passes and the visits redeemed across them.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-2">Each paid pass is one row, sorted by holder name:</p>
         <ul class="doc-list mb-6">
-            <li>Their name and email, the pass type, the visit count, and the expiry date.</li>
+            <li>Their name with their email under it, the ticket type, the visits used, and the expiry date.</li>
             <li>The visit count reads <strong class="text-gray-900 dark:text-white">2 / 10</strong> on a visit pass, which has a limit to count against, and as a plain total ("3 visits") on every other type.</li>
             <li>A status of <strong class="text-gray-900 dark:text-white">Active</strong>, <strong class="text-gray-900 dark:text-white">Used up</strong> (a visit pass at its limit) or <strong class="text-gray-900 dark:text-white">Expired</strong>.</li>
-            <li>Expand the row for the visit log: which event, the date and time, and whether the visit is <strong class="text-gray-900 dark:text-white">Attended</strong>, <strong class="text-gray-900 dark:text-white">Booked</strong> (reserved in advance, not yet scanned) or <strong class="text-gray-900 dark:text-white">Forfeited</strong> (a late cancellation that kept the visit spent).</li>
-            <li>A <strong class="text-gray-900 dark:text-white">View Ticket</strong> link opens the holder's own pass page, which is handy for support questions.</li>
+            <li>Press the arrow before the name to open the visit log: which event, the date and time, and whether the visit is <strong class="text-gray-900 dark:text-white">Attended</strong>, <strong class="text-gray-900 dark:text-white">Booked</strong> (reserved in advance, not yet scanned) or <strong class="text-gray-900 dark:text-white">Forfeited</strong> (a late cancellation that kept the visit spent).</li>
+            <li><strong class="text-gray-900 dark:text-white">View Ticket</strong>, at the end of the row, opens the holder's own pass page, which is handy for support questions.</li>
         </ul>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Paid passes only</div>

@@ -263,7 +263,7 @@ class RealtimeDashboard
             });
     }
 
-    /** One definition for both Realtime pages: see RealtimeRows. */
+    /** One definition for both Realtime views: see RealtimeRows. */
     private function timestamp(string $value): int
     {
         return RealtimeRows::timestamp($value);

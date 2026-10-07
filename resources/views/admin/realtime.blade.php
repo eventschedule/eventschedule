@@ -2,8 +2,11 @@
     <style {!! nonce_attr() !!}>[v-cloak] { display: none; }</style>
     <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
 
+    {{-- Ahead of the stack, not inside it (see admin/dashboard): inside, the tabs stood 16px
+         lower here than on the other admin pages. --}}
+    @include('admin.partials._navigation', ['active' => 'realtime'])
+
     <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'realtime'])
 
         {{--
             Everything inside #realtime-app is a Vue template, and Vue's runtime compiler treats any

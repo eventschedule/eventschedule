@@ -1,241 +1,345 @@
 <x-app-admin-layout>
 
-    {{-- Somebody who wanted a newsletter has just been handed the admin portal, and the only
-         sentence explaining why used to be a three-second toast. A persistent panel instead, with
-         the way back to the schedule they actually came for.
+    <x-slot name="head">
+        {{-- What the list of followed schedules needs beyond the page kit: a narrow column for the
+             row's checkbox, and on a phone the checkbox and the name sharing the row's first line
+             (the kit gives a list's first cell the whole line). --}}
+        <style {!! nonce_attr() !!}>
+            .following-list .c-check {
+              width: 1%;
+              padding-inline-end: 0;
+            }
+            .following-list .c-check input {
+              display: block;
+            }
+            /* An address stays on one line where there is a table to give it a column, and breaks
+               where it must in a phone's row. */
+            .following-list .c-contact {
+              white-space: nowrap;
+            }
+            .following-list tbody tr {
+              cursor: pointer;
+            }
+            .following-search {
+              position: relative;
+            }
+            .following-search input {
+              width: 100%;
+              padding-inline-end: 2.25rem;
+            }
+            .following-search button {
+              position: absolute;
+              inset-block: 0;
+              inset-inline-end: 0.5rem;
+              display: flex;
+              align-items: center;
+              color: rgb(var(--ap-ink-4));
+            }
+            .following-search button:hover {
+              color: rgb(var(--ap-ink-2));
+            }
+            /* A class that sets display outranks the hidden attribute. */
+            .following-search button[hidden],
+            #bulk-action-btn[hidden] {
+              display: none;
+            }
+            /* A phone's row: the tick, the name and the row's menu on one line, and whatever the
+               schedule shows of its addresses beneath, under the name. */
+            @media (max-width: 639.98px) {
+              .following-list .c-check {
+                flex: none;
+                width: auto;
+              }
+              .following-list .c-main {
+                flex: 1 1 0;
+              }
+              /* The kit gives a link in a phone's row room for a thumb at its sides, which set a
+                 name that is a link in from one that is not, and its second line out from its first. */
+              .following-list .c-main a.event-link {
+                margin-inline: 0;
+                padding-inline: 0;
+              }
+              .following-list .c-actions {
+                order: 2;
+                margin-inline-start: 0;
+              }
+              .following-list .c-contact {
+                order: 3;
+                flex: 1 1 100%;
+                padding-inline-start: 1.875rem;
+                white-space: normal;
+                overflow-wrap: anywhere;
+              }
+            }
+        </style>
+    </x-slot>
 
-         Its own session key rather than the shared 'message': that one is toasted by
-         layouts/app.blade.php for the whole app, and this needs to stay on the page. --}}
-    @if (session('subscriber_welcome'))
-    <div class="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
-        <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
-            <div class="flex-1 text-sm text-gray-800 dark:text-gray-200">
+    <div class="page-shell">
+        <x-page-header :title="__('messages.following')" :lead="__('messages.following_lead')" />
+
+        <div class="page-stack">
+            {{-- Somebody who wanted a newsletter has just been handed the admin portal, and the only
+                 sentence explaining why used to be a three-second toast. A persistent panel instead,
+                 with the way back to the schedule they actually came for.
+
+                 Its own session key rather than the shared 'message': that one is toasted by
+                 layouts/app.blade.php for the whole app, and this needs to stay on the page. --}}
+            @if (session('subscriber_welcome'))
+            <x-page-notice tone="success">
                 {{ session('subscriber_welcome') }}
                 @if (session('subscriber_welcome_url'))
-                <div class="mt-2">
+                <x-slot name="action">
                     <x-link href="{{ session('subscriber_welcome_url') }}">{{ __('messages.back_to_schedule') }}</x-link>
-                </div>
+                </x-slot>
                 @endif
-            </div>
-        </div>
-    </div>
-    @endif
+            </x-page-notice>
+            @endif
 
-    @if (! empty($duplicateVenueCount) && $duplicateVenueCount > 0 && ! request()->filter)
-    <div class="mb-4">
-        <a href="{{ route('following.merge_venues') }}"
-           class="block bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
-            <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-                <div class="text-sm text-gray-800 dark:text-gray-200 flex-1">
-                    {{ str_replace(':count', $duplicateVenueCount, __('messages.possible_duplicate_venues_banner')) }}
-                </div>
-            </div>
-        </a>
-    </div>
-    @endif
+            @if (! empty($duplicateVenueCount) && $duplicateVenueCount > 0 && ! request()->filter)
+            <x-page-notice tone="warn" id="duplicate-venues-notice">
+                {{ str_replace(':count', $duplicateVenueCount, __('messages.possible_duplicate_venues_banner')) }}
+                <x-slot name="action">
+                    <a href="{{ route('following.merge_venues') }}" class="event-link">{{ __('messages.review') }}</a>
+                </x-slot>
+            </x-page-notice>
+            @endif
 
-    <div class="flow-root">
-        <div class="flex flex-col sm:flex-row sm:justify-between gap-4 mb-6">
-            <div class="flex-1">
-                <div class="relative">
-                    <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}"
-                        value="{{ request()->filter }}" autocomplete="off"/>
-                    <button type="button" id="clear-filter" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400" style="display: none;">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
             <div>
-                <form id="bulk-action-form" method="POST" action="{{ route('following.bulk-unfollow') }}">
-                    @csrf
-                    <input type="hidden" name="subdomains" id="bulk-subdomains" value="">
-                    <button type="submit" id="bulk-action-btn" style="display: none;"
-                        class="inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        {{ __('messages.unfollow') }}
-                    </button>
-                </form>
+                <div class="page-filters">
+                    <div class="page-filter is-grow following-search">
+                        <label for="filter" class="sr-only">{{ __('messages.filter') }}</label>
+                        <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}"
+                            value="{{ request()->filter }}" autocomplete="off" />
+                        <button type="button" id="clear-filter" aria-label="{{ __('messages.clear_filter') }}" hidden>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <form id="bulk-action-form" method="POST" action="{{ route('following.bulk-unfollow') }}" class="is-end">
+                        @csrf
+                        <input type="hidden" name="subdomains" id="bulk-subdomains" value="">
+                        <button type="submit" id="bulk-action-btn" class="page-tool" hidden>
+                            {{ __('messages.unfollow') }}
+                        </button>
+                    </form>
+                </div>
+
+                <div id="following-table">
+                    @include('role.following_table')
+                </div>
             </div>
         </div>
     </div>
-
-    <div id="following-table">
-        @include('role.following_table')
-    </div>
-
-</x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
-let timeoutId;
-let currentSortBy = '{{ $sortBy }}';
-let currentSortDir = '{{ $sortDir }}';
-const filterInput = document.getElementById('filter');
-const clearButton = document.getElementById('clear-filter');
-const bulkActionBtn = document.getElementById('bulk-action-btn');
-const bulkSubdomainsInput = document.getElementById('bulk-subdomains');
-const bulkActionForm = document.getElementById('bulk-action-form');
+(function() {
+    let timeoutId;
+    let currentSortBy = @json($sortBy);
+    let currentSortDir = @json($sortDir);
+    const filterInput = document.getElementById('filter');
+    const clearButton = document.getElementById('clear-filter');
+    const bulkActionBtn = document.getElementById('bulk-action-btn');
+    const bulkSubdomainsInput = document.getElementById('bulk-subdomains');
+    const bulkActionForm = document.getElementById('bulk-action-form');
+    const followingTable = document.getElementById('following-table');
 
-const unfollowLabel = @json(__('messages.unfollow'));
-const deleteLabel = @json(__('messages.delete'));
-const confirmMessage = @json(__('messages.are_you_sure'));
+    const unfollowLabel = @json(__('messages.unfollow'));
+    const deleteLabel = @json(__('messages.delete'));
+    const confirmMessage = @json(__('messages.are_you_sure'));
+    const copiedLabel = @json(__('messages.copied'));
+    const syncError = @json(__('messages.sync_error'));
+    const notConnected = @json(__('messages.google_calendar_not_connected'));
+    const selectCalendar = @json(__('messages.select_your_calendar'));
+    const calendarsUrl = @json(url('/google-calendar/calendars'));
+    const memberSyncUrl = @json(url('/google-calendar/member-sync'));
 
-// Show clear button if filter has initial value
-if (filterInput.value) {
-    clearButton.style.display = 'block';
-}
+    clearButton.hidden = ! filterInput.value;
 
-// Show/hide clear button based on input content
-filterInput.addEventListener('input', function(e) {
-    clearTimeout(timeoutId);
-    clearButton.style.display = e.target.value ? 'block' : 'none';
+    filterInput.addEventListener('input', function(e) {
+        clearTimeout(timeoutId);
+        clearButton.hidden = ! e.target.value;
+        timeoutId = setTimeout(updateResults, 500);
+    });
 
-    timeoutId = setTimeout(() => {
+    clearButton.addEventListener('click', function() {
+        filterInput.value = '';
+        clearButton.hidden = true;
         updateResults();
-    }, 500);
-});
+        filterInput.focus();
+    });
 
-// Clear input and trigger search immediately
-clearButton.addEventListener('click', function() {
-    filterInput.value = '';
-    clearButton.style.display = 'none';
-    updateResults();
-});
-
-// Handle sort header clicks
-document.addEventListener('click', function(e) {
-    const header = e.target.closest('[data-sort]');
-    if (header) {
-        const sortBy = header.getAttribute('data-sort');
-        if (currentSortBy === sortBy) {
-            currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSortBy = sortBy;
-            currentSortDir = 'asc';
+    function updateResults() {
+        const params = new URLSearchParams();
+        if (filterInput.value) {
+            params.append('filter', filterInput.value);
         }
-        updateResults();
-    }
-});
+        params.append('sort_by', currentSortBy);
+        params.append('sort_dir', currentSortDir);
 
-function updateResults() {
-    const filter = filterInput.value;
-    const params = new URLSearchParams();
-    if (filter) {
-        params.append('filter', filter);
-    }
-    params.append('sort_by', currentSortBy);
-    params.append('sort_dir', currentSortDir);
-
-    fetch(`${window.location.pathname}?${params.toString()}`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.text())
-    .then(html => {
-        const followingTable = document.getElementById('following-table');
-        if (followingTable) {
+        fetch(`${window.location.pathname}?${params.toString()}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
             followingTable.innerHTML = html;
-            setupCheckboxListeners();
             updateBulkActionButton();
-        }
-    })
-    .catch(() => {});
-}
-
-function setupCheckboxListeners() {
-    const selectAllCheckbox = document.getElementById('select-all');
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            rowCheckboxes.forEach(cb => cb.checked = this.checked);
-            updateBulkActionButton();
-        });
+        })
+        .catch(() => {});
     }
 
-    rowCheckboxes.forEach(cb => {
-        cb.addEventListener('change', function() {
+    function rowCheckboxes() {
+        return Array.from(followingTable.querySelectorAll('.row-checkbox'));
+    }
+
+    function updateSelectAllState() {
+        const selectAll = document.getElementById('select-all');
+        const boxes = rowCheckboxes();
+        if (selectAll && boxes.length > 0) {
+            const allChecked = boxes.every(cb => cb.checked);
+            selectAll.checked = allChecked;
+            selectAll.indeterminate = ! allChecked && boxes.some(cb => cb.checked);
+        }
+    }
+
+    function updateBulkActionButton() {
+        const checked = rowCheckboxes().filter(cb => cb.checked);
+        // A followed schedule nobody runs (no address of its own) is removed, not just unfollowed.
+        const unfollowCount = checked.filter(cb => cb.dataset.hasEmail === 'true').length;
+        const deleteCount = checked.length - unfollowCount;
+
+        bulkSubdomainsInput.value = JSON.stringify(checked.map(cb => cb.value));
+        bulkActionBtn.hidden = checked.length === 0;
+
+        if (unfollowCount > 0 && deleteCount > 0) {
+            bulkActionBtn.textContent = `${unfollowLabel} (${unfollowCount}) | ${deleteLabel} (${deleteCount})`;
+        } else if (deleteCount > 0) {
+            bulkActionBtn.textContent = `${deleteLabel} (${deleteCount})`;
+        } else {
+            bulkActionBtn.textContent = `${unfollowLabel} (${unfollowCount})`;
+        }
+    }
+
+    // The list is replaced whole by the filter box and by sorting, so everything in it is heard
+    // on the wrapper that stays: a listener on a row would be gone with the row.
+    followingTable.addEventListener('change', function(e) {
+        if (e.target.id === 'select-all') {
+            rowCheckboxes().forEach(cb => cb.checked = e.target.checked);
+        } else if (! e.target.classList.contains('row-checkbox')) {
+            return;
+        }
+        updateSelectAllState();
+        updateBulkActionButton();
+    });
+
+    followingTable.addEventListener('click', function(e) {
+        const header = e.target.closest('[data-sort]');
+        if (header) {
+            const sortBy = header.getAttribute('data-sort');
+            currentSortDir = currentSortBy === sortBy && currentSortDir === 'asc' ? 'desc' : 'asc';
+            currentSortBy = sortBy;
+            updateResults();
+            return;
+        }
+
+        // Anywhere on a row ticks it, except on the things in it that do something themselves.
+        const row = e.target.closest('tbody tr');
+        if (! row || e.target.closest('a, button, input, .pop-up-menu')) {
+            return;
+        }
+        const cb = row.querySelector('.row-checkbox');
+        if (cb) {
+            cb.checked = ! cb.checked;
             updateSelectAllState();
             updateBulkActionButton();
-        });
+        }
+    });
 
-        // Make entire row clickable to toggle checkbox
-        const row = cb.closest('tr');
-        if (row) {
-            row.style.cursor = 'pointer';
-            row.addEventListener('click', function(e) {
-                // Don't toggle if clicking on links, buttons, or the checkbox itself
-                if (e.target.closest('a') || e.target.closest('button') || e.target.type === 'checkbox') {
+    bulkActionForm.addEventListener('submit', function(e) {
+        if (! confirm(confirmMessage)) {
+            e.preventDefault();
+        }
+    });
+
+    function toast(text) {
+        if (typeof Toastify !== 'undefined') {
+            Toastify({ text: text, duration: 2000, position: 'center', style: { background: '#4BB543' } }).showToast();
+        }
+    }
+
+    function postMemberSync(subdomain, calendarId) {
+        return fetch(memberSyncUrl + '/' + encodeURIComponent(subdomain), {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ google_calendar_id: calendarId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || data.error);
+            if (! data.error) {
+                location.reload();
+            }
+        });
+    }
+
+    function syncToCalendar(subdomain) {
+        fetch(calendarsUrl)
+            .then(response => response.json())
+            .then(data => {
+                const calendars = (data.calendars && Array.isArray(data.calendars)) ? data.calendars : [];
+                if (! calendars.length) {
+                    alert(notConnected);
                     return;
                 }
-                cb.checked = !cb.checked;
-                updateSelectAllState();
-                updateBulkActionButton();
-            });
-        }
-    });
-}
 
-function updateSelectAllState() {
-    const selectAllCheckbox = document.getElementById('select-all');
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-    if (selectAllCheckbox && rowCheckboxes.length > 0) {
-        const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
-        const someChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                const options = calendars.map((cal, i) => (i + 1) + '. ' + cal.summary).join('\n');
+                const choice = prompt(selectCalendar + ':\n\n' + options);
+                if (! choice) {
+                    return;
+                }
+
+                const index = parseInt(choice, 10) - 1;
+                if (isNaN(index) || index < 0 || index >= calendars.length) {
+                    return;
+                }
+
+                return postMemberSync(subdomain, calendars[index].id);
+            })
+            .catch(() => alert(syncError));
     }
-}
 
-function updateBulkActionButton() {
-    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-    const selectedSubdomains = Array.from(checkedBoxes).map(cb => cb.value);
-
-    let unfollowCount = 0;
-    let deleteCount = 0;
-
-    checkedBoxes.forEach(cb => {
-        if (cb.dataset.hasEmail === 'true') {
-            unfollowCount++;
-        } else {
-            deleteCount++;
+    // A row's menu. Heard in the capture phase: the layout stops a click inside one of its menus
+    // from travelling any further up, and the menu closes itself on the same click.
+    document.addEventListener('click', function(e) {
+        if (! e.target.closest) {
+            return;
         }
-    });
 
-    bulkSubdomainsInput.value = JSON.stringify(selectedSubdomains);
-
-    if (selectedSubdomains.length === 0) {
-        bulkActionBtn.style.display = 'none';
-    } else {
-        bulkActionBtn.style.display = 'inline-flex';
-        let label = '';
-        if (unfollowCount > 0 && deleteCount > 0) {
-            label = `${unfollowLabel} (${unfollowCount}) | ${deleteLabel} (${deleteCount})`;
-        } else if (unfollowCount > 0) {
-            label = `${unfollowLabel} (${unfollowCount})`;
-        } else {
-            label = `${deleteLabel} (${deleteCount})`;
+        const copy = e.target.closest('[data-copy-feed]');
+        if (copy) {
+            // The menu closes under the pointer, so the old "Copied" written into the button was
+            // never seen. Said where it can be.
+            navigator.clipboard.writeText(copy.getAttribute('data-copy-feed'))
+                .then(() => toast(copiedLabel))
+                .catch(() => {});
+            return;
         }
-        bulkActionBtn.textContent = label;
-    }
-}
 
-// Confirmation dialog on form submit
-bulkActionForm.addEventListener('submit', function(e) {
-    if (!confirm(confirmMessage)) {
-        e.preventDefault();
-    }
-});
+        const sync = e.target.closest('[data-calendar-sync]');
+        if (sync) {
+            syncToCalendar(sync.getAttribute('data-calendar-sync'));
+            return;
+        }
 
-// Initialize checkbox listeners on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setupCheckboxListeners();
-});
+        const unsync = e.target.closest('[data-calendar-unsync]');
+        if (unsync && confirm(confirmMessage)) {
+            postMemberSync(unsync.getAttribute('data-calendar-unsync'), '').catch(() => alert(syncError));
+        }
+    }, true);
+})();
 </script>
+
+</x-app-admin-layout>

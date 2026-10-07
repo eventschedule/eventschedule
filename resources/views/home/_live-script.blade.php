@@ -9,7 +9,7 @@
      value written here is a number the server computed, set with textContent. --}}
 <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function () {
-        var url = @json(route('realtime.summary'));
+        var url = @json(route('analytics.realtime.summary'));
         var locale = @json(app()->getLocale());
         var EVERY_MS = 30000;
         var number = new Intl.NumberFormat(locale + '-u-nu-latn');

@@ -42,7 +42,8 @@
             <li>The event's ticket currency <strong class="text-gray-900 dark:text-white">matches the card's currency</strong>.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Redemption happens in the ticket checkout only. Appointment bookings have no gift card field, so a card cannot pay for a booked time slot.</p>
-        <p class="text-gray-600 dark:text-gray-300">Selling gift cards is a <strong class="text-gray-900 dark:text-white">Pro</strong> feature, and is included on all selfhosted deployments. Cards you have already sold stay redeemable even if you later turn selling off or your plan lapses.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Selling gift cards is a <strong class="text-gray-900 dark:text-white">Pro</strong> feature, and is included on all selfhosted deployments. Cards you have already sold stay redeemable even if you later turn selling off or your plan lapses.</p>
+        <p class="text-gray-600 dark:text-gray-300">You switch gift cards on in the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab of a schedule's edit page, and follow the cards you have sold on the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab of <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong>.</p>
     </section>
 
     <!-- Setup -->
@@ -56,12 +57,14 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Gift cards are set up per schedule, so each schedule has its own amounts, currency and codes.</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit</strong>.</li>
-            <li>Open the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> section in the sidebar.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong>.</li>
+            <li>Choose the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab.</li>
             <li>Turn on <strong class="text-gray-900 dark:text-white">Enable gift cards</strong>.</li>
             <li>Fill in the settings that appear under the switch (they stay hidden while it is off), then <strong class="text-gray-900 dark:text-white">Save</strong>.</li>
         </ol>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On a free schedule the section shows an upgrade prompt instead of the settings, because selling gift cards requires <strong class="text-gray-900 dark:text-white">Pro</strong>.</p>
+
+        <x-doc-screenshot id="gift-cards--settings" alt="The Gift Cards tab of the schedule form with Enable gift cards switched on and three amounts: 25, 50 and 100" />
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a free schedule the tab shows an upgrade prompt instead of the settings, because selling gift cards requires <strong class="text-gray-900 dark:text-white">Pro</strong>.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -78,7 +81,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Gift card amounts</span></td>
-                        <td>The denominations buyers can choose. Add up to 12, each above zero and no more than 99,999. Buyers pick one of your amounts and cannot type their own, so nothing is on sale until you save at least one.</td>
+                        <td>The denominations buyers can choose. Add each with <strong class="text-gray-900 dark:text-white">+ Add Amount</strong>: up to 12, each above zero and no more than 99,999. Duplicates are dropped and the list is saved lowest first. Buyers pick one of your amounts and cannot type their own, so nothing is on sale until you save at least one.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Currency</span></td>
@@ -90,7 +93,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Payment Method</span></td>
-                        <td>How buyers pay: Cash, Stripe, Invoice Ninja, or your payment link. Only the methods already set up on your account are listed, and Cash is the default. Payfast and PayPal cannot be used for gift cards even when they are connected.</td>
+                        <td>How buyers pay: Cash, Stripe, Invoice Ninja, or your payment link. Only the methods the schedule's owner has already connected are listed, and Cash is the default. Payfast and PayPal cannot be used for gift cards even when they are connected.</td>
                     </tr>
                 </tbody>
             </table>
@@ -102,18 +105,12 @@
             <li>The schedule is on <strong class="text-gray-900 dark:text-white">Pro</strong> (or the install is selfhosted).</li>
             <li><strong class="text-gray-900 dark:text-white">Enable gift cards</strong> is on and at least one amount is saved.</li>
             <li>The payment method you picked is actually connected. Use <strong class="text-gray-900 dark:text-white">Manage payment methods</strong> under the list to connect Stripe, add your Invoice Ninja key, or set a payment link. Cash needs nothing.</li>
-            <li>On eventschedule.com only, the schedule has its own email settings.</li>
+            <li>On eventschedule.com only, the schedule has its own email settings. Until it does, a notice at the top of the tab says so and links to them.</li>
         </ul>
 
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">Hosted schedules need email settings</div>
-            <p>The recipient's email <em>is</em> the delivery mechanism, so on eventschedule.com a schedule must have its own SMTP host and username saved under <strong class="text-gray-900 dark:text-white">Edit &rarr; Integrations &rarr; Email Settings</strong> before gift cards go live. Selfhosted installations use the server's mail configuration instead, so there is nothing extra to do. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The email requirement exists because the recipient's email <em>is</em> the delivery. On eventschedule.com a schedule must have its own SMTP host and username saved under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations &rarr; Email Settings</strong> before gift cards go live. Selfhosted installations use the server's mail configuration instead, so there is nothing extra to do. See <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a>.</p>
 
-        <div class="doc-callout doc-callout-tip mb-2">
-            <div class="doc-callout-title">Your purchase link</div>
-            <p>Once selling is live, a <strong class="text-gray-900 dark:text-white">Gift card purchase link</strong> appears at the bottom of the section with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. Share it in a newsletter, a social post, or anywhere you would put a ticket link.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-2">Once selling is live, a <strong class="text-gray-900 dark:text-white">Gift card purchase link</strong> appears at the bottom of the tab with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. Share it in a newsletter, a social post, or anywhere you would put a ticket link.</p>
     </section>
 
     <!-- Buying -->
@@ -138,11 +135,11 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">The recipient</strong> gets the card itself: the amount, the code, the buyer's message, the expiry date if there is one, and a link to a private card page.</li>
             <li><strong class="text-gray-900 dark:text-white">The buyer</strong> gets a receipt with the code as a backup. This one is skipped when the buyer's address and the recipient's address are the same, since it would be the same inbox.</li>
-            <li><strong class="text-gray-900 dark:text-white">You</strong> get a sale notification. It goes to every owner and admin of the schedule who has turned on <strong class="text-gray-900 dark:text-white">New ticket sale</strong> under <strong class="text-gray-900 dark:text-white">Edit &rarr; Settings &rarr; Notifications</strong>. That toggle is off by default and each team member controls their own.</li>
+            <li><strong class="text-gray-900 dark:text-white">You</strong> get a sale notification. It goes to every owner and admin of the schedule who has turned on <strong class="text-gray-900 dark:text-white">New ticket sale</strong> under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Settings &rarr; Notifications</strong>. That toggle is off by default and each team member controls their own.</li>
         </ul>
         <div class="doc-callout doc-callout-info mb-2">
             <div class="doc-callout-title">Paying by cash</div>
-            <p>A cash card is created as <strong class="text-gray-900 dark:text-white">Pending Payment</strong> and nothing is emailed yet. Collect the money, then use <strong class="text-gray-900 dark:text-white">Mark Paid</strong> on the Sales page to activate it and send the code. Cash cards are never cancelled automatically. An unpaid Stripe, Invoice Ninja or payment link purchase is cancelled for you 48 hours after it was started, so abandoned checkouts do not pile up.</p>
+            <p>A cash card is created as <strong class="text-gray-900 dark:text-white">Pending Payment</strong> and nothing is emailed yet. Collect the money, then open the card's row on the <a href="#managing" class="doc-link">Gift Cards tab</a> of the Sales page and press <strong class="text-gray-900 dark:text-white">Mark Paid</strong> to activate it and send the code. Cash cards are never cancelled automatically. An unpaid Stripe, Invoice Ninja or payment link purchase is cancelled for you 48 hours after it was started, so abandoned checkouts do not pile up.</p>
         </div>
     </section>
 
@@ -168,20 +165,16 @@
             <li><strong class="text-gray-900 dark:text-white">Card covers the whole order:</strong> there is nothing left to pay, so the order is marked paid immediately and the ticket is emailed.</li>
         </ul>
 
-        <div class="doc-callout doc-callout-warning mb-6">
-            <div class="doc-callout-title">Why a code can be refused</div>
-            <p>A code is rejected when it is not yet paid for, cancelled, refunded, expired, out of balance, in a different currency from the event (the message names both), or when the event belongs to a different account. Unlike a promo code, an unusable gift card stops the checkout rather than quietly charging full price, because the customer is expecting it to pay for the order.</p>
-        </div>
+        <h3 id="code-refused" class="doc-subheading">Why a code can be refused</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A code is rejected when it is not yet paid for, cancelled, refunded, expired, out of balance, in a different currency from the event (the message names both), or when the event belongs to a different account. Unlike a promo code, an unusable gift card stops the checkout rather than quietly charging full price, because the customer is expecting it to pay for the order.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Stripe's minimum charge</div>
             <p>Stripe will not process a charge below 50 of the currency's smallest units (0.50 USD or EUR, 50 JPY). Payfast has its own floor of R5.00. On an event taking payment through either, if applying the whole balance would leave less than that still to pay, slightly less is applied and the small remainder stays on the card, so checkout never lands on an amount the gateway would refuse. Events paid by cash, PayPal, Invoice Ninja or a payment link have no floor and are not adjusted.</p>
         </div>
 
-        <div class="doc-callout doc-callout-info mb-2">
-            <div class="doc-callout-title">An abandoned checkout gives the balance back</div>
-            <p>The balance is deducted when the order is created, so an unpaid order would otherwise hold it. If the customer walks away without paying online, that order is expired 48 hours later and the deducted amount goes back onto the card automatically. Cash orders are skipped by that cleanup, since those are settled with you in person, so cancel one yourself if the customer never turns up (or set <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong> on the event to release them on your own schedule).</p>
-        </div>
+        <h3 id="abandoned-checkout" class="doc-subheading">An abandoned checkout gives the balance back</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-2">The balance is deducted when the order is created, so an unpaid order would otherwise hold it. If the customer walks away without paying online, that order is expired 48 hours later and the deducted amount goes back onto the card automatically. Cash orders are skipped by that cleanup, since those are settled with you in person, so cancel one yourself if the customer never turns up (or set <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong> in the event's <a href="{{ route('marketing.docs.tickets') }}#options" class="doc-link">Options</a> row to release them on your own schedule).</p>
     </section>
 
     <!-- Managing -->
@@ -192,8 +185,10 @@
             </svg>
             Step 4 - Track &amp; manage
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and choose the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab, which carries a count of the cards you have sold. It lists every card sold across all the schedules you own, newest first, with a running total of the balance still outstanding on active cards (one total per currency). Each row shows the code, the recipient, the purchase date, the remaining balance against the original value, and a status pill.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Expand a row to see the buyer, the payment method, the expiry date, which schedule sold it, the personal message, and a table of every order the card was redeemed against. Orders that used a card are also flagged with a <strong class="text-gray-900 dark:text-white">Gift Card</strong> line in the sales list and on the attendee's ticket, and the CSV export adds <strong class="text-gray-900 dark:text-white">Gift Card</strong> and <strong class="text-gray-900 dark:text-white">Gift Card Amount</strong> columns.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and choose the <strong class="text-gray-900 dark:text-white">Gift Cards</strong> tab, which carries a count of the cards you have sold. The tab is there on Pro, and on any account once a card has been sold. Two figures open it: the number of cards, and the balance still outstanding on active cards (one total per currency). Under them it lists every card sold on the schedules you manage, newest first. Each row shows the code with the recipient under it, the purchase date, the remaining balance against the original value, a status, and a <strong class="text-gray-900 dark:text-white">View Gift Card</strong> link.</p>
+
+        <x-doc-screenshot id="gift-cards--sales-tab" alt="The Gift Cards tab of Sales: two figures above a list holding one active card with its code, buyer, balance and status" />
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Press the arrow before the code to open a row: the personal message, the buyer, the payment method, the expiry date, which schedule sold it, every order the card was redeemed against, and at the bottom the actions that apply to the card. Orders that used a card also show it: a <strong class="text-gray-900 dark:text-white">Gift Card</strong> chip with the amount under the order's total in the Sales list, a <strong class="text-gray-900 dark:text-white">Gift Card</strong> line on the attendee's ticket, and <strong class="text-gray-900 dark:text-white">Gift Card</strong> and <strong class="text-gray-900 dark:text-white">Gift Card Amount</strong> columns in the CSV export.</p>
 
         <h3 class="doc-subheading">Actions</h3>
         <div class="doc-table-wrap">
@@ -208,7 +203,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">View Gift Card</span></td>
-                        <td>Opens the same card page the recipient sees, with the live balance and code.</td>
+                        <td>Opens the same card page the recipient sees, with the live balance and code. It sits at the end of the row; the other actions are inside the opened row.</td>
                         <td>Always</td>
                     </tr>
                     <tr>
@@ -234,7 +229,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Refund and Cancel are one-way: neither can be undone, and a card cannot be reactivated or topped up afterwards. To give a customer more credit, sell them another card.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Mark Paid, Refund and Cancel each ask you to confirm first. Refund and Cancel are one-way: neither can be undone, and a card cannot be reactivated or topped up afterwards. To give a customer more credit, sell them another card.</p>
 
         <h3 class="doc-subheading">Statuses</h3>
         <div class="doc-table-wrap">
@@ -298,14 +293,9 @@
             <li><strong class="text-gray-900 dark:text-white">One code, reused.</strong> A card works over and over until its balance runs out or it expires.</li>
             <li><strong class="text-gray-900 dark:text-white">The codes are easy to read out.</strong> Twelve characters, shown in groups of four, using only capital letters and digits that cannot be confused (no O, I, 0 or 1). Entry ignores case, spaces and dashes.</li>
             <li><strong class="text-gray-900 dark:text-white">Every card has its own page.</strong> The link in the recipient's email, and <strong class="text-gray-900 dark:text-white">View Gift Card</strong> in the admin panel, open a private page showing the live remaining balance, the code with a <strong class="text-gray-900 dark:text-white">Copy</strong> button, the expiry date, the message and how to redeem it.</li>
-            <li><strong class="text-gray-900 dark:text-white">Expiry starts at payment.</strong> The validity period runs from the moment the card is activated, so a cash card waiting to be paid for does not quietly burn its days.</li>
             <li><strong class="text-gray-900 dark:text-white">Expiry is shown up front.</strong> If you set a validity period, buyers see it before they pay, and the date is printed on the card email and page.</li>
             <li><strong class="text-gray-900 dark:text-white">One schedule per card.</strong> Amounts, currency and codes belong to the schedule that sold the card. A card from one of your schedules cannot be spent on another.</li>
-            <li><strong class="text-gray-900 dark:text-white">Tickets only.</strong> A card is redeemed in the ticket checkout. There is no gift card field on appointment bookings.</li>
-            <li><strong class="text-gray-900 dark:text-white">Buy for yourself.</strong> The <strong class="text-gray-900 dark:text-white">Send to myself</strong> option makes it easy to top up your own credit.</li>
-            <li><strong class="text-gray-900 dark:text-white">Redemption keeps working.</strong> Even if you turn selling off or your plan lapses, already-sold cards can still be redeemed.</li>
             <li><strong class="text-gray-900 dark:text-white">Deleting a schedule voids its cards.</strong> If any card still has a balance you are warned first, because deleting the schedule voids them permanently.</li>
-            <li><strong class="text-gray-900 dark:text-white">Plan.</strong> Selling gift cards requires a <strong class="text-gray-900 dark:text-white">Pro</strong> plan, and is included on selfhosted deployments.</li>
         </ul>
     </section>
 

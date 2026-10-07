@@ -8,12 +8,13 @@ use App\Models\User;
 use App\Utils\RealtimeRows;
 use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
- * What a schedule's owner sees at /realtime, and in the Realtime tile of their dashboard: the live
+ * What a schedule's owner sees on the Realtime tab of /analytics, and in the Realtime tile of their dashboard: the live
  * traffic to their OWN guest pages, and nothing about anyone's identity.
  *
  * It reads the table /admin/realtime reads and shares none of that page's code (RealtimeDashboard),
@@ -87,6 +88,9 @@ class ScheduleRealtime
     /** @var array<int, ?object> */
     private array $events = [];
 
+    /** @var array<int, string> appointment type names, for the page of a booking */
+    private array $types = [];
+
     /**
      * @param  iterable<int>  $roleIds  schedules the viewer may see, already authorized by the caller
      * @param  string  $salt  per session: makes a row's handle useless outside it
@@ -97,8 +101,35 @@ class ScheduleRealtime
         $this->nowTs = RealtimeTracker::now()->getTimestamp();
     }
 
+    private const SALT_KEY = 'realtime_owner_salt';
+
     /**
-     * Whether this person has a Realtime page at all: the install offers it, they are not the
+     * The view of the person asking: every schedule they manage, and their session's salt. What
+     * the Realtime tab of /analytics renders and what its poll answers with are both this, so a
+     * row keeps its handle from the first render to every refresh after it.
+     */
+    public static function forRequest(Request $request, User $user): self
+    {
+        return new self($user, $user->manageableRoles()->pluck('id'), self::salt($request));
+    }
+
+    /**
+     * A row's handle is a hash salted with this, so it means nothing outside the session that is
+     * looking: not to another owner, and not to the same owner tomorrow or on another device.
+     */
+    public static function salt(Request $request): string
+    {
+        $session = $request->session();
+
+        if (! is_string($session->get(self::SALT_KEY)) || $session->get(self::SALT_KEY) === '') {
+            $session->put(self::SALT_KEY, bin2hex(random_bytes(16)));
+        }
+
+        return $session->get(self::SALT_KEY);
+    }
+
+    /**
+     * Whether this person has a Realtime tab at all: the install offers it, they are not the
      * shared demo account (anyone can sign in as it, and it would be watching real visitors), and
      * they manage at least one schedule.
      *
@@ -163,7 +194,7 @@ class ScheduleRealtime
                 'earlier_total' => $earlierPeople->count(),
             ],
             'breakdowns' => [
-                'pages' => $this->pagesBreakdown($views),
+                'pages' => $this->pagesBreakdown($views, $nowPeople),
                 'sources' => $this->sourcesBreakdown($views),
                 // A view with no country (a private address, a lookup that found nothing) is in
                 // the "other" row: every list on the page adds up to the page views above it.
@@ -334,9 +365,17 @@ class ScheduleRealtime
         }
 
         if ($eventIds) {
-            $found = Event::whereIn('id', array_keys($eventIds))->get(['id', 'name'])->keyBy('id')->all();
+            $found = Event::whereIn('id', array_keys($eventIds))->get(['id', 'name', 'appointment_type_id'])->keyBy('id')->all();
             foreach (array_keys($eventIds) as $id) {
                 $this->events[$id] = $found[$id] ?? null;
+            }
+
+            // An appointment booking is an event named after its guest ("Consultation - Dana
+            // Whitlock"). Its page is labelled by what was booked, which needs the type's name.
+            $typeIds = collect($found)->pluck('appointment_type_id')->filter()->unique()
+                ->reject(fn ($id) => array_key_exists((int) $id, $this->types))->values()->all();
+            if ($typeIds) {
+                $this->types += DB::table('appointment_types')->whereIn('id', $typeIds)->pluck('name', 'id')->all();
             }
         }
     }
@@ -352,7 +391,8 @@ class ScheduleRealtime
 
         if ($row->event_id) {
             return [
-                'label' => $event?->name ?: __('messages.realtime_deleted_event'),
+                // Never the event's name directly: see ScheduleActivity::eventLabel().
+                'label' => ScheduleActivity::eventLabel($event, $this->types),
                 'kind' => 'event',
                 // Whose page it is only matters to someone with more than one schedule.
                 'schedule' => count($this->roleIds) > 1 ? $schedule : null,
@@ -366,19 +406,25 @@ class ScheduleRealtime
         ];
     }
 
-    private function pagesBreakdown(Collection $views): array
+    /**
+     * @param  Collection  $nowPeople  everyone who is here now, before the list is cut to NOW_CAP:
+     *                                 a page's "now" is counted from all of them, so the figures
+     *                                 beside the pages add up to "visitors now" and not to fifty
+     */
+    private function pagesBreakdown(Collection $views, Collection $nowPeople): array
     {
         $counts = $views->countBy('page_key')->sortDesc();
         $first = $views->groupBy('page_key')->map(fn ($group) => $group->first());
+        $here = $nowPeople->countBy(fn ($person) => $person['row']->page_key);
 
         // Names for exactly the pages folded() is about to list (it keeps this order: a sort of an
         // already sorted tally moves nothing).
         $this->loadNames($counts->take(self::BREAKDOWN_ROWS)->keys()->map(fn ($key) => $first[$key]));
 
-        return $this->folded($counts, function ($key) use ($first) {
+        return $this->folded($counts, function ($key) use ($first, $here) {
             $page = $this->pageLabel($first[$key]);
 
-            return ['key' => 'p'.md5($key), 'label' => $page['label'], 'sub' => $page['schedule'], 'kind' => $page['kind']];
+            return ['key' => 'p'.md5($key), 'label' => $page['label'], 'sub' => $page['schedule'], 'kind' => $page['kind'], 'now' => (int) ($here[$key] ?? 0)];
         });
     }
 

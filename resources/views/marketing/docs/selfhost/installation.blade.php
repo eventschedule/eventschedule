@@ -13,6 +13,7 @@
         <x-doc-nav-link href="#environment">4. Configure Environment</x-doc-nav-link>
         <x-doc-nav-link href="#cron">5. Set Up Cron Job</x-doc-nav-link>
         <x-doc-nav-link href="#verification">Verification</x-doc-nav-link>
+        <x-doc-nav-link href="#updating">Updating</x-doc-nav-link>
         <x-doc-nav-link href="#push-notifications">Push notifications</x-doc-nav-link>
         <x-doc-nav-link href="#spam-protection">Spam protection</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
@@ -33,6 +34,8 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">These steps describe a plain selfhosted install, where you own every schedule on the server. If you want to run a multi-tenant service where other people sign up and get their own subdomain and plan, follow the <a href="{{ route('marketing.docs.saas.setup') }}" class="doc-link">SaaS setup guide</a> instead.</p>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A selfhosted install is not a reduced edition. It resolves to the Enterprise feature set, so everything the hosted service keeps for Pro and Enterprise comes with no plan to buy: unlimited paid ticket sales, the check-in dashboard, passes, gift cards, custom fields, webhooks, custom CSS, team members, unlimited newsletters, and the AI features once you add a key. A few controls only make sense on the hosted service (per-schedule email settings, subscription billing) and are hidden here. The <a href="{{ route('marketing.docs.selfhost') }}#differences" class="doc-link">Selfhost overview</a> lists every difference.</p>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Automated Installation Options</div>
             <p>For easier installation, you can use:</p>
@@ -40,11 +43,6 @@
                 <li><a href="https://www.softaculous.com/apps/calendars/Event_Schedule" target="_blank" rel="noopener noreferrer" class="doc-link">Softaculous</a> - One-click installation on cPanel hosts</li>
                 <li><a href="https://github.com/eventschedule/dockerfiles" target="_blank" rel="noopener noreferrer" class="doc-link">Docker</a> - Containerized deployment with Docker Compose</li>
             </ul>
-        </div>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Every feature is included</div>
-            <p>A selfhosted install is not a reduced edition. It resolves to the Enterprise feature set, so everything the hosted service keeps for Pro and Enterprise comes with no plan to buy: unlimited paid ticket sales, the check-in dashboard, passes, gift cards, custom fields, webhooks, custom CSS, team members, unlimited newsletters, and the AI features once you add a key. A few controls only make sense on the hosted service (per-schedule email settings, subscription billing) and are hidden here.</p>
         </div>
     </section>
 
@@ -91,7 +89,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Cron</span></td>
                         <td>Every minute</td>
-                        <td>Runs scheduled tasks and the queue worker (<a href="#cron" class="doc-link">step 5</a>); email and calendar sync stop without it</td>
+                        <td>Runs scheduled tasks and the queue (<a href="#cron" class="doc-link">step 5</a>); reminders, scheduled newsletters and calendar sync stop without it</td>
                     </tr>
                 </tbody>
             </table>
@@ -177,15 +175,13 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The archive has no wrapping folder inside it: <code class="doc-inline-code">app</code>, <code class="doc-inline-code">public</code>, <code class="doc-inline-code">storage</code> and the rest land directly in whatever directory you unzip into. So <code class="doc-inline-code">cd</code> into the directory you want the install to live in before extracting.</p>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Point your web server's document root at the <code class="doc-inline-code">public</code> directory inside the install directory, not at the install directory itself. Getting this wrong is the single most common cause of a broken install, and its symptoms are described under <a href="#troubleshooting" class="doc-link">troubleshooting</a>.</p>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">No Composer or Node needed on the server</div>
             <p>The release zip is built with dependencies already installed and the frontend assets already compiled, so you do not run <code class="doc-inline-code">composer install</code> or <code class="doc-inline-code">npm run build</code> after extracting. Those are only needed if you install from a <code class="doc-inline-code">git clone</code> instead.</p>
         </div>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Web Root Configuration</div>
-            <p>Your web server should point to the <code class="doc-inline-code">public</code> directory inside the install directory, not the install directory itself. Getting this wrong is the single most common cause of a broken install, and its symptoms are described under <a href="#troubleshooting" class="doc-link">troubleshooting</a>.</p>
-        </div>
     </section>
 
     <!-- 3. Set File Permissions -->
@@ -210,15 +206,13 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">All three directories are needed: <code class="doc-inline-code">storage</code> holds logs, uploads and caches, <code class="doc-inline-code">bootstrap</code> holds the compiled config and route caches, and <code class="doc-inline-code">public</code> has to be writable because setup creates the <code class="doc-inline-code">public/storage</code> symlink that serves uploaded images.</p>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The web-server user must also be able to write to the <code class="doc-inline-code">.env</code> file you create in the next step. The app writes its <code class="doc-inline-code">APP_KEY</code> there on the first request, and the setup wizard saves your database configuration to the same file, so give it the same owner (e.g. <code class="doc-inline-code">sudo chown www-data:www-data .env</code>). If it is read-only, the wizard shows a warning at the top of the form and stops before touching the database rather than leaving you half configured.</p>
+
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">User Note</div>
+            <div class="doc-callout-title">Which user?</div>
             <p>The user <code class="doc-inline-code">www-data</code> is typical for Apache on Debian/Ubuntu. Your web server may run under a different user (e.g., <code class="doc-inline-code">nginx</code>, <code class="doc-inline-code">apache</code>, or <code class="doc-inline-code">http</code>). Check your server configuration. Docker images based on Alpine often have no <code class="doc-inline-code">www-data</code> name at all, only the numeric UID <code class="doc-inline-code">82</code>, so use <code class="doc-inline-code">chown -R 82:82 ...</code> there instead.</p>
         </div>
 
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">.env must be writable too</div>
-            <p>The web-server user must also be able to write to the <code class="doc-inline-code">.env</code> file, not just <code class="doc-inline-code">storage</code>. The app writes its <code class="doc-inline-code">APP_KEY</code> there on the first request, and the setup wizard saves your database configuration to the same file, so include <code class="doc-inline-code">.env</code> in the ownership change above (e.g. <code class="doc-inline-code">sudo chown www-data:www-data .env</code>). If it is read-only, the wizard shows a warning at the top of the form and stops before touching the database rather than leaving you half configured.</p>
-        </div>
     </section>
 
     <!-- 4. Configure Environment -->
@@ -248,10 +242,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Now access your application at <code class="doc-inline-code">https://your-domain.com</code> in your browser. Because <code class="doc-inline-code">APP_URL</code> is still blank, every request is redirected to the setup wizard, which is the sign-up page. Work through it in order:</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li><span class="font-semibold text-gray-900 dark:text-white">Enter the database connection:</span> MySQL Host, Port, Database, Username and Password, pre-filled from the <code class="doc-inline-code">DB_*</code> values in your <code class="doc-inline-code">.env</code>. All five are required, so a MySQL user with a blank password is not accepted.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Enter the database connection:</span> MySQL Host, Port, Database, Username and Password. The first four are pre-filled from the <code class="doc-inline-code">DB_*</code> values in your <code class="doc-inline-code">.env</code>. All five are required, so a MySQL user with a blank password is not accepted.</li>
             <li><span class="font-semibold text-gray-900 dark:text-white">Press Test.</span> The account fields below stay hidden until the connection succeeds, so this is not an optional check. If the database already contains an Event Schedule installation, Test says so and keeps the form disabled, which is what stops you overwriting an existing site.</li>
             <li><span class="font-semibold text-gray-900 dark:text-white">Create the admin account:</span> Email, Full Name and a password of at least 8 characters. This first account becomes the instance admin.</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Accept the selfhosting terms,</span> and optionally tick <span class="font-semibold text-gray-900 dark:text-white">Report errors to the developers to help us improve the app</span>, which sets <code class="doc-inline-code">REPORT_ERRORS=true</code> so crashes are sent to the developers.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Accept the selfhosting terms,</span> and optionally tick <span class="font-semibold text-gray-900 dark:text-white">Report errors to the developers to help us improve the app (optional)</span>, which sets <code class="doc-inline-code">REPORT_ERRORS=true</code> so crashes are sent to the developers.</li>
             <li><span class="font-semibold text-gray-900 dark:text-white">Press Sign Up.</span> The wizard runs the migrations first, and only writes to <code class="doc-inline-code">.env</code> once they succeed, so a bad database never leaves you with a half-configured install. It then sets <code class="doc-inline-code">APP_URL</code> to the address you loaded the wizard on, sets <code class="doc-inline-code">APP_ENV=production</code>, saves the <code class="doc-inline-code">DB_*</code> values, and creates the <code class="doc-inline-code">public/storage</code> symlink.</li>
         </ol>
 
@@ -322,7 +316,7 @@
             <pre><code>* * * * * php /path/to/eventschedule/artisan schedule:run</code></pre>
         </div>
 
-        <h3 class="doc-subheading">Adding the Cron Job</h3>
+        <h3 id="cron-add" class="doc-subheading">Adding the Cron Job</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">To edit your crontab, run:</p>
 
         <div class="doc-code-block">
@@ -340,7 +334,20 @@
             <p>If using cPanel, you can add cron jobs via the "Cron Jobs" section in your control panel without using the command line.</p>
         </div>
 
-        <h3 class="doc-subheading">What the Scheduler Runs</h3>
+        <h3 id="cron-url" class="doc-subheading">No crontab? Request a URL instead</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Shared hosting that cannot run a command every minute can drive the same schedule over HTTP. Set <code class="doc-inline-code">APP_CRON_SECRET</code> in <code class="doc-inline-code">.env</code> to a long random string, then have your control panel or any outside cron service request this address once a minute:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>http</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>GET https://your-domain.com/translate_data?secret=YOUR_SECRET</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Use one or the other, never both: each is a complete copy of the schedule, and two runners do some work twice. While <code class="doc-inline-code">APP_CRON_SECRET</code> is empty, which is how it ships, the address refuses every request. An install driven this way reports a single heartbeat on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#system-queue" class="doc-link">Queue</a> page rather than a result for each task.</p>
+
+        <h3 id="scheduler-tasks" class="doc-subheading">What the Scheduler Runs</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">A single minutely cron entry is enough because the scheduler decides internally what is due. The main jobs:</p>
 
         <div class="doc-table-wrap">
@@ -361,7 +368,7 @@
                         <td>Every minute</td>
                     </tr>
                     <tr>
-                        <td>Retry failed jobs, and link the events a curator's source schedules publish onto that curator</td>
+                        <td>Retry failed jobs, link the events a curator's source schedules publish onto that curator, and delete expired <a href="{{ route('marketing.docs.selfhost.admin') }}#realtime" class="doc-link">Realtime</a> records</td>
                         <td>Every 5 minutes</td>
                     </tr>
                     <tr>
@@ -369,11 +376,11 @@
                         <td>Every 15 minutes</td>
                     </tr>
                     <tr>
-                        <td>Release unpaid ticket reservations, expire waitlist offers, charge installment payments, send feedback requests, appointment and carpool reminders, event graphic emails, the new-event digest to confirmed subscribers, interest-list emails (tickets on sale, and the reminder before the event), and, with <code class="doc-inline-code">CACHE_STORE=database</code>, delete expired cache entries</td>
+                        <td>Release unpaid ticket reservations, expire waitlist offers, charge installment payments, send feedback requests, appointment and carpool reminders, event graphic emails, the new-event digest to confirmed subscribers, interest-list emails (tickets on sale, and the reminder before the event), send your events to the Event Schedule network when <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">federation</a> is on, and, with <code class="doc-inline-code">CACHE_STORE=database</code>, delete expired cache entries</td>
                         <td>Hourly</td>
                     </tr>
                     <tr>
-                        <td>Renew calendar webhooks, prune old logs and backups, notify owners about new booking requests, fan content and poll options, run curator auto-imports</td>
+                        <td>Renew calendar webhooks, prune old logs and backups, notify owners about new booking requests, fan content and poll options, run curator auto-imports, and check GitHub for a new release</td>
                         <td>Daily</td>
                     </tr>
                     <tr>
@@ -428,20 +435,44 @@
             <li>Turn on <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">federation</a> to share your public events with the eventschedule.com listings (optional, off by default)</li>
             <li>Tour the <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a>, where you can watch the queue, read logs, edit translations and change platform settings</li>
         </ul>
+    </section>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Keeping the install up to date</div>
-            <p>Upgrades are one step, from either direction: open <span class="font-semibold text-gray-900 dark:text-white">Settings &gt; App Update</span>, which shows your installed version next to the latest release and offers an <span class="font-semibold text-gray-900 dark:text-white">Update</span> button when they differ, or run <code class="doc-inline-code">php artisan app:update</code> on the server. Both download and install the new release and then run any new migrations. Take a backup first. Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design, so they survive it. Instance admins get the same panel at <span class="font-semibold text-gray-900 dark:text-white">Admin &gt; System &gt; App Update</span>, which also badges the System menu when a release is waiting.</p>
-            <p class="mt-3">If the App Update screen is not there at all, use the command: it works on every install and does not depend on the screen. That is also the way back from an older release whose UI hid the update button.</p>
+    <!-- Updating -->
+    <section id="updating" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Keeping the Install Up to Date
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">An upgrade is one step, from the browser or from the server. Either way it downloads the new release, installs it, runs any new migrations and clears the cached config, routes and views.</p>
+
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li><span class="font-semibold text-gray-900 dark:text-white">Take a backup first:</span> the database, and the <code class="doc-inline-code">storage</code> directory.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">In the browser:</span> open <span class="font-semibold text-gray-900 dark:text-white">Settings &gt; App Update</span>, which shows your installed version next to the latest release and offers an <span class="font-semibold text-gray-900 dark:text-white">Update</span> button when a newer one is out. Instance admins have the same on <a href="{{ route('marketing.docs.selfhost.admin') }}#system-app-update" class="doc-link">Admin &gt; System &gt; App Update</a>, where a badge on the System tab says a release is waiting.</li>
+            <li><span class="font-semibold text-gray-900 dark:text-white">Or on the server:</span> run <code class="doc-inline-code">php artisan app:update</code>.</li>
+        </ol>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>bash</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-keyword">cd</span> /path/to/eventschedule
+<span class="code-keyword">php</span> artisan app:update</code></pre>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Your uploads, custom translations and anything else under <code class="doc-inline-code">storage/app/</code> are excluded from the update by design, so they survive it. The latest version is looked up once a day by the <a href="#cron" class="doc-link">scheduler</a>; <span class="font-semibold text-gray-900 dark:text-white">Check for Updates</span> on the admin page asks GitHub straight away.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If the App Update screen is not there at all, or a large update outruns PHP's <code class="doc-inline-code">max_execution_time</code>, use the command: it works on every install, has no time limit and does not depend on the screen. That is also the way back from an older release whose UI hid the update button.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A server whose PHP runs OPcache with <code class="doc-inline-code">opcache.validate_timestamps=0</code> keeps serving the old code after the files change: reload PHP-FPM (or your web server) once the update has finished.</p>
     </section>
 
     <!-- Push Notifications -->
     <section id="push-notifications" class="doc-section">
         <h2 class="doc-heading">
-            <span class="doc-heading-icon">
-                <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            </span>
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
             Push Notifications (Optional)
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can send browser and mobile web push notifications alongside the emails it already sends, using <a href="https://onesignal.com" target="_blank" rel="noopener noreferrer" class="doc-link">OneSignal</a>. The same moments trigger both: a ticket sale, a booking request accepted or declined, new feedback, a waitlist opening, a finished backup export or import. Push is <strong>off by default</strong>: if you do not configure it, no push SDK is loaded and your installation makes no calls to OneSignal.</p>
@@ -459,15 +490,15 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
             <div class="doc-callout-title">What turning this on shares</div>
             <p>Enabling OneSignal loads its SDK from OneSignal's CDN and sends notification data to OneSignal's servers. Visitors choose to opt in per device; nothing is sent until they allow notifications.</p>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, a schedule's settings gain a <strong>Push notifications</strong> panel on the <strong>Notifications</strong> tab, with <strong>Enable push on this device</strong> and, after that, <strong>Send test push</strong>. Opting in is per device, so each browser you want alerts on has to be enabled separately. Apple iOS only supports web push for sites the visitor adds to their home screen (iOS 16.4+); Android and desktop browsers work without installation.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, the <strong>Notifications</strong> row of the <strong>Settings</strong> tab on a schedule's edit page gains a <strong>Push notifications</strong> panel, with <strong>Enable push on this device</strong> and, after that, <strong>Send test push</strong>. Opting in is per device, so each browser you want alerts on has to be enabled separately. Apple iOS only supports web push for sites the visitor adds to their home screen (iOS 16.4+); Android and desktop browsers work without installation.</p>
     </section>
 
     <!-- Spam protection -->
     <section id="spam-protection" class="doc-section">
         <h2 class="doc-heading">
-            <span class="doc-heading-icon">
-                <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
-            </span>
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+            </svg>
             Spam Protection (Optional)
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can put a <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer" class="doc-link">Cloudflare Turnstile</a> challenge in front of the forms a stranger uses to sign in, pay, book or post. Turnstile is invisible to most visitors and needs no puzzle-solving.</p>
@@ -476,7 +507,7 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
             <li>Sign in, sign up and password reset</li>
             <li>Ticket checkout and gift card purchases</li>
             <li>RSVPs and appointment bookings</li>
-            <li>Events submitted by guests through a schedule's submission page</li>
+            <li>Events submitted by guests through a schedule's submission page, and booking requests</li>
             <li>Fan photo, video and comment submissions</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The two forms that ask for an email address and nothing else never show the challenge: a schedule's sign-up panel and an event's <strong>Notify me</strong> list. Both are guarded by a hidden honeypot field and by rate limits on the visitor's IP address and on the email address instead.</p>
@@ -578,7 +609,7 @@ return [
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Why this works</div>
-            <p>Changes apply on the next request, no cache clear is required. <code class="doc-inline-code">storage/app/</code> is gitignored, so your overrides survive <code class="doc-inline-code">php artisan app:update</code>, <code class="doc-inline-code">git pull</code>, and fresh checkouts. New keys added in future releases continue to show their bundled English (or translated) value until you override them.</p>
+            <p>Changes apply on the next request, no cache clear is required (with OPcache set to <code class="doc-inline-code">opcache.validate_timestamps=0</code>, reload PHP-FPM after editing a file by hand; the admin editor refreshes the files it writes itself). <code class="doc-inline-code">storage/app/</code> is gitignored, so your overrides survive <code class="doc-inline-code">php artisan app:update</code>, <code class="doc-inline-code">git pull</code>, and fresh checkouts. New keys added in future releases continue to show their bundled English (or translated) value until you override them.</p>
         </div>
     </section>
 

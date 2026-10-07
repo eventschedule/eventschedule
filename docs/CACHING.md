@@ -123,7 +123,7 @@ this middleware can never mark one public: the messages GET is per visitor (its 
 reason nothing visitor-specific may be rendered into the page: the HTML is shared.
 
 The Realtime beacon (`POST /api/realtime`, `RealtimeBeaconController`; it feeds `/admin/realtime`
-and a schedule owner's `/realtime`) needs none of this, because it is registered in
+and the Realtime tab of a schedule owner's `/analytics`) needs none of this, because it is registered in
 `routes/api.php`: the `api` group has no session, cookie or CSRF middleware at all, so it can never
 set `laravel_session` and is not in `STATELESS_ROUTES`. It does READ one cookie off the request,
 the visitor's own `cookie_consent`, to decide whether a schedule's owner may list them

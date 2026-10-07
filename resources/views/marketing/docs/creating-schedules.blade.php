@@ -6,13 +6,16 @@
     article-description="Configure a schedule in Event Schedule: details, address, contact info, short links, sub-schedules, settings and notifications, event requests, event sources, selfhost auto import and calendar integrations."
 >
     <x-slot:toc>
+        {{-- The schedule form's own order: its sections down the sidebar, and each section's rows. --}}
+        <x-doc-nav-link href="#schedule-form">The Schedule Form</x-doc-nav-link>
         <x-doc-nav-link href="#schedule-types">Schedule Types</x-doc-nav-link>
         <x-doc-nav-group label="Details" href="#details">
             <x-doc-nav-link href="#details-general">General</x-doc-nav-link>
+            <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
             <x-doc-nav-link href="#details-localization">Language and time</x-doc-nav-link>
             <x-doc-nav-link href="#contact-info">Contact Info</x-doc-nav-link>
         </x-doc-nav-group>
-        <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
+        <x-doc-nav-link href="#event-sources">Event Sources</x-doc-nav-link>
         <x-doc-nav-link href="#address">Address</x-doc-nav-link>
         <x-doc-nav-link href="#merge">Merging Duplicates</x-doc-nav-link>
         <x-doc-nav-link href="#style">Style</x-doc-nav-link>
@@ -21,14 +24,15 @@
         <x-doc-nav-group label="Customize" href="#customize">
             <x-doc-nav-link href="#customize-subschedules">Sub-schedules</x-doc-nav-link>
             <x-doc-nav-link href="#customize-custom-fields">Custom Fields</x-doc-nav-link>
-            <x-doc-nav-link href="#customize-categories">Custom Categories</x-doc-nav-link>
+            <x-doc-nav-link href="#customize-categories">Categories</x-doc-nav-link>
             <x-doc-nav-link href="#customize-custom-labels">Custom Labels</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Settings" href="#settings">
-            <x-doc-nav-link href="#settings-general">General</x-doc-nav-link>
+            <x-doc-nav-link href="#settings-general">Schedule URL</x-doc-nav-link>
             <x-doc-nav-link href="#custom-domain">Custom Domain</x-doc-nav-link>
             <x-doc-nav-link href="#settings-notifications">Notifications</x-doc-nav-link>
             <x-doc-nav-link href="#settings-advanced">Advanced</x-doc-nav-link>
+            <x-doc-nav-link href="#url-pattern-variables">URL Pattern Variables</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Engagement" href="#engagement">
             <x-doc-nav-link href="#engagement-requests">Requests</x-doc-nav-link>
@@ -39,17 +43,129 @@
             <x-doc-nav-link href="#engagement-venue-map">Venue map</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-accommodation">Accommodation</x-doc-nav-link>
         </x-doc-nav-group>
-        <x-doc-nav-link href="#event-sources">Event Sources</x-doc-nav-link>
+        <x-doc-nav-link href="#gift-cards">Gift Cards</x-doc-nav-link>
         <x-doc-nav-link href="#auto-import">Auto Import</x-doc-nav-link>
         <x-doc-nav-group label="Integrations" href="#integrations">
             <x-doc-nav-link href="#integrations-email">Email Settings</x-doc-nav-link>
+            <x-doc-nav-link href="#calendar-sync">Calendar sync</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-google">Google Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-microsoft">Outlook Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-caldav">CalDAV Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-advanced">Calendar text and feeds</x-doc-nav-link>
+            <x-doc-nav-link href="#available-variables">Available Variables</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
+
+    {{-- The page as a whole: where the form is, what its sections are, how saving works. --}}
+    <section id="schedule-form" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+            The Schedule Form
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A new schedule is created with a name and nothing else (see <a href="{{ route('marketing.docs.getting_started') }}#create-schedule" class="doc-link">Getting Started</a>). Everything else about it is set on one page, the schedule form, and this guide follows that form from top to bottom.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To open it, choose the schedule in the sidebar and click <strong class="text-gray-900 dark:text-white">Edit Schedule</strong> at the top of its page. On a phone the same entry is in the <strong class="text-gray-900 dark:text-white">Actions</strong> menu. The schedule's owner and its admins can open the form; a team member with view access cannot.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The form's sections are listed down the left, and on a phone they are stacked, each opening when you tap it. Under a section's name is one line saying what it holds now, and a dot appears beside the name once you have changed something in it. Inside a section, what everyone fills in is on the page as it opens. The rest sits in rows: a row shows its name and its current setting, opens in place when you click it, and one row of a section is open at a time.</p>
+
+        <x-doc-screenshot id="creating-schedules--section-details" alt="The schedule form: the sections down the left with a line under each name, the Details section open on the schedule's name and description, and the bar with Cancel and Save at the bottom" loading="eager" />
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Not every section is offered to every schedule. In the form's own order:</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Section</th>
+                        <th>What it holds</th>
+                        <th>Shown for</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="#details" class="doc-link">Details</a></td>
+                        <td>Name, description and announcement bar, with rows for Language and time and for Contact Info</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#event-sources" class="doc-link">Event Sources</a></td>
+                        <td>Talent and venue schedules whose events appear on yours automatically</td>
+                        <td>Curator schedules</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#address" class="doc-link">Address</a></td>
+                        <td>The venue's street address</td>
+                        <td>Venue schedules</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#merge" class="doc-link">Merge Venue</a></td>
+                        <td>Folding a duplicate venue into another one you manage</td>
+                        <td>An <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">unclaimed</a> Venue schedule, when you manage another venue it could be merged into</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#style" class="doc-link">Style</a></td>
+                        <td>Profile image, accent color and font, with rows for Event animation, Background, and Header and layout</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#gallery" class="doc-link">Gallery</a> <x-doc-badge plan="pro" /></td>
+                        <td>Photos shown on your schedule page</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#videos-links" class="doc-link">Videos &amp; Links</a></td>
+                        <td>YouTube videos and social links, with a short link for each</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#customize" class="doc-link">Customize</a></td>
+                        <td>Rows for Sub-schedules, Custom Fields, Categories and Custom Labels</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#settings" class="doc-link">Settings</a></td>
+                        <td>The Schedule URL, with rows for Notifications and Advanced</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#engagement" class="doc-link">Engagement</a></td>
+                        <td>Rows for Requests, Fan Content, Feedback, Carpool, Sponsors and Accommodation</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#gift-cards" class="doc-link">Gift Cards</a> <x-doc-badge plan="pro" /></td>
+                        <td>Selling gift cards that are redeemed for tickets</td>
+                        <td>Every schedule</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#auto-import" class="doc-link">Auto Import</a></td>
+                        <td>Web pages to read events from once a day</td>
+                        <td>Selfhosted installs</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#integrations" class="doc-link">Integrations</a></td>
+                        <td>Rows for Email Settings (hosted platform only), Google Calendar, Outlook Calendar, CalDAV Calendar, and Calendar text and feeds</td>
+                        <td>Every schedule</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="doc-callout doc-callout-plan">
+            <div class="doc-callout-title">What needs a plan</div>
+            <p>The form itself, and most of what is on it, is free. <x-doc-badge plan="pro" /> covers the announcement bar, Gallery, Custom Fields, Custom Labels, Feedback, Carpool, Sponsors, Gift Cards and custom CSS. <x-doc-badge plan="enterprise" /> covers the two AI generators, a custom domain, and Internal or Unlisted as the default visibility. A row your plan does not include carries a lock and says which plan it needs when you open it. A <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install resolves to Enterprise, so nothing on the form is held back there.</p>
+        </div>
+
+        <h3 id="saving" class="doc-subheading">Saving</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">There is one <strong class="text-gray-900 dark:text-white">Save</strong> for the whole form, in the bar at the bottom of the page. It saves every section at once, whichever one you are looking at. The same bar says where things stand:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Unsaved</strong>, followed by the sections you have changed. Each name is a link back to that section.</li>
+            <li><strong class="text-gray-900 dark:text-white">Saving removes</strong>, followed by what you took off a list, by name: a sub-schedule, a custom field, a category, a custom label, a sponsor, a source schedule. It is said before the save that removes it.</li>
+            <li><strong class="text-gray-900 dark:text-white">Check</strong>, followed by the sections to look at, when a save was refused. The form opens the section and the row holding the first message, and keeps what you typed.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300"><strong class="text-gray-900 dark:text-white">Cancel</strong>, beside Save, leaves the form. If anything is unsaved it asks first: <strong class="text-gray-900 dark:text-white">Keep editing</strong> or <strong class="text-gray-900 dark:text-white">Discard</strong>.</p>
+    </section>
 
     <!-- Schedule Types -->
     <section id="schedule-types" class="doc-section">
@@ -59,7 +175,7 @@
             </svg>
             Schedule Types
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports three types of schedules, each designed for different use cases:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Every schedule is one of three types. The type is chosen when the schedule is created and cannot be changed afterwards:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -67,30 +183,30 @@
                     <tr>
                         <th>Type</th>
                         <th>Best For</th>
-                        <th>Key Features</th>
+                        <th>What the form adds or leaves out</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Talent</span></td>
                         <td>Musicians, DJs, performers, speakers</td>
-                        <td>Events display venues, focused on "where you'll be"</td>
+                        <td>A shorter <a href="#engagement-requests" class="doc-link">Requests</a> row, because a request to book a performer is always read by hand. <strong class="text-gray-900 dark:text-white">Country</strong> in <a href="#contact-info" class="doc-link">Contact Info</a>. No <strong class="text-gray-900 dark:text-white">Hide Videos</strong> switch.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
                         <td>Bars, clubs, theaters, event spaces</td>
-                        <td>Full address support, map integration</td>
+                        <td>The <a href="#address" class="doc-link">Address</a> section, and <a href="#merge" class="doc-link">Merge Venue</a> on a venue nobody has claimed.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Curator</span></td>
                         <td>Promoters, bloggers, community organizers</td>
-                        <td>Aggregate events from multiple sources</td>
+                        <td>The <a href="#event-sources" class="doc-link">Event Sources</a> section, second in the list. <strong class="text-gray-900 dark:text-white">City</strong> and <strong class="text-gray-900 dark:text-white">Country</strong> in Contact Info. <strong class="text-gray-900 dark:text-white">Require Account</strong> starts switched on.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6">The type is chosen when you create the schedule and it changes which sections the edit page offers. Only <strong class="text-gray-900 dark:text-white">Venue</strong> schedules get the <a href="#address" class="doc-link">Address</a> section and the <a href="#merge" class="doc-link">Merge Venue</a> tool; only <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get the per-schedule banner for the bulk <a href="#merge" class="doc-link">Merge Duplicate Venues</a> page, which is otherwise reached from Following; and <strong class="text-gray-900 dark:text-white">Talent</strong> schedules see a shorter <a href="#engagement-requests" class="doc-link">Requests</a> tab, because a booking request to a performer is always reviewed by hand.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-6">The type also decides which tabs a schedule's own page has (Availability for a Talent, Seating plans for a Venue, Videos for a Curator): see <a href="{{ route('marketing.docs.getting_started') }}#schedule-types" class="doc-link">choosing a type</a> and <a href="{{ route('marketing.docs.managing_schedules') }}" class="doc-link">Managing Schedules</a>.</p>
     </section>
 
     <!-- Details -->
@@ -101,82 +217,7 @@
             </svg>
             Details
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Everything on this page lives on one form. To reach it, open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule</strong> and click <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>. The form is divided into sections listed down the left, and a single <strong class="text-gray-900 dark:text-white">Save</strong> button at the bottom of that list saves the whole form, whichever section you are in. Not every section is offered to every schedule:</p>
-
-        <div class="doc-table-wrap">
-            <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Section</th>
-                        <th>Covers</th>
-                        <th>Shown</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><a href="#details" class="doc-link">Details</a></td>
-                        <td>Name, description, language, timezone, contact details</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#address" class="doc-link">Address</a></td>
-                        <td>Street address and map coordinates</td>
-                        <td>Venue schedules</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#style" class="doc-link">Style</a></td>
-                        <td>Colors, fonts, images, layout</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#videos-links" class="doc-link">Videos &amp; Links</a></td>
-                        <td>YouTube videos and social profiles</td>
-                        <td>After the first save</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#customize" class="doc-link">Customize</a></td>
-                        <td>Sub-schedules, custom fields, categories, labels</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#settings" class="doc-link">Settings</a></td>
-                        <td>URL, notifications, and advanced behavior</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#engagement" class="doc-link">Engagement</a></td>
-                        <td>Requests, fan content, feedback, carpool, sponsors, accommodation</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">Gift Cards</a></td>
-                        <td>Selling gift cards for your events</td>
-                        <td>After the first save</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#event-sources" class="doc-link">Event Sources</a></td>
-                        <td>Talent and venue schedules whose events appear on yours automatically</td>
-                        <td>Curator schedules, after the first save</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#auto-import" class="doc-link">Auto Import</a></td>
-                        <td>Pulling events in from other websites</td>
-                        <td>Selfhosted installs</td>
-                    </tr>
-                    <tr>
-                        <td><a href="#integrations" class="doc-link">Integrations</a></td>
-                        <td>Email, calendar sync, templates, feeds</td>
-                        <td>Always</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#merge" class="doc-link">Merge Venue</a> is a twelfth section, shown on an <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">unclaimed</a> Venue schedule when you manage at least one other venue it could be folded into.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Each section in the sidebar says what it holds under its name, and shows a dot once you have changed something in it. The bar at the bottom of the page has the one <strong class="text-gray-900 dark:text-white">Save</strong> for every section: it lists the sections with unsaved changes, tells you first when saving will remove something you took off a list (a sub-schedule, a custom field, a sponsor), and <strong class="text-gray-900 dark:text-white">Cancel</strong> asks before it discards anything.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Details</strong> section holds your schedule's core identity. The name and description are on the page as it opens; Language and time and Contact Info are two rows under them that open in place, each saying its current setting on the row.</p>
-
-        <x-doc-screenshot id="creating-schedules--section-details" alt="Schedule details settings" loading="eager" />
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Details</strong> section says who the schedule is. The name, the descriptions and the announcement bar are on the page as it opens. <strong class="text-gray-900 dark:text-white">Language and time</strong> and <strong class="text-gray-900 dark:text-white">Contact Info</strong> are two rows under them, each saying its current setting on the row.</p>
 
         <!-- General Tab -->
         <h3 id="details-general" class="doc-subheading">General</h3>
@@ -187,20 +228,37 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Short Description</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A brief subtitle for your schedule, up to 200 characters. This appears below your schedule name on the schedule page.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">One line, up to 200 characters. It is shown under your schedule's name when the <a href="{{ route('marketing.docs.schedule_styling') }}#header-style" class="doc-link">header style</a> is Banner, and it opens the description that search engines and link previews show for your page.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule, shown at the top of your schedule page. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translated name and description</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Once <a href="#details-localization" class="doc-link">a second language</a> is switched on and a translation exists, extra fields appear next to the name, short description and banner so you can correct the wording by hand. Each is labelled with the target language, for example <strong class="text-gray-900 dark:text-white">Name (English)</strong>, so it follows whichever language you chose to translate into rather than always being English.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Once <a href="#details-localization" class="doc-link">a second language</a> is switched on and a translation exists, an extra field appears under the name, the short description and the banner message so you can correct the wording by hand. Each is labelled with the target language, for example <strong class="text-gray-900 dark:text-white">Name (English)</strong>, so it follows whichever language you chose to translate into rather than always being English.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show an announcement bar <x-doc-badge plan="pro" /></h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Turn on <strong class="text-gray-900 dark:text-white">Show an announcement bar</strong> to display a message in a bar at the top of your schedule's guest page, such as a venue change or a "tickets on sale" notice. The <strong class="text-gray-900 dark:text-white">Banner message</strong> box takes up to 500 characters and accepts Markdown, including links. <strong class="text-gray-900 dark:text-white">Show on event pages too</strong> extends the banner from the schedule page to individual event pages.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Turn on <strong class="text-gray-900 dark:text-white">Show an announcement bar</strong> to display a message in a bar at the top of your schedule's guest page, such as a venue change or a "tickets on sale" notice. The <strong class="text-gray-900 dark:text-white">Banner message</strong> box takes up to 500 characters and accepts Markdown, including links. <strong class="text-gray-900 dark:text-white">Show on event pages too</strong> extends the banner from the schedule page to individual event pages. Below Pro the switch is shown greyed out, with a note saying so.</p>
             </div>
+        </div>
+
+        <!-- AI Details Generator -->
+        <h3 id="ai-details-generator" class="doc-subheading">AI Details Generator <x-doc-badge plan="enterprise" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Let AI write your schedule's <strong class="text-gray-900 dark:text-white">short description</strong> and <strong class="text-gray-900 dark:text-white">description</strong> from its name and type. Those two fields are all it generates.</p>
+
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>Click <strong class="text-gray-900 dark:text-white">AI Generator</strong>, at the end of the Details section's title row.</li>
+            <li>Tick the fields you want. A field that already has content is left unticked and marked with a blue dot; tick it anyway and a warning tells you its content will be replaced.</li>
+            <li>Optionally add <strong class="text-gray-900 dark:text-white">Additional instructions</strong> (up to 500 characters) to steer the tone, and tick <strong class="text-gray-900 dark:text-white">Save as default for this schedule</strong> to reuse them next time.</li>
+            <li>Optionally open <strong class="text-gray-900 dark:text-white">View/edit AI prompt</strong> to see the prompt that will be sent and adjust it for this run.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Generate</strong> and review the preview. <strong class="text-gray-900 dark:text-white">Regenerate</strong> redoes one item, <strong class="text-gray-900 dark:text-white">Accept</strong> writes the results into the form, and <strong class="text-gray-900 dark:text-white">Discard</strong> drops them. Nothing is saved until you save the schedule.</li>
+        </ol>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Requirements</div>
+            <p>The button only appears when the site has an AI key configured. Selfhosted installations need a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> in the environment settings, because this feature is generated by Gemini. On the hosted platform a schedule below Enterprise sees the button greyed out, and there is a daily cap on AI text generation per schedule; you are told if you reach it.</p>
         </div>
 
         <!-- Localization Tab -->
@@ -223,29 +281,74 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Off shows times as 2:00 PM, on shows them as 14:00. The choice carries through to event pages, calendar descriptions and the <code class="doc-inline-code">{time}</code> template variable.</p>
             </div>
         </div>
+
+        <!-- Contact Info -->
+        <h3 id="contact-info" class="doc-subheading">Contact Info</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The second row of Details holds how to reach you. Closed, the row shows the schedule's email address. These details appear on your public schedule page, the email address and the phone number only when you switch them on.</p>
+
+        <x-doc-screenshot id="creating-schedules--section-contact-info" alt="The Contact Info row of the Details section, open: Email, Show email address, Phone Number, Website, City and Country" />
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Email</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Required. This is the schedule's own address. On the hosted platform it has to be verified before the schedule's guest page can be opened, and changing it asks for verification again; a selfhosted install treats it as verified. Turn on <strong class="text-gray-900 dark:text-white">Show email address</strong> to publish it to visitors as well; leave it off and the address stays private to you. It is not where your <a href="#settings-notifications" class="doc-link">notifications</a> go: those are sent to the email address on your own account, and to the schedule's <a href="#notification-email" class="doc-link">shared notification address</a> if you add one.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phone Number</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A contact number, entered with a country picker. Once a number is saved a <strong class="text-gray-900 dark:text-white">Show phone number</strong> toggle appears next to it. On the hosted platform the number must be verified by SMS code before it is shown publicly.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Website</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Link to your main website. It opens in a new tab when visitors click it.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">City and Country</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A way to say roughly where you are without a street address. <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get both City and Country; <strong class="text-gray-900 dark:text-white">Talent</strong> schedules get Country only. Venue schedules use the <a href="#address" class="doc-link">Address</a> section instead, so neither field appears here for them.</p>
+            </div>
+        </div>
     </section>
 
-    <!-- AI Details Generator -->
-    <section id="ai-details-generator" class="doc-section">
+    <!-- Event Sources -->
+    <section id="event-sources" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
             </svg>
-            AI Details Generator <x-doc-badge plan="enterprise" />
+            Event Sources <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Curator</span>
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Let AI write your schedule's <strong class="text-gray-900 dark:text-white">short description</strong> and <strong class="text-gray-900 dark:text-white">description</strong> from its name and type. Those two fields are all it generates.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a <strong class="text-gray-900 dark:text-white">Curator</strong> schedule, Event Sources is the second section of the form. List the talent and venue schedules you want to follow and everything they publish shows up on your calendar on its own. It covers what they have already run as well as what is coming, and each new event appears within a few minutes of going live. This is the fastest way to stand up a city guide or a festival hub: pick your rooms and your acts once, and stop copying listings by hand. It is free on every plan.</p>
 
+        <x-doc-screenshot id="creating-schedules--section-sources" alt="The Event Sources section of a curator's schedule form: Add a source schedule, and under Suggested a button for each schedule it already shares events with" />
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or subdomain and pick the talent or venue schedule you want. Only talent and venue schedules can be a source, so one curator never chains onto another.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each saved source shows how many of its events are on your calendar right now, past and upcoming, so you can tell at a glance whether it is feeding your schedule. An event you removed by hand is left out of that number, and an event two sources share counts under both, so the numbers need not add up to your total.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Optional. File everything from one source under a <a href="#customize-subschedules" class="doc-link">sub-schedule</a> so visitors can filter by it. Changing it moves that source's existing events too.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Suggested</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Schedules you already share events with, offered as one-click shortcuts.</p>
+            </div>
+        </div>
+
+        <h3 class="doc-subheading">Setting up event sources</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>On the <strong class="text-gray-900 dark:text-white">Details</strong> section, click <strong class="text-gray-900 dark:text-white">AI Generator</strong> in the section header.</li>
-            <li>Tick the fields you want. A field that already has content is left unticked and marked with a blue dot; tick it anyway and a warning tells you its content will be replaced.</li>
-            <li>Optionally add <strong class="text-gray-900 dark:text-white">Additional instructions</strong> (up to 500 characters) to steer the tone, and tick <strong class="text-gray-900 dark:text-white">Save as default</strong> to reuse them next time.</li>
-            <li>Optionally open <strong class="text-gray-900 dark:text-white">View and edit prompt</strong> to see the prompt that will be sent and adjust it for this run.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Generate</strong>, review the preview, and apply it. Nothing is written into the form until you accept, and nothing is saved until you save the schedule.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong> on a curator schedule and choose <strong class="text-gray-900 dark:text-white">Event Sources</strong>.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">+ Add a source schedule</strong> and search for the talent or venue you want to follow, or click one of the names under <strong class="text-gray-900 dark:text-white">Suggested</strong>.</li>
+            <li>Optionally choose a sub-schedule to file that source's events under. The choice is offered once the schedule has sub-schedules.</li>
+            <li>Save. Their events, past and upcoming, appear on your calendar right away.</li>
         </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">To stop following a schedule, click the <strong class="text-gray-900 dark:text-white">&times;</strong> beside it. The bar at the bottom names it after <strong class="text-gray-900 dark:text-white">Saving removes</strong>, and saving takes its events off your calendar.</p>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Requirements</div>
-            <p>The button only appears when the site has an AI key configured. Selfhosted installations need a <x-link href="https://ai.google.dev/" target="_blank">Gemini API key</x-link> in the environment settings, because this feature is generated by Gemini. On the hosted platform there is a daily cap on AI text generation per schedule; you are told if you reach it.</p>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Tip</div>
+            <p>Sourced events count as yours almost everywhere: they show on your calendar and public page, in your <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">event graphics</a>, and in your iCal and RSS feeds. The exception is the automatic digest to your <a href="#settings-notifications" class="doc-link">email subscribers</a>, which only covers events this schedule created itself. To drop a single one, open it and choose Remove from schedule; it stays gone even though the source is still connected. Removing the source itself takes its events with it and leaves anything you added by hand untouched.</p>
         </div>
     </section>
 
@@ -258,9 +361,9 @@
             </svg>
             Address
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Address</strong> section appears on <strong class="text-gray-900 dark:text-white">Venue</strong> schedules only. Filling it in puts a map on your schedule page, lets event pages show directions, and is what the <a href="#engagement-accommodation" class="doc-link">nearby accommodation</a> map centres on. Talent and Curator schedules give their location on the <a href="#contact-info" class="doc-link">Contact Info</a> tab instead.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Address</strong> section appears on <strong class="text-gray-900 dark:text-white">Venue</strong> schedules only. The address is public. Your schedule page shows it as a link that opens Google Maps, your event pages show it on the venue card, with a map where the site has a Google Maps key, and it is what the <a href="#engagement-accommodation" class="doc-link">nearby accommodation</a> map centres on. Talent and Curator schedules say where they are in the <a href="#contact-info" class="doc-link">Contact Info</a> row instead.</p>
 
-        <x-doc-screenshot id="creating-schedules--section-address" alt="Schedule address settings" />
+        <x-doc-screenshot id="creating-schedules--section-address" alt="The Address section of a venue's schedule form: Street Address, City, State / Province, Postal Code and Country, with View Map and Validate Address under them" />
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -277,45 +380,13 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">View Map and Validate Address</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">View Map</strong> opens what you have typed on a map so you can check it landed in the right place. <strong class="text-gray-900 dark:text-white">Validate Address</strong> looks the address up and offers a tidied version of each field; click <strong class="text-gray-900 dark:text-white">Accept</strong> to take it. Validate Address only appears when the site has a Google Maps key configured.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">View Map</strong> opens what you have typed in Google Maps, in a new tab, so you can check it landed in the right place. <strong class="text-gray-900 dark:text-white">Validate Address</strong> looks the address up and offers a tidied version of each field; click <strong class="text-gray-900 dark:text-white">Accept</strong> to take it. Validate Address only appears when the site has a Google Maps key configured.</p>
             </div>
         </div>
 
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Coordinates are worked out when you save</div>
-            <p>Saving a new or changed address looks up its coordinates in the background, and those coordinates are what the map on your schedule page uses. Clearing the address clears them again. This step needs a Google Maps key on the site, so a selfhosted install without one keeps the address as text and shows no map.</p>
-        </div>
-    </section>
-
-    <!-- Contact Info -->
-    <section id="contact-info" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-            </svg>
-            Contact Info
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Add contact details in the <strong class="text-gray-900 dark:text-white">Details &rarr; Contact Info</strong> row so visitors can reach you. These appear on your public schedule page.</p>
-
-        <x-doc-screenshot id="creating-schedules--section-contact-info" alt="Schedule contact information settings" />
-
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Email</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Required. This is the schedule's own address, and it has to be verified before the schedule's guest page can be opened. Turn on <strong class="text-gray-900 dark:text-white">Show email address</strong> to publish it to visitors as well; leave it off and the address stays private to you. It is not where your <a href="#settings-notifications" class="doc-link">notifications</a> go: those are sent to the email address on your own account, and to the schedule's <a href="#notification-email" class="doc-link">shared notification address</a> if you add one.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phone number</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A contact number, entered with a country picker. Once a number is saved a <strong class="text-gray-900 dark:text-white">Show phone number</strong> toggle appears next to it. On the hosted platform the number must be verified by SMS code before it is shown publicly.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Website</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Link to your main website. It opens in a new tab when visitors click it.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">City and Country</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A way to say roughly where you are without a street address. <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get both City and Country; <strong class="text-gray-900 dark:text-white">Talent</strong> schedules get Country only. Venue schedules use the <a href="#address" class="doc-link">Address</a> section instead, so neither field appears here for them.</p>
-            </div>
+            <div class="doc-callout-title">The address is looked up when you save</div>
+            <p>Saving a new or changed address looks up its coordinates as part of the save. That lookup is what puts the map on your event pages and places the accommodation map. Clearing the address clears the coordinates again. The lookup needs a Google Maps key on the site, so a selfhosted install without one keeps the address as text and shows no map.</p>
         </div>
     </section>
 
@@ -330,8 +401,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">Importing events tends to create the same venue twice, once as "The Anchor" and again as "Anchor Bar". Rather than leave your calendar pointing at two half-empty pages, merge them. Every event moves to the schedule you keep and the duplicate goes away.</p>
 
         <h3 class="doc-subheading">Merge Venue</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Merge Venue</strong> section appears on the edit page when a schedule looks mergeable. The <strong class="text-gray-900 dark:text-white">Merge into</strong> dropdown lists the other venues you manage; pick one and confirm. All of this schedule's events move to the target and this one is removed. If Event Schedule spots a likely match by name, city and country, it names it for you above the dropdown, so usually you only have to confirm.</p>
-        <div class="doc-callout mb-6">
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Merge Venue</strong> section appears on the schedule form of an unclaimed Venue schedule when you manage at least one other venue. It sits after Address in the list. The <strong class="text-gray-900 dark:text-white">Merge into</strong> dropdown lists the other venues you manage; pick one and click the red <strong class="text-gray-900 dark:text-white">Merge Venue</strong> button, which asks you to confirm and says how many events will move. All of this schedule's events move to the target and this one is removed. The merge happens when you confirm: it does not wait for the form's Save. If Event Schedule spots a likely match by name, city and country, it names it for you above the dropdown, so usually you only have to confirm.</p>
+        <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Only unclaimed schedules can be merged</div>
             <p>Merging is offered for schedules nobody has claimed yet, which is exactly the kind an import creates - the pages described under <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>. Once someone claims a schedule it has a real operator behind it, so it can no longer be absorbed into another. Both schedules must also be the same type, so a venue merges into a venue and never into a talent.</p>
         </div>
@@ -360,7 +431,13 @@
             </svg>
             Style
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Customize your schedule's visual appearance including colors, fonts, backgrounds, and layout. See the full <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a> guide for all customization options.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Style</strong> section decides how your public pages look, with a preview beside the form. It has a guide of its own, <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. In the section's order:</p>
+        <ul class="doc-list">
+            <li><strong class="text-gray-900 dark:text-white">On the page as it opens</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#profile-image" class="doc-link">Square Profile Image</a>, <a href="{{ route('marketing.docs.schedule_styling') }}#color-scheme" class="doc-link">Accent Color</a> and <a href="{{ route('marketing.docs.schedule_styling') }}#typography" class="doc-link">Font Family</a></li>
+            <li><strong class="text-gray-900 dark:text-white">Event animation</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll</li>
+            <li><strong class="text-gray-900 dark:text-white">Background</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#backgrounds" class="doc-link">a gradient, a solid color or an image</a></li>
+            <li><strong class="text-gray-900 dark:text-white">Header and layout</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#header-style" class="doc-link">Header Style</a>, <a href="{{ route('marketing.docs.schedule_styling') }}#header-images" class="doc-link">Header Image</a>, <a href="{{ route('marketing.docs.schedule_styling') }}#event-layout" class="doc-link">Default Layout</a> and <a href="{{ route('marketing.docs.schedule_styling') }}#custom-css" class="doc-link">Custom CSS</a> <x-doc-badge plan="pro" /></li>
+        </ul>
     </section>
 
     <!-- Gallery -->
@@ -372,8 +449,9 @@
             Gallery
             <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The Gallery section puts up to {{ \App\Utils\GalleryUtils::maxImages() }} photos on your schedule page: the venue, past events, your team. They appear below your events, and a <strong class="text-gray-900 dark:text-white">photos</strong> link in the header opens them all at once. The section appears once your schedule has been created.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Gallery section puts up to {{ \App\Utils\GalleryUtils::maxImages() }} photos on your schedule page: the venue, past events, your team. They appear below your events, and a <strong class="text-gray-900 dark:text-white">photos</strong> link in the header opens them all at once. In the list of sections, Gallery shows how many photos it holds.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Adding, arranging and captioning photos works exactly as it does for an event's gallery, and nothing is published until you click <strong class="text-gray-900 dark:text-white">Save</strong>. See <a href="{{ route('marketing.docs.creating_events') }}#gallery" class="doc-link">the event gallery</a> for the details. Each event can have a gallery of its own as well.</p>
+        <p class="text-gray-600 dark:text-gray-300">If a schedule drops below Pro, its photos are kept and hidden from guests until the plan is back. They can still be removed in the meantime.</p>
     </section>
 
     <!-- Videos & Links -->
@@ -384,16 +462,16 @@
             </svg>
             Videos & Links
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Two lists, YouTube Videos and Social Links, both shown on your public schedule page. The section appears once the schedule has been saved for the first time.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Two lists, one under the other: <strong class="text-gray-900 dark:text-white">YouTube Videos</strong> and <strong class="text-gray-900 dark:text-white">Social Links</strong>. Both are shown on your public schedule page.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">YouTube Videos</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Paste a YouTube link and it is added with its thumbnail and title. Videos appear in a panel on your schedule page, which the <a href="#settings-advanced" class="doc-link">Hide Videos</a> setting can turn off for Venue and Curator schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">+ Add Video</strong>, paste a YouTube link, and it is added with its thumbnail and title. Videos appear in a panel on your schedule page, which the <a href="#settings-advanced" class="doc-link">Hide Videos</a> setting can turn off for Venue and Curator schedules.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Social Links</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add profile URLs (Instagram, Facebook, X, TikTok, Bandcamp, Spotify and so on), or the address of any other site, so visitors can find you elsewhere. A platform Event Schedule recognises is detected from the URL and its icon is used automatically.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">+ Add Link</strong> to add profile URLs (Instagram, Facebook, X, TikTok, Bandcamp, Spotify and so on), or the address of any other site, so visitors can find you elsewhere. A platform Event Schedule recognises is detected from the URL and its icon is used automatically.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Short links</h4>
@@ -411,22 +489,23 @@
             </svg>
             Customize
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Customize</strong> section has four rows that open in place: Sub-schedules, Custom Fields, Categories, and Custom Labels.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Customize</strong> section is four rows: Sub-schedules, Custom Fields, Categories, and Custom Labels. Closed, each row lists what it holds, so you can read your sub-schedules or see that the categories are still the defaults without opening anything.</p>
+
+        <x-doc-screenshot id="creating-schedules--section-subschedules" alt="The Customize section: rows for Sub-schedules, Custom Fields, Categories and Custom Labels, each listing what it holds" />
 
         <h3 id="customize-subschedules" class="doc-subheading">Sub-schedules</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Sub-schedules are named strands within one schedule, such as "Live Music", "DJ Nights", "Comedy" or "Workshops". Each one gets an address of its own and a color, so visitors can filter your calendar down to the strand they care about. Each is one line in the list: its name, its color, and its own address underneath with <strong class="text-gray-900 dark:text-white">Edit</strong> beside it.</p>
-
-        <x-doc-screenshot id="creating-schedules--section-subschedules" alt="Sub-schedules settings" />
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Sub-schedules split one schedule into parts, such as "Live Music", "DJ Nights", "Comedy" or "Workshops", or a venue's stages and rooms. Each one gets an address of its own and a color, so visitors can filter your calendar down to the part they care about. Each is one line in the list: its name, its color, and its own address underneath with <strong class="text-gray-900 dark:text-white">Edit</strong> beside it.</p>
 
         <h3 class="doc-subheading">Creating a sub-schedule</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open the <strong class="text-gray-900 dark:text-white">Customize</strong> section and open the <strong class="text-gray-900 dark:text-white">Sub-schedules</strong> row.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">+ Add sub-schedule</strong> and give it a <strong class="text-gray-900 dark:text-white">Name</strong>. If your schedule is not written in English, an <strong class="text-gray-900 dark:text-white">English Name</strong> field appears beneath it; leave it blank and the translation fills it in.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">+ Add Sub-schedule</strong> and type its name. If your schedule is not written in English, a second box beside the name takes it in the language your schedule is translated into, and is labelled with that language, for example <strong class="text-gray-900 dark:text-white">Name (English)</strong>. Leave it blank and the translation fills it in.</li>
             <li>Pick a <strong class="text-gray-900 dark:text-white">Color</strong> from the 14-color palette, or use <strong class="text-gray-900 dark:text-white">Clear</strong> to leave it uncolored. The color is what distinguishes sub-schedules in calendar views and on the filter buttons.</li>
             <li>Save. The sub-schedule now has an address such as <code class="doc-inline-code">yourname.eventschedule.com/live-music</code>, shown with a copy button. <strong class="text-gray-900 dark:text-white">Edit</strong> changes that last part.</li>
         </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">&times;</strong> at the end of a line takes a sub-schedule off the list. It is only removed when you save, and the bar at the bottom names it after <strong class="text-gray-900 dark:text-white">Saving removes</strong> until you do.</p>
 
-        <div class="doc-callout mb-6">
+        <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">A sub-schedule sorts, it does not hide</div>
             <p>A sub-schedule carries a name, a color and an address, and nothing else. There is no visibility switch on one, so filing an event under a sub-schedule never hides it. To keep an event off your public page, set the event's own visibility instead - see <a href="{{ route('marketing.docs.creating_events') }}#draft" class="doc-link">event visibility</a>.</p>
         </div>
@@ -437,25 +516,25 @@
         <!-- Custom Fields -->
         <h3 id="customize-custom-fields" class="doc-subheading">Custom Fields <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Define <a href="{{ marketing_url('/features/custom-fields') }}" class="doc-link">Event Custom Fields</a> to add extra data to your events. You can add up to 10 custom fields per schedule. Custom field values can also be used as URL pattern variables.
+            Define <a href="{{ marketing_url('/features/custom-fields') }}" class="doc-link">Event Custom Fields</a> to add extra data to your events. You can add up to 10 custom fields per schedule, with <strong class="text-gray-900 dark:text-white">+ Add Field</strong>. A saved field shows its number beside it, as <code class="doc-inline-code">&rarr; {custom_1}</code>: that is how you refer to its value in an <a href="#url-pattern-variables" class="doc-link">Event URL Pattern</a>, a <a href="#available-variables" class="doc-link">calendar description</a> and event graphics.
         </p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each custom field has the following properties:</p>
-        <div class="doc-fields">
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A field shows its name, its type and its checkboxes. What is rarely touched (the name in your schedule's second language, the pattern an answer must match and the note for the AI import) is behind <strong class="text-gray-900 dark:text-white">More options</strong> on each field.</p>
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Name & English Name</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The display name for the field. The name and the field type are always in view; the name in your schedule's second language, the pattern an answer must match and the note for the AI import are behind <strong class="text-gray-900 dark:text-white">More options</strong> on each field.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Name</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Required. The display name for the field.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Type</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Choose from six types: <strong class="text-gray-900 dark:text-white">String</strong> (single-line text), <strong class="text-gray-900 dark:text-white">Multiline String</strong> (multi-line text), <strong class="text-gray-900 dark:text-white">Switch</strong> (on/off toggle), <strong class="text-gray-900 dark:text-white">Date</strong> (date picker), <strong class="text-gray-900 dark:text-white">Dropdown</strong> (single select from predefined options), or <strong class="text-gray-900 dark:text-white">Multiselect</strong> (multiple selections from predefined options).</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Type</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Choose from six types: <strong class="text-gray-900 dark:text-white">Text</strong> (one line), <strong class="text-gray-900 dark:text-white">Multi-line Text</strong>, <strong class="text-gray-900 dark:text-white">Yes/No</strong> (a switch), <strong class="text-gray-900 dark:text-white">Date</strong> (a date picker), <strong class="text-gray-900 dark:text-white">Dropdown</strong> (one choice from a list you define), or <strong class="text-gray-900 dark:text-white">Multi-select</strong> (several choices from that list).</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Options</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">For <strong class="text-gray-900 dark:text-white">Dropdown</strong> and <strong class="text-gray-900 dark:text-white">Multiselect</strong> fields, type the choices separated by commas. The field only appears for those two types.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">For <strong class="text-gray-900 dark:text-white">Dropdown</strong> and <strong class="text-gray-900 dark:text-white">Multi-select</strong> fields, type the choices separated by commas. The field only appears for those two types.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI Prompt</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">An optional instruction, up to 500 characters, telling the AI how to extract this field's value when a visitor submits an event through <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a>.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI prompt</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">An optional instruction, up to 500 characters, telling the AI how to extract this field's value when a visitor submits an event through <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a>. Under More options.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Required</h4>
@@ -463,108 +542,43 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Private</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Hide the field's value from the guest portal. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code class="doc-inline-code">{custom_N}</code>. A private field is never offered as a filter, whatever its <strong class="text-gray-900 dark:text-white">Show as Filter</strong> setting.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Hide the field's value from the guest portal. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code class="doc-inline-code">{custom_N}</code>. A private field is never offered as a filter, whatever its <strong class="text-gray-900 dark:text-white">Show as filter</strong> setting.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show as Filter</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Offer the field as a filter on your schedule page, so visitors can narrow the calendar to one value, for example every event in <strong class="text-gray-900 dark:text-white">Room A</strong>. Available for <strong class="text-gray-900 dark:text-white">String</strong>, <strong class="text-gray-900 dark:text-white">Dropdown</strong> and <strong class="text-gray-900 dark:text-white">Multiselect</strong> fields. It is on by default for dropdown and multiselect fields and off for string fields. Each different value on your events becomes an option in the filter, and matching ignores capital letters and extra spaces, so <code class="doc-inline-code">Room A</code> and <code class="doc-inline-code">room a</code> count as one. A filtered view is a shareable link: choosing a value adds <code class="doc-inline-code">?custom_N=value</code> to the address, where N is the number shown next to the field. See <a href="{{ route('marketing.docs.sharing') }}#embed-parameters" class="doc-link">embed URL parameters</a> to use it in an embed.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show as filter</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Offer the field as a filter on your schedule page, so visitors can narrow the calendar to one value, for example every event in <strong class="text-gray-900 dark:text-white">Room A</strong>. Available for <strong class="text-gray-900 dark:text-white">Text</strong>, <strong class="text-gray-900 dark:text-white">Dropdown</strong> and <strong class="text-gray-900 dark:text-white">Multi-select</strong> fields. It is on by default for dropdown and multi-select fields and off for text fields. Each different value on your events becomes an option in the filter, and matching ignores capital letters and extra spaces, so <code class="doc-inline-code">Room A</code> and <code class="doc-inline-code">room a</code> count as one. A filtered view is a shareable link: choosing a value adds <code class="doc-inline-code">?custom_N=value</code> to the address, where N is the number shown next to the field. See <a href="{{ route('marketing.docs.sharing') }}#embed-parameters" class="doc-link">embed URL parameters</a> to use it in an embed.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On Request Form</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ask the field as a question on your public <a href="#engagement-requests" class="doc-link">event request form</a>, so visitors answer it when they submit an event. On by default. Uncheck it to keep a field for your own use in the admin portal. Combine a <strong class="text-gray-900 dark:text-white">Multiselect</strong> field with this to offer a checklist, for example which of your equipment the visitor needs.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On request form</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ask the field as a question on your public <a href="#engagement-requests" class="doc-link">event request form</a>, so visitors answer it when they submit an event. On by default. Uncheck it to keep a field for your own use in the admin portal. Combine a <strong class="text-gray-900 dark:text-white">Multi-select</strong> field with this to offer a checklist, for example which of your equipment the visitor needs.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Validation Pattern</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">For <strong class="text-gray-900 dark:text-white">String</strong> and <strong class="text-gray-900 dark:text-white">Multiline String</strong> fields you can require entries to match a pattern, such as a reference code or a phone number. Pick one of the ready-made patterns (email address, phone number, web address, numbers only, letters and numbers) or write your own regular expression, and use the built-in tester to try a sample value before saving. The optional <strong class="text-gray-900 dark:text-white">Hint</strong> is shown under the field so visitors know what format you expect. Patterns are enforced both in the browser and on the server.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Under More options. For <strong class="text-gray-900 dark:text-white">Text</strong> and <strong class="text-gray-900 dark:text-white">Multi-line Text</strong> fields you can require entries to match a pattern, such as a reference code or a phone number. Pick one of the ready-made patterns (email address, phone number, web address, numbers only, letters and numbers) or write your own regular expression, and use the built-in tester to try a sample value before saving. The optional <strong class="text-gray-900 dark:text-white">Hint</strong> is shown under the field so visitors know what format you expect. Patterns are enforced both in the browser and on the server.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop fields to change the order they appear on event forms.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Drag a field by its handle to change the order the fields appear in on event forms. The handle shows once there are two fields.</p>
             </div>
         </div>
 
-        @if (!empty($customFieldsData))
-            {{-- Dynamic: Show user's actual custom fields --}}
-            @foreach ($customFieldsData as $scheduleData)
-                <h4 class="text-md font-medium text-gray-900 dark:text-white mb-2">{{ $scheduleData['role_name'] }}</h4>
-                <div class="doc-table-wrap">
-                    <table class="doc-table">
-                        <thead>
-                            <tr>
-                                <th>Variable</th>
-                                <th>Field Name</th>
-                                <th>Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($scheduleData['fields'] as $index => $field)
-                            <tr>
-                                <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
-                                <td>{{ $field['name'] }}</td>
-                                <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endforeach
-        @else
-            {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
-            <div class="doc-table-wrap">
-                <table class="doc-table">
-                    <thead>
-                        <tr>
-                            <th>Variable</th>
-                            <th>Description</th>
-                            <th>Example</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code class="doc-inline-code">{custom_1}</code></td>
-                            <td>Value of the 1st custom field</td>
-                            <td>john-smith</td>
-                        </tr>
-                        <tr>
-                            <td><code class="doc-inline-code">{custom_2}</code></td>
-                            <td>Value of the 2nd custom field</td>
-                            <td>room-101</td>
-                        </tr>
-                        <tr>
-                            <td><code class="doc-inline-code">{custom_3}</code></td>
-                            <td>Value of the 3rd custom field</td>
-                            <td>workshop</td>
-                        </tr>
-                        <tr>
-                            <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        @endif
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">URL-Safe Formatting</div>
-            <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
-        </div>
-
-        <!-- Custom Categories -->
-        <h3 id="customize-categories" class="doc-subheading">Custom Categories</h3>
+        <!-- Categories -->
+        <h3 id="customize-categories" class="doc-subheading">Categories</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Tailor the event categories shown on your event form and your schedule's filter. The 12 system defaults (Art &amp; Culture, Business Networking, Community, Concerts, Education, Food &amp; Drink, Health &amp; Fitness, Parties &amp; Festivals, Personal Growth, Sports, Spirituality, Tech) are pre-loaded as editable rows. Rename or remove any of them, and add categories that match how you organise events, up to 32 rows in total. A category name can be up to 80 characters.
+            Tailor the event categories shown on your event form and your schedule's filter. The 12 system defaults (Art &amp; Culture, Business Networking, Community, Concerts, Education, Food &amp; Drink, Health &amp; Fitness, Parties &amp; Festivals, Personal Growth, Sports, Spirituality, Tech) are pre-loaded as editable rows. Rename or remove any of them, and add categories that match how you organise events, up to 32 rows in total. A category name can be up to 80 characters. Free on every plan.
         </p>
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Renaming a default</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Edit the name field on any default row to change how it appears on your schedule. The old name is shown underneath for reference. Existing events tagged with that category automatically display the new name once you save.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing a default</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click the X on any default to remove it from your event form and guest portal filter. Events already tagged with that category keep their badge - the original name still resolves via the system defaults. If the category is in use, you'll see a confirmation showing how many events are affected. Use "Reset to default categories" to restore the original 12. While the list is the original 12, the closed row says so in place of naming them all.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click the <strong class="text-gray-900 dark:text-white">&times;</strong> on any default to remove it from your event form and guest portal filter. Events already tagged with that category keep their badge: the original name still resolves via the system defaults. If the category is in use, you'll see a confirmation showing how many events are affected.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding a custom category</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click "+ Add category" and enter a name. Custom categories appear immediately in your event form and on the schedule filter.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">+ Add category</strong> and enter a name. Custom categories appear immediately in your event form and on the schedule filter.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Color</h4>
@@ -572,15 +586,15 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ordering</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Categories are always shown alphabetically - there's no manual reordering. The list re-sorts itself when you rename, add, or remove a row.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Categories are always shown alphabetically: there's no manual reordering. The list re-sorts itself when you rename, add, or remove a row.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translation</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">If your schedule <a href="#details-localization" class="doc-link">offers a second language</a>, custom category names and renamed defaults are translated into it in the background by the same pipeline that translates the rest of your content. Visitors reading in that language see the translated name; everyone else sees the source name you typed.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reset to defaults</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Removes all customisations and restores the original 12 categories. Existing events keep the category they were assigned.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reset to default categories</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Removes all customisations and restores the original 12 categories. Existing events keep the category they were assigned. While the list is the original 12, the closed row says <strong class="text-gray-900 dark:text-white">The 12 default categories</strong> in place of naming them all.</p>
             </div>
         </div>
         <div class="doc-callout doc-callout-info mt-4">
@@ -588,10 +602,7 @@
             <p>When a curator schedule shares an event from a talent schedule, the event's category badge shows the original name chosen by the talent. The curator's filter dropdown dynamically includes any categories present in visible events, so foreign categories remain filterable.</p>
         </div>
 
-    </section>
-
-    <!-- Custom Labels -->
-    <section>
+        <!-- Custom Labels -->
         <h3 id="customize-custom-labels" class="doc-subheading">Custom Labels <x-doc-badge plan="pro" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Override the wording Event Schedule uses on your public schedule page. For example, change "Events" to "Shows", "Follow" to "Subscribe", or "Free entry" to "No cover charge".
@@ -599,11 +610,11 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding a custom label</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Pick a label from the searchable dropdown and click <strong class="text-gray-900 dark:text-white">Add</strong>, then type your replacement, up to 200 characters. A label already overridden drops out of the dropdown, and <strong class="text-gray-900 dark:text-white">Remove</strong> puts it back and restores the original wording.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Pick a label from the searchable dropdown and click <strong class="text-gray-900 dark:text-white">Add</strong>, then type your replacement, up to 200 characters. A label already overridden drops out of the dropdown, and the <strong class="text-gray-900 dark:text-white">&times;</strong> at the end of its line puts it back and restores the original wording once you save.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Available labels</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">36 labels in all, covering the buttons (Request to Book, Submit Event, Follow, Buy Tickets, Book a Time, Register, Share), the navigation (Events, Filter Events, Past Events, Load More, Show All, View Full Schedule), and the wording on events themselves (Free entry, Online, Schedule, Category, Venue, Agenda, About, Photo Gallery, Our Sponsors).</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ count(\App\Models\Role::getCustomizableLabels()) }} labels in all, covering the buttons (Request to Book, Submit Event, Follow, Buy Tickets, Book a Time, Register, Share), the navigation (Events, Filter Events, Past Events, Load More, Show All, View Full Schedule), and the wording on events themselves (Free entry, Online, Schedule, Category, Venue, Agenda, About, Photo Gallery, Our Sponsors).</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translations</h4>
@@ -621,28 +632,197 @@
             </svg>
             Settings
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Settings</strong> section controls how your schedule behaves. The schedule's address is on the page as it opens; Notifications and Advanced are two rows under it, and each says what it holds on the row.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The <strong class="text-gray-900 dark:text-white">Settings</strong> section controls how your schedule behaves. The schedule's address is on the page as it opens. <strong class="text-gray-900 dark:text-white">Notifications</strong> and <strong class="text-gray-900 dark:text-white">Advanced</strong> are two rows under it: closed, Notifications lists the emails that are switched on and Advanced lists its three headings.</p>
 
-        <x-doc-screenshot id="creating-schedules--section-settings" alt="Schedule settings" />
+        <x-doc-screenshot id="creating-schedules--section-settings" alt="The Settings section: the Schedule URL with its copy button and Edit, then the Notifications row and the Advanced row, each saying what it holds" />
 
         <!-- General Tab -->
-        <h3 id="settings-general" class="doc-subheading">General</h3>
+        <h3 id="settings-general" class="doc-subheading">Schedule URL</h3>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule URL</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's address, shown with a copy button. Click <strong class="text-gray-900 dark:text-white">Edit</strong> to change it. On the hosted platform it is a subdomain, <code class="doc-inline-code">yourname.eventschedule.com</code>; on a selfhosted install it is a path, <code class="doc-inline-code">yoursite.com/yourname</code>. Between 4 and 50 characters, lowercase letters, numbers and dashes only. Choose something memorable and easy to type, because changing it later breaks any link people have already saved.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's address, shown with a copy button. Click <strong class="text-gray-900 dark:text-white">Edit</strong> beside it to change it. On the hosted platform it is a subdomain, <code class="doc-inline-code">yourname.eventschedule.com</code>; on a selfhosted install it is a path, <code class="doc-inline-code">yoursite.com/yourname</code>. Between 4 and 50 characters, lowercase letters, numbers and dashes only. Choose something memorable and easy to type, because changing it later breaks any link people have already saved. The same address is under the schedule's name at the top of the form, with <strong class="text-gray-900 dark:text-white">Copy</strong> and <strong class="text-gray-900 dark:text-white">View</strong>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom Domain <x-doc-badge plan="enterprise" /></h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Use your own domain, for example <code class="doc-inline-code">events.yourbrand.com</code>, instead of a subdomain. A custom domain gives your <a href="{{ route('marketing.docs.sharing') }}#schedule-url" class="doc-link">shared schedule URL</a> a more professional look.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Edit</strong> under Schedule URL and the three choices appear: <strong class="text-gray-900 dark:text-white">Subdomain</strong> (the default, no custom domain), <strong class="text-gray-900 dark:text-white">Direct</strong>, and <strong class="text-gray-900 dark:text-white">Redirect</strong>. The last two need Enterprise, and they are offered on the hosted platform only. See the <a href="#custom-domain" class="doc-link">setup instructions</a> below.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Use your own domain, for example <code class="doc-inline-code">events.yourbrand.com</code>, instead of a subdomain.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On the hosted platform, clicking <strong class="text-gray-900 dark:text-white">Edit</strong> beside the Schedule URL also shows a <strong class="text-gray-900 dark:text-white">Mode</strong> with three choices: <strong class="text-gray-900 dark:text-white">Subdomain</strong> (the default, no custom domain), <strong class="text-gray-900 dark:text-white">Redirect</strong>, and <strong class="text-gray-900 dark:text-white">Direct</strong>. The last two need Enterprise; below it they are greyed out. A selfhosted install has no Mode, only the path. See the <a href="#custom-domain" class="doc-link">setup instructions</a> below.</p>
+            </div>
+        </div>
+
+        <!-- Custom Domain -->
+        <h3 id="custom-domain" class="doc-subheading">Custom Domain Setup <x-doc-badge plan="enterprise" /></h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            There are two ways to connect a custom domain to your schedule. Choose the mode that best fits your needs.
+        </p>
+
+        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Direct Mode (CNAME)</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Your schedule is served directly on your custom domain with automatic SSL. This is the recommended option for most users.
+        </p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>In the <strong class="text-gray-900 dark:text-white">Settings</strong> section, click <strong class="text-gray-900 dark:text-white">Edit</strong> beside the Schedule URL, select <strong class="text-gray-900 dark:text-white">Direct</strong>, and enter your domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) under <strong class="text-gray-900 dark:text-white">Custom Domain</strong>. The form shows the CNAME target with a copy button.</li>
+            <li>Go to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare) and create a <strong class="text-gray-900 dark:text-white">CNAME record</strong> pointing your domain to <code class="doc-inline-code">{{ config('services.digitalocean.app_hostname') }}</code>.</li>
+            <li>Wait for DNS propagation (usually a few minutes, but can take up to 48 hours).</li>
+            <li>SSL is provisioned automatically. Once DNS has propagated, your schedule will be accessible at your custom domain over HTTPS.</li>
+        </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">While a Direct domain is being set up, a status sits beside the Schedule URL: <strong class="text-gray-900 dark:text-white">Setting up...</strong>, then nothing once it is live, or <strong class="text-gray-900 dark:text-white">Setup failed</strong>. Until the domain is live, the address shown at the top of the form and of the schedule's pages stays the eventschedule.com one, because that is the one that answers.</p>
+
+        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Redirect Mode (Cloudflare)</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Your custom domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL. Use this if your domain's DNS is managed by Cloudflare. Cloudflare's free plan is sufficient.
+        </p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>In the <strong class="text-gray-900 dark:text-white">Settings</strong> section, click <strong class="text-gray-900 dark:text-white">Edit</strong> beside the Schedule URL, select <strong class="text-gray-900 dark:text-white">Redirect</strong>, and enter your domain under <strong class="text-gray-900 dark:text-white">Custom Domain</strong>.</li>
+            <li>
+                <strong class="text-gray-900 dark:text-white">Add your domain to Cloudflare</strong> (if not already). After adding the domain, Cloudflare will provide two nameservers. Go to your domain registrar and update your domain's nameservers to the ones Cloudflare provides. Wait for Cloudflare to confirm the domain is active.
+            </li>
+            <li>
+                <strong class="text-gray-900 dark:text-white">Set up DNS records.</strong> In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">DNS > Records</strong>:
+                <ul class="list-disc ml-6 mt-2 mb-2">
+                    <li>Delete any existing A or AAAA records for the domain.</li>
+                    <li>Add an <strong class="text-gray-900 dark:text-white">A record</strong> with the name <code class="doc-inline-code">@</code> (root domain) pointing to <code class="doc-inline-code">192.0.2.1</code>.</li>
+                    <li>Add another <strong class="text-gray-900 dark:text-white">A record</strong> with the name <code class="doc-inline-code">*</code> (wildcard) pointing to <code class="doc-inline-code">192.0.2.1</code>.</li>
+                    <li>The IP address doesn't matter since traffic will be redirected. Make sure both records are set to <strong class="text-gray-900 dark:text-white">Proxied</strong> (orange cloud icon) so Cloudflare can intercept and redirect the requests.</li>
+                </ul>
+            </li>
+            <li>
+                <strong class="text-gray-900 dark:text-white">Create a Page Rule.</strong> In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">Rules > Page Rules</strong> and create a new page rule:
+                <ul class="list-disc ml-6 mt-2 mb-2">
+                    <li><strong class="text-gray-900 dark:text-white">URL pattern:</strong> <code class="doc-inline-code">*yourdomain.com/*</code></li>
+                    <li><strong class="text-gray-900 dark:text-white">Setting:</strong> Forwarding URL</li>
+                    <li><strong class="text-gray-900 dark:text-white">Status code:</strong> 301 - Permanent Redirect</li>
+                    <li><strong class="text-gray-900 dark:text-white">Destination URL:</strong> <code class="doc-inline-code">https://yourname.eventschedule.com/$2</code></li>
+                </ul>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">The <code class="doc-inline-code">$2</code> wildcard preserves the URL path, so <code class="doc-inline-code">yourdomain.com/some-event</code> correctly redirects to <code class="doc-inline-code">yourname.eventschedule.com/some-event</code>.</p>
+            </li>
+            <li>Changes may take a few minutes to several hours to propagate. Once active, visitors who go to your custom domain will be seamlessly redirected to your schedule.</li>
+        </ol>
+
+        <!-- Notifications Tab -->
+        <h3 id="settings-notifications" class="doc-subheading">Notifications</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The row is in three groups, by who the email goes to: <strong class="text-gray-900 dark:text-white">Emails to you</strong>, <strong class="text-gray-900 dark:text-white">Emails to followers</strong> and <strong class="text-gray-900 dark:text-white">Shared inbox</strong>. Where the site has push notifications set up, a <strong class="text-gray-900 dark:text-white">Push notifications</strong> panel sits above the three.</p>
+
+        <h4 id="notifications-push" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Push notifications <x-doc-badge plan="pro" /></h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same notifications can also reach you as browser and mobile push, on top of email rather than instead of it. Choose <strong class="text-gray-900 dark:text-white">Enable push on this device</strong>, allow notifications when your browser asks, then use <strong class="text-gray-900 dark:text-white">Send test push</strong> to confirm it works. Push is per device, so repeat it on your phone and your laptop. Enabling it sends notification data to OneSignal, a third-party service.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The panel only appears once the operator of your Event Schedule site has configured push, which is <a href="{{ route('marketing.docs.selfhost.installation') }}#push-notifications" class="doc-link">off by default</a>. On iPhone and iPad, web push only works for sites added to the home screen (iOS 16.4 and later); Android and desktop browsers need no such step.</p>
+
+        <h4 id="notifications-to-you" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Emails to you</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose which emails you get about this schedule. These choices are personal: each owner and admin sets their own in this row, and the emails go to the address on that person's account, not to the schedule's <a href="#contact-info" class="doc-link">contact email</a>. To also send them to a team inbox, add a <a href="#notification-email" class="doc-link">shared notification address</a>. <strong class="text-gray-900 dark:text-white">New event requests</strong>, <strong class="text-gray-900 dark:text-white">Installment payments</strong> and <strong class="text-gray-900 dark:text-white">Weekly summary</strong> start switched on and stay that way until you turn them off; the rest are off until you turn them on.</p>
+        <div class="doc-fields doc-fields--grouped">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New event requests</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when new event requests are pending approval.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New fan content</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when fans submit new videos, comments or photos for your events.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New ticket sale</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a ticket is purchased for one of your events. On the free plan this covers the first paid sale on each event; Pro emails you about every sale.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New feedback</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when attendees submit post-event feedback for your events.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New poll option suggestions</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a visitor suggests a new option on one of your event polls (requires <a href="{{ route('marketing.docs.creating_events') }}#polls" class="doc-link">Allow User Options</a> to be enabled).</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Installment payments</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A daily summary of <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment payments</a> due in the next two days, and an immediate email whenever one fails. It only matters if you let buyers pay in installments, which is a Pro feature.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Weekly summary</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">One email a week with your views, sign-ups, sales and the dates coming up, for all of your schedules together. It is only sent in a week with something to report. The switch is shown to the schedule's owner alone, who is the only one to receive it, and the email is sent on the hosted platform only.</p>
+            </div>
+        </div>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Three of them need your own email settings</div>
+            <p>On the hosted platform, <strong class="text-gray-900 dark:text-white">New ticket sale</strong>, <strong class="text-gray-900 dark:text-white">New feedback</strong> and <strong class="text-gray-900 dark:text-white">New poll option suggestions</strong> only email you once you configure <a href="#integrations-email" class="doc-link">Email Settings</a>, and a note in the row links you straight there. Until then their toggles are greyed out, except that New ticket sale and New feedback stay usable where push notifications are available (above): on Pro those two also arrive as a push, which needs no email settings. A greyed-out toggle keeps whatever it was set to. New event requests, new fan content, <strong class="text-gray-900 dark:text-white">Installment payments</strong> and the weekly summary work either way. Selfhosted installs send everything through the server's own mail configuration, so nothing is gated.</p>
+        </div>
+
+        <h4 id="notifications-to-followers" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Emails to followers</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The one setting in this group points the other way, and it belongs to the whole schedule rather than to you. <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> decides whether your <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a> get an automatic digest when you publish, at most one every few days. It covers the events this schedule created itself, so an event another schedule lists on yours, including everything a curator pulls in through its <a href="#event-sources" class="doc-link">event sources</a>, never appears in it. It is on by default, because the people receiving it asked for it when they signed up.</p>
+
+        <h4 id="notification-email" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Shared notification address</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If your team works from a shared mailbox, enter it under <strong class="text-gray-900 dark:text-white">Shared notification address</strong>, in the <strong class="text-gray-900 dark:text-white">Shared inbox</strong> group at the bottom of the Notifications row. It gets a copy of the schedule's notifications on top of each person's own emails, so it replaces nothing. Unlike the toggles above, it belongs to the whole schedule: there is one per schedule, and any owner or admin can change it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Nothing is sent to it until it is confirmed. Saving the address emails it a confirmation link, valid for {{ \App\Services\NotificationEmailService::VERIFY_TTL_DAYS }} days, and the row shows <strong class="text-gray-900 dark:text-white">Waiting for confirmation</strong> with a button to send the link again. Anyone who reads that mailbox can confirm it, with or without an account. Changing the address asks for confirmation again.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Under <strong class="text-gray-900 dark:text-white">Send to this address</strong> the address has its own set of toggles: <strong class="text-gray-900 dark:text-white">New event requests</strong> (on by default), <strong class="text-gray-900 dark:text-white">New ticket sale</strong>, <strong class="text-gray-900 dark:text-white">New feedback</strong>, <strong class="text-gray-900 dark:text-white">New poll option suggestions</strong> and <strong class="text-gray-900 dark:text-white">Installment payments</strong>. New fan content is not offered, because that email only ever goes to the person who created the event. Each one follows the same rules as your own copy, including the plan and email settings rules above. If the shared address is also the login of someone who already gets that email, it is not sent twice.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every email sent to the shared address ends with a <strong class="text-gray-900 dark:text-white">Stop sending to this address</strong> link, which removes it without signing in. It is also removed when the schedule is <a href="{{ route('marketing.docs.managing_schedules') }}#transfer-ownership" class="doc-link">transferred</a> to a new owner and the previous owner leaves.</p>
+
+        <!-- Advanced Tab -->
+        <h3 id="settings-advanced" class="doc-subheading">Advanced</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Advanced row collects the settings that change how your schedule behaves rather than how it looks, under three headings: <strong class="text-gray-900 dark:text-white">New events</strong>, <strong class="text-gray-900 dark:text-white">Public page</strong> and, on the hosted platform, <strong class="text-gray-900 dark:text-white">AI Import</strong>. Closed, the row lists the headings.</p>
+        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">New events</h4>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default visibility for new events</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The visibility every new event starts with: <strong class="text-gray-900 dark:text-white">Public</strong> or <strong class="text-gray-900 dark:text-white">Draft</strong>, plus <strong class="text-gray-900 dark:text-white">Internal</strong> and <strong class="text-gray-900 dark:text-white">Unlisted</strong> on Enterprise. Public unless you change it, and you can still set the visibility on any individual event. See <a href="{{ route('marketing.docs.creating_events') }}#draft" class="doc-link">event visibility</a>.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event URL Pattern</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Decides the address given to each new event. Leave it empty and the event name is used. Otherwise build a pattern from the <a href="#url-pattern-variables" class="doc-link">variables below</a>, for example <code class="doc-inline-code">{event_name}-{date_dmy}</code>, which produces addresses like <code class="doc-inline-code">my-event-27-1</code>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Changing the pattern only affects events created from then on, so an <strong class="text-gray-900 dark:text-white">Update all events</strong> button appears offering to apply it to your existing events as well. <strong class="text-gray-900 dark:text-white">Show available variables</strong>, under the field, opens the list below.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default category</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Preselect one of your <a href="#customize-categories" class="doc-link">categories</a> on every new event so you do not have to pick one each time. Once saved, an <strong class="text-gray-900 dark:text-white">Update all events</strong> button appears to apply the default to all existing events in one click. If you later remove the category, the setting is flagged so you can pick another.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default curator schedules</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If you also run Curator schedules, tick the ones new events should be shared to automatically, instead of choosing them on every event. Shown on Talent and Venue schedules that have at least one Curator schedule to offer.</p>
+            </div>
+        </div>
+        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">Public page</h4>
+        <div class="doc-fields doc-fields--grouped">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Past Events</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Keep past events off your public schedule so visitors only ever see what is still to come. Your own admin views are unaffected, so nothing is lost: the events are still there when you need them.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Videos</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Hide the videos panel from your public schedule. Offered on <strong class="text-gray-900 dark:text-white">Venue</strong> and <strong class="text-gray-900 dark:text-white">Curator</strong> schedules only, because a Talent schedule's videos are part of the point.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Which day your calendar week starts on. All seven days are available; Sunday unless you change it.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Accessibility Widget</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add an accessibility panel to your public schedule so visitors can adjust font size, contrast, and motion for themselves. Useful if you are publishing on behalf of an organization with an accessibility commitment to meet.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Sign-Up Panel</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On unless you turn it off. Signed-out visitors see the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule page and near the foot of each event page, where they can sign up for <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">email updates</a>. Turning it off also removes the calendar feed link under the form. A link made to open the form, like the QR code on the Followers tab, still shows the panel. The switch only hides it: sign-ups through such a link, and on eventschedule.com through the <strong class="text-gray-900 dark:text-white">Follow</strong> button, still arrive. Free on every plan.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show &ldquo;Notify Me&rdquo; Card</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Off unless you turn it on. When it is on, the public events this schedule creates offer a <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> card, plus links to it in the Add to Calendar menu and beside the buy button, so visitors can join that event's <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a>. It follows the event wherever it is listed, including a performer's or curator's page, because the list and its emails belong to the schedule that created the event. Turning it off again stops new sign-ups, and anyone already on a list still gets the emails they asked for. Free on every plan.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Do not show other schedules' promotions</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Some Event Schedule sites run a promotions network, where schedules pay to have an event featured on other schedules' public pages. Turn this on and your pages carry nothing of the sort: no other schedule's promotions, and no ads either. It is free on every plan, and it does not stop you buying promotions of your own. See <a href="{{ route('marketing.docs.boost') }}#on-network" class="doc-link">on-network promotions</a> and <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">ads on free schedules</a>. The toggle only appears on sites that have this switched on.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List this schedule on the network</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Share this schedule's public events with the listings on eventschedule.com, where each listing links back to the event on your own site. Three choices: <strong class="text-gray-900 dark:text-white">Not decided yet</strong>, <strong class="text-gray-900 dark:text-white">Listed on the network</strong> or <strong class="text-gray-900 dark:text-white">Not listed</strong>. The setting only appears once an administrator has enabled federation for the whole installation, so you will not see it on eventschedule.com itself. You do not have to come here to answer it: once the schedule has an upcoming public event with an image, a <strong class="text-gray-900 dark:text-white">List on the network</strong> prompt on the schedule's page, and on your dashboard for schedules you own, does it in one click. A listed schedule shows <strong class="text-gray-900 dark:text-white">Listed on the network</strong> on its page, which links back to this setting. See <a href="{{ route('marketing.docs.selfhost.federation') }}#per-schedule" class="doc-link">Federation</a>.</p>
+            </div>
+        </div>
+        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">AI Import</h4>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Decides which optional fields appear on the AI import <a href="#engagement-requests" class="doc-link">request form</a>: short description, description, price, coupon code, registration URL, category, and sub-schedule if you have any. The coupon code field brings its discount along with it. Turn a field on and a <strong class="text-gray-900 dark:text-white">Required</strong> checkbox appears next to it, so you can insist on an answer. Shown on the hosted platform only.</p>
             </div>
         </div>
 
         <!-- URL Pattern Variables -->
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4" id="url-pattern-variables">URL Pattern Variables</h4>
+        <h3 id="url-pattern-variables" class="doc-subheading">URL Pattern Variables</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Use these in the Event URL Pattern above. Every value is converted to something safe for a URL: lowercase, with spaces and punctuation turned into dashes. These are close cousins of the <a href="#available-variables" class="doc-link">calendar description variables</a> but not identical, because a URL cannot carry a slash or a colon: dates here use dashes and never gain a year, and there is no variable for the description or the event's own link.
+            Use these in the <strong class="text-gray-900 dark:text-white">Event URL Pattern</strong>, in the Advanced row above. Every value is converted to something safe for a URL: lowercase, with spaces and punctuation turned into dashes. These are close cousins of the <a href="#available-variables" class="doc-link">calendar description variables</a> but not identical, because a URL cannot carry a slash or a colon: dates here use dashes and never gain a year, and there is no variable for the description or the event's own link.
         </p>
 
         <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Date & Time</h5>
@@ -830,170 +1010,75 @@
             </table>
         </div>
 
-        <!-- Custom Domain -->
-        <h3 id="custom-domain" class="doc-subheading">Custom Domain Setup <x-doc-badge plan="enterprise" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            There are two ways to connect a custom domain to your schedule. Choose the mode that best fits your needs.
-        </p>
+        <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Custom Fields <x-doc-badge plan="pro" /></h5>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The value an event holds for one of your <a href="#customize-custom-fields" class="doc-link">custom fields</a>, by the field's number.</p>
+        @if (!empty($customFieldsData))
+            {{-- Dynamic: Show user's actual custom fields --}}
+            @foreach ($customFieldsData as $scheduleData)
+                <h4 class="text-md font-medium text-gray-900 dark:text-white mb-2">{{ $scheduleData['role_name'] }}</h4>
+                <div class="doc-table-wrap">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Field Name</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($scheduleData['fields'] as $index => $field)
+                            <tr>
+                                <td><code class="doc-inline-code">{custom_{{ $field['index'] ?? $loop->iteration }}}</code></td>
+                                <td>{{ $field['name'] }}</td>
+                                <td>{{ __('messages.type_'.($field['type'] ?? 'string')) }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endforeach
+        @else
+            {{-- Static: Generic documentation for logged-out users or users without custom fields --}}
+            <div class="doc-table-wrap">
+                <table class="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code class="doc-inline-code">{custom_1}</code></td>
+                            <td>Value of the 1st custom field</td>
+                            <td>john-smith</td>
+                        </tr>
+                        <tr>
+                            <td><code class="doc-inline-code">{custom_2}</code></td>
+                            <td>Value of the 2nd custom field</td>
+                            <td>room-101</td>
+                        </tr>
+                        <tr>
+                            <td><code class="doc-inline-code">{custom_3}</code></td>
+                            <td>Value of the 3rd custom field</td>
+                            <td>workshop</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-gray-400 text-sm">...up to {custom_10}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        @endif
 
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Direct Mode (CNAME)</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Your schedule is served directly on your custom domain with automatic SSL. This is the recommended option for most users.
-        </p>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>In your schedule settings, enter your domain (e.g., <code class="doc-inline-code">events.yourbrand.com</code>) and select <strong class="text-gray-900 dark:text-white">Direct</strong>.</li>
-            <li>Go to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare) and create a <strong class="text-gray-900 dark:text-white">CNAME record</strong> pointing your domain to <code class="doc-inline-code">{{ config('services.digitalocean.app_hostname') }}</code>.</li>
-            <li>Wait for DNS propagation (usually a few minutes, but can take up to 48 hours).</li>
-            <li>SSL is provisioned automatically. Once DNS has propagated, your schedule will be accessible at your custom domain over HTTPS.</li>
-        </ol>
-
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Redirect Mode (Cloudflare)</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Your custom domain redirects visitors to your <code class="doc-inline-code">eventschedule.com</code> URL. Use this if your domain's DNS is managed by Cloudflare. Cloudflare's free plan is sufficient.
-        </p>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>In your schedule settings, enter your domain and select <strong class="text-gray-900 dark:text-white">Redirect</strong>.</li>
-            <li>
-                <strong class="text-gray-900 dark:text-white">Add your domain to Cloudflare</strong> (if not already). After adding the domain, Cloudflare will provide two nameservers. Go to your domain registrar and update your domain's nameservers to the ones Cloudflare provides. Wait for Cloudflare to confirm the domain is active.
-            </li>
-            <li>
-                <strong class="text-gray-900 dark:text-white">Set up DNS records.</strong> In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">DNS > Records</strong>:
-                <ul class="list-disc ml-6 mt-2 mb-2">
-                    <li>Delete any existing A or AAAA records for the domain.</li>
-                    <li>Add an <strong class="text-gray-900 dark:text-white">A record</strong> with the name <code class="doc-inline-code">@</code> (root domain) pointing to <code class="doc-inline-code">192.0.2.1</code>.</li>
-                    <li>Add another <strong class="text-gray-900 dark:text-white">A record</strong> with the name <code class="doc-inline-code">*</code> (wildcard) pointing to <code class="doc-inline-code">192.0.2.1</code>.</li>
-                    <li>The IP address doesn't matter since traffic will be redirected. Make sure both records are set to <strong class="text-gray-900 dark:text-white">Proxied</strong> (orange cloud icon) so Cloudflare can intercept and redirect the requests.</li>
-                </ul>
-            </li>
-            <li>
-                <strong class="text-gray-900 dark:text-white">Create a Page Rule.</strong> In your Cloudflare dashboard, go to <strong class="text-gray-900 dark:text-white">Rules > Page Rules</strong> and create a new page rule:
-                <ul class="list-disc ml-6 mt-2 mb-2">
-                    <li><strong class="text-gray-900 dark:text-white">URL pattern:</strong> <code class="doc-inline-code">*yourdomain.com/*</code></li>
-                    <li><strong class="text-gray-900 dark:text-white">Setting:</strong> Forwarding URL</li>
-                    <li><strong class="text-gray-900 dark:text-white">Status code:</strong> 301 - Permanent Redirect</li>
-                    <li><strong class="text-gray-900 dark:text-white">Destination URL:</strong> <code class="doc-inline-code">https://yourname.eventschedule.com/$2</code></li>
-                </ul>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">The <code class="doc-inline-code">$2</code> wildcard preserves the URL path, so <code class="doc-inline-code">yourdomain.com/some-event</code> correctly redirects to <code class="doc-inline-code">yourname.eventschedule.com/some-event</code>.</p>
-            </li>
-            <li>Changes may take a few minutes to several hours to propagate. Once active, visitors who go to your custom domain will be seamlessly redirected to your schedule.</li>
-        </ol>
-
-        <!-- Notifications Tab -->
-        <h3 id="settings-notifications" class="doc-subheading">Notifications</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The row is in three groups, by who the email goes to: <strong class="text-gray-900 dark:text-white">Emails to you</strong>, <strong class="text-gray-900 dark:text-white">Emails to followers</strong> and <strong class="text-gray-900 dark:text-white">Shared inbox</strong>.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose which emails you get about this schedule. These choices are personal: each owner and admin sets their own in this row, and the emails go to the address on that person's account, not to the schedule's <a href="#contact-info" class="doc-link">contact email</a>. To also send them to a team inbox, add a <a href="#notification-email" class="doc-link">shared notification address</a>. <strong class="text-gray-900 dark:text-white">New event requests</strong> and <strong class="text-gray-900 dark:text-white">Installment payments</strong> start switched on and stay that way until you turn them off; the rest are off until you turn them on.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">One setting here points the other way, and it belongs to the whole schedule rather than to you. <strong class="text-gray-900 dark:text-white">Email subscribers about new events</strong> decides whether your <a href="{{ route('marketing.docs.newsletters') }}#email-subscribers" class="doc-link">email subscribers</a> get an automatic digest when you publish, at most one every few days. It covers the events this schedule created itself, so an event another schedule lists on yours, including everything a curator pulls in through its <a href="#event-sources" class="doc-link">event sources</a>, never appears in it. It is on by default, because the people receiving it asked for it when they signed up.</p>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New event requests</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when new event requests are pending approval.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New fan content</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when fans submit new videos, comments or photos for your events.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New ticket sale</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a ticket is purchased for one of your events. On the free plan this covers the first paid sale on each event; Pro emails you about every sale.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New feedback</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when attendees submit post-event feedback for your events.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">New poll option suggestions</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Receive an email when a visitor suggests a new option on one of your event polls (requires <a href="{{ route('marketing.docs.creating_events') }}#polls" class="doc-link">Allow User Options</a> to be enabled).</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Installment payments</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A daily summary of <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment payments</a> due in the next two days, and an immediate email whenever one fails. It only matters if you let buyers pay in installments, which is a Pro feature.</p>
-            </div>
-        </div>
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Three of them need your own email settings</div>
-            <p>On the hosted platform, <strong class="text-gray-900 dark:text-white">New ticket sale</strong>, <strong class="text-gray-900 dark:text-white">New feedback</strong> and <strong class="text-gray-900 dark:text-white">New poll option suggestions</strong> only email you once you configure <a href="#integrations-email" class="doc-link">Email Settings</a>, and a note in the row links you straight there. Until then their toggles are greyed out, except that New ticket sale and New feedback stay usable where push notifications are available (below): on Pro those two also arrive as a push, which needs no email settings. A greyed-out toggle keeps whatever it was set to. New event requests, new fan content and <strong class="text-gray-900 dark:text-white">Installment payments</strong> work either way. Selfhosted installs send everything through the server's own mail configuration, so nothing is gated.</p>
+            <div class="doc-callout-title">URL-Safe Formatting</div>
+            <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
         </div>
+    </section>
 
-        <h4 id="notification-email" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Shared notification address</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">If your team works from a shared mailbox, enter it under <strong class="text-gray-900 dark:text-white">Shared notification address</strong> at the bottom of the Notifications row. It gets a copy of the schedule's notifications on top of each person's own emails, so it replaces nothing. Unlike the toggles above, it belongs to the whole schedule: there is one per schedule, and any owner or admin can change it.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Nothing is sent to it until it is confirmed. Saving the address emails it a confirmation link, valid for {{ \App\Services\NotificationEmailService::VERIFY_TTL_DAYS }} days, and the row shows <strong class="text-gray-900 dark:text-white">Waiting for confirmation</strong> with a button to send the link again. Anyone who reads that mailbox can confirm it, with or without an account. Changing the address asks for confirmation again.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The address has its own set of toggles: <strong class="text-gray-900 dark:text-white">New event requests</strong> (on by default), <strong class="text-gray-900 dark:text-white">New ticket sale</strong>, <strong class="text-gray-900 dark:text-white">New feedback</strong>, <strong class="text-gray-900 dark:text-white">New poll option suggestions</strong> and <strong class="text-gray-900 dark:text-white">Installment payments</strong>. New fan content is not offered, because that email only ever goes to the person who created the event. Each one follows the same rules as your own copy, including the plan and email settings rules above. If the shared address is also the login of someone who already gets that email, it is not sent twice.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every email sent to the shared address ends with a <strong class="text-gray-900 dark:text-white">Stop sending to this address</strong> link, which removes it without signing in. It is also removed when the schedule is <a href="{{ route('marketing.docs.managing_schedules') }}#transfer-ownership" class="doc-link">transferred</a> to a new owner and the previous owner leaves.</p>
-
-        <h4 class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Push notifications <x-doc-badge plan="pro" /></h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The same notifications can also reach you as browser and mobile push, on top of email rather than instead of it. Choose <strong class="text-gray-900 dark:text-white">Enable push on this device</strong>, allow notifications when your browser asks, then use <strong class="text-gray-900 dark:text-white">Send test push</strong> to confirm it works. Push is per device, so repeat it on your phone and your laptop. Enabling it sends notification data to OneSignal, a third-party service.</p>
-        <div class="doc-callout mb-6">
-            <div class="doc-callout-title">Two things have to be true</div>
-            <p>The panel only appears once the operator of your Event Schedule site has configured push, which is <a href="{{ route('marketing.docs.selfhost.installation') }}#push-notifications" class="doc-link">off by default</a>. On iPhone and iPad, web push only works for sites added to the home screen (iOS 16.4 and later); Android and desktop browsers need no such step.</p>
-        </div>
-
-        <!-- Advanced Tab -->
-        <h3 id="settings-advanced" class="doc-subheading">Advanced</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The Advanced row collects the settings that change how your schedule behaves rather than how it looks, under three headings. Closed, the row lists the headings.</p>
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">New events</h4>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default new-event visibility</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The visibility every new event starts with: <strong class="text-gray-900 dark:text-white">Public</strong> or <strong class="text-gray-900 dark:text-white">Draft</strong>, plus <strong class="text-gray-900 dark:text-white">Internal</strong> and <strong class="text-gray-900 dark:text-white">Unlisted</strong> on Enterprise. Public unless you change it, and you can still set the visibility on any individual event. See <a href="{{ route('marketing.docs.creating_events') }}#draft" class="doc-link">event visibility</a>.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event URL Pattern</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Decides the address given to each new event. Leave it empty and the event name is used. Otherwise build a pattern from the <a href="#url-pattern-variables" class="doc-link">variables below</a>, for example <code class="doc-inline-code">{event_name}-{date_dmy}</code>, which produces addresses like <code class="doc-inline-code">my-event-27-1</code>.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Changing the pattern only affects events created from then on, so a button appears offering to apply it to your existing events as well.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default Category</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Preselect one of your <a href="#customize-categories" class="doc-link">categories</a> on every new event so you do not have to pick one each time. Once saved, a button appears to apply the default to all existing events in one click. If you later remove the category, the setting is flagged so you can pick another.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default Curator Schedules</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If you also run Curator schedules, tick the ones new events should be shared to automatically, instead of choosing them on every event. Shown on Talent and Venue schedules that have at least one Curator schedule to offer.</p>
-            </div>
-        </div>
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">Public page</h4>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Past Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Keep past events off your public schedule so visitors only ever see what is still to come. Your own admin views are unaffected, so nothing is lost - the events are still there when you need them.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Videos</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Hide the videos panel from your public schedule. Offered on <strong class="text-gray-900 dark:text-white">Venue</strong> and <strong class="text-gray-900 dark:text-white">Curator</strong> schedules only, because a Talent schedule's videos are part of the point.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Which day your calendar week starts on. All seven days are available; Sunday unless you change it.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Accessibility Widget</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add an accessibility panel to your public schedule so visitors can adjust font size, contrast, and motion for themselves. Useful if you are publishing on behalf of an organization with an accessibility commitment to meet.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Sign-Up Panel</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On unless you turn it off. Signed-out visitors see the <strong class="text-gray-900 dark:text-white">Stay up to date</strong> panel on your schedule page and near the foot of each event page, where they can sign up for <a href="{{ route('marketing.docs.sharing') }}#followers" class="doc-link">email updates</a>. Turning it off also removes the calendar feed link under the form. A link made to open the form, like the QR code on the Followers tab, still shows the panel. The switch only hides it: sign-ups through such a link, and on eventschedule.com through the <strong class="text-gray-900 dark:text-white">Follow</strong> button, still arrive. Free on every plan.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show &ldquo;Notify Me&rdquo; Card</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Off unless you turn it on. When it is on, the public events this schedule creates offer a <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> card, plus links to it in the Add to Calendar menu and beside the buy button, so visitors can join that event's <a href="{{ route('marketing.docs.tickets') }}#interest-list" class="doc-link">interest list</a>. It follows the event wherever it is listed, including a performer's or curator's page, because the list and its emails belong to the schedule that created the event. Turning it off again stops new sign-ups, and anyone already on a list still gets the emails they asked for. Free on every plan.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Do not show other schedules' promotions</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Some Event Schedule sites run a promotions network, where schedules pay to have an event featured on other schedules' public pages. Turn this on and your pages carry nothing of the sort: no other schedule's promotions, and no ads either. It is free on every plan, and it does not stop you buying promotions of your own. See <a href="{{ route('marketing.docs.boost') }}#on-network" class="doc-link">on-network promotions</a> and <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">ads on free schedules</a>. The toggle only appears on sites that have this switched on.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List this schedule on the network</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Share this schedule's public events with the listings on eventschedule.com, where each listing links back to the event on your own site. Three choices: leave it undecided, list the schedule, or keep it hidden. The setting only appears once an administrator has enabled federation for the whole installation, so you will not see it on eventschedule.com itself. You do not have to come here to answer it: once the schedule has an upcoming public event with an image, a <strong class="text-gray-900 dark:text-white">List on the network</strong> prompt on the schedule's page, and on your dashboard for schedules you own, does it in one click. A listed schedule shows <strong class="text-gray-900 dark:text-white">Listed on the network</strong> on its page, which links back to this setting. See <a href="{{ route('marketing.docs.selfhost.federation') }}#per-schedule" class="doc-link">Federation</a>.</p>
-            </div>
-        </div>
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">AI import</h4>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Decides which optional fields appear on the AI import <a href="#engagement-requests" class="doc-link">request form</a>: short description, description, price, coupon code, registration URL, category, and sub-schedule if you have any. The coupon code field brings its discount along with it. Turn a field on and a <strong class="text-gray-900 dark:text-white">Required</strong> checkbox appears next to it, so you can insist on an answer. Shown on the hosted platform only.</p>
-            </div>
-        </div>
-
-        <!-- Engagement -->
+    <!-- Engagement -->
     <section id="engagement" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -1001,14 +1086,15 @@
             </svg>
             Engagement
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Everything to do with what visitors can send you, in six rows that each say whether they are on: Requests, Fan Content, Feedback, Carpool, Sponsors, and Accommodation. The last one only appears on sites whose operator has enabled it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Everything to do with what visitors can send you, in six rows that each say whether they are on: Requests, Fan Content, Feedback, Carpool, Sponsors, and Accommodation. The last one only appears on sites whose operator has enabled it. Nothing here is on the page until you open a row.</p>
 
-        <x-doc-screenshot id="creating-schedules--section-engagement" alt="Schedule engagement settings" />
+        <x-doc-screenshot id="creating-schedules--section-engagement" alt="The Engagement section: rows for Requests, Fan Content, Feedback, Carpool and Sponsors, each saying whether it is on" />
 
         <!-- Requests Tab -->
         <h3 id="engagement-requests" class="doc-subheading">Requests</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Let other people put events on your schedule. A <strong class="text-gray-900 dark:text-white">Talent</strong> schedule gets a shorter version of this row, with only <strong class="text-gray-900 dark:text-white">Accept requests</strong>, the Booking Form options, <strong class="text-gray-900 dark:text-white">Request Terms</strong> and your own questions, because a request to book a performer is always read by hand. The same goes for events other schedules add you to: once your talent schedule has an owner, a venue or curator that lists you sends a request you accept under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, unless it had already listed you before you claimed your page. Requests to a talent always come in through the Booking Form, where creating an account is left to the visitor. Whoever sends a request through the Booking Form gives their name and email, and those are shown with the request under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong> so you can reply to them.</p>
-        <div class="doc-fields">
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Let other people put events on your schedule. The row opens on one switch, <strong class="text-gray-900 dark:text-white">Accept requests</strong>, and the rest appears once that is on.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Talent</strong> schedule gets a shorter version of this row, with only <strong class="text-gray-900 dark:text-white">Accept requests</strong>, the Booking Form options, <strong class="text-gray-900 dark:text-white">Request Terms</strong> and your own questions, because a request to book a performer is always read by hand. The same goes for events other schedules add you to: once your talent schedule has an owner, a venue or curator that lists you sends a request you accept under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, unless it had already listed you before you claimed your page. Requests to a talent always come in through the Booking Form, where creating an account is left to the visitor. Whoever sends a request through the Booking Form gives their name and email, and those are shown with the request under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong> so you can reply to them.</p>
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept requests</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Turn on the public request form. What lands there is reviewed in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="doc-link">pending queue</a>. Typical uses:</p>
@@ -1023,19 +1109,19 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code after they press Submit. They can add a flyer and have the form filled in from it. With it off, visitors can send a request as a guest, and on the Booking Form they can also choose to create an account, wherever the site accepts new accounts. Not offered on Talent schedules, whose Booking Form always leaves the account up to the visitor.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event Request Form</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event submission form</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Which form visitors see: <strong class="text-gray-900 dark:text-white">AI Import</strong>, where they paste the event text or upload a flyer and the details are read out of it, or <strong class="text-gray-900 dark:text-white">Booking Form</strong>, a plain form with set fields. AI Import unless you change it. Offered on Venue and Curator schedules while <strong class="text-gray-900 dark:text-white">Require Account</strong> is off; a Talent schedule always uses the Booking Form.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Required Fields</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Choose which of the Booking Form's own fields a visitor has to fill in before sending a request: <strong class="text-gray-900 dark:text-white">Event Name</strong>, <strong class="text-gray-900 dark:text-white">Date &amp; Time</strong>, <strong class="text-gray-900 dark:text-white">Description</strong> and <strong class="text-gray-900 dark:text-white">Location</strong>. Nothing is required until you tick it. Location is satisfied by a venue name, address or city, or by ticking Online, and is not offered on Venue schedules, where your venue is the location. To insist on an answer to one of your own questions, use that question's <strong class="text-gray-900 dark:text-white">Required</strong> option, and for a phone number use <strong class="text-gray-900 dark:text-white">Ask for Phone Number</strong> below. Shown while the Booking Form is in use.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Required fields</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Choose which of the Booking Form's own fields a visitor has to fill in before sending a request: <strong class="text-gray-900 dark:text-white">Event Name</strong>, <strong class="text-gray-900 dark:text-white">Date &amp; Time</strong>, <strong class="text-gray-900 dark:text-white">Description</strong> and <strong class="text-gray-900 dark:text-white">Location</strong>. Nothing is required until you tick it. Location is satisfied by a venue name, address or city, or by ticking Online, and is not offered on Venue schedules, where your venue is the location. To insist on an answer to one of your own questions, use that question's <strong class="text-gray-900 dark:text-white">Required</strong> option, and for a phone number use <strong class="text-gray-900 dark:text-white">Ask for phone number</strong> below. Shown while the Booking Form is in use.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer Online Events</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Offer online events</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">On by default. Turn it off and the Booking Form no longer offers the <strong class="text-gray-900 dark:text-white">Online</strong> option, so every request is for an in-person event. The AI Import form is not affected.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ask for Phone Number</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ask for phone number</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Off by default. Turn it on and the Booking Form asks the visitor for a phone number, and a <strong class="text-gray-900 dark:text-white">Required</strong> switch appears beneath it if you want to insist on one. Signed-in visitors are asked too, since the form does not take one from their account. The number is shown with the request under <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong>, as a link you can tap to call. The AI Import form is not affected.</p>
             </div>
             <div class="doc-field">
@@ -1044,7 +1130,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Approved Schedules</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Name schedules you already trust and what they send from their own schedule skips the queue: an event of theirs that they add you to, or a submission they make signed in while <strong class="text-gray-900 dark:text-white">Require Account</strong> is on. A Booking Form request, or a submission sent without an account, waits for approval like everyone else's. Start typing to search and pick a schedule. Not offered on Talent schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Name schedules you already trust and what they send from their own schedule skips the queue: an event of theirs that they add you to, or a submission they make signed in while <strong class="text-gray-900 dark:text-white">Require Account</strong> is on. A Booking Form request, or a submission sent without an account, waits for approval like everyone else's. Click <strong class="text-gray-900 dark:text-white">+ Add Schedule</strong>, start typing to search, and pick a schedule. Shown while <strong class="text-gray-900 dark:text-white">Require Approval</strong> is on, and not offered on Talent schedules.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
@@ -1052,7 +1138,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your own questions <x-doc-badge plan="pro" /></h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add questions of your own to whichever form you use, with <a href="#customize-custom-fields" class="doc-link">Custom Fields</a> marked <strong class="text-gray-900 dark:text-white">On request form</strong>. Ask whatever you need before accepting an event: which of your equipment the visitor wants (a multiselect checklist), a reference number in a set format (a validation pattern), an expected head count. Answers appear on the request in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong> and on the event once you accept it. A link at the bottom of this tab jumps straight to the Custom Fields tab.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add questions of your own to whichever form you use, with <a href="#customize-custom-fields" class="doc-link">Custom Fields</a> marked <strong class="text-gray-900 dark:text-white">On request form</strong>. Ask whatever you need before accepting an event: which of your equipment the visitor wants (a multi-select checklist), a reference number in a set format (a validation pattern), an expected head count. Answers appear on the request in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong> and on the event once you accept it. A link at the bottom of this row opens the Custom Fields row.</p>
             </div>
         </div>
 
@@ -1061,54 +1147,49 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Let people who were there add to the event afterwards. Each kind has its own switch, all three are off until you turn them on, and nothing a visitor sends appears in public until you approve it.</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Comments</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Comments</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Written comments on your events.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Photos</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Photos</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Uploaded photos. A Free schedule holds up to 25 photos in total; Pro removes the cap and adds a bulk download of every photo on an event.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Videos</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Links to YouTube or Vimeo videos.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Videos</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Links to YouTube videos.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require an Account</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require an account</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Off by default: attendees submit with just a name and email, so they never have to create an account. Turn it on to make them sign in first. Either way nothing appears publicly until you approve it, and the submitter's email is only ever visible to you.</p>
             </div>
         </div>
 
         <!-- Feedback Tab -->
         <h3 id="engagement-feedback" class="doc-subheading">Feedback <x-doc-badge plan="pro" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Ask attendees what they thought once the event is over. Free schedules see the row with the settings greyed out.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Ask attendees what they thought once the event is over. Free schedules see the row with its switch greyed out. On the hosted platform, feedback emails also need <a href="#integrations-email" class="doc-link">Email Settings</a>: until they are configured the switch stays greyed out, and a note in the row links you there.</p>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable Feedback</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Post-event feedback</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Once the event has ended, email everyone holding a ticket or registration for it, asking for a star rating and a comment. The rest of the row appears once this is on.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Feedback Delay</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send feedback request after</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">How long to wait after the event ends: 1, 2, 6, 12, 24 or 48 hours. 24 hours unless you change it.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Feedback Publicly</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show feedback publicly</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Publish the ratings and comments you collect on the event page, so people deciding whether to come can see what previous attendees said. Off by default: with it off, feedback is yours alone to read.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send test feedback</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Send test feedback email</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">A button that sends you the request email as an attendee would receive it, so you can check the wording and the delivery before an event ends.</p>
             </div>
-        </div>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Email Settings Required</div>
-            <p>On the hosted platform, feedback emails need <a href="#integrations-email" class="doc-link">Email Settings</a> configured; the settings here stay greyed out until they are.</p>
         </div>
 
         <h3 id="engagement-carpool" class="doc-subheading">Carpool <x-doc-badge plan="pro" /></h3>
         <div class="doc-fields">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Enable Carpool</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Carpool matching</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Let attendees arrange lifts to and from your events. A carpool link appears on the event page where they can offer a ride or ask for a seat.</p>
             </div>
             <div class="doc-field">
@@ -1125,7 +1206,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding sponsors</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">+ Add Sponsor</strong> to open the form. A logo is required; the name, a link and a tier of <strong class="text-gray-900 dark:text-white">Gold</strong>, <strong class="text-gray-900 dark:text-white">Silver</strong> or <strong class="text-gray-900 dark:text-white">Bronze</strong> are optional. Up to {{ config('app.max_sponsors') }} sponsors per schedule.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">+ Add Sponsor</strong> to open the form. A <strong class="text-gray-900 dark:text-white">Logo</strong> is required; the <strong class="text-gray-900 dark:text-white">Sponsor Name</strong>, a <strong class="text-gray-900 dark:text-white">Website URL</strong> and a <strong class="text-gray-900 dark:text-white">Tier</strong> of Gold, Silver or Bronze are optional. Up to {{ config('app.max_sponsors') }} sponsors per schedule. Nothing is published until you save the form.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
@@ -1133,7 +1214,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Background</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Shown once you have a sponsor. Choose how the sponsors band blends into your page: the default panel, transparent so your own background shows through, or a color of your choosing. Text colors adjust automatically for readability.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Shown once you have a sponsor. Choose how the sponsors band blends into your page: <strong class="text-gray-900 dark:text-white">Default</strong> (the panel), <strong class="text-gray-900 dark:text-white">Transparent</strong> so your own background shows through, or <strong class="text-gray-900 dark:text-white">Custom color</strong>. Text colors adjust automatically for readability.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show sponsors</h4>
@@ -1213,54 +1294,23 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Availability</div>
-            <p>This section only appears if the operator of your Event Schedule instance has enabled the integration. It is available on <strong class="text-gray-900 dark:text-white">all plans</strong>, including Free.</p>
+            <p>This row only appears if the operator of your Event Schedule instance has enabled the integration. It is available on <strong class="text-gray-900 dark:text-white">all plans</strong>, including Free.</p>
         </div>
+    </section>
+
+    <!-- Gift Cards -->
+    <section id="gift-cards" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+            </svg>
+            Gift Cards <x-doc-badge plan="pro" />
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Gift Cards</strong> section sells gift cards that buyers send to someone by email and that are redeemed toward tickets for any event on the schedule. It opens on one switch, <strong class="text-gray-900 dark:text-white">Enable gift cards</strong>; the amounts, the currency, how long a card stays valid and the payment method appear once that is on. In the list of sections it says whether gift cards are on, and for which amounts.</p>
+        <p class="text-gray-600 dark:text-gray-300">Gift cards have a guide of their own: see <a href="{{ route('marketing.docs.gift_cards') }}#setup" class="doc-link">setting up gift cards</a>.</p>
     </section>
 
     <!-- Auto Import -->
-    <!-- Event Sources -->
-    <section id="event-sources" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-            </svg>
-            Event Sources <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Curator</span>
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">List the talent and venue schedules you want to follow and everything they publish shows up on your calendar on its own. It covers what they have already run as well as what is coming, and each new event appears within a few minutes of going live. This is the fastest way to stand up a city guide or a festival hub: pick your rooms and your acts once, and stop copying listings by hand.</p>
-
-        <x-doc-screenshot id="creating-schedules--section-sources" alt="Event sources settings" />
-
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or address and pick the talent or venue schedule you want. Only talent and venue schedules can be a source, so one curator never chains onto another.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Each saved source shows how many of its events are on your calendar right now, past and upcoming, so you can tell at a glance whether it is feeding your schedule. An event you removed by hand is left out of that number, and an event two sources share counts under both, so the numbers need not add up to your total.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Optional. File everything from one source under a <a href="#customize-subschedules" class="doc-link">sub-schedule</a> so visitors can filter by it. Changing it moves that source's existing events too.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Suggested</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Schedules you already share events with, offered as one-click shortcuts.</p>
-            </div>
-        </div>
-
-        <h3 class="doc-subheading">Setting up event sources</h3>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> on a curator schedule and choose <strong class="text-gray-900 dark:text-white">Event Sources</strong>.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">+ Add a source schedule</strong> and search for the talent or venue you want to follow.</li>
-            <li>Optionally choose a sub-schedule to file that source's events under.</li>
-            <li>Save. Their events, past and upcoming, appear on your calendar right away.</li>
-        </ol>
-
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Tip</div>
-            <p>Sourced events count as yours almost everywhere: they show on your calendar and public page, in your <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">event graphics</a>, and in your iCal and RSS feeds. The exception is the automatic digest to your <a href="#settings-notifications" class="doc-link">email subscribers</a>, which only covers events this schedule created itself. To drop a single one, open it and choose Remove from schedule; it stays gone even though the source is still connected. Removing the source itself takes its events with it and leaves anything you added by hand untouched.</p>
-        </div>
-    </section>
-
     <section id="auto-import" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -1270,7 +1320,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Point Event Schedule at a page that lists events and it reads them once a day, so a venue calendar or a tour page keeps your schedule current without you retyping anything. This section only exists on selfhosted installs, and it needs an AI key configured on the server.</p>
 
-        <x-doc-screenshot id="creating-schedules--section-auto-import" alt="Auto import settings" />
+        <x-doc-screenshot id="creating-schedules--section-auto-import" alt="The Auto Import section on a selfhosted install: the Import URLs list and the Import Cities list, each with an Add link" />
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -1286,7 +1336,7 @@
 
         <h3 class="doc-subheading">Setting up auto import</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> and choose <strong class="text-gray-900 dark:text-white">Auto Import</strong>.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong> and choose <strong class="text-gray-900 dark:text-white">Auto Import</strong>.</li>
             <li>Under <strong class="text-gray-900 dark:text-white">Import URLs</strong>, click <strong class="text-gray-900 dark:text-white">+ Add</strong> and paste an address. Repeat for each source.</li>
             <li>Optionally add cities under <strong class="text-gray-900 dark:text-white">Import Cities</strong> to narrow what is taken.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Test Import</strong> to see what a source produces before you commit to it.</li>
@@ -1307,42 +1357,18 @@
             </svg>
             Integrations
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Connect your schedule to the outside world: send its email through your own server, keep it in step with a calendar you already use, and hand out feed URLs other apps can subscribe to. The rows are <strong class="text-gray-900 dark:text-white">Email Settings</strong> (hosted platform only), <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>, and <strong class="text-gray-900 dark:text-white">Calendar text and feeds</strong>. A row that is not connected says so.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Connect your schedule to the outside world: send its email through your own server, keep it in step with a calendar you already use, and hand out feed URLs other apps can subscribe to. The rows are <strong class="text-gray-900 dark:text-white">Email Settings</strong> (hosted platform only), <strong class="text-gray-900 dark:text-white">Google Calendar</strong>, <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong>, <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong>, and <strong class="text-gray-900 dark:text-white">Calendar text and feeds</strong>. A row that is not connected says <strong class="text-gray-900 dark:text-white">Not connected</strong>; a connected calendar row says which way it syncs.</p>
 
-        <x-doc-screenshot id="creating-schedules--section-integrations" alt="Calendar integration settings" />
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">All three calendar integrations are <a href="{{ route('marketing.pricing') }}" class="doc-link">free on every plan</a> and work the same way: choose a calendar, choose a direction, save.</p>
-
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Sync direction</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Four choices per integration: push your events out to the calendar, pull that calendar's events in, keep both in step, or <strong class="text-gray-900 dark:text-white">No sync</strong>, which is where every integration starts.</p>
-            </div>
-            <div id="delete-sync" class="scroll-mt-24 bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When an event is deleted in the connected calendar</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-300">Shown in the Google and Outlook rows once that integration is pulling events in; CalDAV has no such setting, so an event deleted there stays here. Choose what happens here when you delete an event there: <strong class="text-gray-900 dark:text-white">Keep it here</strong> (the default), <strong class="text-gray-900 dark:text-white">Mark as cancelled</strong> (hidden but reversible), or <strong class="text-gray-900 dark:text-white">Delete it here</strong>. Deleting is permanent, so an event with any ticket sale on record (refunded ones included) or an ad boost that has spent money is hidden rather than deleted. An event that another schedule owns and shares with yours is only taken off your schedule, never deleted for everyone.</p>
-            </div>
-        </div>
-
-        <div class="doc-callout mb-6">
-            <div class="doc-callout-title">A recurring event syncs as one entry</div>
-            <p>Event Schedule does not send a repeat rule to a connected calendar, so a weekly event arrives there as a single entry on its start date. If you want every date to show up in someone's calendar app, give them the <a href="#integrations-advanced" class="doc-link">iCal feed</a> instead, which lists each occurrence.</p>
-        </div>
+        <x-doc-screenshot id="creating-schedules--section-integrations" alt="The Integrations section on a selfhosted install, which has no Email Settings row: Google Calendar, Outlook Calendar and CalDAV Calendar, each saying Not connected, and Calendar text and feeds" />
 
         <!-- Email -->
         <h3 id="integrations-email" class="doc-subheading">Email Settings</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Send this schedule's mail - ticket confirmations, notifications, feedback requests and <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> - through your own SMTP server and from your own address.</p>
-
-        <x-doc-screenshot id="creating-schedules--section-email-settings" alt="Email settings" />
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Availability</div>
-            <p>Per-schedule email settings are a hosted-platform feature, available on every plan. Selfhosted installs configure mail once at the server level instead, so the row is not shown - see the <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">selfhost email docs</a>.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Send this schedule's mail (ticket confirmations, notifications, feedback requests and <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a>) through your own SMTP server and from your own address.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Per-schedule email settings are a hosted-platform feature, available on every plan, and the first row of Integrations there. Selfhosted installs configure mail once at the server level instead, so the row is not shown: see the <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">selfhost email docs</a>.</p>
 
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4">Setting up custom email</h4>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong>, choose <strong class="text-gray-900 dark:text-white">Integrations</strong>, and open the <strong class="text-gray-900 dark:text-white">Email Settings</strong> row.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>, choose <strong class="text-gray-900 dark:text-white">Integrations</strong>, and open the <strong class="text-gray-900 dark:text-white">Email Settings</strong> row.</li>
             <li>Fill in <strong class="text-gray-900 dark:text-white">SMTP Host</strong>, <strong class="text-gray-900 dark:text-white">SMTP Port</strong> and <strong class="text-gray-900 dark:text-white">Encryption</strong> (None, TLS or SSL) from your email provider.</li>
             <li>Enter the <strong class="text-gray-900 dark:text-white">SMTP Username</strong> and <strong class="text-gray-900 dark:text-white">SMTP Password</strong>. For Gmail or Google Workspace this must be an App Password, not your account password.</li>
             <li>Set the <strong class="text-gray-900 dark:text-white">From Address</strong> and <strong class="text-gray-900 dark:text-white">From Name</strong> your recipients will see, for example <code class="doc-inline-code">events@yourdomain.com</code>.</li>
@@ -1390,7 +1416,27 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">When email settings stop working</div>
-            <p>If your SMTP credentials start failing, the <strong class="text-gray-900 dark:text-white">Email Settings</strong> row and the Integrations tab both say so in amber, and a warning banner appears inside the row, with a <strong class="text-gray-900 dark:text-white">Show error details</strong> link carrying the provider's own message. Delivery is paused while settings are failing; Event Schedule retries after 24 hours, or immediately once a test email succeeds. Fix the underlying problem, then send a test email to resume delivery right away.</p>
+            <p>If your SMTP credentials start failing, the <strong class="text-gray-900 dark:text-white">Email Settings</strong> row and the Integrations entry in the list of sections both say <strong class="text-gray-900 dark:text-white">Email delivery is failing</strong>, and a warning appears inside the row, with a <strong class="text-gray-900 dark:text-white">Show error details</strong> link carrying the provider's own message. Delivery is paused while settings are failing; Event Schedule retries after 24 hours, or immediately once a test email succeeds. Fix the underlying problem, then send a test email to resume delivery right away.</p>
+        </div>
+
+        <!-- What the three calendar rows share -->
+        <h3 id="calendar-sync" class="doc-subheading">Calendar sync</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The next three rows each keep the schedule in step with a calendar you already use. All three are <a href="{{ route('marketing.pricing') }}" class="doc-link">free on every plan</a> and work the same way: choose a calendar, choose a direction, save. A connection belongs to the schedule's owner, whose account it runs on, so the owner is the one who sets it.</p>
+
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sync Direction</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Four choices per integration: <strong class="text-gray-900 dark:text-white">To</strong> the calendar (push your events out), <strong class="text-gray-900 dark:text-white">From</strong> the calendar (pull its events in), <strong class="text-gray-900 dark:text-white">Bidirectional Sync</strong> (keep both in step), or <strong class="text-gray-900 dark:text-white">No Sync</strong>, which is where every integration starts. Closed, the row shows the direction you chose.</p>
+            </div>
+            <div id="delete-sync" class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When an event is deleted in the connected calendar</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Shown in the Google and Outlook rows once that integration is pulling events in; CalDAV has no such setting, so an event deleted there stays here. It is one setting for both: with Google connected it sits in the Google Calendar row, and otherwise in the Outlook Calendar row. Choose what happens here when you delete an event there: <strong class="text-gray-900 dark:text-white">Keep it here</strong> (the default), <strong class="text-gray-900 dark:text-white">Mark as cancelled</strong> (hidden but reversible), or <strong class="text-gray-900 dark:text-white">Delete it here</strong>. Deleting is permanent, so an event with any ticket sale on record (refunded ones included) or an ad boost that has spent money is hidden rather than deleted. An event that another schedule owns and shares with yours is only taken off your schedule, never deleted for everyone.</p>
+            </div>
+        </div>
+
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">A recurring event syncs as one entry</div>
+            <p>Event Schedule does not send a repeat rule to a connected calendar, so a weekly event arrives there as a single entry on its start date. If you want every date to show up in someone's calendar app, give them the <a href="#integrations-advanced" class="doc-link">iCal feed</a> instead, which lists each occurrence.</p>
         </div>
 
         <!-- Google Calendar -->
@@ -1399,17 +1445,15 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Connect your Google account first, in <a href="{{ route('marketing.docs.account_settings') }}#google" class="doc-link">Account Settings</a>. Then:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> and choose <strong class="text-gray-900 dark:text-white">Integrations &rarr; Google Calendar</strong>.</li>
-            <li>Pick the <strong class="text-gray-900 dark:text-white">calendar</strong> to sync with from the dropdown.</li>
-            <li>Choose a <strong class="text-gray-900 dark:text-white">sync direction</strong>: to Google Calendar, from Google Calendar, bidirectional, or no sync. If you connected Google from the <a href="{{ route('marketing.docs.ai_import') }}#google-import" class="doc-link">import page</a>, the connection is read-only and the two choices that send events to Google are off until you click <strong class="text-gray-900 dark:text-white">Allow at Google</strong>.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>, choose <strong class="text-gray-900 dark:text-white">Integrations</strong>, and open the <strong class="text-gray-900 dark:text-white">Google Calendar</strong> row. Until your Google account is connected, the row holds a <strong class="text-gray-900 dark:text-white">Connect Google Calendar</strong> button in place of the settings.</li>
+            <li>Pick the calendar to sync with under <strong class="text-gray-900 dark:text-white">Select Google Calendar</strong>.</li>
+            <li>Choose a <strong class="text-gray-900 dark:text-white">Sync Direction</strong>: To Google Calendar, From Google Calendar, Bidirectional Sync, or No Sync. If you connected Google from the <a href="{{ route('marketing.docs.ai_import') }}#google-import" class="doc-link">import page</a>, the connection is read-only and the two choices that send events to Google are off until you click <strong class="text-gray-900 dark:text-white">Allow at Google</strong>.</li>
             <li>If you are pulling events in, set <a href="#delete-sync" class="doc-link">what happens when an event is deleted there</a>.</li>
-            <li>Save. The schedule's owner also gets a <strong class="text-gray-900 dark:text-white">Sync events</strong> button for forcing a full re-sync if the two ever drift apart.</li>
+            <li>Save. To run a sync by hand afterwards, the owner has <strong class="text-gray-900 dark:text-white">Sync Events</strong> in the <strong class="text-gray-900 dark:text-white">Actions</strong> menu at the top of the schedule's page.</li>
         </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The row also holds a <strong class="text-gray-900 dark:text-white">Resync to Google Calendar</strong> button, for when you have switched Google account or calendar. Save the form first, because it uses the saved calendar. It sends every event of the schedule to that calendar again and never imports anything from Google, so it needs a direction that sends events there. Copies of the events may be left behind on the calendar you used before.</p>
 
-        <div class="doc-callout doc-callout-tip mb-6">
-            <div class="doc-callout-title">Team members</div>
-            <p>Under <strong class="text-gray-900 dark:text-white">Sync to my calendar</strong>, each team member can point the schedule's events at a calendar of their own. That choice is theirs alone and is separate from the schedule-wide sync above, so everyone can follow the schedule in their own Google account. The schedule-wide sync itself is set by the schedule's owner, because it runs on the owner's Google account.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A team member who is not the owner sees <strong class="text-gray-900 dark:text-white">Sync to My Calendar</strong> in this row instead, where they can point the schedule's events at a calendar of their own. That choice is theirs alone and is separate from the schedule-wide sync above, so everyone can follow the schedule in their own Google account. The schedule-wide sync itself is set by the schedule's owner, because it runs on the owner's Google account.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Selfhost note</div>
@@ -1422,11 +1466,12 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Connect your Outlook account first, in <a href="{{ route('marketing.docs.account_settings') }}#microsoft" class="doc-link">Account Settings</a>. Then:</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> and choose <strong class="text-gray-900 dark:text-white">Integrations &rarr; Outlook Calendar</strong>.</li>
-            <li>Pick the <strong class="text-gray-900 dark:text-white">calendar</strong> to sync with.</li>
-            <li>Choose a <strong class="text-gray-900 dark:text-white">sync direction</strong>: to Outlook, from Outlook, bidirectional, or no sync.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>, choose <strong class="text-gray-900 dark:text-white">Integrations</strong>, and open the <strong class="text-gray-900 dark:text-white">Outlook Calendar</strong> row. Until your Outlook account is connected, the row holds a <strong class="text-gray-900 dark:text-white">Connect Outlook Calendar</strong> button in place of the settings.</li>
+            <li>Pick the calendar to sync with.</li>
+            <li>Choose a <strong class="text-gray-900 dark:text-white">Sync Direction</strong>: To Outlook Calendar, From Outlook Calendar, Bidirectional Sync, or No Sync.</li>
             <li>If you are pulling events in, set <a href="#delete-sync" class="doc-link">what happens when an event is deleted there</a>.</li>
-            <li>Optionally turn on <strong class="text-gray-900 dark:text-white">Teams meetings</strong> so an online event with no venue is created as a Microsoft Teams meeting and its join link is saved back onto the event.</li>
+            <li>Optionally turn on <strong class="text-gray-900 dark:text-white">Create Teams meetings for online events</strong> so an online event with no venue is created as a Microsoft Teams meeting and its join link is saved back onto the event.</li>
+            <li>Save.</li>
         </ol>
 
         <div class="doc-callout doc-callout-info mb-6">
@@ -1439,15 +1484,16 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">CalDAV is the open standard behind Apple Calendar, Fastmail, Nextcloud and many others, so this row covers everything the two above do not. There is no webhook in the standard, so changes are picked up on a regular sweep rather than the moment they happen.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Open <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit Schedule</strong> and choose <strong class="text-gray-900 dark:text-white">Integrations &rarr; CalDAV Calendar</strong>.</li>
-            <li>Enter the <strong class="text-gray-900 dark:text-white">server URL</strong>, <strong class="text-gray-900 dark:text-white">username</strong> and <strong class="text-gray-900 dark:text-white">password</strong>. Providers that use two-factor authentication usually want an app-specific password here rather than your account password.</li>
-            <li>Pick the <strong class="text-gray-900 dark:text-white">calendar</strong> to sync with.</li>
-            <li>Choose a <strong class="text-gray-900 dark:text-white">sync direction</strong>: to CalDAV, from CalDAV, or bidirectional.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Connect</strong>.</li>
+            <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>, choose <strong class="text-gray-900 dark:text-white">Integrations</strong>, and open the <strong class="text-gray-900 dark:text-white">CalDAV Calendar</strong> row.</li>
+            <li>Enter the <strong class="text-gray-900 dark:text-white">Server URL</strong>, <strong class="text-gray-900 dark:text-white">Username</strong> and <strong class="text-gray-900 dark:text-white">Password</strong>. Providers that use two-factor authentication usually want an app-specific password here rather than your account password.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Test Connection</strong>. Once it succeeds, the calendar list and the sync direction appear.</li>
+            <li>Pick the calendar to sync with.</li>
+            <li>Choose a <strong class="text-gray-900 dark:text-white">Sync Direction</strong>: To CalDAV, From CalDAV, or Bidirectional Sync.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Connect</strong>. The connection is saved at once and the page reloads, so save any other changes on the form first.</li>
         </ol>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Once connected, the row shows which server you are attached to, and you can disconnect at any time to stop syncing. The connection belongs to the schedule's owner: other members see how it is set and cannot change it.
+            Once connected, the row shows which server you are attached to, the sync direction can be changed there (with No Sync as a fourth choice), and <strong class="text-gray-900 dark:text-white">Disconnect</strong> asks you to confirm and then stops syncing. The connection belongs to the schedule's owner: other members see how it is set and cannot change it.
         </p>
 
         <!-- Advanced -->
@@ -1456,24 +1502,30 @@
 
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Calendar Description Template</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            An event pushed out to Google Calendar, Outlook or CalDAV normally arrives carrying its own description and nothing else. Set a <strong class="text-gray-900 dark:text-white">Calendar Description Template</strong> and every outbound event uses your wording instead, built from the same variables as <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="doc-link">event graphics</a>. Leave it empty and the event description is used as-is.
+            An event pushed out to Google Calendar, Outlook or CalDAV normally arrives carrying its own description and nothing else. Set a <strong class="text-gray-900 dark:text-white">Calendar Description Template</strong> and every outbound event uses your wording instead, built from the same variables as <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="doc-link">event graphics</a>. Leave it empty and the event description is used as-is. <strong class="text-gray-900 dark:text-white">Show available variables</strong>, above the box, opens the <a href="#available-variables" class="doc-link">list below</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             A line whose variables all come out empty is dropped rather than left as a stray separator, so one template can serve events with a venue and events without.
         </p>
 
-        <div class="doc-callout doc-callout-tip mb-6">
-            <div class="doc-callout-title">Example</div>
-            <p>A template like:</p>
-            <pre class="bg-gray-100 dark:bg-gray-800 rounded p-3 text-sm mt-2 mb-2"><code>{event_name}
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>A template</span>
+            </div>
+            <pre><code>{event_name}
 {date_full_dmy} {time}
 {venue} | {city}
 
 {description}
 
 {url}</code></pre>
-            <p>Would produce a calendar description like:</p>
-            <pre class="bg-gray-100 dark:bg-gray-800 rounded p-3 text-sm mt-2 overflow-x-auto"><code>Summer Concert
+        </div>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>What the calendar receives</span>
+            </div>
+            <pre><code>Summer Concert
 15/03/2025 20:00
 Central Park | New York
 
@@ -1482,7 +1534,17 @@ Join us for a night of music...
 example.eventschedule.com/summer-concert</code></pre>
         </div>
 
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3" id="available-variables">Available Variables</h4>
+        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Feeds</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Under the template, the row gives you two read-only addresses, each with a copy button, that let anyone follow your schedule from an app of their own. They list your public, upcoming events, need no login, and pick up your changes the next time the app checks them.</p>
+
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">iCal Feed</strong>: subscribe from any calendar app (Google Calendar, Apple Calendar, Outlook). Unlike a connected calendar, this feed lists a recurring event on every date it falls in the next 90 days, not just the first.</li>
+            <li><strong class="text-gray-900 dark:text-white">RSS Feed</strong>: follow your schedule from any RSS reader.</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Visitors can find the calendar feed without you: <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule's name appears in the Add to Calendar menu on an event page and in the sign-up panel. See <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">calendar feeds</a>.</p>
+
+        <h3 id="available-variables" class="doc-subheading">Available Variables</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The full list, shared by the calendar description template and by <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="doc-link">event graphics</a>. A variable with nothing behind it, such as <code class="doc-inline-code">{venue}</code> on an online event, simply comes out empty.</p>
 
         <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Date & Time</h5>
@@ -1725,9 +1787,9 @@ example.eventschedule.com/summer-concert</code></pre>
                         <tbody>
                             @foreach ($scheduleData['fields'] as $index => $field)
                             <tr>
-                                <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                <td><code class="doc-inline-code">{custom_{{ $field['index'] ?? $loop->iteration }}}</code></td>
                                 <td>{{ $field['name'] }}</td>
-                                <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                <td>{{ __('messages.type_'.($field['type'] ?? 'string')) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -1772,23 +1834,6 @@ example.eventschedule.com/summer-concert</code></pre>
             <div class="doc-callout-title">Header and footer text use a different set</div>
             <p>Every variable above belongs to one event. The schedule-wide <strong class="text-gray-900 dark:text-white">header</strong> and <strong class="text-gray-900 dark:text-white">footer text</strong> on <a href="{{ route('marketing.docs.event_graphics') }}#header-footer-text" class="doc-link">event graphics</a> have no event behind them, so they take a smaller, context-free set instead: <code class="doc-inline-code">{schedule_name}</code>, today's date parts such as <code class="doc-inline-code">{month_name}</code> and <code class="doc-inline-code">{year}</code>, and the range covered by the graphic, <code class="doc-inline-code">{first_event_date}</code> and <code class="doc-inline-code">{last_event_date}</code>. The event graphics guide lists them all.</p>
         </div>
-
-        <hr class="border-gray-200 dark:border-gray-700 my-8">
-
-        <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Feeds</h4>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The bottom of the Calendar text and feeds row gives you two read-only addresses, each with a copy button, that let anyone follow your schedule from an app of their own. They list your public, upcoming events, need no login, and pick up your changes the next time the app checks them.</p>
-
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">iCal Feed</strong> - subscribe from any calendar app (Google Calendar, Apple Calendar, Outlook). Unlike a connected calendar, this feed lists a recurring event on every date it falls in the next 90 days, not just the first.</li>
-            <li><strong class="text-gray-900 dark:text-white">RSS Feed</strong> - follow your schedule from any RSS reader.</li>
-        </ul>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Visitors can find the calendar feed without you: <strong class="text-gray-900 dark:text-white">Subscribe to all events from</strong> your schedule's name appears in the Add to Calendar menu on an event page and in the sign-up panel. See <a href="{{ route('marketing.docs.sharing') }}#calendar-feeds" class="doc-link">calendar feeds</a>.</p>
-
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">Note</div>
-            <p>Feed URLs only exist once the schedule has been saved. Create and save your schedule first, then come back to the Calendar text and feeds row to find them.</p>
-        </div>
     </section>
 
     <!-- See Also -->
@@ -1827,19 +1872,19 @@ example.eventschedule.com/summer-concert</code></pre>
                 {
                     "@type": "HowToStep",
                     "name": "Enter Schedule Details",
-                    "text": "Open Admin Panel, then Schedule, then Edit Schedule, and set your schedule name, short description, and description, which supports Markdown formatting.",
+                    "text": "Choose the schedule in the sidebar and click Edit Schedule, then set your schedule name, short description, and description, which supports Markdown formatting.",
                     "url": "{{ url(route('marketing.docs.creating_schedules')) }}#details"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Set Your Address",
-                    "text": "For Venue schedules, add your full address including street, city, state, postal code, and country for map integration.",
+                    "text": "For Venue schedules, add your full address including street, city, state, postal code, and country, so your event pages can show it on a map.",
                     "url": "{{ url(route('marketing.docs.creating_schedules')) }}#address"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Configure Settings",
-                    "text": "Set your schedule URL and event URL pattern, choose your email notifications and whether subscribers get a digest of new events, and set defaults such as new-event visibility.",
+                    "text": "Set your schedule URL, choose your email notifications and whether subscribers get a digest of new events, and set defaults such as the event URL pattern and the visibility new events start with.",
                     "url": "{{ url(route('marketing.docs.creating_schedules')) }}#settings"
                 },
                 {

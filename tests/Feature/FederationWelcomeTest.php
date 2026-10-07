@@ -457,8 +457,9 @@ class FederationWelcomeTest extends TestCase
         $unwelcomed = $this->makeInstance(['status' => FederatedInstance::STATUS_APPROVED, 'name' => 'Needs A Welcome']);
 
         $welcomeUrl = route('admin.federation.welcome', UrlUtils::encodeId($unwelcomed->id));
-        // The row button, told apart from the bulk bar's button of the same wording by its target.
-        $rowButton = '/formaction="'.preg_quote($welcomeUrl, '/').'"\s+class="ap-secondary-btn/';
+        // The row button, told apart from the bulk bar's button of the same wording by its target,
+        // and from the Resend link (same target, a text link) by being the kit's small button.
+        $rowButton = '/formaction="'.preg_quote($welcomeUrl, '/').'"\s+class="page-tool"/';
 
         $before = $this->get(route('admin.federation', ['status' => 'approved']))->assertOk();
         $this->assertMatchesRegularExpression($rowButton, $before->getContent());

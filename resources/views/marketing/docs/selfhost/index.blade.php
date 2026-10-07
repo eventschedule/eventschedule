@@ -29,40 +29,45 @@
 
         <x-docs.card-grid group="selfhost" except="selfhost/index" accent="sky" :level="3" />
 
-        <h3 class="doc-subheading">Where to start</h3>
-        <ol class="doc-list doc-list-numbered mb-6">
-            <li>
-                <strong>Install the app.</strong> It runs on ordinary PHP hosting: PHP 8.2 or newer, MySQL 5.7 or MariaDB 10.3, a web server whose document root is the <code class="doc-inline-code">public</code> directory, and HTTPS. Create an empty database, upload the release files, set the file permissions, then open your domain: the sign-up page doubles as the first-run setup wizard, and it takes your database details, runs the migrations, writes <code class="doc-inline-code">.env</code> and creates your account. Finish with the cron entry that runs the scheduler every minute. It is not optional: the scheduler drives the queue worker, so without it email and calendar sync quietly stop.
-                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-link">Installation</a>
+        <h3 id="where-to-start" class="doc-subheading">Where to start</h3>
+        <ol class="doc-steps">
+            <li class="doc-step">
+                <h4 class="doc-step-title">Install the app</h4>
+                <p>It runs on ordinary PHP hosting: PHP 8.2 or newer, MySQL 5.7 or MariaDB 10.3, a web server whose document root is the <code class="doc-inline-code">public</code> directory, and HTTPS. Create an empty database, upload the release files, set the file permissions, then open your domain: the sign-up page doubles as the first-run setup wizard, and it takes your database details, runs the migrations, writes <code class="doc-inline-code">.env</code> and creates your account. Finish with the cron entry that runs the scheduler every minute. It is not optional: without it everything that happens on a timer quietly stops, from reminders and scheduled newsletters to calendar sync and the queue.</p>
+                <p><a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-link">Installation</a></p>
             </li>
-            <li>
-                <strong>Set up email.</strong> Nothing that emails a person works until a mail driver is configured, including password resets, ticket confirmations, booking requests and newsletters. One driver in <code class="doc-inline-code">.env</code> serves the whole instance.
-                <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">Email Setup</a>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Set up email</h4>
+                <p>Nothing that emails a person works until a mail driver is configured, including password resets, ticket confirmations, booking requests and newsletters. One driver in <code class="doc-inline-code">.env</code> serves the whole instance.</p>
+                <p><a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">Email Setup</a></p>
             </li>
-            <li>
-                <strong>Add a way to take payment</strong> if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal and Payfast (South African rand only) take ticket orders, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.
-                <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal and Payfast</a>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Add a way to take payment</h4>
+                <p>Needed only if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal and Payfast (South African rand only) take ticket orders, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.</p>
+                <p><a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal and Payfast</a></p>
             </li>
-            <li>
-                <strong>Add an AI key</strong> (Google Gemini or OpenAI) if you want AI event import, agenda scanning, translation or auto import. Everything else works without one.
-                <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI Setup</a>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Add an AI key</h4>
+                <p>Google Gemini or OpenAI, if you want AI event import, agenda scanning, translation or auto import. Everything else works without one.</p>
+                <p><a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">AI Setup</a></p>
             </li>
-            <li>
-                <strong>Connect calendars.</strong> Google and Outlook sync each need your own OAuth credentials in <code class="doc-inline-code">.env</code>; CalDAV needs no server-side configuration, so a schedule can connect one straight away.
-                <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">Google Calendar</a>,
-                <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-link">Outlook Calendar</a>
-            </li>
-            <li>
-                <strong>Then the optional pieces.</strong>
-                <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> lists your public events on eventschedule.com and links each one back to your site, and stays off until you turn it on in the admin panel;
-                <a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-link">Boost</a> runs Meta ads from inside the app, billed to the one Meta ad account you configure, so every campaign spends your money;
-                <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every ticket, free registrations included, and needs a Google Wallet issuer account of your own;
-                the <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a> at <code class="doc-inline-code">/admin</code> gives you instance-wide monitoring and settings, and lets you edit any schedule on the install down to its name, path and contact details (the account the setup wizard created is already an instance admin); and the
-                <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-link">accessibility</a> guide covers what to put in your own accessibility statement.
+            <li class="doc-step">
+                <h4 class="doc-step-title">Connect calendars</h4>
+                <p>Google and Outlook sync each need your own OAuth credentials in <code class="doc-inline-code">.env</code>; CalDAV needs no server-side configuration, so a schedule can connect one straight away.</p>
+                <p><a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">Google Calendar</a>, <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-link">Outlook Calendar</a></p>
             </li>
         </ol>
 
-        <h3 class="doc-subheading">How a selfhosted install differs</h3>
+        <p class="mb-4">Then the optional pieces, in any order:</p>
+        <ul class="doc-list mb-6">
+            <li><a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-link">Federation</a> lists your public events on eventschedule.com and links each one back to your site. It stays off until you turn it on in the admin panel.</li>
+            <li><a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-link">Boost</a> runs Meta ads from inside the app, billed to the one Meta ad account you configure, so every campaign spends your money.</li>
+            <li><a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet</a> puts an "Add to Google Wallet" button on every ticket, free registrations included, and needs a Google Wallet issuer account of your own.</li>
+            <li>The <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">admin panel</a> at <code class="doc-inline-code">/admin</code> gives you instance-wide monitoring and settings, and lets you edit any schedule on the install down to its name, path and contact details. The account the setup wizard created is already an instance admin.</li>
+            <li>The <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-link">accessibility</a> guide covers the accessibility panel you can switch on for a schedule, and what to put in your own accessibility statement.</li>
+        </ul>
+
+        <h3 id="differences" class="doc-subheading">How a selfhosted install differs</h3>
         <p class="mb-6">
             Same codebase either way. <code class="doc-inline-code">IS_HOSTED=false</code> is what selects the middle column.
         </p>
@@ -84,7 +89,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Schedule addresses</span></td>
-                        <td>Paths under your domain, e.g. <code class="doc-inline-code">yourdomain.com/my-schedule</code>, set in the <strong>Path</strong> field of a schedule's settings</td>
+                        <td>Paths under your domain, e.g. <code class="doc-inline-code">yourdomain.com/my-schedule</code>, set in the <strong>Path</strong> field on the <strong>Settings</strong> tab of a schedule's edit page</td>
                         <td>A subdomain, e.g. <code class="doc-inline-code">my-schedule.eventschedule.com</code>, and Enterprise can point its own domain at a schedule</td>
                     </tr>
                     <tr>
@@ -100,7 +105,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Email delivery</span></td>
                         <td>One mail driver in <code class="doc-inline-code">.env</code> for the whole instance</td>
-                        <td>Per-schedule SMTP in the <strong>Email Settings</strong> tab of a schedule's Integrations section. Hosted only, so that tab is hidden on your install.</td>
+                        <td>Per-schedule SMTP in the <strong>Email Settings</strong> row of a schedule's <strong>Integrations</strong> tab. Hosted only, so that row is not shown on your install.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Newsletter allowance</span></td>
@@ -119,12 +124,12 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Auto Import</span></td>
-                        <td>An <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> section in a schedule's settings imports the events found at its <strong>Import URLs</strong> once a day, from the scheduler. <strong>Import Cities</strong> is optional and only filters: an event held in a city that is not on the list is skipped. Needs an AI key.</td>
+                        <td>An <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> tab on a schedule's edit page imports the events found at its <strong>Import URLs</strong> once a day, from the scheduler. <strong>Import Cities</strong> is optional and only filters: an event held in a city that is not on the list is skipped. Needs an AI key.</td>
                         <td>Not available</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Updates</span></td>
-                        <td><a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">Settings &rarr; App Update</a> compares your installed version against the latest release and applies it in one click, or run <code class="doc-inline-code">php artisan app:update</code></td>
+                        <td><a href="{{ route('marketing.docs.account_settings') }}#app-update" class="doc-link">Settings &rarr; App Update</a> compares your installed version against the latest release and applies it in one click, or run <code class="doc-inline-code">php artisan app:update</code>. Instance admins have the same on <a href="{{ route('marketing.docs.selfhost.admin') }}#system-app-update" class="doc-link">Admin &rarr; System &rarr; App Update</a></td>
                         <td>Updated for you</td>
                     </tr>
                     <tr>

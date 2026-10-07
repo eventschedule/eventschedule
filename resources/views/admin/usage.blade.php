@@ -1,110 +1,95 @@
 <x-app-admin-layout>
+    @include('admin.partials._navigation', ['active' => 'usage'])
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'usage'])
-
-        @include('admin.partials._date-range-filter', ['range' => $range])
-
-        {{-- Anomaly Alert Banner --}}
-        @if (count($anomalies) > 0)
-        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <div class="flex">
-                <svg class="w-5 h-5 text-red-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                <div class="ms-3">
-                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">@lang('messages.usage_anomalies_detected')</h3>
-                    <div class="mt-2 text-sm text-red-700 dark:text-red-300">
-                        <ul class="list-disc ps-5 space-y-1">
-                            @foreach ($anomalies as $anomaly)
-                            <li>{{ $anomaly['category'] }}: {{ number_format($anomaly['today']) }} today (limit: {{ number_format($anomaly['limit']) }})</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_usage_lead') }}</p>
+        <div class="page-actions">
+            @include('admin.partials._date-range-filter', ['range' => $range])
         </div>
+    </div>
+
+    <div class="page-shell page-stack">
+        {{-- A provider past its daily limit today --}}
+        @if (count($anomalies) > 0)
+        <x-page-notice tone="error" :title="__('messages.usage_anomalies_detected')">
+            <ul class="mt-1 list-disc ps-5 space-y-0.5">
+                @foreach ($anomalies as $anomaly)
+                <li>{{ __('messages.usage_anomaly_line', ['category' => $anomaly['category'], 'today' => number_format($anomaly['today']), 'limit' => number_format($anomaly['limit'])]) }}</li>
+                @endforeach
+            </ul>
+        </x-page-notice>
         @endif
 
-        {{-- Summary Metric Cards --}}
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {{-- One figure a provider: what the period came to, then today against the limit. They
+             were seven separate boxes; red is for a provider that is over its limit today. --}}
+        <div class="ap-card rounded-xl page-stats is-auto insight-strip">
             @foreach ($categorySummaries as $key => $cat)
-            <div class="ap-card rounded-xl shadow p-5">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $cat['label'] }}</h4>
-                    @if ($cat['limit'] && $cat['today_total'] > $cat['limit'])
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">@lang('messages.over_limit')</span>
+            @php $over = $cat['limit'] && $cat['today_total'] > $cat['limit']; @endphp
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($cat['period_total']) }}</div>
+                <div class="page-stat-label">{{ $cat['label'] }}</div>
+                <div class="page-stat-sub {{ $over ? 'usage-over' : '' }}">
+                    @lang('messages.today'): <span dir="ltr">{{ number_format($cat['today_total']).($cat['limit'] ? ' / '.number_format($cat['limit']) : '') }}</span>
+                    @if ($over)
+                    <span class="sr-only">@lang('messages.over_limit')</span>
                     @endif
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($cat['period_total']) }}</p>
-                <div class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-center">
-                    @lang('messages.today'): {{ number_format($cat['today_total']) }}
-                    @if ($cat['limit'])
-                    / {{ number_format($cat['limit']) }}
-                    @endif
-                </div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1 text-center">
-                    @lang('messages.avg_per_day', ['avg' => $cat['daily_avg']])
-                </div>
+                <div class="page-stat-sub">@lang('messages.avg_per_day', ['avg' => $cat['daily_avg']])</div>
             </div>
             @endforeach
         </div>
 
-        {{-- Operation Breakdown Table --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.operation_breakdown')</h3>
+        <x-page-card flush :title="__('messages.operation_breakdown')">
             @if (count($operationBreakdown) > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.operation')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.today')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.period_total')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.daily_avg')</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($operationBreakdown as $row)
-                        <tr>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ $row['operation'] }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-900 dark:text-white">{{ number_format($row['today']) }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-900 dark:text-white">{{ number_format($row['period_total']) }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $row['daily_avg'] }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            <table class="page-table">
+                <thead>
+                    <tr>
+                        <th scope="col">@lang('messages.operation')</th>
+                        <th scope="col" class="c-num">@lang('messages.today')</th>
+                        <th scope="col" class="c-num">@lang('messages.period_total')</th>
+                        <th scope="col" class="c-num">@lang('messages.daily_avg')</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($operationBreakdown as $row)
+                    <tr>
+                        <td class="c-main c-mono" dir="ltr">{{ $row['operation'] }}</td>
+                        <td class="c-num" data-label="{{ __('messages.today') }}">{{ number_format($row['today']) }}</td>
+                        <td class="c-num c-strong" data-label="{{ __('messages.period_total') }}">{{ number_format($row['period_total']) }}</td>
+                        <td class="c-num c-quiet" data-label="{{ __('messages.daily_avg') }}">{{ $row['daily_avg'] }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_usage_data')</p>
+            <x-page-empty compact :title="__('messages.no_usage_data')" />
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Top Roles by Usage --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.top_schedules_by_usage')</h3>
+        <x-page-card flush :title="__('messages.top_schedules_by_usage')">
             @if ($topRolesData->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div class="page-scroll">
+                <table class="page-table is-wide is-hover">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.total')</th>
+                            <th scope="col">@lang('messages.schedule')</th>
+                            <th scope="col" class="c-num">@lang('messages.total')</th>
                             @foreach ($categories as $key => $cat)
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $cat['label'] }}</th>
+                            <th scope="col" class="c-num">{{ $cat['label'] }}</th>
                             @endforeach
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                         @foreach ($topRolesData as $roleData)
                         <tr>
-                            <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $roleData['subdomain']]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $roleData['subdomain'] }}</a>
+                            <td class="c-main c-strong">
+                                <a href="{{ route('role.view_guest', ['subdomain' => $roleData['subdomain']]) }}" class="event-link" target="_blank" rel="noopener" dir="ltr">{{ $roleData['subdomain'] }}</a>
                             </td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ number_format($roleData['total']) }}</td>
+                            <td class="c-num c-strong" data-label="{{ __('messages.total') }}">{{ number_format($roleData['total']) }}</td>
+                            {{-- A provider the schedule never touched is left empty, so the columns
+                                 that do hold a number can be found. --}}
                             @foreach ($categories as $key => $cat)
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ number_format($roleData['categories'][$key] ?? 0) }}</td>
+                            <td class="c-num c-quiet" data-label="{{ $cat['label'] }}">{{ ($roleData['categories'][$key] ?? 0) > 0 ? number_format($roleData['categories'][$key]) : '' }}</td>
                             @endforeach
                         </tr>
                         @endforeach
@@ -112,95 +97,75 @@
                 </table>
             </div>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_schedule_usage_data')</p>
+            <x-page-empty compact :title="__('messages.no_schedule_usage_data')" />
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Top Newsletter Senders --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Newsletter Senders</h3>
+        {{-- Who sends the most newsletters, and on whose mail server. A schedule sending in
+             volume through the platform's own is the one this list exists to find. --}}
+        <x-page-card flush :title="__('messages.top_newsletter_senders')">
             @if ($topNewsletterData->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.schedule')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Emails Sent</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SMTP</th>
-                            {{-- Hosted only: off it actualPlanTier() is enterprise for every schedule. --}}
-                            @if (config('app.hosted'))
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Plan</th>
+            <table class="page-table is-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">@lang('messages.schedule')</th>
+                        <th scope="col" class="c-num">@lang('messages.emails_sent')</th>
+                        <th scope="col">SMTP</th>
+                        {{-- Hosted only: off it actualPlanTier() is enterprise for every schedule. --}}
+                        @if (config('app.hosted'))
+                        <th scope="col" data-col="plan">@lang('messages.plan')</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($topNewsletterData as $nlData)
+                    <tr>
+                        <td class="c-main c-strong">
+                            <a href="{{ route('role.view_guest', ['subdomain' => $nlData['subdomain']]) }}" class="event-link" target="_blank" rel="noopener" dir="ltr">{{ $nlData['subdomain'] }}</a>
+                        </td>
+                        <td class="c-num c-strong" data-label="{{ __('messages.emails_sent') }}">{{ number_format($nlData['total']) }}</td>
+                        <td>
+                            @if ($nlData['has_smtp'])
+                            <span class="event-status is-on">@lang('messages.custom')</span>
+                            @else
+                            <span class="event-status {{ $nlData['total'] > 50 ? 'is-bad' : '' }}">@lang('messages.platform')</span>
                             @endif
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($topNewsletterData as $nlData)
-                        <tr class="{{ !$nlData['has_smtp'] && $nlData['total'] > 50 ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
-                            <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $nlData['subdomain']]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $nlData['subdomain'] }}</a>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-white">{{ number_format($nlData['total']) }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                @if ($nlData['has_smtp'])
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Custom</span>
-                                @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Platform</span>
-                                @endif
-                            </td>
-                            @if (config('app.hosted'))
-                            <td class="px-4 py-3 text-sm text-end">
-                                @if ($nlData['plan_tier'] === 'enterprise')
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">Enterprise</span>
-                                @elseif ($nlData['plan_tier'] === 'pro')
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Pro</span>
-                                @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Free</span>
-                                @endif
-                            </td>
-                            @endif
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </td>
+                        @if (config('app.hosted'))
+                        <td><span class="event-chip">{{ __('messages.'.(in_array($nlData['plan_tier'], ['pro', 'enterprise'], true) ? $nlData['plan_tier'] : 'free')) }}</span></td>
+                        @endif
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">No newsletter email data for this period.</p>
+            <x-page-empty compact :title="__('messages.no_newsletter_usage_data')" />
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Translation Backlog --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.translation_backlog')</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@lang('messages.translation_backlog_description')</p>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pass</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pending</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Never Attempted</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Longest Waiting</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($translationBacklog as $pass)
-                        <tr>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{{ $pass['label'] }}</td>
-                            <td class="px-4 py-3 text-sm text-end {{ $pass['pending'] > 0 ? 'text-gray-900 dark:text-gray-200 font-medium' : 'text-gray-400 dark:text-gray-500' }}">{{ number_format($pass['pending']) }}</td>
-                            <td class="px-4 py-3 text-sm text-end {{ $pass['never_attempted'] > 0 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-400 dark:text-gray-500' }}">{{ number_format($pass['never_attempted']) }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">
-                                @if ($pass['oldest'])
-                                    {{ \Carbon\Carbon::parse($pass['oldest'])->diffForHumans() }}
-                                @else
-                                    Never
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <x-page-card flush :title="__('messages.translation_backlog')" :lead="__('messages.translation_backlog_description')">
+            <table class="page-table">
+                <thead>
+                    <tr>
+                        <th scope="col">@lang('messages.content')</th>
+                        <th scope="col" class="c-num">@lang('messages.pending')</th>
+                        <th scope="col" class="c-num">@lang('messages.translation_never_attempted')</th>
+                        <th scope="col" class="c-num">@lang('messages.translation_longest_waiting')</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($translationBacklog as $pass)
+                    <tr>
+                        <td class="c-main c-strong">{{ $pass['label'] }}</td>
+                        <td class="c-num {{ $pass['pending'] > 0 ? 'c-strong' : 'c-quiet' }}" data-label="{{ __('messages.pending') }}">{{ number_format($pass['pending']) }}</td>
+                        {{-- Amber: rows the run has never reached, which is the sign of a cron
+                             that is not keeping up. --}}
+                        <td class="c-num {{ $pass['never_attempted'] > 0 ? 'usage-waiting' : 'c-quiet' }}" data-label="{{ __('messages.translation_never_attempted') }}">{{ number_format($pass['never_attempted']) }}</td>
+                        <td class="c-num c-quiet" data-label="{{ __('messages.translation_longest_waiting') }}">{{ $pass['oldest'] ? \Carbon\Carbon::parse($pass['oldest'])->diffForHumans() : __('messages.never') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
 
             {{-- Kept out of the Pending column on purpose. These are schedules the roles pass has
                  to open to be sure, because their translations live under an `_en` sub-key inside
@@ -210,235 +175,195 @@
                  The run parks them with no AI call and no pause. --}}
             @php $usageRecheck = \App\Services\WorkBacklog::translationRecheck($translationBacklog); @endphp
             @if ($usageRecheck > 0)
-            <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <x-slot name="foot">
                 {{ trans_choice('messages.translation_recheck_note', $usageRecheck, ['count' => number_format($usageRecheck)]) }}
-            </p>
+            </x-slot>
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Stuck Translation Records --}}
+        {{-- Records the translation run keeps failing on. The four kinds were four copies of one
+             row; they are gathered into one list here and drawn once. --}}
         @php
-            $hasStuckRecords = $stuckRoles->count() > 0 || $stuckEvents->count() > 0 || $stuckEventParts->count() > 0 || $stuckEventRoles->count() > 0;
-        @endphp
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.stuck_translation_records')</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@lang('messages.stuck_translation_description', ['threshold' => $stuckThreshold])</p>
+            $never = __('messages.never');
+            $stuckRows = [];
 
-            @if ($hasStuckRecords)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            foreach ($stuckRoles as $record) {
+                $missing = [];
+                if (!empty($record->name) && is_null($record->name_en)) $missing[] = 'name_en';
+                if (!empty($record->description) && is_null($record->description_en)) $missing[] = 'description_en';
+                if (!empty($record->address1) && is_null($record->address1_en)) $missing[] = 'address1_en';
+                if (!empty($record->city) && is_null($record->city_en)) $missing[] = 'city_en';
+                if (!empty($record->state) && is_null($record->state_en)) $missing[] = 'state_en';
+                if (!empty($record->request_terms) && is_null($record->request_terms_en)) $missing[] = 'request_terms_en';
+                $stuckRows[] = [
+                    'kind' => __('messages.schedule'), 'type' => 'role', 'record' => $record,
+                    'name' => $record->name ?: $record->subdomain, 'subdomain' => $record->subdomain, 'note' => '#'.$record->id,
+                    'language' => $record->language_code, 'missing' => $missing,
+                    'preview' => $record->name ?: $record->description,
+                ];
+            }
+            foreach ($stuckEvents as $record) {
+                $missing = [];
+                if (!empty($record->name) && is_null($record->name_en)) $missing[] = 'name_en';
+                if (!empty($record->description) && is_null($record->description_en)) $missing[] = 'description_en';
+                $stuckRows[] = [
+                    'kind' => __('messages.event'), 'type' => 'event', 'record' => $record,
+                    'name' => \Illuminate\Support\Str::limit($record->name, 40), 'subdomain' => null, 'note' => '#'.$record->id,
+                    'language' => $record->venue?->language_code, 'missing' => $missing,
+                    'preview' => $record->name ?: $record->description,
+                ];
+            }
+            foreach ($stuckEventParts as $record) {
+                $missing = [];
+                if (!empty($record->name) && is_null($record->name_en)) $missing[] = 'name_en';
+                if (!empty($record->description) && is_null($record->description_en)) $missing[] = 'description_en';
+                $stuckRows[] = [
+                    'kind' => __('messages.agenda'), 'type' => 'event_part', 'record' => $record,
+                    'name' => \Illuminate\Support\Str::limit($record->name, 40), 'subdomain' => null,
+                    'note' => '#'.$record->id.' ('.mb_strtolower(__('messages.event')).' #'.$record->event_id.')',
+                    'language' => $record->event?->venue?->language_code, 'missing' => $missing,
+                    'preview' => $record->name ?: $record->description,
+                ];
+            }
+            foreach ($stuckEventRoles as $record) {
+                $missing = [];
+                if ($record->event && !empty($record->event->name) && is_null($record->name_translated)) $missing[] = 'name_translated';
+                if ($record->event && !empty($record->event->description) && is_null($record->description_translated)) $missing[] = 'description_translated';
+                $stuckRows[] = [
+                    'kind' => __('messages.curator').' / '.__('messages.event'), 'type' => 'event_role', 'record' => $record,
+                    'name' => $record->event?->name ? \Illuminate\Support\Str::limit($record->event->name, 25) : __('messages.event').' #'.$record->event_id,
+                    'subdomain' => $record->role?->subdomain,
+                    'note' => ($record->role?->subdomain ? '' : '@ #'.$record->role_id.' ').'#'.$record->id,
+                    'language' => $record->role?->language_code, 'missing' => $missing,
+                    'preview' => $record->event?->name,
+                ];
+            }
+        @endphp
+        <x-page-card flush :title="__('messages.stuck_translation_records')" :lead="__('messages.stuck_translation_description', ['threshold' => $stuckThreshold])">
+            @if (count($stuckRows) > 0)
+            <div class="page-scroll">
+                <table class="page-table is-wide">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name / ID</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Source Lang</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Missing Fields</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Content Preview</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Attempts</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Attempt</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
+                            <th scope="col">@lang('messages.name')</th>
+                            <th scope="col">@lang('messages.type')</th>
+                            <th scope="col">@lang('messages.language')</th>
+                            <th scope="col">@lang('messages.missing_fields')</th>
+                            <th scope="col" class="c-num">@lang('messages.attempts')</th>
+                            <th scope="col">@lang('messages.last_attempt')</th>
+                            <th scope="col"><span class="sr-only">@lang('messages.actions')</span></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($stuckRoles as $record)
-                        @php
-                            $missingFields = [];
-                            if (!empty($record->name) && is_null($record->name_en)) $missingFields[] = 'name_en';
-                            if (!empty($record->description) && is_null($record->description_en)) $missingFields[] = 'description_en';
-                            if (!empty($record->address1) && is_null($record->address1_en)) $missingFields[] = 'address1_en';
-                            if (!empty($record->city) && is_null($record->city_en)) $missingFields[] = 'city_en';
-                            if (!empty($record->state) && is_null($record->state_en)) $missingFields[] = 'state_en';
-                            if (!empty($record->request_terms) && is_null($record->request_terms_en)) $missingFields[] = 'request_terms_en';
-                        @endphp
+                    <tbody>
+                        @foreach ($stuckRows as $row)
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">@lang('messages.schedule')</td>
-                            <td class="px-4 py-3 text-sm">
-                                <a href="{{ route('role.view_guest', ['subdomain' => $record->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">{{ $record->name ?: $record->subdomain }}</a>
-                                <span class="text-gray-400">#{{ $record->id }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-sm">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ strtoupper($record->language_code ?? 'N/A') }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $record->name ?: $record->description }}">{{ \Illuminate\Support\Str::limit($record->name ?: $record->description, 50) }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
-                                    {{ $record->translation_attempts }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
-                            </td>
-                        </tr>
-                        @endforeach
-                        @foreach ($stuckEvents as $record)
-                        @php
-                            $missingFields = [];
-                            if (!empty($record->name) && is_null($record->name_en)) $missingFields[] = 'name_en';
-                            if (!empty($record->description) && is_null($record->description_en)) $missingFields[] = 'description_en';
-                            $langCode = $record->venue?->language_code;
-                        @endphp
-                        <tr>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Event</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ \Illuminate\Support\Str::limit($record->name, 40) }} <span class="text-gray-400">#{{ $record->id }}</span></td>
-                            <td class="px-4 py-3 text-sm">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ strtoupper($langCode ?? 'N/A') }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $record->name ?: $record->description }}">{{ \Illuminate\Support\Str::limit($record->name ?: $record->description, 50) }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
-                                    {{ $record->translation_attempts }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="event" data-id="{{ $record->id }}">@lang('messages.retry')</button>
-                            </td>
-                        </tr>
-                        @endforeach
-                        @foreach ($stuckEventParts as $record)
-                        @php
-                            $missingFields = [];
-                            if (!empty($record->name) && is_null($record->name_en)) $missingFields[] = 'name_en';
-                            if (!empty($record->description) && is_null($record->description_en)) $missingFields[] = 'description_en';
-                            $langCode = $record->event?->venue?->language_code;
-                        @endphp
-                        <tr>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">EventPart</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ \Illuminate\Support\Str::limit($record->name, 40) }} <span class="text-gray-400">#{{ $record->id }} (event #{{ $record->event_id }})</span></td>
-                            <td class="px-4 py-3 text-sm">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ strtoupper($langCode ?? 'N/A') }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" title="{{ $record->name ?: $record->description }}">{{ \Illuminate\Support\Str::limit($record->name ?: $record->description, 50) }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
-                                    {{ $record->translation_attempts }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="event_part" data-id="{{ $record->id }}">@lang('messages.retry')</button>
-                            </td>
-                        </tr>
-                        @endforeach
-                        @foreach ($stuckEventRoles as $record)
-                        @php
-                            $missingFields = [];
-                            if ($record->event && !empty($record->event->name) && is_null($record->name_translated)) $missingFields[] = 'name_translated';
-                            if ($record->event && !empty($record->event->description) && is_null($record->description_translated)) $missingFields[] = 'description_translated';
-                            $langCode = $record->role?->language_code;
-                        @endphp
-                        <tr>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">EventRole</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                {{ $record->event?->name ? \Illuminate\Support\Str::limit($record->event->name, 25) : 'Event #' . $record->event_id }}
-                                @if($record->role?->subdomain)
-                                    <a href="{{ route('role.view_guest', ['subdomain' => $record->role->subdomain]) }}" class="text-[var(--brand-blue)] hover:underline" target="_blank">@ {{ $record->role->subdomain }}</a>
-                                @else
-                                    <span class="text-gray-400">@ Role #{{ $record->role_id }}</span>
+                            <td class="c-main" title="{{ $row['preview'] }}">
+                                <span class="c-strong"><bdi>{{ $row['name'] }}</bdi></span>
+                                @if ($row['subdomain'])
+                                <a href="{{ route('role.view_guest', ['subdomain' => $row['subdomain']]) }}" class="event-link" target="_blank" rel="noopener" dir="ltr">{{ '@'.$row['subdomain'] }}</a>
                                 @endif
-                                <span class="text-gray-400">#{{ $record->id }}</span>
+                                <span class="c-quiet" dir="ltr">{{ $row['note'] }}</span>
                             </td>
-                            <td class="px-4 py-3 text-sm">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ strtoupper($langCode ?? 'N/A') }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">{{ implode(', ', $missingFields) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ \Illuminate\Support\Str::limit($record->event?->name, 50) }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $record->translation_attempts >= $stuckThreshold * 2 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }}">
-                                    {{ $record->translation_attempts }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-500 dark:text-gray-400">{{ $record->last_translated_at ? $record->last_translated_at->diffForHumans() : 'Never' }}</td>
-                            <td class="px-4 py-3 text-sm text-end">
-                                <button class="js-retry-translation text-xs text-[var(--brand-blue)] hover:underline" data-type="event_role" data-id="{{ $record->id }}">@lang('messages.retry')</button>
+                            <td class="c-quiet">{{ $row['kind'] }}</td>
+                            <td><span class="event-chip" dir="ltr">{{ strtoupper($row['language'] ?? 'N/A') }}</span></td>
+                            <td class="c-mono c-quiet c-wrap" dir="ltr">{{ implode(', ', $row['missing']) }}</td>
+                            {{-- Red once it has failed twice as often as it takes to be listed. --}}
+                            <td class="c-num {{ $row['record']->translation_attempts >= $stuckThreshold * 2 ? 'usage-over' : 'usage-waiting' }}" data-label="{{ __('messages.attempts') }}">{{ $row['record']->translation_attempts }}</td>
+                            <td class="c-date">{{ $row['record']->last_translated_at ? $row['record']->last_translated_at->diffForHumans() : $never }}</td>
+                            <td class="c-actions">
+                                <button type="button" class="js-retry-translation event-link" data-type="{{ $row['type'] }}" data-id="{{ $row['record']->id }}">@lang('messages.retry')</button>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-
-            <script {!! nonce_attr() !!}>
-                document.addEventListener('click', function(e) {
-                    var button = e.target.closest('.js-retry-translation');
-                    if (!button) return;
-                    retryTranslation(button.getAttribute('data-type'), parseInt(button.getAttribute('data-id')), button);
-                });
-
-                function retryTranslation(type, id, button) {
-                    const originalText = button.textContent;
-                    button.textContent = '...';
-                    button.disabled = true;
-
-                    fetch('{{ route("admin.translation.retry") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            // Accept, not just Content-Type: Content-Type describes the REQUEST
-                            // body and has no bearing on expectsJson(), so without this a lapsed
-                            // admin re-auth window 302s to HTML and the button reports a
-                            // meaningless error instead of a password prompt.
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ type: type, id: id })
-                    })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Request failed');
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            button.textContent = @json(__("messages.done"));
-                            button.classList.remove('text-[var(--brand-blue)]');
-                            button.classList.add('text-green-600', 'dark:text-green-400');
-                            // Optionally remove the row after a short delay
-                            setTimeout(() => {
-                                button.closest('tr').remove();
-                            }, 1000);
-                        } else {
-                            button.textContent = 'Error';
-                            button.classList.remove('text-[var(--brand-blue)]');
-                            button.classList.add('text-red-600', 'dark:text-red-400');
-                            setTimeout(() => {
-                                button.textContent = originalText;
-                                button.classList.remove('text-red-600', 'dark:text-red-400');
-                                button.classList.add('text-[var(--brand-blue)]');
-                                button.disabled = false;
-                            }, 2000);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        button.textContent = 'Error';
-                        button.classList.remove('text-[var(--brand-blue)]');
-                        button.classList.add('text-red-600', 'dark:text-red-400');
-                        setTimeout(() => {
-                            button.textContent = originalText;
-                            button.classList.remove('text-red-600', 'dark:text-red-400');
-                            button.classList.add('text-[var(--brand-blue)]');
-                            button.disabled = false;
-                        }, 2000);
-                    });
-                }
-            </script>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_stuck_translations')</p>
+            <x-page-empty compact :title="__('messages.no_stuck_translations')" />
             @endif
-        </div>
+        </x-page-card>
     </div>
+
+    <x-slot name="head">
+        @include('admin.partials._insight-styles')
+        <style {!! nonce_attr() !!}>
+            /* The two colours this page uses, each for one thing: over a limit (or failing again
+               and again), and still waiting. */
+            .usage-over,
+            .page-table .usage-over {
+              font-weight: 600;
+              color: #b91c1c;
+            }
+            .dark .usage-over,
+            .dark .page-table .usage-over {
+              color: #f87171;
+            }
+            .page-table .usage-waiting {
+              font-weight: 600;
+              color: #b45309;
+            }
+            .dark .page-table .usage-waiting {
+              color: #fbbf24;
+            }
+        </style>
+    </x-slot>
+
+    <script {!! nonce_attr() !!}>
+        document.addEventListener('click', function(e) {
+            var button = e.target.closest('.js-retry-translation');
+            if (!button) return;
+            retryTranslation(button.getAttribute('data-type'), parseInt(button.getAttribute('data-id')), button);
+        });
+
+        function retryTranslation(type, id, button) {
+            const originalText = button.textContent;
+            // What the button says when the retry did not go through, then what it said before.
+            const failed = function() {
+                button.textContent = @json(__('messages.error'));
+                button.classList.add('is-danger');
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('is-danger');
+                    button.disabled = false;
+                }, 2000);
+            };
+            button.textContent = '...';
+            button.disabled = true;
+
+            fetch('{{ route("admin.translation.retry") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Accept, not just Content-Type: Content-Type describes the REQUEST
+                    // body and has no bearing on expectsJson(), so without this a lapsed
+                    // admin re-auth window 302s to HTML and the button reports a
+                    // meaningless error instead of a password prompt.
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ type: type, id: id })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Request failed');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    button.textContent = @json(__("messages.done"));
+                    // The row goes after a moment, so the word can be read first.
+                    setTimeout(() => {
+                        button.closest('tr').remove();
+                    }, 1000);
+                } else {
+                    failed();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                failed();
+            });
+        }
+    </script>
 
 </x-app-admin-layout>

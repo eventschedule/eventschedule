@@ -26,7 +26,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Mail is configured once for the whole install, in your <code class="doc-inline-code">.env</code> file. Every schedule on the instance sends through that one mail transport. Without a working mail configuration these features do nothing:</p>
 
-        <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div class="doc-fields doc-fields--2">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Ticket and booking confirmations</h3>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">The confirmation a buyer receives after checkout, with the ticket details and QR code, plus appointment confirmations, reminders and reschedule notices, and gift card deliveries.</p>
@@ -47,13 +47,30 @@
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">The default is not a real mail transport</div>
-            <p>Out of the box <code class="doc-inline-code">MAIL_MAILER=log</code>. Event Schedule treats <code class="doc-inline-code">log</code> and <code class="doc-inline-code">array</code> as "no mail transport", so ticket and pass confirmations, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages, poll suggestion notices, the new-event digest and the interest list's on-sale and reminder emails are <strong class="text-gray-900 dark:text-white">skipped entirely</strong> rather than delivered. Mail that is not gated this way, such as password resets, verification emails, team invitations, waitlist openings, newsletters, sign-up confirmations and the interest list's cancellation and change notices, is written into <code class="doc-inline-code">storage/logs/laravel.log</code> instead of being sent. The sign-up panel and the <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> form keep collecting addresses on an install left like this, and nobody who uses them hears back. Configure a real driver before you take a single booking.</p>
+            <p>Out of the box <code class="doc-inline-code">MAIL_MAILER=log</code>, and Event Schedule treats <code class="doc-inline-code">log</code> and <code class="doc-inline-code">array</code> as "no mail transport": nothing is delivered. The sign-up panel and the <strong class="text-gray-900 dark:text-white">Tell me when tickets go on sale</strong> form keep collecting addresses on an install left like this, and nobody who uses them hears back. Configure a real driver before you take a single booking.</p>
         </div>
 
-        <div class="doc-callout doc-callout-info mt-6">
-            <div class="doc-callout-title">Install-wide, and never plan-gated</div>
-            <p>A selfhosted install resolves to the Enterprise feature set, so no email feature here is held back by a plan. Note the difference from the hosted service: the per-schedule <strong class="text-gray-900 dark:text-white">Email Settings</strong> tab, found in a schedule's Settings under Integrations, is only rendered when the app runs in hosted mode, and the monthly newsletter allowance, which on the hosted service counts individual recipients rather than newsletters, does not apply to a selfhosted install at all. Your schedules send unlimited newsletters to unlimited recipients through the mail transport you configure below.</p>
+        <h3 id="no-transport" class="doc-subheading">What happens with no mail transport</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">While <code class="doc-inline-code">MAIL_MAILER</code> is <code class="doc-inline-code">log</code> or <code class="doc-inline-code">array</code>, an email goes one of two ways:</p>
+
+        <div class="doc-fields doc-fields--2">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Skipped, with nothing logged</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Ticket and pass confirmations, appointment emails, gift card emails, sale alerts, feedback requests, carpool messages, installment notices, poll suggestion notices, change and cancellation notices to ticket buyers, the new-event digest and the interest list's on-sale and reminder emails.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Written to the log instead of sent</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Mail that is not gated this way ends up in <code class="doc-inline-code">storage/logs/laravel.log</code>: password resets, verification emails, team invitations, waitlist openings, newsletters, sign-up confirmations, scheduled event graphic emails and the interest list's cancellation and change notices, among others.</p>
+            </div>
         </div>
+
+        <h3 id="hosted-differences" class="doc-subheading">What differs from the hosted service</h3>
+        <ul class="doc-list">
+            <li><strong class="text-gray-900 dark:text-white">No plan gate.</strong> A selfhosted install resolves to the Enterprise feature set, so no email feature here is held back by a plan.</li>
+            <li><strong class="text-gray-900 dark:text-white">No per-schedule sender.</strong> The <strong class="text-gray-900 dark:text-white">Email Settings</strong> row, on the <strong class="text-gray-900 dark:text-white">Integrations</strong> tab of the schedule form, is drawn only in hosted mode. Every schedule on your install sends through the transport you configure below. See <a href="#sender" class="doc-link">Sender Configuration</a>.</li>
+            <li><strong class="text-gray-900 dark:text-white">No newsletter allowance.</strong> The monthly allowance of the hosted service, which counts individual recipients rather than newsletters, does not apply. Your schedules send unlimited newsletters to unlimited recipients.</li>
+            <li><strong class="text-gray-900 dark:text-white">No platform mail.</strong> Onboarding and activation nudges, the weekly owner digest, plan renewal reminders and referral credit notices belong to the hosted service. Their scheduled tasks do nothing while <code class="doc-inline-code">IS_HOSTED=false</code>.</li>
+        </ul>
     </section>
 
     <!-- What Is Sent Automatically -->
@@ -102,6 +119,41 @@
                         <td>Sent when they sign up. Clicking the link confirms the subscription. With <code class="doc-inline-code">ALLOW_REGISTRATION=true</code> it also sets up a passwordless account that follows the schedule; with registration closed, the default on a selfhosted install, the address is confirmed and nothing more.</td>
                     </tr>
                     <tr>
+                        <td>Waitlist opening</td>
+                        <td>The person who has waited longest on a sold-out event's waitlist</td>
+                        <td>Sent when a place comes back, for example when a sale is cancelled, refunded or expires. They have 24 hours to buy. An hourly task then closes the offer and makes it to the next person. See <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="doc-link">Waitlist</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Appointment reminder</td>
+                        <td>The guest of a confirmed appointment booking</td>
+                        <td>Checked every hour. One reminder for each booking that starts within the next 24 hours. A booking still waiting for approval, or for an online payment, gets none.</td>
+                    </tr>
+                    <tr>
+                        <td>Feedback request</td>
+                        <td>Buyers and registered attendees</td>
+                        <td>Checked every hour, while <strong class="text-gray-900 dark:text-white">Post-event feedback</strong> is on for the schedule or the event. One request per order, sent once the delay the schedule chose has passed since the event ended (24 hours unless changed), and never more than 30 days after it. Pass purchases get none. See <a href="{{ route('marketing.docs.tickets') }}#feedback" class="doc-link">Feedback</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Carpool reminder</td>
+                        <td>A rider with an approved seat, and the driver</td>
+                        <td>Checked every hour. One reminder in the 24 hours before the event starts, or before it ends for a ride home. Anyone who has unsubscribed from email gets none.</td>
+                    </tr>
+                    <tr>
+                        <td>Installment notices</td>
+                        <td>A buyer paying for tickets in installments</td>
+                        <td>Checked every hour. A heads-up two days before each charge, a notice when a charge fails, needs the buyer to authenticate or leaves the plan on hold, and a final notice a week before the event to anyone who still owes a balance. See <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">Installments</a>.</td>
+                    </tr>
+                    <tr>
+                        <td>Daily notice of what is waiting</td>
+                        <td>Team members who switched the notification on, and the schedule's shared notification address</td>
+                        <td>Once a day, at 12:00 in the app's timezone. A schedule that requires approval is told when more event requests are waiting than at the last notice. The same run reports new poll suggestions, and tells an event's creator about audience comments, photos and videos waiting for review.</td>
+                    </tr>
+                    <tr>
+                        <td>Scheduled event graphic</td>
+                        <td>The addresses listed under <strong class="text-gray-900 dark:text-white">Send To</strong> in the schedule's graphic email settings</td>
+                        <td>Checked every hour. Sent daily, weekly or monthly, at the hour the owner chose in the schedule's timezone, at most once per period. See <a href="{{ route('marketing.docs.event_graphics') }}#email-scheduling" class="doc-link">Email scheduling</a>.</td>
+                    </tr>
+                    <tr>
                         <td>Invitation to claim a page</td>
                         <td>A performer or venue an organizer named who is not on the install</td>
                         <td>Sent on the hosted service only. A selfhosted install creates the page but never emails an invitation to claim it.</td>
@@ -110,7 +162,7 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4 mt-6">The digest and the interest list's on-sale and reminder emails come from hourly scheduled tasks, so they need the <code class="doc-inline-code">schedule:run</code> cron entry from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> even when <code class="doc-inline-code">QUEUE_CONNECTION=sync</code>. Four optional variables change their timing and their size:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 mt-6">Every row that is checked on the hour or once a day is a scheduled task, so it needs the <code class="doc-inline-code">schedule:run</code> cron entry from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> even when <code class="doc-inline-code">QUEUE_CONNECTION=sync</code>. Six optional variables change the timing and the size of the digest and the interest list's emails:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -128,6 +180,11 @@
                         <td>The least time between two digests from one schedule. The sign-up confirmation promises "At most one email every few days", so keep it at a few days.</td>
                     </tr>
                     <tr>
+                        <td><code class="doc-inline-code">AUDIENCE_ANNOUNCEMENT_BATCH</code></td>
+                        <td><code class="doc-inline-code">100</code></td>
+                        <td>The most schedules one hourly run handles. The rest wait for the next run.</td>
+                    </tr>
+                    <tr>
                         <td><code class="doc-inline-code">AUDIENCE_ANNOUNCEMENT_RECIPIENT_BATCH</code></td>
                         <td><code class="doc-inline-code">2000</code></td>
                         <td>The most digest emails one hourly run queues. Schedules past that point go out on the next run.</td>
@@ -141,6 +198,11 @@
                         <td><code class="doc-inline-code">EVENT_INTEREST_RECIPIENT_BATCH</code></td>
                         <td><code class="doc-inline-code">2000</code></td>
                         <td>The most interest-list emails one hourly run queues. The rest go out on the next run.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">EVENT_INTEREST_TICKETS_MAX_AGE_DAYS</code></td>
+                        <td><code class="doc-inline-code">180</code></td>
+                        <td>How many days a request to hear when tickets go on sale keeps waiting. After that the on-sale email is no longer sent for it.</td>
                     </tr>
                 </tbody>
             </table>
@@ -361,10 +423,7 @@
             <p>There is no <code class="doc-inline-code">mailgun</code> mailer in <code class="doc-inline-code">config/mail.php</code>, so <code class="doc-inline-code">MAIL_MAILER=mailgun</code> will not boot, and <code class="doc-inline-code">MAILGUN_DOMAIN</code> and <code class="doc-inline-code">MAILGUN_SECRET</code> are not read anywhere. Use Mailgun through <a href="#smtp" class="doc-link">SMTP</a> instead, which is the same infrastructure and needs no extra package.</p>
         </div>
 
-        <div class="doc-callout doc-callout-tip mt-6">
-            <div class="doc-callout-title">Recommendation</div>
-            <p>For production selfhosted instances, we recommend SMTP pointed at a transactional email service such as Mailgun, Amazon SES or Postmark. These services are built for application-generated email, they let you authenticate your sending domain, and they give you far better deliverability than a personal mailbox.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300">For a production install we recommend SMTP pointed at a transactional email service such as Mailgun, Amazon SES or Postmark. These services are built for application-generated email, they let you authenticate your sending domain, and they deliver far better than a personal mailbox.</p>
     </section>
 
     <!-- Sender Configuration -->
@@ -387,7 +446,7 @@
         </div>
 
         <h3 class="doc-subheading">One sender for every schedule</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From address for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the Email Settings tab that lets an owner supply their own SMTP credentials is part of the hosted service and is not rendered when the app runs selfhosted, so mail that a hosted schedule may only send from its own address, such as change and cancellation notices to ticket buyers, goes out from this one (see <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>). Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a selfhosted install this is the From address for all outgoing mail, whichever schedule triggered it. There is no per-schedule sender to configure: the <strong class="text-gray-900 dark:text-white">Email Settings</strong> row of the schedule form's <strong class="text-gray-900 dark:text-white">Integrations</strong> tab, where an owner supplies their own SMTP credentials, is part of the hosted service and is not rendered when the app runs selfhosted, so mail that a hosted schedule may only send from its own address, such as change and cancellation notices to ticket buyers, goes out from this one (see <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a>). Pick an address that reads sensibly for every schedule on the instance, and one you can actually receive replies at.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Three emails also name the schedule. The sign-up confirmation, the new-event digest and the interest list's emails keep your address but put the schedule in the sender name, for example "The Blue Note via My Event Schedule" with the settings above, and send replies to the schedule's own email address when it has one.</p>
 
         <div class="doc-callout doc-callout-info">
@@ -410,42 +469,51 @@
             </svg>
             Testing
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">After configuring your email settings, verify that mail is really being sent. The Send Test Email button in the admin portal belongs to the hosted per-schedule email settings, so on a selfhosted install you test from the command line.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">After configuring your email settings, verify that mail is really being sent. The <strong class="text-gray-900 dark:text-white">Send Test Email</strong> button for SMTP settings belongs to the hosted-only <strong class="text-gray-900 dark:text-white">Email Settings</strong> row, so on a selfhosted install you test the transport from the command line.</p>
 
-        <h3 class="doc-subheading">1. Clear the config cache</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Laravel caches <code class="doc-inline-code">.env</code> values, so do this first or you will be testing the old configuration:</p>
+        <ol class="doc-steps">
+            <li class="doc-step">
+                <h4 class="doc-step-title">Clear the config cache</h4>
+                <p>Laravel caches <code class="doc-inline-code">.env</code> values, so do this first or you will be testing the old configuration:</p>
 
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>bash</span>
-                <button class="doc-copy-btn">Copy</button>
-            </div>
-            <pre><code>php artisan config:clear</code></pre>
-        </div>
+                <div class="doc-code-block">
+                    <div class="doc-code-header">
+                        <span>bash</span>
+                        <button class="doc-copy-btn">Copy</button>
+                    </div>
+                    <pre><code>php artisan config:clear</code></pre>
+                </div>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Send a test message</h4>
+                <p>Use Laravel's built-in Artisan command to send a test email:</p>
 
-        <h3 class="doc-subheading">2. Send a test message</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Use Laravel's built-in Artisan command to send a test email:</p>
+                <div class="doc-code-block">
+                    <div class="doc-code-header">
+                        <span>bash</span>
+                        <button class="doc-copy-btn">Copy</button>
+                    </div>
+                    <pre><code>php artisan tinker --execute="Mail::raw('Test email from Event Schedule', function(\$m) { \$m->to('your@email.com')->subject('Test'); });"</code></pre>
+                </div>
 
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>bash</span>
-                <button class="doc-copy-btn">Copy</button>
-            </div>
-            <pre><code>php artisan tinker --execute="Mail::raw('Test email from Event Schedule', function(\$m) { \$m->to('your@email.com')->subject('Test'); });"</code></pre>
-        </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-6 mt-4">Send it to a real mailbox you can open. Addresses on the reserved test domains (<code class="doc-inline-code">example.com</code>, <code class="doc-inline-code">example.org</code>, <code class="doc-inline-code">example.net</code>, <code class="doc-inline-code">test.com</code>, <code class="doc-inline-code">test.org</code>, <code class="doc-inline-code">test.net</code>) and anything at <code class="doc-inline-code">@localhost</code> are deliberately never emailed by the app's own notifications.</p>
-
-        <h3 class="doc-subheading">3. Confirm queued mail is being processed</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket confirmations, sale alerts and newsletter batches are dispatched as background jobs rather than sent inline. Which means:</p>
-        <ul class="doc-list mb-6">
-            <li>With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately, in the same request. Nothing extra is needed.</li>
-            <li>With <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code> they wait for a worker. Event Schedule's scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute and retries failed jobs every five minutes, so the <code class="doc-inline-code">schedule:run</code> cron job from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> is what actually drains the mail queue. No cron, no email.</li>
-            <li>Scheduled newsletters are also released by that same cron, once a minute.</li>
-            <li>The new-event digest and the interest list's on-sale and reminder emails are sent by hourly tasks on that same cron, whatever the queue connection.</li>
-        </ul>
-
-        <p class="text-gray-600 dark:text-gray-300">A real end-to-end check is a free RSVP or a test ticket purchase on one of your own schedules: it exercises the queue, the mailable and the sender address together.</p>
+                <p>Send it to a real mailbox you can open. Addresses on the reserved test domains (<code class="doc-inline-code">example.com</code>, <code class="doc-inline-code">example.org</code>, <code class="doc-inline-code">example.net</code>, <code class="doc-inline-code">test.com</code>, <code class="doc-inline-code">test.org</code>, <code class="doc-inline-code">test.net</code>) and anything at <code class="doc-inline-code">@localhost</code> are deliberately never emailed by the app's own notifications.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Confirm queued mail is being processed</h4>
+                <p>Ticket confirmations, sale alerts and newsletter batches are dispatched as background jobs rather than sent inline. Which means:</p>
+                <ul class="doc-list">
+                    <li>With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately, in the same request. Nothing extra is needed.</li>
+                    <li>With <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code> they wait for a worker. Event Schedule's scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute and retries failed jobs every five minutes, so the <code class="doc-inline-code">schedule:run</code> cron job from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a> is what actually drains the mail queue. No cron, no email.</li>
+                    <li>Scheduled newsletters are also released by that same cron, once a minute.</li>
+                    <li>The hourly and daily emails listed under <a href="#what-is-sent" class="doc-link">What Is Sent Automatically</a> are sent by tasks on that same cron, whatever the queue connection.</li>
+                </ul>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Run one through the app</h4>
+                <p>A real end-to-end check is a free RSVP or a test ticket purchase on one of your own schedules: it exercises the queue, the mailable and the sender address together.</p>
+                <p>Two buttons inside the app also send through your transport once their feature is set up: <strong class="text-gray-900 dark:text-white">Send test feedback email</strong>, in the <strong class="text-gray-900 dark:text-white">Feedback</strong> row of the schedule form's <strong class="text-gray-900 dark:text-white">Engagement</strong> tab while <strong class="text-gray-900 dark:text-white">Post-event feedback</strong> is on, and <strong class="text-gray-900 dark:text-white">Send Test Email</strong> in a schedule's <a href="{{ route('marketing.docs.event_graphics') }}#email-scheduling" class="doc-link">graphic email settings</a>. With <code class="doc-inline-code">MAIL_MAILER</code> still on <code class="doc-inline-code">log</code> or <code class="doc-inline-code">array</code>, the feedback test answers "Email settings are not configured" instead of sending.</p>
+            </li>
+        </ol>
     </section>
 
     <!-- Troubleshooting -->
@@ -458,7 +526,7 @@
             Troubleshooting
         </h2>
 
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Emails not sending</h3>
                 <ul class="doc-list text-sm">
@@ -466,6 +534,7 @@
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code> after changing <code class="doc-inline-code">.env</code></li>
                     <li>Check <code class="doc-inline-code">storage/logs/laravel.log</code> for error messages</li>
                     <li>If <code class="doc-inline-code">QUEUE_CONNECTION</code> is not <code class="doc-inline-code">sync</code>, confirm the <code class="doc-inline-code">schedule:run</code> cron job is installed. It is what runs the queue worker; check <code class="doc-inline-code">storage/logs/scheduler.log</code> and the <code class="doc-inline-code">failed_jobs</code> table</li>
+                    <li>The admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#system-queue" class="doc-link">Queue</a> page, under <strong class="text-gray-900 dark:text-white">System</strong>, shows the same from inside the app: when the scheduler last ran, the pending jobs and the failed ones with their errors</li>
                 </ul>
             </div>
 

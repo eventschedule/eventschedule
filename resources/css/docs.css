@@ -402,6 +402,10 @@ a .doc-inline-code { color: inherit; }
    one without touching a single blade file. Body text stays the normal prose
    colour - only the title and icon carry the tint. Tinting the whole block is
    why info callouts used to read as a wall of blue.
+
+   One hairline all the way round and a tinted ground: never a thicker edge on
+   one side. A coloured stripe down the side of a box is ruled out everywhere
+   in this product (CLAUDE.md), and the icon already says which kind it is.
    ========================================================================== */
 
 .doc-callout {
@@ -411,7 +415,6 @@ a .doc-inline-code { color: inherit; }
     padding: 0.9375rem 1.125rem;
     margin: 0 0 1.5rem;
     border: 1px solid var(--doc-callout-line);
-    border-inline-start-width: 3px;
     border-radius: 0.75rem;
     background: var(--doc-callout-bg);
     color: var(--doc-text);
@@ -505,26 +508,14 @@ a .doc-inline-code { color: inherit; }
     transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-/* Hue tick in the gutter: quiet at rest, full on hover. Gives a stack of cards
-   rhythm without adding colour weight. */
-.doc-field::before {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    width: 3px;
-    background: var(--doc-hue);
-    opacity: 0.28;
-    transition: opacity 0.18s ease;
-}
-
+/* No tick down the side: the cards had a 3px hue bar in the gutter until
+   2026-10, which is the side-stripe this product does not use. Hover lifts the
+   card and firms its border instead. */
 .doc-field:hover {
     border-color: var(--doc-border-strong);
     box-shadow: var(--doc-shadow-md);
     transform: translateY(-1px);
 }
-
-.doc-field:hover::before { opacity: 1; }
 
 /* Element selectors, so the existing inner nodes keep their utilities
    harmlessly - `.doc-field > h4` (0,1,1) beats `.font-semibold` (0,1,0). */
@@ -569,9 +560,7 @@ a .doc-inline-code { color: inherit; }
 }
 
 .doc-fields--grouped .doc-field:last-child { border-bottom: 0; }
-.doc-fields--grouped .doc-field::before { opacity: 0; }
 .doc-fields--grouped .doc-field:hover { background: var(--doc-surface-2); transform: none; box-shadow: none; }
-.doc-fields--grouped .doc-field:hover::before { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
     .doc-field { transition: none; }
@@ -717,6 +706,12 @@ a .doc-inline-code { color: inherit; }
     .doc-table { font-size: 0.8125rem; }
     .doc-table thead th,
     .doc-table tbody td { padding: 0.5625rem 0.75rem; }
+
+    /* A heading kept on one line is the widest thing in most of these tables
+       ("Newsletter emails per month" over a column of numbers), and it alone
+       pushed two and three column tables off the side of a phone. Wrapped,
+       they fit; a table that is really wide still scrolls. */
+    .doc-table thead th { white-space: normal; }
 
     /* Freeze the key column so a row never loses its label while scrolling. */
     .doc-table tbody td:first-child,
@@ -887,10 +882,13 @@ a .doc-inline-code { color: inherit; }
 
 .doc-list .doc-list { margin: 0.4375rem 0 0; padding-inline-start: 0.5rem; }
 
+/* Direct children only: a bullet list inside a numbered step was numbered on
+   as steps 4, 5 and 6 (the old `li` selector reached every level), which is
+   how a seven-step procedure came to print ten numbers. */
 .doc-list.doc-list-numbered { counter-reset: doc-li; }
-.doc-list.doc-list-numbered li { counter-increment: doc-li; padding-inline-start: 2.125rem; }
+.doc-list.doc-list-numbered > li { counter-increment: doc-li; padding-inline-start: 2.125rem; }
 
-.doc-list.doc-list-numbered li::before {
+.doc-list.doc-list-numbered > li::before {
     content: counter(doc-li);
     display: flex;
     align-items: center;
@@ -971,11 +969,15 @@ a .doc-inline-code { color: inherit; }
    12. Screenshots
    ========================================================================== */
 
+/* <x-doc-screenshot>. The frame is a link to the picture at full size: a
+   1280px screenshot is readable in the 52rem column and a thumbnail on a
+   phone, where opening it is the only way to read what it shows. */
 .doc-shot { margin: 1.5rem 0; }
 
 .doc-shot-frame {
     position: relative;
     display: block;
+    cursor: zoom-in;
     overflow: hidden;
     border-radius: 0.9375rem;
     border: 1px solid var(--doc-border);
@@ -984,6 +986,7 @@ a .doc-inline-code { color: inherit; }
     text-decoration: none;
 }
 
+.doc-shot-frame picture { display: block; }
 .doc-shot-img { display: block; width: 100%; height: auto; }
 
 .doc-shot-zoom {
@@ -1004,6 +1007,11 @@ a .doc-inline-code { color: inherit; }
 
 a.doc-shot-frame:hover .doc-shot-zoom,
 a.doc-shot-frame:focus-visible .doc-shot-zoom { opacity: 1; transform: none; }
+
+/* Nothing hovers on a touch screen, which is where the label matters most. */
+@media (hover: none) {
+    .doc-shot-zoom { opacity: 1; transform: none; }
+}
 a.doc-shot-frame:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: 3px; }
 
 .doc-shot figcaption {
@@ -1503,6 +1511,5 @@ a.doc-nav-group-header:hover { color: var(--doc-text-strong); }
     .doc-cta { border: 1px solid CanvasText; }
 
     .doc-callout::before,
-    .doc-subheading::before,
-    .doc-field::before { forced-color-adjust: none; }
+    .doc-subheading::before { forced-color-adjust: none; }
 }

@@ -1,131 +1,398 @@
 <x-app-admin-layout>
+    <x-slot name="head">
+        <style {!! nonce_attr() !!}>
+            /* A small button that destroys something: the weight of .page-tool, in red. */
+            .page-tool.is-danger {
+              border-color: rgba(220, 38, 38, 0.4);
+              color: #b91c1c;
+            }
+            .page-tool.is-danger:hover {
+              border-color: #dc2626;
+              background: rgba(220, 38, 38, 0.08);
+              color: #b91c1c;
+            }
+            .dark .page-tool.is-danger,
+            .dark .page-tool.is-danger:hover {
+              border-color: rgba(248, 113, 113, 0.5);
+              color: #f87171;
+            }
+            /* The verdict at the end of a card's head: the kit's status mark, a size up, so
+               "Never run" is the first thing read on the card without being a red headline. */
+            .sys-verdict {
+              font-size: 1rem;
+              font-weight: 600;
+            }
+            .sys-verdict::before {
+              width: 0.625rem;
+              height: 0.625rem;
+            }
+            .sys-figure {
+              font-size: 1rem;
+              font-weight: 600;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink));
+            }
+            /* The blocks of a card, side by side where there is room. The lines between them
+               are drawn as the kit draws a strip's, so they hold wherever the row breaks. */
+            .sys-cols {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+              overflow: hidden;
+            }
+            .sys-cols > div {
+              min-width: 0;
+              padding: 1rem 1.25rem;
+              box-shadow: -1px 0 0 rgb(var(--ap-border)), 0 -1px 0 rgb(var(--ap-border));
+            }
+            [dir="rtl"] .sys-cols > div {
+              box-shadow: 1px 0 0 rgb(var(--ap-border)), 0 -1px 0 rgb(var(--ap-border));
+            }
+            .sys-label {
+              margin: 0 0 0.5rem;
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink-3));
+            }
+            .sys-text {
+              margin: 0;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink));
+            }
+            .sys-cols .page-kv > div {
+              border-top: 0;
+              padding: 0.125rem 0;
+            }
+            /* The name keeps its line; a long value (a container's host) is the one cut short. */
+            .sys-cols .page-kv dt {
+              flex: none;
+            }
+            .sys-cols .page-kv dd {
+              min-width: 0;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              font-weight: 500;
+            }
+            .sys-mono {
+              font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+              font-size: 0.8125rem;
+            }
+            .sys-bad {
+              color: #b91c1c;
+            }
+            .dark .sys-bad {
+              color: #f87171;
+            }
+            .sys-warn {
+              color: #b45309;
+            }
+            .dark .sys-warn {
+              color: #fbbf24;
+            }
+            .sys-quiet {
+              font-weight: 400;
+              color: rgb(var(--ap-ink-3));
+            }
+            /* A part of a flush card that is not a table. */
+            .sys-block {
+              border-top: 1px solid rgb(var(--ap-border));
+              padding: 1rem 1.25rem;
+            }
+            .sys-block-head {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: baseline;
+              gap: 0.25rem 0.75rem;
+              margin-bottom: 0.5rem;
+            }
+            .sys-block-head h3 {
+              margin: 0;
+              font-size: 0.875rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .sys-block-head span,
+            .sys-note {
+              font-size: 0.75rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .sys-note {
+              margin: 0.5rem 0 0;
+            }
+            .sys-block .page-kv > div {
+              padding: 0.375rem 0;
+            }
+            .sys-block .page-kv dd {
+              display: flex;
+              align-items: baseline;
+              gap: 0.625rem;
+            }
+            .sys-rate {
+              margin: 0.75rem 0 0;
+              border-top: 1px solid rgb(var(--ap-border));
+              padding-top: 0.75rem;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .sys-rate strong {
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            /* One scheduled task: its name and how often, then how it stands. */
+            .sys-rows {
+              border-top: 1px solid rgb(var(--ap-border));
+            }
+            .sys-rows.is-bad {
+              background: rgba(239, 68, 68, 0.05);
+            }
+            .sys-task {
+              padding: 0.625rem 1.25rem;
+            }
+            .sys-task + .sys-task {
+              border-top: 1px solid var(--ap-hairline);
+            }
+            .sys-task-line {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: baseline;
+              gap: 0.25rem 0.75rem;
+            }
+            .sys-task-name {
+              overflow-wrap: anywhere;
+              color: rgb(var(--ap-ink));
+            }
+            .sys-task-every {
+              font-size: 0.75rem;
+              white-space: nowrap;
+              color: rgb(var(--ap-ink-3));
+            }
+            .sys-task-line .event-status {
+              margin-inline-start: auto;
+              white-space: nowrap;
+            }
+            .sys-task details {
+              margin-top: 0.25rem;
+            }
+            .sys-task summary {
+              overflow: hidden;
+              font-size: 0.75rem;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              cursor: pointer;
+            }
+            .sys-more > summary {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 0.375rem;
+              border-top: 1px solid rgb(var(--ap-border));
+              padding: 0.75rem 1.25rem;
+              font-size: 0.875rem;
+              font-weight: 500;
+              list-style: none;
+              color: rgb(var(--ap-ink-3));
+              cursor: pointer;
+              user-select: none;
+              transition: background-color 0.2s, color 0.2s;
+            }
+            .sys-more > summary::-webkit-details-marker {
+              display: none;
+            }
+            .sys-more > summary:hover {
+              background: var(--ap-tint-1);
+              color: rgb(var(--ap-ink));
+            }
+            .sys-more > summary svg {
+              width: 1rem;
+              height: 1rem;
+              transition: transform 0.2s;
+            }
+            .sys-more[open] > summary svg {
+              transform: rotate(180deg);
+            }
+            .sys-pre {
+              max-height: 16rem;
+              margin: 0.5rem 0 0;
+              overflow-y: auto;
+              border-radius: 0.5rem;
+              padding: 0.75rem;
+              background: var(--ap-tint-1);
+              font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+              font-size: 0.75rem;
+              line-height: 1.5;
+              white-space: pre-wrap;
+              overflow-wrap: anywhere;
+              color: rgb(var(--ap-ink-2));
+            }
+            .sys-foot {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.5rem 1rem;
+            }
+            /* How the waiting jobs divide: a name, its share, its count. */
+            .sys-bars {
+              display: grid;
+              grid-template-columns: minmax(0, auto) minmax(3rem, 1fr) auto;
+              align-items: center;
+              gap: 0.625rem 1rem;
+            }
+            .sys-bar {
+              height: 0.5rem;
+              overflow: hidden;
+              border-radius: 999px;
+              background: var(--ap-tint-2);
+            }
+            .sys-bar > i {
+              display: block;
+              height: 100%;
+              border-radius: 999px;
+              background: var(--brand-blue);
+            }
+            .sys-bars bdi {
+              color: rgb(var(--ap-ink-2));
+              overflow-wrap: anywhere;
+            }
+            .sys-bars b {
+              font-size: 0.875rem;
+              font-weight: 600;
+              font-variant-numeric: tabular-nums;
+              text-align: end;
+              color: rgb(var(--ap-ink));
+            }
+            .page-table details > summary {
+              cursor: pointer;
+              overflow-wrap: anywhere;
+            }
+            .page-table details > summary:hover {
+              color: var(--brand-blue);
+            }
+            .page-table td {
+              vertical-align: top;
+            }
+            .page-table .c-bar {
+              min-width: 9rem;
+            }
+            .page-table .c-bar > div {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+            }
+            .page-table .c-bar .sys-bar {
+              flex: 1;
+            }
+        </style>
+    </x-slot>
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'queue'])
+    @include('admin.partials._navigation', ['active' => 'queue'])
 
-        @if (session('success'))
-        <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
-        </div>
-        @endif
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_queue_lead') }}</p>
+    </div>
 
-        {{-- Alert Banner --}}
-        @if ($schedulerStalled || $failedJobsCount > 0 || ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) >= \App\Services\AdminAlertService::JOBS_STALLED_MINUTES))
-        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <div class="flex">
-                <svg class="w-5 h-5 text-red-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                <div class="ms-3">
-                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">@lang('messages.queue_health_issues')</h3>
-                    <div class="mt-2 text-sm text-red-700 dark:text-red-300">
-                        <ul class="list-disc ps-5 space-y-1">
-                            {{-- First: nothing else on this page can drain while the scheduler is down. --}}
-                            @if ($schedulerStalled)
-                            <li>@lang('messages.scheduler_stalled_detail', ['minutes' => $schedulerStaleMinutes])</li>
-                            @endif
-                            @if ($failedJobsCount > 0)
-                            <li>@lang('messages.n_failed_jobs', ['count' => number_format($failedJobsCount)])</li>
-                            @endif
-                            @if ($oldestJobAge && $oldestJobAge->diffInMinutes(now()) >= \App\Services\AdminAlertService::JOBS_STALLED_MINUTES)
-                            <li>@lang('messages.oldest_job_stuck', ['age' => $oldestJobAge->diffForHumans(null, true, true)])</li>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+    @php
+        $jobsStalled = $oldestJobAge && $oldestJobAge->diffInMinutes(now()) >= \App\Services\AdminAlertService::JOBS_STALLED_MINUTES;
+    @endphp
+
+    <div class="page-shell page-stack">
+        <x-page-flash :keys="['success' => 'success']" />
+
+        @if ($schedulerStalled || $failedJobsCount > 0 || $jobsStalled)
+        <x-page-notice tone="error" :title="__('messages.queue_health_issues')">
+            <ul class="mt-1 list-disc ps-5 space-y-1">
+                {{-- First: nothing else on this page can drain while the scheduler is down. --}}
+                @if ($schedulerStalled)
+                <li>{{ __('messages.scheduler_stalled_detail', ['minutes' => $schedulerStaleMinutes]) }}</li>
+                @endif
+                @if ($failedJobsCount > 0)
+                <li>{{ __('messages.n_failed_jobs', ['count' => number_format($failedJobsCount)]) }}</li>
+                @endif
+                @if ($jobsStalled)
+                <li>{{ __('messages.oldest_job_stuck', ['age' => $oldestJobAge->diffForHumans(null, true, true)]) }}</li>
+                @endif
+            </ul>
+        </x-page-notice>
         @endif
 
         {{-- Scheduler. One card holding summary, exceptions and the full list, so every scheduler
-             signal sits together. Deliberately not a fifth cell in the bento below: the grid is a
-             2/4-column layout and a fifth card would leave it ragged, and this answers a different
-             question - is the runner alive, not how much work is waiting.
-
-             That second question is the Work Waiting card immediately below, and the page reads
-             top-down in that order: is the runner alive, how much has it left to do, then the
-             jobs table itself. --}}
-        <div class="ap-card rounded-xl shadow overflow-hidden">
-            <div class="p-5 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <svg aria-hidden="true" class="w-5 h-5 {{ $schedulerStalled ? 'text-red-500 dark:text-red-400' : 'text-green-500 dark:text-green-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.scheduler')</h2>
-                </div>
-                <p class="text-2xl font-bold {{ $schedulerStalled ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
+             signal sits together. It answers a different question from the job counts further
+             down - is the runner alive, not how much work is waiting - and the page reads
+             top-down in that order: is the runner alive, how much has it left to do (the Work
+             Waiting card), then the jobs table itself. --}}
+        <x-page-card :title="__('messages.scheduler')" flush>
+            <x-slot name="aside">
+                <span class="event-status sys-verdict {{ $schedulerStalled ? 'is-bad' : 'is-on' }}">
                     @if ($schedulerLastRunAt)
                     {{-- true = DIFF_ABSOLUTE. The second argument is Carbon's $syntax, not "omit the suffix":
                          false yields "5m ago", and the string appends its own, giving "last tick 5m ago ago". --}}
-                    @lang('messages.scheduler_last_tick', ['age' => $schedulerLastRunAt->diffForHumans(null, true, true)])
+                    {{ __('messages.scheduler_last_tick', ['age' => $schedulerLastRunAt->diffForHumans(null, true, true)]) }}
                     @else
-                    @lang('messages.scheduler_never_ran')
+                    {{ __('messages.scheduler_never_ran') }}
                     @endif
-                </p>
-            </div>
+                </span>
+            </x-slot>
 
-            {{-- 4-up, complete at both breakpoints (2x2, then 1x4), so the bento rule holds.
-                 Stacks on a phone. --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-gray-200 dark:border-gray-700 divide-y sm:divide-y-0 sm:divide-x sm:rtl:divide-x-reverse divide-gray-200 dark:divide-gray-700">
-                <div class="p-5">
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@lang('messages.scheduler_rails')</h4>
-                    @forelse ($schedulerRails as $rail)
-                    <div class="flex items-baseline justify-between gap-2 text-sm">
-                        <span dir="ltr" class="font-mono text-gray-900 dark:text-white">{{ $rail->name }}</span>
-                        {{-- $rail->at is NULL for an expected rail that has never ticked. That row is
-                             the whole point of showing it - the operator is waiting on a worker that
-                             has not written a heartbeat yet - so it must render, not fatal. --}}
-                        @if ($rail->at)
-                        <span class="{{ $rail->stale ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400' }} whitespace-nowrap"
-                              title="{{ $rail->at->format('Y-m-d H:i:s') }}">{{ $rail->at->diffForHumans(null, false, true) }}</span>
-                        @else
-                        <span class="text-red-600 dark:text-red-400 whitespace-nowrap">@lang('messages.scheduler_rail_never_seen')</span>
-                        @endif
-                    </div>
-                    @empty
-                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.none')</p>
-                    @endforelse
+            <div class="sys-cols">
+                <div>
+                    <p class="sys-label">{{ __('messages.scheduler_rails') }}</p>
+                    @if ($schedulerRails->isNotEmpty())
+                    <dl class="page-kv">
+                        @foreach ($schedulerRails as $rail)
+                        <div>
+                            <dt><bdi dir="ltr" class="sys-mono">{{ $rail->name }}</bdi></dt>
+                            {{-- $rail->at is NULL for an expected rail that has never ticked. That row is
+                                 the whole point of showing it - the operator is waiting on a worker that
+                                 has not written a heartbeat yet - so it must render, not fatal. --}}
+                            @if ($rail->at)
+                            <dd class="{{ $rail->stale ? 'sys-bad' : '' }}" title="{{ $rail->at->format('Y-m-d H:i:s') }}">{{ $rail->at->diffForHumans(null, false, true) }}</dd>
+                            @else
+                            <dd class="sys-bad">{{ __('messages.scheduler_rail_never_seen') }}</dd>
+                            @endif
+                        </div>
+                        @endforeach
+                    </dl>
+                    @else
+                    <p class="sys-text sys-quiet">{{ __('messages.none') }}</p>
+                    @endif
                 </div>
 
-                <div class="p-5">
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@lang('messages.scheduled_tasks')</h4>
-                    <p class="text-sm text-gray-900 dark:text-white">
-                        @lang('messages.scheduled_tasks_reporting', ['ok' => $tasksReporting, 'total' => $scheduledTasks->count()])
-                    </p>
+                <div>
+                    <p class="sys-label">{{ __('messages.scheduled_tasks') }}</p>
+                    <p class="sys-text">{{ __('messages.scheduled_tasks_reporting', ['ok' => $tasksReporting, 'total' => $scheduledTasks->count()]) }}</p>
                 </div>
 
-                <div class="p-5">
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@lang('messages.needs_attention')</h4>
-                    <p class="text-sm {{ $taskExceptions->count() > 0 ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-green-600 dark:text-green-400' }}">
-                        {{ trans_choice('messages.scheduled_tasks_needs_attention', $taskExceptions->count(), ['count' => $taskExceptions->count()]) }}
-                    </p>
+                <div>
+                    <p class="sys-label">{{ __('messages.needs_attention') }}</p>
+                    {{-- Green only while the scheduler is ticking: with it stopped nothing below is
+                         known, and a green "healthy" beside a red "Never run" said the opposite. --}}
+                    <span class="event-status {{ $taskExceptions->count() > 0 ? 'is-bad' : ($schedulerStalled ? '' : 'is-on') }}">{{ trans_choice('messages.scheduled_tasks_needs_attention', $taskExceptions->count(), ['count' => $taskExceptions->count()]) }}</span>
                 </div>
 
                 {{-- Which cache store holds the heartbeat, and whether every container can read it.
                      Without this the operator cannot tell a dead worker from an unshared cache -
                      the two look identical everywhere else on this page. --}}
-                <div class="p-5">
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@lang('messages.scheduler_runtime')</h4>
-                    <div class="flex items-baseline justify-between gap-2 text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">@lang('messages.scheduler_cache_store')</span>
-                        <span dir="ltr" class="font-mono text-gray-900 dark:text-white">{{ $cacheStore }}</span>
-                    </div>
-                    <div class="flex items-baseline justify-between gap-2 text-sm mt-1">
-                        <span class="text-gray-500 dark:text-gray-400">@lang('messages.scheduler_cache_shared')</span>
-                        {{-- Amber only when an unshared store is actually causing something. A
-                             single-container selfhost on the `file` driver is perfectly healthy,
-                             and colouring "No" as a warning there would nag every such install
-                             forever about a condition that costs it nothing. --}}
-                        <span class="{{ $cacheHidesScheduler ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-900 dark:text-white' }}">
-                            {{ $cacheStoreIsShared ? __('messages.yes') : __('messages.no') }}
-                        </span>
-                    </div>
-                    @if ($lastTaskHost)
-                    <div class="flex items-baseline justify-between gap-2 text-sm mt-1">
-                        <span class="text-gray-500 dark:text-gray-400">@lang('messages.scheduler_running_on')</span>
-                        <span dir="ltr" class="font-mono text-gray-900 dark:text-white truncate" title="{{ $lastTaskHost }}{{ $lastTaskRail ? ' · '.$lastTaskRail : '' }}">{{ \Illuminate\Support\Str::limit($lastTaskHost, 14) }}</span>
-                    </div>
-                    @endif
+                <div>
+                    <p class="sys-label">{{ __('messages.scheduler_runtime') }}</p>
+                    <dl class="page-kv">
+                        <div>
+                            <dt>{{ __('messages.scheduler_cache_store') }}</dt>
+                            <dd><bdi dir="ltr" class="sys-mono">{{ $cacheStore }}</bdi></dd>
+                        </div>
+                        <div>
+                            <dt>{{ __('messages.scheduler_cache_shared') }}</dt>
+                            {{-- Amber only when an unshared store is actually causing something. A
+                                 single-container selfhost on the `file` driver is perfectly healthy,
+                                 and colouring "No" as a warning there would nag every such install
+                                 forever about a condition that costs it nothing. --}}
+                            <dd class="{{ $cacheHidesScheduler ? 'sys-warn' : '' }}">{{ $cacheStoreIsShared ? __('messages.yes') : __('messages.no') }}</dd>
+                        </div>
+                        @if ($lastTaskHost)
+                        <div>
+                            <dt>{{ __('messages.scheduler_running_on') }}</dt>
+                            <dd title="{{ $lastTaskHost }}{{ $lastTaskRail ? ' · '.$lastTaskRail : '' }}"><bdi dir="ltr" class="sys-mono">{{ $lastTaskHost }}</bdi></dd>
+                        </div>
+                        @endif
+                    </dl>
                 </div>
             </div>
 
@@ -133,15 +400,8 @@
                  when the evidence is unambiguous: the store is per-container AND the database says
                  tasks are still completing. --}}
             @if ($cacheHidesScheduler)
-            <div class="border-t border-gray-200 dark:border-gray-700 p-5">
-                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                        <svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0l-7.1 12.25A2 2 0 004.99 19z"/>
-                        </svg>
-                        <span>@lang('messages.scheduler_cache_not_shared_detail', ['store' => $cacheStore])</span>
-                    </p>
-                </div>
+            <div class="sys-block">
+                <x-page-notice tone="warn">{{ __('messages.scheduler_cache_not_shared_detail', ['store' => $cacheStore]) }}</x-page-notice>
             </div>
             @endif
 
@@ -150,298 +410,214 @@
                  hiding it behind the stalled branch would leave the summary above saying "2 tasks
                  need attention" with nothing on screen to act on. --}}
             @if ($taskExceptions->isNotEmpty())
-            <div class="border-t border-gray-200 dark:border-gray-700">
-                <div class="divide-y divide-gray-100 dark:divide-white/[0.06] bg-red-50/50 dark:bg-red-900/10">
-                    @foreach ($taskExceptions as $task)
-                        @include('admin.partials._scheduled-task-row', ['task' => $task])
-                    @endforeach
-                </div>
+            <div class="sys-rows is-bad">
+                @foreach ($taskExceptions as $task)
+                    @include('admin.partials._scheduled-task-row', ['task' => $task])
+                @endforeach
             </div>
             @endif
 
             @if ($schedulerHttpRailOnly)
-            {{-- The /translate_data rail dispatches no ScheduledTask* events, so the table below can
+            {{-- The /translate_data rail dispatches no ScheduledTask* events, so the list below can
                  never fill on this install. Say so, rather than showing an empty list that reads as
                  a bug. Blue, not amber: nothing is wrong here. --}}
-            <div class="border-t border-gray-200 dark:border-gray-700 p-5">
-                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
-                    <p class="text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
-                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>@lang('messages.scheduled_tasks_http_rail')</span>
-                    </p>
-                </div>
+            <div class="sys-block">
+                <x-page-notice tone="info">{{ __('messages.scheduled_tasks_http_rail') }}</x-page-notice>
             </div>
             @elseif ($schedulerStalled)
-            <div class="border-t border-gray-200 dark:border-gray-700 px-5 py-3">
-                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.scheduled_tasks_unknown_while_stalled')</p>
+            <div class="sys-block">
+                <p class="sys-text sys-quiet">{{ __('messages.scheduled_tasks_unknown_while_stalled') }}</p>
             </div>
             @elseif ($scheduledTasks->isNotEmpty())
-            <details class="group border-t border-gray-200 dark:border-gray-700">
-                <summary class="flex items-center justify-center gap-1.5 px-5 py-3 cursor-pointer select-none list-none text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10 transition-all duration-200 [&::-webkit-details-marker]:hidden">
-                    <span>@lang('messages.scheduled_tasks_show_all', ['count' => $scheduledTasks->count()])</span>
-                    <svg aria-hidden="true" class="w-4 h-4 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            <details class="sys-more">
+                <summary>
+                    <span>{{ __('messages.scheduled_tasks_show_all', ['count' => $scheduledTasks->count()]) }}</span>
+                    <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </summary>
-                <div class="divide-y divide-gray-100 dark:divide-white/[0.06] border-t border-gray-200 dark:border-gray-700">
+                <div class="sys-rows">
                     @foreach ($scheduledTasks as $task)
                         @include('admin.partials._scheduled-task-row', ['task' => $task])
                     @endforeach
                 </div>
             </details>
             @endif
-        </div>
+        </x-page-card>
 
         @include('admin.partials._work-backlog')
 
-        {{-- Health Overview Cards --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="ap-card rounded-xl shadow p-5">
-                <div class="flex items-center gap-3 mb-2">
-                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                    </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pending_jobs')</h4>
-                </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($pendingJobsCount) }}</p>
+        {{-- The jobs table in figures: one strip, as on the Logs and Audit Log pages. --}}
+        <div class="ap-card rounded-xl page-stats is-auto">
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($pendingJobsCount) }}</div>
+                <div class="page-stat-label">{{ __('messages.pending_jobs') }}</div>
                 @if ($pendingByQueue->count() > 0)
-                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                    @foreach ($pendingByQueue as $queueRow)
-                    <div>{{ $queueRow->queue }}: {{ number_format($queueRow->count) }}</div>
-                    @endforeach
+                <div class="page-stat-sub">
+                    @foreach ($pendingByQueue as $queueRow)<bdi dir="ltr">{{ $queueRow->queue }}: {{ number_format($queueRow->count) }}</bdi>@if (! $loop->last) &middot; @endif @endforeach
                 </div>
                 @endif
             </div>
-
-            <div class="ap-card rounded-xl shadow p-5">
-                <div class="flex items-center gap-3 mb-2">
-                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.failed_jobs')</h4>
-                </div>
-                <p class="text-2xl font-bold {{ $failedJobsCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($failedJobsCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value {{ $failedJobsCount > 0 ? 'is-bad' : '' }}">{{ number_format($failedJobsCount) }}</div>
+                <div class="page-stat-label">{{ __('messages.failed_jobs') }}</div>
             </div>
-
-            <div class="ap-card rounded-xl shadow p-5">
-                <div class="flex items-center gap-3 mb-2">
-                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.job_batches')</h4>
-                </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($jobBatchesCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($jobBatchesCount) }}</div>
+                <div class="page-stat-label">{{ __('messages.job_batches') }}</div>
             </div>
-
-            <div class="ap-card rounded-xl shadow p-5">
-                <div class="flex items-center gap-3 mb-2">
-                    <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.oldest_pending_job')</h4>
-                </div>
-                @if ($oldestJobAge)
-                <p class="text-2xl font-bold {{ $oldestJobAge->diffInMinutes(now()) >= \App\Services\AdminAlertService::JOBS_STALLED_MINUTES ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $oldestJobAge->diffForHumans(null, false, true) }}</p>
-                @else
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">@lang('messages.none')</p>
-                @endif
+            <div class="page-stat">
+                <div class="page-stat-value {{ $jobsStalled ? 'is-bad' : '' }}">{{ $oldestJobAge ? $oldestJobAge->diffForHumans(null, false, true) : __('messages.none') }}</div>
+                <div class="page-stat-label">{{ __('messages.oldest_pending_job') }}</div>
             </div>
         </div>
 
-        {{-- Pending Jobs Breakdown --}}
         @if ($pendingByClass->count() > 0)
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.pending_jobs_by_class')</h3>
-            <div class="space-y-3">
+        <x-page-card :title="__('messages.pending_jobs_by_class')">
+            <div class="sys-bars">
                 @foreach ($pendingByClass as $className => $count)
-                <div class="flex items-center">
-                    <div class="w-48 flex-shrink-0">
-                        <span class="text-sm font-mono text-gray-700 dark:text-gray-300">{{ $className }}</span>
-                    </div>
-                    <div class="flex-1 mx-4">
-                        <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
-                            <div class="bg-blue-500 h-4 rounded-full" style="width: {{ min(100, ($count / $pendingByClass->first()) * 100) }}%"></div>
-                        </div>
-                    </div>
-                    <div class="w-16 text-end">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($count) }}</span>
-                    </div>
-                </div>
+                <bdi dir="ltr" class="sys-mono">{{ $className }}</bdi>
+                <div class="sys-bar"><i style="width: {{ min(100, ($count / $pendingByClass->first()) * 100) }}%"></i></div>
+                <b>{{ number_format($count) }}</b>
                 @endforeach
             </div>
-        </div>
+        </x-page-card>
         @endif
 
-        {{-- Bulk Actions Bar --}}
-        @if ($failedJobsCount > 0 || $pendingJobsCount > 0)
-        <div class="ap-card rounded-xl shadow p-4 flex flex-wrap gap-3">
+        {{-- What acts on a whole list sits in that list's head. The three buttons used to share
+             a card of their own above both lists, two of them in red capitals. Each still asks
+             first: data-confirm on the form, which the layout's one handler reads. --}}
+        <x-page-card :title="__('messages.failed_jobs')" flush>
             @if ($failedJobsCount > 0)
-            <form method="POST" action="{{ route('admin.queue.retry-all') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_retry_all_failed', ['count' => number_format($failedJobsCount)]) }}">
-                @csrf
-                <x-brand-button type="submit">
-                    @lang('messages.retry_all_failed')
-                </x-brand-button>
-            </form>
-            <form method="POST" action="{{ route('admin.queue.clear-failed') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_delete_all_failed', ['count' => number_format($failedJobsCount)]) }}">
-                @csrf
-                <x-danger-button>
-                    @lang('messages.clear_all_failed')
-                </x-danger-button>
-            </form>
+            <x-slot name="aside">
+                <form method="POST" action="{{ route('admin.queue.clear-failed') }}" data-confirm="{{ __('messages.confirm_delete_all_failed', ['count' => number_format($failedJobsCount)]) }}">
+                    @csrf
+                    <button type="submit" class="page-tool is-danger">{{ __('messages.clear_all_failed') }}</button>
+                </form>
+                <form method="POST" action="{{ route('admin.queue.retry-all') }}" data-confirm="{{ __('messages.confirm_retry_all_failed', ['count' => number_format($failedJobsCount)]) }}">
+                    @csrf
+                    <button type="submit" class="page-tool">{{ __('messages.retry_all_failed') }}</button>
+                </form>
+            </x-slot>
             @endif
-            @if ($pendingJobsCount > 0)
-            <form method="POST" action="{{ route('admin.queue.flush-pending') }}" class="js-confirm-form" data-confirm="{{ __('messages.confirm_flush_pending', ['count' => number_format($pendingJobsCount)]) }}">
-                @csrf
-                <x-danger-button>
-                    @lang('messages.flush_pending')
-                </x-danger-button>
-            </form>
-            @endif
-        </div>
-        @endif
 
-        {{-- Failed Jobs Table --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.failed_jobs')</h3>
             @if ($failedJobs->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.job_class')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.queue')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.exception')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.failed_at')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.actions')</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($failedJobs as $job)
-                        <tr>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ $job->class_name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $job->queue }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white max-w-md">
-                                <details>
-                                    <summary class="cursor-pointer text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 truncate max-w-md">{{ $job->exception_excerpt }}</summary>
-                                    <pre class="mt-2 text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-64 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-3 rounded">{{ $job->exception }}</pre>
-                                </details>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap" title="{{ $job->failed_at->format('Y-m-d H:i:s') }}">{{ $job->failed_at->diffForHumans() }}</td>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap">
-                                <div class="flex gap-3">
-                                    <form method="POST" action="{{ route('admin.queue.retry', $job->uuid) }}">
-                                        @csrf
-                                        <button type="submit" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">@lang('messages.retry')</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.queue.delete', $job->uuid) }}">
-                                        @csrf
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium">@lang('messages.delete')</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            <table class="page-table">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ __('messages.job_class') }}</th>
+                        <th scope="col">{{ __('messages.queue') }}</th>
+                        <th scope="col">{{ __('messages.exception') }}</th>
+                        <th scope="col">{{ __('messages.failed_at') }}</th>
+                        <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($failedJobs as $job)
+                    <tr>
+                        <td class="c-main c-strong c-mono"><bdi dir="ltr">{{ $job->class_name }}</bdi></td>
+                        <td class="c-quiet"><bdi dir="ltr">{{ $job->queue }}</bdi></td>
+                        <td class="c-main c-mono">
+                            <details>
+                                <summary><bdi dir="ltr">{{ Str::limit($job->exception_excerpt, 110) }}</bdi></summary>
+                                <pre class="sys-pre" dir="ltr">{{ $job->exception }}</pre>
+                            </details>
+                        </td>
+                        <td class="c-date" title="{{ $job->failed_at->format('Y-m-d H:i:s') }}">{{ $job->failed_at->diffForHumans() }}</td>
+                        <td class="c-actions">
+                            <form method="POST" action="{{ route('admin.queue.retry', $job->uuid) }}">
+                                @csrf
+                                <button type="submit" class="event-link">{{ __('messages.retry') }}</button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.queue.delete', $job->uuid) }}" data-confirm="{{ __('messages.are_you_sure') }}">
+                                @csrf
+                                <button type="submit" class="event-link is-danger">{{ __('messages.delete') }}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_failed_jobs')</p>
+            <x-page-empty :title="__('messages.no_failed_jobs')" compact />
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Pending Jobs Table --}}
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.pending_jobs')</h3>
+        <x-page-card :title="__('messages.pending_jobs')" flush>
+            @if ($pendingJobsCount > 0)
+            <x-slot name="aside">
+                <form method="POST" action="{{ route('admin.queue.flush-pending') }}" data-confirm="{{ __('messages.confirm_flush_pending', ['count' => number_format($pendingJobsCount)]) }}">
+                    @csrf
+                    <button type="submit" class="page-tool is-danger">{{ __('messages.flush_pending') }}</button>
+                </form>
+            </x-slot>
+            @endif
+
             @if ($pendingJobsTable->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.job_class')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.queue')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.attempts')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.created_at')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.available_at')</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($pendingJobsTable as $job)
-                        <tr>
-                            <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ $job->class_name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $job->queue }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-900 dark:text-white">{{ $job->attempts }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap" title="{{ $job->created_at->format('Y-m-d H:i:s') }}">{{ $job->created_at->diffForHumans() }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap" title="{{ $job->available_at->format('Y-m-d H:i:s') }}">{{ $job->available_at->diffForHumans() }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            <table class="page-table">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ __('messages.job_class') }}</th>
+                        <th scope="col">{{ __('messages.queue') }}</th>
+                        <th scope="col" class="c-num">{{ __('messages.attempts') }}</th>
+                        <th scope="col">{{ __('messages.created_at') }}</th>
+                        <th scope="col">{{ __('messages.available_at') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($pendingJobsTable as $job)
+                    <tr>
+                        <td class="c-main c-strong c-mono"><bdi dir="ltr">{{ $job->class_name }}</bdi></td>
+                        <td class="c-quiet"><bdi dir="ltr">{{ $job->queue }}</bdi></td>
+                        <td class="c-num" data-label="{{ __('messages.attempts') }}">{{ $job->attempts }}</td>
+                        <td class="c-date" data-label="{{ __('messages.created_at') }}" title="{{ $job->created_at->format('Y-m-d H:i:s') }}">{{ $job->created_at->diffForHumans() }}</td>
+                        <td class="c-date" data-label="{{ __('messages.available_at') }}" title="{{ $job->available_at->format('Y-m-d H:i:s') }}">{{ $job->available_at->diffForHumans() }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
             @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_pending_jobs')</p>
+            <x-page-empty :title="__('messages.no_pending_jobs')" compact />
             @endif
-        </div>
+        </x-page-card>
 
-        {{-- Job Batches Table --}}
         @if ($jobBatches->count() > 0)
-        <div class="ap-card rounded-xl shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.job_batches')</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <x-page-card :title="__('messages.job_batches')" flush>
+            <div class="page-scroll">
+                <table class="page-table is-wide">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.name')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.total')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.pending')</th>
-                            <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.failed')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.progress')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.created')</th>
-                            <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">@lang('messages.finished')</th>
+                            <th scope="col">{{ __('messages.name') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.total') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.pending') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.failed') }}</th>
+                            <th scope="col">{{ __('messages.progress') }}</th>
+                            <th scope="col">{{ __('messages.created') }}</th>
+                            <th scope="col">{{ __('messages.finished') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                         @foreach ($jobBatches as $batch)
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $batch->name ?? '-' }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-900 dark:text-white">{{ number_format($batch->total_jobs) }}</td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-900 dark:text-white">{{ number_format($batch->pending_jobs) }}</td>
-                            <td class="px-4 py-3 text-sm text-end {{ $batch->failed_jobs > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ number_format($batch->failed_jobs) }}</td>
-                            <td class="px-4 py-3 text-sm">
-                                <div class="flex items-center gap-2">
-                                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden min-w-[80px]">
-                                        <div class="bg-blue-500 h-3 rounded-full" style="width: {{ $batch->progress }}%"></div>
-                                    </div>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $batch->progress }}%</span>
+                            <td class="c-main c-strong"><bdi>{{ $batch->name ?? '-' }}</bdi></td>
+                            <td class="c-num" data-label="{{ __('messages.total') }}">{{ number_format($batch->total_jobs) }}</td>
+                            <td class="c-num" data-label="{{ __('messages.pending') }}">{{ number_format($batch->pending_jobs) }}</td>
+                            <td class="c-num {{ $batch->failed_jobs > 0 ? 'sys-bad' : '' }}" data-label="{{ __('messages.failed') }}">{{ number_format($batch->failed_jobs) }}</td>
+                            <td class="c-bar">
+                                <div>
+                                    <div class="sys-bar"><i style="width: {{ $batch->progress }}%"></i></div>
+                                    <span class="c-quiet"><bdi dir="ltr">{{ $batch->progress }}%</bdi></span>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap" title="{{ $batch->created_at->format('Y-m-d H:i:s') }}">{{ $batch->created_at->diffForHumans() }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                @if ($batch->finished_at)
-                                <span title="{{ $batch->finished_at->format('Y-m-d H:i:s') }}">{{ $batch->finished_at->diffForHumans() }}</span>
-                                @else
-                                -
-                                @endif
-                            </td>
+                            <td class="c-date" data-label="{{ __('messages.created') }}" title="{{ $batch->created_at->format('Y-m-d H:i:s') }}">{{ $batch->created_at->diffForHumans() }}</td>
+                            <td class="c-date" @if ($batch->finished_at) data-label="{{ __('messages.finished') }}" title="{{ $batch->finished_at->format('Y-m-d H:i:s') }}" @endif>@if ($batch->finished_at){{ $batch->finished_at->diffForHumans() }}@endif</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-        </div>
+        </x-page-card>
         @endif
     </div>
-
-    <script {!! nonce_attr() !!}>
-        document.addEventListener('submit', function(e) {
-            var form = e.target.closest('.js-confirm-form');
-            if (form) {
-                if (!confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
-                }
-            }
-        });
-    </script>
 
 </x-app-admin-layout>

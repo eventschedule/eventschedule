@@ -1,179 +1,143 @@
 <x-app-admin-layout>
+    <x-slot name="head">
+        {{-- Two things the page kit does not have yet. A filter's box and selects at the size of
+             the list under them: the layout gives every input and select 0.75rem by 1rem of
+             padding and a 1.15rem type with !important, and six of them took two rows of a laptop.
+             And a figure in a strip that is a link. --}}
+        <style {!! nonce_attr() !!}>
+            .page-filters input[type="text"],
+            .page-filters select {
+              padding-block: 0.5rem !important;
+              padding-inline: 0.625rem !important;
+              font-size: 0.875rem !important;
+              line-height: 1.25rem !important;
+            }
+            .page-filters select {
+              padding-inline-end: 2rem !important;
+            }
+            a.page-stat {
+              transition: background-color 0.2s;
+            }
+            a.page-stat:hover {
+              background: var(--ap-tint-1);
+            }
+            a.page-stat:focus-visible {
+              outline: 2px solid var(--brand-blue);
+              outline-offset: -2px;
+            }
+        </style>
+    </x-slot>
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'schedules'])
+    @include('admin.partials._navigation', ['active' => 'schedules'])
 
-        {{-- Plans, their status and their source exist only on a hosted install. A plain selfhost
-             has none (actualPlanTier() is enterprise for every schedule), so it gets the
-             verification split and the columns that apply to it. --}}
-        @php $hosted = (bool) config('app.hosted'); @endphp
+    {{-- Plans, their status and their source exist only on a hosted install. A plain selfhost
+         has none (actualPlanTier() is enterprise for every schedule), so it gets the
+         verification split and the columns that apply to it. --}}
+    @php
+        $hosted = (bool) config('app.hosted');
+        $filtered = request('search') || request('plan_type') || request('status') || request('source') || request('verification') || request('owner');
 
-        {{-- Row 1: Plan Breakdown. The three plan counts are verified-only, so Unverified
-             completes the row: free + pro + enterprise + unverified is every non-demo
-             schedule with an owner. --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 {{ $hosted ? 'lg:grid-cols-4' : '' }} gap-4">
+        // The subscription's state as a word and the tone its mark wears. A schedule with no
+        // subscription has no state to show, so the cell stays empty rather than reading "None".
+        $statusMarks = [
+            'active' => ['is-on', __('messages.active')],
+            'trial' => ['is-info', __('messages.trial')],
+            'grace_period' => ['is-warn', __('messages.grace_period')],
+            'cancelled' => ['is-bad', __('messages.cancelled')],
+            'past_due' => ['is-bad', __('messages.past_due')],
+            'inactive' => ['', __('messages.inactive')],
+        ];
+    @endphp
+
+    <div class="page-head">
+        <p class="page-lead">{{ $hosted ? __('messages.admin_schedules_lead') : __('messages.admin_schedules_lead_selfhost') }}</p>
+    </div>
+
+    <div class="page-shell page-stack">
+        {{-- Saving a plan comes back here with its confirmation, which nothing on the page used
+             to show: the layout's toast reads `message`, `error` and `warning`, not `success`. --}}
+        <x-page-flash :keys="['success' => 'success']" />
+
+        {{-- The counts, as two strips of plain figures where there were eight icon tiles. The
+             three plan counts are verified-only, so Unverified completes the first strip: free +
+             pro + enterprise + unverified is every non-demo schedule with an owner. --}}
+        <div class="ap-card rounded-xl page-stats is-auto">
             @if ($hosted)
-            {{-- Free Count --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-gray-100 dark:bg-gray-500/10"
-                         style="--icon-glow: rgba(107, 114, 128, 0.15)">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.free')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($freeCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($freeCount) }}</div>
+                <div class="page-stat-label">@lang('messages.free')</div>
             </div>
-
-            {{-- Pro Count --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10"
-                         style="--icon-glow: rgba(59, 130, 246, 0.15)">
-                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.pro')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($proCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($proCount) }}</div>
+                <div class="page-stat-label">@lang('messages.pro')</div>
             </div>
-
-            {{-- Enterprise Count --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-purple-50 dark:bg-purple-500/10"
-                         style="--icon-glow: rgba(168, 85, 247, 0.15)">
-                        <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.enterprise')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($enterpriseCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($enterpriseCount) }}</div>
+                <div class="page-stat-label">@lang('messages.enterprise')</div>
             </div>
             @else
-            {{-- Verified Count: the three plan counts above, which are verified-only, summed. --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10"
-                         style="--icon-glow: rgba(16, 185, 129, 0.15)">
-                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.verified')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($freeCount + $proCount + $enterpriseCount) }}</p>
+            {{-- The three plan counts, which are verified-only, summed. --}}
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($freeCount + $proCount + $enterpriseCount) }}</div>
+                <div class="page-stat-label">@lang('messages.verified')</div>
             </div>
             @endif
 
-            {{-- Unverified Count. Deliberately the only clickable card on this page: it
-                 replaces the dashboard alert row that used to deep-link here. --}}
-            <a href="{{ route('admin.schedules', ['verification' => 'unverified']) }}"
-               class="ap-card rounded-xl shadow p-6 flex flex-col items-center transition-all duration-200 hover:shadow-md">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10"
-                         style="--icon-glow: rgba(245, 158, 11, 0.15)">
-                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-.34-.014-.677-.042-1.01zM12 9v2m0 4h.01" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.unverified')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($unverifiedCount) }}</p>
+            {{-- Deliberately the only figure on this page that is a link: it replaces the
+                 dashboard alert row that used to deep-link here. --}}
+            <a href="{{ route('admin.schedules', ['verification' => 'unverified']) }}" class="page-stat">
+                <div class="page-stat-value {{ $unverifiedCount > 0 ? 'is-warn' : '' }}">{{ number_format($unverifiedCount) }}</div>
+                <div class="page-stat-label">@lang('messages.unverified')</div>
             </a>
         </div>
 
-        {{-- Row 2: Payment/Status Breakdown --}}
         @if ($hosted)
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {{-- Stripe Paid --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10"
-                         style="--icon-glow: rgba(34, 197, 94, 0.15)">
-                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.stripe_paid')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($stripePaidCount) }}</p>
+        <div class="ap-card rounded-xl page-stats is-auto">
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($stripePaidCount) }}</div>
+                <div class="page-stat-label">@lang('messages.stripe_paid')</div>
             </div>
-
-            {{-- Manual --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10"
-                         style="--icon-glow: rgba(99, 102, 241, 0.15)">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.manual')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($manualPlanCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($manualPlanCount) }}</div>
+                <div class="page-stat-label">@lang('messages.manual')</div>
             </div>
-
-            {{-- On Trial --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-yellow-50 dark:bg-yellow-500/10"
-                         style="--icon-glow: rgba(234, 179, 8, 0.15)">
-                        <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.on_free_trial')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($trialCount) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($trialCount) }}</div>
+                <div class="page-stat-label">@lang('messages.on_free_trial')</div>
             </div>
-
-            {{-- Expiring Soon --}}
-            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
-                <div class="flex items-center gap-3 mb-3 self-start">
-                    <div class="dashboard-icon p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10"
-                         style="--icon-glow: rgba(245, 158, 11, 0.15)">
-                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.expiring_soon')</p>
-                </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($expiringSoon) }}</p>
+            <div class="page-stat">
+                <div class="page-stat-value {{ $expiringSoon > 0 ? 'is-warn' : '' }}">{{ number_format($expiringSoon) }}</div>
+                <div class="page-stat-label">@lang('messages.expiring_soon')</div>
             </div>
         </div>
         @endif
 
-        {{-- Filters --}}
-        <div class="ap-card rounded-xl shadow p-4">
-            {{-- Wraps rather than sharing one row: with six controls the flex-1 search box was
-                 squeezed to a few pixels at 1440px wide. --}}
-            <form method="GET" action="{{ route('admin.schedules') }}" class="flex flex-wrap items-center gap-3">
-                <div class="relative flex-1 min-w-[240px]">
+        <div>
+            <form method="GET" action="{{ route('admin.schedules') }}" class="page-filters">
+                <div class="page-filter is-grow relative">
+                    <label for="schedule-search">@lang('messages.search')</label>
                     {{-- The dropdown must offer exactly what the table below can return, so it is
                          handed this page's own owner and state filters. --}}
-                    <input type="text" name="search" value="{{ request('search') }}"
+                    <input type="text" name="search" id="schedule-search" value="{{ request('search') }}" dir="auto"
                         placeholder="{{ __('messages.search_schedules') }}" autocomplete="off" data-subdomain-autocomplete
                         data-subdomain-params="{{ 'admin_listable=1&owner='.urlencode((string) (is_array(request('owner')) ? '' : request('owner', ''))).(request('status') === 'deleted' ? '&deleted_only=1' : '') }}"
-                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                    <div data-subdomain-dropdown class="hidden absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50"></div>
+                        class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <div data-subdomain-dropdown class="hidden absolute start-0 end-0 top-full mt-1"></div>
                 </div>
                 @if ($hosted)
-                <div class="w-full sm:w-44 flex-none">
-                    <select name="plan_type" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                <label class="page-filter">
+                    <span>@lang('messages.plan')</span>
+                    <select name="plan_type" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_plans')</option>
                         <option value="free" {{ request('plan_type') === 'free' ? 'selected' : '' }}>@lang('messages.free')</option>
                         <option value="pro" {{ request('plan_type') === 'pro' ? 'selected' : '' }}>@lang('messages.pro')</option>
                         <option value="enterprise" {{ request('plan_type') === 'enterprise' ? 'selected' : '' }}>@lang('messages.enterprise')</option>
                     </select>
-                </div>
+                </label>
                 @endif
-                <div class="w-full sm:w-44 flex-none">
-                    <select name="status" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                <label class="page-filter">
+                    <span>@lang('messages.status')</span>
+                    <select name="status" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_status')</option>
                         @if ($hosted)
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>@lang('messages.active')</option>
@@ -182,252 +146,158 @@
                         @endif
                         <option value="deleted" {{ request('status') === 'deleted' ? 'selected' : '' }}>@lang('messages.deleted')</option>
                     </select>
-                </div>
-                <div class="w-full sm:w-44 flex-none">
-                    <select name="owner" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                </label>
+                <label class="page-filter">
+                    <span>@lang('messages.owner')</span>
+                    <select name="owner" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.claimed')</option>
                         <option value="unclaimed" {{ request('owner') === 'unclaimed' ? 'selected' : '' }}>@lang('messages.unclaimed')</option>
                         <option value="any" {{ request('owner') === 'any' ? 'selected' : '' }}>@lang('messages.all_owners')</option>
                     </select>
-                </div>
+                </label>
                 @if ($hosted)
-                <div class="w-full sm:w-44 flex-none">
-                    <select name="source" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                <label class="page-filter">
+                    <span>@lang('messages.source')</span>
+                    <select name="source" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all_sources')</option>
                         <option value="stripe" {{ request('source') === 'stripe' ? 'selected' : '' }}>@lang('messages.stripe')</option>
                         <option value="manual" {{ request('source') === 'manual' ? 'selected' : '' }}>@lang('messages.manual')</option>
                         <option value="trial" {{ request('source') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
                     </select>
-                </div>
+                </label>
                 @endif
-                <div class="w-full sm:w-44 flex-none">
-                    <select name="verification" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                <label class="page-filter">
+                    <span>@lang('messages.verification')</span>
+                    <select name="verification" class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                         <option value="">@lang('messages.all')</option>
                         <option value="verified" {{ request('verification') === 'verified' ? 'selected' : '' }}>@lang('messages.verified')</option>
                         <option value="unverified" {{ request('verification') === 'unverified' ? 'selected' : '' }}>@lang('messages.unverified')</option>
                     </select>
-                </div>
-                <div class="flex gap-2">
-                    <x-brand-button type="submit">
-                        @lang('messages.filter')
-                    </x-brand-button>
-                    @if(request('search') || request('plan_type') || request('status') || request('source') || request('verification') || request('owner'))
-                        <x-secondary-link :href="route('admin.schedules')">
-                            @lang('messages.clear')
-                        </x-secondary-link>
+                </label>
+                <div class="is-end">
+                    @if ($filtered)
+                    <a href="{{ route('admin.schedules') }}" class="page-tool">@lang('messages.clear')</a>
                     @endif
+                    <x-brand-button type="submit" size="sm">@lang('messages.filter')</x-brand-button>
                 </div>
             </form>
-        </div>
 
-        {{-- Role List Table --}}
-        <div class="ap-card rounded-xl shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.schedule')
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.type')
-                            </th>
-                            @if ($hosted)
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.plan')
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.term')
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.expires')
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.status')
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.source')
-                            </th>
-                            @endif
-                            <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                @lang('messages.actions')
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse ($roles as $role)
+            @if ($roles->count() > 0)
+            <div class="ap-card rounded-xl overflow-hidden">
+                <div class="page-scroll">
+                    <table class="page-table is-wide">
+                        <thead>
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div>
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
-                                                    {{ $role->name }}
-                                                </a>
-                                                @if ($role->is_deleted)
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                                        @lang('messages.deleted')
-                                                    </span>
-                                                @endif
-                                                @if (! $role->user_id)
-                                                    {{-- No owner: a venue or talent EventRepo auto-created while importing an
-                                                         event. It has no public page, but it does hold a subdomain. --}}
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                                        @lang('messages.unclaimed')
-                                                    </span>
-                                                @endif
-                                                @if (! $role->email && ! $role->phone)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
-                                                        @lang('messages.unverified')
-                                                    </span>
-                                                @else
-                                                    @if ($role->email)
-                                                        <span title="{{ $role->email_verified_at ? __('messages.email') . ' ' . __('messages.verified') : __('messages.email_not_verified') }}"
-                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ $role->email_verified_at ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' }}">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                            </svg>
-                                                            @lang('messages.email')
-                                                        </span>
-                                                    @endif
-                                                    @if ($role->phone)
-                                                        <span title="{{ $role->phone_verified_at ? __('messages.phone_verified') : __('messages.phone_not_verified') }}"
-                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ $role->phone_verified_at ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' }}">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                                            </svg>
-                                                            @lang('messages.phone')
-                                                        </span>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $role->subdomain }}
+                                <th scope="col">@lang('messages.schedule')</th>
+                                <th scope="col">@lang('messages.type')</th>
+                                @if ($hosted)
+                                <th scope="col">@lang('messages.plan')</th>
+                                <th scope="col">@lang('messages.term')</th>
+                                <th scope="col">@lang('messages.expires')</th>
+                                <th scope="col">@lang('messages.status')</th>
+                                <th scope="col">@lang('messages.source')</th>
+                                @endif
+                                <th scope="col"><span class="sr-only">@lang('messages.actions')</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($roles as $role)
+                            <tr>
+                                <td class="c-main">
+                                    <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank" rel="noopener" class="event-link"><bdi>{{ $role->name }}</bdi></a>
+                                    @if ($role->is_deleted)
+                                    <span class="event-chip">@lang('messages.deleted')</span>
+                                    @endif
+                                    @if (! $role->user_id)
+                                    {{-- No owner: a venue or talent EventRepo auto-created while importing an
+                                         event. It has no public page, but it does hold a subdomain. --}}
+                                    <span class="event-chip">@lang('messages.unclaimed')</span>
+                                    @endif
+                                    {{-- Under the name: the address, then which contact is verified (a green
+                                         mark for one that is, an amber one for an address or number
+                                         still waiting). --}}
+                                    <span class="c-sub">
+                                        <span class="inline-flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                                            <span>
+                                                <span dir="ltr">{{ $role->subdomain }}</span>
                                                 {{-- Gated on is_deleted too: restore() keeps the column when it
                                                      could not reclaim the original, so a live schedule would
                                                      otherwise carry a "was ..." note forever. --}}
                                                 @if ($role->is_deleted && $role->subdomain_before_delete)
-                                                    <span class="text-xs text-gray-400 dark:text-gray-500">
-                                                        &middot; @lang('messages.original_subdomain', ['subdomain' => $role->subdomain_before_delete])
-                                                    </span>
+                                                &middot; @lang('messages.original_subdomain', ['subdomain' => $role->subdomain_before_delete])
                                                 @endif
-                                            </div>
-                                        </div>
-                                    </div>
+                                            </span>
+                                            @if (! $role->email && ! $role->phone)
+                                            <span class="event-status is-warn">@lang('messages.unverified')</span>
+                                            @else
+                                            @if ($role->email)
+                                            <span class="event-status {{ $role->email_verified_at ? 'is-on' : 'is-warn' }}" title="{{ $role->email_verified_at ? __('messages.email_verified') : __('messages.email_not_verified') }}">@lang('messages.email')<span class="sr-only">: {{ $role->email_verified_at ? __('messages.verified') : __('messages.unverified') }}</span></span>
+                                            @endif
+                                            @if ($role->phone)
+                                            <span class="event-status {{ $role->phone_verified_at ? 'is-on' : 'is-warn' }}" title="{{ $role->phone_verified_at ? __('messages.phone_verified') : __('messages.phone_not_verified') }}">@lang('messages.phone')<span class="sr-only">: {{ $role->phone_verified_at ? __('messages.verified') : __('messages.unverified') }}</span></span>
+                                            @endif
+                                            @endif
+                                        </span>
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm text-gray-900 dark:text-white capitalize">{{ $role->type }}</span>
-                                </td>
+                                <td class="c-quiet">{{ in_array($role->type, ['talent', 'venue', 'curator'], true) ? __('messages.'.$role->type) : $role->type }}</td>
                                 @if ($hosted)
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @php
-                                        $planType = $role->actualPlanTier();
-                                        $badgeColors = [
-                                            'free' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-                                            'pro' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-                                            'enterprise' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-                                        ];
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeColors[$planType] ?? $badgeColors['free'] }}">
-                                        {{ ucfirst($planType) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $role->plan_term ? ucfirst($role->plan_term) : '-' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    @if ($role->trial_ends_at && $role->onGenericTrial())
-                                        {{ \Carbon\Carbon::parse($role->trial_ends_at)->format('M d, Y') }}
-                                        <div class="text-xs text-yellow-600 dark:text-yellow-400">
-                                            @lang('messages.n_days_left', ['count' => (int) now()->diffInDays($role->trial_ends_at)])
-                                        </div>
-                                    @elseif ($role->plan_expires)
-                                        {{ \Carbon\Carbon::parse($role->plan_expires)->format('M d, Y') }}
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @php
-                                        $status = $role->subscriptionStatusLabel();
-                                        $statusColors = [
-                                            'active' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-                                            'trial' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-                                            'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-                                            'grace_period' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-                                            'past_due' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-                                            'none' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-                                            'inactive' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-                                        ];
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$status] ?? $statusColors['none'] }}">
-                                        {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if ($role->hasActiveSubscription())
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                            @lang('messages.stripe')
-                                        </span>
-                                    @elseif ($role->onGenericTrial())
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                                            @lang('messages.trial')
-                                        </span>
-                                    @elseif (($role->plan_type ?? 'free') !== 'free' && $role->plan_expires)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
-                                            @lang('messages.manual')
-                                        </span>
-                                    @else
-                                        <span class="text-sm text-gray-400 dark:text-gray-500">-</span>
-                                    @endif
-                                </td>
+                                @php
+                                    $planType = $role->actualPlanTier();
+                                    $status = $role->subscriptionStatusLabel();
+                                    $onTrial = $role->trial_ends_at && $role->onGenericTrial();
+                                @endphp
+                                <td class="{{ $planType === 'free' ? 'c-quiet' : 'c-strong' }}">{{ in_array($planType, ['free', 'pro', 'enterprise'], true) ? __('messages.'.$planType) : ucfirst($planType) }}</td>
+                                {{-- Every schedule carries a term, a free one too. It says something
+                                     only beside a plan that is paid for or on trial. --}}
+                                <td class="c-quiet">@if ($planType !== 'free'){{ $role->plan_term === 'month' ? __('messages.monthly') : ($role->plan_term === 'year' ? __('messages.yearly') : '') }}@endif</td>
+                                <td class="c-date" data-label="{{ __('messages.expires') }}">@if ($onTrial){{ $role->trial_ends_at->translatedFormat('M j, Y') }}<span class="c-sub">{{ trans_choice('messages.days_left_choice', (int) now()->diffInDays($role->trial_ends_at), ['count' => (int) now()->diffInDays($role->trial_ends_at)]) }}</span>@elseif ($role->plan_expires){{ \Carbon\Carbon::parse($role->plan_expires)->translatedFormat('M j, Y') }}@endif</td>
+                                <td>@isset($statusMarks[$status])<span class="event-status {{ $statusMarks[$status][0] }}">{{ $statusMarks[$status][1] }}</span>@endisset</td>
+                                <td class="c-quiet">@if ($role->hasActiveSubscription())@lang('messages.stripe')@elseif ($role->onGenericTrial())@lang('messages.trial')@elseif (($role->plan_type ?? 'free') !== 'free' && $role->plan_expires)@lang('messages.manual')@endif</td>
                                 @endif
-                                <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                                <td class="c-actions">
                                     {{-- One action beside Edit, not three: the row is already the
                                          widest on the page, and the full set (with the copy that
                                          explains what a release does) lives on the edit page. --}}
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.schedules.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                            @lang('messages.edit')
-                                        </a>
-                                        @if ($role->is_deleted && $role->subdomain_before_delete)
-                                            <form method="POST" action="{{ route('admin.schedules.restore', ['role' => $role->encodeId()]) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-[var(--brand-blue)] hover:underline"
-                                                    data-confirm="{{ __('messages.restore_schedule_confirm') }}">
-                                                    @lang('messages.restore')
-                                                </button>
-                                            </form>
-                                        @else
-                                            {{-- A deleted row with no recorded original is one the API, unfollow or
-                                                 merge paths left behind: still deleted, still holding its name. --}}
-                                            <form method="POST" action="{{ route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-red-600 hover:underline dark:text-red-400"
-                                                    data-confirm="{{ $role->is_deleted ? __('messages.release_subdomain_confirm') : __('messages.mark_deleted_confirm') }}">
-                                                    {{ $role->is_deleted ? __('messages.release') : __('messages.delete') }}
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
+                                    <a href="{{ route('admin.schedules.edit', ['role' => $role->encodeId()]) }}" class="event-link">@lang('messages.edit')</a>
+                                    @if ($role->is_deleted && $role->subdomain_before_delete)
+                                    <form method="POST" action="{{ route('admin.schedules.restore', ['role' => $role->encodeId()]) }}">
+                                        @csrf
+                                        <button type="submit" class="event-link" data-confirm="{{ __('messages.restore_schedule_confirm') }}">@lang('messages.restore')</button>
+                                    </form>
+                                    @else
+                                    {{-- A deleted row with no recorded original is one the API, unfollow or
+                                         merge paths left behind: still deleted, still holding its name. --}}
+                                    <form method="POST" action="{{ route('admin.schedules.mark_deleted', ['role' => $role->encodeId()]) }}">
+                                        @csrf
+                                        <button type="submit" class="event-link is-danger"
+                                            data-confirm="{{ $role->is_deleted ? __('messages.release_subdomain_confirm') : __('messages.mark_deleted_confirm') }}">{{ $role->is_deleted ? __('messages.release') : __('messages.delete') }}</button>
+                                    </form>
+                                    @endif
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="{{ $hosted ? 8 : 3 }}" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                    @lang('messages.no_schedules_found')
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            {{-- Pagination --}}
+            @else
+            <div class="ap-card rounded-xl">
+                <x-page-empty
+                    :title="__('messages.no_schedules_found')"
+                    :text="($filtered || $roles->currentPage() > 1) ? __('messages.no_match_filters') : __('messages.admin_schedules_empty_text')"
+                    icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5">
+                    @if ($filtered)
+                    <x-secondary-link :href="route('admin.schedules')">@lang('messages.clear_filters')</x-secondary-link>
+                    @endif
+                </x-page-empty>
+            </div>
+            @endif
+
+            {{-- Outside the list's own branch: a page past the last one still needs the way back. --}}
             @if ($roles->hasPages())
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                    {{ $roles->links() }}
-                </div>
+            <div class="page-pager">{{ $roles->links() }}</div>
             @endif
         </div>
     </div>

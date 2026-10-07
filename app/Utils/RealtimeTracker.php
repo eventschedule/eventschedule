@@ -98,7 +98,7 @@ class RealtimeTracker
     }
 
     /**
-     * Whether a schedule's owner may see the live traffic to their own pages (/realtime).
+     * Whether a schedule's owner may see the live traffic to their own pages (the Realtime tab of /analytics).
      *
      * A second switch, not a consequence of the first: an operator who turned Realtime on did so
      * under a setting that said only administrators see it, and may want it for themselves without
@@ -124,7 +124,7 @@ class RealtimeTracker
 
     /**
      * Whether this visitor's cookie choice lets a schedule's organizer see them as a row of the
-     * organizer's own Realtime page (never by name; App\Services\ScheduleRealtime).
+     * organizer's own Realtime tab (never by name; App\Services\ScheduleRealtime).
      *
      * True only for a choice that allows analytics AND carries the "org" token, which
      * cookie-consent.js writes when the notice that was answered said that a schedule's organizer
@@ -242,7 +242,7 @@ class RealtimeTracker
     /**
      * A signed-in member of the schedule looking at that schedule's own guest page. Their visits
      * are not the owner's audience, whatever their cookie choice, so the row is marked and the
-     * owner's Realtime page leaves it out (as Analytics leaves it out of the daily counts).
+     * owner's Realtime tab leaves it out (as Analytics leaves it out of the daily counts).
      */
     private static function isTeamView(mixed $user, string $surface, mixed $role): bool
     {

@@ -2,14 +2,29 @@
 
     <x-slot name="head">
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+        @include('boost.partials.styles')
     </x-slot>
 
-    <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost') }}</h1>
+    @php
+        // A campaign can only be started where a channel exists to carry it. With neither set up
+        // the button used to open a dialog that had an event picker and no way on.
+        $boostCanStart = \App\Services\MetaAdsService::isBoostConfigured() || \App\Services\PromotionService::isEnabled();
+        // Boost is part of the Pro plan. The schedule the gate speaks about is the one picked,
+        // or, with none picked, the first of somebody whose schedules are all on the free plan:
+        // they used to get an empty list and a dialog saying they had no upcoming events.
+        $boostGateRole = $selectedRole
+            ? ($selectedRole->isPro() ? null : $selectedRole)
+            : ($roles->isNotEmpty() && ! $roles->contains(fn ($r) => $r->isPro()) ? $roles->first() : null);
+    @endphp
 
-            <div class="flex items-center gap-3">
-                @if ($roles->isNotEmpty())
-                <div class="min-w-[200px] max-w-xs">
+    {{-- The campaigns this person started, newest first. One list for every width (.page-table):
+         it was a wall of cards, each with its own coloured pill. --}}
+    <div class="page-shell">
+        <x-page-header :title="__('messages.boost')" :lead="__('messages.boost_lead')">
+            <x-slot name="actions">
+                @if ($roles->count() > 1)
+                <div class="boost-schedule-pick">
+                    <label for="role-filter" class="sr-only">{{ __('messages.schedule') }}</label>
                     <select id="role-filter" data-searchable
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
                         <option value="">{{ __('messages.all_schedules') }}</option>
@@ -22,43 +37,62 @@
                 </div>
                 @endif
 
+                @if ($boostCanStart && ! $boostGateRole)
+                {{-- The button is drawn here and again by the Vue island that takes this element
+                     over, so the title row does not jump when the script arrives. --}}
                 <div id="boost-modal-app">
-                    <boost-modal-app></boost-modal-app>
+                    <x-brand-button class="whitespace-nowrap">{{ __('messages.boost_event') }}</x-brand-button>
                 </div>
+                @endif
+            </x-slot>
+        </x-page-header>
+
+        <div class="page-stack">
+            <x-page-flash :keys="['success' => 'success', 'error' => 'error']" />
+
+            @if ($boostGateRole)
+            <x-plan-gate tier="pro" :title="__('messages.boost')" :role="$boostGateRole" :subdomain="$boostGateRole->subdomain"
+                :canUpgrade="auth()->user()->id == $boostGateRole->user_id">
+                {{ __('messages.boost_plan_gate') }}
+            </x-plan-gate>
+            @elseif (! $boostCanStart)
+            <x-page-notice tone="info">{{ __('messages.boost_not_set_up') }}</x-page-notice>
+            @endif
+
+            @if ($campaigns->count() > 0)
+            <div class="ap-card rounded-xl overflow-hidden">
+                <table class="page-table is-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ __('messages.event') }}</th>
+                            <th scope="col">{{ __('messages.status') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.impressions') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.clicks') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.spend') }}</th>
+                            <th scope="col" class="c-num">{{ __('messages.promotion_budget') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($campaigns as $campaign)
+                            @include('boost.partials.campaign-row', ['campaign' => $campaign])
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </div>
 
-        @if (session('success'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('success') }}
+            @if ($campaigns->hasPages())
+            <div class="page-pager">
+                {{ $campaigns->withQueryString()->links() }}
+            </div>
+            @endif
+            @elseif (! $boostGateRole)
+            <div class="ap-card rounded-xl">
+                <x-page-empty :title="__('messages.no_boost_campaigns')" :text="__('messages.boost_empty_description')"
+                    icon="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+            </div>
+            @endif
         </div>
-        @endif
-
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
-
-        @if ($campaigns->count() > 0)
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach ($campaigns as $campaign)
-                @include('boost.partials.campaign-card', ['campaign' => $campaign])
-            @endforeach
-        </div>
-
-        <div class="mt-6">
-            {{ $campaigns->withQueryString()->links() }}
-        </div>
-        @else
-        <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4M19.22 2C19.06 2 18.88 2 18.7 2.04C16.56 2.11 13.5 3.31 10.77 6.04C8.95 7.87 7.57 10.04 6.63 12.46C6.37 13.1 6.55 13.85 7.07 14.33L9.65 16.91C10.13 17.42 10.87 17.61 11.53 17.35C13.95 16.42 16.12 15.04 17.95 13.22C20.67 10.5 21.88 7.44 21.95 5.3C22.04 3.5 20.87 2 19.22 2M14.54 9.46C13.76 8.68 13.76 7.41 14.54 6.63S16.59 5.85 17.37 6.63C18.14 7.41 18.15 8.68 17.37 9.46C16.59 10.24 15.32 10.24 14.54 9.46M8.88 16.53L7.47 15.12L8.88 16.53M6.24 22L8.4 20.46L7.18 19.28L6.24 22M2 18L3.54 15.6L4.72 16.82L2 18Z"/>
-            </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.no_boost_campaigns') }}</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.boost_empty_description') }}</p>
-        </div>
-        @endif
+    </div>
 
     <script {!! nonce_attr() !!}>
         document.getElementById('role-filter')?.addEventListener('change', function() {
@@ -69,10 +103,13 @@
             } else {
                 url.searchParams.delete('role_id');
             }
+            // A page of the longer list may not exist in the shorter one.
+            url.searchParams.delete('page');
             window.location.href = url.toString();
         });
     </script>
 
+    @if ($boostCanStart && ! $boostGateRole)
     <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof Vue === 'undefined') return;
@@ -157,49 +194,40 @@
             },
             template: `
 <div>
-    <button @click="openModal" class="inline-flex items-center gap-2 px-4 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition ease-in-out duration-150 hover:scale-105 hover:shadow-lg whitespace-nowrap">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4M19.22 2C19.06 2 18.88 2 18.7 2.04C16.56 2.11 13.5 3.31 10.77 6.04C8.95 7.87 7.57 10.04 6.63 12.46C6.37 13.1 6.55 13.85 7.07 14.33L9.65 16.91C10.13 17.42 10.87 17.61 11.53 17.35C13.95 16.42 16.12 15.04 17.95 13.22C20.67 10.5 21.88 7.44 21.95 5.3C22.04 3.5 20.87 2 19.22 2M14.54 9.46C13.76 8.68 13.76 7.41 14.54 6.63S16.59 5.85 17.37 6.63C18.14 7.41 18.15 8.68 17.37 9.46C16.59 10.24 15.32 10.24 14.54 9.46M8.88 16.53L7.47 15.12L8.88 16.53M6.24 22L8.4 20.46L7.18 19.28L6.24 22M2 18L3.54 15.6L4.72 16.82L2 18Z"/>
-        </svg>
-        {{ __('messages.boost_event') }}
-    </button>
+    <x-brand-button @click="openModal" class="whitespace-nowrap">{{ __('messages.boost_event') }}</x-brand-button>
 
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="closeModal">
-        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-md w-full mx-4" @click.stop>
-            <div class="flex items-center justify-between px-5 pt-5 pb-3">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.boost_event') }}</h3>
-                <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="boost-dialog" role="dialog" aria-modal="true" aria-labelledby="boost-dialog-title" @click.stop>
+            <div class="boost-dialog-head">
+                <h2 id="boost-dialog-title" class="page-card-title">{{ __('messages.boost_event') }}</h2>
+                <button type="button" @click="closeModal" class="boost-dialog-close" aria-label="{{ __('messages.close') }}">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
             <template v-if="events.length > 0">
-                <div class="px-5 pb-3">
+                <div class="boost-dialog-body">
                     <x-event-selector />
                 </div>
-                <div class="flex flex-col gap-2 px-5 pb-5 pt-2 sm:flex-row sm:justify-end">
+                {{-- Where the campaign runs is the step that goes on, so each channel is a button:
+                     the one that leaves this site last. --}}
+                <div class="page-form-actions boost-dialog-foot">
                     @if (\App\Services\PromotionService::isEnabled())
-                    <button @click="boostEvent('network')" :disabled="!selectedEvent"
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-[#3a3a3d] border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="button" @click="boostEvent('network')" :disabled="!selectedEvent"
+                        class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.promotion_channel_network') }}
                     </button>
                     @endif
                     @if (\App\Services\MetaAdsService::isBoostConfigured())
-                    <button @click="boostEvent('meta')" :disabled="!selectedEvent"
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <x-brand-button @click="boostEvent('meta')" ::disabled="!selectedEvent">
                         {{ __('messages.promotion_channel_meta') }}
-                    </button>
+                    </x-brand-button>
                     @endif
                 </div>
             </template>
-            <div v-else class="text-center px-5 pb-5 pt-2">
-                <svg class="mx-auto h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/>
-                </svg>
-                <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.no_upcoming_events') }}</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.boost_no_upcoming_events') }}</p>
-            </div>
+            <x-page-empty v-else :title="__('messages.no_upcoming_events')" :text="__('messages.boost_no_upcoming_events')"
+                icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
         </div>
     </div>
 </div>
@@ -209,5 +237,6 @@
         app.mount('#boost-modal-app');
     });
     </script>
+    @endif
 
 </x-app-admin-layout>

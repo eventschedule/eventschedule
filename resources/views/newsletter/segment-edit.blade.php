@@ -1,219 +1,174 @@
 <x-app-admin-layout>
-    <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_segment') }}</h2>
-            <a href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </a>
-        </div>
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+    </x-slot>
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
+    {{-- One segment: its name, who it resolves to, and for a manual one the way to add and change
+         the people in it. --}}
+    <div class="page-shell">
+        @php
+            $roleParam = \App\Utils\UrlUtils::encodeId($role->id);
+            $segmentParams = ['role_id' => $roleParam, 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)];
+            $isManual = $segment->type === 'manual';
+            $subscriberList = $isManual ? $subscribers->items() : $subscribers;
+        @endphp
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+        <x-page-header
+            :title="$segment->name"
+            :back="route('newsletter.segments', ['role_id' => $roleParam])"
+            :back-label="__('messages.segments')" />
 
-        @if ($errors->any())
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+        @include('newsletter.partials._notices')
 
-        {{-- Segment Info --}}
-        <div class="ap-card sm:rounded-xl p-6 mb-6">
-            <form method="POST" action="{{ route('newsletter.segment.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}">
-                @csrf
-                @method('PUT')
-                <div class="space-y-4">
-                    <div>
-                        <x-input-label for="segment_name" :value="__('messages.name')" />
-                        <x-text-input id="segment_name" name="name" type="text" class="mt-1 block w-full" :value="$segment->name" required />
+        <div class="page-stack">
+            <x-page-card beside :title="__('messages.edit_segment')">
+                <form method="POST" action="{{ route('newsletter.segment.update', $segmentParams) }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="page-form-fields">
+                        <div>
+                            <x-input-label for="segment_name" :value="__('messages.name')" />
+                            <x-text-input id="segment_name" name="name" type="text" class="mt-1 block w-full" :value="$segment->name" required />
+                        </div>
+
+                        <dl class="news-facts">
+                            <div><dt>{{ __('messages.type') }}</dt> <dd>{{ \App\Models\NewsletterSegment::typeLabel($segment->type) }}</dd></div>
+                            @if (! empty($eventName))
+                            <div><dt>{{ __('messages.event') }}</dt> <dd><bdi>{{ $eventName }}</bdi></dd></div>
+                            @endif
+                            <div><dt>{{ __('messages.recipients') }}</dt> <dd>{{ number_format($recipientCount) }}</dd></div>
+                            <div><dt>{{ __('messages.created') }}</dt> <dd>{{ $segment->created_at->translatedFormat('M j, Y') }}</dd></div>
+                        </dl>
                     </div>
 
-                    <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{{ __('messages.type') }}: {{ \App\Models\NewsletterSegment::typeLabel($segment->type) }}</span>
-                        @if (!empty($eventName))
-                        <span>{{ __('messages.event') }}: {{ $eventName }}</span>
-                        @endif
-                        <span>{{ __('messages.recipients') }}: {{ number_format($recipientCount) }}</span>
-                        <span>{{ __('messages.created') }}: {{ $segment->created_at->format('M j, Y') }}</span>
+                    <div class="page-form-actions">
+                        <x-brand-button type="submit">{{ __('messages.save_changes') }}</x-brand-button>
                     </div>
+                </form>
+            </x-page-card>
 
-                    <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)]">
-                            {{ __('messages.save_changes') }}
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            {{-- Add subscriber (manual segments only) --}}
+            @if ($isManual)
+            <x-page-card beside :title="__('messages.add_subscriber')">
+                <form method="POST" action="{{ route('newsletter.segment.user.store', $segmentParams) }}" class="news-inline-form" autocomplete="off">
+                    @csrf
+                    <x-text-input name="name" type="text" class="is-grow" :placeholder="__('messages.name')" :aria-label="__('messages.name')" data-1p-ignore data-lpignore="true" />
+                    <x-text-input name="email" type="email" class="is-grow" :placeholder="__('messages.email')" :aria-label="__('messages.email')" required data-1p-ignore data-lpignore="true" />
+                    <x-brand-button type="submit">{{ __('messages.add_subscriber') }}</x-brand-button>
+                </form>
+                <x-slot name="foot">
+                    <x-link href="{{ route('newsletter.import', ['role_id' => $roleParam]) }}">{{ __('messages.import_in_bulk') }}</x-link>
+                </x-slot>
+            </x-page-card>
+            @endif
 
-        {{-- Add Subscriber (manual segments only) --}}
-        @if ($segment->type === 'manual')
-        <div class="ap-card sm:rounded-xl p-6 mb-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
-            <form method="POST" action="{{ route('newsletter.segment.user.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                class="flex flex-col sm:flex-row gap-3" autocomplete="off">
-                @csrf
-                <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" data-1p-ignore data-lpignore="true" />
-                <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required data-1p-ignore data-lpignore="true" />
-                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] whitespace-nowrap">
-                    {{ __('messages.add_subscriber') }}
-                </button>
-            </form>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                <a href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                    {{ __('messages.import_in_bulk') }}
-                </a>
-            </p>
-        </div>
-        @endif
-
-        {{-- Subscribers Table --}}
-        <div class="ap-card sm:rounded-xl p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                {{ __('messages.subscribers') }} ({{ number_format($recipientCount) }})
-            </h3>
-
-            @php
-                $subscriberList = $segment->type === 'manual' ? $subscribers->items() : $subscribers;
-            @endphp
-
-            @if (count($subscriberList) > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+            {{-- Subscribers --}}
+            <x-page-card flush :title="__('messages.subscribers') . ' (' . number_format($recipientCount) . ')'">
+                @if (count($subscriberList) > 0)
+                <table class="page-table">
+                    <thead>
                         <tr>
-                            @if ($segment->type === 'manual')
-                            <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.name') }}</x-sortable-header>
-                            <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.email') }}</x-sortable-header>
-                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.date_added') }}</x-sortable-header>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
+                            @if ($isManual)
+                            <x-page-sort column="name" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.name') }}</x-page-sort>
+                            <x-page-sort column="email" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.email') }}</x-page-sort>
+                            <x-page-sort column="created_at" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.date_added') }}</x-page-sort>
+                            <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
                             @else
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.name') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.email') }}</th>
+                            <th scope="col">{{ __('messages.name') }}</th>
+                            <th scope="col">{{ __('messages.email') }}</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                         @foreach ($subscriberList as $subscriber)
-                        @if ($segment->type === 'manual')
+                        @if ($isManual)
                         @php $encodedId = \App\Utils\UrlUtils::encodeId($subscriber->id); @endphp
                         {{-- Display row --}}
                         <tr data-display-row="{{ $encodedId }}">
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($subscriber->name)<x-user-text>{{ $subscriber->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->email }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
-                            <td class="px-4 py-3 text-sm text-right">
-                                <div class="flex gap-3 justify-end">
-                                    <button type="button" data-segment="{{ $encodedId }}" class="js-segment-edit-toggle text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</button>
-                                    <form method="POST" action="{{ route('newsletter.segment.user.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
-                                        class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700">{{ __('messages.delete') }}</button>
-                                    </form>
-                                </div>
+                            <td class="c-main c-strong">@if ($subscriber->name)<x-user-text><bdi>{{ $subscriber->name }}</bdi></x-user-text>@else<span class="c-quiet italic font-normal">{{ __('messages.no_name') }}</span>@endif</td>
+                            <td class="c-wrap">{{ $subscriber->email }}</td>
+                            <td class="c-date">{{ $subscriber->created_at?->translatedFormat('M j, Y') }}</td>
+                            <td class="c-actions">
+                                <button type="button" data-segment="{{ $encodedId }}" class="js-segment-edit-toggle event-link">{{ __('messages.edit') }}</button>
+                                <form method="POST" action="{{ route('newsletter.segment.user.delete', $segmentParams + ['userHash' => $encodedId]) }}" class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="event-link is-danger">{{ __('messages.delete') }}</button>
+                                </form>
                             </td>
                         </tr>
                         {{-- Edit row --}}
-                        <tr data-edit-row="{{ $encodedId }}" style="display: none;">
-                            <td colspan="4" class="px-4 py-3">
-                                <form method="POST" action="{{ route('newsletter.segment.user.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
-                                    class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                        <tr data-edit-row="{{ $encodedId }}" class="news-edit-row" hidden>
+                            <td colspan="4">
+                                <form method="POST" action="{{ route('newsletter.segment.user.update', $segmentParams + ['userHash' => $encodedId]) }}" class="news-inline-form">
                                     @csrf
                                     @method('PUT')
-                                    <x-text-input name="name" type="text" class="flex-1 text-sm" :value="$subscriber->name" :placeholder="__('messages.name')" />
-                                    <x-text-input name="email" type="email" class="flex-1 text-sm" :value="$subscriber->email" :placeholder="__('messages.email')" />
-                                    <div class="flex gap-2">
-                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-[var(--brand-button-bg-hover)]">
-                                            {{ __('messages.save_changes') }}
-                                        </button>
-                                        <button type="button" class="js-segment-edit-toggle inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
-                                            {{ __('messages.cancel') }}
-                                        </button>
-                                    </div>
+                                    <x-text-input name="name" type="text" class="is-grow text-sm" :value="$subscriber->name" :placeholder="__('messages.name')" :aria-label="__('messages.name')" />
+                                    <x-text-input name="email" type="email" class="is-grow text-sm" :value="$subscriber->email" :placeholder="__('messages.email')" :aria-label="__('messages.email')" />
+                                    <button type="button" class="js-segment-edit-toggle page-tool">{{ __('messages.cancel') }}</button>
+                                    <x-brand-button type="submit" size="sm">{{ __('messages.save_changes') }}</x-brand-button>
                                 </form>
                             </td>
                         </tr>
                         @else
-                        {{-- Read-only row for non-manual segments --}}
+                        {{-- Read-only row for a segment that is worked out, not kept by hand --}}
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($subscriber->name)<x-user-text>{{ $subscriber->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->email }}</td>
+                            <td class="c-main c-strong">@if ($subscriber->name)<x-user-text><bdi>{{ $subscriber->name }}</bdi></x-user-text>@else<span class="c-quiet italic font-normal">{{ __('messages.no_name') }}</span>@endif</td>
+                            <td class="c-wrap">{{ $subscriber->email }}</td>
                         </tr>
                         @endif
                         @endforeach
                     </tbody>
                 </table>
-            </div>
 
-            @if ($segment->type === 'manual' && $subscribers instanceof \Illuminate\Pagination\LengthAwarePaginator)
-            <div class="mt-4">
-                {{ $subscribers->links() }}
-            </div>
-            @endif
+                @if ($isManual && $subscribers instanceof \Illuminate\Pagination\LengthAwarePaginator && $subscribers->hasPages())
+                <div class="page-card-foot">
+                    {{ $subscribers->links() }}
+                </div>
+                @endif
 
-            @if ($segment->type !== 'manual' && $recipientCount > 50)
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                {{ __('messages.showing_first_of', ['count' => number_format($recipientCount)]) }}
-            </p>
-            @endif
-            @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_subscribers') }}</p>
-            @endif
+                @if (! $isManual && $recipientCount > 50)
+                <div class="page-card-foot">{{ __('messages.showing_first_of', ['count' => number_format($recipientCount)]) }}</div>
+                @endif
+                @else
+                <x-page-empty compact :title="__('messages.no_subscribers')" />
+                @endif
+            </x-page-card>
         </div>
-    <script {!! nonce_attr() !!}>
-        document.addEventListener('click', function(e) {
-            var header = e.target.closest('[data-sort]');
-            if (header) {
-                var url = new URL(window.location.href);
-                var currentSort = url.searchParams.get('sort_by') || 'created_at';
-                var currentDir = url.searchParams.get('sort_dir') || 'desc';
-                var sortBy = header.getAttribute('data-sort');
-                url.searchParams.set('sort_by', sortBy);
-                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
-                url.searchParams.delete('page');
-                window.location.href = url.toString();
-            }
-        });
+    </div>
 
-        document.addEventListener('submit', function(e) {
-            var form = e.target.closest('.js-confirm-form');
-            if (form) {
-                if (!confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
+    @include('newsletter.partials._list-script')
+    <script {!! nonce_attr() !!}>
+        {{-- One row at a time is changed in place: its line gives way to a small form. The rows
+             are shown and put away with the hidden attribute, never an inline style. --}}
+        (function() {
+            var currentEditId = null;
+            function show(id, editing) {
+                var display = document.querySelector('[data-display-row="' + id + '"]');
+                var edit = document.querySelector('[data-edit-row="' + id + '"]');
+                if (display && edit) {
+                    display.hidden = editing;
+                    edit.hidden = ! editing;
                 }
             }
-        });
-
-        var currentEditId = null;
-        function toggleSegmentEdit(id) {
-            if (currentEditId) {
-                document.querySelector('[data-display-row="' + currentEditId + '"]').style.display = '';
-                document.querySelector('[data-edit-row="' + currentEditId + '"]').style.display = 'none';
-            }
-            currentEditId = id;
-            if (id) {
-                document.querySelector('[data-display-row="' + id + '"]').style.display = 'none';
-                document.querySelector('[data-edit-row="' + id + '"]').style.display = '';
-            }
-        }
-        // Capture-phase delegation (replaces inline onclick; CSP blocks inline handlers).
-        document.addEventListener('click', function (e) {
-            if (! e.target.closest) return;
-            var toggleBtn = e.target.closest('.js-segment-edit-toggle');
-            if (toggleBtn) toggleSegmentEdit(toggleBtn.getAttribute('data-segment') || null);
-        }, true);
+            document.addEventListener('click', function(e) {
+                var toggle = e.target.closest ? e.target.closest('.js-segment-edit-toggle') : null;
+                if (! toggle) {
+                    return;
+                }
+                var id = toggle.getAttribute('data-segment') || null;
+                if (currentEditId) {
+                    show(currentEditId, false);
+                }
+                currentEditId = id;
+                if (id) {
+                    show(id, true);
+                    var first = document.querySelector('[data-edit-row="' + id + '"] input[name="name"]');
+                    if (first) {
+                        first.focus();
+                    }
+                }
+            });
+        })();
     </script>
 </x-app-admin-layout>

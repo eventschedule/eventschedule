@@ -1,5 +1,11 @@
 {{-- theme-variants opts this layout in to the six palettes. The guest portal
      renders through the same <x-app-layout> shell and deliberately does not. --}}
+{{-- One frame for every page of the portal (partials/admin-page-styles, .ap-frame): the header,
+     the tabs and what a page shows share both edges, 80rem apart at most, in the middle of the
+     room beside the sidebar. A page that is a canvas (the seating designer, the box office) asks
+     for the whole window with <x-app-admin-layout wide>. Read here, ahead of the shell: inside
+     its slots the attribute bag in scope is no longer this layout's own. --}}
+@php $frameWide = $attributes->has('wide') && $attributes->get('wide') !== false; @endphp
 <x-app-layout :theme-variants="true" realtime-surface="ap" :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
 
     <x-slot name="head">
@@ -62,6 +68,15 @@
             });
         </script>
 
+        {{-- The portal's two kits, for every page of it: the form kit (links, chips, status marks,
+             rows, the address strip) and the page kit that sits on it (title row, tabs, lists,
+             figures, cards, empty states). Here, once, and ahead of the page's own head so a
+             page's own rule still wins a tie. They were included page by page while only the
+             three forms and a schedule's tabs used them. --}}
+        @include('partials.form-kit-styles')
+        @include('partials.admin-page-styles')
+        @include('partials.admin-page-script')
+
         {{ isset($head) ? $head : '' }}
     </x-slot>
 
@@ -119,7 +134,7 @@
 
         <div class="lg:ps-72 flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
             <div
-                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 header-gradient px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 header-gradient px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 ap-frame-bar{{ $frameWide ? ' is-wide' : '' }}">
                 <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 lg:hidden">
                     <span class="sr-only">{{ __('messages.open_sidebar') }}</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -200,18 +215,23 @@
                 </div>
             </div>
 
-            <main id="main-content" tabindex="-1" class="py-10">
+            {{-- The frame is on <main> itself and not on a div inside it: SetupGuide.vue reads
+                 this element's box to dock the guide beside a form's fields. --}}
+            <main id="main-content" tabindex="-1" class="py-10 ap-frame{{ $frameWide ? ' is-wide' : '' }}">
                 <div class="px-4 sm:px-6 lg:px-8">
 
+                    {{-- What a form that was just sent got wrong, said once for every page of
+                         the portal and as the kit's notice. A page does not print the list again:
+                         the newsletter pages and the platform's Boost page did, so every message
+                         was on the screen twice. --}}
                     @if ($errors->any())
-                    <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 card-highlight shadow-md sm:rounded-xl text-red-600 dark:text-red-400">
-                        <b>{{ __('messages.there_was_a_problem') . ':' }}</b>
+                    <x-page-notice tone="error" role="alert" class="mb-4 ap-form-errors" :title="__('messages.there_was_a_problem').':'">
                         <ul>
                             @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
+                            <li v-pre>{{ $error }}</li>
                             @endforeach
                         </ul>
-                    </div>
+                    </x-page-notice>
                     @endif
 
                     {{-- The setup guide's floating shapes (partials/setup-guide). Here, never in
@@ -223,7 +243,7 @@
                 </div>
             </main>
 
-            <div class="mt-auto pb-8 px-4 sm:px-6 lg:px-8 text-sm text-gray-500 dark:text-gray-400" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
+            <div class="mt-auto pb-8 px-4 sm:px-6 lg:px-8 ap-frame{{ $frameWide ? ' is-wide' : '' }} text-sm text-gray-500 dark:text-gray-400" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
                 @if (config('app.hosted'))
                     {!! str_replace(':email', '<bdi dir="ltr"><a href="mailto:'.config('app.support_email').'?subject=Feedback" class="hover:underline">'.config('app.support_email').'</a></bdi>', __('messages.questions_or_suggestions')) !!}
                 @else

@@ -1,98 +1,82 @@
 <x-app-admin-layout>
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center gap-6 mb-6">
-            @if (is_rtl())
-                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    {{ __('messages.cancel') }}
-                </a>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
-            @else
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.boost_event') }}</h1>
-                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    {{ __('messages.cancel') }}
-                </a>
-            @endif
-        </div>
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+    <x-slot name="head">
+        @include('boost.partials.styles')
+    </x-slot>
 
-        @if ($activeCampaigns >= $maxConcurrent)
-        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-700 dark:text-yellow-300">
+    @php
+        // The form is drawn, and its scripts with it, only while another campaign may be started.
+        $boostFormOpen = $activeCampaigns < $maxConcurrent;
+        // A new schedule's spending limit is the smallest budget there is, which leaves the slider
+        // with one stop. It is not drawn then: a slider that cannot move reads as a broken page.
+        $sliderMax = min($maxBudget, 500);
+        $sliderFixed = $sliderMax <= $minBudget;
+    @endphp
+
+    {{-- The short way to boost an event on Facebook and Instagram: a budget and a button, with the
+         ad the event's own details make. The longer way (boost/create-advanced) is a link at the
+         foot of the form. --}}
+    <div class="page-shell">
+        <x-page-header :title="__('messages.boost_event')" :lead="__('messages.boost_create_lead')"
+            :back="route('boost.index')" :back-label="__('messages.boost')" />
+
+        <x-page-flash :keys="['error' => 'error']" class="mb-4" />
+
+        @if (! $boostFormOpen)
+        <x-page-notice tone="warn">
             {{ __('messages.boost_max_concurrent') }}
-        </div>
+            <x-slot name="action"><a href="{{ route('boost.index') }}" class="event-link">{{ __('messages.boost') }}</a></x-slot>
+        </x-page-notice>
         @else
+
+        <div class="boost-cols">
+        <div class="boost-cols-main">
 
         {{-- First-time onboarding --}}
         @if ($isFirstTime)
-        <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <h3 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">{{ __('messages.boost_onboarding_title') }}</h3>
-            <p class="text-sm text-blue-700 dark:text-blue-300 mb-2">{{ __('messages.boost_onboarding_body') }}</p>
-            <ul class="text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
+        <x-page-notice tone="info" :title="__('messages.boost_onboarding_title')">
+            <p>{{ __('messages.boost_onboarding_body') }}</p>
+            <ul class="mt-1 list-disc list-inside">
                 <li>{{ __('messages.boost_onboarding_point1') }}</li>
                 <li>{{ __('messages.boost_onboarding_point2') }}</li>
                 <li>{{ __('messages.boost_onboarding_point3') }}</li>
             </ul>
-        </div>
+        </x-page-notice>
         @endif
 
-        <div class="lg:grid lg:grid-cols-2 lg:gap-4">
-        <div>
-
         {{-- Event summary --}}
-        <div class="ap-card shadow-md rounded-lg p-6 mb-6">
-            <div class="flex items-start gap-4">
+        <section class="ap-card rounded-xl page-card">
+            <div class="boost-event">
                 @if ($event->getImageUrl())
-                <img src="{{ $event->getImageUrl() }}" alt="{{ $event->name }}" class="w-24 rounded-lg object-contain flex-shrink-0">
+                <img src="{{ $event->getImageUrl() }}" alt="">
                 @endif
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->translatedName() }}</h2>
+                <div class="min-w-0">
+                    <h2><bdi>{{ $event->translatedName() }}</bdi></h2>
                     @if ($event->starts_at)
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->localStartsAt(true) }}</p>
+                    <p>{{ $event->localStartsAt(true) }}</p>
                     @endif
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->getVenueDisplayName() }}</p>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $role->name }}</p>
+                    <p><bdi>{{ $event->getVenueDisplayName() }}</bdi></p>
+                    <p><bdi>{{ $role->name }}</bdi></p>
                 </div>
             </div>
-        </div>
+        </section>
 
         {{-- Warnings --}}
         @if (!empty($defaults['warnings']))
-        <div class="mb-6 space-y-2">
             @foreach ($defaults['warnings'] as $warning)
-            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg text-sm text-yellow-700 dark:text-yellow-300">
-                {{ $warning }}
-            </div>
+            <x-page-notice tone="warn">{{ $warning }}</x-page-notice>
             @endforeach
-        </div>
         @endif
 
         {{-- Boost credit banner --}}
         @if (!empty($boostCredit) && $boostCredit > 0)
-        <div class="mb-0 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-            <p class="text-sm text-green-700 dark:text-green-300 font-medium">
-                {{ __('messages.you_have') }} {{ $currencySymbol }}{{ number_format($boostCredit, 2) }} {{ __('messages.in_boost_credit') }}
-            </p>
-        </div>
-        @endif
-
-        {{-- Spending limit info --}}
-        @if ($isHosted)
-        <div class="mb-0 p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
-            <p class="text-sm text-gray-600 dark:text-gray-300">
-                {{ __('messages.boost_limit_info', ['limit' => $currencySymbol . number_format($maxBudget, 0)]) }}
-                {{ __('messages.boost_limit_grows') }}
-            </p>
-        </div>
+        <x-page-notice tone="success">
+            {{ __('messages.you_have') }} {{ $currencySymbol }}{{ number_format($boostCredit, 2) }} {{ __('messages.in_boost_credit') }}
+        </x-page-notice>
         @endif
 
         {{-- Boost form --}}
-        <form id="boost-form" class="space-y-6">
+        <form id="boost-form">
             @csrf
             <input type="hidden" name="event_id" value="{{ $event->hashedId() }}">
             <input type="hidden" name="role_id" value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">
@@ -100,132 +84,128 @@
             <input type="hidden" name="budget_type" value="lifetime">
 
             {{-- Budget slider --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.ad_budget') }}</label>
-                <div class="flex items-center gap-4 mb-2">
-                    <input type="range" id="budget-slider" min="{{ $minBudget }}" max="{{ min($maxBudget, 500) }}" step="5"
-                        value="{{ $defaults['budget'] }}"
-                        class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                    <span id="budget-display" class="text-2xl font-bold text-gray-900 dark:text-white min-w-[80px] {{ is_rtl() ? 'text-left' : 'text-right' }}">{{ $currencySymbol }}{{ number_format($defaults['budget'], 0) }}</span>
+            <section class="ap-card rounded-xl page-card">
+                <div class="page-card-head">
+                    <div class="min-w-0">
+                        <h2 class="page-card-title"><label for="budget-slider">{{ __('messages.ad_budget') }}</label></h2>
+                        {{-- Spending limit info --}}
+                        @if ($isHosted)
+                        <p class="page-card-lead">
+                            {{ __('messages.boost_limit_info', ['limit' => $currencySymbol . number_format($maxBudget, 0)]) }}
+                            {{ __('messages.boost_limit_grows') }}
+                        </p>
+                        @endif
+                    </div>
+                </div>
+                <div class="boost-budget">
+                    <input type="range" id="budget-slider" min="{{ $minBudget }}" max="{{ $sliderMax }}" step="5"
+                        value="{{ $defaults['budget'] }}" @if ($sliderFixed) hidden @endif>
+                    <span id="budget-display" class="boost-budget-figure" @if ($sliderFixed) style="text-align: start" @endif>{{ $currencySymbol }}{{ number_format($defaults['budget'], 0) }}</span>
                 </div>
                 <input type="hidden" id="budget-input" name="budget" value="{{ $defaults['budget'] }}">
 
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                    {{ __('messages.boost_duration_text', ['days' => $defaults['duration_days'], 'date' => $defaults['scheduled_end']->format('M j, Y')]) }}
+                <p class="boost-note">
+                    {{ __('messages.boost_duration_text', ['days' => $defaults['duration_days'], 'date' => $defaults['scheduled_end']->translatedFormat('M j, Y')]) }}
                 </p>
 
                 {{-- Cost breakdown --}}
-                <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm">
-                    <div class="flex justify-between text-gray-600 dark:text-gray-300">
-                        <span>{{ __('messages.ad_budget') }}</span>
-                        <span id="cost-budget">{{ $currencySymbol }}{{ number_format($defaults['budget'], 2) }}</span>
-                    </div>
-                    @if ($isHosted)
-                    <div class="flex justify-between text-gray-600 dark:text-gray-300 mt-1">
-                        <span>{{ __('messages.service_fee') }} ({{ intval($markupRate * 100) }}%)</span>
-                        <span id="cost-fee">{{ $currencySymbol }}{{ number_format($defaults['budget'] * $markupRate, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between font-semibold text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <span>{{ __('messages.total') }}</span>
-                        <span id="cost-total">{{ $currencySymbol }}{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</span>
-                    </div>
-                    @endif
+                <div class="boost-costs">
+                    <dl class="page-kv">
+                        <div>
+                            <dt>{{ __('messages.ad_budget') }}</dt>
+                            <dd id="cost-budget">{{ $currencySymbol }}{{ number_format($defaults['budget'], 2) }}</dd>
+                        </div>
+                        @if ($isHosted)
+                        <div>
+                            <dt>{{ __('messages.service_fee') }} ({{ intval($markupRate * 100) }}%)</dt>
+                            <dd id="cost-fee">{{ $currencySymbol }}{{ number_format($defaults['budget'] * $markupRate, 2) }}</dd>
+                        </div>
+                        <div>
+                            <dt>{{ __('messages.total') }}</dt>
+                            <dd id="cost-total">{{ $currencySymbol }}{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</dd>
+                        </div>
+                        @endif
+                    </dl>
                 </div>
-            </div>
-
-            {{-- Ad preview (mobile only; desktop version in right column) --}}
-            <div class="lg:hidden">
-                <div class="ap-card shadow-md rounded-lg p-6">
-                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
-                    @include('boost.partials.ad-preview-mockup', [
-                        'headline' => $defaults['headline'],
-                        'primaryText' => $defaults['primary_text'],
-                        'imageUrl' => $defaults['image_url'],
-                        'cta' => $defaults['call_to_action'],
-                    ])
-                </div>
-            </div>
+            </section>
 
             {{-- Credit payment (shown when credit covers full cost) --}}
-            <div id="credit-payment-section" class="ap-card shadow-md rounded-lg p-6 hidden">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
-                <div class="flex items-center gap-2 text-green-700 dark:text-green-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span class="text-sm font-medium" id="credit-payment-text">{{ __('messages.will_be_paid_with_boost_credit') }}</span>
-                </div>
-            </div>
+            <section id="credit-payment-section" class="ap-card rounded-xl page-card is-after-preview hidden">
+                <div class="page-card-head"><h2 class="page-card-title">{{ __('messages.payment') }}</h2></div>
+                <span class="event-status is-on" id="credit-payment-text">{{ __('messages.will_be_paid_with_boost_credit') }}</span>
+            </section>
 
             {{-- Stripe/testing payment --}}
-            @if (!empty($isTesting) || empty($isHosted))
-            <div id="stripe-payment-section" class="ap-card shadow-md rounded-lg p-6">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
-                @if (!empty($isTesting))
-                <div class="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <span>Testing mode: payment will be skipped.</span>
-                    </p>
-                </div>
-                @endif
-                <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
+            @if (!empty($isTesting))
+            <section id="stripe-payment-section" class="ap-card rounded-xl page-card is-after-preview">
+                <div class="page-card-head"><h2 class="page-card-title">{{ __('messages.payment') }}</h2></div>
+                <x-page-notice tone="warn">{{ __('messages.boost_testing_mode') }}</x-page-notice>
+                <div id="payment-errors" class="mt-3 text-sm text-red-600 dark:text-red-400 hidden" role="alert"></div>
+            </section>
+            @elseif (empty($isHosted))
+            {{-- A selfhosted installation pays Meta from its own ad account, so there is nothing to
+                 pay here. The element stays, without a card around it, because the script shows
+                 it and writes a refusal into it: it used to be an empty card headed "Payment". --}}
+            <div id="stripe-payment-section" class="is-after-preview">
+                <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden" role="alert"></div>
             </div>
             @else
-            <div id="stripe-payment-section" class="ap-card shadow-md rounded-lg p-6">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.payment') }}</h3>
+            <section id="stripe-payment-section" class="ap-card rounded-xl page-card is-after-preview">
+                <div class="page-card-head"><h2 class="page-card-title">{{ __('messages.payment') }}</h2></div>
                 @if (!empty($pmLastFour))
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                <p class="boost-note" style="margin: 0 0 0.75rem">
                     {{ __('messages.saved_card_on_file', ['brand' => ucfirst($pmType ?? 'card'), 'last4' => $pmLastFour]) }}
                 </p>
                 @endif
                 <div id="payment-element" class="mb-4"></div>
-                <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
-            </div>
+                <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden" role="alert"></div>
+            </section>
             @endif
 
-            {{-- Submit --}}
-            <div class="flex items-center justify-between">
+            {{-- Submit: the other way to do this at the start of the row, then Cancel, and the
+                 button that spends the money last. --}}
+            <div class="page-form-actions is-split is-after-preview" style="margin-top: 0">
                 <a href="{{ route('boost.create', ['event_id' => $event->hashedId(), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'advanced' => 1]) }}"
-                   class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                   class="event-link">
                     {{ __('messages.customize_targeting_creative') }}
                 </a>
-                <button type="submit" id="submit-btn"
-                    class="inline-flex items-center px-6 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span id="submit-text">{{ __('messages.boost_for') }} {{ $currencySymbol }}<span id="submit-amount">{{ $isHosted ? number_format($defaults['budget'] * (1 + $markupRate), 2) : number_format($defaults['budget'], 2) }}</span></span>
-                    <span id="submit-spinner" class="hidden ml-2">
-                        <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                    </span>
-                </button>
+                <div class="page-actions">
+                    <x-secondary-link href="{{ route('boost.index') }}" class="js-cancel-btn">{{ __('messages.cancel') }}</x-secondary-link>
+                    <x-brand-button type="submit" id="submit-btn">
+                        <span id="submit-text">{{ __('messages.boost_for') }} {{ $currencySymbol }}<span id="submit-amount">{{ $isHosted ? number_format($defaults['budget'] * (1 + $markupRate), 2) : number_format($defaults['budget'], 2) }}</span></span>
+                        <span id="submit-spinner" class="hidden ms-2">
+                            <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </span>
+                    </x-brand-button>
+                </div>
             </div>
         </form>
 
         </div>
 
-        {{-- Right column: ad preview (desktop only, sticky) --}}
-        <div class="hidden lg:block">
-            <div class="lg:sticky lg:top-6">
-                <div class="ap-card shadow-md rounded-lg p-6">
-                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_preview') }}</h3>
-                    @include('boost.partials.ad-preview-mockup', [
-                        'headline' => $defaults['headline'],
-                        'primaryText' => $defaults['primary_text'],
-                        'imageUrl' => $defaults['image_url'],
-                        'cta' => $defaults['call_to_action'],
-                    ])
-                </div>
-            </div>
-        </div>
+        {{-- The ad as it will look: beside the form from a laptop up, and between the budget and
+             the payment on a phone. One copy (it was drawn twice, once for each width). --}}
+        <aside class="boost-cols-aside">
+            <x-page-card :title="__('messages.ad_preview')">
+                @include('boost.partials.ad-preview-mockup', [
+                    'headline' => $defaults['headline'],
+                    'primaryText' => $defaults['primary_text'],
+                    'imageUrl' => $defaults['image_url'],
+                    'cta' => $defaults['call_to_action'],
+                ])
+            </x-page-card>
+        </aside>
 
         </div>
         @endif
     </div>
 
+    {{-- The scripts read the form by element id, so they are sent only with the form: on the page
+         that says the limit of running campaigns is reached they threw on the first line. --}}
+    @if ($boostFormOpen)
     <script {!! nonce_attr() !!}>
         // Budget slider (in its own script block so it works even if Stripe fails)
         const markupRate = {{ $markupRate }};
@@ -559,5 +539,6 @@
             document.getElementById('payment-errors').classList.remove('hidden');
         });
     </script>
+    @endif
     @endif
 </x-app-admin-layout>

@@ -325,9 +325,9 @@ class RouteLoadTest extends TestCase
     }
 
     /**
-     * A schedule owner's own Realtime page, its poll and the dashboard tile's poll. They exist
-     * only where both switches are on (they are a 404 otherwise, which the list above would
-     * accept as "loads"), so this turns them on and asks for a 200.
+     * A schedule owner's Realtime tab on the Analytics page, its poll and the dashboard tile's
+     * poll. The polls exist only where both switches are on (they are a 404 otherwise, which the
+     * list above would accept as "loads"), so this turns them on and asks for a 200.
      */
     public function test_owner_realtime_routes_load(): void
     {
@@ -337,9 +337,11 @@ class RouteLoadTest extends TestCase
         \App\Models\Setting::set('realtime_enabled', '1');
         \App\Models\Setting::set('realtime_owner_view', '1');
 
-        foreach (['/realtime', '/realtime/data', '/realtime/summary'] as $url) {
+        foreach (['/analytics?tab=realtime', '/analytics/realtime/data', '/analytics/realtime/summary'] as $url) {
             $this->actingAs($user)->get($url)->assertOk();
         }
+
+        $this->actingAs($user)->get('/analytics?tab=realtime')->assertSee('id="schedule-realtime"', false);
     }
 
     public function test_ap_schedule_routes_load(): void

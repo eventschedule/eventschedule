@@ -3,6 +3,13 @@
     <x-slot name="description">Set an online course up once as a term, cap the seats per session, and sell single classes or class cards at zero platform fees. Any video platform works.</x-slot>
     <x-slot name="breadcrumbTitle">For Online Classes</x-slot>
 
+    <x-slot name="headMeta">
+        {{-- The page's own typefaces, from the fonts the app already bundles (never a CDN). --}}
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Lexend') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('DM Serif Display') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Sacramento') }}">
+    </x-slot>
+
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Online Classes"
@@ -50,388 +57,1129 @@
 
     <style {!! nonce_attr() !!}>
         /* ==============================================================
-           For-online-classes "The Syllabus" styles.
+           For-online-classes "The Course" styles.
 
-           THE CONCEPT. A syllabus is the one sheet a teacher hands out
-           in week one: what the course is, which night it meets, how
-           many sessions it runs, which weeks are off, how many seats
-           there are, and what a seat costs. That sheet IS the product
-           argument: a course is not an event, it is a TERM, and in
-           Event Schedule a term is one recurring event whose
-           recurrence ends after a set number of sessions
-           (Event::$recurring_end_type = 'after_events'), whose holiday
-           weeks are date exceptions (recurring_exclude_dates), whose
-           seats are counted per session date
-           (Event::rsvpRemaining($date)), and whose multi-session card
-           is a pass (Ticket::$pass_usage_type). Every mark on the
-           sheet is a column.
+           The page is a course and the reader is enrolled in it: a
+           syllabus down the side, twelve lessons in four modules, a
+           progress ring that fills, ticks that fill as each lesson is
+           read, and a certificate at the end with the reader's own
+           schedule name on it. Twelve, because that is the headline:
+           a course is not one class, it is twelve of them.
 
-           THE SHEET IS A FIXED PHYSICAL OBJECT. .es-syl-sheet is
-           manila paper and renders IDENTICALLY with .dark on and off:
-           no dark: utilities inside it, no shared class that flips
-           (.grid-overlay / .animate-shimmer / .es-claim never appear
-           inside a sheet). Verified with the verifier's --bands flag.
+           Two voices. The player is an interface (Lexend, rounded,
+           calm). The certificate is engraved (DM Serif Display, a
+           guilloche border, a pleated seal), and that engraving leaks
+           back into the interface as the hero's lathe-work rosette
+           and the module bands.
 
-           COLOUR. The page keeps its existing hue family - amber - but
-           pushed down into ochre pencil on manila (#7d4e05 light,
-           #eab945 dark) so it reads as graphite-and-highlighter rather
-           than as the bright gold or highlighter-yellow other rebuilt
-           pages already own. The red is not a brand accent: it is the
-           margin rule that is printed on ruled paper, used only as a
-           1.5px stroke and for a "no class" mark.
-
-           CONTRAST. The light ground is tinted (#f7f4ec), which
-           invalidates text-gray-500. Muted ink is .es-syl-muted
-           (#4c4a54, 7.91 on the page ground) and never a Tailwind gray
-           utility. Measured pairs, worst case each:
-             ink   #17161b on #f7f4ec 16.37 / #eeecf1 on #101013 16.19
-             muted #4c4a54 on #efeadd  7.24 / #a3a0aa on #1e1e25  6.44
-             ochre #7d4e05 on #efeadd  5.90 / #eab945 on #1e1e25  9.09
-             sheet #221f18 on #e0d5b9 11.27, #514b3e on #e0d5b9 5.93
-             red   #a51c1c on #efe7d3  6.12 / #f87171 on #0d0d11 7.01
-             btn   #ffffff on #2b2833 14.44 / #171410 on #eab945 10.07
-
-           BLADE. No @supports probes in this block: a "#" hex inside a
-           parenthesized at-rule condition breaks Blade compilation of
-           every later parenthesized directive.
+           Everything is scoped under #oc. The scroll-driven parts
+           (ring, percentage, ticks, the phone's progress line) sit
+           inside one @supports block behind html.es-anim, so without
+           them the syllabus is a plain numbered list.
            ============================================================== */
 
-        /* --- Ground and ink ------------------------------------------ */
-        .es-syl-page { background-color: #f7f4ec; color: #17161b; }
-        .dark .es-syl-page { background-color: #101013; color: #eeecf1; }
-        .es-syl-sub { background-color: #efeadd; }
-        .dark .es-syl-sub { background-color: #16161a; }
-        .es-syl-ink { color: #17161b; }
-        .dark .es-syl-ink { color: #eeecf1; }
-        .es-syl-muted { color: #4c4a54; }
-        .dark .es-syl-muted { color: #a3a0aa; }
-        .es-syl-accent { color: #7d4e05; }
-        .dark .es-syl-accent { color: #eab945; }
-        /* Always-lit inks, for the two fixed-dark bands in both colour
-           modes. These are page-local classes rather than Tailwind
-           arbitrary values (text-[#eab945]) on purpose: an arbitrary hex
-           that no already-built page uses is not in the compiled bundle,
-           so it silently resolves to the inherited colour. */
-        .es-syl-lit { color: #eab945; }
-        .es-syl-bright { color: #eeecf1; }
-        .es-syl-dim { color: #a3a0aa; }
-        .es-syl-hair { border-color: rgba(23, 22, 27, 0.12); }
-        .dark .es-syl-hair { border-color: rgba(238, 236, 241, 0.12); }
+        @property --oc-ang { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+        @property --oc-pct { syntax: '<integer>'; inherits: true; initial-value: 0; }
 
-        /* --- Cards --------------------------------------------------- */
-        .es-syl-card {
-            border: 1px solid rgba(23, 22, 27, 0.12);
-            border-radius: 1rem;
-            background-color: #fffdf7;
-        }
-        .dark .es-syl-card { border-color: rgba(238, 236, 241, 0.12); background-color: #1b1b21; }
-        .es-syl-band .es-syl-card { border-color: rgba(238, 236, 241, 0.14); background-color: #1e1e25; }
-
-        /* --- Fixed-dark band. Same in both colour modes, so the shared
-               classes that flip inside it are pinned here. ------------- */
-        .es-syl-band {
-            background-color: #0d0d11;
-            background-image: radial-gradient(125% 100% at 50% 0%, #1a1a21 0%, #121218 55%, #08080b 100%);
-            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(238, 236, 241, 0.05);
-        }
-        .es-syl-band .grid-overlay {
-            background-image:
-                linear-gradient(rgba(238, 236, 241, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(238, 236, 241, 0.05) 1px, transparent 1px);
-        }
-        .es-syl-band .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            background-size: 200% 100%;
-        }
-        .es-syl-band .es-claim:focus-within {
-            border-color: rgba(234, 185, 69, 0.75);
-            box-shadow: 0 0 0 4px rgba(234, 185, 69, 0.22);
-        }
-
-        /* --- THE SHEET. Manila paper, pinned across colour modes. ----- */
-        .es-syl-sheet {
+        #oc {
+            --oc-bg: #fbf8f1;
+            --oc-bg-2: #f4efe2;
+            --oc-card: #fffdf8;
+            --oc-ink: #16242b;
+            --oc-ink-2: #3b4d55;
+            --oc-ink-3: #586a71;
+            --oc-line: rgba(22, 36, 43, 0.15);
+            --oc-line-2: rgba(22, 36, 43, 0.08);
+            --oc-line-3: rgba(22, 36, 43, 0.32);
+            --oc-teal: #0d5c63;
+            --oc-fill: #0d5c63;
+            --oc-fill-2: #2d7f84;
+            --oc-on-fill: #fbf8f1;
+            --oc-sea: #d9eae4;
+            --oc-sea-2: #edf5f0;
+            --oc-gold: #ffb703;
+            --oc-eng: rgba(13, 92, 99, 0.13);
+            --oc-eng-2: rgba(13, 92, 99, 0.32);
+            --oc-btn-bg: #0d5c63;
+            --oc-btn-ink: #fbf8f1;
+            --oc-btn-shadow: rgba(13, 92, 99, 0.7);
+            --oc-shadow: rgba(13, 60, 65, 0.42);
+            --oc-display: 'DM Serif Display', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+            --oc-text: 'Lexend', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
             position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(34, 31, 24, 0.2);
+            background: var(--oc-bg);
+            color: var(--oc-ink);
+            font-family: var(--oc-text);
+            font-size: 1rem;
+            line-height: 1.62;
+        }
+        .dark #oc {
+            --oc-bg: #0b1a1d;
+            --oc-bg-2: #0e2024;
+            --oc-card: #10262a;
+            --oc-ink: #f6f1e4;
+            --oc-ink-2: #c7d3d1;
+            --oc-ink-3: #9bacab;
+            --oc-line: rgba(246, 241, 228, 0.16);
+            --oc-line-2: rgba(246, 241, 228, 0.08);
+            --oc-line-3: rgba(246, 241, 228, 0.36);
+            --oc-teal: #7dd6cc;
+            --oc-fill: #43b5aa;
+            --oc-fill-2: #2b8d85;
+            --oc-on-fill: #0b1a1d;
+            --oc-sea: #17393d;
+            --oc-sea-2: #132c30;
+            --oc-gold: #ffc533;
+            --oc-eng: rgba(125, 214, 204, 0.1);
+            --oc-eng-2: rgba(125, 214, 204, 0.3);
+            --oc-btn-bg: #ffc533;
+            --oc-btn-ink: #16242b;
+            --oc-btn-shadow: rgba(255, 197, 51, 0.5);
+            --oc-shadow: rgba(0, 0, 0, 0.7);
+        }
+
+        /* The bar above takes the course's paper. */
+        body > header.sticky {
+            background-color: rgba(251, 248, 241, 0.9);
+            border-bottom-color: rgba(22, 36, 43, 0.12);
+        }
+        .dark body > header.sticky {
+            background-color: rgba(11, 26, 29, 0.9);
+            border-bottom-color: rgba(246, 241, 228, 0.12);
+        }
+
+        #oc ::selection { background: #ffb703; color: #16242b; }
+        #oc a:focus-visible,
+        #oc summary:focus-visible {
+            outline: 3px solid var(--oc-teal);
+            outline-offset: 3px;
             border-radius: 0.5rem;
-            background-color: #efe7d3;
-            color: #221f18;
-            box-shadow: 0 26px 50px -26px rgba(34, 31, 24, 0.5);
-        }
-        /* Ruled body. The rule pitch is the line height of the week list,
-           so the sheet reads as written-on rather than textured. */
-        .es-syl-ruled {
-            background-image: repeating-linear-gradient(180deg,
-                transparent 0, transparent 25px,
-                rgba(34, 31, 24, 0.1) 25px, rgba(34, 31, 24, 0.1) 26px);
-        }
-        .es-syl-sheet-head {
-            background-color: #e0d5b9;
-            border-bottom: 1px solid rgba(34, 31, 24, 0.2);
-        }
-        .es-syl-sheet-note {
-            background-color: #f8f2e2;
-            border: 1px solid rgba(125, 78, 5, 0.4);
-            border-radius: 0.4rem;
-        }
-        .es-syl-sheet-ink { color: #221f18; }
-        .es-syl-sheet-muted { color: #514b3e; }
-        .es-syl-sheet-accent { color: #7d4e05; }
-        .es-syl-sheet-red { color: #a51c1c; }
-        .es-syl-sheet-hair { border-color: rgba(34, 31, 24, 0.18); }
-        /* The printed margin rule: the page's recurring stroke. */
-        .es-syl-margin {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 1.5px;
-            background-color: rgba(165, 28, 28, 0.5);
         }
 
-        /* --- THE TERM SPINE. One tick per calendar week of the term:
-               filled = a session, hollow dashed = a week off. --------- */
-        .es-syl-spine { display: flex; gap: 0.2rem; align-items: stretch; }
-        .es-syl-tick {
-            flex: 1 1 0;
-            min-width: 0;
-            height: 1.7rem;
-            border-radius: 0.15rem;
-            background-color: #7d4e05;
-        }
-        .dark .es-syl-tick { background-color: #eab945; }
-        /* A week off is deliberately hollow, not merely dimmer: it is an
-           excluded date, not a quieter session. */
-        .es-syl-tick-off {
-            background-color: rgba(23, 22, 27, 0.06);
-            border: 1.5px dashed rgba(23, 22, 27, 0.55);
-        }
-        .dark .es-syl-tick-off { background-color: rgba(238, 236, 241, 0.05); border-color: rgba(238, 236, 241, 0.5); }
-        /* Inside a sheet the spine is printed ink, identical in both modes. */
-        .es-syl-sheet .es-syl-tick { background-color: #7d4e05; }
-        .es-syl-sheet .es-syl-tick-off { background-color: rgba(34, 31, 24, 0.05); border-color: rgba(34, 31, 24, 0.6); }
-        /* Inside a fixed-dark band it is always the lit ochre. */
-        .es-syl-band .es-syl-tick { background-color: #eab945; }
-        .es-syl-band .es-syl-tick-off { background-color: rgba(238, 236, 241, 0.05); border-color: rgba(238, 236, 241, 0.45); }
-        .es-syl-spine-thin .es-syl-tick { height: 0.85rem; }
-        /* Week ruler above a spine. */
-        .es-syl-ruler {
-            display: flex;
-            gap: 0.2rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.56rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-        .es-syl-ruler span { flex: 1 1 0; min-width: 0; text-align: center; }
+        .oc-wrap { width: min(100% - 2rem, 80rem); margin-inline: auto; }
+        .oc-icon { width: 1.1rem; height: 1.1rem; flex: none; }
 
-        /* --- THE CLASS CARD. The visit card is the term spine cut into
-               visits: the same strip geometry as the spine above it, one
-               cell per visit, inked when spent. Drawn as the sheet's own
-               strip rather than as a punched circle on purpose - the
-               spine is this page's mark, and reading the card with the
-               same eye as the term makes the ten-against-twelve
-               arithmetic visible instead of stated. Only ever used
-               inside a sheet, so the colours are the sheet's and do not
-               flip. --------------------------------------------------- */
-        .es-syl-visit { display: flex; gap: 0.2rem; align-items: stretch; }
-        .es-syl-visit-cell {
-            display: flex;
-            flex: 1 1 0;
-            min-width: 0;
+        /* Buttons */
+        .oc-btn {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 1.6rem;
-            border-radius: 0.15rem;
-            border: 1.5px solid rgba(125, 78, 5, 0.5);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.55rem;
+            gap: 0.6rem;
+            padding: 0.95rem 1.55rem;
+            border-radius: 999px;
+            background: var(--oc-btn-bg);
+            color: var(--oc-btn-ink);
             font-weight: 700;
-            color: #7d4e05;
+            font-size: 1.02rem;
+            line-height: 1.2;
+            box-shadow: 0 12px 24px -14px var(--oc-btn-shadow);
+            transition: translate 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         }
-        .es-syl-visit-used {
-            border-color: #7d4e05;
-            background-color: #7d4e05;
-            color: #efe7d3;
+        .oc-btn:hover { translate: 0 -2px; box-shadow: 0 18px 30px -14px var(--oc-btn-shadow); }
+        .oc-btn .oc-icon { transition: translate 0.2s ease; }
+        .oc-btn:hover .oc-icon { translate: 3px 0; }
+        .oc-btn-ghost {
+            background: transparent;
+            color: var(--oc-ink);
+            box-shadow: inset 0 0 0 1.5px var(--oc-line-3);
         }
-        /* The membership card has no cells to count, so it gets a band
-           of solid ink across the same footprint instead: unlimited
-           until the expiry date. */
-        .es-syl-unlimited {
-            height: 1.6rem;
-            border-radius: 0.3rem;
-            background-image: repeating-linear-gradient(135deg,
-                rgba(125, 78, 5, 0.9) 0, rgba(125, 78, 5, 0.9) 7px,
-                rgba(125, 78, 5, 0.55) 7px, rgba(125, 78, 5, 0.55) 14px);
-        }
+        .oc-btn-ghost:hover { background: var(--oc-sea-2); box-shadow: inset 0 0 0 1.5px var(--oc-ink-3); }
+        .oc-btn-ghost:hover .oc-icon { translate: 0 3px; }
 
-        /* --- THE REGISTER. Seats left on one session date. ----------- */
-        .es-syl-fill {
-            position: relative;
-            height: 0.45rem;
-            border-radius: 9999px;
-            overflow: hidden;
-            background-color: rgba(23, 22, 27, 0.1);
-        }
-        .dark .es-syl-fill { background-color: rgba(238, 236, 241, 0.12); }
-        .es-syl-fill-bar {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            border-radius: 9999px;
-            background-color: #7d4e05;
-            transform-origin: left center;
-            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .dark .es-syl-fill-bar { background-color: #eab945; }
-        .es-syl-fill-bar-full { background-color: #a51c1c; }
-        .dark .es-syl-fill-bar-full { background-color: #f87171; }
-        html.es-anim [data-reveal]:not(.is-revealed) .es-syl-fill-bar { transform: scaleX(0); }
-
-        /* --- Clause mark: the syllabus paragraph numeral. ------------- */
-        .es-syl-clause {
+        .oc-tag {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.3rem 0.8rem;
-            border-radius: 0.3rem;
-            border: 1px solid rgba(23, 22, 27, 0.18);
-            background-color: #fffdf7;
-            color: #17161b;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-variant-numeric: tabular-nums;
-            font-weight: 800;
-            font-size: 0.8rem;
-            letter-spacing: 0.06em;
+            padding: 0.16rem 0.55rem;
+            border-radius: 999px;
+            background: var(--oc-sea);
+            color: var(--oc-teal);
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            line-height: 1.5;
+            white-space: nowrap;
         }
-        .dark .es-syl-clause { border-color: rgba(238, 236, 241, 0.2); background-color: #1b1b21; color: #eeecf1; }
-        .es-syl-band .es-syl-clause { border-color: rgba(238, 236, 241, 0.2); background-color: #1e1e25; color: #eeecf1; }
-        .es-syl-clause::before {
-            content: "";
-            width: 2px;
-            align-self: stretch;
-            border-radius: 1px;
-            background-color: #7d4e05;
+        .oc-tag-paid { background: #ffb703; color: #16242b; }
+        .oc-link {
+            color: var(--oc-teal);
+            font-weight: 700;
+            text-decoration: underline;
+            text-decoration-color: var(--oc-gold);
+            text-decoration-thickness: 2px;
+            text-underline-offset: 0.2em;
         }
-        .dark .es-syl-clause::before { background-color: #eab945; }
-        .es-syl-band .es-syl-clause::before { background-color: #eab945; }
+        .oc-link:hover { text-decoration-color: currentColor; }
 
-        /* --- Eyebrow --------------------------------------------------- */
-        .es-syl-tag {
+        /* ---------------------------------------------------------------
+           The course page header (hero)
+           --------------------------------------------------------------- */
+        .oc-hero { position: relative; overflow: clip; padding-block: clamp(2.25rem, 5vw, 4.25rem) clamp(1.5rem, 3vw, 2.25rem); }
+        /* Lathe work, the way a diploma's rosette is engraved: fine rays crossed by
+           fine rings, cut to an annulus. */
+        .oc-hero::before {
+            content: "";
+            position: absolute;
+            right: -11rem;
+            top: -9rem;
+            width: 50rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                repeating-conic-gradient(from 0deg, var(--oc-eng) 0 0.5deg, transparent 0.5deg 2.5deg),
+                repeating-radial-gradient(circle, transparent 0 8px, var(--oc-eng) 8px 9px);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 20%, #000 20.5% 49.5%, transparent 50%);
+            mask-image: radial-gradient(circle, transparent 0 20%, #000 20.5% 49.5%, transparent 50%);
+            pointer-events: none;
+        }
+        html.es-anim #oc .oc-hero::before { animation: oc-turn 260s linear infinite; }
+        @keyframes oc-turn { to { rotate: 360deg; } }
+        @media (max-width: 999.98px) {
+            .oc-hero::before { right: -13rem; top: -12rem; width: 30rem; }
+        }
+        .oc-hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; align-items: center; }
+        @media (min-width: 1000px) {
+            .oc-hero-grid { grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr); gap: 3.75rem; }
+        }
+        .oc-hero-copy { container-type: inline-size; min-width: 0; }
+        .oc-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+            padding: 0.4rem 0.95rem 0.4rem 0.5rem;
+            border-radius: 999px;
+            background: var(--oc-card);
+            border: 1px solid var(--oc-line);
+            font-family: var(--oc-text);
+            font-size: 0.84rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--oc-ink-2);
+        }
+        /* A progress ring a third of the way round, as the pill's mark. */
+        .oc-eyebrow::before {
+            content: "";
+            flex: none;
+            width: 1.3rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: conic-gradient(var(--oc-gold) 0 120deg, var(--oc-line) 0);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 46%, #000 48%);
+            mask-image: radial-gradient(circle, transparent 0 46%, #000 48%);
+        }
+        .oc-h1 {
+            font-family: var(--oc-display);
+            font-weight: 400;
+            font-size: clamp(2.55rem, 11.6cqi, 4.75rem);
+            line-height: 1.02;
+            letter-spacing: -0.012em;
+            text-wrap: balance;
+            color: var(--oc-ink);
+        }
+        .oc-mark {
+            padding: 0 0.14em;
+            border-radius: 0.14em;
+            background-color: #ffb703;
+            color: #16242b;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+        /* The marker goes over "twelve" once the line has risen. */
+        html.es-anim #oc .oc-mark { animation: oc-mark 0.55s ease 1.05s both; }
+        @keyframes oc-mark { from { background-color: transparent; color: inherit; } }
+        .oc-lede { margin-top: 1.6rem; max-width: 36rem; font-size: clamp(1.08rem, 1.5vw, 1.2rem); line-height: 1.55; color: var(--oc-ink-2); }
+        .oc-lede-2 { margin-top: 0.9rem; max-width: 36rem; font-size: 0.97rem; color: var(--oc-ink-3); }
+        .oc-cta { display: flex; flex-wrap: wrap; gap: 0.9rem 1rem; margin-top: 1.9rem; }
+        .oc-facts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 1.9rem; font-size: 0.84rem; font-weight: 700; color: var(--oc-ink-2); }
+        .oc-facts li { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .oc-facts li::before { content: ""; width: 0.5rem; aspect-ratio: 1; border-radius: 50%; background: var(--oc-gold); }
+
+        /* The course card: the old syllabus, as the thing you would enrol on. */
+        .oc-cc {
+            position: relative;
+            container-type: inline-size;
+            overflow: hidden;
+            background: var(--oc-card);
+            border: 1px solid var(--oc-line);
+            border-radius: 1.4rem;
+            box-shadow: 0 34px 60px -38px var(--oc-shadow);
+        }
+        .oc-cc-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.75rem 1.3rem 0.7rem;
+            background: #0d5c63;
+            color: #fbf8f1;
             font-size: 0.7rem;
             font-weight: 700;
-            letter-spacing: 0.26em;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: #4c4a54;
         }
-        .dark .es-syl-tag { color: #a3a0aa; }
-        .es-syl-band .es-syl-tag { color: #eab945; }
+        .oc-cc-top span:last-child { color: #ffc94d; }
+        /* An engraved band: two chains of small rings, half a link apart, so they interlock. */
+        .oc-band {
+            height: 1.05rem;
+            background-color: #f1ead8;
+            background-image:
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 2.3px, rgba(13, 92, 99, 0.62) 2.3px 3.1px),
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 2.3px, rgba(214, 143, 0, 0.7) 2.3px 3.1px);
+            background-size: 24px 24px, 24px 24px;
+            background-position: 0 50%, 12px 50%;
+            border-bottom: 1px solid rgba(13, 92, 99, 0.5);
+        }
+        .oc-cc-body { padding: 1.35rem 1.35rem 1.3rem; }
+        .oc-cc-title { font-family: var(--oc-display); font-size: clamp(1.5rem, 6.6cqi, 2.15rem); line-height: 1.1; color: var(--oc-ink); }
+        .oc-cc-meta { margin-top: 0.55rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--oc-ink-3); }
+        .oc-cc-note { margin-top: 1.2rem; padding: 0.9rem 1rem 0.95rem; border-radius: 0.9rem; background: var(--oc-sea-2); border: 1px solid var(--oc-line-2); }
+        .oc-cc-note-tag { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oc-teal); }
+        .oc-cc-note-big { margin-top: 0.2rem; font-weight: 700; color: var(--oc-ink); }
+        .oc-cc-note p:last-child { margin-top: 0.25rem; font-size: 0.86rem; line-height: 1.5; color: var(--oc-ink-2); }
+        .oc-cc-note b { color: var(--oc-ink); }
+        .oc-cc-foot { margin-top: 1.1rem; padding-top: 0.95rem; border-top: 1px solid var(--oc-line-2); font-size: 0.86rem; color: var(--oc-ink-2); }
 
-        /* --- Plan tags ------------------------------------------------- */
-        .es-syl-plan {
-            display: inline-flex;
+        /* The term, drawn: thirteen weeks, one of them hollow. */
+        .oc-term { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: clamp(2px, 0.9cqi, 9px); }
+        /* One column, held to the week's own width: left to size itself it took the width of the
+           date under it, so on a narrow strip every square grew to its label and they ran together. */
+        .oc-wk { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0.3rem; min-width: 0; }
+        .oc-wk-w,
+        .oc-wk-d { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; color: var(--oc-ink-3); }
+        .oc-wk-n {
+            display: grid;
+            place-items: center;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 28%;
+            background: var(--oc-fill);
+            color: var(--oc-on-fill);
+            font-weight: 700;
+            font-size: clamp(0.56rem, 2.3cqi, 1.05rem);
+            line-height: 1;
+            transition: opacity 0.4s ease, scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition-delay: calc(var(--i, 0) * 45ms + 150ms);
+        }
+        .oc-wk-off .oc-wk-n { background: transparent; color: var(--oc-ink-3); border: 1.5px dashed var(--oc-line-3); font-size: clamp(0.5rem, 1.5cqi, 0.72rem); }
+        .oc-wk-off .oc-wk-d { color: var(--oc-ink); }
+        html.es-anim #oc [data-reveal]:not(.is-revealed) .oc-wk-n { opacity: 0; scale: 0.5; }
+        /* On the small strips only the two ends carry a label. */
+        .oc-term-sm .oc-wk-w,
+        .oc-term-sm .oc-wk-d { visibility: hidden; }
+        .oc-term-sm .oc-wk:first-child .oc-wk-w,
+        .oc-term-sm .oc-wk:first-child .oc-wk-d,
+        .oc-term-sm .oc-wk:last-child .oc-wk-w,
+        .oc-term-sm .oc-wk:last-child .oc-wk-d,
+        .oc-term-sm .oc-wk-off .oc-wk-d { visibility: visible; }
+        .oc-term-sm { margin-top: 1.3rem; }
+        @container (max-width: 43.99rem) {
+            .oc-term .oc-wk-w,
+            .oc-term .oc-wk-d { visibility: hidden; }
+            .oc-term .oc-wk:first-child .oc-wk-w,
+            .oc-term .oc-wk:first-child .oc-wk-d,
+            .oc-term .oc-wk:last-child .oc-wk-w,
+            .oc-term .oc-wk:last-child .oc-wk-d,
+            .oc-term .oc-wk-off .oc-wk-d { visibility: visible; }
+            /* Under the page id, or the base rule further down outranks it and a phone keeps
+               the wide padding. */
+            #oc .oc-worked { padding-inline: 0.85rem; }
+        }
+
+        .oc-subjects {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
             align-items: center;
+            gap: 0.5rem;
+            margin-top: clamp(2rem, 4.5vw, 3.25rem);
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--oc-line);
+        }
+        .oc-subjects b { margin-inline-end: 0.5rem; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oc-ink-3); }
+        .oc-subject { padding: 0.32rem 0.8rem; border-radius: 999px; border: 1px solid var(--oc-line); background: var(--oc-card); font-size: 0.84rem; color: var(--oc-ink-2); }
+
+        /* ---------------------------------------------------------------
+           The player: syllabus beside the lessons
+           --------------------------------------------------------------- */
+        .oc-course { position: relative; padding-top: clamp(1rem, 2.5vw, 2rem); }
+        .oc-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; min-width: 0; padding-bottom: clamp(3.5rem, 7vw, 6rem); }
+        @media (min-width: 1100px) {
+            .oc-course { display: grid; grid-template-columns: 17.75rem minmax(0, 1fr); gap: 0 2.75rem; align-items: start; }
+        }
+
+        .oc-syllabus { position: sticky; z-index: 30; }
+        .oc-syl-title { font-family: var(--oc-display); font-size: 1.3rem; line-height: 1.1; color: var(--oc-ink); }
+        .oc-syl-title small { display: block; margin-top: 0.2rem; font-family: var(--oc-text); font-size: 0.74rem; font-weight: 400; color: var(--oc-ink-3); }
+        .oc-ring {
+            position: relative;
             flex: none;
-            padding: 0.1rem 0.45rem;
-            border-radius: 0.25rem;
-            border: 1px solid rgba(125, 78, 5, 0.45);
-            color: #7d4e05;
-            font-size: 0.6rem;
-            font-weight: 800;
+            display: grid;
+            place-items: center;
+            width: 4rem;
+            aspect-ratio: 1;
+            --oc-ang: 0deg;
+        }
+        .oc-ring::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(var(--oc-gold) var(--oc-ang), var(--oc-line) 0);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 57%, #000 59%);
+            mask-image: radial-gradient(circle, transparent 0 57%, #000 59%);
+        }
+        .oc-ring-num { font-weight: 700; font-size: 0.92rem; font-variant-numeric: tabular-nums; color: var(--oc-ink); }
+        .oc-ring-num::after { content: "12"; }
+        .oc-syl a.es-dot {
+            display: grid;
+            grid-template-columns: 1.1rem 1.75rem minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.42rem 0.55rem;
+            border-radius: 0.65rem;
+            font-size: 0.86rem;
+            line-height: 1.3;
+            color: var(--oc-ink-2);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .oc-syl a.es-dot:hover { background: var(--oc-sea-2); color: var(--oc-ink); }
+        .oc-syl a.es-dot.is-active { background: var(--oc-sea); color: var(--oc-ink); font-weight: 700; }
+        .oc-syl-no { font-size: 0.74rem; font-variant-numeric: tabular-nums; color: var(--oc-ink-3); }
+        .oc-syl-no:empty { padding: 0; }
+        .oc-syl-min { font-size: 0.7rem; font-weight: 400; color: var(--oc-ink-3); white-space: nowrap; }
+        .oc-syl a.is-active .oc-syl-no,
+        .oc-syl a.is-active .oc-syl-min { color: var(--oc-ink-2); }
+        .oc-syl-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .oc-mod { margin-top: 0.85rem; padding: 0.2rem 0.55rem; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--oc-ink-3); }
+        .oc-mod b { color: var(--oc-teal); margin-inline-end: 0.35rem; }
+        /* The certificate's row: a small pleated seal where the tick would be. */
+        .oc-syl-seal {
+            width: 1.1rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--oc-card) 0 28%, transparent 30%), repeating-conic-gradient(#ffb703 0 15deg, #d99500 15deg 30deg);
+        }
+
+        /* A tick: an empty ring that fills once the lesson has been read. */
+        .oc-tick {
+            position: relative;
+            display: block;
+            width: 1.1rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1.5px solid var(--oc-line-3);
+        }
+        .oc-tick::after {
+            content: "";
+            position: absolute;
+            left: 34%;
+            top: 16%;
+            width: 30%;
+            height: 52%;
+            border: solid var(--oc-on-fill);
+            border-width: 0 2px 2px 0;
+            rotate: 45deg;
+            opacity: 0;
+        }
+
+        @media (min-width: 1100px) {
+            .oc-syllabus {
+                top: 5.25rem;
+                max-height: calc(100svh - 6.5rem);
+                overflow-y: auto;
+                scrollbar-width: thin;
+                padding: 1.1rem 0.85rem 0.9rem;
+                background: var(--oc-card);
+                border: 1px solid var(--oc-line);
+                border-radius: 1.3rem;
+                box-shadow: 0 24px 44px -36px var(--oc-shadow);
+            }
+            .oc-progress { display: flex; align-items: center; gap: 0.9rem; padding: 0 0.4rem 0.9rem; border-bottom: 1px solid var(--oc-line-2); }
+        }
+
+        /* Below that the syllabus folds into one slim bar under the site header:
+           the ring, the lesson you are in, and a line that fills. */
+        @media (max-width: 1099.98px) {
+            .oc-syllabus {
+                top: 4rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                min-height: 2.9rem;
+                margin-inline: -1rem;
+                margin-bottom: 1.25rem;
+                padding: 0.45rem 1rem;
+                background: var(--oc-bg);
+                border-bottom: 1px solid var(--oc-line);
+            }
+            .oc-syllabus::after {
+                content: "";
+                position: absolute;
+                inset: auto 0 -1px 0;
+                height: 3px;
+                background: var(--oc-gold);
+                transform-origin: 0 50%;
+                scale: 0 1;
+            }
+            .oc-progress { display: contents; }
+            .oc-ring { width: 1.65rem; }
+            .oc-ring-num { display: none; }
+            .oc-syl-title { font-family: var(--oc-text); font-size: 0.9rem; font-weight: 700; }
+            .oc-syl-title small { display: inline; margin: 0 0 0 0.5rem; }
+            .oc-syllabus:has(.is-active) .oc-syl-title { display: none; }
+            .oc-syl { flex: 1; min-width: 0; }
+            .oc-syl li { display: none; }
+            .oc-syl li:has(> a.is-active) { display: block; }
+            .oc-syl a.es-dot,
+            .oc-syl a.es-dot.is-active { grid-template-columns: auto minmax(0, 1fr) auto; padding: 0.2rem 0; background: none; font-size: 0.9rem; }
+            .oc-syl a.es-dot .oc-tick,
+            .oc-syl a.es-dot .oc-syl-seal { display: none; }
+            .oc-syl-no { padding: 0.05rem 0.5rem; border-radius: 999px; background: #ffb703; color: #16242b; font-weight: 700; }
+            .oc-syl a.is-active .oc-syl-no { color: #16242b; }
+        }
+
+        /* Module bands in the lesson column */
+        .oc-module { display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem; }
+        .oc-module:first-child { margin-top: 0; }
+        .oc-module-no { flex: none; padding: 0.22rem 0.7rem; border-radius: 999px; background: var(--oc-ink); color: var(--oc-bg); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+        .oc-module-name { flex: none; font-family: var(--oc-display); font-size: 1.5rem; line-height: 1; color: var(--oc-ink); }
+        .oc-module i {
+            flex: 1;
+            height: 1rem;
+            background-image:
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 2.3px, var(--oc-eng-2) 2.3px 3.1px),
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 2.3px, var(--oc-eng-2) 2.3px 3.1px);
+            background-size: 24px 24px, 24px 24px;
+            background-position: 0 50%, 12px 50%;
+            -webkit-mask-image: linear-gradient(90deg, #000 20%, transparent);
+            mask-image: linear-gradient(90deg, #000 20%, transparent);
+        }
+
+        /* ---------------------------------------------------------------
+           A lesson
+           --------------------------------------------------------------- */
+        .oc-lesson {
+            position: relative;
+            container-type: inline-size;
+            scroll-margin-top: 5.25rem;
+            padding: clamp(1.35rem, 3.4vw, 2.75rem);
+            background: var(--oc-card);
+            border: 1px solid var(--oc-line);
+            border-radius: 1.6rem;
+        }
+        @media (max-width: 1099.98px) { .oc-lesson { scroll-margin-top: 7.5rem; } }
+        .oc-lhead {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 0.75rem;
+            margin-bottom: 1.15rem;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            color: var(--oc-ink-3);
+        }
+        .oc-lno {
+            display: inline-grid;
+            place-items: center;
+            min-width: 2.5rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            background: #ffb703;
+            color: #16242b;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+            font-size: 0.82rem;
+        }
+        .oc-ldur { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 400; letter-spacing: 0.06em; }
+        .oc-ldur::before { content: ""; width: 0.8rem; aspect-ratio: 1; border-radius: 50%; border: 1.5px solid currentColor; background: conic-gradient(currentColor 0 90deg, transparent 0); }
+        .oc-h2 {
+            font-family: var(--oc-display);
+            font-weight: 400;
+            font-size: clamp(1.8rem, 5.2cqi, 2.9rem);
+            line-height: 1.08;
+            letter-spacing: -0.008em;
+            text-wrap: balance;
+            color: var(--oc-ink);
+        }
+        .oc-h2 em {
+            font-style: normal;
+            color: var(--oc-teal);
+            text-decoration: underline;
+            text-decoration-color: var(--oc-gold);
+            text-decoration-thickness: 0.09em;
+            text-underline-offset: 0.16em;
+        }
+        .oc-lead { margin-top: 0.95rem; max-width: 46rem; font-size: 1.1rem; line-height: 1.58; color: var(--oc-ink-2); }
+        .oc-lead a { color: var(--oc-teal); font-weight: 700; text-decoration: underline; text-decoration-color: var(--oc-gold); text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+        .oc-lfoot {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem 1.5rem;
+            margin-top: clamp(1.5rem, 3vw, 2.25rem);
+            padding-top: 1.1rem;
+            border-top: 1px solid var(--oc-line-2);
+            font-size: 0.86rem;
+            color: var(--oc-ink-3);
+        }
+        .oc-ldone { display: inline-flex; align-items: center; gap: 0.6rem; }
+        /* The padding is handed back as margin: a 24px target, nothing moved. */
+        .oc-lfoot a { display: inline-flex; align-items: center; gap: 0.5rem; margin-block: -0.1rem; padding-block: 0.1rem; color: var(--oc-ink-2); transition: gap 0.2s ease, color 0.2s ease; }
+        .oc-lfoot a b { color: var(--oc-ink); }
+        .oc-lfoot a:hover { gap: 0.8rem; color: var(--oc-teal); }
+        .oc-lfoot a .oc-icon { width: 1rem; height: 1rem; }
+
+        /* Parts a lesson is built from */
+        .oc-trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 1.75rem; }
+        .oc-duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 1.25rem; }
+        @container (min-width: 44rem) {
+            .oc-trio { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .oc-duo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        .oc-mini { display: flex; flex-direction: column; padding: 1.2rem 1.25rem 1.25rem; border: 1px solid var(--oc-line); border-radius: 1.1rem; background: var(--oc-bg); }
+        .oc-mini-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; margin-bottom: 0.5rem; }
+        .oc-mini h3 { font-size: 1.04rem; font-weight: 700; line-height: 1.3; color: var(--oc-ink); }
+        .oc-mini p { font-size: 0.93rem; line-height: 1.58; color: var(--oc-ink-2); }
+        .oc-mini-foot { margin-top: auto; padding-top: 1.1rem; }
+        .oc-mini-foot p { font-size: 0.82rem; color: var(--oc-ink-3); }
+        /* A link standing on its own is a target: as a block it is as tall as its line. */
+        .oc-mini-foot > .oc-link { display: inline-block; }
+
+        .oc-worked {
+            position: relative;
+            margin-top: 2rem;
+            padding: 1.6rem 1.25rem 1.3rem;
+            border: 1.5px dashed var(--oc-line-3);
+            border-radius: 1.2rem;
+            background: var(--oc-bg);
+        }
+        .oc-worked-tag {
+            position: absolute;
+            top: -0.72rem;
+            left: 1.1rem;
+            padding: 0.18rem 0.7rem;
+            border-radius: 999px;
+            background: var(--oc-ink);
+            color: var(--oc-bg);
+            font-size: 0.64rem;
+            font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
+            line-height: 1.5;
         }
-        .dark .es-syl-plan { border-color: rgba(234, 185, 69, 0.45); color: #eab945; }
-        .es-syl-plan-pro { border-color: rgba(23, 22, 27, 0.35); color: #17161b; }
-        .dark .es-syl-plan-pro { border-color: rgba(238, 236, 241, 0.38); color: #eeecf1; }
+        .oc-worked-cap { margin-top: 1.1rem; font-size: 0.92rem; color: var(--oc-ink-2); }
+        .oc-worked-cap a { display: inline-flex; align-items: center; gap: 0.3rem; margin-inline-start: 0.35rem; color: var(--oc-teal); font-weight: 700; border-bottom: 2px solid var(--oc-gold); transition: gap 0.2s ease; }
+        .oc-worked-cap a:hover { gap: 0.55rem; }
+        .oc-worked-cap a .oc-icon { width: 0.95rem; height: 0.95rem; }
 
-        /* --- Chips ----------------------------------------------------- */
-        .es-syl-chip {
-            display: inline-flex;
+        .oc-note { margin-top: 1.25rem; padding: 1.25rem 1.35rem 1.3rem; border-radius: 1.1rem; background: var(--oc-sea-2); border: 1px solid var(--oc-line-2); }
+        .oc-note-tag { display: inline-flex; align-items: center; gap: 0.45rem; margin-bottom: 0.5rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oc-teal); }
+        .oc-note-tag::before { content: "i"; display: grid; place-items: center; width: 1.05rem; aspect-ratio: 1; border-radius: 50%; background: var(--oc-fill); color: var(--oc-on-fill); font-family: Georgia, serif; font-style: italic; font-size: 0.75rem; letter-spacing: 0; text-transform: none; }
+        .oc-note h3 { font-size: 1.08rem; font-weight: 700; color: var(--oc-ink); }
+        .oc-note p { margin-top: 0.4rem; font-size: 0.95rem; color: var(--oc-ink-2); }
+        .oc-smallprint { margin-top: 1.25rem; font-size: 0.9rem; color: var(--oc-ink-2); }
+
+        /* Lesson 1.1 is the featured one: teal in both modes, with its own inks. */
+        #oc .oc-lesson-feature {
+            --oc-ink: #fbf8f1;
+            --oc-ink-2: #dcece9;
+            --oc-ink-3: #cfe5e1;
+            --oc-line: rgba(251, 248, 241, 0.22);
+            --oc-line-2: rgba(251, 248, 241, 0.14);
+            --oc-line-3: rgba(251, 248, 241, 0.45);
+            --oc-teal: #ffc94d;
+            --oc-fill: #ffb703;
+            --oc-on-fill: #16242b;
+            --oc-bg: rgba(4, 44, 49, 0.42);
+            --oc-gold: #ffb703;
+            overflow: hidden;
+            background-color: #0d5c63;
+            background-image: radial-gradient(120% 90% at 100% 0%, #10686f 0%, rgba(13, 92, 99, 0) 60%);
+            border-color: transparent;
+            color: #fbf8f1;
+        }
+        .oc-lesson-feature::before {
+            content: "";
+            position: absolute;
+            left: -12rem;
+            bottom: -16rem;
+            width: 34rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                repeating-conic-gradient(from 0deg, rgba(251, 248, 241, 0.07) 0 0.6deg, transparent 0.6deg 3deg),
+                repeating-radial-gradient(circle, transparent 0 8px, rgba(251, 248, 241, 0.07) 8px 9px);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 22%, #000 22.5% 49.5%, transparent 50%);
+            mask-image: radial-gradient(circle, transparent 0 22%, #000 22.5% 49.5%, transparent 50%);
+            pointer-events: none;
+        }
+        .oc-lesson-feature > * { position: relative; }
+        .oc-lesson-feature .oc-worked-tag { background: #ffb703; color: #16242b; }
+        .oc-mini h3.oc-figure { display: block; margin: 0.35rem 0 0.5rem; font-family: var(--oc-display); font-weight: 400; font-size: 3rem; line-height: 1; color: #ffc94d; }
+        .oc-mini h3.oc-figure small { font-family: var(--oc-text); font-size: 1.04rem; font-weight: 700; color: var(--oc-ink); }
+        .oc-mini h3.oc-figure-word { font-size: 1.85rem; line-height: 1.62; }
+        #oc .oc-lesson-feature a:focus-visible { outline-color: #ffb703; }
+
+        /* Lesson 1.2: three settings, each with the control it is */
+        .oc-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; margin-top: auto; padding-top: 1.1rem; font-size: 0.7rem; font-weight: 700; }
+        .oc-ctl span { display: grid; place-items: center; min-width: 1.7rem; height: 1.7rem; padding-inline: 0.45rem; border-radius: 0.5rem; border: 1px solid var(--oc-line); color: var(--oc-ink-3); white-space: nowrap; }
+        .oc-ctl span.is-on { background: var(--oc-fill); border-color: transparent; color: var(--oc-on-fill); }
+        .oc-ctl span.is-out { border-style: dashed; border-color: var(--oc-line-3); text-decoration: line-through; }
+        .oc-ctl b { margin-inline-start: 0.4rem; color: var(--oc-ink); }
+
+        /* Lesson 2.1: the register */
+        .oc-reg-wrap { margin-top: 1.9rem; }
+        .oc-reg { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+        .oc-reg th,
+        .oc-reg td { padding: 0.5rem 0.55rem; text-align: start; vertical-align: middle; border-top: 1px solid var(--oc-line-2); }
+        .oc-reg thead th { padding-top: 0; border-top: 0; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--oc-ink-3); }
+        .oc-reg tbody th { font-weight: 700; color: var(--oc-ink); }
+        .oc-reg td { color: var(--oc-ink-2); }
+        .oc-reg .oc-reg-end { text-align: end; white-space: nowrap; }
+        .oc-reg .oc-reg-bar { width: 48%; }
+        .oc-reg b { color: var(--oc-ink); }
+        .oc-reg-off th,
+        .oc-reg-off td { color: var(--oc-ink-3); border-top-style: dashed; border-top-color: var(--oc-line-3); }
+        .oc-reg-off + tr th,
+        .oc-reg-off + tr td { border-top-style: dashed; border-top-color: var(--oc-line-3); }
+        .oc-fill-track { height: 0.55rem; border-radius: 999px; background: var(--oc-line-2); overflow: hidden; }
+        .oc-fill-bar { height: 100%; border-radius: inherit; background: var(--oc-fill); transform-origin: 0 50%; transition: scale 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.2s; }
+        [dir="rtl"] .oc-fill-bar { transform-origin: 100% 50%; }
+        .oc-fill-bar-full { background: #ffb703; }
+        html.es-anim #oc [data-reveal]:not(.is-revealed) .oc-fill-bar { scale: 0 1; }
+        .oc-full { display: inline-block; padding: 0.05rem 0.55rem; border-radius: 999px; background: #ffb703; color: #16242b; font-weight: 700; font-size: 0.78rem; }
+        @container (max-width: 33rem) {
+            .oc-reg .oc-reg-bar { display: none; }
+            #oc .oc-reg th,
+            #oc .oc-reg td { padding-inline: 0.35rem; }
+        }
+        /* A date stays on one line wherever the three columns have room for it: on a 375px
+           phone "Sep 15" broke in two while "Oct 6" did not. */
+        @container (min-width: 17rem) {
+            .oc-reg td:nth-child(2) { white-space: nowrap; }
+        }
+
+        /* Lesson 2.2: the class card */
+        .oc-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; margin-top: 1.75rem; }
+        @container (min-width: 50rem) {
+            .oc-split { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 2.5rem; align-items: start; }
+        }
+        .oc-checks { display: grid; gap: 0.85rem; }
+        .oc-checks li { position: relative; padding-inline-start: 1.9rem; color: var(--oc-ink-2); font-size: 0.97rem; }
+        .oc-checks li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0.2rem; width: 1.15rem; aspect-ratio: 1; border-radius: 50%; background: var(--oc-fill); }
+        .oc-checks li::after { content: ""; position: absolute; inset-inline-start: 0.4rem; top: 0.38rem; width: 0.33rem; height: 0.6rem; border: solid var(--oc-on-fill); border-width: 0 2px 2px 0; rotate: 45deg; }
+        .oc-ids { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+        @container (min-width: 40rem) { .oc-ids { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; } }
+        .oc-id {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 1rem;
+            background: var(--oc-card);
+            border: 1px solid var(--oc-line);
+            box-shadow: 0 22px 36px -26px var(--oc-shadow);
+        }
+        .oc-id-top { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.65rem 1.1rem 0.6rem; background: #0d5c63; color: #fbf8f1; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+        .oc-id-top span:last-child { font-size: 0.85rem; letter-spacing: 0.02em; color: #ffc94d; }
+        .oc-id-body { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.9rem; padding: 1.1rem 1.1rem 0; }
+        .oc-id-badge { display: grid; place-items: center; width: 3.4rem; aspect-ratio: 1; border-radius: 0.8rem; background: #ffb703; color: #16242b; font-family: var(--oc-display); font-size: 1.7rem; line-height: 1; }
+        .oc-id-name { font-family: var(--oc-display); font-size: 1.5rem; line-height: 1.15; color: var(--oc-ink); }
+        .oc-id-sub { font-size: 0.88rem; line-height: 1.35; color: var(--oc-ink-3); }
+        .oc-id-rest { padding: 1rem 1.1rem 1rem; }
+        .oc-cells { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
+        .oc-cell { display: grid; place-items: center; aspect-ratio: 1; border-radius: 0.3rem; border: 1px solid var(--oc-line-3); font-size: clamp(0.56rem, 1.4cqi, 0.76rem); font-weight: 700; color: var(--oc-ink-3); }
+        .oc-cell.is-used { background: var(--oc-fill); border-color: transparent; color: var(--oc-on-fill); }
+        .oc-strip { height: clamp(1.45rem, 3.4cqi, 2.1rem); border-radius: 0.3rem; background: repeating-linear-gradient(135deg, var(--oc-fill) 0 7px, var(--oc-fill-2) 7px 14px); }
+        .oc-id-count { margin-top: 0.6rem; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--oc-teal); }
+        .oc-id-fine { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid var(--oc-line-2); font-size: 0.84rem; line-height: 1.45; color: var(--oc-ink-3); }
+        .oc-id-code { margin-top: auto; height: 1.5rem; margin-inline: 1.1rem; margin-bottom: 1rem; opacity: 0.75; background: repeating-linear-gradient(90deg, var(--oc-ink) 0 2px, transparent 2px 5px, var(--oc-ink) 5px 6px, transparent 6px 8px, var(--oc-ink) 8px 11px, transparent 11px 13px, var(--oc-ink) 13px 14px, transparent 14px 18px); }
+        .oc-seats { padding: 1.1rem 1.15rem 1.15rem; border: 1px solid var(--oc-line); border-radius: 1rem; background: var(--oc-bg); }
+        .oc-seats h3 { font-size: 1.04rem; font-weight: 700; line-height: 1.3; color: var(--oc-ink); }
+        .oc-seat { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; gap: 0.9rem; padding-block: 0.4rem; border-top: 1px solid var(--oc-line-2); font-size: 0.93rem; }
+        .oc-seat:first-of-type { border-top: 0; }
+        .oc-seat span:first-child { font-weight: 700; color: var(--oc-ink); }
+        .oc-seat span:nth-child(2) { font-size: 0.8rem; color: var(--oc-ink-3); }
+        .oc-seat span:last-child { min-width: 2.6rem; text-align: end; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--oc-ink); }
+        .oc-seats > p { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--oc-line-2); font-size: 0.84rem; line-height: 1.55; color: var(--oc-ink-2); }
+        .oc-seats > p b { color: var(--oc-teal); }
+
+        /* Lesson 2.3: the room */
+        .oc-join { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.9rem; align-items: center; }
+        @container (min-width: 44rem) { .oc-join { grid-template-columns: minmax(0, 0.9fr) auto minmax(0, 1.1fr); gap: 1.25rem; } }
+        .oc-field { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.9rem; border-radius: 0.8rem; border: 1px solid var(--oc-line-3); background: var(--oc-card); font-size: 0.9rem; color: var(--oc-ink-3); min-width: 0; }
+        .oc-field i { flex: none; width: 0.6rem; aspect-ratio: 1; border-radius: 50%; background: var(--oc-gold); }
+        .oc-field span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .oc-field-solid { color: var(--oc-ink); font-weight: 700; }
+        /* The address is the point of this field, so it is set to fit: at the size of the others
+           it was cut to "your-classes.eventsche..." in every three-column row. */
+        .oc-field-solid { container-type: inline-size; }
+        .oc-field-solid span { font-size: clamp(0.68rem, 5.5cqi, 0.9rem); }
+        .oc-join-arrow { justify-self: center; color: var(--oc-ink-3); }
+        .oc-join-arrow .oc-icon { width: 1.4rem; height: 1.4rem; }
+        @container (max-width: 43.99rem) { .oc-join-arrow { rotate: 90deg; } }
+        .oc-sessions { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; }
+        .oc-sessions span { display: grid; place-items: center; aspect-ratio: 1; border-radius: 28%; background: var(--oc-fill); color: var(--oc-on-fill); font-size: clamp(0.55rem, 1.5cqi, 0.8rem); font-weight: 700; }
+
+        /* Lesson 3.1: the handouts */
+        .oc-handouts { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 1.5rem; border-top: 1px solid var(--oc-line); }
+        @container (min-width: 46rem) {
+            .oc-handouts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2.5rem; }
+        }
+        .oc-handout { padding-block: 1.15rem 1.2rem; border-bottom: 1px solid var(--oc-line); }
+        .oc-handout h3 { font-size: 1.02rem; font-weight: 700; line-height: 1.3; color: var(--oc-ink); }
+        .oc-handout p { margin-top: 0.4rem; font-size: 0.93rem; line-height: 1.58; color: var(--oc-ink-2); }
+
+        /* Lesson 3.2: the catalogue */
+        .oc-catalogue { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-top: 1.75rem; }
+        @container (min-width: 32rem) { .oc-catalogue { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @container (min-width: 52rem) { .oc-catalogue { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .oc-tile { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--oc-line); border-radius: 1.1rem; background: var(--oc-bg); transition: translate 0.25s ease, box-shadow 0.25s ease; }
+        .oc-tile:hover { translate: 0 -4px; box-shadow: 0 22px 34px -26px var(--oc-shadow); }
+        .oc-cover { position: relative; height: 5.6rem; background-color: var(--c, #0d5c63); background-image: var(--p, none); background-size: var(--s, auto); }
+        .oc-cover span { position: absolute; left: 0.8rem; bottom: 0.7rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: #fbf8f1; color: #16242b; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; }
+        .oc-tile-body { display: flex; flex-direction: column; flex: 1; padding: 1rem 1.05rem 1.1rem; }
+        .oc-tile h3 { font-size: 1.04rem; font-weight: 700; line-height: 1.3; color: var(--oc-ink); }
+        .oc-tile p { margin-top: 0.4rem; font-size: 0.9rem; line-height: 1.55; color: var(--oc-ink-2); }
+        .oc-tile a { margin-top: auto; padding-top: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 700; color: var(--oc-teal); }
+        .oc-tile a .oc-icon { width: 0.95rem; height: 0.95rem; transition: translate 0.2s ease; }
+        .oc-tile a:hover .oc-icon { translate: 3px 0; }
+
+        /* Lesson 3.3: three steps on a line */
+        .oc-steps { counter-reset: oc-step; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; margin-top: 1.9rem; }
+        .oc-step { position: relative; padding-inline-start: 3.6rem; }
+        .oc-step-no { position: absolute; inset-inline-start: 0; top: 0; display: grid; place-items: center; width: 2.6rem; aspect-ratio: 1; border-radius: 50%; background: var(--oc-fill); color: var(--oc-on-fill); font-family: var(--oc-display); font-size: 1.15rem; }
+        .oc-step h3 { font-size: 1.08rem; font-weight: 700; color: var(--oc-ink); }
+        .oc-step p { margin-top: 0.35rem; font-size: 0.93rem; line-height: 1.58; color: var(--oc-ink-2); }
+        @container (min-width: 44rem) {
+            .oc-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.75rem; }
+            .oc-step { padding-inline-start: 0; padding-top: 3.6rem; }
+            /* The line the three stops sit on. */
+            .oc-step::before { content: ""; position: absolute; top: 1.25rem; inset-inline: 2.6rem -1.75rem; height: 2px; background: repeating-linear-gradient(90deg, var(--oc-line-3) 0 6px, transparent 6px 12px); }
+            .oc-step:last-child::before { display: none; }
+        }
+
+        /* Lesson 3.4 and 4.2: reading list and electives */
+        .oc-reading { margin-top: 1.5rem; border-top: 1px solid var(--oc-line); }
+        .oc-read {
+            display: grid;
+            grid-template-columns: 2.2rem minmax(0, 1fr) auto;
             align-items: center;
-            white-space: nowrap;
-            padding: 0.35rem 0.85rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(23, 22, 27, 0.16);
-            background-color: rgba(255, 253, 247, 0.75);
-            color: #4c4a54;
-            font-size: 0.76rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            gap: 0.9rem;
+            padding: 1rem 0.6rem;
+            border-bottom: 1px solid var(--oc-line);
+            border-radius: 0.6rem;
+            transition: background-color 0.2s ease, padding 0.25s ease;
         }
-        .dark .es-syl-chip {
-            border-color: rgba(238, 236, 241, 0.16);
-            background-color: #1b1b21;
-            color: #a3a0aa;
+        .oc-read:hover { background: var(--oc-sea-2); padding-inline: 1rem 0.6rem; }
+        .oc-read-no { font-family: var(--oc-display); font-size: 1.35rem; line-height: 1; color: var(--oc-teal); }
+        .oc-read strong { display: block; font-weight: 700; color: var(--oc-ink); }
+        .oc-read small { display: block; margin-top: 0.1rem; font-size: 0.9rem; color: var(--oc-ink-2); }
+        .oc-read .oc-icon { color: var(--oc-ink-3); transition: translate 0.2s ease, color 0.2s ease; }
+        .oc-read:hover .oc-icon { translate: 4px 0; color: var(--oc-teal); }
+        .oc-more { display: inline-flex; align-items: center; gap: 0.45rem; margin-top: 1.25rem; color: var(--oc-teal); font-weight: 700; border-bottom: 2px solid var(--oc-gold); padding-bottom: 0.1rem; transition: gap 0.2s ease; }
+        .oc-more:hover { gap: 0.75rem; }
+        .oc-more .oc-icon { width: 1rem; height: 1rem; }
+        .oc-electives { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; margin-top: 1.5rem; }
+        @container (min-width: 48rem) { .oc-electives { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .oc-elective { position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 9rem; padding: 1.6rem 1rem 1rem; border: 1px solid var(--oc-line); border-radius: 1.1rem; background: var(--oc-bg); transition: translate 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+        .oc-elective::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 0.7rem;
+            background-color: #f1ead8;
+            background-image:
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 2.3px, rgba(13, 92, 99, 0.62) 2.3px 3.1px),
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 2.3px, rgba(214, 143, 0, 0.7) 2.3px 3.1px);
+            background-size: 24px 24px, 24px 24px;
+            background-position: 0 50%, 12px 50%;
+        }
+        .oc-elective:hover { translate: 0 -4px; border-color: var(--oc-teal); box-shadow: 0 20px 30px -24px var(--oc-shadow); }
+        .oc-elective small { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--oc-ink-3); }
+        .oc-elective strong { margin-top: 0.35rem; font-family: var(--oc-display); font-weight: 400; font-size: 1.3rem; line-height: 1.12; color: var(--oc-ink); }
+        /* Two to a row on a narrow phone, "Conferences" was wider than its card. */
+        @container (max-width: 19rem) { #oc .oc-elective strong { font-size: 1.1rem; } }
+        .oc-elective span { margin-top: auto; padding-top: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.84rem; font-weight: 700; color: var(--oc-teal); }
+        .oc-elective span .oc-icon { width: 0.9rem; height: 0.9rem; transition: translate 0.2s ease; }
+        .oc-elective:hover span .oc-icon { translate: 3px 0; }
+
+        /* Lesson 4.1: tuition. The shared plan band keeps its words and prices. */
+        #oc .oc-plans > section { background: transparent; padding: 0; }
+        #oc .oc-plans > section > div { max-width: none; padding-inline: 0; }
+        #oc .oc-plans .text-center { text-align: start; margin-inline: 0; max-width: 44rem; }
+        #oc .oc-plans h2 { font-family: var(--oc-display); font-weight: 400; font-size: clamp(1.8rem, 5.2cqi, 2.9rem); line-height: 1.08; letter-spacing: -0.008em; color: var(--oc-ink); }
+        #oc .oc-plans h2 + p { font-size: 1.05rem; color: var(--oc-ink-2); }
+        #oc .oc-plans .grid { grid-template-columns: minmax(0, 1fr); }
+        @container (min-width: 46rem) { #oc .oc-plans .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        #oc .oc-plans .grid > div { background: var(--oc-bg); border: 1px solid var(--oc-line); border-radius: 1.1rem; box-shadow: none; }
+        #oc .oc-plans .grid > div.border-blue-300 { border: 2px solid var(--oc-fill); background: var(--oc-sea-2); }
+        #oc .oc-plans .grid > div span,
+        #oc .oc-plans .grid > div p,
+        #oc .oc-plans .grid > div li { color: var(--oc-ink-2); }
+        #oc .oc-plans .grid > div .text-3xl { font-family: var(--oc-display); font-weight: 400; font-size: 2.4rem; color: var(--oc-ink); }
+        #oc .oc-plans .grid > div .uppercase { color: var(--oc-ink); }
+        #oc .oc-plans .grid > div .rounded-full { background: #ffb703; color: #16242b; }
+        #oc .oc-plans .grid > div svg { color: var(--oc-teal); }
+        #oc .oc-plans .sm\:flex-row { justify-content: flex-start; }
+        #oc .oc-plans a.font-medium { color: var(--oc-teal); }
+        #oc .oc-plans a.rounded-2xl { background: var(--oc-btn-bg); color: var(--oc-btn-ink); border-radius: 999px; box-shadow: 0 12px 24px -14px var(--oc-btn-shadow); }
+
+        /* Lesson 4.3: check your understanding */
+        .oc-quiz { counter-reset: oc-q; display: grid; gap: 0.7rem; margin-top: 1.75rem; }
+        .oc-q { border: 1px solid var(--oc-line); border-radius: 1rem; background: var(--oc-bg); transition: border-color 0.2s ease, background-color 0.2s ease; }
+        .oc-q[open] { border-color: var(--oc-fill); background: var(--oc-sea-2); }
+        .oc-q summary { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.85rem; padding: 0.95rem 1.05rem; cursor: pointer; }
+        .oc-q-no { display: grid; place-items: center; min-width: 2.15rem; height: 2.15rem; border-radius: 50%; border: 1.5px solid var(--oc-line-3); font-size: 0.74rem; font-weight: 700; color: var(--oc-ink-2); }
+        .oc-q[open] .oc-q-no { background: var(--oc-fill); border-color: transparent; color: var(--oc-on-fill); }
+        .oc-q h3 { font-size: 1.02rem; font-weight: 700; line-height: 1.35; color: var(--oc-ink); }
+        .oc-q-show { padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid var(--oc-line-3); font-size: 0.72rem; font-weight: 700; color: var(--oc-ink-2); white-space: nowrap; }
+        .oc-q-show::before { content: "Show answer"; }
+        .oc-q[open] .oc-q-show::before { content: "Hide"; }
+        .oc-q summary:hover .oc-q-show { border-color: var(--oc-teal); color: var(--oc-teal); }
+        .oc-q > p { padding: 0 1.05rem 1.2rem 4.05rem; max-width: 50rem; font-size: 0.96rem; line-height: 1.65; color: var(--oc-ink-2); }
+        @container (max-width: 34rem) {
+            .oc-q-show { padding: 0; border: 0; width: 1.1rem; height: 1.1rem; position: relative; }
+            .oc-q-show::before { content: ""; position: absolute; inset: calc(50% - 1px) 0 auto 0; height: 2px; background: currentColor; }
+            .oc-q-show::after { content: ""; position: absolute; inset: 0 calc(50% - 1px) 0 auto; width: 2px; background: currentColor; transition: opacity 0.2s ease; }
+            .oc-q[open] .oc-q-show::before { content: ""; }
+            .oc-q[open] .oc-q-show::after { opacity: 0; }
+            .oc-q > p { padding-inline-start: 1.05rem; }
         }
 
-        /* --- Links and buttons ----------------------------------------- */
-        .es-syl-link { color: #7d4e05; }
-        .es-syl-link:hover { color: #17161b; }
-        .dark .es-syl-link { color: #eab945; }
-        .dark .es-syl-link:hover { color: #eeecf1; }
+        /* ---------------------------------------------------------------
+           Graduation: the certificate. Teal hall and ivory paper in both
+           modes, so every colour in here is literal.
+           --------------------------------------------------------------- */
+        .oc-grad {
+            position: relative;
+            overflow: clip;
+            scroll-margin-top: 4rem;
+            padding-block: clamp(4rem, 9vw, 7rem) clamp(6rem, 11vw, 9rem);
+            background-color: #0a474d;
+            background-image: radial-gradient(90% 70% at 50% 0%, #11686f 0%, rgba(10, 71, 77, 0) 70%);
+            color: #fbf8f1;
+        }
+        .oc-grad::before,
+        .oc-grad::after {
+            content: "";
+            position: absolute;
+            width: 44rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                repeating-conic-gradient(from 0deg, rgba(251, 248, 241, 0.06) 0 0.6deg, transparent 0.6deg 3deg),
+                repeating-radial-gradient(circle, transparent 0 8px, rgba(251, 248, 241, 0.06) 8px 9px);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 22%, #000 22.5% 49.5%, transparent 50%);
+            mask-image: radial-gradient(circle, transparent 0 22%, #000 22.5% 49.5%, transparent 50%);
+            pointer-events: none;
+        }
+        .oc-grad::before { left: -18rem; top: -14rem; }
+        .oc-grad::after { right: -18rem; bottom: -18rem; }
+        .oc-grad-in { position: relative; z-index: 1; text-align: center; }
+        .oc-grad-tag { display: inline-flex; padding: 0.3rem 0.9rem; border-radius: 999px; background: #ffb703; color: #16242b; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+        .oc-grad-h2 { margin: 1.4rem auto 0; max-width: 46rem; font-family: var(--oc-display); font-weight: 400; font-size: clamp(2.3rem, 6vw, 4.2rem); line-height: 1.04; text-wrap: balance; color: #fbf8f1; }
+        .oc-grad-h2 span { color: #ffc94d; }
+        .oc-grad-sub { margin: 1.3rem auto 0; max-width: 40rem; font-size: 1.08rem; color: #d7e9e5; }
 
-        .es-syl-btn {
-            background-color: #2b2833;
-            color: #ffffff;
-            box-shadow: 0 18px 36px -14px rgba(43, 40, 51, 0.55);
+        .oc-cert {
+            position: relative;
+            container-type: inline-size;
+            width: min(100%, 54rem);
+            margin: clamp(2.5rem, 5vw, 3.75rem) auto 0;
+            padding: clamp(0.7rem, 2vw, 1.4rem);
+            /* Guilloche: rings struck from the four corners and from the middle, fine
+               enough that where they cross they weave. */
+            background-color: #f1ead8;
+            background-image:
+                repeating-radial-gradient(circle at 0 0, transparent 0 4px, rgba(13, 92, 99, 0.55) 4px 4.8px),
+                repeating-radial-gradient(circle at 100% 0, transparent 0 4px, rgba(13, 92, 99, 0.55) 4px 4.8px),
+                repeating-radial-gradient(circle at 0 100%, transparent 0 4px, rgba(13, 92, 99, 0.55) 4px 4.8px),
+                repeating-radial-gradient(circle at 100% 100%, transparent 0 4px, rgba(13, 92, 99, 0.55) 4px 4.8px),
+                repeating-radial-gradient(circle at 50% 50%, transparent 0 6px, rgba(226, 150, 0, 0.6) 6px 6.9px);
+            border-radius: 0.5rem;
+            box-shadow: inset 0 0 0 2px #0d5c63, 0 40px 70px -40px rgba(0, 0, 0, 0.75);
+            color: #16242b;
+            text-align: center;
         }
-        .es-syl-btn:hover { background-color: #1d1b24; box-shadow: 0 22px 44px -14px rgba(43, 40, 51, 0.65); }
-        .dark .es-syl-btn { background-color: #eab945; color: #171410; box-shadow: 0 18px 36px -14px rgba(234, 185, 69, 0.35); }
-        .dark .es-syl-btn:hover { background-color: #f2c862; }
+        .oc-cert-in {
+            position: relative;
+            padding: clamp(1.5rem, 5cqi, 3.25rem) clamp(1.1rem, 6cqi, 4rem) clamp(1.4rem, 4cqi, 2.4rem);
+            background: #fbf8f1;
+            box-shadow: 0 0 0 1px #0d5c63, inset 0 0 0 4px #fbf8f1, inset 0 0 0 5px rgba(13, 92, 99, 0.55);
+        }
+        /* The watermark: lathe work again, very faint, behind the words. */
+        .oc-cert-in::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: min(78%, 30rem);
+            aspect-ratio: 1;
+            translate: -50% -50%;
+            border-radius: 50%;
+            background:
+                repeating-conic-gradient(from 0deg, rgba(13, 92, 99, 0.07) 0 0.7deg, transparent 0.7deg 3deg),
+                repeating-radial-gradient(circle, transparent 0 6px, rgba(13, 92, 99, 0.06) 6px 7px);
+            -webkit-mask-image: radial-gradient(circle, transparent 0 16%, #000 16.5% 49.5%, transparent 50%);
+            mask-image: radial-gradient(circle, transparent 0 16%, #000 16.5% 49.5%, transparent 50%);
+            pointer-events: none;
+        }
+        .oc-cert-in > * { position: relative; }
+        .oc-cert-corner {
+            position: absolute;
+            z-index: 1;
+            width: clamp(1.9rem, 7cqi, 3.4rem);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, #0d5c63 0 12%, #f1ead8 13% 22%, transparent 23%),
+                repeating-conic-gradient(#0d5c63 0 4deg, #f1ead8 4deg 10deg);
+            box-shadow: 0 0 0 2px #f1ead8, 0 0 0 3px #0d5c63;
+        }
+        .oc-cert-corner:nth-of-type(1) { left: 0; top: 0; translate: -18% -18%; }
+        .oc-cert-corner:nth-of-type(2) { right: 0; top: 0; translate: 18% -18%; }
+        .oc-cert-corner:nth-of-type(3) { left: 0; bottom: 0; translate: -18% 18%; }
+        .oc-cert-corner:nth-of-type(4) { right: 0; bottom: 0; translate: 18% 18%; }
+        .oc-cert-kicker { font-size: clamp(0.62rem, 2cqi, 0.8rem); font-weight: 700; letter-spacing: 0.34em; text-transform: uppercase; color: #0d5c63; }
+        .oc-cert-title { margin-top: 0.5rem; font-family: var(--oc-display); font-size: clamp(1.7rem, 7cqi, 3.4rem); line-height: 1.05; color: #16242b; }
+        .oc-cert-line { display: block; margin-top: clamp(1.1rem, 3.6cqi, 2rem); font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: clamp(0.95rem, 2.6cqi, 1.15rem); color: #3b4d55; }
+        .oc-cert-form { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: clamp(0.9rem, 2.6cqi, 1.4rem); margin-top: 0.8rem; }
+        #oc .oc-claim {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            width: min(100%, 36rem);
+            padding: 0.35rem 0.5rem 0.45rem;
+            border: 0;
+            border-bottom: 2px solid #16242b;
+            border-radius: 0.3rem 0.3rem 0 0;
+            background: rgba(255, 183, 3, 0.14);
+            font-family: var(--oc-display);
+            font-size: clamp(1.02rem, 5cqi, 2.2rem);
+            line-height: 1.2;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #oc .oc-claim:focus-within { border-color: #16242b; background: rgba(255, 183, 3, 0.3); box-shadow: 0 0 0 3px rgba(13, 92, 99, 0.35); }
+        #oc .oc-claim input {
+            flex: 1 1 0;
+            width: 0;
+            min-width: 0;
+            /* The field reaches over the row's own padding, so the target is the whole row
+               (it was one 20px line on a phone) and nothing moves. */
+            margin-block: -0.35rem -0.45rem;
+            padding: 0.35rem 0 0.45rem;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            outline: none;
+            text-align: right;
+            font: inherit;
+            color: #16242b;
+        }
+        #oc .oc-claim input::placeholder { color: #6b7a7f; opacity: 1; }
+        .oc-claim span { flex: none; color: #3b4d55; user-select: none; }
+        .oc-cert-form p { max-width: 34rem; font-size: clamp(0.92rem, 2.4cqi, 1.04rem); color: #3b4d55; }
+        #oc .oc-cert .oc-btn { background: #0d5c63; color: #fbf8f1; box-shadow: 0 12px 24px -14px rgba(13, 92, 99, 0.7); }
+        #oc .oc-cert a:focus-visible { outline-color: #0d5c63; }
+        .oc-cert-note { margin-top: 0.75rem; font-size: 0.86rem; color: #586a71; }
+        .oc-cert-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 0.75rem; margin-top: clamp(1.4rem, 4cqi, 2.4rem); }
+        /* The column is held to its third of the foot and the signature is let down to fit it:
+           sized by its own words it pushed the registrar's line out through the certificate's
+           frame on a phone under about 385px. */
+        .oc-sign { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; min-width: 0; }
+        .oc-sign b { font-family: 'Sacramento', 'Snell Roundhand', 'Brush Script MT', cursive; font-weight: 400; font-size: clamp(1.1rem, 5.2cqi, 2.2rem); line-height: 1; color: #0d5c63; white-space: nowrap; }
+        .oc-sign em { font-family: var(--oc-display); font-style: normal; font-size: clamp(1rem, 3.4cqi, 1.45rem); line-height: 1.5; color: #16242b; white-space: nowrap; }
+        .oc-sign small { width: 100%; margin-top: 0.15rem; padding-top: 0.3rem; border-top: 1px solid #16242b; font-size: clamp(0.56rem, 1.6cqi, 0.68rem); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #3b4d55; }
+        /* The seal: pleated ribbon, two tails, a struck centre. */
+        .oc-seal { position: relative; width: clamp(4.4rem, 15cqi, 7.2rem); aspect-ratio: 1; margin-bottom: clamp(-4.2rem, -8cqi, -2.4rem); filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.3)); transition: opacity 0.5s ease 0.55s, scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s, rotate 0.6s ease 0.55s; }
+        .oc-seal::before,
+        .oc-seal::after { content: ""; position: absolute; top: 52%; width: 32%; height: 86%; background: #0d5c63; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); }
+        .oc-seal::before { left: 14%; rotate: 13deg; }
+        .oc-seal::after { right: 14%; rotate: -13deg; background: #0a474d; }
+        .oc-seal-disc { position: absolute; inset: 0; z-index: 1; background: repeating-conic-gradient(from 0deg, #ffb703 0 6deg, #e39a00 6deg 12deg); }
+        .oc-seal-core { position: absolute; inset: 19%; z-index: 2; display: grid; place-items: center; align-content: center; border-radius: 50%; background: #0d5c63; box-shadow: 0 0 0 2px #ffcf4d, inset 0 0 0 2px rgba(251, 248, 241, 0.25); color: #fbf8f1; line-height: 1; }
+        .oc-seal-core b { font-family: var(--oc-display); font-weight: 400; font-size: clamp(1rem, 4.4cqi, 2rem); }
+        .oc-seal-core small { margin-top: 0.15em; font-size: clamp(0.4rem, 1.2cqi, 0.56rem); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #ffc94d; }
+        html.es-anim #oc [data-reveal]:not(.is-revealed) .oc-seal { opacity: 0; scale: 1.6; rotate: -30deg; }
 
-        /* --- FAQ / related hover --------------------------------------- */
-        .es-syl-hover:hover { border-color: rgba(125, 78, 5, 0.5); }
-        .dark .es-syl-hover:hover { border-color: rgba(234, 185, 69, 0.45); }
-        .es-syl-hover:hover .es-syl-hover-title,
-        .es-syl-hover:hover .es-syl-hover-arrow { color: #7d4e05; }
-        .dark .es-syl-hover:hover .es-syl-hover-title,
-        .dark .es-syl-hover:hover .es-syl-hover-arrow { color: #eab945; }
+        /* The closing strip is a shared partial too. */
+        #oc .oc-keep > section { background: var(--oc-bg-2); border-top: 1px solid var(--oc-line); }
+        #oc .oc-keep h2 { font-family: var(--oc-display); font-weight: 400; font-size: clamp(1.9rem, 3.4vw, 2.6rem); line-height: 1.1; color: var(--oc-ink); }
+        #oc .oc-keep p.uppercase { color: var(--oc-teal); letter-spacing: 0.14em; }
+        #oc .oc-keep .grid > a { background: var(--oc-card); border: 1px solid var(--oc-line); border-radius: 1.1rem; }
+        #oc .oc-keep .grid > a:hover { border-color: var(--oc-teal); box-shadow: 0 20px 30px -24px var(--oc-shadow); }
+        #oc .oc-keep .grid > a > span:first-child { display: none; }
+        #oc .oc-keep .grid > a h3 { color: var(--oc-ink); }
+        #oc .oc-keep .grid > a p { color: var(--oc-ink-2); }
+        #oc .oc-keep .grid > a > span:last-child,
+        #oc .oc-keep a.self-start { color: var(--oc-teal); }
 
-        /* --- Shared-system recolours (brand blue by default) ----------- */
-        .es-hero .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(125, 78, 5, 0.13), transparent 60%);
+        /* ---------------------------------------------------------------
+           Progress, driven by the scroll. The course grid is one view
+           timeline (the ring, the percentage, the phone's line); each
+           lesson is another, hoisted to the grid with timeline-scope so
+           the tick beside its name in the syllabus can read it.
+           --------------------------------------------------------------- */
+        @supports (animation-timeline: view()) and (timeline-scope: --oc-a) {
+            html.es-anim #oc .oc-course {
+                view-timeline-name: --oc-course;
+                timeline-scope: --oc-t1, --oc-t2, --oc-t3, --oc-t4, --oc-t5, --oc-t6, --oc-t7, --oc-t8, --oc-t9, --oc-t10, --oc-t11, --oc-t12;
+            }
+            html.es-anim #oc .oc-lesson { view-timeline-name: var(--oc-tl); }
+            html.es-anim #oc .oc-ring {
+                animation: oc-ring linear both;
+                animation-timeline: --oc-course;
+                animation-range: contain 0% contain 100%;
+            }
+            /* Safari carries a registered integer through fractions while a timeline animates it
+               (24.9966), and a bare fraction is not a counter value: the ring filled while its
+               figure read 0% until the very end. Inside calc() it is rounded, and it counts. */
+            html.es-anim #oc .oc-ring-num::after { counter-reset: oc-pct calc(var(--oc-pct) * 1); content: counter(oc-pct) "%"; }
+            html.es-anim #oc .oc-tick {
+                animation: oc-tick linear both;
+                animation-timeline: var(--oc-tl);
+                animation-range: exit 0% exit 42%;
+            }
+            html.es-anim #oc .oc-tick::after {
+                animation: oc-check linear both;
+                animation-timeline: var(--oc-tl);
+                animation-range: exit 0% exit 42%;
+            }
+            @media (max-width: 1099.98px) {
+                html.es-anim #oc .oc-syllabus::after {
+                    animation: oc-line linear both;
+                    animation-timeline: --oc-course;
+                    animation-range: contain 0% contain 100%;
+                }
+            }
         }
-        .dark .es-hero .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(234, 185, 69, 0.12), transparent 60%);
-        }
-        .es-dot:hover .es-dot-pip { background-color: rgba(125, 78, 5, 0.65); }
-        .dark .es-dot:hover .es-dot-pip { background-color: rgba(234, 185, 69, 0.65); }
-        .es-dot.is-active .es-dot-pip { background-color: #7d4e05; }
-        .dark .es-dot.is-active .es-dot-pip { background-color: #eab945; }
-        .es-syl-tip {
-            border-color: rgba(23, 22, 27, 0.14);
-            background-color: #fffdf7;
-            color: #17161b;
-        }
-        .dark .es-syl-tip {
-            border-color: rgba(238, 236, 241, 0.14);
-            background-color: #1b1b21;
-            color: #eeecf1;
-        }
+        @keyframes oc-ring { from { --oc-ang: 0deg; --oc-pct: 0; } to { --oc-ang: 360deg; --oc-pct: 100; } }
+        @keyframes oc-tick { 0% { background-color: transparent; } 60%, 100% { background-color: var(--oc-fill); border-color: var(--oc-fill); } }
+        @keyframes oc-check { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes oc-line { from { scale: 0 1; } to { scale: 1 1; } }
 
-        /* --- Focus rings. No border-radius here: setting it would
-               change the element's own shape on focus. ---------------- */
-        #es-syl-page a:focus-visible,
-        #es-syl-page summary:focus-visible,
-        #es-syl-page button:focus-visible {
-            outline: 2px solid #7d4e05;
-            outline-offset: 3px;
-        }
-        .dark #es-syl-page a:focus-visible,
-        .dark #es-syl-page summary:focus-visible,
-        .dark #es-syl-page button:focus-visible {
-            outline-color: #eab945;
-        }
-        .es-syl-band a:focus-visible,
-        .es-syl-band summary:focus-visible,
-        .es-syl-band button:focus-visible {
-            outline-color: #eab945 !important;
-        }
+        /* Hovering a lesson lights its line in the syllabus. */
+        #oc:has(#term:hover) .oc-syl a[href="#term"],
+        #oc:has(#setup:hover) .oc-syl a[href="#setup"],
+        #oc:has(#register:hover) .oc-syl a[href="#register"],
+        #oc:has(#card:hover) .oc-syl a[href="#card"],
+        #oc:has(#link:hover) .oc-syl a[href="#link"],
+        #oc:has(#rest:hover) .oc-syl a[href="#rest"],
+        #oc:has(#who:hover) .oc-syl a[href="#who"],
+        #oc:has(#steps:hover) .oc-syl a[href="#steps"],
+        #oc:has(#reading:hover) .oc-syl a[href="#reading"],
+        #oc:has(#tuition:hover) .oc-syl a[href="#tuition"],
+        #oc:has(#electives:hover) .oc-syl a[href="#electives"],
+        #oc:has(#faq:hover) .oc-syl a[href="#faq"] { color: var(--oc-ink); box-shadow: inset 0 0 0 1.5px var(--oc-gold); }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-syl-fill-bar { transition: none; }
+            .oc-btn, .oc-btn .oc-icon, .oc-tile, .oc-elective, .oc-read, .oc-wk-n, .oc-fill-bar, .oc-seal, .oc-q, .oc-syl a.es-dot { transition: none; }
         }
     </style>
 
@@ -516,815 +1264,813 @@
         ];
     @endphp
 
-    <div id="es-syl-page" class="es-syl-page">
-
-    <!-- ============================================================ -->
-    <!-- 1. Hero: the syllabus sheet                                  -->
-    <!-- ============================================================ -->
-    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(125, 78, 5, 0.2), rgba(125, 78, 5, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(234, 185, 69, 0.16), rgba(234, 185, 69, 0) 65%);"></div>
-            <div class="es-spot absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-        </div>
-
-        <div class="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
-                <div>
-                    <h1 class="es-balance es-syl-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <x-marketing.hero-eyebrow class="es-fade-up es-d-1 glass inline-flex items-center gap-3 rounded-full px-5 py-2.5 mb-8">
-                            <svg aria-hidden="true" class="es-syl-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                            <span class="es-syl-muted text-sm font-medium tracking-wide">Event schedule for online classes, tutors and coaches</span>
-                        </x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">A course is not one class.</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">It is <span class="es-syl-accent">twelve</span> of them.</span></span>
-                    </h1>
-
-                    <p class="es-fade-up es-d-2 es-syl-muted mb-6 max-w-xl text-lg sm:text-xl">
-                        Write the term once - the night it meets, the weeks you are off, the session it finishes on - and take every registration for it from a single link, with zero platform fees.
-                    </p>
-                    <p class="es-fade-up es-d-2 es-syl-muted mb-10 max-w-xl text-base">
-                        Online class scheduling with free registration and a seat cap counted per session date, multi-session class cards, recurring terms that end themselves, and payments through your own Stripe or PayPal account.
-                    </p>
-
-                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap">
-                        <a href="#setup" class="glass group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                            How a term works
-                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                        </a>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-syl-btn group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                            Create your class schedule
-                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- The syllabus. A fixed sheet of manila paper: identical
-                     with .dark on and off. -->
-                <div class="es-fade-up es-d-4" data-reveal>
-                    <div class="es-syl-sheet">
-                        <div class="es-syl-sheet-head flex items-center justify-between gap-3 px-5 py-3">
-                            <span class="es-syl-sheet-ink font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.2em]">Syllabus</span>
-                            <span class="es-syl-sheet-muted font-mono text-[0.7rem] font-bold">Term 1</span>
-                        </div>
-
-                        <div class="es-syl-ruled relative px-5 py-6 sm:px-7">
-                            <span class="es-syl-margin left-3 sm:left-4" aria-hidden="true"></span>
-
-                            <h2 class="es-syl-sheet-ink text-xl font-black leading-tight sm:text-2xl">Conversational Spanish, Level 1</h2>
-                            <p class="es-syl-sheet-muted mt-1 font-mono text-[0.7rem] font-bold uppercase tracking-wider">
-                                Tuesdays 6:00 PM &middot; online &middot; 12 sessions &middot; 14 seats a session
-                            </p>
-
-                            <div class="mt-6" aria-hidden="true">
-                                <div class="es-syl-ruler es-syl-sheet-muted mb-1">
-                                    @foreach ($termWeeks as $wi => $wState)
-                                        <span>{{ $wi === 0 ? 'W1' : ($wi === 12 ? 'W13' : '') }}</span>
-                                    @endforeach
-                                </div>
-                                <div class="es-syl-spine">
-                                    @foreach ($termWeeks as $wState)
-                                        <div class="es-syl-tick @if ($wState === 'off') es-syl-tick-off @endif"></div>
-                                    @endforeach
-                                </div>
-                                <div class="es-syl-sheet-muted mt-1.5 flex justify-between font-mono text-[0.6rem] font-bold">
-                                    <span>Sep 15</span>
-                                    <span>Dec 8</span>
-                                </div>
-                            </div>
-
-                            <div class="es-syl-sheet-note mt-6 px-4 py-3">
-                                <p class="es-syl-sheet-accent font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Recurrence</p>
-                                <p class="es-syl-sheet-ink mt-1 text-sm font-semibold">Ends after 12 sessions.</p>
-                                <p class="es-syl-sheet-muted mt-1 text-xs">Thirteen Tuesdays, twelve sessions. The hollow week is <span class="es-syl-sheet-red font-semibold">Nov 24</span>, taken out as a date exception.</p>
-                            </div>
-
-                            <p class="es-syl-sheet-muted es-syl-sheet-hair mt-5 border-t pt-4 text-xs">
-                                One recurring event. Change the start time once and all twelve sessions follow.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Subject marquee -->
-            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1">
-                        <div class="es-marquee-track">
-                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
-                                @foreach (['Languages', 'Cooking', 'Yoga', 'Coding', 'Drawing', 'Music', 'Tutoring', 'Masterclasses', 'Kids Classes', 'Coaching'] as $chip)
-                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-syl-chip">{{ $chip }}</span>
-                                @endforeach
-                            @endfor
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. A course is not one class (fixed-dark band)                -->
-    <!-- ============================================================ -->
-    <section id="term" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
-        <div class="es-syl-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="grid-overlay absolute inset-0 opacity-20"></div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 02</span></div>
-                    <p class="es-syl-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The unit</p>
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Most calendars think a class is <span class="es-syl-lit">one night.</span>
-                    </h2>
-                    <p class="mt-5 text-lg es-syl-dim" data-reveal style="--reveal-delay: 0.15s;">
-                        The thing you actually teach is a term. Twelve sessions, one topic, the same students each week, and a last night.
-                    </p>
-                </div>
-
-                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
-                    <div class="es-syl-card p-6" data-reveal="panel">
-                        <p class="es-syl-tag mb-3">The term</p>
-                        <h3 class="mb-2 text-lg font-bold es-syl-bright">
-                            <span data-count-to="12">12</span> sessions
-                        </h3>
-                        <p class="text-sm es-syl-dim">Same course, same students, thirteen weeks. Entering it as twelve separate events is twelve chances to mistype a time.</p>
-                    </div>
-                    <div class="es-syl-card p-6" data-reveal="panel">
-                        <p class="es-syl-tag mb-3">The setup</p>
-                        <h3 class="mb-2 text-lg font-bold es-syl-bright">
-                            <span data-count-to="1">1</span> event
-                        </h3>
-                        <p class="text-sm es-syl-dim">A repeat pattern, exceptions for the weeks you are off, and an end. Move the class an hour later once and every session moves.</p>
-                    </div>
-                    <div class="es-syl-card p-6" data-reveal="panel">
-                        <p class="es-syl-tag mb-3">The close</p>
-                        <h3 class="mb-2 text-lg font-bold es-syl-bright">It stops itself</h3>
-                        <p class="text-sm es-syl-dim">A term ends on a closing date or after a set number of sessions, so it is not still taking sign-ups for week nineteen in March.</p>
-                    </div>
-                </div>
-
-                <div class="mx-auto mt-12 max-w-3xl" data-reveal>
-                    <p class="es-syl-tag mb-3 text-center">The term, drawn</p>
-                    <div class="es-syl-spine es-syl-spine-thin" aria-hidden="true">
-                        @foreach ($termWeeks as $wState)
-                            <div class="es-syl-tick @if ($wState === 'off') es-syl-tick-off @endif"></div>
-                        @endforeach
-                    </div>
-                    <p class="mt-3 text-center text-sm es-syl-dim">
-                        Thirteen weeks, twelve filled. The hollow one is a date exception, not a cancelled event.
-                        <a href="#setup" class="es-syl-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
-                            Write one
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                        </a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. Writing the term                                          -->
-    <!-- ============================================================ -->
-    <section id="setup" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 03</span></div>
-                <p class="es-syl-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Writing the term</p>
-                <h2 class="es-balance es-syl-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Three lines and you have a <span class="es-syl-accent">course.</span>
-                </h2>
-                <p class="es-syl-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    All three are on the free plan. None of them are a spreadsheet.
-                </p>
-            </div>
-
-            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
-                <div class="es-syl-card p-7" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-lg font-bold">The night it meets</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">Pick the days of the week and the start time. Repeats can be daily, weekly, every few weeks, or monthly by date or by weekday, so a fortnightly workshop is one setting rather than a second calendar.</p>
-                </div>
-                <div class="es-syl-card p-7" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-lg font-bold">The weeks you are off</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">Date exceptions take single dates out, so a holiday week or a week you are travelling disappears from the schedule without rebuilding the term. You can add one-off dates back in the same way.</p>
-                </div>
-                <div class="es-syl-card p-7" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-lg font-bold">The last session</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">End the recurrence after a set number of sessions, or on a closing date, or never. This is the setting that makes a term a term instead of a weekly slot that runs forever.</p>
-                </div>
-            </div>
-
-            <!-- Honesty beat: one recurring event has one name. -->
-            <div class="es-syl-card mx-auto mt-8 max-w-3xl p-7" data-reveal="panel">
-                <p class="es-syl-tag mb-3">Worth knowing</p>
-                <h3 class="es-syl-ink mb-2 text-lg font-bold">A term has one name, not twelve titles.</h3>
-                <p class="es-syl-muted text-sm leading-relaxed">
-                    A recurring event carries one name and one description, so week four is not separately titled "the past tense". If the weeks really are different topics with different prices, make them separate events - cloning one is a click - and keep them together in a sub-schedule. If they are one course, the term is the right shape, and the week-by-week breakdown belongs in the description, because the agenda you set runs the same way in every session.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. The register: seats counted per session date               -->
-    <!-- ============================================================ -->
-    <section id="register" class="es-syl-sub scroll-mt-24 border-y py-20 es-syl-hair lg:py-28">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 04</span></div>
-                <p class="es-syl-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The register</p>
-                <h2 class="es-balance es-syl-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Fourteen seats, <span class="es-syl-accent">counted per date.</span>
-                </h2>
-                <p class="es-syl-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    The cap is set once on the course and counted separately for every session, so week three filling up does not close week four. Free registration, free plan.
-                </p>
-            </div>
-
-            <div class="es-syl-card p-5 sm:p-8" data-reveal="panel">
-                <table class="w-full border-collapse text-left">
-                    <caption class="sr-only">Term register: seats taken and seats left for each session date, with a seat cap of fourteen</caption>
-                    <thead>
-                        <tr class="es-syl-tag">
-                            <th scope="col" class="pb-3 font-bold">Session</th>
-                            <th scope="col" class="pb-3 font-bold">Date</th>
-                            <th scope="col" class="hidden pb-3 font-bold sm:table-cell">Taken</th>
-                            <th scope="col" class="pb-3 text-right font-bold">Seats left</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($register as [$rNum, $rDate, $rCap, $rLeft])
-                            @php
-                                $rSkip = $rCap === 0;
-                                $rTaken = $rSkip ? 0 : $rCap - $rLeft;
-                                $rPct = $rSkip ? 0 : (int) round(($rTaken / $rCap) * 100);
-                                $rFull = ! $rSkip && $rLeft === 0;
-                            @endphp
-                            <tr class="border-t es-syl-hair">
-                                <th scope="row" class="es-syl-ink py-2.5 pe-3 align-middle font-mono text-xs font-bold">
-                                    @if ($rSkip)
-                                        <span class="es-syl-muted">off</span>
-                                    @else
-                                        {{ $rNum }}
-                                    @endif
-                                </th>
-                                <td class="es-syl-muted py-2.5 pe-3 align-middle font-mono text-xs">{{ $rDate }}</td>
-                                <td class="hidden w-1/2 py-2.5 pe-3 align-middle sm:table-cell">
-                                    @if ($rSkip)
-                                        <span class="es-syl-muted text-xs font-semibold">No class this week</span>
-                                    @else
-                                        <div class="es-syl-fill" role="img" aria-label="{{ $rTaken }} of {{ $rCap }} seats taken">
-                                            <div class="es-syl-fill-bar @if ($rFull) es-syl-fill-bar-full @endif" style="width: {{ $rPct }}%;"></div>
-                                        </div>
-                                    @endif
-                                </td>
-                                <td class="py-2.5 text-right align-middle font-mono text-xs">
-                                    @if ($rSkip)
-                                        <span class="es-syl-muted">date exception</span>
-                                    @elseif ($rFull)
-                                        <span class="es-syl-ink font-bold">full</span>
-                                    @else
-                                        <span class="es-syl-ink font-bold">{{ $rLeft }}</span><span class="es-syl-muted"> / {{ $rCap }}</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <p class="es-syl-muted mt-5 text-xs leading-relaxed">
-                    Week one is full and week six is empty, on the same course, at the same time. That is the point: the count lives on the date, not on the course. Students see the seats left for the date they are looking at, and a full date stops taking sign-ups without touching the others.
-                </p>
-            </div>
-
-            <div class="mx-auto mt-8 grid max-w-4xl gap-6 md:grid-cols-2" data-reveal-group="90">
-                <div class="es-syl-card p-6" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-base font-bold">Free registration</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">A name and an email gets somebody a seat on a specific date, with an optional cap. No card, no checkout, and no plan to upgrade to first.</p>
-                </div>
-                <div class="es-syl-card p-6" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-base font-bold">A waitlist when a date fills up</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">Once a registration date is full, the sign-up button on it becomes a waitlist. When somebody drops, the first person waiting for <em>that</em> date is emailed and has twenty-four hours to claim the seat before it moves to the next in line. Set the cap you can actually teach to and let the list do the rest. On a sold-out <em>paid</em> date the same waitlist is Pro.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. The class card (passes)                                   -->
-    <!-- ============================================================ -->
-    <section id="card" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-start gap-12 lg:grid-cols-[1fr_1.05fr]">
-                <div>
-                    <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 05</span></div>
-                    <p class="es-syl-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The class card</p>
-                    <h2 class="es-balance es-syl-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Nobody wants to buy <span class="es-syl-accent">twelve tickets.</span>
-                    </h2>
-                    <p class="es-syl-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        They want one card that covers the term. A pass counts the way your course actually sells: a fixed number of visits, or unlimited visits until it runs out of days.
-                    </p>
-                    <ul class="es-syl-muted space-y-3" data-reveal-group="70">
-                        <li class="flex gap-3" data-reveal>
-                            <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>A visit card is good for a set number of visits across the sessions it covers. Ten visits, used whenever they can make it.</span>
-                        </li>
-                        <li class="flex gap-3" data-reveal>
-                            <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>A membership is unlimited until it expires. Set how many days it is valid for from the day it is bought.</span>
-                        </li>
-                        <li class="flex gap-3" data-reveal>
-                            <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Scope it to everything you teach, to one sub-schedule, or to the specific courses you name, so a beginner card does not open the advanced track.</span>
-                        </li>
-                        <li class="flex gap-3" data-reveal>
-                            <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Holders can reserve a date in advance, or just turn up. Set a cancellation deadline and decide whether a late cancel gets the visit back.</span>
-                        </li>
-                        <li class="flex gap-3" data-reveal>
-                            <svg aria-hidden="true" class="es-syl-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>Set admissions per session above one and a card lets somebody bring a partner. Usage is tracked, so you can see which cards are being used.</span>
-                        </li>
-                    </ul>
-                    <p class="es-syl-muted mt-6 text-sm">
-                        Class cards are Pro, at {{ plan_price($proMonthly) }} a month, along with anything that carries a price. Publishing the term and taking free registrations are not.
-                        <a href="{{ marketing_url('/features/ticketing') }}" class="es-syl-link font-semibold underline hover:no-underline">See what ticketing includes</a>.
-                    </p>
-                </div>
-
-                <!-- Two cards on the same sheet of manila. Fixed object. -->
-                <div class="grid gap-5 sm:grid-cols-2" data-reveal-group="100">
-                    <div class="es-syl-sheet" data-reveal="panel">
-                        <div class="es-syl-sheet-head flex items-center justify-between gap-2 px-4 py-2.5">
-                            <span class="es-syl-sheet-ink font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Visit card</span>
-                            <span class="es-syl-sheet-muted font-mono text-[0.6rem] font-bold">$120</span>
-                        </div>
-                        <div class="es-syl-ruled relative px-4 py-5">
-                            <span class="es-syl-margin left-2.5" aria-hidden="true"></span>
-                            <p class="es-syl-sheet-ink text-sm font-bold">10 visits</p>
-                            <p class="es-syl-sheet-muted mt-0.5 text-xs">Any Tuesday in the term.</p>
-                            <div class="es-syl-visit mt-4" aria-hidden="true">
-                                @foreach (range(1, 10) as $visit)
-                                    <span class="es-syl-visit-cell @if ($visit <= 4) es-syl-visit-used @endif">{{ $visit }}</span>
-                                @endforeach
-                            </div>
-                            <p class="es-syl-sheet-accent mt-3 font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">4 used &middot; 6 left</p>
-                            <p class="es-syl-sheet-muted es-syl-sheet-hair mt-3 border-t pt-3 text-[0.65rem]">Ten cells against twelve sessions: two Tuesdays can slip. Valid 120 days from purchase. Admits 1.</p>
-                        </div>
-                    </div>
-
-                    <div class="es-syl-sheet" data-reveal="panel">
-                        <div class="es-syl-sheet-head flex items-center justify-between gap-2 px-4 py-2.5">
-                            <span class="es-syl-sheet-ink font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Membership</span>
-                            <span class="es-syl-sheet-muted font-mono text-[0.6rem] font-bold">$45</span>
-                        </div>
-                        <div class="es-syl-ruled relative px-4 py-5">
-                            <span class="es-syl-margin left-2.5" aria-hidden="true"></span>
-                            <p class="es-syl-sheet-ink text-sm font-bold">Unlimited</p>
-                            <p class="es-syl-sheet-muted mt-0.5 text-xs">Every session, until it expires.</p>
-                            <div class="es-syl-unlimited mt-4" aria-hidden="true"></div>
-                            <p class="es-syl-sheet-accent mt-3 font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.2em]">Same strip, no cells</p>
-                            <p class="es-syl-sheet-muted es-syl-sheet-hair mt-3 border-t pt-3 text-[0.65rem]">Valid 90 days. Scoped to the Beginner sub-schedule.</p>
-                        </div>
-                    </div>
-
-                    <div class="es-syl-card p-5 sm:col-span-2" data-reveal="panel">
-                        <div class="mb-3 flex flex-wrap items-center gap-2">
-                            <h3 class="es-syl-ink text-base font-bold">And single seats, alongside</h3>
-                            <span class="es-syl-plan">Free</span>
-                        </div>
-                        <div class="space-y-2">
-                            @foreach ([['Drop-in seat', 'one session', '$18'], ['Concession', 'one session', '$12'], ['First session', 'try it once', 'Free']] as [$tName, $tScope, $tPrice])
-                                <div class="flex items-baseline gap-3 text-sm">
-                                    <span class="es-syl-ink min-w-0 flex-1 truncate font-semibold">{{ $tName }}</span>
-                                    <span class="es-syl-muted hidden truncate text-xs sm:inline">{{ $tScope }}</span>
-                                    <span class="es-syl-ink font-mono">{{ $tPrice }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                        <p class="es-syl-muted mt-4 border-t pt-3 text-xs es-syl-hair">
-                            Cards are sold next to single seats, not instead of them. Both need the Pro plan, because both carry a price; a free trial session does not. Payments run through your own Stripe or PayPal account, or Invoice Ninja, a payment link or cash, and Event Schedule takes <span class="es-syl-accent font-semibold">zero platform fees</span> at every plan level.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. The room and the link                                     -->
-    <!-- ============================================================ -->
-    <section id="link" class="es-syl-sub scroll-mt-24 border-y py-20 es-syl-hair lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 06</span></div>
-                <p class="es-syl-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The room</p>
-                <h2 class="es-balance es-syl-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Your link. <span class="es-syl-accent">Any platform.</span>
-                </h2>
-                <p class="es-syl-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Paste one meeting link on the course and every session in the term joins through it, the way a recurring meeting room already works. Zoom, Google Meet, Microsoft Teams, YouTube Live, your own setup: it is a link field, so all of them work and none of them own you.
-                </p>
-            </div>
-
-            <div class="grid gap-6 lg:grid-cols-3" data-reveal-group="100">
-                <div class="es-syl-card flex flex-col p-7" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-lg font-bold">One link for the whole schedule</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">Your schedule lives at its own address. Put it in a bio, a signature, a course page, and it keeps being right when the term rolls over.</p>
-                    <div class="mt-auto pt-5">
-                        <div class="es-syl-card p-3">
-                            <span class="es-syl-ink block truncate font-mono text-xs">your-classes.eventschedule.com</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="es-syl-card flex flex-col p-7" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-lg font-bold">Or on the site you already have</h3>
-                        <span class="es-syl-plan">Free</span>
-                    </div>
-                    <p class="es-syl-muted text-sm">Embed the calendar in a page on your own site with an iframe. A list layout suits a term better than a month grid, and that is a setting.</p>
-                    <p class="es-syl-muted mt-auto pt-5 text-xs">The registration form can be embedded too, free. The ticket purchase form is the Pro version of that widget.</p>
-                </div>
-                <div class="es-syl-card flex flex-col p-7" data-reveal="panel">
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <h3 class="es-syl-ink text-lg font-bold">What this is not</h3>
-                    </div>
-                    <p class="es-syl-muted text-sm">It is not a video platform and does not pretend to be. Event Schedule does not create the meeting, count who is in the room, take attendance from it, or hold recordings. It publishes the sessions, takes the registrations, and hands over your link. One link, for the whole term: if week four genuinely needs its own room, week four is a separate event.</p>
-                    <p class="mt-auto pt-5 text-xs">
-                        <a href="{{ marketing_url('/features/online-events') }}" class="es-syl-link font-semibold underline hover:no-underline">How online events work</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. Everything else                                           -->
-    <!-- ============================================================ -->
     @php
-        $rest = [
-            ['Newsletters to your students', 'Free', 'Students follow your schedule so you can write to them. Materials before, a recording link after, next term when it opens. Ten emails a month free, a hundred on Pro and a thousand on Enterprise, each recipient counting as one, with open and click rates.'],
-            ['Two-way calendar sync', 'Free', 'Google, Outlook and CalDAV, both directions, so your teaching hours and the rest of your week sit in one calendar. A recurring term syncs across as its next session rather than as a repeating series; to see all twelve dates in a calendar app, subscribe to your schedule\'s calendar feed instead. Students can subscribe to the same live feed from your schedule page, with no email address, and it updates itself when a date changes.'],
-            ['Analytics that are already on', 'Free', 'Views, devices and where the traffic came from, per schedule. Enough to know whether the term filled from your newsletter or from somebody else linking you.'],
-            ['A session agenda', 'Free', 'Break a class into named parts with their own times: warm-up, teaching, questions. It is the running order of a session, and on a term every session runs it.'],
-            ['Sub-schedules for levels', 'Free', 'Beginner, intermediate and advanced as separate strands of the same link, each with its own colour. They organise and filter; they do not hide anything, and a pass can be scoped to one of them.'],
-            ['Questions at checkout', 'Pro', 'Custom fields on the form collect what the course needs at the point of signing up: the level they think they are, dietary notes for a cooking class, a parent contact.'],
-            ['Reusable event templates', 'Pro', 'Save a term as a template and start next term from it, or clone last term outright. A template keeps the pattern and the twelve-session end; the holiday dates it deliberately does not keep, because those belong to the calendar and not to the course. A clone keeps them.'],
-            ['A follower QR code', 'Free', 'Every schedule has a QR code that points at it. Put it on the last slide of the deck and the people who liked the class can follow you before they close the tab.'],
+        // The page as a course: four modules, twelve lessons, then the certificate.
+        // Lesson titles come from $dotSections where the section had a name there.
+        $ocLabel = array_column($dotSections, 1, 0);
+        $ocModules = [
+            ['The term', [['term', $ocLabel['term'], '4 min'], ['setup', $ocLabel['setup'], '4 min']]],
+            ['The class', [['register', $ocLabel['register'], '5 min'], ['card', $ocLabel['card'], '5 min'], ['link', $ocLabel['link'], '3 min']]],
+            ['Around it', [['rest', $ocLabel['rest'], '6 min'], ['who', $ocLabel['who'], '2 min'], ['steps', 'Three steps', '1 min'], ['reading', 'Reading list', '1 min']]],
+            ['Finals', [['tuition', 'Tuition', '2 min'], ['electives', 'Electives', '1 min'], ['faq', $ocLabel['faq'], 'Quiz']]],
         ];
+        $ocL = [];
+        $ocOrder = [];
+        foreach ($ocModules as $ocMi => [$ocMName, $ocMLessons]) {
+            foreach ($ocMLessons as $ocLi => [$ocId, $ocTitle, $ocMin]) {
+                $ocOrder[] = $ocId;
+                $ocL[$ocId] = ['no' => ($ocMi + 1).'.'.($ocLi + 1), 'title' => $ocTitle, 'min' => $ocMin, 'n' => count($ocOrder)];
+            }
+        }
+
+        $ocArrow = '<svg aria-hidden="true" class="oc-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>';
+        $ocDown = '<svg aria-hidden="true" class="oc-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>';
+
+        // A lesson's head (number, kicker, length) and its foot (the tick, and what is up next).
+        $ocHead = function (string $id, string $kicker) use ($ocL) {
+            return '<div class="oc-lhead" data-reveal><span class="oc-lno">'.e($ocL[$id]['no']).'</span><span>'.e($kicker).'</span><span class="oc-ldur">'.e($ocL[$id]['min']).'</span></div>';
+        };
+        $ocFoot = function (string $id) use ($ocL, $ocOrder, $ocArrow) {
+            $next = $ocOrder[$ocL[$id]['n']] ?? 'claim';
+            $label = $next === 'claim' ? 'Certificate' : $ocL[$next]['no'].' '.$ocL[$next]['title'];
+
+            return '<div class="oc-lfoot"><span class="oc-ldone" aria-hidden="true"><i class="oc-tick"></i>End of lesson '.e($ocL[$id]['no']).'</span>'
+                .'<a href="#'.e($next).'">Up next <b>'.e($label).'</b>'.$ocArrow.'</a></div>';
+        };
+
+        // The seal's pleated edge: sixty points, alternately out and in.
+        $ocSealPoints = [];
+        for ($ocP = 0; $ocP < 60; $ocP++) {
+            $ocR = $ocP % 2 === 0 ? 50 : 45.5;
+            $ocA = deg2rad($ocP * 6);
+            $ocSealPoints[] = round(50 + $ocR * sin($ocA), 2).'% '.round(50 - $ocR * cos($ocA), 2).'%';
+        }
+        $ocSeal = implode(', ', $ocSealPoints);
     @endphp
-    <section id="rest" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 07</span></div>
-                <p class="es-syl-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
-                <h2 class="es-balance es-syl-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    The rest of the <span class="es-syl-accent">syllabus.</span>
-                </h2>
-                <p class="es-syl-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Marked Free or Pro, honestly. Six of these eight cost nothing.
-                </p>
-            </div>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
-                @foreach ($rest as [$rTitle, $rPlan, $rBody])
-                    <div class="es-syl-card flex flex-col p-6" data-reveal="panel">
-                        <div class="mb-3 flex flex-wrap items-center gap-2">
-                            <h3 class="es-syl-ink text-base font-bold">{{ $rTitle }}</h3>
-                            <span class="es-syl-plan @if ($rPlan === 'Pro') es-syl-plan-pro @endif">{{ $rPlan }}</span>
+    <div id="oc">
+
+        <!-- ============================================================ -->
+        <!-- The course page header                                       -->
+        <!-- ============================================================ -->
+        <section id="top" class="oc-hero">
+            <div class="oc-wrap">
+                <div class="oc-hero-grid">
+                    <div class="oc-hero-copy">
+                        <h1 class="oc-h1">
+                            <x-marketing.hero-eyebrow class="oc-eyebrow es-fade-up es-d-1">
+                                Event schedule for online classes, tutors and coaches
+                            </x-marketing.hero-eyebrow>
+                            <span class="es-mask"><span class="es-mask-line">A course is not one class.</span></span>
+                            <span class="es-mask es-mask-2"><span class="es-mask-line">It is <span class="oc-mark">twelve</span> of them.</span></span>
+                        </h1>
+
+                        <p class="oc-lede es-fade-up es-d-2">
+                            Write the term once - the night it meets, the weeks you are off, the session it finishes on - and take every registration for it from a single link, with zero platform fees.
+                        </p>
+                        <p class="oc-lede-2 es-fade-up es-d-2">
+                            Online class scheduling with free registration and a seat cap counted per session date, multi-session class cards, recurring terms that end themselves, and payments through your own Stripe or PayPal account.
+                        </p>
+
+                        <div class="oc-cta es-fade-up es-d-3">
+                            <a href="#setup" class="oc-btn oc-btn-ghost">
+                                How a term works
+                                {!! $ocDown !!}
+                            </a>
+                            <a href="{{ app_url('/sign_up?type=talent') }}" class="oc-btn">
+                                Create your class schedule
+                                {!! $ocArrow !!}
+                            </a>
                         </div>
-                        <p class="es-syl-muted text-sm leading-relaxed">{{ $rBody }}</p>
+
+                        <ul class="oc-facts es-fade-up es-d-4" aria-hidden="true">
+                            <li>12 lessons</li>
+                            <li>4 modules</li>
+                            <li>About 35 minutes</li>
+                            <li>1 certificate</li>
+                        </ul>
                     </div>
-                @endforeach
-            </div>
 
-            <p class="es-syl-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
-                Worth being precise about which list is which. Somebody who left an email address and confirmed it hears when you publish new classes, as one digest rather than a message per class. Somebody who pressed Follow from their own account is on the other list, and that one is reached only by a newsletter you write. There is no automation builder here either way: no branching sequence, no drip.
-            </p>
-        </div>
-    </section>
+                    <!-- The course card: what the old syllabus said, as the thing you enrol on. -->
+                    <div class="es-fade-up es-d-4">
+                        <div class="oc-cc">
+                            <div class="oc-cc-top"><span>Syllabus</span><span>Term 1</span></div>
+                            <div class="oc-band" aria-hidden="true"></div>
+                            <div class="oc-cc-body">
+                                <p class="oc-cc-title">Conversational Spanish, Level 1</p>
+                                <p class="oc-cc-meta">
+                                    Tuesdays 6:00 PM &middot; online &middot; 12 sessions &middot; 14 seats a session
+                                </p>
 
-    <!-- ============================================================ -->
-    <!-- 8. Perfect for (shared sub-audience cards)                   -->
-    <!-- ============================================================ -->
-    <section id="who" class="es-syl-sub scroll-mt-24 border-y py-20 es-syl-hair lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 08</span></div>
-                <h2 class="es-balance es-syl-ink mb-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Every kind of <span class="es-syl-accent">online class</span>
-                </h2>
-                <p class="es-syl-muted text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    A term is a term whether it is verbs or knife skills. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}" class="es-syl-link underline hover:no-underline">Webinars</a> and <a href="{{ marketing_url('/for-virtual-conferences') }}" class="es-syl-link underline hover:no-underline">Virtual Conferences</a>.
-                </p>
-            </div>
+                                <div class="oc-term oc-term-sm" aria-hidden="true">
+                                    @foreach ($termWeeks as $wi => $wState)
+                                        <div class="oc-wk @if ($wState === 'off') oc-wk-off @endif">
+                                            <span class="oc-wk-w">W{{ $wi + 1 }}</span>
+                                            <span class="oc-wk-n">{{ $wState === 'off' ? 'off' : (int) $register[$wi][0] }}</span>
+                                            <span class="oc-wk-d">{{ $register[$wi][1] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                <!-- Yoga & Fitness -->
-                <x-sub-audience-card
-                    name="Yoga & Fitness Instructors"
-                    description="Daily or weekly sessions with a cap per date, and a ten-visit card for the regulars who cannot make every one."
-                    icon-color="cyan"
-                    blog-slug="for-yoga-fitness-instructors-online"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
+                                <div class="oc-cc-note">
+                                    <p class="oc-cc-note-tag">Recurrence</p>
+                                    <p class="oc-cc-note-big">Ends after 12 sessions.</p>
+                                    <p>Thirteen Tuesdays, twelve sessions. The hollow week is <b>Nov 24</b>, taken out as a date exception.</p>
+                                </div>
 
-                <!-- Cooking Classes -->
-                <x-sub-audience-card
-                    name="Cooking Instructors"
-                    description="Newsletter the ingredient list to the people who signed up for the course, teach live, then write once more with the recipe."
-                    icon-color="teal"
-                    blog-slug="for-cooking-instructors-online"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Art & Music Teachers -->
-                <x-sub-audience-card
-                    name="Art & Music Teachers"
-                    description="A drawing term and a guitar term as separate sub-schedules on one link, each ending on its own last session."
-                    icon-color="sky"
-                    blog-slug="for-art-music-teachers-online"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Language Tutors -->
-                <x-sub-audience-card
-                    name="Language Tutors"
-                    description="A twelve-week conversation class that stops after twelve, with holiday weeks taken out as date exceptions."
-                    icon-color="blue"
-                    blog-slug="for-language-tutors"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Coding & Tech -->
-                <x-sub-audience-card
-                    name="Coding & Tech Educators"
-                    description="Bootcamps, workshops and study groups, kept in beginner and advanced strands so a card for one does not open the other."
-                    icon-color="amber"
-                    blog-slug="for-coding-tech-educators"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Business & Professional -->
-                <x-sub-audience-card
-                    name="Business Coaches"
-                    description="A cohort that meets fortnightly, sold as a term membership, with the intake question asked at checkout."
-                    icon-color="emerald"
-                    blog-slug="for-business-coaches-online"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 9. Three steps                                               -->
-    <!-- ============================================================ -->
-    <section class="scroll-mt-24 py-20 lg:py-24">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance es-syl-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal>
-                    Three steps to week one
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ([['01', 'Write the term', 'Create the course as a recurring event, pick the night it meets, and end the recurrence after a set number of sessions or on a closing date.'], ['02', 'Skip the weeks you are off', 'Add date exceptions for the holiday weeks, and paste your class link on the course so students join from the schedule.'], ['03', 'Open the register', 'Set a seat cap counted per date, then take free registrations, or sell single seats and class cards with nothing taken off the top.']] as [$stepNum, $stepTitle, $stepBody])
-                    <div class="es-syl-card p-7" data-reveal="panel">
-                        <div class="es-syl-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
-                        <h3 class="es-syl-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
-                        <p class="es-syl-muted text-sm leading-relaxed">{{ $stepBody }}</p>
+                                <p class="oc-cc-foot">
+                                    One recurring event. Change the start time once and all twelve sessions follow.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
+                </div>
 
-    <!-- ============================================================ -->
-    <!-- 10. Key features                                             -->
-    <!-- ============================================================ -->
-    <section class="es-syl-sub border-y py-20 es-syl-hair">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-syl-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Recurring Events" description="Set a term once, skip the holiday weeks, end after a set number of sessions" :url="marketing_url('/features/recurring-events')" icon-color="amber">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Online Events" description="Publish sessions that meet on any platform, from one link field" :url="marketing_url('/features/online-events')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Email the students who follow you, with open and click rates" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="teal">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
+                <div class="oc-subjects es-fade-up es-d-5">
+                    <b aria-hidden="true">Taught here</b>
+                    @foreach (['Languages', 'Cooking', 'Yoga', 'Coding', 'Drawing', 'Music', 'Tutoring', 'Masterclasses', 'Kids Classes', 'Coaching'] as $chip)
+                        <span class="oc-subject">{{ $chip }}</span>
+                    @endforeach
                 </div>
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-syl-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    @include('marketing.partials.pricing-nudge')
+        <!-- ============================================================ -->
+        <!-- The player: the syllabus beside twelve lessons               -->
+        <!-- ============================================================ -->
+        <div class="oc-wrap">
+            <div class="oc-course">
 
-    <!-- ============================================================ -->
-    <!-- 11. Related pages                                            -->
-    <!-- ============================================================ -->
-    <section class="py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-syl-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
-                @foreach ([['/for-workshop-instructors', 'Workshop Instructors'], ['/for-webinars', 'Webinars'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-virtual-conferences', 'Virtual Conferences']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" class="es-syl-hover es-syl-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-syl-hover-title es-syl-ink mb-3 text-sm font-semibold transition-colors">For {{ $relName }}</span>
-                        <span class="es-syl-hover-arrow es-syl-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-            <div class="mt-8 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-syl-link inline-flex items-center font-medium hover:underline">
-                    See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
+                <nav class="oc-syllabus es-dotnav" aria-label="Page sections">
+                    <div class="oc-progress">
+                        <div class="oc-ring" aria-hidden="true"><span class="oc-ring-num"></span></div>
+                        <p class="oc-syl-title">{{ $ocLabel['top'] }} <small>12 lessons in 4 modules</small></p>
+                    </div>
+                    <ol class="oc-syl">
+                        @foreach ($ocModules as $ocMi => [$ocMName, $ocMLessons])
+                            <li class="oc-mod" aria-hidden="true"><b>Module {{ $ocMi + 1 }}</b>{{ $ocMName }}</li>
+                            @foreach ($ocMLessons as [$ocId])
+                                <li>
+                                    <a href="#{{ $ocId }}" class="es-dot" style="--oc-tl: --oc-t{{ $ocL[$ocId]['n'] }};">
+                                        <i class="oc-tick" aria-hidden="true"></i>
+                                        <span class="oc-syl-no">{{ $ocL[$ocId]['no'] }}</span>
+                                        <span class="oc-syl-name">{{ $ocL[$ocId]['title'] }}</span>
+                                        <span class="oc-syl-min" aria-hidden="true">{{ $ocL[$ocId]['min'] }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        @endforeach
+                        <li>
+                            <a href="#claim" class="es-dot">
+                                <i class="oc-syl-seal" aria-hidden="true"></i>
+                                <span class="oc-syl-no" aria-hidden="true"></span>
+                                <span class="oc-syl-name">Certificate</span>
+                                <span class="oc-syl-min" aria-hidden="true">{{ $ocLabel['claim'] }}</span>
+                            </a>
+                        </li>
+                    </ol>
+                </nav>
 
-    <!-- ============================================================ -->
-    <!-- 12. FAQ                                                      -->
-    <!-- ============================================================ -->
-    <x-seo.faq-schema :items="$faqs" />
+                <div class="oc-main">
 
-    <section id="faq" class="es-syl-sub scroll-mt-24 border-t py-20 es-syl-hair lg:py-28">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 text-center">
-                <div class="es-syl-clause mb-6" data-reveal aria-hidden="true"><span>&sect; 09</span></div>
-                <h2 class="es-balance es-syl-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
-                    Frequently asked questions
-                </h2>
-                <p class="es-syl-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    What instructors ask before they move a term across.
-                </p>
-            </div>
+                    <div class="oc-module" aria-hidden="true"><span class="oc-module-no">Module 1</span><span class="oc-module-name">The term</span><i></i></div>
 
-            <div class="space-y-3" data-reveal-group="80">
-                @foreach ($faqs as $faqIndex => $faq)
-                    <details name="faq" class="es-syl-hover es-syl-card group p-6 transition-all duration-200" data-reveal>
-                        <summary class="es-syl-ink flex cursor-pointer items-start gap-3 font-semibold">
-                            <span class="es-syl-accent flex-none font-mono text-sm font-bold" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                            <span class="es-syl-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
-                            <svg aria-hidden="true" class="es-syl-muted mt-0.5 h-5 w-5 flex-none transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <p class="faq-answer es-syl-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
+                    <!-- 1.1 A course is not one class -->
+                    <section id="term" class="oc-lesson oc-lesson-feature" style="--oc-tl: --oc-t1;">
+                        {!! $ocHead('term', 'The unit') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Most calendars think a class is <em>one night.</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            The thing you actually teach is a term. Twelve sessions, one topic, the same students each week, and a last night.
+                        </p>
 
-    <!-- ============================================================ -->
-    <!-- 13. Finale                                                   -->
-    <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-syl-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
-                <div class="relative z-10">
-                    <p class="es-syl-tag mb-4">Free forever</p>
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Write the term once. <span class="es-syl-lit">Teach all twelve.</span>
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg es-syl-dim">
-                        Publishing your term, capping the seats and taking free registrations are free forever, with no monthly ceiling on any of them. Charging for a seat, and class cards, are {{ plan_price($proMonthly) }} a month, and nothing is taken off what you charge.
-                    </p>
+                        <div class="oc-trio" data-reveal-group="110">
+                            <div class="oc-mini" data-reveal="panel">
+                                <p class="oc-cc-note-tag">The term</p>
+                                <h3 class="oc-figure"><span data-count-to="12">12</span> <small>sessions</small></h3>
+                                <p>Same course, same students, thirteen weeks. Entering it as twelve separate events is twelve chances to mistype a time.</p>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <p class="oc-cc-note-tag">The setup</p>
+                                <h3 class="oc-figure"><span data-count-to="1">1</span> <small>event</small></h3>
+                                <p>A repeat pattern, exceptions for the weeks you are off, and an end. Move the class an hour later once and every session moves.</p>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <p class="oc-cc-note-tag">The close</p>
+                                <h3 class="oc-figure oc-figure-word">It stops itself</h3>
+                                <p>A term ends on a closing date or after a set number of sessions, so it is not still taking sign-ups for week nineteen in March.</p>
+                            </div>
+                        </div>
 
-                    <div class="mx-auto mb-10 max-w-md" aria-hidden="true">
-                        <div class="es-syl-spine es-syl-spine-thin">
-                            @foreach ($termWeeks as $wState)
-                                <div class="es-syl-tick @if ($wState === 'off') es-syl-tick-off @endif"></div>
+                        <div class="oc-worked" data-reveal>
+                            <p class="oc-worked-tag">The term, drawn</p>
+                            <div class="oc-term" aria-hidden="true">
+                                @foreach ($termWeeks as $wi => $wState)
+                                    <div class="oc-wk @if ($wState === 'off') oc-wk-off @endif" style="--i: {{ $wi }};">
+                                        <span class="oc-wk-w">W{{ $wi + 1 }}</span>
+                                        <span class="oc-wk-n">{{ $wState === 'off' ? 'off' : (int) $register[$wi][0] }}</span>
+                                        <span class="oc-wk-d">{{ $register[$wi][1] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="oc-worked-cap">
+                                Thirteen weeks, twelve filled. The hollow one is a date exception, not a cancelled event.
+                                <a href="#setup">
+                                    Write one
+                                    {!! $ocDown !!}
+                                </a>
+                            </p>
+                        </div>
+
+                        {!! $ocFoot('term') !!}
+                    </section>
+
+                    <!-- 1.2 Writing the term -->
+                    <section id="setup" class="oc-lesson" style="--oc-tl: --oc-t2;">
+                        {!! $ocHead('setup', 'Writing the term') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Three lines and you have a <em>course.</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            All three are on the free plan. None of them are a spreadsheet.
+                        </p>
+
+                        <div class="oc-trio" data-reveal-group="100">
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>The night it meets</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>Pick the days of the week and the start time. Repeats can be daily, weekly, every few weeks, or monthly by date or by weekday, so a fortnightly workshop is one setting rather than a second calendar.</p>
+                                <div class="oc-ctl" aria-hidden="true">
+                                    <span>M</span><span class="is-on">T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                                    <b>6:00 PM</b>
+                                </div>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>The weeks you are off</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>Date exceptions take single dates out, so a holiday week or a week you are travelling disappears from the schedule without rebuilding the term. You can add one-off dates back in the same way.</p>
+                                <div class="oc-ctl" aria-hidden="true">
+                                    <span class="is-on">Nov 10</span><span class="is-on">Nov 17</span><span class="is-out">Nov 24</span><span class="is-on">Dec 1</span>
+                                </div>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>The last session</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>End the recurrence after a set number of sessions, or on a closing date, or never. This is the setting that makes a term a term instead of a weekly slot that runs forever.</p>
+                                <div class="oc-ctl" aria-hidden="true">
+                                    <span class="is-on">After 12 sessions</span><span>On a date</span><span>Never</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Honesty beat: one recurring event has one name. -->
+                        <div class="oc-note" data-reveal="panel">
+                            <p class="oc-note-tag">Worth knowing</p>
+                            <h3>A term has one name, not twelve titles.</h3>
+                            <p>
+                                A recurring event carries one name and one description, so week four is not separately titled "the past tense". If the weeks really are different topics with different prices, make them separate events - cloning one is a click - and keep them together in a sub-schedule. If they are one course, the term is the right shape, and the week-by-week breakdown belongs in the description, because the agenda you set runs the same way in every session.
+                            </p>
+                        </div>
+
+                        {!! $ocFoot('setup') !!}
+                    </section>
+
+                    <div class="oc-module" aria-hidden="true"><span class="oc-module-no">Module 2</span><span class="oc-module-name">The class</span><i></i></div>
+
+                    <!-- 2.1 The register: seats counted per session date -->
+                    <section id="register" class="oc-lesson" style="--oc-tl: --oc-t3;">
+                        {!! $ocHead('register', 'The register') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Fourteen seats, <em>counted per date.</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            The cap is set once on the course and counted separately for every session, so week three filling up does not close week four. Free registration, free plan.
+                        </p>
+
+                        <div class="oc-worked oc-reg-wrap" data-reveal="panel">
+                            <p class="oc-worked-tag" aria-hidden="true">Worked example</p>
+                            <table class="oc-reg">
+                                <caption class="sr-only">Term register: seats taken and seats left for each session date, with a seat cap of fourteen</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Session</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col" class="oc-reg-bar">Taken</th>
+                                        <th scope="col" class="oc-reg-end">Seats left</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($register as [$rNum, $rDate, $rCap, $rLeft])
+                                        @php
+                                            $rSkip = $rCap === 0;
+                                            $rTaken = $rSkip ? 0 : $rCap - $rLeft;
+                                            $rPct = $rSkip ? 0 : (int) round(($rTaken / $rCap) * 100);
+                                            $rFull = ! $rSkip && $rLeft === 0;
+                                        @endphp
+                                        <tr @if ($rSkip) class="oc-reg-off" @endif>
+                                            <th scope="row">
+                                                @if ($rSkip)
+                                                    off
+                                                @else
+                                                    {{ $rNum }}
+                                                @endif
+                                            </th>
+                                            <td>{{ $rDate }}</td>
+                                            <td class="oc-reg-bar">
+                                                @if ($rSkip)
+                                                    No class this week
+                                                @else
+                                                    <div class="oc-fill-track" role="img" aria-label="{{ $rTaken }} of {{ $rCap }} seats taken">
+                                                        <div class="oc-fill-bar @if ($rFull) oc-fill-bar-full @endif" style="width: {{ $rPct }}%;"></div>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td class="oc-reg-end">
+                                                @if ($rSkip)
+                                                    date exception
+                                                @elseif ($rFull)
+                                                    <span class="oc-full">full</span>
+                                                @else
+                                                    <b>{{ $rLeft }}</b> / {{ $rCap }}
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <p class="oc-worked-cap">
+                                Week one is full and week six is empty, on the same course, at the same time. That is the point: the count lives on the date, not on the course. Students see the seats left for the date they are looking at, and a full date stops taking sign-ups without touching the others.
+                            </p>
+                        </div>
+
+                        <div class="oc-duo" data-reveal-group="90">
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>Free registration</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>A name and an email gets somebody a seat on a specific date, with an optional cap. No card, no checkout, and no plan to upgrade to first.</p>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>A waitlist when a date fills up</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>Once a registration date is full, the sign-up button on it becomes a waitlist. When somebody drops, the first person waiting for <em>that</em> date is emailed and has twenty-four hours to claim the seat before it moves to the next in line. Set the cap you can actually teach to and let the list do the rest. On a sold-out <em>paid</em> date the same waitlist is Pro.</p>
+                            </div>
+                        </div>
+
+                        {!! $ocFoot('register') !!}
+                    </section>
+
+                    <!-- 2.2 The class card (passes) -->
+                    <section id="card" class="oc-lesson" style="--oc-tl: --oc-t4;">
+                        {!! $ocHead('card', 'The class card') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Nobody wants to buy <em>twelve tickets.</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            They want one card that covers the term. A pass counts the way your course actually sells: a fixed number of visits, or unlimited visits until it runs out of days.
+                        </p>
+
+                        <!-- Two enrolment cards, then the rules beside the single seats. -->
+                        <div class="oc-worked">
+                            <p class="oc-worked-tag" aria-hidden="true">Two cards, one term</p>
+                            <div class="oc-ids" data-reveal-group="100">
+                                <div data-reveal="panel" data-tilt="5">
+                                    <div class="oc-id es-tilt-inner">
+                                        <div class="oc-id-top"><span>Visit card</span><span>$120</span></div>
+                                        <div class="oc-id-body">
+                                            <span class="oc-id-badge" aria-hidden="true">10</span>
+                                            <div>
+                                                <p class="oc-id-name">10 visits</p>
+                                                <p class="oc-id-sub">Any Tuesday in the term.</p>
+                                            </div>
+                                        </div>
+                                        <div class="oc-id-rest">
+                                            <div class="oc-cells" aria-hidden="true">
+                                                @foreach (range(1, 10) as $visit)
+                                                    <span class="oc-cell @if ($visit <= 4) is-used @endif">{{ $visit }}</span>
+                                                @endforeach
+                                            </div>
+                                            <p class="oc-id-count">4 used &middot; 6 left</p>
+                                            <p class="oc-id-fine">Ten cells against twelve sessions: two Tuesdays can slip. Valid 120 days from purchase. Admits 1.</p>
+                                        </div>
+                                        <div class="oc-id-code" aria-hidden="true"></div>
+                                    </div>
+                                </div>
+
+                                <div data-reveal="panel" data-tilt="5">
+                                    <div class="oc-id es-tilt-inner">
+                                        <div class="oc-id-top"><span>Membership</span><span>$45</span></div>
+                                        <div class="oc-id-body">
+                                            <span class="oc-id-badge" aria-hidden="true">&infin;</span>
+                                            <div>
+                                                <p class="oc-id-name">Unlimited</p>
+                                                <p class="oc-id-sub">Every session, until it expires.</p>
+                                            </div>
+                                        </div>
+                                        <div class="oc-id-rest">
+                                            <div class="oc-strip" aria-hidden="true"></div>
+                                            <p class="oc-id-count">Same strip, no cells</p>
+                                            <p class="oc-id-fine">Valid 90 days. Scoped to the Beginner sub-schedule.</p>
+                                        </div>
+                                        <div class="oc-id-code" aria-hidden="true"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="oc-split">
+                            <div>
+                                <ul class="oc-checks" data-reveal-group="70">
+                                    <li data-reveal>A visit card is good for a set number of visits across the sessions it covers. Ten visits, used whenever they can make it.</li>
+                                    <li data-reveal>A membership is unlimited until it expires. Set how many days it is valid for from the day it is bought.</li>
+                                    <li data-reveal>Scope it to everything you teach, to one sub-schedule, or to the specific courses you name, so a beginner card does not open the advanced track.</li>
+                                    <li data-reveal>Holders can reserve a date in advance, or just turn up. Set a cancellation deadline and decide whether a late cancel gets the visit back.</li>
+                                    <li data-reveal>Set admissions per session above one and a card lets somebody bring a partner. Usage is tracked, so you can see which cards are being used.</li>
+                                </ul>
+                                <p class="oc-smallprint" data-reveal>
+                                    Class cards are Pro, at {{ plan_price($proMonthly) }} a month, along with anything that carries a price. Publishing the term and taking free registrations are not.
+                                    <a href="{{ marketing_url('/features/ticketing') }}" class="oc-link">See what ticketing includes</a>.
+                                </p>
+                            </div>
+
+                            <div class="oc-seats" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>And single seats, alongside</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                @foreach ([['Drop-in seat', 'one session', '$18'], ['Concession', 'one session', '$12'], ['First session', 'try it once', 'Free']] as [$tName, $tScope, $tPrice])
+                                    <div class="oc-seat">
+                                        <span>{{ $tName }}</span>
+                                        <span>{{ $tScope }}</span>
+                                        <span>{{ $tPrice }}</span>
+                                    </div>
+                                @endforeach
+                                <p>
+                                    Cards are sold next to single seats, not instead of them. Both need the Pro plan, because both carry a price; a free trial session does not. Payments run through your own Stripe or PayPal account, or Invoice Ninja, a payment link or cash, and Event Schedule takes <b>zero platform fees</b> at every plan level.
+                                </p>
+                            </div>
+                        </div>
+
+                        {!! $ocFoot('card') !!}
+                    </section>
+
+                    <!-- 2.3 The room and the link -->
+                    <section id="link" class="oc-lesson" style="--oc-tl: --oc-t5;">
+                        {!! $ocHead('link', 'The room') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Your link. <em>Any platform.</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            Paste one meeting link on the course and every session in the term joins through it, the way a recurring meeting room already works. Zoom, Google Meet, Microsoft Teams, YouTube Live, your own setup: it is a link field, so all of them work and none of them own you.
+                        </p>
+
+                        <div class="oc-worked" data-reveal aria-hidden="true">
+                            <p class="oc-worked-tag">One link, for the whole term</p>
+                            <div class="oc-join">
+                                <div class="oc-field"><i></i><span>Paste one meeting link</span></div>
+                                <span class="oc-join-arrow">{!! $ocArrow !!}</span>
+                                <div class="oc-sessions">
+                                    @foreach (range(1, 12) as $ocSession)
+                                        <span>{{ $ocSession }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="oc-trio" data-reveal-group="100">
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>One link for the whole schedule</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>Your schedule lives at its own address. Put it in a bio, a signature, a course page, and it keeps being right when the term rolls over.</p>
+                                <div class="oc-mini-foot">
+                                    <div class="oc-field oc-field-solid" dir="ltr"><i aria-hidden="true"></i><span>your-classes.eventschedule.com</span></div>
+                                </div>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>Or on the site you already have</h3>
+                                    <span class="oc-tag">Free</span>
+                                </div>
+                                <p>Embed the calendar in a page on your own site with an iframe. A list layout suits a term better than a month grid, and that is a setting.</p>
+                                <div class="oc-mini-foot">
+                                    <p>The registration form can be embedded too, free. The ticket purchase form is the Pro version of that widget.</p>
+                                </div>
+                            </div>
+                            <div class="oc-mini" data-reveal="panel">
+                                <div class="oc-mini-head">
+                                    <h3>What this is not</h3>
+                                </div>
+                                <p>It is not a video platform and does not pretend to be. Event Schedule does not create the meeting, count who is in the room, take attendance from it, or hold recordings. It publishes the sessions, takes the registrations, and hands over your link. One link, for the whole term: if week four genuinely needs its own room, week four is a separate event.</p>
+                                <div class="oc-mini-foot">
+                                    <a href="{{ marketing_url('/features/online-events') }}" class="oc-link">How online events work</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {!! $ocFoot('link') !!}
+                    </section>
+
+                    <div class="oc-module" aria-hidden="true"><span class="oc-module-no">Module 3</span><span class="oc-module-name">Around it</span><i></i></div>
+
+                    <!-- 3.1 Everything else -->
+                @php
+                    $rest = [
+                        ['Newsletters to your students', 'Free', 'Students follow your schedule so you can write to them. Materials before, a recording link after, next term when it opens. Ten emails a month free, a hundred on Pro and a thousand on Enterprise, each recipient counting as one, with open and click rates.'],
+                        ['Two-way calendar sync', 'Free', 'Google, Outlook and CalDAV, both directions, so your teaching hours and the rest of your week sit in one calendar. A recurring term syncs across as its next session rather than as a repeating series; to see all twelve dates in a calendar app, subscribe to your schedule\'s calendar feed instead. Students can subscribe to the same live feed from your schedule page, with no email address, and it updates itself when a date changes.'],
+                        ['Analytics that are already on', 'Free', 'Views, devices and where the traffic came from, per schedule. Enough to know whether the term filled from your newsletter or from somebody else linking you.'],
+                        ['A session agenda', 'Free', 'Break a class into named parts with their own times: warm-up, teaching, questions. It is the running order of a session, and on a term every session runs it.'],
+                        ['Sub-schedules for levels', 'Free', 'Beginner, intermediate and advanced as separate strands of the same link, each with its own colour. They organise and filter; they do not hide anything, and a pass can be scoped to one of them.'],
+                        ['Questions at checkout', 'Pro', 'Custom fields on the form collect what the course needs at the point of signing up: the level they think they are, dietary notes for a cooking class, a parent contact.'],
+                        ['Reusable event templates', 'Pro', 'Save a term as a template and start next term from it, or clone last term outright. A template keeps the pattern and the twelve-session end; the holiday dates it deliberately does not keep, because those belong to the calendar and not to the course. A clone keeps them.'],
+                        ['A follower QR code', 'Free', 'Every schedule has a QR code that points at it. Put it on the last slide of the deck and the people who liked the class can follow you before they close the tab.'],
+                    ];
+                @endphp
+                    <section id="rest" class="oc-lesson" style="--oc-tl: --oc-t6;">
+                        {!! $ocHead('rest', 'Everything else') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            The rest of the <em>syllabus.</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            Marked Free or Pro, honestly. Six of these eight cost nothing.
+                        </p>
+
+                        <div class="oc-handouts" data-reveal-group="60">
+                            @foreach ($rest as [$rTitle, $rPlan, $rBody])
+                                <div class="oc-handout" data-reveal>
+                                    <div class="oc-mini-head">
+                                        <h3>{{ $rTitle }}</h3>
+                                        <span class="oc-tag @if ($rPlan === 'Pro') oc-tag-paid @endif">{{ $rPlan }}</span>
+                                    </div>
+                                    <p>{{ $rBody }}</p>
+                                </div>
                             @endforeach
                         </div>
-                    </div>
 
-                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
-                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-classes" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        <div class="oc-note" data-reveal>
+                            <p class="oc-note-tag">Which list is which</p>
+                            <p>
+                                Worth being precise about which list is which. Somebody who left an email address and confirmed it hears when you publish new classes, as one digest rather than a message per class. Somebody who pressed Follow from their own account is on the other list, and that one is reached only by a newsletter you write. There is no automation builder here either way: no branching sequence, no drip.
+                            </p>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-syl-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                        </a>
-                    </div>
 
-                    <p class="mt-6 text-sm es-syl-dim">No credit card required</p>
+                        {!! $ocFoot('rest') !!}
+                    </section>
+
+                    <!-- 3.2 Perfect for: the catalogue -->
+                    @php
+                        // Department code, name, description, blog slug, and the cover it is printed on.
+                        $ocCatalogue = [
+                            ['FIT 110', 'Yoga & Fitness Instructors', 'Daily or weekly sessions with a cap per date, and a ten-visit card for the regulars who cannot make every one.', 'for-yoga-fitness-instructors-online',
+                                '--c: #0d5c63; --p: repeating-radial-gradient(circle at 50% 130%, transparent 0 13px, rgba(251, 248, 241, 0.3) 13px 15px);'],
+                            ['CUL 120', 'Cooking Instructors', 'Newsletter the ingredient list to the people who signed up for the course, teach live, then write once more with the recipe.', 'for-cooking-instructors-online',
+                                '--c: #ffb703; --p: radial-gradient(circle, rgba(22, 36, 43, 0.9) 0 20%, transparent 22%); --s: 20px 20px;'],
+                            ['ART 130', 'Art & Music Teachers', 'A drawing term and a guitar term as separate sub-schedules on one link, each ending on its own last session.', 'for-art-music-teachers-online',
+                                '--c: #d9eae4; --p: linear-gradient(90deg, #0d5c63 0 9%, transparent 9% 14%, #16242b 14% 17%, transparent 17% 30%, #ffb703 30% 44%, transparent 44% 52%, #0d5c63 52% 55%, transparent 55% 63%, #16242b 63% 72%, transparent 72% 80%, #ffb703 80% 84%, transparent 84% 91%, #0d5c63 91% 100%);'],
+                            ['LAN 140', 'Language Tutors', 'A twelve-week conversation class that stops after twelve, with holiday weeks taken out as date exceptions.', 'for-language-tutors',
+                                '--c: #16242b; --p: repeating-linear-gradient(0deg, transparent 0 15px, rgba(251, 248, 241, 0.22) 15px 16px), linear-gradient(90deg, transparent 0 22%, rgba(255, 183, 3, 0.9) 22% 23%, transparent 23%);'],
+                            ['CSC 150', 'Coding & Tech Educators', 'Bootcamps, workshops and study groups, kept in beginner and advanced strands so a card for one does not open the other.', 'for-coding-tech-educators',
+                                '--c: #0a474d; --p: linear-gradient(rgba(251, 248, 241, 0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(251, 248, 241, 0.16) 1px, transparent 1px), linear-gradient(135deg, transparent 0 62%, rgba(255, 183, 3, 0.95) 62% 100%); --s: 18px 18px, 18px 18px, auto;'],
+                            ['BUS 160', 'Business Coaches', 'A cohort that meets fortnightly, sold as a term membership, with the intake question asked at checkout.', 'for-business-coaches-online',
+                                '--c: #ffc94d; --p: repeating-linear-gradient(135deg, transparent 0 14px, rgba(13, 92, 99, 0.85) 14px 20px);'],
+                        ];
+                    @endphp
+                    <section id="who" class="oc-lesson" style="--oc-tl: --oc-t7;">
+                        {!! $ocHead('who', 'Perfect for') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Every kind of <em>online class</em>
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            A term is a term whether it is verbs or knife skills. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}">Webinars</a> and <a href="{{ marketing_url('/for-virtual-conferences') }}">Virtual Conferences</a>.
+                        </p>
+
+                        <div class="oc-catalogue" data-reveal-group="70">
+                            @foreach ($ocCatalogue as [$cCode, $cName, $cBody, $cSlug, $cCover])
+                                @php $cPost = get_sub_audience_blog($cSlug); @endphp
+                                <article class="oc-tile" data-reveal>
+                                    <div class="oc-cover" style="{{ $cCover }}" aria-hidden="true"><span>{{ $cCode }}</span></div>
+                                    <div class="oc-tile-body">
+                                        <h3>{{ $cName }}</h3>
+                                        <p>{{ $cBody }}</p>
+                                        @if ($cPost)
+                                            <a href="{{ blog_url('/' . $cPost->slug) }}" aria-label="Learn more about Event Schedule for {{ $cName }}">
+                                                Learn more
+                                                {!! $ocArrow !!}
+                                            </a>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+
+                        {!! $ocFoot('who') !!}
+                    </section>
+
+                    <!-- 3.3 Three steps -->
+                    <section id="steps" class="oc-lesson" style="--oc-tl: --oc-t8;">
+                        {!! $ocHead('steps', 'Homework') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Three steps to week one
+                        </h2>
+
+                        <ol class="oc-steps" data-reveal-group="120">
+                            @foreach ([['01', 'Write the term', 'Create the course as a recurring event, pick the night it meets, and end the recurrence after a set number of sessions or on a closing date.'], ['02', 'Skip the weeks you are off', 'Add date exceptions for the holiday weeks, and paste your class link on the course so students join from the schedule.'], ['03', 'Open the register', 'Set a seat cap counted per date, then take free registrations, or sell single seats and class cards with nothing taken off the top.']] as [$stepNum, $stepTitle, $stepBody])
+                                <li class="oc-step" data-reveal>
+                                    <span class="oc-step-no" aria-hidden="true">{{ $stepNum }}</span>
+                                    <h3>{{ $stepTitle }}</h3>
+                                    <p>{{ $stepBody }}</p>
+                                </li>
+                            @endforeach
+                        </ol>
+
+                        {!! $ocFoot('steps') !!}
+                    </section>
+
+                    <!-- 3.4 Key features: the reading list -->
+                    <section id="reading" class="oc-lesson" style="--oc-tl: --oc-t9;">
+                        {!! $ocHead('reading', 'Reading list') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">Key features</h2>
+
+                        <div class="oc-reading" data-reveal-group="70">
+                            @foreach ([
+                                ['Recurring Events', 'Set a term once, skip the holiday weeks, end after a set number of sessions', marketing_url('/features/recurring-events')],
+                                ['Online Events', 'Publish sessions that meet on any platform, from one link field', marketing_url('/features/online-events')],
+                                ['Newsletters', 'Email the students who follow you, with open and click rates', marketing_url('/features/newsletters')],
+                                ['Analytics', 'Track page views, devices, and traffic sources', marketing_url('/features/analytics')],
+                            ] as $ocReadIndex => [$ocReadName, $ocReadBody, $ocReadUrl])
+                                <a href="{{ $ocReadUrl }}" class="oc-read" data-reveal>
+                                    <span class="oc-read-no" aria-hidden="true">{{ $ocReadIndex + 1 }}</span>
+                                    <span>
+                                        <strong>{{ $ocReadName }}</strong>
+                                        <small>{{ $ocReadBody }}</small>
+                                    </span>
+                                    {!! $ocArrow !!}
+                                </a>
+                            @endforeach
+                        </div>
+                        <a href="{{ marketing_url('/features') }}" class="oc-more">
+                            See all features
+                            {!! $ocArrow !!}
+                        </a>
+
+                        {!! $ocFoot('reading') !!}
+                    </section>
+
+                    <div class="oc-module" aria-hidden="true"><span class="oc-module-no">Module 4</span><span class="oc-module-name">Finals</span><i></i></div>
+
+                    <!-- 4.1 Tuition: the shared plan band -->
+                    <section id="tuition" class="oc-lesson oc-plans" style="--oc-tl: --oc-t10;">
+                        {!! $ocHead('tuition', 'Tuition') !!}
+                        @include('marketing.partials.pricing-nudge')
+                        {!! $ocFoot('tuition') !!}
+                    </section>
+
+                    <!-- 4.2 Related pages: the electives -->
+                    <section id="electives" class="oc-lesson" style="--oc-tl: --oc-t11;">
+                        {!! $ocHead('electives', 'Electives') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">Related pages</h2>
+
+                        <div class="oc-electives" data-reveal-group="70">
+                            @foreach ([['/for-workshop-instructors', 'Workshop Instructors'], ['/for-webinars', 'Webinars'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-virtual-conferences', 'Virtual Conferences']] as [$relHref, $relName])
+                                <a href="{{ marketing_url($relHref) }}" class="oc-elective" data-reveal>
+                                    <small aria-hidden="true">Elective</small>
+                                    <strong>For {{ $relName }}</strong>
+                                    <span>
+                                        Read more
+                                        {!! $ocArrow !!}
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                        <a href="{{ marketing_url('/use-cases') }}" class="oc-more">
+                            See all use cases
+                            {!! $ocArrow !!}
+                        </a>
+
+                        {!! $ocFoot('electives') !!}
+                    </section>
+
+                    <!-- 4.3 FAQ: check your understanding -->
+                    <x-seo.faq-schema :items="$faqs" />
+
+                    <section id="faq" class="oc-lesson" style="--oc-tl: --oc-t12;">
+                        {!! $ocHead('faq', 'Check your understanding') !!}
+                        <h2 class="oc-h2" data-reveal style="--reveal-delay: 0.06s;">
+                            Frequently asked questions
+                        </h2>
+                        <p class="oc-lead" data-reveal style="--reveal-delay: 0.12s;">
+                            What instructors ask before they move a term across.
+                        </p>
+
+                        <div class="oc-quiz" data-reveal-group="60">
+                            @foreach ($faqs as $faqIndex => $faq)
+                                <details name="faq" class="oc-q" data-reveal>
+                                    <summary>
+                                        <span class="oc-q-no" aria-hidden="true">Q{{ $faqIndex + 1 }}</span>
+                                        <h3>{{ $faq['q'] }}</h3>
+                                        <span class="oc-q-show" aria-hidden="true"></span>
+                                    </summary>
+                                    <p class="faq-answer">{{ $faq['a'] }}</p>
+                                </details>
+                            @endforeach
+                        </div>
+
+                        {!! $ocFoot('faq') !!}
+                    </section>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Desktop dot nav -->
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="es-syl-tip pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3">{{ $sectionLabel }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
+        <!-- ============================================================ -->
+        <!-- Graduation: the certificate                                  -->
+        <!-- ============================================================ -->
+        <section id="claim" class="oc-grad">
+            <div class="oc-wrap oc-grad-in">
+                <p class="oc-grad-tag" data-reveal>Free forever</p>
+                <h2 class="oc-grad-h2" data-reveal style="--reveal-delay: 0.06s;">
+                    Write the term once. <span>Teach all twelve.</span>
+                </h2>
+                <p class="oc-grad-sub" data-reveal style="--reveal-delay: 0.12s;">
+                    Publishing your term, capping the seats and taking free registrations are free forever, with no monthly ceiling on any of them. Charging for a seat, and class cards, are {{ plan_price($proMonthly) }} a month, and nothing is taken off what you charge.
+                </p>
 
+                <div class="oc-cert" id="oc-cert" data-reveal="panel">
+                    <i class="oc-cert-corner" aria-hidden="true"></i>
+                    <i class="oc-cert-corner" aria-hidden="true"></i>
+                    <i class="oc-cert-corner" aria-hidden="true"></i>
+                    <i class="oc-cert-corner" aria-hidden="true"></i>
+                    <div class="oc-cert-in">
+                        <p class="oc-cert-kicker" aria-hidden="true">Certificate of completion</p>
+                        <p class="oc-cert-title" aria-hidden="true">Twelve lessons, read.</p>
+                        <label for="es-claim-input" class="oc-cert-line">This certifies that<span class="sr-only">: your schedule name</span></label>
+                        <div class="oc-cert-form">
+                            <div dir="ltr" class="es-claim oc-claim">
+                                <input id="es-claim-input" type="text" placeholder="your-classes" autocomplete="off" spellcheck="false" maxlength="30">
+                                <span>.eventschedule.com</span>
+                            </div>
+                            <p aria-hidden="true">has read the whole course, knows a term from a single night, and is ready for week one.</p>
+                            <a href="{{ app_url('/sign_up?type=talent') }}" class="oc-btn">
+                                Get Started Free
+                                {!! $ocArrow !!}
+                            </a>
+                        </div>
+                        <p class="oc-cert-note">No credit card required</p>
+
+                        <div class="oc-cert-foot" aria-hidden="true">
+                            <div class="oc-sign"><em>{{ $ocLabel['claim'] }}</em><small>Dated</small></div>
+                            <div class="oc-seal">
+                                <div class="oc-seal-disc" style="clip-path: polygon({{ $ocSeal }});"></div>
+                                <div class="oc-seal-core"><b>12</b><small>of 12</small></div>
+                            </div>
+                            <div class="oc-sign"><b>Event Schedule</b><small>Registrar</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="oc-keep">
+            <x-marketing.related-pages />
+        </div>
     </div>
 
-    <x-marketing.related-pages />
-
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
+    {{-- Graduation confetti, in the course's own colours rather than the site's blues. --}}
+    <script {!! nonce_attr() !!}>
+        document.addEventListener('DOMContentLoaded', function () {
+            var cert = document.getElementById('oc-cert');
+            if (!cert || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting || typeof window.confetti !== 'function') {
+                        return;
+                    }
+                    io.disconnect();
+                    var colors = ['#ffb703', '#fbf8f1', '#7dd6cc', '#ffc94d'];
+                    {{-- The library's default cannon draws from a blob worker, which the site's
+                         content policy refuses without throwing, so nothing was ever drawn.
+                         One made here draws on the page instead. --}}
+                    var fire = typeof window.confetti.create === 'function' ? window.confetti.create(null, { resize: true }) : window.confetti;
+                    [[60, 0.05], [120, 0.95]].forEach(function (shot) {
+                        fire({ particleCount: 70, angle: shot[0], spread: 60, startVelocity: 52, origin: { x: shot[1], y: 0.92 }, colors: colors, disableForReducedMotion: true });
+                    });
+                });
+            }, { threshold: 0.55 });
+            io.observe(cert);
+        });
+    </script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

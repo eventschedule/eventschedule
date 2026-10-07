@@ -624,15 +624,17 @@ class SaleRefundTest extends TestCase
         // so assertSee() on it passes even with the button disabled and pins nothing.
         $response->assertDontSee(__('messages.mark_as_refunded'));
 
-        // The mobile card is the other half of this table and reaches the dialog by a different
-        // route: an Alpine @click whose arguments are Js::from() values concatenated into a
-        // double-quoted attribute. Nothing had ever rendered it - the button lived behind
-        // `@if(false && ...)` until refunds shipped - and a malformed concatenation there is a
-        // silent JS error at click time, not a failing page.
+        // One list for every width now, so ONE way to the dialog: the button carries what the
+        // dialog asks for as data attributes, which the page's script hands to openRefundDialog().
+        // The phone used to have a second copy of the row, an Alpine @click with the same values
+        // concatenated into an attribute, and the two were pinned separately.
+        $html = $response->getContent();
+        $this->assertSame(1, substr_count($html, 'data-sale-action="refund"'), 'one refund control per sale');
+        $response->assertSee(sprintf('data-sale-id="%s"', UrlUtils::encodeId($sale->id)), false);
+        $response->assertSee('data-refund-decimals="2"', false);
         $response->assertSee(sprintf(
-            "openRefundDialog('%s', '100.000', '%s', 2)",
-            UrlUtils::encodeId($sale->id),
-            \App\Utils\MoneyUtils::format(100.0, 'USD'),
+            'data-refund-remaining-formatted="%s"',
+            e(\App\Utils\MoneyUtils::format(100.0, 'USD')),
         ), false);
     }
 
@@ -896,13 +898,13 @@ class SaleRefundTest extends TestCase
         $response = $this->actingAs($owner)->get(route('sales'));
         $response->assertOk();
 
-        // Counted, not assertSee'd. The table renders every sale TWICE - the desktop row and the
-        // mobile card - and each carries its own copy of this block, so a bare assertSee passes
-        // with either one still nested under the `paid` badge and pins only the other.
+        // Counted, not assertSee'd: the list is drawn once for every width (it used to be a table
+        // AND a stack of phone cards, each with its own copy of this block), so exactly one
+        // warning per sale is the whole of it.
         $this->assertSame(
-            2,
+            1,
             substr_count($response->getContent(), __('messages.refund_awaiting_confirmation')),
-            'Both the desktop row and the mobile card must warn on a refunded sale.',
+            'A refunded sale with an unconfirmed claim must warn, once.',
         );
     }
 

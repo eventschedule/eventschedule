@@ -53,8 +53,8 @@
            owner's analytics. (The platform's realtime view is separate:
            it keeps an hour of page views, all of it for site admins at
            /admin/realtime and, where RealtimeTracker::ownerViewEnabled(),
-           the part about a schedule's own pages for its owner at
-           /realtime, where a visitor who allowed analytics is a row with
+           the part about a schedule's own pages for its owner on the
+           Realtime tab of /analytics, where a visitor who allowed analytics is a row with
            no name. Every claim on this page is scoped to the schedule's
            analytics; the two FAQ answers that touch the live view ask
            that predicate.)
@@ -519,9 +519,9 @@
                 'q' => 'Can I see who visited my schedule?',
                 'a' => 'Not who they are, and that is deliberate. A stored row is a schedule, a date and a set of counters, so there is no name, no email, no session and no page-by-page trail to look up. The IP address is never written down. It is hashed with a salt that changes at midnight, and that hash sits in the cache only so the same person is not counted twenty times; the address itself is read once against the country file that ships with the app, and then it is gone. If you want to reach the people who look you up, ask them to follow your schedule: followers give you their name and email on purpose, and you can email them from the newsletter tool. '
                     // Who sees the live view follows the predicate behind an owner's own Realtime
-                    // page, so this answer cannot promise more privacy than the install gives.
+                    // tab, so this answer cannot promise more privacy than the install gives.
                     .(\App\Utils\RealtimeTracker::ownerViewEnabled()
-                        ? 'Separately, Realtime shows you the live traffic to your own pages: page views as they happen, and each visitor who accepted cookies on a notice that mentions organizers as a row with no name, just a country, a device type, the page they have open and for how long. It is deleted about an hour later. The site\'s administrators see the same last hour across the whole site.'
+                        ? 'Separately, Realtime shows you the live traffic to your own pages: page views as they happen, and each visitor who accepted cookies on a notice that mentions organizers as a row with no name, just a country, a device type, the page they have open and for how long. What it holds about a visit is deleted about an hour later. Beside the traffic it lists your own last 24 hours: sales, registrations, bookings, new followers and requests, without names, and, for a ticketed event that is on, where your plan has check-in, how many have arrived. A sale that lands while one visitor is on that event\'s page can tell you whose visit it was. The site\'s administrators see the same last hour of traffic across the whole site.'
                         : 'Separately, the site\'s administrators see a live view of the last hour of activity across the site, including schedule pages; it identifies a visitor only if they accepted cookies, is deleted about an hour later, and is never shown to schedule owners.'),
             ],
             [
@@ -854,7 +854,7 @@
                 </div>
 
                 <p class="es-dash-muted es-dash-hair mt-6 border-t pt-5 text-sm leading-relaxed">
-                    This table has no visitor column, no session, no name, no email and no page-by-page trail, so nothing in your schedule's analytics can answer "who was that". Sources are stored the same way, one line per day per bucket, and a source line holds a domain at most.
+                    This table has no visitor column, no session, no name, no email and no page-by-page trail, so nothing in it can answer "who was that". Sources are stored the same way, one line per day per bucket, and a source line holds a domain at most.
                 </p>
 
                 <div class="mt-5 overflow-x-auto">

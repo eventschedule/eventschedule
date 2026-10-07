@@ -32,18 +32,22 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No daily AI caps</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">The per-day allowances that apply on eventschedule.com, one on event parsing and one on generated images, are switched off when the app is not hosted, so no schedule is ever told it has reached a daily limit. Your only ceilings are the quota and billing on your own provider account.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">The per-schedule daily allowances that apply on eventschedule.com, on event parsing, agenda scans, generated details and style values, and generated images, are switched off when the app is not hosted, so no schedule is ever told it has reached a daily limit. Your only ceilings are the quota and billing on your own provider account.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Requests leave your server</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Text and images are sent to Google or OpenAI for processing. If your deployment must not call third-party services, leave both keys unset and everything except the AI features keeps working. One caller is easy to miss: when an event or sub-schedule name contains no Latin characters, the app asks the text provider for an English rendering so it can build a readable URL slug, even with translation switched off.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Text and images are sent to Google or OpenAI for processing. If your deployment must not call third-party services, leave both keys unset and everything except the AI features keeps working. One caller is easy to miss: when an event or schedule name contains no Latin characters, the app asks the text provider for an English rendering so it can build a readable address for it, even with translation switched off.</p>
             </div>
         </div>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Optional Setup</div>
-            <p>AI features are entirely optional. With no keys configured, the AI buttons are hidden. The import screen still takes a link to a calendar or to a page that publishes its events as data, since reading those involves no AI, and shows the installation's admin a <strong class="text-gray-900 dark:text-white">Get API Key</strong> panel marked <em>Optional</em>. The public submission form, which reads only text and images, shows a <strong class="text-gray-900 dark:text-white">Setup Required: Gemini API Key</strong> panel instead. Both walk through <strong class="text-gray-900 dark:text-white">Get API Key</strong>, <strong class="text-gray-900 dark:text-white">Add to Environment</strong> and <strong class="text-gray-900 dark:text-white">Restart Application</strong>. Despite the heading, an OpenAI key satisfies it just as well. Nothing else in the app is affected.</p>
-        </div>
+        <h3 id="no-key" class="doc-subheading">What an install with no key looks like</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">AI features are entirely optional. With neither key configured, the AI buttons are hidden and three screens change:</p>
+        <ul class="doc-list">
+            <li>The import screen still takes a link to a calendar, or to a page that publishes its events as data, since reading those involves no AI. Below it, the installation's admin sees a <strong class="text-gray-900 dark:text-white">Get API Key</strong> panel marked <em>Optional</em>.</li>
+            <li>The public import page reads only text and images, so it shows a <strong class="text-gray-900 dark:text-white">Setup Required: Gemini API Key</strong> panel instead of the form. Visitors reach it on a schedule that accepts requests with <strong class="text-gray-900 dark:text-white">AI Import</strong> as its <strong class="text-gray-900 dark:text-white">Event submission form</strong> and <strong class="text-gray-900 dark:text-white">Require Account</strong> off, so switch such a schedule to the <strong class="text-gray-900 dark:text-white">Booking Form</strong>, which uses no AI, until a key is in place.</li>
+            <li>The submission form used when <strong class="text-gray-900 dark:text-white">Require Account</strong> is on keeps working. It only loses its <strong class="text-gray-900 dark:text-white">Auto-fill</strong> box.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300">Both panels walk through <strong class="text-gray-900 dark:text-white">Get API Key</strong>, <strong class="text-gray-900 dark:text-white">Add to Environment</strong> and <strong class="text-gray-900 dark:text-white">Restart Application</strong>. Despite the second panel's heading, an OpenAI key satisfies it just as well. Nothing else in the app is affected.</p>
     </section>
 
     <!-- AI Features -->
@@ -57,25 +61,25 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">These are every place a configured key changes what the admin panel can do. The plan badge records the gate that applies on the hosted service; on a selfhosted install all of them pass.</p>
 
         <h3 class="doc-subheading">Text and parsing</h3>
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event import <x-doc-badge plan="free" /></h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Choose <strong class="text-gray-900 dark:text-white">Import Events</strong> from the schedule's <strong class="text-gray-900 dark:text-white">Actions</strong> menu. Paste an email, a message or a block of flyer text, or drop in a picture of a poster, and the event name, date, time, duration, venue, performers, category and description come back filled in for review before anything is saved. The same parsing sits behind the <strong class="text-gray-900 dark:text-white">Auto-fill</strong> dropzone on the public submit-event form, so guests get it too. See the <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import guide</a>.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Choose <strong class="text-gray-900 dark:text-white">Import Events</strong> from the schedule's <strong class="text-gray-900 dark:text-white">Actions</strong> menu. Paste an email, a message or a block of flyer text, or drop in a picture of a poster, and the event name, date, time, duration, venue, performers, category and description come back filled in for review before anything is saved. The same parsing runs the public import page and the <strong class="text-gray-900 dark:text-white">Auto-fill</strong> box on the public submission form, so guests get it too. See the <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import guide</a>.</p>
             </div>
 
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Agenda scanning <x-doc-badge plan="enterprise" /></h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">In the <strong class="text-gray-900 dark:text-white">Agenda</strong> section of the event form, <strong class="text-gray-900 dark:text-white">Import from Image</strong> and <strong class="text-gray-900 dark:text-white">Import from Text</strong> read a set list, running order or conference agenda and fill in the event's parts. It adds parts to the one event you are editing, it does not create separate events. An optional instructions box steers the parsing and can be saved as the default for the schedule, and the source picture can be kept and shown on the event. On narrow screens the same tool also gets its own <strong class="text-gray-900 dark:text-white">Scan Agenda</strong> entry in the schedule's Actions menu, which pre-picks a recent event that has no agenda yet. See the <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-link">Scan Agenda guide</a>.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">An <strong class="text-gray-900 dark:text-white">Import</strong> row sits at the foot of the event form's <strong class="text-gray-900 dark:text-white">Agenda</strong> tab, under <strong class="text-gray-900 dark:text-white">Add Part</strong>. Paste a set list, running order or conference agenda and press <strong class="text-gray-900 dark:text-white">Read This Text</strong>, or press <strong class="text-gray-900 dark:text-white">Or Choose a Photo</strong>, then accept the parts it previews. They are added to the parts of the one event you are editing: nothing is replaced, and no separate events are created. <strong class="text-gray-900 dark:text-white">Instructions for the AI</strong> steers the parsing and can be kept for every event on the schedule, and <strong class="text-gray-900 dark:text-white">Keep the photo</strong> shows the source picture with the agenda on the event's page. On narrow screens the same tool also gets its own <strong class="text-gray-900 dark:text-white">Scan Agenda</strong> entry in the schedule's Actions menu, which pre-picks a recent event that has no agenda yet. See the <a href="{{ route('marketing.docs.scan_agenda') }}" class="doc-link">Scan Agenda guide</a>.</p>
             </div>
 
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Second-language translation <x-doc-badge plan="free" /></h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> in the schedule's <strong class="text-gray-900 dark:text-white">Details</strong> section and pick a <strong class="text-gray-900 dark:text-white">Translate into</strong> language. A scheduled task that runs every 15 minutes then fills the translated copy of the schedule name, short description, description, address, request terms, banner message and sponsor section title, and of every event and event part, so guests get a button to switch between the language you typed and the translation. Sub-schedule names and custom field names and options are translated as you save instead of waiting for the task. It is one target language per schedule, not a set of languages, and it needs the cron entry to be running.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">On the schedule form's <strong class="text-gray-900 dark:text-white">Details</strong> tab, open the <strong class="text-gray-900 dark:text-white">Language and time</strong> row, turn on <strong class="text-gray-900 dark:text-white">Offer a second language to visitors</strong> and pick a <strong class="text-gray-900 dark:text-white">Translate into</strong> language. A scheduled task that runs every 15 minutes then fills the translated copy of the schedule name, short description, description, address, request terms, banner message and sponsor section title, and of every event and event part, so guests get a button to switch between the language you typed and the translation. Sub-schedule names and custom field names and options are translated as you save instead of waiting for the task. It is one target language per schedule, not a set of languages, and it needs the cron entry to be running.</p>
             </div>
 
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI Generator for details <x-doc-badge plan="enterprise" /></h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">An <strong class="text-gray-900 dark:text-white">AI Generator</strong> button appears beside the <strong class="text-gray-900 dark:text-white">Details</strong> heading on the schedule form, and under <strong class="text-gray-900 dark:text-white">About</strong> on the event form. On a schedule it offers Short Description and Description; on an event it offers Category, Flyer Image, Short Description and Description. You tick the fields to fill, can add extra instructions, save those instructions as the default for the schedule, and preview each result before applying it. Fields that already have a value are left unticked so nothing is overwritten by accident.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">An <strong class="text-gray-900 dark:text-white">AI Generator</strong> button appears beside the <strong class="text-gray-900 dark:text-white">Details</strong> heading on the schedule form, and inside the <strong class="text-gray-900 dark:text-white">About</strong> row of the event form's <strong class="text-gray-900 dark:text-white">Event</strong> tab. On a schedule it offers Short Description and Description; on an event it offers Category, Flyer Image, Short Description and Description. You tick the fields to fill, can add extra instructions, save those instructions as the default for the schedule, and preview each result before applying it. Fields that already have a value are left unticked so nothing is overwritten by accident.</p>
             </div>
 
             <div class="doc-field">
@@ -98,12 +102,12 @@
 
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI Style Generator <x-doc-badge plan="enterprise" /></h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">The <strong class="text-gray-900 dark:text-white">AI Generator</strong> button beside the schedule's <strong class="text-gray-900 dark:text-white">Style</strong> heading offers five fields: Profile Image, Header Image, Accent Color, Font and Background Image. The three images come from the image provider; the accent color and font come from the text provider. See <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">The <strong class="text-gray-900 dark:text-white">AI Generator</strong> button beside the <strong class="text-gray-900 dark:text-white">Style</strong> heading on the schedule form offers five fields: Profile image, Header Image, Accent Color, Font Family and Background Image. The three images come from the image provider; the accent color and font come from the text provider. See <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>.</p>
             </div>
         </div>
 
         <h3 class="doc-subheading">Daily Auto Import from event URLs <x-doc-badge plan="selfhost" /></h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">An <strong class="text-gray-900 dark:text-white">Auto Import</strong> section appears in the schedule editor on selfhosted installs only, and it is the one AI feature that runs unattended. It is offered on every schedule type, but every event it creates is attached to the schedule as that event's <em>curator</em>, so it is really a curator tool. A scheduled task visits your sources once a day, so the cron entry has to be running and an AI key has to be set, otherwise the task reports that no key was found and stops without importing anything.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">An <strong class="text-gray-900 dark:text-white">Auto Import</strong> tab appears on the schedule form on selfhosted installs only, between Gift Cards and Integrations, and it is the one AI feature that runs unattended. It is offered on every schedule type, but every event it creates is attached to the schedule as that event's <em>curator</em>, so it is really a curator tool. A scheduled task visits your sources once a day, so the cron entry has to be running and an AI key has to be set, otherwise the task reports that no key was found and stops without importing anything.</p>
 
         <div class="doc-fields">
             <div class="doc-field">
@@ -120,7 +124,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reviewing what arrives</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Imported events arrive the same way a submitted event does. They only appear on the schedule straight away when it has <strong class="text-gray-900 dark:text-white">Accept requests</strong> on and <strong class="text-gray-900 dark:text-white">Require Approval</strong> off; otherwise they wait on the <strong class="text-gray-900 dark:text-white">Requests</strong> tab for you to approve. A venue or performer an imported event names that is not already on your install becomes a schedule of its own, with no owner. Its public page says it has not been claimed and stays out of search engines, it is listed under <strong class="text-gray-900 dark:text-white">Unclaimed</strong> on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-plans" class="doc-link">Schedules</a> page, and a selfhosted install never emails anyone an invitation to claim it. See <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> in the schedule guide.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Imported events arrive the same way a submitted event does. They only appear on the schedule straight away when it has <strong class="text-gray-900 dark:text-white">Accept requests</strong> on and <strong class="text-gray-900 dark:text-white">Require Approval</strong> off, both in the <strong class="text-gray-900 dark:text-white">Requests</strong> row of the schedule form's <strong class="text-gray-900 dark:text-white">Engagement</strong> tab; otherwise they wait on the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab for you to approve. A venue or performer an imported event names that is not already on your install becomes a schedule of its own, with no owner. Its public page says it has not been claimed and stays out of search engines, it is listed under <strong class="text-gray-900 dark:text-white">Unclaimed</strong> on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-plans" class="doc-link">Schedules</a> page, and a selfhosted install never emails anyone an invitation to claim it. See <a href="{{ route('marketing.docs.creating_schedules') }}#auto-import" class="doc-link">Auto Import</a> in the schedule guide.</p>
             </div>
         </div>
 
@@ -198,7 +202,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Pricing</div>
-            <p>OpenAI image generation is a paid API with no free tier, and each image costs a small amount based on size and quality. Check <a href="https://openai.com/api/pricing/" target="_blank" rel="noopener noreferrer" class="doc-link">OpenAI's pricing page</a> for current rates. If you would rather not pay per image, leave this key out and set <code class="doc-inline-code">AI_IMAGE_PROVIDER=gemini</code>.</p>
+            <p>OpenAI image generation is a paid API with no free tier, and each image costs a small amount based on size and quality. Check <a href="https://openai.com/api/pricing/" target="_blank" rel="noopener noreferrer" class="doc-link">OpenAI's pricing page</a> for current rates. If you would rather not pay OpenAI per image, leave this key out: with only a Gemini key set, images are drawn by Gemini with no other setting. With both keys set, <code class="doc-inline-code">AI_IMAGE_PROVIDER=gemini</code> does the same.</p>
         </div>
     </section>
 
@@ -312,7 +316,7 @@
             <pre><code>php artisan config:clear</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6">That is it. The AI buttons appear throughout the admin panel as soon as a key is readable. The only AI feature that still needs switching on per schedule is second-language translation. The model variables are split into translation and content on purpose, so you can point batch translation at a cheap fast model and keep a more capable one for parsing and writing. If your deployment runs <code class="doc-inline-code">php artisan config:cache</code>, run it again after editing <code class="doc-inline-code">.env</code> or the old cached values will keep being served.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-6">The AI buttons appear throughout the admin panel as soon as a key is readable. Three features still have to be set up on each schedule that wants them: second-language translation, Auto Import and the AI prompt for graphic captions. The model variables are split into translation and content on purpose, so you can point batch translation at a cheap fast model and keep a more capable one for parsing and writing. If your deployment runs <code class="doc-inline-code">php artisan config:cache</code>, run it again after editing <code class="doc-inline-code">.env</code> or the old cached values will keep being served.</p>
     </section>
 
     <!-- Troubleshooting -->
@@ -325,9 +329,9 @@
             Troubleshooting
         </h2>
 
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">"Setup Required: Gemini API Key" on the submission form, or "Get API Key" on the import screen</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">"Setup Required: Gemini API Key" on the public import page, or "Get API Key" on the import screen</h3>
                 <ul class="doc-list text-sm">
                     <li>Either panel shows when neither key is readable, so check that <code class="doc-inline-code">GEMINI_API_KEY</code> or <code class="doc-inline-code">OPENAI_API_KEY</code> is set in <code class="doc-inline-code">.env</code></li>
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code>, and <code class="doc-inline-code">php artisan config:cache</code> again if you cache your config</li>
@@ -339,7 +343,7 @@
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Add GEMINI_API_KEY= or OPENAI_API_KEY= to the .env file to enable AI image generation"</h4>
                 <ul class="doc-list text-sm">
                     <li>This is the reply from a flyer or style-image request when neither key is present</li>
-                    <li>Either key satisfies it, so a Gemini-only install can still generate images by setting <code class="doc-inline-code">AI_IMAGE_PROVIDER=gemini</code></li>
+                    <li>Either key satisfies it. A Gemini-only install draws images with Gemini without <code class="doc-inline-code">AI_IMAGE_PROVIDER</code> being set, because the request falls back to the provider that has a key</li>
                     <li>Run <code class="doc-inline-code">php artisan config:clear</code> after editing <code class="doc-inline-code">.env</code></li>
                 </ul>
             </div>
@@ -347,10 +351,9 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI buttons are missing entirely</h4>
                 <ul class="doc-list text-sm">
-                    <li>The AI Generator and agenda import buttons are rendered only when a key is configured, so an unreadable key hides them rather than showing an error</li>
+                    <li>The <strong class="text-gray-900 dark:text-white">AI Generator</strong> buttons and the agenda's <strong class="text-gray-900 dark:text-white">Import</strong> row are rendered only when a key is configured, so an unreadable key hides them rather than showing an error</li>
                     <li>Reload the schedule or event form after clearing the config cache</li>
-                    <li>The two agenda import buttons sit at the foot of the <strong class="text-gray-900 dark:text-white">Agenda</strong> section of the event form, next to <strong class="text-gray-900 dark:text-white">Add Part</strong>, rather than in its heading</li>
-                </ul>
+                    <li>The agenda importer is a row, not a button in the heading: look for <strong class="text-gray-900 dark:text-white">Import</strong> at the foot of the event form's <strong class="text-gray-900 dark:text-white">Agenda</strong> tab, under <strong class="text-gray-900 dark:text-white">Add Part</strong></li>                </ul>
             </div>
 
             <div class="doc-field">
@@ -366,7 +369,7 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">AI image generation failing</h4>
                 <ul class="doc-list text-sm">
-                    <li>Check that your server can make outbound HTTPS connections to <code class="doc-inline-code">api.openai.com</code></li>
+                    <li>Check that your server can make outbound HTTPS connections to <code class="doc-inline-code">api.openai.com</code>, or to <code class="doc-inline-code">generativelanguage.googleapis.com</code> if Gemini is drawing the images</li>
                     <li>Verify your OpenAI API key is valid at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="doc-link">OpenAI Platform</a></li>
                     <li>Ensure your OpenAI account has available credits</li>
                     <li>Some prompts may be rejected by OpenAI's content policy, so try adjusting your style instructions</li>

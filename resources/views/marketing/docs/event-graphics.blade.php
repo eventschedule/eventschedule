@@ -42,13 +42,20 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            To open it, go to your schedule in the admin panel and choose <strong>Events Graphic</strong> from the <strong>Actions</strong> menu.
+            To open it, go to your schedule in the admin panel and choose <strong>Events Graphic</strong> from the <strong>Actions</strong> menu at the end of the schedule's title row. Anyone on the schedule's team can open the page and generate; saving the settings, uploading a header image and sending the scheduled email are for the owner and admins. The link above the page's title, named after your schedule, goes back to it.
         </p>
 
-        <x-doc-screenshot id="event-graphics--graphic-page" alt="Event graphics page with generated graphic" loading="eager" />
+        <x-doc-screenshot id="event-graphics--graphic-page" alt="The Events Graphic page: settings in three tabs on one side, the generated text and image on the other" loading="eager" />
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The image panel has <strong>Download</strong> and <strong>Copy Image</strong>; the text panel has <strong>Copy Text</strong>, plus <strong>Share</strong> on devices whose browser supports it. <strong>Save Settings</strong> stores your choices for next time and for the scheduled email; <strong>Run</strong> regenerates the preview.
+        <h3 class="doc-subheading">The page</h3>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Settings</strong> are in three tabs, <strong class="text-gray-900 dark:text-white">Graphic</strong>, <strong class="text-gray-900 dark:text-white">Text</strong> and <strong class="text-gray-900 dark:text-white">Automation</strong>, with two buttons under them. <strong class="text-gray-900 dark:text-white">Run</strong> regenerates the preview from what is on screen; <strong class="text-gray-900 dark:text-white">Save Settings</strong> stores your choices for next time and for the scheduled email.</li>
+            <li><strong class="text-gray-900 dark:text-white">The text</strong> is shown first, with <strong class="text-gray-900 dark:text-white">Copy Text</strong>, plus <strong class="text-gray-900 dark:text-white">Share</strong> on devices whose browser can share a file, where it hands the image and the text to another app together.</li>
+            <li><strong class="text-gray-900 dark:text-white">The image</strong> is under it, with <strong class="text-gray-900 dark:text-white">Download</strong> and <strong class="text-gray-900 dark:text-white">Copy Image</strong>.</li>
+            <li><strong class="text-gray-900 dark:text-white">On a phone</strong> the settings fold into a <strong class="text-gray-900 dark:text-white">Settings</strong> panel you open, and the image and the text are two tabs, <strong class="text-gray-900 dark:text-white">Graphic</strong> and <strong class="text-gray-900 dark:text-white">Text</strong>.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            If some upcoming events use a different timezone than the schedule, and so may show the wrong time on the graphic, a notice above the settings says how many, with <strong class="text-gray-900 dark:text-white">Review</strong> leading to the schedule so you can correct them before sharing.
         </p>
 
         <h3 class="doc-subheading">What goes on the graphic</h3>
@@ -68,7 +75,7 @@
 
         <h3 class="doc-subheading">Layout Type</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The settings panel is split into three tabs: <strong>Graphic</strong>, <strong>Text</strong> and <strong>Automation</strong>. The Graphic tab starts with the layout.
+            The Graphic tab starts with the layout. A line under the choices says what the chosen one suits.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -255,7 +262,7 @@
         <x-doc-screenshot id="event-graphics--settings" alt="Event graphics settings" />
 
         <h3 class="doc-subheading">Default Template</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">If you leave the template blank, the following default format is used:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Until you save a template of your own, the <strong>Text Template</strong> box opens filled in with this one:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -264,9 +271,11 @@
             </div>
             <pre><code>*{day_name}* {date_dmy} | {time}
 *{event_name}*:
+{short_description}
 {venue} | {city}
 {url}</code></pre>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you empty the box, a built-in template is used instead: the same four lines without <code class="doc-inline-code">{short_description}</code>. A scheduled email sent before any template was saved uses that one too. A template can be up to 2,000 characters.</p>
 
         <h3 class="doc-subheading">Example Output</h3>
         <div class="doc-code-block">
@@ -275,9 +284,11 @@
             </div>
             <pre><code>*Wednesday* 15/3 | 20:00
 *Summer Concert*:
+Live jazz with local artists
 Central Park | New York
-https://example.com/event/summer-concert</code></pre>
+example.com/summer-concert</code></pre>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The link has no <code class="doc-inline-code">https://</code> and no event id unless you turn on <strong>Include HTTPS</strong> or <strong>Include Event ID</strong>, described <a href="#text-options" class="doc-link">below</a>. An event with no short description has no third line.</p>
 
         <div class="doc-callout doc-callout-tip mt-6">
             <div class="doc-callout-title">Tip</div>
@@ -329,7 +340,7 @@ https://example.com/event/summer-concert</code></pre>
             You do not need a separate template for events that have no venue or no price. If a variable comes back empty, a stranded <code class="doc-inline-code">|</code> separator around it is removed, and a line left with nothing but punctuation is dropped from that event's entry.
         </p>
 
-        <h3 class="doc-subheading">The rest of the Text tab</h3>
+        <h3 id="text-options" class="doc-subheading">The rest of the Text tab</h3>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -630,7 +641,7 @@ https://example.com/event/summer-concert</code></pre>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">{price}</code></td>
-                        <td>Lowest ticket price. Blank when every ticket is free, when the event has no price, and when the event has no tickets at all, so a free event simply drops the line rather than printing a zero.</td>
+                        <td>Lowest ticket price. Blank when every ticket is free, when the event has no price, and when the event has no tickets at all, so a free event drops the line rather than printing a zero.</td>
                         <td>10</td>
                     </tr>
                     <tr>
@@ -678,9 +689,9 @@ https://example.com/event/summer-concert</code></pre>
                         <tbody>
                             @foreach ($scheduleData['fields'] as $index => $field)
                             <tr>
-                                <td><code class="doc-inline-code">{custom_{{ $loop->iteration }}}</code></td>
+                                <td><code class="doc-inline-code">{custom_{{ $field['index'] ?? $loop->iteration }}}</code></td>
                                 <td>{{ $field['name'] }}</td>
-                                <td>{{ ucfirst(str_replace('_', ' ', $field['type'] ?? 'string')) }}</td>
+                                <td>{{ __('messages.type_'.($field['type'] ?? 'string')) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -722,21 +733,14 @@ https://example.com/event/summer-concert</code></pre>
             </div>
         @endif
 
-        <div class="doc-callout doc-callout-tip mb-6">
-            <div class="doc-callout-title">Tip</div>
-            <p>Custom field variables correspond to the order your fields are defined in schedule settings. For example, if your first custom field is "Speaker Name", then <code class="doc-inline-code">{custom_1}</code> will show the speaker's name. A yes/no field prints as Yes or No.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Custom field variables follow the number shown beside each field in your schedule's settings. For example, if your first custom field is "Speaker Name", then <code class="doc-inline-code">{custom_1}</code> shows the speaker's name. A yes/no field prints as Yes or No.</p>
 
-        <div class="doc-callout doc-callout-info mb-6">
-            <div class="doc-callout-title">Overlay Text uses a subset</div>
-            <p>The same variables work in the Overlay Text on the flyer strip, with four exceptions: <code class="doc-inline-code">{url}</code>, <code class="doc-inline-code">{number}</code>, <code class="doc-inline-code">{month_pad}</code> and <code class="doc-inline-code">{day_pad}</code> are text-only and are left as they are there. Keep overlay text short: it is drawn on one line across the width of a flyer.</p>
-        </div>
+        <h3 id="overlay-variables" class="doc-subheading">In Overlay Text</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The same variables work in the Overlay Text on the flyer strip, with four exceptions: <code class="doc-inline-code">{url}</code>, <code class="doc-inline-code">{number}</code>, <code class="doc-inline-code">{month_pad}</code> and <code class="doc-inline-code">{day_pad}</code> are text-only and are left as they are there. Keep overlay text short: it is drawn on one line across the width of a flyer.</p>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Localization</div>
-            <p>Date and time variables like <code class="doc-inline-code">{day_name}</code>, <code class="doc-inline-code">{month_name}</code>, and <code class="doc-inline-code">{time}</code> are automatically translated to your schedule's language and respect its 24-hour time setting. Text for a Hebrew or Arabic schedule is also marked so it pastes right-to-left into apps like WhatsApp, while the event links stay intact.</p>
-            <p class="mt-2">If your schedule uses a non-English language and translates into English, you can turn on <strong>Generate text in English</strong> on the Text tab to produce the text, and the dates and event details on the graphic itself, in English instead. English translations of event and venue names are used when available, falling back to the original values.</p>
-        </div>
+        <h3 id="localization" class="doc-subheading">Language and Direction</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Date and time variables like <code class="doc-inline-code">{day_name}</code>, <code class="doc-inline-code">{month_name}</code>, and <code class="doc-inline-code">{time}</code> are written in your schedule's language and respect its 24-hour time setting. Text for a Hebrew or Arabic schedule is also marked so it pastes right-to-left into apps like WhatsApp, while the event links stay intact.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If your schedule uses a non-English language and translates into English, you can turn on <strong>Generate text in English</strong> on the Text tab to produce the text, and the dates and event details on the graphic itself, in English instead. English translations of event and venue names are used when available, falling back to the original values.</p>
     </section>
 
     <div class="doc-callout doc-callout-plan">
@@ -768,7 +772,7 @@ https://example.com/event/summer-concert</code></pre>
             <li>Add hashtags or mentions</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Generating takes a moment longer with a prompt set, so the text appears first and is replaced when the AI finishes. Your prompt is treated strictly as formatting instructions, and if it cannot be applied the original text is kept. The same prompt is applied to the scheduled email described below.
+            Generating takes a moment longer with a prompt set, so the text appears first and is replaced when the AI finishes. Your prompt is treated strictly as formatting instructions, and if it cannot be applied the original text is kept. The same prompt is applied to the scheduled email described below. A prompt can be up to 2,000 characters. On eventschedule.com each schedule gets 50 AI content requests a day, an allowance this prompt shares with the AI details generators of the event and schedule forms; a run past it leaves the text as the template wrote it.
         </p>
 
         <h3 class="doc-subheading">Example Prompts</h3>
@@ -825,7 +829,7 @@ https://example.com/event/summer-concert</code></pre>
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Day of Month</strong></td>
-                        <td>For Monthly: the day to send on. A day later than the month has, such as 31 in April, falls back to the last day of that month.</td>
+                        <td>For Monthly: the day to send on, from 1 to 28, so every month has it.</td>
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Send At</strong></td>

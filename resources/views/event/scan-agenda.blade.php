@@ -4,54 +4,16 @@
     <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 </x-slot>
 
-<div class="flex justify-between items-center gap-6 pb-6">
-    @if (is_rtl())
-        <div class="flex items-center gap-3">
-            <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </button>
-        </div>
-
-        <div class="flex items-center text-end">
-            @if ($role->profile_image_url)
-                <div class="pe-4">
-                    <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                </div>
-            @endif
-            <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                {{ __('messages.scan_agenda') }}
-            </h2>
-        </div>
-    @else
-        <div class="flex items-center">
-            @if ($role->profile_image_url)
-                <div class="pe-4">
-                    <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                </div>
-            @endif
-            <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                {{ __('messages.scan_agenda') }}
-            </h2>
-        </div>
-
-        <div class="flex items-center gap-3">
-            <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </button>
-        </div>
-    @endif
-</div>
-
-<script {!! nonce_attr() !!}>
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.js-back-btn')) {
-            history.back();
-        }
-    });
-</script>
+{{-- One task on one page: the title and the scanner are one column in the middle of the frame
+     (the title stood at the frame's edge over a body centred on a width of its own). --}}
+<div class="page-shell page-col is-narrow">
+{{-- Reached from the schedule's own page, so the way back is the schedule, by name. --}}
+<x-page-header :title="__('messages.scan_agenda')" :image="$role->profile_image_url ?: null"
+    :back="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])" :back-label="$role->name" />
 
 <div id="scan-agenda-app">
     <scan-agenda-app></scan-agenda-app>
+</div>
 </div>
 
 <script {!! nonce_attr() !!}>
@@ -467,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         },
         template: `
-<div class="max-w-2xl mx-auto">
+<div>
     <!-- No events message -->
     <div v-if="!hasEvents" class="text-center py-12">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -561,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <!-- Try Again button -->
                 <div class="mt-6 text-center">
-                    <button @click="retryCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <button @click="retryCameraAccess" class="inline-flex items-center justify-center gap-2 px-4 py-3 text-base bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -570,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
             <div v-else-if="!cameraStarted" class="text-center py-12">
-                <button v-if="!showCameraModal" @click="requestCameraAccess" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                <button v-if="!showCameraModal" @click="requestCameraAccess" class="inline-flex items-center justify-center gap-2 px-4 py-3 text-base bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -726,13 +688,13 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             <!-- Floating save/cancel bar -->
-            <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+            <div class="ap-foot-bar bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-40 shadow-lg" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
                 <div class="flex gap-3 justify-center max-w-lg mx-auto">
-                    <button @click="saveParts" class="inline-flex items-center justify-center px-6 py-3 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        {{ __('messages.save') }}
-                    </button>
-                    <button @click="cancelEditing" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <button @click="cancelEditing" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                         {{ __('messages.retake') }}
+                    </button>
+                    <button @click="saveParts" class="inline-flex items-center justify-center gap-2 px-4 py-3 text-base bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
+                        {{ __('messages.save') }}
                     </button>
                 </div>
             </div>

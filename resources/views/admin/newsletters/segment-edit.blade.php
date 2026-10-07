@@ -1,176 +1,146 @@
 <x-app-admin-layout>
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'newsletters'])
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+        <style {!! nonce_attr() !!}>
+            /* The accounts a search finds, under the field that searches. */
+            .news-results {
+              position: absolute;
+              z-index: 10;
+              inset-inline: 0;
+              max-height: 15rem;
+              margin-top: 0.25rem;
+              border: 1px solid rgb(var(--ap-border));
+              border-radius: 0.5rem;
+              background: rgb(var(--ap-surface));
+              box-shadow: var(--ap-shadow-dropdown);
+              overflow-y: auto;
+            }
+            .news-result {
+              padding: 0.5rem 0.75rem;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink));
+              cursor: pointer;
+            }
+            .news-result:hover {
+              background: rgb(var(--ap-surface-hover));
+            }
+            .news-result span {
+              margin-inline-start: 0.5rem;
+              color: rgb(var(--ap-ink-3));
+            }
+        </style>
+    </x-slot>
 
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.edit_segment') }}</h2>
-            <x-secondary-link :href="route('admin.newsletters.segments')">
-                {{ __('messages.back') }}
-            </x-secondary-link>
-        </div>
+    @include('admin.partials._navigation', ['active' => 'newsletters'])
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
+    {{-- One of the platform's segments: its name, who it resolves to, and for a manual one the
+         accounts in it. --}}
+    <div class="page-shell">
+        @php
+            $segmentHash = \App\Utils\UrlUtils::encodeId($segment->id);
+            $isManual = $segment->type === 'manual';
+            $subscriberList = $isManual ? $subscribers->items() : $subscribers;
+        @endphp
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+        @include('admin.newsletters.partials._subpage-head', [
+            'title' => $segment->name,
+            'back' => route('admin.newsletters.segments'),
+            'backLabel' => __('messages.segments'),
+        ])
 
-        @if ($errors->any())
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
+        @include('newsletter.partials._notices')
 
-        {{-- Segment Info --}}
-        <div class="ap-card shadow-md sm:rounded-xl p-6 mb-6">
-            <form method="POST" action="{{ route('admin.newsletters.segment.update', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}">
-                @csrf
-                @method('PUT')
-                <div class="space-y-4">
-                    <div>
-                        <x-input-label for="segment_name" :value="__('messages.name')" />
-                        <x-text-input id="segment_name" name="name" type="text" class="mt-1 block w-full" :value="$segment->name" required />
-                    </div>
-
-                    <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{{ __('messages.type') }}:
-                            @if ($segment->type === 'all_users')
-                                {{ __('messages.all_platform_users') }}
-                            @elseif ($segment->type === 'plan_tier')
-                                {{ __('messages.plan_tier') }}
-                            @elseif ($segment->type === 'signup_date')
-                                {{ __('messages.signup_date') }}
-                            @elseif ($segment->type === 'admins')
-                                {{ __('messages.admins') }}
-                            @elseif ($segment->type === 'manual')
-                                {{ __('messages.manual') }}
-                            @else
-                                {{ $segment->type }}
-                            @endif
-                        </span>
-                        <span>{{ __('messages.recipients') }}: {{ number_format($recipientCount) }}</span>
-                        <span>{{ __('messages.created') }}: {{ $segment->created_at->format('M j, Y') }}</span>
-                    </div>
-
-                    <div class="flex justify-end">
-                        <x-brand-button type="submit">
-                            {{ __('messages.save_changes') }}
-                        </x-brand-button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        {{-- Add Subscriber (manual segments only) --}}
-        @if ($segment->type === 'manual')
-        <div class="ap-card shadow-md sm:rounded-xl p-6 mb-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
-            <form method="POST" action="{{ route('admin.newsletters.segment.user.store', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                id="add-user-form" class="relative">
-                @csrf
-                <input type="hidden" name="user_id" id="selected-user-id">
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1 relative">
-                        <x-text-input type="text" id="user-search-input" class="block w-full" :placeholder="__('messages.search_users')" autocomplete="off" />
-                        <div id="user-search-results" class="absolute z-10 mt-1 w-full border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+        <div class="page-stack">
+            <x-page-card beside :title="__('messages.edit_segment')">
+                <form method="POST" action="{{ route('admin.newsletters.segment.update', ['hash' => $segmentHash]) }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="page-form-fields">
+                        <div>
+                            <x-input-label for="segment_name" :value="__('messages.name')" />
+                            <x-text-input id="segment_name" name="name" type="text" class="mt-1 block w-full" :value="$segment->name" required />
                         </div>
+
+                        <dl class="news-facts">
+                            <div><dt>{{ __('messages.type') }}</dt> <dd>@include('admin.newsletters.partials._segment-type')</dd></div>
+                            <div><dt>{{ __('messages.recipients') }}</dt> <dd>{{ number_format($recipientCount) }}</dd></div>
+                            <div><dt>{{ __('messages.created') }}</dt> <dd>{{ $segment->created_at->translatedFormat('M j, Y') }}</dd></div>
+                        </dl>
                     </div>
-                    <x-brand-button type="submit" id="add-user-btn" disabled class="whitespace-nowrap">
-                        {{ __('messages.add_subscriber') }}
-                    </x-brand-button>
-                </div>
-            </form>
-        </div>
-        @endif
 
-        {{-- Subscribers Table --}}
-        <div class="ap-card shadow-md sm:rounded-xl p-6">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                {{ __('messages.subscribers') }} ({{ number_format($recipientCount) }})
-            </h3>
+                    <div class="page-form-actions">
+                        <x-brand-button type="submit">{{ __('messages.save_changes') }}</x-brand-button>
+                    </div>
+                </form>
+            </x-page-card>
 
-            @php
-                $subscriberList = $segment->type === 'manual' ? $subscribers->items() : $subscribers;
-            @endphp
+            {{-- Add subscriber (manual segments only) --}}
+            @if ($isManual)
+            <x-page-card beside :title="__('messages.add_subscriber')">
+                <form method="POST" action="{{ route('admin.newsletters.segment.user.store', ['hash' => $segmentHash]) }}" id="add-user-form" class="news-inline-form">
+                    @csrf
+                    <input type="hidden" name="user_id" id="selected-user-id">
+                    <div class="is-grow relative">
+                        <x-text-input type="text" id="user-search-input" class="block w-full" :placeholder="__('messages.search_users')" :aria-label="__('messages.search_users')" autocomplete="off" />
+                        <div id="user-search-results" class="news-results hidden"></div>
+                    </div>
+                    <x-brand-button type="submit" id="add-user-btn" disabled>{{ __('messages.add_subscriber') }}</x-brand-button>
+                </form>
+            </x-page-card>
+            @endif
 
-            @if (count($subscriberList) > 0)
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+            {{-- Subscribers --}}
+            <x-page-card flush :title="__('messages.subscribers') . ' (' . number_format($recipientCount) . ')'">
+                @if (count($subscriberList) > 0)
+                <table class="page-table">
+                    <thead>
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.name') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.email') }}</th>
-                            @if ($segment->type === 'manual')
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.date_added') }}</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
+                            <th scope="col">{{ __('messages.name') }}</th>
+                            <th scope="col">{{ __('messages.email') }}</th>
+                            @if ($isManual)
+                            <th scope="col">{{ __('messages.date_added') }}</th>
+                            <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                         @foreach ($subscriberList as $subscriber)
-                        @if ($segment->type === 'manual')
                         <tr>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($subscriber->name)<x-user-text>{{ $subscriber->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->email }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
-                            <td class="px-4 py-3 text-sm text-right">
-                                <form method="POST" action="{{ route('admin.newsletters.segment.user.delete', ['hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => \App\Utils\UrlUtils::encodeId($subscriber->id)]) }}"
-                                    class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                            <td class="c-main c-strong">@if ($subscriber->name)<x-user-text><bdi>{{ $subscriber->name }}</bdi></x-user-text>@else<span class="c-quiet italic font-normal">{{ __('messages.no_name') }}</span>@endif</td>
+                            <td class="c-wrap">{{ $subscriber->email }}</td>
+                            @if ($isManual)
+                            <td class="c-date">{{ $subscriber->created_at?->translatedFormat('M j, Y') }}</td>
+                            <td class="c-actions">
+                                <form method="POST" action="{{ route('admin.newsletters.segment.user.delete', ['hash' => $segmentHash, 'userHash' => \App\Utils\UrlUtils::encodeId($subscriber->id)]) }}" class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">{{ __('messages.delete') }}</button>
+                                    <button type="submit" class="event-link is-danger">{{ __('messages.delete') }}</button>
                                 </form>
                             </td>
+                            @endif
                         </tr>
-                        @else
-                        <tr>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">@if ($subscriber->name)<x-user-text>{{ $subscriber->name }}</x-user-text>@else<span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>@endif</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->email }}</td>
-                        </tr>
-                        @endif
                         @endforeach
                     </tbody>
                 </table>
-            </div>
 
-            @if ($segment->type === 'manual' && $subscribers instanceof \Illuminate\Pagination\LengthAwarePaginator)
-            <div class="mt-4">
-                {{ $subscribers->links() }}
-            </div>
-            @endif
+                @if ($isManual && $subscribers instanceof \Illuminate\Pagination\LengthAwarePaginator && $subscribers->hasPages())
+                <div class="page-card-foot">
+                    {{ $subscribers->links() }}
+                </div>
+                @endif
 
-            @if ($segment->type !== 'manual' && $recipientCount > 50)
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                {{ __('messages.showing_first_of', ['count' => number_format($recipientCount)]) }}
-            </p>
-            @endif
-            @else
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_subscribers') }}</p>
-            @endif
+                @if (! $isManual && $recipientCount > 50)
+                <div class="page-card-foot">{{ __('messages.showing_first_of', ['count' => number_format($recipientCount)]) }}</div>
+                @endif
+                @else
+                <x-page-empty compact :title="__('messages.no_subscribers')" />
+                @endif
+            </x-page-card>
         </div>
     </div>
 
+    @include('newsletter.partials._list-script')
     <script {!! nonce_attr() !!}>
-        // Confirm delete forms
-        document.addEventListener('submit', function(e) {
-            var form = e.target.closest('.js-confirm-form');
-            if (form) {
-                if (!confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
-                }
-            }
-        });
-
         @if ($segment->type === 'manual')
         // User search autocomplete
         (function() {
@@ -209,9 +179,9 @@
                             resultsContainer.innerHTML = '';
                             data.forEach(function(user) {
                                 const div = document.createElement('div');
-                                div.className = 'px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm';
-                                div.innerHTML = '<span class="text-gray-900 dark:text-gray-100">' + escapeHtml(user.name || '') + '</span>' +
-                                    '<span class="text-gray-500 dark:text-gray-400 ml-2">' + escapeHtml(user.email) + '</span>';
+                                div.className = 'news-result';
+                                div.innerHTML = '<bdi>' + escapeHtml(user.name || '') + '</bdi>' +
+                                    '<span>' + escapeHtml(user.email) + '</span>';
                                 div.addEventListener('click', function() {
                                     userIdInput.value = user.id;
                                     searchInput.value = (user.name ? user.name + ' - ' : '') + user.email;

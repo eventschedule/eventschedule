@@ -1,193 +1,192 @@
 {{--
-  Installments tab. An action queue, not a ledger: overdue rows sort first (done in
+  Installments tab of ticket/sales. An action queue, not a ledger: overdue rows sort first (done in
   getInstallmentsData), and the summary leads with what has actually been collected.
 --}}
 
 @if ($installments->isEmpty())
-    <div class="ap-card rounded-xl p-6 text-center">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_installment_plans_yet') }}</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">{{ __('messages.no_installment_plans_yet_help') }}</p>
-    </div>
+<div class="ap-card rounded-xl">
+    <x-page-empty :title="__('messages.no_installment_plans_yet')" :text="__('messages.no_installment_plans_yet_help')"
+        icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+</div>
 @else
+{{-- Says out loud what the Sales tab cannot: those totals recognise the whole ticket at
+     purchase, because the sale is `paid` from the first installment. Left only to the
+     docs this is a guaranteed support ticket. --}}
+<div class="page-head">
+    <p class="page-lead">{{ __('messages.installments_revenue_note') }}</p>
+</div>
+
+<div class="page-stack">
     {{-- Grouped per currency. This page aggregates across every schedule the user owns, so a
          single summed number would be a lie the moment they run one event in EUR and another in
          GBP. Same treatment the gift-cards partial uses. --}}
-    <div class="ap-card rounded-xl p-6 mb-4">
-        @foreach ($installmentTotals as $totals)
-            <div class="flex flex-wrap items-baseline gap-x-6 gap-y-2 {{ ! $loop->first ? 'mt-3 pt-3 border-t border-gray-200 dark:border-gray-700' : '' }}">
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $totals['count'] }}</span>
-                    {{ trans_choice('messages.installments_plan_count', $totals['count'], ['count' => $totals['count']]) }}
-                </span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ \App\Utils\MoneyUtils::format($totals['collected'], $totals['currency']) }}</span>
-                    {{ __('messages.installments_collected') }}
-                </span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
-                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ \App\Utils\MoneyUtils::format($totals['outstanding'], $totals['currency']) }}</span>
-                    {{ __('messages.installments_outstanding') }}
-                </span>
-                @php $overdue = $installments->where('currency', $totals['currency'])->where('is_overdue', true)->count(); @endphp
-                @if ($overdue > 0)
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                        <span class="text-lg font-bold text-amber-600 dark:text-amber-400">{{ $overdue }}</span>
-                        {{ __('messages.installments_overdue') }}
-                    </span>
-                @endif
-            </div>
-        @endforeach
-
-        {{-- Says out loud what the Sales tab cannot: those totals recognise the whole ticket at
-             purchase, because the sale is `paid` from the first installment. Left only to the
-             docs this is a guaranteed support ticket. --}}
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-            {{ __('messages.installments_revenue_note') }}
-        </p>
+    @foreach ($installmentTotals as $totals)
+    @php $overdue = $installments->where('currency', $totals['currency'])->where('is_overdue', true)->count(); @endphp
+    <div class="ap-card rounded-xl page-stats is-auto">
+        <div class="page-stat">
+            <div class="page-stat-value">{{ $totals['count'] }}</div>
+            <div class="page-stat-label">{{ trans_choice('messages.installments_plan_count', $totals['count'], ['count' => $totals['count']]) }}</div>
+        </div>
+        <div class="page-stat">
+            <div class="page-stat-value is-good">{{ \App\Utils\MoneyUtils::format($totals['collected'], $totals['currency']) }}</div>
+            <div class="page-stat-label">{{ __('messages.installments_collected') }}</div>
+        </div>
+        <div class="page-stat">
+            <div class="page-stat-value">{{ \App\Utils\MoneyUtils::format($totals['outstanding'], $totals['currency']) }}</div>
+            <div class="page-stat-label">{{ __('messages.installments_outstanding') }}</div>
+        </div>
+        @if ($overdue > 0)
+        <div class="page-stat">
+            <div class="page-stat-value is-warn">{{ $overdue }}</div>
+            <div class="page-stat-label">{{ __('messages.installments_overdue') }}</div>
+        </div>
+        @endif
     </div>
+    @endforeach
 
     @if ($installmentForecast->isNotEmpty())
-        <div class="ap-card rounded-xl p-6 mb-4">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.installments_expected_by_month') }}</h3>
-            <div class="flex flex-wrap gap-x-6 gap-y-2">
-                @foreach ($installmentForecast as $month)
-                    <div class="text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">{{ $month['label'] }}</span>
-                        <span class="font-semibold text-gray-900 dark:text-gray-100 ms-2">{{ \App\Utils\MoneyUtils::format($month['amount'], $month['currency']) }}</span>
-                        <span class="text-gray-400 dark:text-gray-500 ms-1">({{ $month['count'] }})</span>
-                    </div>
-                @endforeach
-            </div>
+    <section class="ap-card rounded-xl page-card is-flush">
+        <div class="page-card-head">
+            <h2 class="page-card-title">{{ __('messages.installments_expected_by_month') }}</h2>
         </div>
+        <div class="page-stats is-auto">
+            @foreach ($installmentForecast as $month)
+            <div class="page-stat">
+                <div class="page-stat-value">{{ \App\Utils\MoneyUtils::format($month['amount'], $month['currency']) }}</div>
+                <div class="page-stat-label">{{ $month['label'] }} <span class="c-quiet">({{ $month['count'] }})</span></div>
+            </div>
+            @endforeach
+        </div>
+    </section>
     @endif
 
     <div class="ap-card rounded-xl overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <div class="page-scroll">
+            <table class="page-table is-wide">
                 <thead>
                     <tr>
-                        <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.name') }}</th>
-                        <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.event') }}</th>
-                        <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.payment_plan') }}</th>
-                        <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.installments_collected') }}</th>
-                        <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.installments_outstanding') }}</th>
-                        <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.date') }}</th>
-                        <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.status') }}</th>
+                        <th scope="col">{{ __('messages.name') }}</th>
+                        <th scope="col">{{ __('messages.event') }}</th>
+                        <th scope="col">{{ __('messages.payment_plan') }}</th>
+                        <th scope="col" class="c-num">{{ __('messages.installments_collected') }}</th>
+                        <th scope="col" class="c-num">{{ __('messages.installments_outstanding') }}</th>
+                        <th scope="col">{{ __('messages.date') }}</th>
+                        <th scope="col">{{ __('messages.status') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody>
                     @foreach ($installments as $row)
-                        <tr class="{{ $row['is_overdue'] ? 'bg-amber-50/50 dark:bg-amber-900/10' : '' }}">
-                            <td class="px-4 py-3 text-sm">
-                                {{-- Buyer-supplied, and this page is a Vue-free Blade view, but
-                                     <x-user-text> is the house guard for names on AP surfaces. --}}
-                                <div class="font-medium text-gray-900 dark:text-gray-100"><x-user-text>{{ $row['name'] }}</x-user-text></div>
-                                <div class="text-gray-500 dark:text-gray-400"><x-user-text>{{ $row['email'] }}</x-user-text></div>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300"><x-user-text>{{ $row['event'] }}</x-user-text></td>
-                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                {{ $row['progress'] }}
-                                @if ($row['card'])
-                                    <div class="text-xs {{ $row['card_expiring'] ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-gray-500' }}">
-                                        {{ $row['card'] }}
-                                        @if ($row['card_expiring'])
-                                            <span class="block">{{ __('messages.installment_card_expiring') }}</span>
-                                        @endif
-                                    </div>
+                    @php
+                        $planHasReferences = $row['payments']->where('reference', '!=', null)->isNotEmpty();
+                        $planMark = match ($row['status']) {
+                            'completed' => ['messages.installment_status_completed', 'is-on'],
+                            'overdue' => ['messages.installment_status_overdue', 'is-warn'],
+                            'cancelled' => ['messages.installment_status_cancelled', ''],
+                            default => ['messages.installment_status_active', 'is-info'],
+                        };
+                    @endphp
+                    <tr>
+                        <td class="c-main">
+                            <div class="sales-customer">
+                                {{-- Every payment reference, one per charge. Refunding the sale walks
+                                     these, because the sale's single transaction_reference cannot identify
+                                     N charges; they stay listed so an organizer can reconcile a leg by
+                                     hand against their own dashboard. --}}
+                                @if ($planHasReferences)
+                                <button type="button" class="sales-open" data-toggle-row="plan-{{ $loop->index }}" aria-expanded="false">
+                                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                    <span class="sr-only">{{ __('messages.details') }}</span>
+                                </button>
                                 @endif
-                            </td>
-                            <td class="px-4 py-3 text-sm text-end text-gray-900 dark:text-gray-100">{{ \App\Utils\MoneyUtils::format($row['collected'], $row['currency']) }}</td>
-                            <td class="px-4 py-3 text-sm text-end font-medium text-gray-900 dark:text-gray-100">{{ \App\Utils\MoneyUtils::format($row['outstanding'], $row['currency']) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                {{ $row['next_due'] ?? '' }}
-                                @if ($row['error'])
-                                    {{-- Never the raw Stripe code: "waiting for the buyer to
-                                         confirm with their bank" and "card declined" call for
-                                         completely different responses from the organizer. --}}
-                                    <div class="text-xs text-amber-600 dark:text-amber-400">{{ $row['error'] }}</div>
+                                <div class="page-person-text">
+                                    {{-- Buyer-supplied: x-user-text is the house guard for names
+                                         on AP surfaces. --}}
+                                    <span class="c-strong"><bdi><x-user-text>{{ $row['name'] }}</x-user-text></bdi></span>
+                                    <span class="c-sub"><x-user-text dir="ltr" title="{{ $row['email'] }}">{{ $row['email'] }}</x-user-text></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="c-wrap c-event"><bdi><x-user-text>{{ $row['event'] }}</x-user-text></bdi></td>
+                        <td class="c-plan" data-label="{{ __('messages.payment_plan') }}">
+                            {{ $row['progress'] }}
+                            @if ($row['card'])
+                            <span class="c-sub">
+                                {{ $row['card'] }}
+                                @if ($row['card_expiring'])
+                                <span class="event-status is-warn">{{ __('messages.installment_card_expiring') }}</span>
                                 @endif
-                            </td>
-                            <td class="px-4 py-3 text-sm">
-                                @php
-                                    $chip = match ($row['status']) {
-                                        'completed' => ['messages.installment_status_completed', 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'],
-                                        'overdue' => ['messages.installment_status_overdue', 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'],
-                                        'cancelled' => ['messages.installment_status_cancelled', 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'],
-                                        default => ['messages.installment_status_active', 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'],
-                                    };
-                                @endphp
-                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $chip[1] }}">{{ __($chip[0]) }}</span>
-                            </td>
-                        </tr>
+                            </span>
+                            @endif
+                        </td>
+                        <td class="c-num c-cap" data-label="{{ __('messages.installments_collected') }}">{{ \App\Utils\MoneyUtils::format($row['collected'], $row['currency']) }}</td>
+                        <td class="c-num c-strong c-cap" data-label="{{ __('messages.installments_outstanding') }}">{{ \App\Utils\MoneyUtils::format($row['outstanding'], $row['currency']) }}</td>
+                        <td class="c-due">
+                            {{ $row['next_due'] ?? '' }}
+                            @if ($row['error'])
+                            {{-- Never the raw Stripe code: "waiting for the buyer to
+                                 confirm with their bank" and "card declined" call for
+                                 completely different responses from the organizer. --}}
+                            <span class="c-sub"><span class="event-status is-warn">{{ $row['error'] }}</span></span>
+                            @endif
+                        </td>
+                        <td><span class="event-status {{ $planMark[1] }}">{{ __($planMark[0]) }}</span></td>
+                    </tr>
 
-                        {{-- The two states nothing automatic will resolve. Money that arrived and
-                             could not be applied is never auto-applied, and a charge with an
-                             unknown outcome is never retried, because a retry after Stripe's
-                             idempotency key expires is how a timeout becomes a double charge. Both
-                             were being written and read by nobody, so the organizer had no way to
-                             learn either had happened. --}}
-                        @if ($row['unmatched'] || $row['needs_check'])
-                            <tr>
-                                <td colspan="7" class="px-4 pb-3">
-                                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                        <div class="flex items-start gap-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                            </svg>
-                                            <div class="text-sm text-amber-800 dark:text-amber-200 space-y-1">
-                                                @if ($row['unmatched'])
-                                                    <p>{{ __('messages.installment_unmatched_notice', ['amount' => \App\Utils\MoneyUtils::format($row['unmatched'], $row['currency'])]) }}</p>
-                                                @endif
+                    {{-- The two states nothing automatic will resolve. Money that arrived and
+                         could not be applied is never auto-applied, and a charge with an
+                         unknown outcome is never retried, because a retry after Stripe's
+                         idempotency key expires is how a timeout becomes a double charge. Both
+                         were being written and read by nobody, so the organizer had no way to
+                         learn either had happened. --}}
+                    @if ($row['unmatched'] || $row['needs_check'])
+                    <tr class="sales-detail">
+                        <td colspan="7" class="c-main">
+                            <x-page-notice tone="warn">
+                                @if ($row['unmatched'])
+                                <p>{{ __('messages.installment_unmatched_notice', ['amount' => \App\Utils\MoneyUtils::format($row['unmatched'], $row['currency'])]) }}</p>
+                                @endif
+                                @if ($row['needs_check'])
+                                <p>{{ __('messages.installment_needs_check_notice') }}</p>
+                                @endif
+                            </x-page-notice>
+                        </td>
+                    </tr>
+                    @endif
 
-                                                @if ($row['needs_check'])
-                                                    <p>{{ __('messages.installment_needs_check_notice') }}</p>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endif
-
-                        {{-- Every payment reference, one per charge. Refunding the sale walks
-                             these, because the sale's single transaction_reference cannot identify
-                             N charges; they stay listed so an organizer can reconcile a leg by
-                             hand against their own dashboard. --}}
-                        @if ($row['payments']->where('reference', '!=', null)->isNotEmpty())
-                            <tr class="bg-gray-50 dark:bg-[#252526]">
-                                <td colspan="7" class="px-4 py-2">
-                                    <details>
-                                        <summary class="text-xs text-gray-500 dark:text-gray-400 cursor-pointer">{{ __('messages.details') }}</summary>
-                                        <div class="mt-2 space-y-1">
-                                            @foreach ($row['payments'] as $payment)
-                                                <div class="text-xs text-gray-600 dark:text-gray-400 flex flex-wrap gap-x-4">
-                                                    <span>{{ $payment['due_at'] }}</span>
-                                                    <span>{{ \App\Utils\MoneyUtils::format($payment['amount'], $row['currency']) }}</span>
-                                                    {{-- Each state named. This read "Scheduled" for
-                                                         everything unpaid, so a failed, parked or
-                                                         cancelled payment was indistinguishable
-                                                         from one simply not due yet. --}}
-                                                    <span>{{ __(match ($payment['status']) {
-                                                        'paid' => 'messages.paid',
-                                                        'processing' => 'messages.installment_status_processing',
-                                                        'failed' => 'messages.installment_payment_failed',
-                                                        'cancelled' => 'messages.installment_status_cancelled',
-                                                        'awaiting_customer' => 'messages.installment_payment_awaiting_buyer',
-                                                        'awaiting_reconciliation' => 'messages.installment_error_reconcile',
-                                                        default => 'messages.scheduled',
-                                                    }) }}</span>
-                                                    @if ($payment['reference'])
-                                                        <span class="font-mono">{{ $payment['reference'] }}</span>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
-                        @endif
+                    @if ($planHasReferences)
+                    <tr class="detail-row-plan-{{ $loop->index }} sales-detail hidden">
+                        <td colspan="7" class="c-main">
+                            <ul class="sales-lines sales-detail-body">
+                                @foreach ($row['payments'] as $payment)
+                                <li>
+                                    <span>{{ $payment['due_at'] }}</span>
+                                    <span>{{ \App\Utils\MoneyUtils::format($payment['amount'], $row['currency']) }}</span>
+                                    {{-- Each state named. This read "Scheduled" for
+                                         everything unpaid, so a failed, parked or
+                                         cancelled payment was indistinguishable
+                                         from one simply not due yet. --}}
+                                    <span>{{ __(match ($payment['status']) {
+                                        'paid' => 'messages.paid',
+                                        'processing' => 'messages.installment_status_processing',
+                                        'failed' => 'messages.installment_payment_failed',
+                                        'cancelled' => 'messages.installment_status_cancelled',
+                                        'awaiting_customer' => 'messages.installment_payment_awaiting_buyer',
+                                        'awaiting_reconciliation' => 'messages.installment_error_reconcile',
+                                        default => 'messages.scheduled',
+                                    }) }}</span>
+                                    @if ($payment['reference'])
+                                    <span class="c-mono" dir="ltr">{{ $payment['reference'] }}</span>
+                                    @endif
+                                </li>
+                                @endforeach
+                            </ul>
+                        </td>
+                    </tr>
+                    @endif
                     @endforeach
                 </tbody>
             </table>
         </div>
     </div>
+</div>
 @endif

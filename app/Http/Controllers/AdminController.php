@@ -390,10 +390,25 @@ class AdminController extends Controller
         // exclusion, so the table and the totals agree about every sale.
         $sales = fn () => Sale::query()->whereNotIn('event_id', DemoService::demoEventIdsQuery());
 
-        $totalRevenue = $sales()->where('status', 'paid')->sum('payment_amount');
-        $revenueInPeriod = $sales()->where('status', 'paid')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('payment_amount');
+        // A sale has no currency of its own: it is in its event's ticket currency (USD where the
+        // event sets none, as MoneyUtils::format() reads it). Summed across every event, dollars,
+        // euros and shekels became one number under the platform's symbol. So money is added per
+        // currency: the platform's own is the figure in each tile, the rest are named beside it.
+        $platformCurrency = strtoupper(platform_currency());
+        $saleCurrency = "UPPER(COALESCE(NULLIF(events.ticket_currency_code, ''), 'USD'))";
+        $moneyByCurrency = fn (string $status, ?array $between = null) => $sales()
+            ->leftJoin('events', 'events.id', '=', 'sales.event_id')
+            ->where('sales.status', $status)
+            ->when($between, fn ($query) => $query->whereBetween('sales.created_at', $between))
+            ->selectRaw("$saleCurrency as currency, SUM(sales.payment_amount) as total")
+            ->groupByRaw($saleCurrency)
+            ->pluck('total', 'currency')
+            ->map(fn ($total) => (float) $total);
+
+        $paidByCurrency = $moneyByCurrency('paid');
+        $totalRevenue = $paidByCurrency->get($platformCurrency, 0);
+        $revenueInPeriod = $moneyByCurrency('paid', [$startDate, $endDate])->get($platformCurrency, 0);
+        $otherRevenue = $paidByCurrency->except($platformCurrency)->sortKeys()->all();
 
         $totalSales = $sales()->where('status', 'paid')->count();
         $salesInPeriod = $sales()->where('status', 'paid')
@@ -404,7 +419,9 @@ class AdminController extends Controller
         $refundRate = ($totalSales + $refundedSales) > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
 
         $pendingSales = $sales()->where('status', 'unpaid')->count();
-        $pendingRevenue = $sales()->where('status', 'unpaid')->sum('payment_amount');
+        $unpaidByCurrency = $moneyByCurrency('unpaid');
+        $pendingRevenue = $unpaidByCurrency->get($platformCurrency, 0);
+        $otherPending = $unpaidByCurrency->except($platformCurrency)->sortKeys()->all();
 
         // Boost markup revenue
         $boostMarkupTotal = BoostBillingRecord::where('type', 'charge')
@@ -556,6 +573,9 @@ class AdminController extends Controller
             'refundRate',
             'pendingSales',
             'pendingRevenue',
+            'otherRevenue',
+            'otherPending',
+            'platformCurrency',
             'boostMarkupTotal',
             'boostMarkupInPeriod',
             'boostMarkupCurrency',
@@ -1256,6 +1276,10 @@ class AdminController extends Controller
             },
             DB::raw('SUM(revenue) as total')
         )
+            // One currency, the platform's, like the tiles beside this chart: a line that adds
+            // dollars to euros to shekels day by day measures nothing.
+            ->whereIn('event_id', Event::query()->select('id')
+                ->whereRaw("UPPER(COALESCE(NULLIF(ticket_currency_code, ''), 'USD')) = ?", [strtoupper(platform_currency())]))
             ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->groupBy('period')
             ->orderBy('period')

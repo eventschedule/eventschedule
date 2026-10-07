@@ -2,6 +2,141 @@
 
     <x-slot name="head">
         <script src="https://js.stripe.com/v3/" {!! nonce_attr() !!}></script>
+
+        {{-- A choice drawn as a card: a real radio inside a label, and the label says which one is
+             chosen with the brand's border. The two plans were buttons, and the two terms labels
+             whose tick a script moved by hand, in indigo and amber, which are nobody's colours
+             here. --}}
+        <style {!! nonce_attr() !!}>
+            .plan-choice {
+              position: relative;
+              display: flex;
+              flex-direction: column;
+              border: 1px solid rgb(var(--ap-border-strong));
+              border-radius: 0.75rem;
+              padding: 1.25rem;
+              background: rgb(var(--ap-surface));
+              cursor: pointer;
+              transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+            }
+            .plan-choice:hover {
+              border-color: rgb(var(--ap-ink-4));
+            }
+            .plan-choice:has(input:checked) {
+              border-color: var(--brand-blue);
+              box-shadow: 0 0 0 1px var(--brand-blue);
+              background: color-mix(in srgb, var(--brand-blue) 6%, rgb(var(--ap-surface)));
+            }
+            .plan-choice:has(input:focus-visible) {
+              outline: 2px solid var(--brand-blue);
+              outline-offset: 2px;
+            }
+            .plan-choice-head {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.75rem;
+            }
+            .plan-choice-name {
+              font-size: 1rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .plan-choice-sub {
+              margin-top: 0.125rem;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .plan-choice-mark {
+              display: flex;
+              flex: none;
+              align-items: center;
+              justify-content: center;
+              width: 1.25rem;
+              height: 1.25rem;
+              border: 2px solid rgb(var(--ap-border-strong));
+              border-radius: 50%;
+              color: #fff;
+            }
+            .plan-choice-mark svg {
+              display: none;
+              width: 0.75rem;
+              height: 0.75rem;
+            }
+            .plan-choice:has(input:checked) .plan-choice-mark {
+              border-color: var(--brand-button-bg);
+              background: var(--brand-button-bg);
+            }
+            .plan-choice:has(input:checked) .plan-choice-mark svg {
+              display: block;
+            }
+            .plan-price {
+              margin-top: 0.75rem;
+              font-size: 1.875rem;
+              font-weight: 700;
+              line-height: 1.2;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink));
+            }
+            .plan-price.is-small {
+              font-size: 1.5rem;
+            }
+            .plan-price small {
+              font-size: 0.875rem;
+              font-weight: 400;
+              color: rgb(var(--ap-ink-3));
+            }
+            .plan-features {
+              display: grid;
+              gap: 0.5rem;
+              margin: 1rem 0 0;
+              padding: 0;
+              list-style: none;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-2));
+            }
+            .plan-features li {
+              display: flex;
+              align-items: flex-start;
+              gap: 0.5rem;
+            }
+            .plan-features svg {
+              flex: none;
+              width: 1rem;
+              height: 1rem;
+              margin-top: 0.125rem;
+              color: #16a34a;
+            }
+            .dark .plan-features svg {
+              color: #4ade80;
+            }
+            .plan-save {
+              display: inline-block;
+              margin-inline-start: 0.5rem;
+              border-radius: 999px;
+              padding: 0.0625rem 0.5rem;
+              background: rgba(34, 197, 94, 0.14);
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: #15803d;
+            }
+            .dark .plan-save {
+              color: #4ade80;
+            }
+            /* A class that sets display outranks the hidden attribute. */
+            .plan-save[hidden] {
+              display: none;
+            }
+            .page-card-title.plan-heading {
+              margin-bottom: 0.75rem;
+            }
+            .plan-card-box {
+              border: 1px solid rgb(var(--ap-border-strong));
+              border-radius: 0.5rem;
+              padding: 0.875rem 0.75rem;
+              background: rgb(var(--ap-surface));
+            }
+        </style>
     </x-slot>
 
     @php
@@ -23,7 +158,7 @@
 
             $planPrices[$tier] = [
                 // Pre-formatted, symbol included. The markup used to concatenate a literal
-                // '$' into four x-text bindings; savePercent above is still computed from the
+                // '$' into four bindings; savePercent above is still computed from the
                 // raw amounts, so the arithmetic is unaffected.
                 'monthly' => plan_price($monthly),
                 'yearly' => plan_price($yearly),
@@ -33,238 +168,143 @@
         }
     @endphp
 
-    <div class="max-w-4xl mx-auto py-8" x-data="{
-        selectedTier: '{{ $selectedTier }}',
-        selectedPlan: 'monthly',
-        prices: @js($planPrices)
-    }">
-        <h2 class="pb-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-            <span x-show="selectedTier === 'enterprise'" x-cloak>{{ __('messages.enterprise_plan') }}</span>
-            <span x-show="selectedTier !== 'enterprise'">{{ __('messages.subscribe_to_pro') }}</span>
-        </h2>
+    <div class="page-shell page-col is-narrow" id="subscribe-page">
+        <x-page-header :title="__('messages.upgrade')" :lead="__('messages.subscribe_page_lead', ['tab' => __('messages.plan')])"
+                       :back="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])"
+                       :back-label="$role->getDisplayName(false)"
+                       :image="$role->profile_image_url" />
 
-        {{-- Free Trial Badge --}}
-        @if ($role->isEligibleForTrial())
-        <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                <span class="text-green-800 dark:text-green-200 font-medium">
-                    {{ __('messages.free_trial_badge') }} - {{ __('messages.you_wont_be_charged_until', ['date' => now()->addDays(config('app.trial_days'))->format('F j, Y')]) }}
-                </span>
-            </div>
-        </div>
-        @elseif ($role->calculateRemainingTrialDays() > 0)
-        <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-blue-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                </svg>
-                <span class="text-blue-800 dark:text-blue-200 font-medium">
-                    {{ __('messages.trial_days_remaining_info', ['days' => $role->calculateRemainingTrialDays()]) }}
-                </span>
-            </div>
-        </div>
-        @endif
+        {{-- A payment that failed comes back to the top of this page: the answer is here, under
+             the title, and not beside the card fields a screen and a half down. --}}
+        <x-page-flash :keys="['error' => 'error']" class="mb-4" />
 
-        {{-- Tier Selection Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {{-- Pro Card --}}
-            <button type="button" @click="selectedTier = 'pro'" class="relative rounded-xl border-2 p-6 text-left transition-all cursor-pointer" :class="selectedTier === 'pro' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-600' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.pro_plan') }}</h3>
-                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :class="selectedTier === 'pro' ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 dark:border-gray-600'">
-                        <svg x-show="selectedTier === 'pro'" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="prices.pro[selectedPlan]"></span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                        <span x-show="selectedPlan === 'yearly'" x-cloak>/{{ __('messages.year') }}</span>
-                        <span x-show="selectedPlan !== 'yearly'">/{{ __('messages.month') }}</span>
-                    </span>
-                </div>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_white_label') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_ticketing_qr') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_sell_online_stripe') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_event_graphics') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_promo_codes') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_rest_api_webhooks') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        100 {{ __('messages.newsletters_per_month') }}
-                    </li>
-                </ul>
-            </button>
-
-            {{-- Enterprise Card --}}
-            @if ($enterpriseConfigured)
-            <button type="button" @click="selectedTier = 'enterprise'" class="relative rounded-xl border-2 p-6 text-left transition-all cursor-pointer" :class="selectedTier === 'enterprise' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-500' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.enterprise_plan') }}</h3>
-                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :class="selectedTier === 'enterprise' ? 'border-amber-500 bg-amber-500' : 'border-gray-300 dark:border-gray-600'">
-                        <svg x-show="selectedTier === 'enterprise'" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <span class="text-3xl font-bold text-gray-900 dark:text-gray-100" x-text="prices.enterprise[selectedPlan]"></span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                        <span x-show="selectedPlan === 'yearly'" x-cloak>/{{ __('messages.year') }}</span>
-                        <span x-show="selectedPlan !== 'yearly'">/{{ __('messages.month') }}</span>
-                    </span>
-                </div>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.everything_in_pro') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_team_members') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_ai_parsing_flyer') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_custom_domain') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_private_events') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_whatsapp_creation') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        1,000 {{ __('messages.newsletters_per_month') }}
-                    </li>
-                    <li class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        {{ __('messages.feature_priority_support') }}
-                    </li>
-                </ul>
-            </button>
+        <div class="page-stack">
+            {{-- The trial: nothing is charged today --}}
+            @if ($role->isEligibleForTrial())
+            <x-page-notice tone="success">
+                {{ __('messages.free_trial_badge') }} - {{ __('messages.you_wont_be_charged_until', ['date' => now()->addDays(config('app.trial_days'))->translatedFormat('F j, Y')]) }}
+            </x-page-notice>
+            @elseif ($role->calculateRemainingTrialDays() > 0)
+            <x-page-notice tone="info">
+                {{ __('messages.trial_days_remaining_info', ['days' => $role->calculateRemainingTrialDays()]) }}
+            </x-page-notice>
             @endif
-        </div>
 
-        <div class="ap-card rounded-xl p-8">
-            {{-- Plan Selection (Monthly/Yearly) --}}
-            <div class="mb-8">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.select_plan') }}</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label class="relative flex cursor-pointer rounded-lg border bg-white dark:bg-gray-700 p-4 shadow-sm focus:outline-none plan-option" data-plan="monthly" @click="selectedPlan = 'monthly'">
-                        <input type="radio" name="plan_radio" value="monthly" class="sr-only" checked>
-                        <span class="flex flex-1">
-                            <span class="flex flex-col">
-                                <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.monthly') }}</span>
-                                <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_monthly') }}</span>
-                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100"><span x-text="prices[selectedTier]['monthly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.month') }}</span></span>
-                            </span>
-                        </span>
-                        <svg class="h-5 w-5 text-indigo-600 plan-check hidden" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span class="pointer-events-none absolute -inset-px rounded-lg border-2 plan-border border-transparent" aria-hidden="true"></span>
-                    </label>
+            {{-- Which plan --}}
+            <div class="{{ $enterpriseConfigured ? 'page-grid2' : '' }}" role="radiogroup" aria-label="{{ __('messages.plan') }}">
+                <label class="plan-choice">
+                    <input type="radio" name="tier_radio" value="pro" class="sr-only" @checked($selectedTier !== 'enterprise')>
+                    <span class="plan-choice-head">
+                        <span class="plan-choice-name">{{ __('messages.pro_plan') }}</span>
+                        <span class="plan-choice-mark" aria-hidden="true"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span>
+                    </span>
+                    <span class="plan-price"><span data-tier-price="pro">{{ $planPrices['pro']['monthly'] }}</span><small>/<span data-period="monthly">{{ __('messages.month') }}</span><span data-period="yearly" hidden>{{ __('messages.year') }}</span></small></span>
+                    <ul class="plan-features">
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_white_label') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_ticketing_qr') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_sell_online_stripe') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_event_graphics') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_promo_codes') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_rest_api_webhooks') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>100 {{ __('messages.newsletters_per_month') }}</li>
+                    </ul>
+                </label>
 
-                    <label class="relative flex cursor-pointer rounded-lg border bg-white dark:bg-gray-700 p-4 shadow-sm focus:outline-none plan-option" data-plan="yearly" @click="selectedPlan = 'yearly'">
-                        <input type="radio" name="plan_radio" value="yearly" class="sr-only">
-                        <span class="flex flex-1">
-                            <span class="flex flex-col">
-                                <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {{ __('messages.yearly') }}
-                                    <span x-show="prices[selectedTier]['savePercent'] > 0" x-cloak
-                                          x-text="prices[selectedTier]['saveLabel']"
-                                          class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"></span>
-                                </span>
-                                <span class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">{{ __('messages.billed_yearly') }}</span>
-                                <span class="mt-4 text-2xl font-semibold text-gray-900 dark:text-gray-100"><span x-text="prices[selectedTier]['yearly']"></span><span class="text-sm font-normal text-gray-500 dark:text-gray-400">/{{ __('messages.year') }}</span></span>
-                            </span>
-                        </span>
-                        <svg class="h-5 w-5 text-indigo-600 plan-check hidden" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span class="pointer-events-none absolute -inset-px rounded-lg border-2 plan-border border-transparent" aria-hidden="true"></span>
-                    </label>
-                </div>
+                @if ($enterpriseConfigured)
+                <label class="plan-choice">
+                    <input type="radio" name="tier_radio" value="enterprise" class="sr-only" @checked($selectedTier === 'enterprise')>
+                    <span class="plan-choice-head">
+                        <span class="plan-choice-name">{{ __('messages.enterprise_plan') }}</span>
+                        <span class="plan-choice-mark" aria-hidden="true"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span>
+                    </span>
+                    <span class="plan-price"><span data-tier-price="enterprise">{{ $planPrices['enterprise']['monthly'] }}</span><small>/<span data-period="monthly">{{ __('messages.month') }}</span><span data-period="yearly" hidden>{{ __('messages.year') }}</span></small></span>
+                    <ul class="plan-features">
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.everything_in_pro') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_team_members') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_ai_parsing_flyer') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_custom_domain') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_private_events') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_whatsapp_creation') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>1,000 {{ __('messages.newsletters_per_month') }}</li>
+                        <li><svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>{{ __('messages.feature_priority_support') }}</li>
+                    </ul>
+                </label>
+                @endif
             </div>
 
-            {{-- Payment Form --}}
-            <form id="payment-form" action="{{ route('subscription.store', ['subdomain' => $role->subdomain]) }}" method="POST">
-                @csrf
-                <input type="hidden" name="plan" id="selected-plan" :value="selectedPlan">
-                <input type="hidden" name="tier" id="selected-tier" :value="selectedTier">
-                <input type="hidden" name="payment_method" id="payment-method">
-                @if ($checkoutSource ?? null)
-                    <input type="hidden" name="source" value="{{ $checkoutSource }}">
-                @endif
-
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.payment_details') }}</h3>
-
-                <div class="mb-6">
-                    <label for="card-holder-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ __('messages.card_holder_name') }}
-                    </label>
-                    <input type="text" id="card-holder-name" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm" required>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ __('messages.card_details') }}
-                    </label>
-                    <div id="card-element" class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-3 shadow-sm"></div>
-                    <div id="card-errors" class="mt-2 text-sm text-red-600" role="alert"></div>
-                </div>
-
-                @if (session('error'))
-                <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p class="text-sm text-red-600 dark:text-red-400">{{ session('error') }}</p>
-                </div>
-                @endif
-
-                <div class="flex items-center justify-between pt-4">
-                    <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']) }}" class="js-cancel-btn text-sm text-gray-600 dark:text-gray-400 hover:text-gray-500">
-                        {{ __('messages.cancel') }}
-                    </a>
-                    <button type="submit" id="submit-button" class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span id="button-text">{{ __('messages.subscribe') }}</span>
-                        <span id="button-spinner" class="hidden ml-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+            <div class="ap-card rounded-xl page-card">
+                {{-- Monthly or yearly --}}
+                <h2 class="page-card-title plan-heading">{{ __('messages.select_plan') }}</h2>
+                <div class="page-grid2" role="radiogroup" aria-label="{{ __('messages.select_plan') }}">
+                    <label class="plan-choice plan-option" data-plan="monthly">
+                        <input type="radio" name="plan_radio" value="monthly" class="sr-only" checked>
+                        <span class="plan-choice-head">
+                            <span>
+                                <span class="plan-choice-name">{{ __('messages.monthly') }}</span>
+                                <span class="plan-choice-sub block">{{ __('messages.billed_monthly') }}</span>
+                            </span>
+                            <span class="plan-choice-mark" aria-hidden="true"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span>
                         </span>
-                    </button>
+                        <span class="plan-price is-small"><span data-term-price="monthly">{{ $planPrices[$selectedTier === 'enterprise' ? 'enterprise' : 'pro']['monthly'] }}</span><small>/{{ __('messages.month') }}</small></span>
+                    </label>
+
+                    <label class="plan-choice plan-option" data-plan="yearly">
+                        <input type="radio" name="plan_radio" value="yearly" class="sr-only">
+                        <span class="plan-choice-head">
+                            <span>
+                                <span class="plan-choice-name">{{ __('messages.yearly') }}</span><span class="plan-save" id="plan-save" @if ($planPrices[$selectedTier === 'enterprise' ? 'enterprise' : 'pro']['savePercent'] <= 0) hidden @endif>{{ $planPrices[$selectedTier === 'enterprise' ? 'enterprise' : 'pro']['saveLabel'] }}</span>
+                                <span class="plan-choice-sub block">{{ __('messages.billed_yearly') }}</span>
+                            </span>
+                            <span class="plan-choice-mark" aria-hidden="true"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></span>
+                        </span>
+                        <span class="plan-price is-small"><span data-term-price="yearly">{{ $planPrices[$selectedTier === 'enterprise' ? 'enterprise' : 'pro']['yearly'] }}</span><small>/{{ __('messages.year') }}</small></span>
+                    </label>
                 </div>
-            </form>
+
+                {{-- The card --}}
+                <form id="payment-form" action="{{ route('subscription.store', ['subdomain' => $role->subdomain]) }}" method="POST" class="mt-6">
+                    @csrf
+                    {{-- Filled in here as well as by the script, so the choice the page opened
+                         with is what is sent even if the script never ran. --}}
+                    <input type="hidden" name="plan" id="selected-plan" value="monthly">
+                    <input type="hidden" name="tier" id="selected-tier" value="{{ $selectedTier === 'enterprise' ? 'enterprise' : 'pro' }}">
+                    <input type="hidden" name="payment_method" id="payment-method">
+                    @if ($checkoutSource ?? null)
+                        <input type="hidden" name="source" value="{{ $checkoutSource }}">
+                    @endif
+
+                    <h2 class="page-card-title plan-heading">{{ __('messages.payment_details') }}</h2>
+
+                    <div class="page-form-fields">
+                        <div>
+                            <x-input-label for="card-holder-name" :value="__('messages.card_holder_name')" />
+                            <x-text-input type="text" id="card-holder-name" class="mt-1 block w-full" autocomplete="cc-name" required />
+                        </div>
+
+                        <div>
+                            <x-input-label :value="__('messages.card_details')" />
+                            <div id="card-element" class="plan-card-box mt-1"></div>
+                            <div id="card-errors" class="mt-2 text-sm text-red-600 dark:text-red-400" role="alert"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="page-form-actions">
+                        <x-secondary-link :href="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])" class="js-cancel-btn">
+                            {{ __('messages.cancel') }}
+                        </x-secondary-link>
+                        <x-brand-button type="submit" id="submit-button">
+                            <span id="button-text">{{ __('messages.subscribe') }}</span>
+                            <span id="button-spinner" class="hidden ms-2">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                        </x-brand-button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -300,28 +340,45 @@
             }
         });
 
-        // Plan selection (monthly/yearly)
-        const planOptions = document.querySelectorAll('.plan-option');
+        // The two choices (which plan, and monthly or yearly) and everything that follows them:
+        // the prices shown, the saving, and the two fields the form sends. Plain script on the
+        // radios themselves; this page was the last one here driven by Alpine.
+        const prices = @json($planPrices);
         const selectedPlanInput = document.getElementById('selected-plan');
+        const selectedTierInput = document.getElementById('selected-tier');
+        const saveBadge = document.getElementById('plan-save');
 
-        planOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                planOptions.forEach(opt => {
-                    opt.querySelector('input').checked = false;
-                    opt.querySelector('.plan-check').classList.add('hidden');
-                    opt.querySelector('.plan-border').classList.remove('border-indigo-600');
-                });
+        function chosen(name, fallback) {
+            const radio = document.querySelector('input[name="' + name + '"]:checked');
+            return radio ? radio.value : fallback;
+        }
 
-                this.querySelector('input').checked = true;
-                this.querySelector('.plan-check').classList.remove('hidden');
-                this.querySelector('.plan-border').classList.add('border-indigo-600');
-                // Alpine binding handles the hidden field value
+        function paintChoice() {
+            const tier = chosen('tier_radio', selectedTierInput.value);
+            const plan = chosen('plan_radio', 'monthly');
+
+            selectedTierInput.value = tier;
+            selectedPlanInput.value = plan;
+
+            document.querySelectorAll('[data-tier-price]').forEach(function(el) {
+                el.textContent = prices[el.dataset.tierPrice][plan];
             });
-        });
+            document.querySelectorAll('[data-term-price]').forEach(function(el) {
+                el.textContent = prices[tier][el.dataset.termPrice];
+            });
+            document.querySelectorAll('[data-period]').forEach(function(el) {
+                el.hidden = el.dataset.period !== plan;
+            });
+            saveBadge.textContent = prices[tier].saveLabel;
+            saveBadge.hidden = ! (prices[tier].savePercent > 0);
+        }
 
-        // Initialize first option as selected
-        planOptions[0].querySelector('.plan-check').classList.remove('hidden');
-        planOptions[0].querySelector('.plan-border').classList.add('border-indigo-600');
+        document.querySelectorAll('input[name="tier_radio"], input[name="plan_radio"]').forEach(function(radio) {
+            radio.addEventListener('change', paintChoice);
+        });
+        // Back, or a reload, brings the page back with the radios as they were left.
+        window.addEventListener('pageshow', paintChoice);
+        paintChoice();
 
         // Form submission
         const form = document.getElementById('payment-form');

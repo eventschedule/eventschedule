@@ -442,49 +442,14 @@ class HomeDashboard
     }
 
     /**
-     * What an event's tickets or sign-ups say for one date: how many seats are taken and, where
-     * there is a limit, out of how many. Null where the event takes neither.
-     *
-     * The seats are the event's own arithmetic (Event::occurrenceSeatsRemaining()), not a sum
-     * over ticket types: three types that share one house of 100 are 100 seats, not 300; a pass
-     * is sold once for a whole series, so its pool belongs to no date, while the seats its
-     * holders booked on this date are taken; and a seated house has no single number at all.
+     * What an event's tickets or sign-ups say for one date. The arithmetic is EventSeats::line(),
+     * which the Realtime tab's door card reads too, so the two cannot disagree about a house.
      *
      * @return array{sold: int, capacity: ?int, paid: bool}|null
      */
     private function ticketLine(Event $event, string $date): ?array
     {
-        // Sign-ups first, as the event itself reads them (Event::isFree()).
-        if ($event->rsvp_enabled) {
-            return [
-                'sold' => (int) $event->rsvpSoldCount($date),
-                'capacity' => (int) $event->rsvp_limit > 0 ? (int) $event->rsvp_limit : null,
-                'paid' => false,
-            ];
-        }
-
-        if (! $event->tickets_enabled) {
-            return null;
-        }
-
-        // tickets() already leaves add-ons out; seatTickets() leaves passes out too.
-        $seats = $event->seatTickets();
-        if ($seats->isEmpty()) {
-            return null;
-        }
-
-        $seated = $event->hasAllocatedSeating();
-        $sold = (int) $seats->sum(fn ($ticket) => $ticket->soldCountFor($date));
-        if (! $seated) {
-            $sold += (int) $this->safe(fn () => $event->passReservedSeats($date));
-        }
-        $limited = ! $seated && $seats->every(fn ($ticket) => (int) $ticket->quantity > 0);
-
-        return [
-            'sold' => $sold,
-            'capacity' => $limited ? (int) $event->getTotalTicketQuantity() : null,
-            'paid' => $seats->contains(fn ($ticket) => (float) $ticket->price > 0),
-        ];
+        return EventSeats::line($event, $date);
     }
 
     /** @return array<int, int> */

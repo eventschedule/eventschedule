@@ -428,10 +428,15 @@ class DocsManifestTest extends TestCase
     {
         $view = file_get_contents(resource_path('views/ticket/sales.blade.php'));
 
-        preg_match_all('/<button[^>]*id="(tab-[a-z-]+)"[^>]*class="sales-tab/', $view, $matches);
-        $tabs = array_unique($matches[1]);
+        // The tabs are ONE list in the view ($salesTabs), which feeds the strip and the phone's
+        // dropdown; each button's id is "tab-" and the entry's id. Read the list, and check the
+        // buttons are still built from it with the class the Help script listens for.
+        $this->assertSame(1, preg_match('/\$salesTabs = array_values\(array_filter\(\[(.*?)\]\)\);/s', $view, $list), 'Expected the Sales tab list to be found');
+        preg_match_all("/\\['id' => '([a-z-]+)'/", $list[1], $matches);
+        $tabs = array_map(fn ($id) => 'tab-'.$id, array_unique($matches[1]));
 
         $this->assertGreaterThanOrEqual(5, count($tabs), 'Expected the Sales tab strip to be found');
+        $this->assertSame(1, substr_count($view, 'id="tab-{{ $salesTab[\'id\'] }}" class="ap-tab sales-tab"'), 'the buttons are built from the list, with the class the Help script reads');
 
         $reflection = new \ReflectionProperty(\App\Utils\HelpUtils::class, 'mappings');
         $reflection->setAccessible(true);

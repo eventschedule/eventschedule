@@ -1,4 +1,4 @@
-<x-app-admin-layout>
+<x-app-admin-layout wide>
     @php
         // Fully qualified rather than a `use` statement: this @php block sits inside a component
         // slot, which Blade compiles into a CLOSURE body, and a `use` import there is a PHP syntax

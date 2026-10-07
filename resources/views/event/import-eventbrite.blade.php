@@ -1,42 +1,9 @@
 <x-app-admin-layout>
+    <div class="page-shell page-col is-narrow">
 
-    <div class="flex justify-between items-center gap-6 pb-6">
-        @if (is_rtl())
-            <div class="flex items-center gap-3">
-                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    {{ __('messages.back') }}
-                </button>
-            </div>
-
-            <div class="flex items-center text-end">
-                @if ($role->profile_image_url)
-                    <div class="pe-4">
-                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                    </div>
-                @endif
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ __('messages.import_from_eventbrite') }}
-                </h2>
-            </div>
-        @else
-            <div class="flex items-center">
-                @if ($role->profile_image_url)
-                    <div class="pe-4">
-                        <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                    </div>
-                @endif
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                    {{ __('messages.import_from_eventbrite') }}
-                </h2>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button type="button" class="js-back-btn inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                    {{ __('messages.back') }}
-                </button>
-            </div>
-        @endif
-    </div>
+    {{-- One of the ways to bring events in, so it hangs from the Import events page. --}}
+    <x-page-header :title="__('messages.import_from_eventbrite')" :image="$role->profile_image_url ?: null"
+        :back="route('event.show_import', ['subdomain' => $role->subdomain])" :back-label="__('messages.import_events')" />
 
     <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 
@@ -52,8 +19,7 @@
     <div id="eventbrite-app">
         {{-- Step 1: Connect --}}
         <div v-if="step === 'connect'">
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <div class="max-w-lg">
+            <div class="ap-card rounded-xl page-card">
                     <label for="eventbrite-token" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ __('messages.eventbrite_token_label') }}
                     </label>
@@ -66,7 +32,7 @@
                             placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxx"
                             @keyup.enter="connectToEventbrite"
                         >
-                        <button type="button" @click="showToken = !showToken" class="absolute inset-y-0 {{ is_rtl() ? 'start-0 ps-3' : 'end-0 pe-3' }} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <button type="button" @click="showToken = !showToken" class="absolute inset-y-0 end-0 pe-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                             <svg v-if="!showToken" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -91,14 +57,13 @@
 
                     <div class="mt-4">
                         <button type="button" @click="connectToEventbrite" :disabled="connecting || !token.trim()" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
-                            <svg v-if="connecting" class="animate-spin {{ is_rtl() ? 'ms-2' : 'me-2' }} h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <svg v-if="connecting" class="animate-spin me-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
                             <span v-text="connecting ? connectingText : connectText"></span>
                         </button>
                     </div>
-                </div>
             </div>
         </div>
 
@@ -119,7 +84,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="ap-card rounded-xl overflow-hidden">
                 {{-- Header with toggle and select all --}}
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-4">
@@ -161,7 +126,7 @@
                                     </span>
                                     <span v-if="event.is_online" class="flex items-center gap-1">
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
-                                        Online
+                                        {{ __('messages.online') }}
                                     </span>
                                     <span v-if="event.tickets && event.tickets.length" class="flex items-center gap-1">
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" /></svg>
@@ -180,7 +145,7 @@
             </div>
 
             {{-- Import button --}}
-            <div class="mt-4 flex {{ is_rtl() ? 'justify-start' : 'justify-end' }}">
+            <div class="mt-4 flex justify-end">
                 <button type="button" @click="startImport" :disabled="selectedIds.length === 0" class="inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm">
                     <span v-text="importButtonText"></span>
                 </button>
@@ -189,7 +154,7 @@
 
         {{-- Step 3: Importing --}}
         <div v-if="step === 'importing'">
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="ap-card rounded-xl page-card">
                 {{-- Progress bar --}}
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-2">
@@ -253,12 +218,6 @@
     </div>
 
     <script {!! nonce_attr() !!}>
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.js-back-btn')) {
-                history.back();
-            }
-        });
-
         const { createApp } = Vue;
 
         const app = createApp({
@@ -463,4 +422,5 @@
         document.getElementById('eventbrite-app').classList.add('loaded');
     </script>
 
+    </div>
 </x-app-admin-layout>

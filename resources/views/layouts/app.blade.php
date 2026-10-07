@@ -588,10 +588,13 @@
             color: #d4d4d4 !important; /* gray-300 */
         }
 
+        /* The editor's body is a field, and is filled and edged like one (x-text-input in a dark
+           palette: gray-900 on a gray-700 line). It had the card's own surface and no border, so
+           on a card it was invisible: a toolbar floating over nothing. */
         .dark .CodeMirror {
-            background-color: rgb(var(--ap-surface)) !important; /* gray-800 - match standard text inputs */
+            background-color: rgb(var(--ap-gray-900)) !important;
             color: #f9f9f9 !important; /* gray-50 */
-            border: none !important;
+            border: 1px solid rgb(var(--ap-gray-700)) !important;
         }
 
         .dark .CodeMirror-cursor {
@@ -628,7 +631,8 @@
 
         .dark .EasyMDEContainer .CodeMirror,
         .dark .EasyMDEContainer .CodeMirror-focused {
-            border: none !important;
+            border: 1px solid rgb(var(--ap-gray-700)) !important;
+            border-top: 0 !important;
         }
 
     </style>
@@ -718,8 +722,13 @@
 
 
             {{-- JSON_HEX_TAG: these messages can carry a schedule's name, and a "<!--<script"
-                 inside a script block would otherwise swallow the rest of it. --}}
-            @if (session('message'))
+                 inside a script block would otherwise swallow the rest of it.
+
+                 $flashOnPage: the keys a page of the admin portal has already printed as a
+                 notice (x-page-flash leaves them on the request). The toast for such a key
+                 stands down; every other key is toasted as before. --}}
+            @php $flashOnPage = request()->attributes->get('pageFlashShown', []); @endphp
+            @if (session('message') && ! in_array('message', $flashOnPage, true))
             (function() {
                 var key = '{{ uniqid("toast_") }}';
                 if (!sessionStorage.getItem(key)) {
@@ -741,7 +750,7 @@
                  notification for something already on screen. It stays a separate key from
                  session('error') because event/show-guest.blade.php force-opens the ticket form on
                  session('error'). See RoleSubscriberController::respond(). --}}
-            @elseif (session('error'))
+            @elseif (session('error') && ! in_array('error', $flashOnPage, true))
             (function() {
                 var key = '{{ uniqid("toast_") }}';
                 if (!sessionStorage.getItem(key)) {
@@ -758,7 +767,7 @@
                     }).showToast();
                 }
             })();
-            @elseif (session('warning'))
+            @elseif (session('warning') && ! in_array('warning', $flashOnPage, true))
             (function() {
                 var key = '{{ uniqid("toast_") }}';
                 if (!sessionStorage.getItem(key)) {

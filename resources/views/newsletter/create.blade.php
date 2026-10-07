@@ -1,44 +1,43 @@
 <x-app-admin-layout>
-    <div class="space-y-4">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.create_newsletter') }}</h2>
-            <a href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </a>
-        </div>
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+        @include('newsletter.partials._builder-styles')
+    </x-slot>
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
+    {{-- A new newsletter: the builder, under a title row that leads back to the list. The
+         month's allowance sits at the end of that row, where it can be read without standing
+         between the title and the work. --}}
+    <div class="page-shell">
+        @php $roleParam = \App\Utils\UrlUtils::encodeId($role->id); @endphp
 
+        <x-page-header
+            :title="__('messages.create_newsletter')"
+            :back="route('newsletter.index', ['role_id' => $roleParam])"
+            :back-label="__('messages.newsletters')">
+            <x-slot name="actions">@include('newsletter.partials._usage-meter')</x-slot>
+        </x-page-header>
+
+        @include('newsletter.partials._notices')
         @include('newsletter.partials._verification-warning')
 
-        @include('newsletter.partials._usage-meter')
-
-        {{-- Template Picker --}}
-        @if (!request('template_id') && ($savedTemplates ?? collect())->count())
-        <div class="ap-card sm:rounded-xl p-6 mb-2">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.start_from_template') }}</h3>
-
-            @if (($savedTemplates ?? collect())->count())
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">{{ __('messages.your_templates') }}</p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {{-- Template picker --}}
+        @if (! request('template_id') && ($savedTemplates ?? collect())->count())
+        <x-page-card class="news-notice" :title="__('messages.start_from_template')" :lead="__('messages.your_templates')">
+            <div class="news-picks">
                 @foreach ($savedTemplates as $tmpl)
-                <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'template_id' => \App\Utils\UrlUtils::encodeId($tmpl->id)]) }}"
-                    class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:border-[var(--brand-blue)] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $tmpl->name }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{{ $tmpl->template }}</div>
+                <a href="{{ route('newsletter.create', ['role_id' => $roleParam, 'template_id' => \App\Utils\UrlUtils::encodeId($tmpl->id)]) }}" class="news-pick">
+                    @include('newsletter.partials._template-swatch', ['swatchOf' => $tmpl])
+                    <span>
+                        <span class="news-pick-name"><bdi>{{ $tmpl->name }}</bdi></span>
+                        <span class="news-pick-meta block">{{ $tmpl->template }}</span>
+                    </span>
                 </a>
                 @endforeach
             </div>
-            @endif
-        </div>
+        </x-page-card>
         @endif
 
-        <form method="POST" action="{{ route('newsletter.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
+        <form method="POST" action="{{ route('newsletter.store', ['role_id' => $roleParam]) }}">
             @csrf
             @php
                 $newsletter = new \App\Models\Newsletter(['template' => $defaultTemplate, 'style_settings' => $defaultStyleSettings, 'segment_ids' => $defaultSegmentIds]);

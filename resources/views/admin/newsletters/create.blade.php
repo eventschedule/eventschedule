@@ -1,33 +1,36 @@
 <x-app-admin-layout>
-    <div class="space-y-4">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.create_admin_newsletter') }}</h2>
-            <a href="{{ route('admin.newsletters.index') }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </a>
-        </div>
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+        @include('newsletter.partials._builder-styles')
+    </x-slot>
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
+    @include('admin.partials._navigation', ['active' => 'newsletters'])
 
-        {{-- Template Picker --}}
-        @if (!request('template_id') && ($savedTemplates ?? collect())->count())
-        <div class="ap-card sm:rounded-xl p-6 mb-2">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.start_from_template') }}</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    {{-- A new platform newsletter, in the builder a schedule's owner uses. --}}
+    <div class="page-shell">
+        @include('admin.newsletters.partials._subpage-head', [
+            'title' => __('messages.create_admin_newsletter'),
+            'back' => route('admin.newsletters.index'),
+            'backLabel' => __('messages.admin_newsletters'),
+        ])
+
+        @include('newsletter.partials._notices')
+
+        {{-- Template picker --}}
+        @if (! request('template_id') && ($savedTemplates ?? collect())->count())
+        <x-page-card class="news-notice" :title="__('messages.start_from_template')">
+            <div class="news-picks">
                 @foreach ($savedTemplates as $tmpl)
-                <a href="{{ route('admin.newsletters.create', ['template_id' => \App\Utils\UrlUtils::encodeId($tmpl->id)]) }}"
-                    class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:border-[var(--brand-blue)] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $tmpl->name }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{{ $tmpl->template }}</div>
+                <a href="{{ route('admin.newsletters.create', ['template_id' => \App\Utils\UrlUtils::encodeId($tmpl->id)]) }}" class="news-pick">
+                    @include('newsletter.partials._template-swatch', ['swatchOf' => $tmpl])
+                    <span>
+                        <span class="news-pick-name"><bdi>{{ $tmpl->name }}</bdi></span>
+                        <span class="news-pick-meta block">{{ $tmpl->template }}</span>
+                    </span>
                 </a>
                 @endforeach
             </div>
-        </div>
+        </x-page-card>
         @endif
 
         <form method="POST" action="{{ route('admin.newsletters.store') }}">

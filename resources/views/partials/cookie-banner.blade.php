@@ -27,7 +27,7 @@
      centring, so the entrance animation is free to use transform. The bottom offset clears the
      iPhone home indicator where the layout opts into viewport-fit=cover. --}}
 @if (cookie_banner_visible())
-{{-- Where a schedule's organizer has a Realtime page (RealtimeTracker::ownerViewEnabled()), the
+{{-- Where a schedule's organizer has a Realtime tab (RealtimeTracker::ownerViewEnabled()), the
      notice says so on its FIRST line, where "Allow all" is, and carries data-names-organizers.
      cookie-consent.js reads that attribute when a choice is saved and records it on the choice;
      only such a choice may put a visitor on an organizer's page

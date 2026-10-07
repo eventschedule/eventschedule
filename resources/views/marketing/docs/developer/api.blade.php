@@ -9,7 +9,7 @@
         <x-doc-nav-group label="Getting Started" expanded>
             <x-doc-nav-link href="#authentication" search="authentication api key header x-api-key">Authentication</x-doc-nav-link>
             <x-doc-nav-link href="#rate-limits" search="rate limits throttle 429">Rate Limits</x-doc-nav-link>
-            <x-doc-nav-link href="#response-format" search="response format json data meta error">Response Format</x-doc-nav-link>
+            <x-doc-nav-link href="#response-format" search="response format json data meta error accept header html record ids dates times utc iso 8601">Response Format</x-doc-nav-link>
             <x-doc-nav-link href="#pagination" search="pagination page per_page">Pagination</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Auth">
@@ -18,7 +18,7 @@
         </x-doc-nav-group>
         <x-doc-nav-group label="Schedules">
             <x-doc-nav-link href="#list-schedules" search="list schedules get /api/schedules filter name type"><span class="api-method-dot api-method-get"></span>List Schedules</x-doc-nav-link>
-            <x-doc-nav-link href="#show-schedule" search="show schedule get /api/schedules subdomain"><span class="api-method-dot api-method-get"></span>Show Schedule</x-doc-nav-link>
+            <x-doc-nav-link href="#show-schedule" search="show schedule get /api/schedules subdomain schedule object fields"><span class="api-method-dot api-method-get"></span>Show Schedule</x-doc-nav-link>
             <x-doc-nav-link href="#create-schedule" search="create schedule post /api/schedules venue talent curator"><span class="api-method-dot api-method-post"></span>Create Schedule</x-doc-nav-link>
             <x-doc-nav-link href="#update-schedule" search="update schedule put /api/schedules"><span class="api-method-dot api-method-put"></span>Update Schedule</x-doc-nav-link>
             <x-doc-nav-link href="#delete-schedule" search="delete schedule /api/schedules"><span class="api-method-dot api-method-delete"></span>Delete Schedule</x-doc-nav-link>
@@ -31,16 +31,16 @@
         </x-doc-nav-group>
         <x-doc-nav-group label="Events">
             <x-doc-nav-link href="#list-events" search="list events get /api/events filter subdomain date"><span class="api-method-dot api-method-get"></span>List Events</x-doc-nav-link>
-            <x-doc-nav-link href="#show-event" search="show event get /api/events detail"><span class="api-method-dot api-method-get"></span>Show Event</x-doc-nav-link>
-            <x-doc-nav-link href="#create-event" search="create event post /api/events tickets agenda"><span class="api-method-dot api-method-post"></span>Create Event</x-doc-nav-link>
-            <x-doc-nav-link href="#update-event" search="update event put /api/events partial"><span class="api-method-dot api-method-put"></span>Update Event</x-doc-nav-link>
-            <x-doc-nav-link href="#delete-event" search="delete event /api/events"><span class="api-method-dot api-method-delete"></span>Delete Event</x-doc-nav-link>
+            <x-doc-nav-link href="#show-event" search="show event get /api/events detail event object fields tickets members schedules"><span class="api-method-dot api-method-get"></span>Show Event</x-doc-nav-link>
+            <x-doc-nav-link href="#create-event" search="create event post /api/events tickets agenda recurrence visibility venue members payment method daily cap"><span class="api-method-dot api-method-post"></span>Create Event</x-doc-nav-link>
+            <x-doc-nav-link href="#update-event" search="update event put /api/events partial replaces removes promo codes passes venue members"><span class="api-method-dot api-method-put"></span>Update Event</x-doc-nav-link>
+            <x-doc-nav-link href="#delete-event" search="delete event /api/events sales deleted appointment"><span class="api-method-dot api-method-delete"></span>Delete Event</x-doc-nav-link>
             <x-doc-nav-link href="#upload-flyer" search="upload flyer image post /api/events/flyer multipart"><span class="api-method-dot api-method-post"></span>Upload Flyer</x-doc-nav-link>
             <x-doc-nav-link href="#list-categories" search="list categories get /api/categories"><span class="api-method-dot api-method-get"></span>List Categories</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Sales">
             <x-doc-nav-link href="#list-sales" search="list sales get /api/sales filter status email"><span class="api-method-dot api-method-get"></span>List Sales</x-doc-nav-link>
-            <x-doc-nav-link href="#show-sale" search="show sale get /api/sales detail"><span class="api-method-dot api-method-get"></span>Show Sale</x-doc-nav-link>
+            <x-doc-nav-link href="#show-sale" search="show sale get /api/sales detail sale object fields group order secret amount_mismatch"><span class="api-method-dot api-method-get"></span>Show Sale</x-doc-nav-link>
             <x-doc-nav-link href="#create-sale" search="create sale post /api/sales tickets"><span class="api-method-dot api-method-post"></span>Create Sale</x-doc-nav-link>
             <x-doc-nav-link href="#update-sale" search="update sale status put /api/sales mark_paid refund partial refund cancel idempotency_key"><span class="api-method-dot api-method-put"></span>Update Sale Status</x-doc-nav-link>
             <x-doc-nav-link href="#delete-sale" search="delete sale /api/sales"><span class="api-method-dot api-method-delete"></span>Delete Sale</x-doc-nav-link>
@@ -106,7 +106,7 @@
                         </h2>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Every endpoint except <a href="#register" class="doc-link">Register</a> and <a href="#login" class="doc-link">Login</a> authenticates with an API key sent in the <code class="doc-inline-code">X-API-Key</code> header. There are two ways to get one:</p>
                         <ul class="doc-list mb-6">
-                            <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong>, go to <strong class="text-gray-900 dark:text-white">API Settings</strong> and turn on <strong class="text-gray-900 dark:text-white">Enable API Access</strong>. The key is shown once, so copy it before you leave the page. See <a href="{{ route('marketing.docs.account_settings') }}#api" class="doc-link">Account Settings</a>.</li>
+                            <li>Open <strong class="text-gray-900 dark:text-white">Settings</strong> in the admin panel and choose the <strong class="text-gray-900 dark:text-white">Developers</strong> tab. Under <strong class="text-gray-900 dark:text-white">API Settings</strong>, switch on <strong class="text-gray-900 dark:text-white">Enable API Access</strong> and press <strong class="text-gray-900 dark:text-white">Save</strong>. The key is shown once, beside a copy button, so copy it before you leave the page. See <a href="{{ route('marketing.docs.account_settings') }}#api" class="doc-link">Account Settings</a>.</li>
                             <li>Call the <a href="#register" class="doc-link">Register</a> or <a href="#login" class="doc-link">Login</a> endpoints, which return a key in the response body (useful for AI agents and scripted setup).</li>
                         </ul>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">A key belongs to a <em>user account</em>, not to one schedule. It can reach every schedule where you are the owner or an admin, and nothing else. Followers and members cannot be used to authorise API calls.</p>
@@ -114,9 +114,10 @@
                         <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service, a schedule must be on a Pro or Enterprise plan for the API to see it. The schedule, event, sale and feedback lists leave out anything that belongs only to free schedules, and single-record reads and writes on a free schedule return <code class="doc-inline-code">403 API usage is limited to Pro accounts</code>. A few endpoints carry no plan check at all: <a href="#create-schedule" class="doc-link">Create Schedule</a>, so a new account can bootstrap; <a href="#delete-schedule" class="doc-link">Delete Schedule</a>, so an owner can always retire one; <a href="#create-sale" class="doc-link">Create Sale</a>, so a schedule can record a sale it took elsewhere; both <a href="#list-categories" class="doc-link">List Categories</a> routes; and <a href="#list-fan-content" class="doc-link">List Fan Content</a>. A new schedule starts on the Free plan with no trial. Selfhosted installs resolve to Enterprise, so every endpoint is available there.</p>
                         <h3 class="doc-subheading">Key lifetime and rotation</h3>
                         <ul class="doc-list mb-6">
-                            <li>A key expires one year after it is issued. After that every request returns <code class="doc-inline-code">401 API key expired</code>.</li>
-                            <li>Keys are stored hashed, so a lost key cannot be recovered. To rotate one, turn <strong class="text-gray-900 dark:text-white">Enable API Access</strong> off and back on in <strong class="text-gray-900 dark:text-white">Settings</strong>. That revokes the old key immediately and issues a new one.</li>
+                            <li>A key expires one year after it is issued. After that every request returns <code class="doc-inline-code">401 API key expired</code>. <strong class="text-gray-900 dark:text-white">API Settings</strong> shows the expiry date under the key, and says so once the key has expired.</li>
+                            <li>Keys are stored hashed, so a lost key cannot be recovered. To rotate one, switch <strong class="text-gray-900 dark:text-white">Enable API Access</strong> off and press <strong class="text-gray-900 dark:text-white">Save</strong>, then switch it on and save again. The first save deletes the old key at once, after asking you to confirm, and the second issues a new one.</li>
                             <li>Ten consecutive requests with the same invalid key block that key for 15 minutes with <code class="doc-inline-code">423 API key temporarily blocked</code>.</li>
+                            <li>A request with no <code class="doc-inline-code">X-API-Key</code> header returns <code class="doc-inline-code">401 API key is required</code>, and an unknown key <code class="doc-inline-code">401 Invalid API key</code>.</li>
                         </ul>
                         <div class="doc-callout doc-callout-warning">
                             <div class="doc-callout-title">Keep the key server-side</div>
@@ -127,12 +128,13 @@
                         <div class="doc-code-block">
                             <div class="doc-code-header"><span>cURL Example</span><button class="doc-copy-btn">Copy</button></div>
                             <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/schedules"</span> \
-         -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+         -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+         -H <span class="code-string">"Accept: application/json"</span></code></pre>
                         </div>
                     </div>
                 </div>
             </section>
-    
+
             <!-- Rate Limits -->
             <section id="rate-limits" class="doc-section api-endpoint-section">
                 <div class="api-endpoint-row">
@@ -154,7 +156,7 @@
                             </table>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Each bucket counts in a fixed one-minute window that opens with its first counted request. When that minute is up the count starts again from zero, so a client that makes no more than 300 reads and 30 writes in any one window is never refused, however long it runs.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#create-event" class="doc-link">Create Event</a> carries a second throttle of 30 requests per minute on top of the write bucket, so a bulk import should pace itself well below that.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#create-event" class="doc-link">Create Event</a> carries a second throttle of 30 requests per minute on top of the write bucket. It is counted per account and per schedule rather than per address, so a bulk import should pace itself well below that.</p>
                         <h3 class="doc-subheading">Unauthenticated endpoints</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">The auth endpoints are limited separately, because they run before any key exists:</p>
                         <div class="doc-table-wrap">
@@ -168,6 +170,7 @@
                             </table>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300">The read and write buckets and the three endpoints above all answer <code class="doc-inline-code">429</code> with an <code class="doc-inline-code">error</code> message when the limit is hit. A <code class="doc-inline-code">429</code> from a read or write bucket also carries a <code class="doc-inline-code">Retry-After</code> header with the number of seconds until that bucket's window resets. The three auth endpoints send no rate limit headers, so back off on the status code there.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-6">The Create Event throttle answers differently, because it is the framework's own: its <code class="doc-inline-code">429</code> carries <code class="doc-inline-code">Retry-After</code>, <code class="doc-inline-code">X-RateLimit-Limit</code> and <code class="doc-inline-code">X-RateLimit-Remaining</code> headers, and its body holds a <code class="doc-inline-code">message</code> in place of <code class="doc-inline-code">error</code>. See <a href="#response-format" class="doc-link">Response Format</a> for why that request needs an <code class="doc-inline-code">Accept</code> header.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -190,11 +193,25 @@
                             </svg>
                             Response Format
                         </h2>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every response is JSON. Successful responses wrap the result in a <code class="doc-inline-code">data</code> property: an object for single-record endpoints, an array for list endpoints. List endpoints add a <code class="doc-inline-code">meta</code> object with the pagination counters. Event and sale writes and Upload Flyer put a confirmation in <code class="doc-inline-code">meta.message</code>, while the delete endpoints return theirs as <code class="doc-inline-code">data.message</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every endpoint answers in JSON. Successful responses wrap the result in a <code class="doc-inline-code">data</code> property: an object for single-record endpoints, an array for list endpoints. List endpoints add a <code class="doc-inline-code">meta</code> object with the pagination counters. Event and sale writes and Upload Flyer put a confirmation in <code class="doc-inline-code">meta.message</code>, while the delete endpoints return theirs as <code class="doc-inline-code">data.message</code>.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Failures return an <code class="doc-inline-code">error</code> string. A validation failure adds an <code class="doc-inline-code">errors</code> object keyed by field name, each holding an array of messages.</p>
-                        <div class="doc-callout doc-callout-info">
-                            <div class="doc-callout-title">Record IDs are opaque strings</div>
-                            <p>Schedules, events, sub-schedules, tickets and sales are all identified by an encoded string such as <code class="doc-inline-code">"evt123"</code>, never by the raw database number. Pass the same string back exactly as you received it. Category IDs are the one exception: they are plain integers.</p>
+                        <h3 class="doc-subheading" id="accept-header">Ask for JSON</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Send <code class="doc-inline-code">Accept: application/json</code> with every request. A failure raised outside an endpoint is rendered by the framework, which picks its format from that header. Without it, the <a href="#create-event" class="doc-link">Create Event</a> throttle, an unknown URL, an unknown <code class="doc-inline-code">venue_id</code> and a server error come back as HTML pages, and the daily cap on new events comes back as a redirect. With it they are JSON, though the framework's own replies name the reason <code class="doc-inline-code">message</code>, not <code class="doc-inline-code">error</code>.</p>
+                        <h3 class="doc-subheading" id="record-ids">Record IDs</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Schedules, events, sub-schedules, tickets and sales are all identified by an opaque encoded string such as <code class="doc-inline-code">"w4K8xU"</code>, never by the raw database number. Pass the same string back exactly as you received it. The examples on this page use readable stand-ins such as <code class="doc-inline-code">"evt123"</code>. Category IDs are the one exception: they are plain integers.</p>
+                        <h3 class="doc-subheading" id="dates-and-times">Dates and times</h3>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Value</th><th>Format</th></tr></thead>
+                                <tbody>
+                                    <tr><td>An event's <code class="doc-inline-code">starts_at</code>, sent or returned</td><td>UTC, <code class="doc-inline-code">Y-m-d H:i:s</code>, with no offset suffix. The schedule's timezone only decides how that instant is shown on the guest page.</td></tr>
+                                    <tr><td><code class="doc-inline-code">starts_after</code>, <code class="doc-inline-code">starts_before</code></td><td>UTC calendar dates, <code class="doc-inline-code">Y-m-d</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">event_date</code> on sales, feedback and fan content</td><td><code class="doc-inline-code">Y-m-d</code>, the date of the occurrence. For a sale it is the calendar date in the schedule's own timezone.</td></tr>
+                                    <tr><td><code class="doc-inline-code">created_at</code>, <code class="doc-inline-code">updated_at</code>, <code class="doc-inline-code">api_key_expires_at</code> and a returned ticket's <code class="doc-inline-code">sales_start_at</code> and <code class="doc-inline-code">sales_end_at</code></td><td>ISO 8601 with an offset, such as <code class="doc-inline-code">2026-07-11T09:12:00+00:00</code></td></tr>
+                                    <tr><td>A ticket's <code class="doc-inline-code">sales_start_at</code> and <code class="doc-inline-code">sales_end_at</code>, when you send them</td><td>UTC, <code class="doc-inline-code">Y-m-d H:i:s</code>. An offset in the value is not applied.</td></tr>
+                                    <tr><td>An agenda part's <code class="doc-inline-code">start_time</code> and <code class="doc-inline-code">end_time</code></td><td>Plain text of up to 10 characters such as <code class="doc-inline-code">"20:00"</code>, stored and returned as sent</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     <div class="api-endpoint-code">
@@ -284,7 +301,8 @@
                             <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
                             <code class="doc-inline-code">/api/register/send-code</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">No authentication required. Takes a single <code class="doc-inline-code">email</code> parameter and emails a 6-digit code that is valid for 10 minutes. Rate limited to 5 codes per email per hour. An address that already belongs to a full account is rejected with a <code class="doc-inline-code">422</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">No authentication required. Takes a single <code class="doc-inline-code">email</code> parameter and emails a 6-digit code that is valid for 10 minutes, answering <code class="doc-inline-code">200</code> with a confirmation in <code class="doc-inline-code">data.message</code>. Rate limited to 5 codes per email per hour. An address that already belongs to a full account is rejected with a <code class="doc-inline-code">422</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">A new code replaces the one before it, and a code can be tried once: registering with a wrong <code class="doc-inline-code">verification_code</code> uses it up, so request another.</p>
                         <h3 class="doc-subheading">Step 2: Register</h3>
                         @else
                         <p class="text-gray-600 dark:text-gray-300 mb-4">Create a new account and receive an API key. No verification code is involved on a selfhosted install, and <code class="doc-inline-code">/api/register/send-code</code> returns a <code class="doc-inline-code">400</code> there.</p>
@@ -298,18 +316,22 @@
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
                                 <tbody>
-                                    <tr><td><code class="doc-inline-code">name</code></td><td>Yes</td><td>Your display name</td></tr>
-                                    <tr><td><code class="doc-inline-code">email</code></td><td>Yes</td><td>Email address</td></tr>
+                                    <tr><td><code class="doc-inline-code">name</code></td><td>Yes</td><td>Your display name (max 255 characters)</td></tr>
+                                    @if(config('app.hosted'))
+                                    <tr><td><code class="doc-inline-code">email</code></td><td>Yes</td><td>Email address (max 255 characters). Disposable-mail domains and <code class="doc-inline-code">@example.com</code> addresses are refused, here and in Step 1.</td></tr>
+                                    @else
+                                    <tr><td><code class="doc-inline-code">email</code></td><td>Yes</td><td>Email address (max 255 characters)</td></tr>
+                                    @endif
                                     <tr><td><code class="doc-inline-code">password</code></td><td>Yes</td><td>Password (min 8 characters)</td></tr>
                                     @if(config('app.hosted'))
                                     <tr><td><code class="doc-inline-code">verification_code</code></td><td>Yes</td><td>6-digit code from Step 1</td></tr>
                                     @endif
-                                    <tr><td><code class="doc-inline-code">timezone</code></td><td>No</td><td>IANA timezone name (default: America/New_York)</td></tr>
+                                    <tr><td><code class="doc-inline-code">timezone</code></td><td>No</td><td>IANA timezone name (default: America/New_York, which is also what an unrecognised name falls back to)</td></tr>
                                     <tr><td><code class="doc-inline-code">language_code</code></td><td>No</td><td>One of the supported interface languages (default: en)</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mt-6">The endpoint also watches a hidden <code class="doc-inline-code">website</code> honeypot field. Leave it out entirely: sending any value in it returns a <code class="doc-inline-code">422</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-6">@if(config('app.hosted'))Both steps watch @else The endpoint also watches @endif a hidden <code class="doc-inline-code">website</code> honeypot field. Leave it out entirely: sending any value in it returns <code class="doc-inline-code">422 Invalid request</code>.</p>
                         @if(! config('app.hosted'))
                         <div class="doc-callout doc-callout-warning">
                             <div class="doc-callout-title">Registration closes after the first account</div>
@@ -323,19 +345,32 @@
                             <div class="doc-code-header"><span>Step 1: Send Code</span><button class="doc-copy-btn">Copy</button></div>
                             <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/register/send-code"</span> \
          -H <span class="code-string">"Content-Type: application/json"</span> \
-         -d <span class="code-string">'{"email": "user@example.com"}'</span></code></pre>
+         -d <span class="code-string">'{"email": "you@yourdomain.com"}'</span></code></pre>
                         </div>
                         @endif
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>@if(config('app.hosted'))Step 2: Register @else cURL @endif</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/register"</span> \
+         -H <span class="code-string">"Content-Type: application/json"</span> \
+         -H <span class="code-string">"Accept: application/json"</span> \
+         -d <span class="code-string">'{
+             "name": "Your Name",
+             "email": "you@yourdomain.com",
+             "password": "a_long_password"@if(config('app.hosted')),
+             "verification_code": "123456"@endif
+
+         }'</span></code></pre>
+                        </div>
                         <div class="doc-code-block">
                             <div class="doc-code-header"><span>Response (201)</span><button class="doc-copy-btn">Copy</button></div>
                             <pre><code>{
         <span class="code-string">"data"</span>: {
             <span class="code-string">"api_key"</span>: <span class="code-string">"your_new_api_key"</span>,
-            <span class="code-string">"api_key_expires_at"</span>: <span class="code-string">"2027-02-28T00:00:00Z"</span>,
+            <span class="code-string">"api_key_expires_at"</span>: <span class="code-string">"2027-02-28T00:00:00+00:00"</span>,
             <span class="code-string">"user"</span>: {
                 <span class="code-string">"id"</span>: <span class="code-string">"abc123"</span>,
                 <span class="code-string">"name"</span>: <span class="code-string">"Your Name"</span>,
-                <span class="code-string">"email"</span>: <span class="code-string">"user@example.com"</span>
+                <span class="code-string">"email"</span>: <span class="code-string">"you@yourdomain.com"</span>
             }
         }
     }</code></pre>
@@ -359,11 +394,11 @@
                             <code class="doc-inline-code">/api/login</code>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-4">No authentication required. Exchanges an email and password for an API key valid for one year.</p>
-                        <div class="doc-callout doc-callout-warning">
+                        <div class="doc-callout doc-callout-info">
                             <div class="doc-callout-title">Login issues a key only when you do not already have one</div>
-                            <p>This is not a session endpoint and it will not hand you a fresh key on demand. If the account already has an unexpired key, login returns <code class="doc-inline-code">409</code> and issues nothing, so store the key from the first call. To replace a key you have lost, turn <strong class="text-gray-900 dark:text-white">Enable API Access</strong> off and back on in <strong class="text-gray-900 dark:text-white">Settings</strong>.</p>
+                            <p>This is not a session endpoint and it will not hand you a fresh key on demand. If the account already has an unexpired key, login returns <code class="doc-inline-code">409</code> and issues nothing, so store the key from the first call. To replace a key you have lost, rotate it under <strong class="text-gray-900 dark:text-white">Settings</strong>, <strong class="text-gray-900 dark:text-white">Developers</strong>, as described in <a href="#authentication" class="doc-link">Authentication</a>. An expired key does not block login: the call issues a new one.</p>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">Two other refusals to handle: an account with two-factor authentication enabled returns <code class="doc-inline-code">403</code> and must generate its key from <strong class="text-gray-900 dark:text-white">Settings</strong> instead, and a wrong email or password returns <code class="doc-inline-code">401</code> and counts toward the 5-per-15-minute limit.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">Two other refusals to handle: an account with two-factor authentication enabled returns <code class="doc-inline-code">403</code> and must generate its key from <strong class="text-gray-900 dark:text-white">Settings</strong> instead, and a wrong email or password returns <code class="doc-inline-code">401</code> and counts toward the 5-per-15-minute limit. A successful login clears that count.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
@@ -379,18 +414,18 @@
                             <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
                             <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/login"</span> \
          -H <span class="code-string">"Content-Type: application/json"</span> \
-         -d <span class="code-string">'{"email": "user@example.com", "password": "your_password"}'</span></code></pre>
+         -d <span class="code-string">'{"email": "you@yourdomain.com", "password": "your_password"}'</span></code></pre>
                         </div>
                         <div class="doc-code-block">
                             <div class="doc-code-header"><span>Response (200)</span><button class="doc-copy-btn">Copy</button></div>
                             <pre><code>{
         <span class="code-string">"data"</span>: {
             <span class="code-string">"api_key"</span>: <span class="code-string">"your_new_api_key"</span>,
-            <span class="code-string">"api_key_expires_at"</span>: <span class="code-string">"2027-02-28T00:00:00Z"</span>,
+            <span class="code-string">"api_key_expires_at"</span>: <span class="code-string">"2027-02-28T00:00:00+00:00"</span>,
             <span class="code-string">"user"</span>: {
                 <span class="code-string">"id"</span>: <span class="code-string">"abc123"</span>,
                 <span class="code-string">"name"</span>: <span class="code-string">"Your Name"</span>,
-                <span class="code-string">"email"</span>: <span class="code-string">"user@example.com"</span>
+                <span class="code-string">"email"</span>: <span class="code-string">"you@yourdomain.com"</span>
             }
         }
     }</code></pre>
@@ -467,6 +502,27 @@
                             <code class="doc-inline-code">/api/schedules/{subdomain}</code>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single schedule by subdomain, including its sub-schedules in a <code class="doc-inline-code">groups</code> array. You must be the owner or an admin of it, otherwise the response is <code class="doc-inline-code">404</code>. A schedule that is not on a Pro or Enterprise plan returns <code class="doc-inline-code">403</code>.</p>
+                        <h3 class="doc-subheading" id="schedule-object">The schedule object</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">List, Show, Create and Update Schedule return this shape. A field with nothing stored is <code class="doc-inline-code">null</code>.</p>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Field</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">id</code></td><td>Encoded schedule ID</td></tr>
+                                    <tr><td><code class="doc-inline-code">subdomain</code></td><td>The name every <code class="doc-inline-code">{subdomain}</code> path takes</td></tr>
+                                    <tr><td><code class="doc-inline-code">url</code></td><td>Address of the schedule's public page. An empty string until the schedule is verified.</td></tr>
+                                    <tr><td><code class="doc-inline-code">type</code></td><td><code class="doc-inline-code">venue</code>, <code class="doc-inline-code">talent</code> or <code class="doc-inline-code">curator</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">name</code>, <code class="doc-inline-code">email</code>, <code class="doc-inline-code">phone</code>, <code class="doc-inline-code">website</code></td><td>Name and contact details</td></tr>
+                                    <tr><td><code class="doc-inline-code">show_phone</code></td><td><code class="doc-inline-code">1</code> when the phone number is shown on the public page, <code class="doc-inline-code">0</code> when it is not. Read only, as is <code class="doc-inline-code">phone</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">description</code>, <code class="doc-inline-code">short_description</code></td><td>Markdown description and one-line summary</td></tr>
+                                    <tr><td><code class="doc-inline-code">timezone</code>, <code class="doc-inline-code">language_code</code></td><td>IANA timezone name and language code</td></tr>
+                                    <tr><td><code class="doc-inline-code">profile_image_url</code></td><td>URL of the profile image, or <code class="doc-inline-code">null</code>. Read only.</td></tr>
+                                    <tr><td><code class="doc-inline-code">address1</code>, <code class="doc-inline-code">city</code>, <code class="doc-inline-code">state</code>, <code class="doc-inline-code">postal_code</code>, <code class="doc-inline-code">country_code</code></td><td>Address</td></tr>
+                                    <tr><td><code class="doc-inline-code">created_at</code>, <code class="doc-inline-code">updated_at</code></td><td>ISO 8601 timestamps</td></tr>
+                                    <tr><td><code class="doc-inline-code">groups</code></td><td>The schedule's sub-schedules, each with <code class="doc-inline-code">id</code>, <code class="doc-inline-code">name</code>, <code class="doc-inline-code">slug</code> and <code class="doc-inline-code">color</code></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -482,8 +538,16 @@
             <span class="code-string">"subdomain"</span>: <span class="code-string">"my-venue"</span>,
             <span class="code-string">"name"</span>: <span class="code-string">"My Venue"</span>,
             <span class="code-string">"type"</span>: <span class="code-string">"venue"</span>,
+            <span class="code-string">"email"</span>: <span class="code-string">"info@myvenue.com"</span>,
+            <span class="code-string">"timezone"</span>: <span class="code-string">"America/New_York"</span>,
+            <span class="code-string">"created_at"</span>: <span class="code-string">"2026-03-01T12:00:00+00:00"</span>,
             <span class="code-string">"groups"</span>: [
-                { <span class="code-string">"id"</span>: <span class="code-string">"def456"</span>, <span class="code-string">"name"</span>: <span class="code-string">"Main Stage"</span>, <span class="code-string">"slug"</span>: <span class="code-string">"main-stage"</span> }
+                {
+                    <span class="code-string">"id"</span>: <span class="code-string">"def456"</span>,
+                    <span class="code-string">"name"</span>: <span class="code-string">"Main Stage"</span>,
+                    <span class="code-string">"slug"</span>: <span class="code-string">"main-stage"</span>,
+                    <span class="code-string">"color"</span>: <span class="code-string">"#FF5733"</span>
+                }
             ],
             ...
         }
@@ -514,18 +578,21 @@
                                 <tbody>
                                     <tr><td><code class="doc-inline-code">name</code></td><td>Yes</td><td>Schedule name (max 255 characters). The subdomain is generated from it and cannot be set through the API.</td></tr>
                                     <tr><td><code class="doc-inline-code">type</code></td><td>Yes</td><td>Schedule type: <code class="doc-inline-code">venue</code>, <code class="doc-inline-code">talent</code>, or <code class="doc-inline-code">curator</code></td></tr>
-                                    <tr><td><code class="doc-inline-code">email</code></td><td>No</td><td>Contact email</td></tr>
+                                    <tr><td><code class="doc-inline-code">email</code></td><td>No</td><td>Contact email (max 255 characters). On the hosted service a schedule made without one takes your account's own address, which is what verifies it (see below). On a selfhosted install it stays empty.</td></tr>
                                     <tr><td><code class="doc-inline-code">description</code></td><td>No</td><td>Markdown description (max 10,000 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">short_description</code></td><td>No</td><td>One-line summary (max 200 characters)</td></tr>
-                                    <tr><td><code class="doc-inline-code">timezone</code></td><td>No</td><td>IANA timezone name (defaults to your account timezone)</td></tr>
+                                    <tr><td><code class="doc-inline-code">timezone</code></td><td>No</td><td>IANA timezone name (defaults to your account timezone). A name that is not a timezone returns a <code class="doc-inline-code">422</code>.</td></tr>
                                     <tr><td><code class="doc-inline-code">language_code</code></td><td>No</td><td>Supported language code such as en, es, fr (defaults to your account language)</td></tr>
-                                    <tr><td><code class="doc-inline-code">website</code></td><td>No</td><td>Website URL</td></tr>
-                                    <tr><td><code class="doc-inline-code">address1</code>, <code class="doc-inline-code">city</code>, <code class="doc-inline-code">state</code>, <code class="doc-inline-code">postal_code</code>, <code class="doc-inline-code">country_code</code></td><td>No</td><td>Address fields, used for venue schedules. Send <code class="doc-inline-code">country_code</code> as a two-letter ISO code.</td></tr>
+                                    <tr><td><code class="doc-inline-code">website</code></td><td>No</td><td>Website URL (max 255 characters)</td></tr>
+                                    <tr><td><code class="doc-inline-code">address1</code>, <code class="doc-inline-code">city</code>, <code class="doc-inline-code">state</code>, <code class="doc-inline-code">postal_code</code>, <code class="doc-inline-code">country_code</code></td><td>No</td><td>Address fields, used for venue schedules (max 255 characters each, 20 for <code class="doc-inline-code">postal_code</code>). Send <code class="doc-inline-code">country_code</code> as a two-letter ISO code.</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mt-6">On the hosted service one account may own up to 50 schedules. Beyond that the endpoint returns a <code class="doc-inline-code">422</code>.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mt-4">On the hosted service a schedule is not public until its contact email or phone number is verified: until then its pages answer visitors with a 404, so search engines never see them. Send your account's own email address and the schedule shares your account's verification; any other address is sent a verification link.</p>
+                        <h3 class="doc-subheading">What comes back</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The reply is <code class="doc-inline-code">201</code>, and <code class="doc-inline-code">data</code> holds <a href="#schedule-object" class="doc-link">the schedule object</a>, generated <code class="doc-inline-code">subdomain</code> included. This is the one place the object is returned for a schedule on the Free plan, so you can read what you made. <a href="#show-schedule" class="doc-link">Show Schedule</a> answers <code class="doc-inline-code">403</code> for it and <a href="#list-schedules" class="doc-link">List Schedules</a> leaves it out until it is on Pro or Enterprise.</p>
+                        <h3 class="doc-subheading">Hosted limits and verification</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service one account may own up to 50 schedules. Beyond that the endpoint returns a <code class="doc-inline-code">422</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service a schedule is not public until its contact email or phone number is verified: until then its pages answer visitors with a 404, so search engines never see them. Leave <code class="doc-inline-code">email</code> out, or send your account's own address, and the schedule shares your account's verification; any other address is sent a verification link. A selfhosted install treats every new schedule as verified.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -533,7 +600,12 @@
                             <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/schedules"</span> \
          -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
          -H <span class="code-string">"Content-Type: application/json"</span> \
-         -d <span class="code-string">'{"name": "My Venue", "type": "venue", "city": "New York"}'</span></code></pre>
+         -d <span class="code-string">'{
+             "name": "My Venue",
+             "type": "venue",
+             "email": "you@yourdomain.com",
+             "city": "New York"
+         }'</span></code></pre>
                         </div>
                     </div>
                 </div>
@@ -553,8 +625,9 @@
                             <span class="api-method-pill api-method-pill-put px-2 py-1 rounded text-sm font-medium">PUT</span>
                             <code class="doc-inline-code">/api/schedules/{subdomain}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Update a schedule. Include only the fields you want to change; anything you omit is left alone. Takes the same fields as <a href="#create-schedule" class="doc-link">Create Schedule</a> apart from <code class="doc-inline-code">type</code>: neither the schedule type nor the subdomain can be changed through the API. Requires owner or admin access and a Pro or Enterprise plan.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Branding, images, layout and integrations are not exposed here. Edit those in the admin panel, under the <strong class="text-gray-900 dark:text-white">Style</strong>, <strong class="text-gray-900 dark:text-white">Settings</strong> and <strong class="text-gray-900 dark:text-white">Integrations</strong> sections of the schedule editor.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Update a schedule. Include only the fields you want to change; anything you omit is left alone. Takes the same fields as <a href="#create-schedule" class="doc-link">Create Schedule</a> apart from <code class="doc-inline-code">type</code>: neither the schedule type nor the subdomain can be changed through the API, and any other field in the request is ignored. Requires owner or admin access and a Pro or Enterprise plan. Returns <a href="#schedule-object" class="doc-link">the schedule object</a>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service, changing <code class="doc-inline-code">email</code> clears the schedule's email verification and sends a verification link to the new address. Unless its phone number is verified, the schedule's pages stop being public until that link is followed.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Branding, images, layout and integrations are not exposed here. Edit those in the admin panel, on the <strong class="text-gray-900 dark:text-white">Style</strong>, <strong class="text-gray-900 dark:text-white">Settings</strong> and <strong class="text-gray-900 dark:text-white">Integrations</strong> tabs of the schedule form.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -593,6 +666,7 @@
                             <li>Frees its subdomain for anyone to register, keeping the old name on record so a platform admin can restore the schedule</li>
                         </ul>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Events are not swept up automatically. The exception is a talent schedule: an event whose only member was that schedule is deleted with it, so nothing is left orphaned.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule with a paid plan has its subscription cancelled first, at once and not at the end of the billing period. If that cancellation fails the reply is <code class="doc-inline-code">502</code> and nothing is deleted, so the call is safe to repeat.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -777,7 +851,7 @@
                             <code class="doc-inline-code">/api/events</code>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of events on the schedules where you are the owner or an admin, newest start date first. On the hosted service an event is only listed if at least one of its schedules is on a Pro or Enterprise plan. Appointment bookings are never returned here; they are not calendar events.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Drafts, internal and unlisted events are all included, so check <code class="doc-inline-code">is_draft</code>, <code class="doc-inline-code">is_internal</code> and <code class="doc-inline-code">is_private</code> before republishing a row on a public site.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Drafts, internal and unlisted events are all included, so check <code class="doc-inline-code">is_draft</code>, <code class="doc-inline-code">is_internal</code> and <code class="doc-inline-code">is_private</code> before republishing a row on a public site. Each row is <a href="#event-object" class="doc-link">the event object</a>.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
@@ -797,7 +871,7 @@
                         </div>
                         <div class="doc-callout doc-callout-info">
                             <div class="doc-callout-title">All times are UTC</div>
-                            <p>The API reads and writes <code class="doc-inline-code">starts_at</code> in UTC, in <code class="doc-inline-code">Y-m-d H:i:s</code> format with no offset suffix. The schedule's own timezone only controls how that instant is displayed on the guest page, so convert on your side before filtering or creating.</p>
+                            <p>The API reads and writes <code class="doc-inline-code">starts_at</code> in UTC, in <code class="doc-inline-code">Y-m-d H:i:s</code> format with no offset suffix. The schedule's own timezone only controls how that instant is displayed on the guest page, so convert on your side before filtering or creating. <a href="#dates-and-times" class="doc-link">Dates and times</a> lists every format.</p>
                         </div>
                     </div>
                     <div class="api-endpoint-code">
@@ -842,7 +916,36 @@
                             <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
                             <code class="doc-inline-code">/api/events/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single event by its encoded ID, including its ticket types, add-ons, members, agenda parts, venue, recurring configuration and visibility flags. Requires owner or admin access on one of the event's schedules, and a Pro or Enterprise plan.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single event by its encoded ID, including its ticket types, add-ons, members, agenda parts, venue, recurring configuration and visibility flags. Requires owner or admin access on one of the event's schedules, and a Pro or Enterprise plan. An appointment booking, which <a href="#list-events" class="doc-link">List Events</a> leaves out, can be read here by its ID.</p>
+                        <h3 class="doc-subheading" id="event-object">The event object</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">List, Show, Create and Update Event and Upload Flyer return this shape, and so do the <code class="doc-inline-code">event.*</code> <a href="{{ route('marketing.docs.developer.webhooks') }}#payload" class="doc-link">webhooks</a>. A field with nothing stored is <code class="doc-inline-code">null</code>, except the few marked as present only in some cases.</p>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Field</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">id</code>, <code class="doc-inline-code">url</code></td><td>Encoded event ID and the address of the event's public page</td></tr>
+                                    <tr><td><code class="doc-inline-code">name</code>, <code class="doc-inline-code">short_description</code>, <code class="doc-inline-code">description</code></td><td>Name, short summary and Markdown description</td></tr>
+                                    <tr><td><code class="doc-inline-code">starts_at</code>, <code class="doc-inline-code">duration</code></td><td>Start in UTC (<code class="doc-inline-code">Y-m-d H:i:s</code>) and length in hours</td></tr>
+                                    <tr><td><code class="doc-inline-code">category_id</code>, <code class="doc-inline-code">category_name</code>, <code class="doc-inline-code">category_color</code></td><td>The category's integer ID, with its name and colour as the schedule has them</td></tr>
+                                    <tr><td><code class="doc-inline-code">is_draft</code>, <code class="doc-inline-code">is_private</code>, <code class="doc-inline-code">is_internal</code></td><td>Visibility flags, see <a href="#create-event" class="doc-link">Create Event</a></td></tr>
+                                    <tr><td><code class="doc-inline-code">is_password_protected</code></td><td>Whether the event page asks for a password. The password itself is never returned.</td></tr>
+                                    <tr><td><code class="doc-inline-code">event_url</code>, <code class="doc-inline-code">registration_url</code></td><td>The online or external event link, and the external registration link</td></tr>
+                                    <tr><td><code class="doc-inline-code">venue_id</code>, <code class="doc-inline-code">venue_name</code>, <code class="doc-inline-code">venue_address1</code>, <code class="doc-inline-code">venue_subdomain</code></td><td>The event's venue schedule</td></tr>
+                                    <tr><td><code class="doc-inline-code">flyer_image_url</code></td><td>URL of the flyer image</td></tr>
+                                    <tr><td><code class="doc-inline-code">schedule_type</code></td><td><code class="doc-inline-code">single</code> or <code class="doc-inline-code">recurring</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">recurring_frequency</code>, <code class="doc-inline-code">recurring_interval</code>, <code class="doc-inline-code">days_of_week</code>, <code class="doc-inline-code">recurring_end_type</code>, <code class="doc-inline-code">recurring_end_value</code></td><td>Present only on a recurring event. <code class="doc-inline-code">days_of_week</code> reads <code class="doc-inline-code">"1111111"</code> for every frequency other than weekly and every_n_weeks.</td></tr>
+                                    <tr><td><code class="doc-inline-code">rsvp_enabled</code>, <code class="doc-inline-code">rsvp_limit</code>, <code class="doc-inline-code">tickets_enabled</code></td><td>Registration and ticketing switches</td></tr>
+                                    <tr><td><code class="doc-inline-code">seating_plan_id</code></td><td>Encoded ID of the event's seating plan, <code class="doc-inline-code">null</code> on a general-admission event</td></tr>
+                                    <tr><td><code class="doc-inline-code">tickets</code></td><td>Present only while tickets are enabled. Each row has <code class="doc-inline-code">id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">description</code>, <code class="doc-inline-code">sales_start_at</code>, <code class="doc-inline-code">sales_end_at</code>, <code class="doc-inline-code">volume_discount</code> and <code class="doc-inline-code">is_pass</code>. <code class="doc-inline-code">price</code> is a decimal string such as <code class="doc-inline-code">"25.000"</code>, here and on add-ons. A ticket that sells a seating band adds <code class="doc-inline-code">seating_band</code> and <code class="doc-inline-code">is_allocated</code>, and a pass adds its <code class="doc-inline-code">pass_*</code> settings.</td></tr>
+                                    <tr><td><code class="doc-inline-code">addons</code></td><td>Present only while tickets are enabled. Each row has <code class="doc-inline-code">id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">description</code>, <code class="doc-inline-code">image_url</code> and <code class="doc-inline-code">url</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">members</code></td><td>The event's performers, as an object rather than an array: each key is a talent schedule's encoded ID and each value holds <code class="doc-inline-code">name</code>, <code class="doc-inline-code">email</code> and <code class="doc-inline-code">youtube_url</code>. With no performers it reads <code class="doc-inline-code">[]</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">event_parts</code></td><td>Agenda parts, each with <code class="doc-inline-code">id</code>, <code class="doc-inline-code">name</code>, <code class="doc-inline-code">description</code>, <code class="doc-inline-code">start_time</code> and <code class="doc-inline-code">end_time</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">ticket_currency_code</code>, <code class="doc-inline-code">payment_method</code>, <code class="doc-inline-code">terms_url</code></td><td>Currency, payment method and the event's own terms link for tickets. <code class="doc-inline-code">terms_url</code> is read only.</td></tr>
+                                    <tr><td><code class="doc-inline-code">schedules</code></td><td>Every schedule the event is on, each with <code class="doc-inline-code">id</code>, <code class="doc-inline-code">subdomain</code>, <code class="doc-inline-code">name</code> and <code class="doc-inline-code">type</code>, plus a <code class="doc-inline-code">group</code> object (<code class="doc-inline-code">id</code>, <code class="doc-inline-code">name</code>, <code class="doc-inline-code">slug</code>) where the event is filed under a sub-schedule there</td></tr>
+                                    <tr><td><code class="doc-inline-code">created_at</code>, <code class="doc-inline-code">updated_at</code></td><td>ISO 8601 timestamps</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -858,11 +961,47 @@
             <span class="code-string">"name"</span>: <span class="code-string">"Jazz Night"</span>,
             <span class="code-string">"starts_at"</span>: <span class="code-string">"2025-03-15 20:00:00"</span>,
             <span class="code-string">"duration"</span>: <span class="code-value">3</span>,
+            <span class="code-string">"is_draft"</span>: <span class="code-value">false</span>,
+            <span class="code-string">"venue_id"</span>: <span class="code-string">"abc123"</span>,
+            <span class="code-string">"schedule_type"</span>: <span class="code-string">"single"</span>,
+            <span class="code-string">"tickets_enabled"</span>: <span class="code-value">true</span>,
             <span class="code-string">"tickets"</span>: [
-                { <span class="code-string">"id"</span>: <span class="code-string">"tkt1"</span>, <span class="code-string">"type"</span>: <span class="code-string">"General"</span>, <span class="code-string">"price"</span>: <span class="code-value">25</span>, <span class="code-string">"quantity"</span>: <span class="code-value">100</span> }
+                {
+                    <span class="code-string">"id"</span>: <span class="code-string">"tkt1"</span>,
+                    <span class="code-string">"type"</span>: <span class="code-string">"General"</span>,
+                    <span class="code-string">"price"</span>: <span class="code-string">"25.000"</span>,
+                    <span class="code-string">"quantity"</span>: <span class="code-value">100</span>,
+                    <span class="code-string">"description"</span>: <span class="code-value">null</span>,
+                    <span class="code-string">"sales_start_at"</span>: <span class="code-value">null</span>,
+                    <span class="code-string">"sales_end_at"</span>: <span class="code-value">null</span>,
+                    <span class="code-string">"volume_discount"</span>: <span class="code-value">null</span>,
+                    <span class="code-string">"is_pass"</span>: <span class="code-value">false</span>
+                }
             ],
+            <span class="code-string">"members"</span>: {
+                <span class="code-string">"tal789"</span>: {
+                    <span class="code-string">"name"</span>: <span class="code-string">"The Quartet"</span>,
+                    <span class="code-string">"email"</span>: <span class="code-string">"band@yourdomain.com"</span>,
+                    <span class="code-string">"youtube_url"</span>: <span class="code-value">null</span>
+                }
+            },
             <span class="code-string">"event_parts"</span>: [
-                { <span class="code-string">"name"</span>: <span class="code-string">"Opening Act"</span>, <span class="code-string">"start_time"</span>: <span class="code-string">"20:00"</span> }
+                {
+                    <span class="code-string">"id"</span>: <span class="code-string">"prt1"</span>,
+                    <span class="code-string">"name"</span>: <span class="code-string">"Opening Act"</span>,
+                    <span class="code-string">"description"</span>: <span class="code-value">null</span>,
+                    <span class="code-string">"start_time"</span>: <span class="code-string">"20:00"</span>,
+                    <span class="code-string">"end_time"</span>: <span class="code-string">"20:45"</span>
+                }
+            ],
+            <span class="code-string">"ticket_currency_code"</span>: <span class="code-string">"USD"</span>,
+            <span class="code-string">"schedules"</span>: [
+                {
+                    <span class="code-string">"id"</span>: <span class="code-string">"abc123"</span>,
+                    <span class="code-string">"subdomain"</span>: <span class="code-string">"my-venue"</span>,
+                    <span class="code-string">"name"</span>: <span class="code-string">"My Venue"</span>,
+                    <span class="code-string">"type"</span>: <span class="code-string">"venue"</span>
+                }
             ],
             ...
         }
@@ -886,7 +1025,8 @@
                             <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
                             <code class="doc-inline-code">/api/events/{subdomain}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Create an event on the schedule identified by <code class="doc-inline-code">{subdomain}</code>. Requires owner or admin access on that schedule and a Pro or Enterprise plan. This endpoint carries its own throttle of 30 requests per minute in addition to the write bucket.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Create an event on the schedule identified by <code class="doc-inline-code">{subdomain}</code>. Requires owner or admin access on that schedule and a Pro or Enterprise plan. This endpoint carries its own throttle of 30 requests per minute in addition to the write bucket. On success it returns <code class="doc-inline-code">201</code> with <a href="#event-object" class="doc-link">the event object</a>. The schedule you post to becomes the event's owner, the one that sells its tickets and sees its sales, and no later request can change that.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Only the parameters listed here are read. Anything else at the top level of the body is dropped before the event is saved, so settings the API has no field for (sponsors, custom fields, promo codes, ticket options, seating) are made in the admin panel.</p>
                         <h3 class="doc-subheading">Core fields</h3>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
@@ -897,7 +1037,7 @@
                                     <tr><td><code class="doc-inline-code">duration</code></td><td>No</td><td>Length in hours, 0 to 8760. Decimals are allowed, so 1.5 is 90 minutes. There is no separate end-time field.</td></tr>
                                     <tr><td><code class="doc-inline-code">description</code></td><td>No</td><td>Full description, Markdown supported (max 10,000 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">short_description</code></td><td>No</td><td>Short description used in listings and previews (max 500 characters)</td></tr>
-                                    <tr><td><code class="doc-inline-code">event_url</code></td><td>No</td><td>A single URL for an online event or an external event page (max 255 characters)</td></tr>
+                                    <tr><td><code class="doc-inline-code">event_url</code></td><td>No</td><td>A single URL for an online event or an external event page (max 500 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">registration_url</code></td><td>No</td><td>External registration URL, used instead of on-platform tickets (max 2048 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">category_id</code></td><td>No</td><td>Category ID, which must be in this schedule's effective category list (see <a href="#list-categories" class="doc-link">List Categories</a>)</td></tr>
                                     <tr><td><code class="doc-inline-code">category</code></td><td>No</td><td>Category name, matched case- and punctuation-insensitively against the same list. Ignored when <code class="doc-inline-code">category_id</code> is present; an unmatched name returns <code class="doc-inline-code">422 Category not found</code>.</td></tr>
@@ -920,6 +1060,7 @@
                             </table>
                         </div>
                         <h3 class="doc-subheading">Recurrence</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The recurrence fields only take effect in a request that also carries <code class="doc-inline-code">schedule_type: "recurring"</code>. Without it a new event is a single one, whatever else is sent.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
@@ -942,31 +1083,43 @@
                                     <tr><td><code class="doc-inline-code">rsvp_limit</code></td><td>No</td><td>Cap on registrations per date (integer, minimum 1)</td></tr>
                                     <tr><td><code class="doc-inline-code">tickets_enabled</code></td><td>No</td><td>Enable ticketing (boolean)</td></tr>
                                     <tr><td><code class="doc-inline-code">ticket_currency_code</code></td><td>No</td><td>Three-letter ISO currency code, for example USD. Once the event has taken money, Update Event refuses to change it with a <code class="doc-inline-code">422</code>, because past sales and any later refund are denominated in it.</td></tr>
-                                    <tr><td><code class="doc-inline-code">payment_method</code></td><td>No</td><td>cash, stripe, paypal, invoiceninja, payment_url or payfast. <code class="doc-inline-code">manual</code> is accepted as an alias for <code class="doc-inline-code">cash</code>. The method must be connected on the account; <code class="doc-inline-code">payfast</code> only settles events priced in ZAR, and <code class="doc-inline-code">paypal</code> only the currencies listed under <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a> - PayPal's own list minus the Hungarian forint, Japanese yen and New Taiwan dollar. On create, omitting this field uses the installation's <code class="doc-inline-code">DEFAULT_PAYMENT_METHOD</code> if one is set and is usable for the event's currency, falling back to <code class="doc-inline-code">cash</code>; send <code class="doc-inline-code">null</code> to mean cash explicitly. On update, omitting it leaves the stored value alone</td></tr>
+                                    <tr><td><code class="doc-inline-code">payment_method</code></td><td>No</td><td><code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">paypal</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code> or <code class="doc-inline-code">payfast</code>, with <code class="doc-inline-code">manual</code> accepted as an alias for <code class="doc-inline-code">cash</code>. See <a href="#event-payment-method" class="doc-link">Payment method</a> below.</td></tr>
                                     <tr><td><code class="doc-inline-code">payment_instructions</code></td><td>No</td><td>Instructions shown for manual payment (max 5000 characters)</td></tr>
-                                    <tr><td><code class="doc-inline-code">tickets</code></td><td>No</td><td>Array of ticket types. Each takes <code class="doc-inline-code">type</code> (required), <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">description</code>, <code class="doc-inline-code">sales_start_at</code> and <code class="doc-inline-code">sales_end_at</code>. A <code class="doc-inline-code">quantity</code> of 0 means unlimited.</td></tr>
-                                    <tr><td><code class="doc-inline-code">addons</code></td><td>No</td><td>Array of paid extras sold alongside a ticket, such as parking or merchandise. Each takes <code class="doc-inline-code">type</code> (required), <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">description</code> and <code class="doc-inline-code">url</code>. Only saved when <code class="doc-inline-code">tickets_enabled</code> is true.</td></tr>
+                                    <tr><td><code class="doc-inline-code">tickets</code></td><td>No</td><td>Array of ticket types. Each takes <code class="doc-inline-code">type</code> (required, max 255 characters), <code class="doc-inline-code">quantity</code> (integer, 0 means unlimited), <code class="doc-inline-code">price</code> (0 or more), <code class="doc-inline-code">description</code> (max 1000 characters), <code class="doc-inline-code">sales_start_at</code> and <code class="doc-inline-code">sales_end_at</code> (UTC, <code class="doc-inline-code">Y-m-d H:i:s</code>).</td></tr>
+                                    <tr><td><code class="doc-inline-code">addons</code></td><td>No</td><td>Array of paid extras sold alongside a ticket, such as parking or merchandise. Each takes <code class="doc-inline-code">type</code> (required, max 255 characters), <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">description</code> (max 1000 characters) and <code class="doc-inline-code">url</code> (max 2000 characters). Only saved when <code class="doc-inline-code">tickets_enabled</code> is true.</td></tr>
                                 </tbody>
                             </table>
                         </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every row you send in <code class="doc-inline-code">tickets</code>, <code class="doc-inline-code">addons</code> or <code class="doc-inline-code">event_parts</code> is a new row on a new event. An <code class="doc-inline-code">id</code> copied from a read of another event is ignored. On <a href="#update-event-removes" class="doc-link">Update Event</a> the same <code class="doc-inline-code">id</code> is what addresses an existing row.</p>
+                        <h3 class="doc-subheading" id="event-payment-method">Payment method</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The API stores any method from the list without checking that it is connected on the account or can settle the event's currency, so check both yourself: <code class="doc-inline-code">payfast</code> only settles events priced in ZAR, and <code class="doc-inline-code">paypal</code> only the currencies listed under <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a>, which is PayPal's own list minus the Hungarian forint, Japanese yen and New Taiwan dollar.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">On create, omitting the field uses the installation's <code class="doc-inline-code">DEFAULT_PAYMENT_METHOD</code> if one is set and is usable for the event's currency, falling back to <code class="doc-inline-code">cash</code>; send <code class="doc-inline-code">null</code> to mean cash explicitly. On update, omitting it leaves the stored value alone.</p>
                         <h3 class="doc-subheading">Agenda, venue and performers</h3>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
                                 <tbody>
-                                    <tr><td><code class="doc-inline-code">event_parts</code></td><td>No</td><td>Agenda segments within the event. Each takes <code class="doc-inline-code">name</code> (required), <code class="doc-inline-code">description</code>, <code class="doc-inline-code">start_time</code> and <code class="doc-inline-code">end_time</code>.</td></tr>
-                                    <tr><td><code class="doc-inline-code">venue_id</code></td><td>No</td><td>Encoded ID of an existing venue schedule</td></tr>
-                                    <tr><td><code class="doc-inline-code">venue_name</code></td><td>No</td><td>Venue name. Must be sent together with <code class="doc-inline-code">venue_address1</code>.</td></tr>
-                                    <tr><td><code class="doc-inline-code">venue_address1</code></td><td>No</td><td>Venue street address. The pair is looked up against venue schedules you own or follow; no match returns <code class="doc-inline-code">422 Venue not found</code> rather than creating one.</td></tr>
+                                    <tr><td><code class="doc-inline-code">event_parts</code></td><td>No</td><td>Agenda segments within the event. Each takes <code class="doc-inline-code">name</code> (required, max 255 characters), <code class="doc-inline-code">description</code> (max 1000 characters), <code class="doc-inline-code">start_time</code> and <code class="doc-inline-code">end_time</code> (plain text, up to 10 characters).</td></tr>
+                                    <tr><td><code class="doc-inline-code">venue_id</code></td><td>No</td><td>Encoded ID of an existing venue schedule. An ID that matches no schedule returns a <code class="doc-inline-code">404</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">venue_name</code></td><td>No</td><td>Venue name (max 255 characters). Send it together with <code class="doc-inline-code">venue_address1</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">venue_address1</code></td><td>No</td><td>Venue street address (max 255 characters). The pair is looked up, as an exact match on both, against venue schedules you own or follow; no match returns <code class="doc-inline-code">422 Venue not found</code> rather than creating one.</td></tr>
                                     <tr><td><code class="doc-inline-code">members</code></td><td>No</td><td>Performers, given as objects with <code class="doc-inline-code">name</code> and/or <code class="doc-inline-code">email</code>. Each is matched to an existing talent schedule you own or follow; no match returns <code class="doc-inline-code">422 Talent member not found</code>.</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="doc-callout doc-callout-info">
-                            <div class="doc-callout-title">The schedule's own type is applied for you</div>
-                            <p>Creating on a venue schedule sets that venue on the event, creating on a talent schedule adds it as a member, and creating on a curator schedule lists the event as curated. You do not need to send <code class="doc-inline-code">venue_id</code> or <code class="doc-inline-code">members</code> for the schedule you are posting to.</p>
+                        <div class="doc-callout doc-callout-warning">
+                            <div class="doc-callout-title">Send the venue name and address as a pair</div>
+                            <p>The lookup only runs when both are present. With just one of them the request skips it and falls through to the event form's own rule, which attaches the best-matching venue anywhere on the install or creates a new, unclaimed venue schedule from what you sent.</p>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">The hosted service also applies a generous daily cap on how many events one schedule or one account may create, as an anti-abuse measure. A bulk import that trips it gets a <code class="doc-inline-code">422</code> and can resume the next day. Selfhosted installs have no cap.</p>
+                        <h3 class="doc-subheading">What the schedule's type decides</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The schedule you post to is always on the event, in the place its type gives it:</p>
+                        <ul class="doc-list mb-6">
+                            <li><strong class="text-gray-900 dark:text-white">Venue.</strong> It is the event's venue. <code class="doc-inline-code">venue_id</code> and the name and address pair are overridden.</li>
+                            <li><strong class="text-gray-900 dark:text-white">Talent.</strong> It is the event's one performer. <code class="doc-inline-code">members</code> is overridden, so other performers cannot be added through a talent schedule.</li>
+                            <li><strong class="text-gray-900 dark:text-white">Curator.</strong> The event is listed on it, and takes its venue and performers from the request.</li>
+                        </ul>
+                        <h3 class="doc-subheading" id="event-daily-cap">Daily cap</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The hosted service caps how many events one schedule, and one account across its schedules, may create in a day, as an anti-abuse measure. The shipped defaults are 500 a day per schedule on Pro, 1,000 on Enterprise and 100 during a trial, and three times that per account. A bulk import that trips the cap gets a <code class="doc-inline-code">422</code> whose body carries <code class="doc-inline-code">"code": "event_create_limit"</code> beside <code class="doc-inline-code">error</code>, so it can stop at the first refusal and resume the next day. Selfhosted installs have no cap.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -974,6 +1127,7 @@
                             <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/events/my-venue"</span> \
          -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
          -H <span class="code-string">"Content-Type: application/json"</span> \
+         -H <span class="code-string">"Accept: application/json"</span> \
          -d <span class="code-string">'{
              "name": "Jazz Night",
              "starts_at": "{{ now()->addDays(7)->format('Y-m-d') }} 20:00:00",
@@ -990,10 +1144,23 @@
              ]
          }'</span></code></pre>
                         </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response (201)</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"data"</span>: {
+            <span class="code-string">"id"</span>: <span class="code-string">"evt123"</span>,
+            <span class="code-string">"name"</span>: <span class="code-string">"Jazz Night"</span>,
+            ...
+        },
+        <span class="code-string">"meta"</span>: {
+            <span class="code-string">"message"</span>: <span class="code-string">"Event created successfully"</span>
+        }
+    }</code></pre>
+                        </div>
                     </div>
                 </div>
             </section>
-    
+
             <!-- Update Event -->
             <section id="update-event" class="doc-section api-endpoint-section">
                 <div class="api-endpoint-row">
@@ -1008,12 +1175,31 @@
                             <span class="api-method-pill api-method-pill-put px-2 py-1 rounded text-sm font-medium">PUT</span>
                             <code class="doc-inline-code">/api/events/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Update an event by its encoded ID. Takes the same parameters as <a href="#create-event" class="doc-link">Create Event</a>, and supports partial updates: send only the fields you want to change. Requires owner or admin access on one of the event's schedules and a Pro or Enterprise plan.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Omitting a collection leaves it alone. The start time, recurring configuration, ticket types, add-ons and agenda parts are all carried over from the stored event when the request does not mention them.</p>
-                        <div class="doc-callout doc-callout-warning">
-                            <div class="doc-callout-title">A collection you do send replaces the whole list</div>
-                            <p>Sending <code class="doc-inline-code">tickets</code>, <code class="doc-inline-code">addons</code> or <code class="doc-inline-code">event_parts</code> replaces that whole list: any row you leave out is retired. To change one ticket type, send the full set with your edit applied. Sending <code class="doc-inline-code">tickets_enabled: false</code> retires every ticket type on the event.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Update an event by its encoded ID. Takes the same parameters as <a href="#create-event" class="doc-link">Create Event</a>, and supports partial updates: send only the fields you want to change. Requires owner or admin access on one of the event's schedules and a Pro or Enterprise plan. Returns <code class="doc-inline-code">200</code> with <a href="#event-object" class="doc-link">the event object</a>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The update runs through one of the event's schedules that you own or administer. If your account created the event but is neither owner nor admin of any of its schedules, the reply is <code class="doc-inline-code">422 No schedule found for this event that you have access to</code>.</p>
+                        <h3 class="doc-subheading" id="update-event-kept">What an update leaves alone</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A field the request does not carry keeps its stored value. That covers the start time, the visibility flags, the recurrence, the payment method, the lists of ticket types, add-ons and agenda parts, the venue, the performers and the other schedules the event is listed on. The schedule that owns the event never changes.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">What the API has no field for stays as the admin panel left it: promo codes, a ticket type's <strong class="text-gray-900 dark:text-white">Max Per Order</strong>, custom fields and pass settings, the dates added to or skipped from a series, sponsors and the event's custom fields. An update that only renames an event changes its name.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A venue, performer or listing the request does not name also keeps its answer. One that had not yet accepted the event, or had turned it down, is still in that state afterwards: an update does not accept an event on a schedule's behalf. <code class="doc-inline-code">venue_id</code>, <code class="doc-inline-code">venue_name</code> and <code class="doc-inline-code">venue_address1</code> sent as <code class="doc-inline-code">null</code> name no venue, so the event stays where it is.</p>
+                        <ul class="doc-list mb-6">
+                            <li>To change the recurrence, send <code class="doc-inline-code">schedule_type</code> with the full set of recurrence fields, since one left out goes back to its default. Without <code class="doc-inline-code">schedule_type</code> the stored frequency, interval and end rule are kept and those fields in the request are ignored; only <code class="doc-inline-code">days_of_week</code> is still applied. <code class="doc-inline-code">schedule_type: "single"</code> turns a recurring event into a single one.</li>
+                            <li><code class="doc-inline-code">schedule</code> moves the event to another sub-schedule. There is no way to take an event out of a sub-schedule through the API.</li>
+                            <li>A visibility flag takes effect as on create: Unlisted and Internal need Enterprise, and <code class="doc-inline-code">is_internal: true</code> also makes the event a Draft.</li>
+                        </ul>
+                        <h3 class="doc-subheading" id="update-event-removes">What an update replaces or removes</h3>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Request</th><th>What it does</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Carries <code class="doc-inline-code">tickets</code>, <code class="doc-inline-code">addons</code> or <code class="doc-inline-code">event_parts</code></td><td>Replaces that list, row by row. A row with the <code class="doc-inline-code">id</code> a read returned updates that row and keeps whatever the row does not send, so a ticket type keeps its ID and what was sold against it. A row without an <code class="doc-inline-code">id</code> is added. A stored row the list leaves out is retired (a ticket type or an add-on) or deleted (an agenda part). A ticket type's <code class="doc-inline-code">type</code> may be <code class="doc-inline-code">null</code> here, which is what a read returns for an event with one unnamed ticket type. An <code class="doc-inline-code">id</code> that is not one of this event's rows is refused with a <code class="doc-inline-code">422</code> naming the row, and nothing is saved.</td></tr>
+                                    <tr><td>Carries <code class="doc-inline-code">tickets_enabled: false</code></td><td>Retires every ticket type and add-on on the event, without asking, even when people have bought them.</td></tr>
+                                    <tr><td>Carries <code class="doc-inline-code">schedule_type: "single"</code></td><td>Turns a recurring event into a single one, and with that clears the dates added to and skipped from the series. Refused with a <code class="doc-inline-code">422</code> while the event sells a pass counted per date (<code class="doc-inline-code">per_occurrence</code>), which only a recurring event can have: give the pass another usage type first.</td></tr>
+                                    <tr><td>Carries <code class="doc-inline-code">venue_id</code>, or <code class="doc-inline-code">venue_name</code> with <code class="doc-inline-code">venue_address1</code></td><td>Moves the event to that venue, off the one it was at. There is no way to leave an event with no venue through the API.</td></tr>
+                                    <tr><td>Carries <code class="doc-inline-code">members</code></td><td>Replaces the performers. One you could pick in the event form (a schedule you own, administer or view, or follow while it accepts requests) and leave out of the list is taken off the event. When the update runs through a talent schedule the list is set aside, as on create, and the performers stay as they are.</td></tr>
+                                </tbody>
+                            </table>
                         </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Some schedules always stay on the event: the one the update runs through, the one that created it, and any that sit outside your account. The schedules an event is listed on cannot be named in a request, so the API neither adds nor removes one.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1042,7 +1228,9 @@
                             <code class="doc-inline-code">/api/events/{id}</code>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Permanently delete an event. Requires owner or admin access on one of its schedules and a Pro or Enterprise plan. There is no undo, so hide the event with <code class="doc-inline-code">is_draft</code> instead if you may want it back.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting also removes the synced copy from any connected Google Calendar, Outlook calendar and CalDAV calendar, cancels any running boost campaign, and deletes its sponsor logo files. Unless the event was a draft, an <code class="doc-inline-code">event.deleted</code> <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhook</a> is sent with the event's final state.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">An event that has sales is not deleted. The reply is <code class="doc-inline-code">422</code> and nothing changes, whether those sales are paid, refunded or cancelled, because the sale records would go with the event. Cancel it in the admin panel instead, which keeps the records and lets you tell the buyers.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting also removes the synced copy from any connected Google Calendar, Outlook calendar and CalDAV calendar, cancels any running boost campaign, and deletes its gallery photos and sponsor logo files. Unless the event was a draft, an <code class="doc-inline-code">event.deleted</code> <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhook</a> is sent with the event's final state.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">An appointment booking is the exception. It is cancelled, not deleted: the slot is freed, the booking and its sale are kept, the guest of a booking that was still live is emailed, and no webhook is sent. That reply is a bare <code class="doc-inline-code">{"message": "Appointment cancelled"}</code> with no <code class="doc-inline-code">data</code> wrapper.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1129,7 +1317,7 @@
                             <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
                             <code class="doc-inline-code">/api/categories/{subdomain}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule can rename, hide or add categories of its own, and <code class="doc-inline-code">category_id</code> is validated against that effective list rather than the global one. Call this variant to get the exact set a given schedule will accept, and use it whenever the schedule has customised its categories.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule can rename, remove or add categories of its own, and <code class="doc-inline-code">category_id</code> is validated against that effective list rather than the global one. Call this variant to get the exact set a given schedule will accept, and use it whenever the schedule has customised its categories. It returns the same <code class="doc-inline-code">id</code> and <code class="doc-inline-code">name</code> pairs, and <code class="doc-inline-code">404</code> for a subdomain that does not exist.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1166,7 +1354,8 @@
                             <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
                             <code class="doc-inline-code">/api/sales</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of sales on events you own or administer, newest order first. Deleted sales are excluded, and on the hosted service so are sales on schedules that are not Pro or Enterprise. RSVP registrations appear here too, as zero-value paid sales.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of sales, newest order first, each as <a href="#sale-object" class="doc-link">the sale object</a>. Deleted sales are excluded, and on the hosted service so are sales on schedules that are not Pro or Enterprise. RSVP registrations appear here too, as zero-value paid sales.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The list covers events your account created, events one of your schedules created, and events another schedule created that your venue or talent schedule has accepted. A curator schedule that only lists somebody else's event does not open that event's sales, here or on the other sale endpoints.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
@@ -1225,7 +1414,32 @@
                             <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
                             <code class="doc-inline-code">/api/sales/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single sale by its encoded ID, including a row per ticket type and add-on with <code class="doc-inline-code">ticket_id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code> and the <code class="doc-inline-code">is_addon</code> and <code class="doc-inline-code">is_pass</code> flags. On an event with allocated seating each row also carries <code class="doc-inline-code">seats</code>, the labels of the seats the sale holds. The sale's <code class="doc-inline-code">secret</code>, the token that opens the buyer's ticket page and QR code, is included only when the key belongs to the account that created the event or placed the sale. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single sale by its encoded ID. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan. A sale that exists but is not yours to read returns <code class="doc-inline-code">403</code>; a deleted or unknown one returns <code class="doc-inline-code">404</code>.</p>
+                        <h3 class="doc-subheading" id="sale-object">The sale object</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every sale endpoint except Delete Sale returns this shape, and so do the <code class="doc-inline-code">sale.*</code> <a href="{{ route('marketing.docs.developer.webhooks') }}#payload" class="doc-link">webhooks</a>. There is no currency field: read the event's <code class="doc-inline-code">ticket_currency_code</code>.</p>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Field</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">id</code>, <code class="doc-inline-code">event_id</code>, <code class="doc-inline-code">event_name</code></td><td>Encoded sale ID, and the event the sale is on</td></tr>
+                                    <tr><td><code class="doc-inline-code">subdomain</code></td><td>The schedule the sale was made through</td></tr>
+                                    <tr><td><code class="doc-inline-code">name</code>, <code class="doc-inline-code">email</code>, <code class="doc-inline-code">phone</code></td><td>The buyer, or the named guest on a guest's row</td></tr>
+                                    <tr><td><code class="doc-inline-code">event_date</code></td><td>The date of the event the sale is for (<code class="doc-inline-code">Y-m-d</code>)</td></tr>
+                                    <tr><td><code class="doc-inline-code">status</code></td><td><code class="doc-inline-code">unpaid</code>, <code class="doc-inline-code">paid</code>, <code class="doc-inline-code">cancelled</code>, <code class="doc-inline-code">refunded</code> or <code class="doc-inline-code">expired</code>. A sale whose payment arrived for a different amount reads <code class="doc-inline-code">amount_mismatch</code> while it is held for review.</td></tr>
+                                    <tr><td><code class="doc-inline-code">payment_method</code></td><td>The event's payment method when the sale was made, <code class="doc-inline-code">rsvp</code> for a free registration, or <code class="doc-inline-code">import</code> for an imported attendee</td></tr>
+                                    <tr><td><code class="doc-inline-code">payment_amount</code></td><td>What the buyer agreed to pay, as a number</td></tr>
+                                    <tr><td><code class="doc-inline-code">volume_discount_amount</code>, <code class="doc-inline-code">discount_amount</code>, <code class="doc-inline-code">gift_card_amount</code></td><td>What a volume discount, a promo code and a gift card took off. <code class="doc-inline-code">null</code> when there was none.</td></tr>
+                                    <tr><td><code class="doc-inline-code">transaction_reference</code></td><td>The payment provider's reference, or the note recorded when the sale was marked paid by hand</td></tr>
+                                    <tr><td><code class="doc-inline-code">secret</code></td><td>The token that opens the buyer's ticket page and QR code. Present only when the key belongs to the account that created the event or placed the sale.</td></tr>
+                                    <tr><td><code class="doc-inline-code">tickets</code></td><td>A row per ticket type and add-on, each with <code class="doc-inline-code">ticket_id</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">quantity</code>, <code class="doc-inline-code">price</code>, <code class="doc-inline-code">is_addon</code> and <code class="doc-inline-code">is_pass</code>. A pass adds <code class="doc-inline-code">pass_usage_type</code>, <code class="doc-inline-code">pass_visits_used</code>, <code class="doc-inline-code">pass_max_uses</code> and <code class="doc-inline-code">pass_expires_at</code>. On an event with allocated seating a row also carries <code class="doc-inline-code">seats</code>, the labels of the seats it holds.</td></tr>
+                                    <tr><td><code class="doc-inline-code">total_quantity</code></td><td>How many tickets this row holds</td></tr>
+                                    <tr><td><code class="doc-inline-code">group_id</code>, <code class="doc-inline-code">is_primary</code></td><td>Set on an order bought for several named guests, see below. An ordinary sale has <code class="doc-inline-code">group_id: null</code> and <code class="doc-inline-code">is_primary: false</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">order_id</code>, <code class="doc-inline-code">is_order_primary</code></td><td>Set on a purchase that covered several events, see below</td></tr>
+                                    <tr><td><code class="doc-inline-code">created_at</code>, <code class="doc-inline-code">updated_at</code></td><td>ISO 8601 timestamps</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h3 class="doc-subheading" id="sale-groups-and-orders">Guests, orders and amounts</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">An order bought for several named guests is stored as one row per guest, all sharing a <code class="doc-inline-code">group_id</code>. The row with <code class="doc-inline-code">is_primary</code> set to true holds the totals for the whole order; the other rows report zero so you do not double-count when you add them up. Every row in a group belongs to the same event.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">A purchase that covered several events shares an <code class="doc-inline-code">order_id</code> instead, one row per event, with <code class="doc-inline-code">is_order_primary</code> on the anchoring row. The two nest: a leg of an order can itself be split across named guests, so a row may carry both.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">payment_amount</code> is what the buyer agreed to pay, not what has been collected. The two differ for a sale bought on an <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plan</a>: the sale reads <code class="doc-inline-code">paid</code> with the full total from the first payment onwards, because the ticket is issued then, while the rest arrives over the following months. Reconcile against Stripe rather than against this field if you are counting money in the bank.</p>
@@ -1245,12 +1459,26 @@
             <span class="code-string">"event_name"</span>: <span class="code-string">"Jazz Night"</span>,
             <span class="code-string">"name"</span>: <span class="code-string">"John Doe"</span>,
             <span class="code-string">"email"</span>: <span class="code-string">"john@example.com"</span>,
+            <span class="code-string">"event_date"</span>: <span class="code-string">"2025-03-15"</span>,
             <span class="code-string">"status"</span>: <span class="code-string">"paid"</span>,
+            <span class="code-string">"payment_method"</span>: <span class="code-string">"stripe"</span>,
             <span class="code-string">"payment_amount"</span>: <span class="code-value">50</span>,
-            <span class="code-string">"total_quantity"</span>: <span class="code-value">2</span>,
+            <span class="code-string">"order_id"</span>: <span class="code-value">null</span>,
+            <span class="code-string">"is_order_primary"</span>: <span class="code-value">false</span>,
             <span class="code-string">"tickets"</span>: [
-                { <span class="code-string">"type"</span>: <span class="code-string">"General"</span>, <span class="code-string">"quantity"</span>: <span class="code-value">2</span>, <span class="code-string">"price"</span>: <span class="code-value">25</span> }
-            ]
+                {
+                    <span class="code-string">"ticket_id"</span>: <span class="code-string">"tkt1"</span>,
+                    <span class="code-string">"quantity"</span>: <span class="code-value">2</span>,
+                    <span class="code-string">"price"</span>: <span class="code-value">25</span>,
+                    <span class="code-string">"type"</span>: <span class="code-string">"General"</span>,
+                    <span class="code-string">"is_addon"</span>: <span class="code-value">false</span>,
+                    <span class="code-string">"is_pass"</span>: <span class="code-value">false</span>
+                }
+            ],
+            <span class="code-string">"total_quantity"</span>: <span class="code-value">2</span>,
+            <span class="code-string">"group_id"</span>: <span class="code-value">null</span>,
+            <span class="code-string">"is_primary"</span>: <span class="code-value">false</span>,
+            ...
         }
     }</code></pre>
                         </div>
@@ -1282,12 +1510,13 @@
                                     <tr><td><code class="doc-inline-code">email</code></td><td>Yes</td><td>Buyer email (max 255 characters)</td></tr>
                                     <tr><td><code class="doc-inline-code">tickets</code></td><td>Yes</td><td>Object mapping ticket identifiers to quantities, each 1 or more. A key may be an encoded ticket ID or a ticket type name.</td></tr>
                                     <tr><td><code class="doc-inline-code">addons</code></td><td>No</td><td>Object mapping encoded add-on IDs to quantities</td></tr>
-                                    <tr><td><code class="doc-inline-code">event_date</code></td><td>No</td><td>Which date of the event the sale is for (Y-m-d). Defaults to the event's start date, and is <strong class="text-gray-900 dark:text-white">required</strong> for a recurring event.</td></tr>
+                                    <tr><td><code class="doc-inline-code">event_date</code></td><td>No</td><td>Which date of the event the sale is for (Y-m-d). Defaults to the event's start date in the schedule's timezone, and is <strong class="text-gray-900 dark:text-white">required</strong> for a recurring event.</td></tr>
                                 </tbody>
                             </table>
                         </div>
                         <h3 class="doc-subheading">What happens on success</h3>
                         <ul class="doc-list mb-6">
+                            <li>The reply is <code class="doc-inline-code">201</code> with <a href="#sale-object" class="doc-link">the sale object</a>, <code class="doc-inline-code">secret</code> included, since your key placed the sale.</li>
                             <li>The sale is created as <code class="doc-inline-code">unpaid</code>. You cannot set the status from the request; use <a href="#update-sale" class="doc-link">Update Sale Status</a> once you have the money.</li>
                             <li>A sale whose total comes to zero is marked <code class="doc-inline-code">paid</code> immediately.</li>
                             <li>Any volume discount configured on the ticket type is applied to the total.</li>
@@ -1327,7 +1556,17 @@
                             <span class="api-method-pill api-method-pill-put px-2 py-1 rounded text-sm font-medium">PUT</span>
                             <code class="doc-inline-code">/api/sales/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Move a sale to a new status by sending an <code class="doc-inline-code">action</code>. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan. Which actions are available depends on where the sale is now; an action the current status does not allow returns a <code class="doc-inline-code">422</code> naming both. <code class="doc-inline-code">refund</code> asks one thing more, because the money leaves the event creator's account: the schedule you act through must have created the event or accepted its place on it, or the reply is <code class="doc-inline-code">403</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Move a sale to a new status by sending an <code class="doc-inline-code">action</code>. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan. Which actions are available depends on where the sale is now; an action the current status does not allow returns a <code class="doc-inline-code">422</code> naming both. <code class="doc-inline-code">refund</code> asks one thing more, because the money leaves the event creator's account: the schedule you act through must have created the event or accepted its place on it, or the reply is <code class="doc-inline-code">403</code>. A change that goes through returns <code class="doc-inline-code">200</code> with <a href="#sale-object" class="doc-link">the sale object</a> in its new state.</p>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">action</code></td><td>Yes</td><td><code class="doc-inline-code">mark_paid</code>, <code class="doc-inline-code">refund</code> or <code class="doc-inline-code">cancel</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">amount</code></td><td>No</td><td>With <code class="doc-inline-code">refund</code>: the part to send back, 0.01 or more. See <a href="#refunds" class="doc-link">Refunds</a>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">idempotency_key</code></td><td>No</td><td>With <code class="doc-inline-code">refund</code>: a key of your own that makes a retry safe</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Action</th><th>From Status</th><th>To Status</th><th>Webhook</th></tr></thead>
@@ -1339,16 +1578,14 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="doc-callout doc-callout-info">
-                            <div class="doc-callout-title">refund moves money on Stripe and PayPal</div>
-                            <p>For a Stripe or PayPal sale, <code class="doc-inline-code">refund</code> sends the money back through the provider and then updates the status. Send an optional <code class="doc-inline-code">amount</code> to return part of it; omit it and the whole remaining balance goes back. A partial refund leaves the sale <code class="doc-inline-code">paid</code>, fires no webhook, and returns <code class="doc-inline-code">200</code> with the message <code class="doc-inline-code">Partial refund sent</code>.</p>
-                            <p>Every other method - Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand - only records the refund and backs the amount out of your revenue figures, and it ignores <code class="doc-inline-code">amount</code>: the whole sale is recorded as refunded. Issue the money in your payment provider, then call this to keep the two in step.</p>
-                            <p>It does not work the other way round. A refund issued from the Stripe or PayPal dashboard is not reported back to Event Schedule, so the sale stays <code class="doc-inline-code">paid</code> and its tickets keep scanning. Refund through this endpoint or the Sales page instead.</p>
-                            <p>A refund the gateway refuses returns <code class="doc-inline-code">422</code> and leaves the sale <code class="doc-inline-code">paid</code>. A refund whose outcome could not be confirmed returns <code class="doc-inline-code">409</code>: nothing is retried automatically, because retrying a refund that may already have gone through is how one refund becomes two. Check it against your provider before acting.</p>
-                            <p>Send an <code class="doc-inline-code">idempotency_key</code> of your own, up to 64 letters, digits, <code class="doc-inline-code">_</code>, <code class="doc-inline-code">.</code>, <code class="doc-inline-code">:</code> or <code class="doc-inline-code">-</code>, to make retrying safe. A repeat carrying the same key returns the first attempt's outcome instead of issuing a second refund, and a repeat sent while the first is still running returns <code class="doc-inline-code">409</code>. Without a key, a retried request is a second refund.</p>
-                            <p>A payment plan is refunded in full only: sending <code class="doc-inline-code">amount</code> for one returns <code class="doc-inline-code">422</code>. Each collected payment goes back separately, and an attempt that stops partway can be repeated to return the rest.</p>
-                        </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling or fully refunding releases the seats back into stock and notifies anyone on the waitlist for that date; a partial refund does neither. A named guest's row inside a <code class="doc-inline-code">group_id</code> returns <code class="doc-inline-code">403</code>: act on the group's primary row (<code class="doc-inline-code">is_primary</code>), which carries the change to every guest. On a multi-event order the row with <code class="doc-inline-code">is_order_primary</code> carries it to every leg, while acting on any other leg changes only that leg and its own guests.</p>
+                        <h3 class="doc-subheading" id="refunds">Refunds</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">For a Stripe or PayPal sale, <code class="doc-inline-code">refund</code> sends the money back through the provider and then updates the status. Send an optional <code class="doc-inline-code">amount</code> to return part of it; omit it and the whole remaining balance goes back. A partial refund leaves the sale <code class="doc-inline-code">paid</code>, fires no webhook, and returns <code class="doc-inline-code">200</code> with the message <code class="doc-inline-code">Partial refund sent</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every other method - Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand - only records the refund and backs the amount out of your revenue figures, and it ignores <code class="doc-inline-code">amount</code>: the whole sale is recorded as refunded. Issue the money in your payment provider, then call this to keep the two in step.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">It does not work the other way round. A refund issued from the Stripe or PayPal dashboard is not reported back to Event Schedule, so the sale stays <code class="doc-inline-code">paid</code> and its tickets keep scanning. Refund through this endpoint or the Sales page instead.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A refund the gateway refuses returns <code class="doc-inline-code">422</code> and leaves the sale <code class="doc-inline-code">paid</code>. A refund whose outcome could not be confirmed returns <code class="doc-inline-code">409</code>: nothing is retried automatically, because retrying a refund that may already have gone through is how one refund becomes two. Check it against your provider before acting.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Send an <code class="doc-inline-code">idempotency_key</code> of your own, up to 64 letters, digits, <code class="doc-inline-code">_</code>, <code class="doc-inline-code">.</code>, <code class="doc-inline-code">:</code> or <code class="doc-inline-code">-</code>, to make retrying safe. A repeat carrying the same key returns the first attempt's outcome instead of issuing a second refund, and a repeat sent while the first is still running returns <code class="doc-inline-code">409</code>. Without a key, a retried request is a second refund.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">A payment plan is refunded in full only: sending <code class="doc-inline-code">amount</code> for one returns <code class="doc-inline-code">422</code>. Each collected payment goes back separately, and an attempt that stops partway can be repeated to return the rest.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1385,6 +1622,7 @@
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Remove a sale from your records. It is cancelled first, so its seats return to stock, and then flagged as deleted: it stops appearing in <a href="#list-sales" class="doc-link">List Sales</a> and in the admin panel, and <a href="#show-sale" class="doc-link">Show Sale</a> returns <code class="doc-inline-code">404</code> for it. Requires owner or admin access on the event's schedule and a Pro or Enterprise plan.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting the row with <code class="doc-inline-code">is_order_primary</code> deletes the whole multi-event order, and deleting a group's primary row deletes its guests with it. A named guest's row returns <code class="doc-inline-code">403</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting moves no money and sends no webhook, not even <code class="doc-inline-code">sale.cancelled</code>. To give a buyer their money back, <a href="#refunds" class="doc-link">refund</a> the sale first.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">
@@ -1484,6 +1722,7 @@
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns fan comments, photos and videos submitted on events for schedules you own or administer, all three kinds merged into one feed, newest first. Approved items only by default, which is what you want when displaying them on an external site. Submitter email addresses are never included. Read only: approve and reject submissions in the admin panel.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Each kind of submission has its own <code class="doc-inline-code">id</code> sequence, so an <code class="doc-inline-code">id</code> is only unique within a <code class="doc-inline-code">type</code>. Key on the two together when storing rows from this feed.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Every row carries the fields in the example. What follows them depends on the <code class="doc-inline-code">type</code>: a comment has <code class="doc-inline-code">comment</code>, a photo has <code class="doc-inline-code">photo_url</code>, and a video has <code class="doc-inline-code">youtube_url</code> and <code class="doc-inline-code">embed_url</code>. <code class="doc-inline-code">event_part_id</code> is the agenda part the submission was made on, or <code class="doc-inline-code">null</code>.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
@@ -1512,6 +1751,7 @@
                 <span class="code-string">"type"</span>: <span class="code-string">"photo"</span>,
                 <span class="code-string">"event_id"</span>: <span class="code-string">"ev456"</span>,
                 <span class="code-string">"event_name"</span>: <span class="code-string">"Jazz Night"</span>,
+                <span class="code-string">"event_part_id"</span>: <span class="code-value">null</span>,
                 <span class="code-string">"event_date"</span>: <span class="code-string">"2026-07-10"</span>,
                 <span class="code-string">"submitted_by"</span>: <span class="code-string">"Dana Guest"</span>,
                 <span class="code-string">"is_guest_submission"</span>: <span class="code-value">true</span>,
@@ -1537,7 +1777,7 @@
                             </svg>
                             Error Handling
                         </h2>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">The API uses standard HTTP status codes and always returns the reason as a JSON <code class="doc-inline-code">error</code> string.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The API uses standard HTTP status codes, and every endpoint returns the reason as a JSON <code class="doc-inline-code">error</code> string. The few failures raised outside an endpoint carry <code class="doc-inline-code">message</code> in its place, and need an <code class="doc-inline-code">Accept</code> header to be JSON at all: see <a href="#accept-header" class="doc-link">Ask for JSON</a>.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Code</th><th>When you see it</th></tr></thead>
@@ -1547,12 +1787,13 @@
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">400</span></td><td>Verification codes requested on a selfhosted install, where they do not apply</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">401</span></td><td>API key missing, invalid, or past its one-year expiry. Also a wrong email or password on Login.</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">403</span></td><td>You are not an owner or admin of the record, the schedule is not on a Pro or Enterprise plan, the sale row is a named guest's rather than its group's primary, the account uses two-factor authentication, or selfhosted registration is closed</td></tr>
-                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">404</span></td><td>Not found, or found but outside the schedules your key can reach</td></tr>
+                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">404</span></td><td>The record does not exist or has been deleted. A schedule your key cannot reach also answers <code class="doc-inline-code">404</code>, where an event or a sale answers <code class="doc-inline-code">403</code>.</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">409</span></td><td>Login when the account already has an unexpired API key, or a refund whose outcome could not be confirmed or is still in progress</td></tr>
-                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">422</span></td><td>Validation error, with field-level detail in <code class="doc-inline-code">errors</code>. Also business refusals such as an unmatched venue, a sold-out ticket or a past event.</td></tr>
+                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">422</span></td><td>Validation error, with field-level detail in <code class="doc-inline-code">errors</code>. Also business refusals such as an unmatched venue, a sold-out ticket, a past event, deleting an event that has sales, or the daily cap on new events.</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">423</span></td><td>The API key is blocked for 15 minutes after 10 consecutive failed attempts</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">429</span></td><td>Rate limit exceeded, see <a href="#rate-limits" class="doc-link">Rate Limits</a></td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">500</span></td><td>Server error. Retry with backoff; the failure is logged on our side.</td></tr>
+                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">502</span></td><td><a href="#delete-schedule" class="doc-link">Delete Schedule</a> could not cancel the schedule's paid plan, so nothing was deleted</td></tr>
                                 </tbody>
                             </table>
                         </div>

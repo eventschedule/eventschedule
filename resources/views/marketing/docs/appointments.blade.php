@@ -12,9 +12,9 @@
         <x-doc-nav-link href="#date-overrides">Date overrides</x-doc-nav-link>
         <x-doc-nav-link href="#buffers-and-notice">Scheduling rules</x-doc-nav-link>
         <x-doc-nav-link href="#location">Where you meet</x-doc-nav-link>
-        <x-doc-nav-link href="#guest-details">What you ask guests</x-doc-nav-link>
         <x-doc-nav-link href="#payments">Payments</x-doc-nav-link>
         <x-doc-nav-link href="#refunds" sub>Refunds</x-doc-nav-link>
+        <x-doc-nav-link href="#guest-details">What you ask guests</x-doc-nav-link>
         <x-doc-nav-link href="#approval">Approval</x-doc-nav-link>
         <x-doc-nav-link href="#bookings">Managing bookings</x-doc-nav-link>
         <x-doc-nav-link href="#rescheduling">Rescheduling</x-doc-nav-link>
@@ -32,6 +32,7 @@
             How booking works
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Appointment booking lets guests reserve a time with you on a public page. You define <strong class="text-gray-900 dark:text-white">appointment types</strong> (for example a 30 minute intro call), and guests pick an open slot and book it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It lives on the <strong class="text-gray-900 dark:text-white">Appointments</strong> tab of your schedule in the admin panel, on every schedule type. The tab has two views, switched at its top left: <strong class="text-gray-900 dark:text-white">Appointment types</strong>, where you set up what can be booked, and <strong class="text-gray-900 dark:text-white">Bookings</strong>, where you see what has been. A number on the tab, and again on Bookings, counts the requests still waiting for your answer.</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li><strong class="text-gray-900 dark:text-white">You</strong> create one or more appointment types and set the hours you take bookings.</li>
             <li><strong class="text-gray-900 dark:text-white">A guest</strong> opens your booking page, picks a day and time, and enters their details.</li>
@@ -41,7 +42,7 @@
             <div class="doc-callout-title">Bookings stay off your public schedule</div>
             <p>Every booking is created as an unlisted event, so it never shows up on your public schedule, your iCal feed, your RSS feed, or your event graphics. It does block the time against further bookings, it syncs to your own connected calendars, and it appears on your Sales page.</p>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Appointment booking is available on <strong class="text-gray-900 dark:text-white">every plan</strong>. The free plan carries <strong class="text-gray-900 dark:text-white">one</strong> appointment type with weekly hours, a public booking page and every guest email. Pro adds more types, lets a type carry a <strong class="text-gray-900 dark:text-white">price</strong>, and unlocks the scheduling rules: date overrides, buffers, minimum notice and the approval step.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Appointment booking is available on <strong class="text-gray-900 dark:text-white">every plan</strong>. The free plan carries <strong class="text-gray-900 dark:text-white">one</strong> appointment type with weekly hours, a public booking page and every guest email. Pro adds more types, lets a type carry a <strong class="text-gray-900 dark:text-white">price</strong>, and unlocks the scheduling rules: date overrides, buffers, minimum notice, the booking window and the approval step.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -53,7 +54,7 @@
                 <tbody>
                     <tr>
                         <td>Free</td>
-                        <td>1</td>
+                        <td>1 active at a time. A type you have switched off does not count</td>
                     </tr>
                     <tr>
                         <td>Pro</td>
@@ -83,50 +84,67 @@
         </h2>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open your schedule in the admin panel and go to the <strong class="text-gray-900 dark:text-white">Appointments</strong> tab.</li>
-            <li>Choose <strong class="text-gray-900 dark:text-white">New appointment type</strong>.</li>
-            <li>Fill in the <strong class="text-gray-900 dark:text-white">Details</strong> at the top, then work down the editor: Availability, Scheduling rules, Location, Price, Booking form.</li>
-            <li>Leave <strong class="text-gray-900 dark:text-white">Active</strong> on at the bottom and choose <strong class="text-gray-900 dark:text-white">Save</strong>.</li>
+            <li>Choose <strong class="text-gray-900 dark:text-white">New appointment type</strong>. The editor takes over the tab until you save or cancel.</li>
+            <li>Fill in the <strong class="text-gray-900 dark:text-white">Details</strong> card, then work through the other six: Weekly hours, Date overrides, Scheduling rules, Location, Price and Booking form. On a wide screen they sit in two columns.</li>
+            <li>Leave <strong class="text-gray-900 dark:text-white">Active</strong> switched on in the bar at the top and choose <strong class="text-gray-900 dark:text-white">Save</strong> beside it. The bar stays in view as you scroll, and <strong class="text-gray-900 dark:text-white">Cancel</strong> in it goes back to the list without saving.</li>
         </ol>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The rest of this page follows those editor sections in order. The <strong class="text-gray-900 dark:text-white">Details</strong> section itself holds three fields:</p>
+
+        <x-doc-screenshot id="appointments--editor" alt="The appointment type editor: the bar with Active, Cancel and Save, then the Details card with Name, Description and Duration" />
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On the Free plan a small meter beside the button reads <strong class="text-gray-900 dark:text-white">1 of 1 used</strong> once your type is active, and the button carries a Pro lock: pressing it explains the allowance rather than opening the editor.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The rest of this page follows the editor's cards in order. The <strong class="text-gray-900 dark:text-white">Details</strong> card itself holds three fields:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Name</strong> - what guests see in the list, for example "30 minute intro call". A new type starts out named "30 minute meeting".</li>
             <li><strong class="text-gray-900 dark:text-white">Description</strong> - optional detail shown under the name on the booking page.</li>
             <li><strong class="text-gray-900 dark:text-white">Duration</strong> - how long the appointment runs. Tap one of the presets (15, 30, 45, 60, 90 or 120 minutes) or type any value from 5 minutes to 24 hours in the box beside them.</li>
         </ul>
-        <h3 class="doc-subheading">The types list</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Back on the Appointments tab, each type shows its duration, its price, whether it requires confirmation, and how many bookings it has taken. The buttons on the row are:</p>
+        <h3 id="types-list" class="doc-subheading">The types list</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Back on the Appointments tab, each type is a card with three parts. The first names the type and shows its duration, its price or <strong class="text-gray-900 dark:text-white">Free</strong>, <strong class="text-gray-900 dark:text-white">Requires confirmation</strong> if it does, and how many bookings it has taken; a type that is switched off is marked <strong class="text-gray-900 dark:text-white">Inactive</strong>. The second shows the week at a glance, with the days it is open filled in, its earliest and latest hours, and where it happens (it is left out on a phone). The third holds the actions:</p>
+
+        <x-doc-screenshot id="appointments--types" alt="The Appointments tab with three types: the Your booking page row with Copy Link and Preview, then a card for each type with its weekdays, hours, Active switch, Edit and the three-dot menu" />
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
                     <tr>
                         <th>Action</th>
+                        <th>Where</th>
                         <th>What it does</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>Active</td>
-                        <td>A switch that turns the type on or off for guests. Turning it off stops new bookings and hides the type from your booking page. Bookings already made are unaffected.</td>
-                    </tr>
-                    <tr>
-                        <td>Copy link</td>
-                        <td>Copies that type's own booking address, so you can link straight to it. Only shown while the type is bookable.</td>
+                        <td>On the card</td>
+                        <td>A switch that turns the type on or off for guests, saved the moment you flip it. Turning it off stops new bookings and hides the type from your booking page. Bookings already made are unaffected.</td>
                     </tr>
                     <tr>
                         <td>Edit</td>
+                        <td>On the card</td>
                         <td>Reopens the type in the editor.</td>
                     </tr>
                     <tr>
+                        <td>Preview</td>
+                        <td>Actions menu (the three dots)</td>
+                        <td>Opens that type's booking page in a new tab, as a guest sees it. Only shown while the type is bookable.</td>
+                    </tr>
+                    <tr>
+                        <td>Copy Link</td>
+                        <td>Actions menu</td>
+                        <td>Copies that type's own booking address, so you can link straight to it. Only shown while the type is bookable.</td>
+                    </tr>
+                    <tr>
                         <td>Clone</td>
-                        <td>Makes a copy named "... (Copy)" and opens it in the editor, switched off, so you rename it before anyone can book it. A clone uses one of your plan's appointment types.</td>
+                        <td>Actions menu</td>
+                        <td>Makes a copy named "... (Copy)" and opens it in the editor, switched off, so you rename it before anyone can book it. On the Free plan it is refused while your one type is active.</td>
                     </tr>
                     <tr>
                         <td>Delete</td>
-                        <td>Stops guests booking the type. Bookings already made are kept, and so is their history on the Sales page.</td>
+                        <td>Actions menu</td>
+                        <td>Asks first, then stops guests booking the type and takes it off the list. Bookings already made are kept, and so is their history on the Sales page.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A card also says, in an amber note, when its type cannot be booked as it stands: no weekly hours, no payment method a paid type can use, or a price on a plan that cannot charge.</p>
         <p class="text-gray-600 dark:text-gray-300">Create as many types as your plan allows. A free intro call and a paid consultation can sit side by side with different hours, prices, and rules.</p>
     </section>
 
@@ -138,17 +156,17 @@
             </svg>
             Weekly hours
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Weekly hours</strong> sits at the top of the editor's <strong class="text-gray-900 dark:text-white">Availability</strong> section. Tick the days you take bookings and set the hours for each one. A new type starts on Monday to Friday, 09:00 to 17:00.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4"><strong class="text-gray-900 dark:text-white">Weekly hours</strong> is the editor's second card, under Details. Tick the days you take bookings and set the hours for each one. A new type starts on Monday to Friday, 09:00 to 17:00.</p>
         <ul class="doc-list mb-6">
-            <li>A day can hold up to <strong class="text-gray-900 dark:text-white">four ranges</strong>, so mornings and late afternoons can be open while the middle of the day is not.</li>
+            <li>A day can hold up to <strong class="text-gray-900 dark:text-white">four ranges</strong>, so mornings and late afternoons can be open while the middle of the day is not. The plus at the end of a day's row (<strong class="text-gray-900 dark:text-white">Add hours</strong>) adds one, and the cross beside a range removes it.</li>
             <li>Ranges cannot overlap, and each one has to end after it starts. Start and end times are offered in 15 minute steps, labelled in your schedule's 12 or 24 hour format.</li>
-            <li><strong class="text-gray-900 dark:text-white">Copy to all selected days</strong> pushes one day's ranges onto every other ticked day, which is much faster than setting a week a dropdown at a time.</li>
+            <li>The copy icon beside the plus (<strong class="text-gray-900 dark:text-white">Copy to all selected days</strong>) pushes one day's ranges onto every other ticked day, which is much faster than setting a week a dropdown at a time.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Below the hours, <strong class="text-gray-900 dark:text-white">Start times every</strong> controls how often a slot is offered inside those hours: 5, 10, 15, 20, 30 or 60 minutes. Leave it on <strong class="text-gray-900 dark:text-white">Same as the duration</strong> and slots line up back to back, so a 30 minute call is offered at 9:00, 9:30, 10:00. Set it to 15 instead and the same call can also start at 9:15 or 9:45, which fills a day more densely at the cost of leaving odd gaps behind.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Hours are in your <strong class="text-gray-900 dark:text-white">schedule's timezone</strong>. Guests always see open times converted to their own timezone, with your timezone shown alongside so nobody has to do the maths.</p>
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Set your timezone first</div>
-            <p>If your schedule has no timezone set, slots are worked out in the application's default timezone and the Appointments tab warns you. Set it under <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Edit Schedule, Details</a> before you share your booking page.</p>
+            <p>If your schedule has no timezone set, slots are worked out in the application's default timezone and the Appointments tab warns you, with an <strong>Edit</strong> link to the schedule form. Set it under <a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Edit Schedule &rarr; Details &rarr; Language and time</a> before you share your booking page.</p>
         </div>
         <h3 class="doc-subheading">What else blocks a slot</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Open times also respect what is already on your schedule. Anything that overlaps a slot removes it:</p>
@@ -167,20 +185,21 @@
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Date overrides
+            Date overrides <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Weekly hours repeat every week, so use a date override when one particular day is different. <strong class="text-gray-900 dark:text-white">Date overrides</strong> is the last block in the editor's Availability section.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Weekly hours repeat every week, so use a date override when one particular day is different. <strong class="text-gray-900 dark:text-white">Date overrides</strong> is the editor's third card, under Weekly hours.</p>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Choose <strong class="text-gray-900 dark:text-white">Add date</strong> and pick the date.</li>
+            <li>Choose <strong class="text-gray-900 dark:text-white">+ Add Date</strong> and pick the date.</li>
             <li>Leave it marked <strong class="text-gray-900 dark:text-white">Unavailable</strong> to close the date completely, or untick that and set the hours you are open just for that date.</li>
             <li>Save the type. Removing the row later puts that date back on its normal weekly hours.</li>
         </ol>
         <p class="text-gray-600 dark:text-gray-300 mb-4">An override replaces the weekly hours for that date rather than adding to them, and the same four-range, no-overlap rule applies. Public holidays, a day off, a morning-only Friday before a long weekend, and a one-off late evening are all overrides.</p>
-        <div class="doc-callout mb-6">
+        <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Overrides are per appointment type</div>
             <p>Each type keeps its own overrides, so closing a date for one type does not close it for the others. If you take a whole week off, add the override to every type you have active, or turn the types off instead.</p>
         </div>
-        <p class="text-gray-600 dark:text-gray-300">Past overrides stay listed so you can tidy them up, and they have no effect on open times.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Past overrides stay listed so you can tidy them up, and they have no effect on open times.</p>
+        <p id="advanced-on-free" class="text-gray-600 dark:text-gray-300">On the Free plan this card and the Scheduling rules card open with the notice <strong class="text-gray-900 dark:text-white">Advanced scheduling is a Pro feature</strong>. The fields are not locked, because a schedule that used to be on Pro has to be able to see what it set. What a Free schedule saves is limited instead: it can remove an override or change the hours on one it already has, and lower or clear a buffer or the minimum notice, but it cannot add a date, raise those numbers, or move the booking window further from its 60-day default. Whatever was set on Pro keeps working until you change it.</p>
     </section>
 
     <!-- Buffers and notice -->
@@ -189,9 +208,9 @@
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Scheduling rules
+            Scheduling rules <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The editor's <strong class="text-gray-900 dark:text-white">Scheduling rules</strong> section decides how close to an appointment, and how far ahead, a guest may book.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The editor's <strong class="text-gray-900 dark:text-white">Scheduling rules</strong> card decides how close to an appointment, and how far ahead, a guest may book. Changing them needs Pro; see <a href="#advanced-on-free" class="doc-link">what a Free schedule can save</a>.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -237,29 +256,13 @@
             </svg>
             Where you meet
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Location</strong> section says how the appointment happens, and only the matching field is shown:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Location</strong> card says how the appointment happens. Pick one of three and only the matching field is shown:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">In person</strong> - enter the address guests should come to.</li>
             <li><strong class="text-gray-900 dark:text-white">Online</strong> - enter the meeting link. It is attached to the booking as the event link, so the guest gets it with their confirmation. The booking page tells them the joining link arrives after they book.</li>
             <li><strong class="text-gray-900 dark:text-white">Phone</strong> - enter the number to call. Leave it blank and the booking shows the guest's own number instead, which is the right way round when you are the one calling them.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300">Whichever you choose travels with the booking: it shows on the guest's booking page, in the confirmation email, and in the calendar invite.</p>
-    </section>
-
-    <!-- Guest details -->
-    <section id="guest-details" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
-            What you ask guests
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every booking collects a <strong class="text-gray-900 dark:text-white">name</strong> and <strong class="text-gray-900 dark:text-white">email address</strong>, which is where the confirmation goes. The editor's <strong class="text-gray-900 dark:text-white">Booking form</strong> section adds two options on top of that:</p>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Ask for a phone number</strong> - adds an optional phone field.</li>
-            <li><strong class="text-gray-900 dark:text-white">Require a phone number</strong> - makes that field mandatory. It only appears once you are asking for a number at all, and only counts while you are.</li>
-        </ul>
-        <p class="text-gray-600 dark:text-gray-300">Guests can also leave <strong class="text-gray-900 dark:text-white">notes</strong> with anything that helps you prepare. Notes are saved on the booking and shown on its row in the Bookings list, so they are there when you need them. If you want structured questions on your ticket checkout instead, see <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">Custom Fields</a>.</p>
     </section>
 
     <!-- Payments -->
@@ -270,7 +273,8 @@
             </svg>
             Payments
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Leave the <strong class="text-gray-900 dark:text-white">Price</strong> at zero for a free type. Enter an amount and the currency and payment method appear: paid types take payment by <strong class="text-gray-900 dark:text-white">cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong>, or a <strong class="text-gray-900 dark:text-white">payment link</strong>. Those three only: PayPal, Payfast and Invoice Ninja cannot be used for appointments even when they are connected, so a schedule whose only payment method is one of those needs another before a paid type can be booked. A currency is required once there is a price.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The editor's <strong class="text-gray-900 dark:text-white">Price</strong> card opens on <strong class="text-gray-900 dark:text-white">Free</strong>. Choose <strong class="text-gray-900 dark:text-white">Paid</strong> and three fields appear: <strong class="text-gray-900 dark:text-white">Amount</strong>, <strong class="text-gray-900 dark:text-white">Currency</strong> and <strong class="text-gray-900 dark:text-white">Payment Method</strong>, which is <strong class="text-gray-900 dark:text-white">Cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong> or <strong class="text-gray-900 dark:text-white">Payment Link</strong>. Those three only: PayPal, Payfast and Invoice Ninja cannot be used for appointments even when they are connected, so a schedule whose only payment method is one of those needs another before a paid type can be booked. A currency is required once there is a price, and switching back to Free sets the amount to zero.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Taking payment for a booking needs Pro <x-doc-badge plan="pro" />. On the Free plan, choosing Paid shows the notice <strong class="text-gray-900 dark:text-white">Charging for a booking is a Pro feature</strong>: the price is saved, but the type stays off your booking page until you upgrade.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -307,10 +311,10 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Stripe payments are created directly on your own connected Stripe account with no platform fee, exactly as ticket sales are.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Paid types need a payment method</div>
-            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> to make the type bookable. PayPal, Payfast and Invoice Ninja do not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
+            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Settings &rarr; Payment Methods</a> to make the type bookable. PayPal, Payfast and Invoice Ninja do not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
         </div>
         <h3 id="refunds" class="doc-subheading">Refunds</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Cancelling a paid booking does not move any money on its own. Money goes back from the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>: open the booking's sale and choose <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> from its actions menu (<strong class="text-gray-900 dark:text-white">Refund</strong> on a phone). What happens next depends on how the guest paid:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Cancelling a paid booking does not move any money on its own. Money goes back from the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>: find the booking's sale, open the three-dot menu at the end of its row and choose <strong class="text-gray-900 dark:text-white">Refund</strong>. What happens next depends on how the guest paid:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Stripe</strong> - the money goes back through Stripe first, and only then does the sale change. Refund the whole amount and the booking is cancelled: its time is freed and the guest is emailed that the appointment was cancelled. Enter less in <strong class="text-gray-900 dark:text-white">Refund Amount</strong> (the dialog shows what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>) and it is a partial refund: the booking stays confirmed, nobody is emailed, and the sale shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>.</li>
             <li><strong class="text-gray-900 dark:text-white">A payment link, or cash you have marked paid</strong> - the menu says <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. It cancels the booking the same way, freeing the time and emailing the guest, but it moves no money, so return it through whatever took the payment.</li>
@@ -321,18 +325,34 @@
         </div>
     </section>
 
+    <!-- Guest details -->
+    <section id="guest-details" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+            What you ask guests
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every booking collects a <strong class="text-gray-900 dark:text-white">name</strong> and <strong class="text-gray-900 dark:text-white">email address</strong>, which is where the confirmation goes. The editor's <strong class="text-gray-900 dark:text-white">Booking form</strong> card, the last one, adds two switches on top of that (its third switch, Require approval before confirming, is covered under <a href="#approval" class="doc-link">Approval</a>):</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Ask for a phone number</strong> - adds an optional phone field.</li>
+            <li><strong class="text-gray-900 dark:text-white">Require a phone number</strong> - makes that field mandatory. It only appears once you are asking for a number at all, and only counts while you are.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300">Guests can also leave <strong class="text-gray-900 dark:text-white">notes</strong> with anything that helps you prepare. Notes are saved on the booking and shown on its row in the Bookings list, so they are there when you need them. If you want structured questions on your ticket checkout instead, see <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-fields" class="doc-link">Custom Fields</a>.</p>
+    </section>
+
     <!-- Approval -->
     <section id="approval" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Approval
+            Approval <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Turn on <strong class="text-gray-900 dark:text-white">Require approval before confirming</strong> in the Booking form section and bookings for that type arrive as requests. The type is labelled "Requires confirmation" on the booking page, and the guest is told nothing is booked until you confirm.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Turn on <strong class="text-gray-900 dark:text-white">Require approval before confirming</strong>, the first switch on the Booking form card, and bookings for that type arrive as requests. The type is labelled "Requires confirmation" on the booking page, and the guest is told nothing is booked until you confirm. Switching it on needs Pro; a type that already has it on keeps it, and it can always be switched off.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Requests appear in two places, and the Appointments tab carries a count of the bookings still waiting on you:</p>
         <ul class="doc-list mb-6">
-            <li>The <strong class="text-gray-900 dark:text-white">Requests</strong> tab, alongside events submitted to your schedule. Each request is a card showing the guest, the time, the amount and their notes, with <strong class="text-gray-900 dark:text-white">Accept</strong> and <strong class="text-gray-900 dark:text-white">Decline</strong> at the bottom. <strong class="text-gray-900 dark:text-white">Accept all</strong> at the top of that tab clears the whole list at once, bookings included, so read it before using it.</li>
+            <li>The <strong class="text-gray-900 dark:text-white">Requests</strong> tab, alongside events submitted to your schedule. The tab is there while anything is waiting. Each request is a card: the appointment type, the guest's name, the time, their email address and phone number, the amount with <strong class="text-gray-900 dark:text-white">Paid</strong> or <strong class="text-gray-900 dark:text-white">Unpaid</strong>, and their notes, with <strong class="text-gray-900 dark:text-white">Decline</strong> and <strong class="text-gray-900 dark:text-white">Accept</strong> at the bottom. A booking that came back for approval after the guest moved it carries a <strong class="text-gray-900 dark:text-white">Moved</strong> chip. Once two or more requests are waiting, <strong class="text-gray-900 dark:text-white">Accept All</strong> appears at the top with their number. It asks you to confirm and then accepts the whole list, bookings included, so read the list before using it.</li>
             <li>The <strong class="text-gray-900 dark:text-white">Pending</strong> filter of your Bookings list, which adds a third answer: <strong class="text-gray-900 dark:text-white">Change time</strong>, to propose a different slot instead of saying yes or no. See <a href="#rescheduling" class="doc-link">Rescheduling</a>.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Accepting sends the guest their confirmation and calendar invite and syncs the booking to your connected calendars. Declining tells them they are welcome to book another time and releases the slot.</p>
@@ -349,7 +369,7 @@
             Managing bookings
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Switch the Appointments tab from <strong class="text-gray-900 dark:text-white">Appointment types</strong> to <strong class="text-gray-900 dark:text-white">Bookings</strong> to see what has been booked, filtered by <strong class="text-gray-900 dark:text-white">Upcoming</strong>, <strong class="text-gray-900 dark:text-white">Pending</strong>, <strong class="text-gray-900 dark:text-white">Past</strong>, or <strong class="text-gray-900 dark:text-white">Cancelled</strong>. Anything waiting on your approval lives under Pending only, so it never gets buried among the settled bookings in Upcoming. There is also a search box for a guest's name or email address.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each row already carries the whole booking: the date and time, the appointment type, the guest's name, email and phone number, their notes, the amount, and a status.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each row already carries the whole booking: the date and time, the appointment type, the guest's name, email and phone number (both are links, to write or call), their notes, the amount, and a status. On a phone each booking is a card with the same details and the same actions.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -372,7 +392,7 @@
                         <td>Booked but not yet paid: a cash booking with the balance due, or a card or link hold still waiting to clear.</td>
                     </tr>
                     <tr>
-                        <td>Cancelled</td>
+                        <td>This appointment was cancelled</td>
                         <td>Cancelled, fully refunded, or an unpaid hold that expired. The slot has been released. A partial refund leaves a booking Confirmed.</td>
                     </tr>
                     <tr>
@@ -382,13 +402,17 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A row still waiting on you leads with <strong class="text-gray-900 dark:text-white">Decline</strong> and <strong class="text-gray-900 dark:text-white">Accept</strong>, so it asks one clear question. Once a booking has been decided on, the row offers instead:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A row still waiting on you leads with <strong class="text-gray-900 dark:text-white">Decline</strong> and <strong class="text-gray-900 dark:text-white">Accept</strong>, so it asks one clear question, with <strong class="text-gray-900 dark:text-white">Change time</strong> beside them. Once a booking has been decided on, the row offers instead:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Preview</strong> opens the guest's own booking page in a new tab, exactly as they see it.</li>
             <li><strong class="text-gray-900 dark:text-white">Reschedule</strong> moves a booking to another time without cancelling it. See <a href="#rescheduling" class="doc-link">Rescheduling</a>.</li>
-            <li><strong class="text-gray-900 dark:text-white">Cancel appointment</strong> emails the guest and releases the slot. It is not offered on a booking that has already happened, and it moves no money, so <a href="#refunds" class="doc-link">refund</a> a paid booking first.</li>
-            <li><strong class="text-gray-900 dark:text-white">New bookings email you too</strong>, whether they are confirmed or waiting for your approval. The notice goes to every team member whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for it.</li>
-            <li><strong class="text-gray-900 dark:text-white">Paid bookings appear on the Sales page</strong>, where you mark them paid, <a href="#refunds" class="doc-link">refund them</a>, and see the revenue with the rest of your sales. They count on the Revenue tab of <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a> too.</li>
+            <li><strong class="text-gray-900 dark:text-white">Cancel appointment</strong> asks you to confirm, then emails the guest and releases the slot. It is not offered on a booking that has already happened, and it moves no money, so <a href="#refunds" class="doc-link">refund</a> a paid booking first.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A team member with view-only access sees the list but none of these actions.</p>
+        <h3 id="bookings-elsewhere" class="doc-subheading">Where else a booking shows up</h3>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">In your inbox.</strong> New bookings email you, whether they are confirmed or waiting for your approval. The notice goes to every team member whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for it.</li>
+            <li><strong class="text-gray-900 dark:text-white">On the Sales page.</strong> Paid bookings appear there, where you mark them paid, <a href="#refunds" class="doc-link">refund them</a>, and see the revenue with the rest of your sales. They count on the Revenue tab of <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a> too.</li>
         </ul>
     </section>
 
@@ -429,7 +453,9 @@
             </svg>
             The booking page
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Once a type is bookable, the Appointments tab shows <strong class="text-gray-900 dark:text-white">Your booking page</strong> with the link to copy, share and preview. It lives at <code class="doc-inline-code">/book</code> on your schedule, and each type has its own address underneath it, so you can link straight to one type. When only one type is bookable, <code class="doc-inline-code">/book</code> takes guests straight to it instead of showing a list of one.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once a type is bookable, the Appointments tab shows <strong class="text-gray-900 dark:text-white">Your booking page</strong> above the list of types: the page's address, a <strong class="text-gray-900 dark:text-white">Copy Link</strong> button and <strong class="text-gray-900 dark:text-white">Preview</strong>, which opens it in a new tab. It lives at <code class="doc-inline-code">/book</code> on your schedule, and each type has its own address underneath it, so you can link straight to one type. When only one type is bookable, <code class="doc-inline-code">/book</code> takes guests straight to it instead of showing a list of one.</p>
+
+        <x-doc-screenshot id="appointments--booking-page" alt="A public booking page titled Book a Time, listing three appointment types with their length, price and place" />
         <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Book a Time</strong> button also appears on your public schedule page. Its wording is editable under <a href="{{ route('marketing.docs.creating_schedules') }}#customize-custom-labels" class="doc-link">Customize, Custom Labels</a> <x-doc-badge plan="pro" />, like your other labels.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Guests see each type with its duration and price, then move through two steps: pick a date and a time, then enter their details. Times are grouped into morning, afternoon, and evening, with a shortcut to the next available slot. Everything is shown in the guest's own timezone, detected from their browser and changeable from a picker, with your schedule's timezone alongside it. After they confirm they get:</p>
         <ul class="doc-list mb-6">
@@ -437,7 +463,7 @@
             <li>A private link to manage the booking. It offers an <strong class="text-gray-900 dark:text-white">Add to Calendar</strong> menu for Google Calendar, Outlook and a calendar file, and lets them <a href="#rescheduling" class="doc-link">move the booking to another time</a> or cancel it while the appointment is still in the future.</li>
             <li>A reminder email about 24 hours before it starts, with the invite attached again.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300">If nothing on your schedule is bookable, the booking page is simply not there, and the Book a Time button does not appear.</p>
+        <p class="text-gray-600 dark:text-gray-300">If nothing on your schedule is bookable, the booking page is not there, and the Book a Time button does not appear. When that is because every active type carries a price the schedule cannot charge, the Appointments tab says so under <strong class="text-gray-900 dark:text-white">Your booking page is empty</strong> in place of the link.</p>
     </section>
 
     <!-- Good to know -->
@@ -448,17 +474,48 @@
             </svg>
             Good to know
         </h2>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Email has to work.</strong> On the hosted platform, guests get no confirmations or reminders, and you get no booking notices, until the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> are configured, and the Appointments tab warns you about it.</li>
-            <li><strong class="text-gray-900 dark:text-white">Reminders only go to confirmed bookings.</strong> A request still waiting on you, or a card booking still waiting on payment, does not get one.</li>
-            <li><strong class="text-gray-900 dark:text-white">The same guest cannot double-book.</strong> One email address cannot hold two bookings that start at the same time on your schedule.</li>
-            <li><strong class="text-gray-900 dark:text-white">Paid bookings follow the same rule as paid tickets.</strong> Taking payment for an appointment needs Pro, exactly as selling a priced <em>ticket</em> for an event does. Free bookings work on every plan.</li>
-            <li><strong class="text-gray-900 dark:text-white">A booking is not a ticket.</strong> It carries no QR code and offers no Add to Google Wallet button. The confirmation email, its calendar invite and the private link are what the guest keeps.</li>
-            <li><strong class="text-gray-900 dark:text-white">You can email past guests.</strong> Everyone who books counts as a ticket buyer on your schedule, so a newsletter sent to the <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">Ticket Buyers</a> segment reaches them.</li>
-            <li><strong class="text-gray-900 dark:text-white">Turn a type off rather than delete it.</strong> Switching it off hides it from guests and keeps everything already booked, and you can switch it back on later.</li>
-            <li><strong class="text-gray-900 dark:text-white">Not the same as Availability.</strong> <a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</li>
-            <li><strong class="text-gray-900 dark:text-white">Plan.</strong> Free covers one appointment type. Pro and Enterprise add more types, the ability to charge, and the scheduling rules, as does every selfhosted deployment. Nothing is deleted when a plan lapses: every type and every rule is kept exactly as configured, and they come back on upgrade.</li>
-        </ul>
+        <div class="doc-fields doc-fields--grouped">
+            <div class="doc-field">
+                <h4>Email has to work</h4>
+                <p>On the hosted platform, guests get no confirmations or reminders, and you get no booking notices, until the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-email" class="doc-link">email settings</a> are configured. The Appointments tab warns you about it, with an <strong>Edit</strong> link that opens Integrations &rarr; Email Settings on the schedule form.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Reminders only go to confirmed bookings</h4>
+                <p>A request still waiting on you, or a card booking still waiting on payment, does not get one.</p>
+            </div>
+            <div class="doc-field">
+                <h4>The same guest cannot double-book</h4>
+                <p>One email address cannot hold two bookings that start at the same time on your schedule.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Paid bookings follow the same rule as paid tickets</h4>
+                <p>Taking payment for an appointment needs Pro, exactly as selling a priced <em>ticket</em> for an event does. Free bookings work on every plan.</p>
+            </div>
+            <div class="doc-field">
+                <h4>A booking is not a ticket</h4>
+                <p>It carries no QR code and offers no Add to Google Wallet button. The confirmation email, its calendar invite and the private link are what the guest keeps.</p>
+            </div>
+            <div class="doc-field">
+                <h4>You can email past guests</h4>
+                <p>Everyone who books counts as a ticket buyer on your schedule, so a newsletter sent to the <a href="{{ route('marketing.docs.newsletters') }}#recipients" class="doc-link">Ticket Buyers</a> segment reaches them.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Turn a type off rather than delete it</h4>
+                <p>Switching it off hides it from guests and keeps everything already booked, and you can switch it back on later.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Not the same as Availability</h4>
+                <p><a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Not the same as a request to put an event on your schedule</h4>
+                <p>The <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Requests</a> row of the schedule form lets a promoter ask to book a performer, or a band ask a venue for a date. Those arrive on the same Requests tab as bookings waiting for approval, but each one is an event of its own, not a slot from your weekly hours.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Plan</h4>
+                <p>Free covers one active appointment type. Pro and Enterprise add more types, the ability to charge, and the scheduling rules, as does every selfhosted deployment. Nothing is deleted when a plan lapses: every type and every rule is kept exactly as configured, and they come back on upgrade.</p>
+            </div>
+        </div>
     </section>
 
     <!-- See also -->

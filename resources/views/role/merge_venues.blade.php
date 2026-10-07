@@ -1,30 +1,94 @@
 <x-app-admin-layout>
 
-    <div class="space-y-4 max-w-3xl mx-auto">
+    <x-slot name="head">
+        {{-- One venue of a group, as a row to choose: the one being kept says so with its border. --}}
+        <style {!! nonce_attr() !!}>
+            .merge-target {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: baseline;
+              gap: 0.125rem 0.5rem;
+              margin: 0 0 1rem;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-2));
+            }
+            .merge-target .event-chip {
+              margin-inline-start: 0;
+            }
+            /* A class that sets display outranks the hidden attribute. */
+            .merge-target [hidden] {
+              display: none;
+            }
+            .merge-options {
+              display: grid;
+              gap: 0.5rem;
+            }
+            .merge-option {
+              display: flex;
+              align-items: flex-start;
+              gap: 0.75rem;
+              border: 1px solid rgb(var(--ap-border));
+              border-radius: 0.625rem;
+              padding: 0.75rem;
+              cursor: pointer;
+              transition: background-color 0.2s, border-color 0.2s;
+            }
+            .merge-option:hover {
+              background: var(--ap-tint-1);
+            }
+            .merge-option:has(input:checked) {
+              border-color: var(--brand-blue);
+              background: var(--ap-tint-1);
+            }
+            .merge-option input {
+              margin-top: 0.1875rem;
+            }
+            .merge-option-name {
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+              overflow-wrap: anywhere;
+            }
+            a.merge-option-name:hover {
+              text-decoration: underline;
+            }
+            .merge-option-sub {
+              margin-top: 0.125rem;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .merge-summary {
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-3));
+            }
+        </style>
+    </x-slot>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {{ __('messages.merge_venues_title') }}
-            </h2>
-            <x-secondary-link :href="$backUrl">
-                {{ __('messages.back') }}
-            </x-secondary-link>
-        </div>
+    @php
+        // One view, two addresses: a curator schedule's own duplicates (/{subdomain}/merge-venues)
+        // and the account's (/following/merge-venues). The way back is named after the page it
+        // leads to, the schedule or Following, where it used to be a button that said "Back".
+        $mergeSubdomain = request()->route('subdomain');
+        $mergeRole = $mergeSubdomain ? \App\Models\Role::subdomain($mergeSubdomain)->first() : null;
 
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.' . $introKey) }}
-        </p>
+        // A count after its name, so no language has to agree a noun with it: a pair of
+        // duplicates, which is most groups, read "1 venues, 1 events".
+        $eventCountLabel = $eventCountKey === 'merge_venues_future_events_count' ? 'merge_venues_upcoming_events_label' : 'merge_venues_events_label';
+    @endphp
+
+    <div class="page-shell">
+        <x-page-header
+            :title="__('messages.merge_venues_title')"
+            :lead="__('messages.' . $introKey)"
+            :back="$backUrl"
+            :back-label="$mergeRole ? $mergeRole->getDisplayName(false) : __('messages.following')" />
 
         @if (empty($groups))
-            <div class="ap-card rounded-xl p-8 text-center">
-                <svg class="w-12 h-12 mx-auto text-green-500 dark:text-green-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <p class="text-gray-700 dark:text-gray-300">
-                    {{ __('messages.' . $emptyStateKey) }}
-                </p>
+            <div class="ap-card rounded-xl">
+                <x-page-empty :title="__('messages.' . $emptyStateKey)"
+                    icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </div>
         @else
+            <div class="page-stack">
             @foreach ($groups as $groupIndex => $group)
                 @php
                     // Default target preselection: claimed > non-deleted > most future events > lowest id.
@@ -33,17 +97,15 @@
                     $groupHash = $group[0]->ids_hash;
                 @endphp
 
-                <div class="ap-card rounded-xl p-5" id="group-{{ $groupHash }}">
+                <div class="ap-card rounded-xl page-card" id="group-{{ $groupHash }}">
 
-                    <div class="mb-4 text-sm text-gray-700 dark:text-gray-300 flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span class="font-medium">{{ __('messages.merge_venues_will_merge_into') }}</span>
-                        <span class="font-semibold text-gray-900 dark:text-gray-100" data-target-name="{{ $groupHash }}">{{ $defaultTarget->getDisplayName(false) }}</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400" data-target-subdomain="{{ $groupHash }}">/{{ $defaultTarget->subdomain }}</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" data-target-deleted="{{ $groupHash }}" @if(! $defaultTarget->is_deleted) style="display:none" @endif>
-                            {{ __('messages.deleted_tag') }}
-                        </span>
-                        <span data-target-city="{{ $groupHash }}" @if(! $defaultTarget->city) style="display:none" @endif>@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif</span>
-                    </div>
+                    <p class="merge-target">
+                        <span>{{ __('messages.merge_venues_will_merge_into') }}</span>
+                        <bdi class="font-semibold text-gray-900 dark:text-gray-100" data-target-name="{{ $groupHash }}">{{ $defaultTarget->getDisplayName(false) }}</bdi>
+                        <bdi dir="ltr" class="text-xs text-gray-500 dark:text-gray-400" data-target-subdomain="{{ $groupHash }}">/{{ $defaultTarget->subdomain }}</bdi>
+                        <span class="event-chip" data-target-deleted="{{ $groupHash }}" @if (! $defaultTarget->is_deleted) hidden @endif>{{ __('messages.deleted_tag') }}</span>
+                        <bdi data-target-city="{{ $groupHash }}" @if (! $defaultTarget->city) hidden @endif>{{ $defaultTarget->city }}</bdi>
+                    </p>
 
                     <form method="POST" action="{{ $mergeUrl }}"
                           class="merge-group-form" data-group-hash="{{ $groupHash }}">
@@ -55,9 +117,9 @@
                             @endif
                         @endforeach
 
-                        <div class="space-y-2">
+                        <div class="merge-options">
                             @foreach ($group as $venue)
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                                <label class="merge-option">
                                     <input type="radio" name="target_choice_{{ $groupHash }}" value="{{ \App\Utils\UrlUtils::encodeId($venue->id) }}"
                                            data-group-radio="{{ $groupHash }}"
                                            data-venue-name="{{ $venue->getDisplayName(false) }}"
@@ -65,41 +127,41 @@
                                            data-venue-city="{{ $venue->city }}"
                                            data-venue-deleted="{{ $venue->is_deleted ? '1' : '0' }}"
                                            data-future-events="{{ $venue->future_event_count }}"
-                                           class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                                           class="text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                            {{ $venue->id === $defaultTarget->id ? 'checked' : '' }}>
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            @php($venueUrl = $venue->getGuestUrl())
+                                        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                            @php
+                                                $venueUrl = $venue->getGuestUrl();
+                                            @endphp
                                             @if ($venueUrl)
-                                                <a href="{{ $venueUrl }}" target="_blank"
-                                                   class="font-medium text-gray-900 dark:text-gray-100 hover:underline">
-                                                    {{ $venue->name }}
-                                                </a>
+                                                <a href="{{ $venueUrl }}" target="_blank" rel="noopener" class="merge-option-name"><bdi>{{ $venue->name }}</bdi></a>
                                             @else
-                                                <span class="font-medium text-gray-900 dark:text-gray-100">{{ $venue->name }}</span>
+                                                <span class="merge-option-name"><bdi>{{ $venue->name }}</bdi></span>
                                             @endif
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">/{{ $venue->subdomain }}</span>
+                                            <bdi dir="ltr" class="text-xs text-gray-500 dark:text-gray-400">/{{ $venue->subdomain }}</bdi>
                                             @if ($venue->is_deleted)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                                    {{ __('messages.deleted_tag') }}
-                                                </span>
+                                                <span class="event-chip">{{ __('messages.deleted_tag') }}</span>
                                             @endif
                                         </div>
-                                        <div class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                                            {{ implode(', ', array_filter([$venue->city, $venue->country_code ? strtoupper($venue->country_code) : null])) }}
-                                            <span class="ms-2">{{ str_replace(':count', $venue->future_event_count, __('messages.' . $eventCountKey)) }}</span>
+                                        <div class="merge-option-sub">
+                                            @php
+                                                $venuePlace = implode(', ', array_filter([$venue->city, $venue->country_code ? strtoupper($venue->country_code) : null]));
+                                            @endphp
+                                            @if ($venuePlace)<bdi>{{ $venuePlace }}</bdi> &middot; @endif{{ __('messages.' . $eventCountLabel, ['count' => $venue->future_event_count]) }}
                                         </div>
                                     </div>
                                 </label>
                             @endforeach
                         </div>
 
-                        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
-                            <div class="text-sm text-gray-600 dark:text-gray-400" data-merge-summary="{{ $groupHash }}">
-                                {{ str_replace([':venues', ':events'], [count($group) - 1, collect($group)->where('id', '!=', $defaultTarget->id)->sum('future_event_count')], __('messages.merge_venues_summary')) }}
+                        {{-- What will happen, then the two answers: the one that goes on last. --}}
+                        <div class="page-form-actions is-split">
+                            <div class="merge-summary" data-merge-summary="{{ $groupHash }}">
+                                {{ __('messages.merge_venues_summary_counts', ['venues' => count($group) - 1, 'events' => collect($group)->where('id', '!=', $defaultTarget->id)->sum('future_event_count')]) }}
                             </div>
-                            <div class="flex flex-col-reverse sm:flex-row gap-2">
-                                <button type="button" class="dismiss-group-btn px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            <div class="page-actions">
+                                <button type="button" class="dismiss-group-btn ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                                         data-group-hash="{{ $groupHash }}">
                                     {{ __('messages.merge_venues_not_duplicates_button') }}
                                 </button>
@@ -119,13 +181,14 @@
                     </form>
                 </div>
             @endforeach
+            </div>
         @endif
 
     </div>
 
     <script {!! nonce_attr() !!}>
     (function() {
-        var summaryTemplate = @json(__('messages.merge_venues_summary'));
+        var summaryTemplate = @json(__('messages.merge_venues_summary_counts'));
         var previewSummaryTemplate = @json(__('messages.merge_venues_preview_summary'));
         var reviveSuffixTemplate = @json(__('messages.merge_venues_preview_revive_suffix'));
         var errorMsg = @json(__('messages.an_error_occurred'));
@@ -167,14 +230,14 @@
 
                 var deletedEl = document.querySelector('[data-target-deleted="' + hash + '"]');
                 if (deletedEl) {
-                    deletedEl.style.display = radio.getAttribute('data-venue-deleted') === '1' ? '' : 'none';
+                    deletedEl.hidden = radio.getAttribute('data-venue-deleted') !== '1';
                 }
 
                 var city = radio.getAttribute('data-venue-city') || '';
                 var cityEl = document.querySelector('[data-target-city="' + hash + '"]');
                 if (cityEl) {
-                    cityEl.textContent = city ? ', ' + city : '';
-                    cityEl.style.display = city ? '' : 'none';
+                    cityEl.textContent = city;
+                    cityEl.hidden = ! city;
                 }
 
                 // Update summary line.

@@ -1,74 +1,44 @@
 <x-app-admin-layout>
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.templates') }}</h2>
-        <div class="flex gap-3">
-            <x-secondary-link href="{{ route('newsletter.index', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
-                {{ __('messages.back') }}
-            </x-secondary-link>
-            <x-brand-link href="{{ route('newsletter.template.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
-                <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                {{ __('messages.create_template') }}
-            </x-brand-link>
-        </div>
-    </div>
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+    </x-slot>
 
-    @if (session('status'))
-    <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-        {{ session('status') }}
-    </div>
-    @endif
+    {{-- The Templates tab: the designs this schedule has saved, as cards that show their colours. --}}
+    <div class="page-shell">
+        @include('newsletter.partials._section', ['tab' => 'templates'])
 
-    @if ($userTemplates->count())
-        <div class="space-y-4">
-            @foreach ($userTemplates as $template)
-            <div class="ap-card sm:rounded-xl p-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">{{ $template->name }}</h4>
-                        <div class="flex items-center gap-3 mt-1">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 capitalize">{{ $template->template }}</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $template->created_at->format('M j, Y') }}</span>
-                        </div>
-                    </div>
-                    <div class="shrink-0 space-x-3">
-                        <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'template_id' => \App\Utils\UrlUtils::encodeId($template->id)]) }}"
-                            class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ __('messages.use') }}</a>
-                        <a href="{{ route('newsletter.template.edit', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($template->id)]) }}"
-                            class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ __('messages.edit') }}</a>
-                        <form method="POST" action="{{ route('newsletter.template.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($template->id)]) }}"
-                            class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700 text-sm">{{ __('messages.delete') }}</button>
-                        </form>
-                    </div>
-                </div>
+        @php $roleParam = \App\Utils\UrlUtils::encodeId($role->id); @endphp
+
+        <div class="page-head">
+            <p class="page-lead">{{ __('messages.newsletter_templates_lead') }}</p>
+            {{-- With nothing saved yet the empty state below carries this button. --}}
+            @if ($userTemplates->count())
+            <div class="page-actions">
+                <x-secondary-link href="{{ route('newsletter.template.create', ['role_id' => $roleParam]) }}">
+                    {{ __('messages.create_template') }}
+                </x-secondary-link>
             </div>
-            @endforeach
+            @endif
         </div>
+
+        @if ($userTemplates->count())
+        @include('newsletter.partials._template-cards', [
+            'templates' => $userTemplates,
+            'useUrl' => fn ($template) => route('newsletter.create', ['role_id' => $roleParam, 'template_id' => \App\Utils\UrlUtils::encodeId($template->id)]),
+            'editUrl' => fn ($template) => route('newsletter.template.edit', ['role_id' => $roleParam, 'hash' => \App\Utils\UrlUtils::encodeId($template->id)]),
+            'deleteUrl' => fn ($template) => route('newsletter.template.delete', ['role_id' => $roleParam, 'hash' => \App\Utils\UrlUtils::encodeId($template->id)]),
+        ])
         @else
-        <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <rect x="3" y="3" width="7" height="7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <rect x="14" y="3" width="7" height="7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <rect x="3" y="14" width="7" height="7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <rect x="14" y="14" width="7" height="7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_templates') }}</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_templates_description') }}</p>
+        <div class="ap-card rounded-xl">
+            <x-page-empty
+                :title="__('messages.no_templates')"
+                :text="__('messages.no_templates_description')"
+                icon="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z">
+                <x-secondary-link href="{{ route('newsletter.template.create', ['role_id' => $roleParam]) }}">{{ __('messages.create_template') }}</x-secondary-link>
+            </x-page-empty>
         </div>
         @endif
+    </div>
 
-    <script {!! nonce_attr() !!}>
-        document.addEventListener('submit', function(e) {
-            var form = e.target.closest('.js-confirm-form');
-            if (form) {
-                if (!confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
-                }
-            }
-        });
-    </script>
+    @include('newsletter.partials._list-script')
 </x-app-admin-layout>

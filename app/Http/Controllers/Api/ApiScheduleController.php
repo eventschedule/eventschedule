@@ -141,6 +141,14 @@ class ApiScheduleController extends Controller
             $role->language_code = $user->language_code ?? 'en';
         }
 
+        // A hosted schedule has to have an address to verify, or its public page never opens.
+        // The new-schedule form posts the account's own (a hidden field); a call that named none
+        // went on to mail a verification link to nobody, which threw after the row was saved:
+        // a 500, and a schedule left behind with no owner attached to it.
+        if (config('app.hosted') && ! $role->email) {
+            $role->email = $user->email;
+        }
+
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
         $role->background_colors = ColorUtils::randomGradient();
@@ -176,7 +184,9 @@ class ApiScheduleController extends Controller
         $role->load('groups');
 
         return response()->json([
-            'data' => $role->toApiData(),
+            // Whatever the plan: a schedule made here starts on Free, and the caller has to be
+            // told what it made. Every other endpoint still needs Pro.
+            'data' => $role->toApiData(whateverThePlan: true),
         ], 201, [], JSON_PRETTY_PRINT);
     }
 

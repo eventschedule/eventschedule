@@ -55,7 +55,7 @@ class GenerateDocScreenshots extends Command
             ->first() : null;
 
         // Build screenshot definitions
-        $pages = $this->getPages($role, $venueRole, $demoEvent);
+        $pages = $this->getPages($role, $venueRole, $demoEvent, $user);
 
         // Filter to single page if requested
         $singlePage = $this->option('page');
@@ -127,11 +127,13 @@ class GenerateDocScreenshots extends Command
         $referralUsers = [];
         $referralRecords = [];
         if (isset($pages['referral-program'])) {
-            $maskedEmails = ['li***@example.com', 'ja***@example.com', 'sa***@example.com', 'mi***@example.com', 'em***@example.com'];
-            foreach ($maskedEmails as $email) {
+            // The history prints each address masked to its first two letters, so the five
+            // begin differently: they all began "ref-demo-" once, and the picture showed the
+            // same "re***@temp.local" five times.
+            foreach (['lisa', 'jake', 'sara', 'mike', 'emma'] as $name) {
                 $referralUsers[] = User::create([
-                    'name' => explode('@', $email)[0],
-                    'email' => 'ref-demo-'.uniqid().'@temp.local',
+                    'name' => ucfirst($name),
+                    'email' => $name.'.'.uniqid().'@example.com',
                     'password' => Hash::make('temp'),
                 ]);
             }
@@ -175,9 +177,87 @@ class GenerateDocScreenshots extends Command
             $this->line('Created referral demo data.');
         }
 
+        // The demo schedule has never sent a newsletter, and an empty list shows none of the
+        // list: one sent, one scheduled and one draft are made for the picture and removed.
+        $newsletterRecords = [];
+        if (isset($pages['newsletters'])) {
+            $newsletterRows = [
+                ['subject' => 'This weekend in Springfield', 'status' => 'sent', 'sent_at' => now()->subDays(9)->setTime(14, 0), 'sent_count' => 248, 'open_count' => 131, 'click_count' => 37],
+                ['subject' => 'New Year\'s Eve: tickets are on sale', 'status' => 'scheduled', 'scheduled_at' => now()->addDays(3)->setTime(15, 0)],
+                ['subject' => 'November at a glance', 'status' => 'draft'],
+            ];
+            foreach ($newsletterRows as $row) {
+                $newsletterRecords[] = \App\Models\Newsletter::create($row + [
+                    'role_id' => $role->id,
+                    'user_id' => $user->id,
+                    'type' => 'schedule',
+                    'blocks' => [],
+                ]);
+            }
+            $this->line('Created newsletter demo data.');
+        }
+
+        // The demo data has no appointment types, and the Appointments tab without one is only its
+        // opening line: three are made for the pictures and removed.
+        $appointmentRecords = [];
+        $appointmentRole = isset($pages['appointments']) ? Role::where('subdomain', 'demo-lisajazz')->first() : null;
+        if ($appointmentRole) {
+            $weekdays = fn (string $start, string $end) => [
+                '0' => [], '1' => [['start' => $start, 'end' => $end]], '2' => [['start' => $start, 'end' => $end]],
+                '3' => [['start' => $start, 'end' => $end]], '4' => [['start' => $start, 'end' => $end]],
+                '5' => [['start' => $start, 'end' => $end]], '6' => [],
+            ];
+            $appointmentRows = [
+                ['name' => 'Intro call', 'slug' => 'intro-call', 'duration_minutes' => 15, 'weekly_windows' => $weekdays('10:00', '16:00')],
+                ['name' => 'Private lesson', 'slug' => 'private-lesson', 'duration_minutes' => 60, 'weekly_windows' => $weekdays('12:00', '20:00')],
+                ['name' => 'Booking enquiry', 'slug' => 'booking-enquiry', 'duration_minutes' => 30, 'weekly_windows' => $weekdays('09:00', '17:00')],
+            ];
+            foreach ($appointmentRows as $row) {
+                $type = new \App\Models\AppointmentType;
+                $type->role_id = $appointmentRole->id;
+                $type->price = 0;
+                $type->payment_method = 'cash';
+                $type->is_active = true;
+                foreach ($row as $key => $value) {
+                    $type->{$key} = $value;
+                }
+                $type->save();
+                $appointmentRecords[] = $type;
+            }
+            $this->line('Created appointment demo data.');
+        }
+
+        // Realtime with nobody on the site is an empty page. realtime:simulate invents visitors and
+        // refuses to run anywhere but a local or testing environment; its --purge takes them away,
+        // along with every other row of realtime_hits (which holds about an hour of visits).
+        $simulatedTraffic = false;
+        if ((isset($pages['analytics']) || isset($pages['selfhost-admin'])) && app()->environment(['local', 'testing'])) {
+            try {
+                $simulatedTraffic = \Illuminate\Support\Facades\Artisan::call('realtime:simulate') === 0;
+            } catch (\Throwable $e) {
+                $this->warn('Could not simulate realtime traffic: '.$e->getMessage());
+            }
+        }
+
         try {
             return $this->generate($user, $pages, $force, $outputDir);
         } finally {
+            if ($simulatedTraffic) {
+                try {
+                    \Illuminate\Support\Facades\Artisan::call('realtime:simulate', ['--purge' => true]);
+                } catch (\Throwable $e) {
+                    $this->warn('Could not remove the simulated realtime traffic: '.$e->getMessage());
+                }
+            }
+
+            foreach ($appointmentRecords as $appointmentType) {
+                $appointmentType->delete();
+            }
+
+            foreach ($newsletterRecords as $newsletter) {
+                $newsletter->delete();
+            }
+
             // Clean up referral demo data
             foreach ($referralRecords as $referral) {
                 $referral->delete();
@@ -212,7 +292,7 @@ class GenerateDocScreenshots extends Command
         }
     }
 
-    private function getPages(?Role $role, ?Role $venueRole, ?\App\Models\Event $demoEvent = null): array
+    private function getPages(?Role $role, ?Role $venueRole, ?\App\Models\Event $demoEvent = null, ?User $user = null): array
     {
         $encodedRoleId = $role ? UrlUtils::encodeId($role->id) : null;
 
@@ -227,12 +307,49 @@ class GenerateDocScreenshots extends Command
             ? \App\Models\Event::where('seating_plan_id', $seatingPlan->id)->first()
             : null;
 
+        // An event that sells tickets, opened from the schedule it belongs to, for the Tickets tab:
+        // the one with the most ticket types, so the list has more than a single line. The demo
+        // account only FOLLOWS some of the demo venues, and the form sends anyone who cannot edit
+        // the schedule in the address somewhere else, so the schedule has to be one it edits.
+        $ticketEventRoute = null;
+        $ticketEvents = \App\Models\Event::where('tickets_enabled', true)
+            ->whereNotNull('creator_role_id')
+            ->withCount(['tickets' => fn ($q) => $q->where('is_deleted', false)])
+            ->having('tickets_count', '>', 0)
+            ->upcomingOrOngoing()
+            ->orderByDesc('tickets_count')
+            ->orderBy('starts_at')
+            ->limit(50)
+            ->get();
+        foreach ($ticketEvents as $ticketEvent) {
+            $ticketRole = Role::find($ticketEvent->creator_role_id);
+            if ($ticketRole && $user && $user->isEditor($ticketRole->subdomain)) {
+                $ticketEventRoute = '/'.$ticketRole->subdomain.'/edit-event/'.UrlUtils::encodeId($ticketEvent->id);
+                break;
+            }
+        }
+
+        // The check-in dashboard of an event nobody bought a ticket for is one line saying so:
+        // open it on the event with the most paid sales.
+        $checkinEvent = $user
+            ? \App\Models\Event::managedBy($user)
+                ->whereNull('appointment_type_id')
+                ->withCount(['sales' => fn ($q) => $q->where('status', 'paid')->where('is_deleted', false)])
+                ->orderByDesc('sales_count')
+                ->first()
+            : null;
+        $checkinRoute = $checkinEvent && $checkinEvent->sales_count
+            ? '/checkin?event='.UrlUtils::encodeId($checkinEvent->id)
+            : '/checkin';
+
         $pages = [
             'getting-started' => [
                 ['id' => 'getting-started--dashboard', 'route' => '/dashboard'],
+                ['id' => 'getting-started--create-form', 'route' => '/new/venue'],
             ],
             'schedule-styling' => [
                 ['id' => 'schedule-styling--section-style', 'route' => '/simpsons/edit', 'section' => 'section-style'],
+                ['id' => 'schedule-styling--header-layout', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-style\"]').click(); var row = document.getElementById('style-tab-advanced'); row.click(); row.scrollIntoView({ block: 'start' }); window.scrollBy(0, -90);"],
             ],
             'allocated-seating' => [
                 ['id' => 'allocated-seating--plans', 'route' => $seatingRole ? '/demo-aztectheater/seating' : null],
@@ -253,11 +370,16 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'creating-schedules--section-sources', 'route' => '/simpsons/edit', 'section' => 'section-sources'],
                 ['id' => 'creating-schedules--section-auto-import', 'route' => '/simpsons/edit', 'section' => 'section-auto-import'],
                 ['id' => 'creating-schedules--section-integrations', 'route' => '/simpsons/edit', 'section' => 'section-integrations'],
-                ['id' => 'creating-schedules--section-email-settings', 'route' => '/simpsons/edit', 'script' => "document.querySelector('a[data-section=\"section-integrations\"]').click(); setTimeout(() => document.querySelector('.integration-tab[data-tab=\"email\"]').click(), 500)"],
+                // No picture of the Email Settings row: it exists only on a hosted install, and this
+                // command's server runs with IS_HOSTED=false. The entry that used to be here clicked
+                // a row that was not there and photographed the Integrations list a second time.
             ],
             'creating-events' => [
                 ['id' => 'creating-events--schedule-tab', 'route' => '/simpsons/schedule'],
                 ['id' => 'creating-events--add-event', 'route' => '/simpsons/add-event'],
+                // A new event's Tickets tab: the three tiles, nothing chosen yet.
+                ['id' => 'creating-events--tickets-tab', 'route' => '/simpsons/add-event', 'section' => 'section-tickets'],
+                ['id' => 'creating-events--listing', 'route' => '/simpsons/add-event', 'section' => 'section-listing'],
                 ['id' => 'creating-events--import', 'route' => '/simpsons/import/ai'],
             ],
             'fan-content' => [
@@ -265,6 +387,8 @@ class GenerateDocScreenshots extends Command
             ],
             'sharing' => [
                 ['id' => 'sharing--guest-portal', 'route' => '/simpsons', 'public' => true],
+                // The dialog behind Actions, Embed Schedule.
+                ['id' => 'sharing--embed-dialog', 'route' => '/simpsons/schedule', 'script' => "document.getElementById('embed-schedule-link').click();"],
             ],
             'event-graphics' => [
                 ['id' => 'event-graphics--graphic-page', 'route' => '/simpsons/events-graphic', 'pause' => 3000],
@@ -276,12 +400,29 @@ class GenerateDocScreenshots extends Command
             ],
             'tickets' => [
                 ['id' => 'tickets--sales', 'route' => '/sales'],
+                ['id' => 'tickets--tickets-tab', 'route' => $ticketEventRoute, 'section' => 'section-tickets'],
+                ['id' => 'tickets--checkin', 'route' => $checkinRoute, 'pause' => 2500],
+            ],
+            'gift-cards' => [
+                ['id' => 'gift-cards--settings', 'route' => $venueRole ? '/demo-moestavern/edit' : null, 'section' => 'section-gift-cards'],
+                ['id' => 'gift-cards--sales-tab', 'route' => '/sales?tab=gift-cards'],
+            ],
+            // Three appointment types are made for the pictures and removed (see handle()).
+            'appointments' => [
+                ['id' => 'appointments--types', 'route' => '/demo-lisajazz/appointments'],
+                ['id' => 'appointments--editor', 'route' => '/demo-lisajazz/appointments?new=1'],
+                ['id' => 'appointments--booking-page', 'route' => '/demo-lisajazz/book', 'public' => true, 'pause' => 2500],
             ],
             'analytics' => [
                 ['id' => 'analytics--dashboard', 'route' => '/analytics', 'pause' => 3000],
+                // Live traffic is invented for the picture (realtime:simulate, see handle()).
+                ['id' => 'analytics--realtime', 'route' => '/analytics?tab=realtime', 'pause' => 4000],
             ],
             'account-settings' => [
                 ['id' => 'account-settings--settings', 'route' => '/settings'],
+                ['id' => 'account-settings--payment-methods', 'route' => '/settings#section-payment-methods', 'script' => "document.querySelectorAll('#section-payment-methods button[data-row-group][aria-expanded=\"true\"]').forEach(function (b) { b.click(); }); window.scrollTo(0, 0);"],
+                ['id' => 'account-settings--security', 'route' => '/settings#section-security', 'script' => 'window.scrollTo(0, 0);'],
+                ['id' => 'account-settings--developers', 'route' => '/settings#section-developers', 'script' => 'window.scrollTo(0, 0);'],
             ],
             'managing-schedules' => [
                 ['id' => 'managing-schedules--schedule-tab', 'route' => '/simpsons/schedule'],
@@ -312,6 +453,7 @@ class GenerateDocScreenshots extends Command
                 // ?sample=1: invented data (AdminDashboardSample). The real page lists people,
                 // schedules and events by name, and leaves demo content out.
                 ['id' => 'selfhost-admin--dashboard', 'route' => '/admin/dashboard?sample=1', 'pause' => 3000],
+                ['id' => 'selfhost-admin--realtime', 'route' => '/admin/realtime', 'pause' => 4000],
                 ['id' => 'selfhost-admin--users', 'route' => '/admin/users', 'pause' => 2000],
                 ['id' => 'selfhost-admin--revenue', 'route' => '/admin/revenue', 'pause' => 2000],
                 ['id' => 'selfhost-admin--analytics', 'route' => '/admin/analytics', 'pause' => 2000],
@@ -321,6 +463,7 @@ class GenerateDocScreenshots extends Command
                 ['id' => 'selfhost-admin--audit-log', 'route' => '/admin/audit-log'],
                 ['id' => 'selfhost-admin--queue', 'route' => '/admin/queue'],
                 ['id' => 'selfhost-admin--logs', 'route' => '/admin/logs'],
+                ['id' => 'selfhost-admin--settings', 'route' => '/admin/settings'],
             ],
         ];
 
@@ -360,6 +503,11 @@ class GenerateDocScreenshots extends Command
         // Start ChromeDriver on a dynamic port
         $chromePort = $this->findAvailablePort();
         $chromeProcess = (new ChromeProcess)->toProcess(["--port={$chromePort}"]);
+        // The browser takes the demo account's timezone: on another clock the new-schedule form
+        // opens with a notice that the device and the account disagree.
+        if ($user->timezone) {
+            $chromeProcess->setEnv(['TZ' => $user->timezone]);
+        }
         $chromeProcess->start();
 
         // Wait for ChromeDriver to be ready
@@ -490,6 +638,16 @@ class GenerateDocScreenshots extends Command
                     // eventschedule.com, the schedule's subdomain and then whatever follows it.
                     // Only the text is replaced, so a link keeps its icon.
                     $browser->script("document.querySelectorAll('.event-url-text, #url-display a').forEach(function (el) { var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); var parts = []; while (walker.nextNode()) { parts.push(walker.currentNode); } var m = parts.map(function (n) { return n.nodeValue; }).join('').trim().match(/^[^\\/]+\\/([^\\/]+)(\\/.*)?$/); if (m && parts.length) { parts[0].nodeValue = m[1] + '.eventschedule.com' + (m[2] || ''); parts.slice(1).forEach(function (n) { n.nodeValue = ''; }); } });");
+
+                    // The same for the other places an address is printed or sits in a field (the
+                    // referral link, the text beside an events graphic): 127.0.0.1:port/schedule
+                    // reads as the schedule's subdomain, and the bare address as eventschedule.com.
+                    $browser->script("(function () { var local = /(https?:\\/\\/)?127\\.0\\.0\\.1:\\d+/; var fix = function (t) { return t.replace(/(?:https?:\\/\\/)?127\\.0\\.0\\.1:\\d+\\/([a-z0-9-]+)((?:\\/[^\\s]*)?)/g, '\$1.eventschedule.com\$2').replace(/https?:\\/\\/127\\.0\\.0\\.1:\\d+/g, 'https://eventschedule.com'); }; var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); var nodes = []; while (walker.nextNode()) { nodes.push(walker.currentNode); } nodes.forEach(function (n) { if (local.test(n.nodeValue) && ! n.parentElement.closest('script, style')) { n.nodeValue = fix(n.nodeValue); } }); document.querySelectorAll('input[type=text], input:not([type]), input[type=url], textarea').forEach(function (el) { if (local.test(el.value)) { el.value = fix(el.value); } }); })();");
+
+                    // A checkout form opens filled in with whoever is signed in, which here is
+                    // this command's own temporary address; the new-schedule form and the settings
+                    // page print it as text.
+                    $browser->script("(function () { var temp = '".self::TEMP_EMAIL."'; document.querySelectorAll('input').forEach(function (el) { if (el.value === temp) { el.value = 'alex@example.com'; } }); var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); var nodes = []; while (walker.nextNode()) { nodes.push(walker.currentNode); } nodes.forEach(function (n) { if (n.nodeValue.indexOf(temp) !== -1 && ! n.parentElement.closest('script, style')) { n.nodeValue = n.nodeValue.split(temp).join('alex@example.com'); } }); })();");
 
                     // Take light screenshot (Browser stores as PNG in the storeScreenshotsAt dir)
                     $browser->screenshot($id);

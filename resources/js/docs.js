@@ -184,8 +184,13 @@ function initScrollSpy() {
         }
 
         links.forEach((link) => link.classList.toggle('active', link === active));
-        moveRail(list, active);
+        // The group first, then the indicator: it is placed from where the link
+        // sits in the list, and opening one group while another closes moves
+        // every link below them. Measured the other way round it stopped beside
+        // the wrong entry (123px out on creating-schedules) until the next
+        // section change.
         expandGroupFor(toc, active);
+        moveRail(list, active);
     }
 
     const observer = new IntersectionObserver((entries) => {
@@ -205,6 +210,16 @@ function initScrollSpy() {
     // Keep the indicator correct when the rail itself scrolls or the viewport
     // resizes, since both change offsetTop-relative geometry.
     window.addEventListener('resize', () => moveRail(list, toc.querySelector('.doc-toc-link.active')));
+
+    // A group opens and closes over a quarter of a second (grid-template-rows),
+    // and the links below it are still moving when paint() measures: measure
+    // once more when it has settled. This also covers a group opened or closed
+    // by hand.
+    toc.addEventListener('transitionend', (event) => {
+        if (event.target instanceof Element && event.target.classList.contains('doc-nav-group-items')) {
+            moveRail(list, toc.querySelector('.doc-toc-link.active'));
+        }
+    });
 }
 
 function moveRail(list, active) {

@@ -43,6 +43,17 @@ class CheckInController extends Controller
             fn (Event $e) => in_array($e->scheduleToday(), $salesDatesByEvent[$e->id] ?? [], true)
         )?->id ?? $events->first()?->id;
 
+        // A link that names an event (the Realtime tab's door card) opens on it, when it is one
+        // of the events listed here. Anything else is ignored, not refused: the page is the same
+        // page, opened on its usual event.
+        $asked = request()->query('event');
+        if (is_string($asked) && $asked !== '') {
+            $askedId = (int) UrlUtils::decodeId($asked);
+            if ($askedId > 0 && $events->contains('id', $askedId)) {
+                $selectedEventId = $askedId;
+            }
+        }
+
         $eventsData = $events->map(function ($event) {
             return [
                 'id' => UrlUtils::encodeId($event->id),
@@ -133,16 +144,55 @@ class CheckInController extends Controller
             ->limit(30)
             ->get();
 
-        return response()->json([
-            'results' => $seats->map(fn (SeatingSeat $seat) => [
-                'seat' => $seat->fullLabel(),
-                'name' => $seat->sale?->name,
-                'ticket_type' => $seat->saleTicket?->ticket?->type,
-                'status' => $seat->sale?->status,
-                'arrived' => $seat->checked_in_at !== null,
-                'arrived_at' => $seat->checked_in_at?->getTimestamp(),
-            ])->values(),
-        ]);
+        $results = $seats->map(fn (SeatingSeat $seat) => [
+            'seat' => $seat->fullLabel(),
+            'name' => $seat->sale?->name,
+            'ticket_type' => $seat->saleTicket?->ticket?->type,
+            'status' => $seat->sale?->status,
+            'quantity' => 1,
+            'arrived_count' => $seat->checked_in_at !== null ? 1 : 0,
+            'arrived' => $seat->checked_in_at !== null,
+            'arrived_at' => $seat->checked_in_at?->getTimestamp(),
+        ])->values();
+
+        // Then the orders with no seat to their name. The box promises "a name, or an email", and
+        // this read the seat map and nothing else: at an event without a seating plan, which is
+        // most events, every name answered "nobody matched" about people who had paid. The same
+        // orders stats() counts on this page (paid, this date, not deleted), one row a ticket
+        // line, saying how many of its tickets are in.
+        if ($results->count() < 30) {
+            $lines = SaleTicket::with(['sale:id,name,status', 'ticket:id,type'])
+                ->whereDoesntHave('seatingSeats')
+                ->whereHas('sale', fn ($q) => $q->where('event_id', $event->id)
+                    ->where('event_date', $date)
+                    ->where('status', 'paid')
+                    ->where('is_deleted', false)
+                    ->where(fn ($sq) => $sq->where('name', 'like', $like)->orWhere('email', 'like', $like)))
+                ->orderBy(Sale::select('name')->whereColumn('sales.id', 'sale_tickets.sale_id'))
+                ->orderBy('sale_tickets.id')
+                ->limit(30 - $results->count())
+                ->get();
+
+            foreach ($lines as $line) {
+                $slots = $line->seats ? json_decode($line->seats, true) : [];
+                $slots = is_array($slots) ? $slots : [];
+                $in = array_filter($slots, fn ($timestamp) => $timestamp !== null);
+                $quantity = max((int) $line->quantity, count($slots), 1);
+
+                $results->push([
+                    'seat' => null,
+                    'name' => $line->sale?->name,
+                    'ticket_type' => $line->ticket?->type,
+                    'status' => $line->sale?->status,
+                    'quantity' => $quantity,
+                    'arrived_count' => count($in),
+                    'arrived' => count($in) >= $quantity,
+                    'arrived_at' => $in ? (int) max($in) : null,
+                ]);
+            }
+        }
+
+        return response()->json(['results' => $results->values()]);
     }
 
     public function stats($eventId)

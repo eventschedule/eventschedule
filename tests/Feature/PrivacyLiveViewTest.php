@@ -14,7 +14,7 @@ use Tests\TestCase;
  *
  * For a week the privacy policy and the Analytics feature page said that only administrators
  * see Realtime, and the cookie notice said "we". Then schedule owners were given the part about
- * their own pages (/realtime, App\Services\ScheduleRealtime). A promise like that is easy to
+ * their own pages (the Realtime tab of /analytics, App\Services\ScheduleRealtime). A promise like that is easy to
  * leave behind in one of three places, and nothing else would notice: every page would still
  * render.
  *
@@ -58,14 +58,21 @@ class PrivacyLiveViewTest extends TestCase
         $this->assertStringContainsString("Show a schedule's organizer your visit to their own pages as a row with no name", $html, 'the legal bases');
         $this->assertStringNotContainsString(self::ADMINS_ONLY, $html);
         // It says what they never see, and that an older choice does not list anyone.
-        $this->assertStringContainsString('An organizer never sees your name, email address or account', $html);
+        $this->assertStringContainsString('In that view an organizer never sees your name, email address or account', $html);
         $this->assertStringContainsString('before our cookie notice began to mention organizers', $html);
+        // The tab now sets a day of the organizer's own sales beside the unnamed visits, so the
+        // policy says what that makes possible, in both clauses, and promises deletion only of
+        // what the live view itself holds.
+        $this->assertSame(2, substr_count($html, 'may be able to tell which unnamed visit was yours'), 'clauses 06 and 12');
+        $this->assertStringContainsString('what it holds about your visit is deleted about an hour after your last activity', $html);
+        $this->assertStringNotContainsString('and it is deleted about an hour after your last activity', $html);
 
         Setting::set('realtime_owner_view', '0');
         $html = $this->page('/privacy');
         $this->assertStringContainsString(self::ADMINS_ONLY, $html);
         $this->assertStringNotContainsString(self::ORGANIZER_SEES, $html);
         $this->assertStringNotContainsString('A schedule owner can also see live traffic', $html);
+        $this->assertStringNotContainsString('which unnamed visit was yours', $html, 'Nothing to explain where organizers see no visits.');
     }
 
     /** Mutation: leave "never shown to schedule owners" in the feature page's answer. */
@@ -75,6 +82,10 @@ class PrivacyLiveViewTest extends TestCase
         $this->assertStringNotContainsString('never shown to schedule owners', $html);
         $this->assertStringContainsString('Realtime shows you the live traffic to your own pages', $html);
         $this->assertStringContainsString('as a row with no name', $html);
+        // "It is deleted about an hour later" was about the whole tab, and the tab now also lists
+        // a day of the organizer's own sales, which nothing deletes.
+        $this->assertStringContainsString('What it holds about a visit is deleted about an hour later', $html);
+        $this->assertStringContainsString('without names', $html);
 
         Setting::set('realtime_owner_view', '0');
         $html = $this->page('/features/analytics');

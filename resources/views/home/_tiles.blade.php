@@ -85,7 +85,7 @@
 
     @if ($live !== null)
         @php $quiet = ! $live['views_5m'] && ! $live['visitors_now']; @endphp
-        <x-dashboard-tile :href="route('realtime')" :label="__('messages.realtime')" :icon="\App\Utils\RealtimeIcons::PATHS['signal']"
+        <x-dashboard-tile :href="route('analytics', ['tab' => 'realtime'])" :label="__('messages.realtime')" :icon="\App\Utils\RealtimeIcons::PATHS['signal']"
             tint="bg-green-50 dark:bg-green-500/10" ink="text-green-500" glow="rgba(34, 197, 94, 0.15)"
             :dot="$quiet ? 'bg-gray-400' : 'bg-green-500'" :foot-label="__('messages.dash_page_views_30m')" data-live-tile>
             <div data-live-quiet class="{{ $quiet ? 'flex' : 'hidden' }} items-center justify-center min-h-[3.4rem]">

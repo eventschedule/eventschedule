@@ -7,24 +7,41 @@
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#prerequisites">Prerequisites</x-doc-nav-link>
-        <x-doc-nav-link href="#environment">Environment Configuration</x-doc-nav-link>
+        <x-doc-nav-group label="Environment Configuration" href="#environment">
+            <x-doc-nav-link href="#core-settings">Core SaaS Settings</x-doc-nav-link>
+            <x-doc-nav-link href="#branding">Branding</x-doc-nav-link>
+            <x-doc-nav-link href="#legal-pages">Legal Pages</x-doc-nav-link>
+            <x-doc-nav-link href="#support-email">Support Address</x-doc-nav-link>
+            <x-doc-nav-link href="#trials">Trials</x-doc-nav-link>
+            <x-doc-nav-link href="#push-notifications">Push Notifications</x-doc-nav-link>
+            <x-doc-nav-link href="#google-wallet">Google Wallet Passes</x-doc-nav-link>
+            <x-doc-nav-link href="#reverse-proxy">Reverse Proxy</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-link href="#dns">DNS Configuration</x-doc-nav-link>
         <x-doc-nav-link href="#webserver">Web Server Configuration</x-doc-nav-link>
-        <x-doc-nav-link href="#stripe">Stripe Subscription Setup</x-doc-nav-link>
+        <x-doc-nav-group label="Stripe Subscription Setup" href="#stripe">
+            <x-doc-nav-link href="#stripe-variables">Environment Variables</x-doc-nav-link>
+            <x-doc-nav-link href="#stripe-webhook">Webhook Endpoint</x-doc-nav-link>
+            <x-doc-nav-link href="#stripe-flow">How Subscriptions Work</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-link href="#example">Complete Example</x-doc-nav-link>
         <x-doc-nav-link href="#verification">Verification Steps</x-doc-nav-link>
         <x-doc-nav-link href="#demo">Demo Mode</x-doc-nav-link>
-        <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
-        <x-doc-nav-link href="#scheduler">Scheduler and queue</x-doc-nav-link>
+        <x-doc-nav-group label="Scheduler and queue" href="#scheduler">
+            <x-doc-nav-link href="#http-cron">HTTP cron endpoint</x-doc-nav-link>
+            <x-doc-nav-link href="#queue">Queue</x-doc-nav-link>
+            <x-doc-nav-link href="#scheduler-health">Knowing that it stopped</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-link href="#backup-storage">Backup storage</x-doc-nav-link>
         <x-doc-nav-link href="#support-chat">Support Chat</x-doc-nav-link>
         <x-doc-nav-link href="#translations">Custom translations</x-doc-nav-link>
         <x-doc-nav-link href="#custom-links">Custom dashboard links</x-doc-nav-link>
-        <x-doc-nav-link href="#related">Related Documentation</x-doc-nav-link>
         <x-doc-nav-link href="#security">Security Considerations</x-doc-nav-link>
+        <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
+        <x-doc-nav-link href="#related">Related Documentation</x-doc-nav-link>
     </x-slot:toc>
 
-    <!-- Overview -->
+    {{-- Overview --}}
     <section id="overview" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -33,6 +50,8 @@
             </svg>
             Overview
         </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">This page turns a working selfhosted install into a platform other people sign up to. Each customer schedule gets a subdomain of your domain, your logo and domain are on the product, and paid plans are billed through your own Stripe account. The setup itself is done in <code class="doc-inline-code">.env</code>, your DNS and your web server. Once it is running you operate the platform from the admin panel at <code class="doc-inline-code">/admin</code>, the <strong>Admin</strong> entry in the sidebar of an administrator's account, which the <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">Admin Panel guide</a> describes tab by tab.</p>
+
         <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule supports two deployment modes:</p>
 
         <div class="doc-table-wrap">
@@ -46,12 +65,12 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Selfhosted</span></td>
+                        <td><strong>Selfhosted</strong></td>
                         <td>Path-based <code class="doc-inline-code">/schedule-name/...</code></td>
                         <td>Single organization or personal use</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">SaaS/Hosted</span></td>
+                        <td><strong>SaaS/Hosted</strong></td>
                         <td>Subdomain-based <code class="doc-inline-code">schedule-name.yourdomain.com</code></td>
                         <td>Multi-tenant platform for multiple customers</td>
                     </tr>
@@ -60,6 +79,8 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">In SaaS mode each customer schedule gets its own subdomain, and signing in, the admin portal and billing all live on one shared <code class="doc-inline-code">app</code> subdomain. A schedule on an Enterprise plan can additionally be served from the customer's own domain; see <a href="{{ route('marketing.docs.saas.custom_domains') }}" class="doc-link">Custom Domains</a>.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <code class="doc-inline-code">app</code> and <code class="doc-inline-code">www</code> hosts never resolve to a schedule, and a list of names the app needs for itself (among them <code class="doc-inline-code">admin</code>, <code class="doc-inline-code">api</code>, <code class="doc-inline-code">blog</code>, <code class="doc-inline-code">docs</code>, <code class="doc-inline-code">demo</code> and anything starting with <code class="doc-inline-code">demo-</code>) cannot be taken as a subdomain. A customer who asks for a reserved name is given a different subdomain instead, and renaming a schedule to one from the admin panel is refused with "That subdomain is reserved".</p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Your platform does not serve the Event Schedule marketing site</div>
@@ -71,7 +92,7 @@
         </div>
     </section>
 
-    <!-- Prerequisites -->
+    {{-- Prerequisites --}}
     <section id="prerequisites" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -88,7 +109,7 @@
         </ol>
     </section>
 
-    <!-- Environment Configuration -->
+    {{-- Environment Configuration --}}
     <section id="environment" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -99,7 +120,7 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Add the following variables to your <code class="doc-inline-code">.env</code> file to enable SaaS mode:</p>
 
-        <h3 class="doc-subheading">Core SaaS Settings</h3>
+        <h3 id="core-settings" class="doc-subheading">Core SaaS Settings</h3>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
@@ -114,11 +135,11 @@
 <span class="code-comment"># Main application URL (use app subdomain)</span>
 <span class="code-variable">APP_URL</span>=<span class="code-string">https://app.yourdomain.com</span>
 
-<span class="code-comment"># Marketing site URL (can be same as APP_URL)</span>
+<span class="code-comment"># Your own marketing site: the base of every link to a page the app does not serve</span>
 <span class="code-variable">APP_MARKETING_URL</span>=<span class="code-string">https://yourdomain.com</span></code></pre>
         </div>
 
-        <div class="overflow-x-auto mb-8">
+        <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
@@ -136,17 +157,17 @@
                     <tr>
                         <td><code class="doc-inline-code">APP_NAME</code></td>
                         <td><code class="doc-inline-code">Laravel</code></td>
-                        <td>Reaches the app only through the <code class="doc-inline-code">MAIL_FROM_NAME="${APP_NAME}"</code> reference in <code class="doc-inline-code">.env.example</code>, so it sets the sender name on outgoing email. It does <span class="font-semibold text-gray-900 dark:text-white">not</span> rename the product in the interface: admin and marketing page titles are literal, and <code class="doc-inline-code">config('app.name')</code> is a fixed <code class="doc-inline-code">Event Schedule</code> string in <code class="doc-inline-code">config/app.php</code>. Public schedule pages are already unbranded, since their title carries the schedule's own name. Rename in-app wording with <a href="#translations" class="doc-link">custom translations</a> instead.</td>
+                        <td>Sets the sender name on outgoing email, through the <code class="doc-inline-code">MAIL_FROM_NAME="${APP_NAME}"</code> reference in <code class="doc-inline-code">.env.example</code>. It also names the session cookie (<code class="doc-inline-code">laravel_session</code> for the shipped value) unless you set <code class="doc-inline-code">SESSION_COOKIE</code>, so changing it on a live platform signs everyone out once. It does <strong>not</strong> rename the product: admin page titles are literal, and <code class="doc-inline-code">config('app.name')</code> is a fixed <code class="doc-inline-code">Event Schedule</code> string in <code class="doc-inline-code">config/app.php</code>, which is also the wordmark on mail the platform sends about an account or to a schedule's owner. Public schedule pages are already unbranded, since their title carries the schedule's own name. Rename in-app wording with <a href="#translations" class="doc-link">custom translations</a> instead.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">APP_URL</code></td>
                         <td>-</td>
-                        <td>Application URL. Set to the <code class="doc-inline-code">app</code> subdomain (e.g. <code class="doc-inline-code">https://app.yourdomain.com</code>). The base domain is derived by stripping a leading <code class="doc-inline-code">app.</code>, <code class="doc-inline-code">www.</code>, <code class="doc-inline-code">blog.</code> or <code class="doc-inline-code">demo.</code>, and the <code class="doc-inline-code">blog</code> and <code class="doc-inline-code">demo</code> subdomains are then built back from it automatically.</td>
+                        <td>Application URL. Set to the <code class="doc-inline-code">app</code> subdomain (e.g. <code class="doc-inline-code">https://app.yourdomain.com</code>). The base domain is derived by stripping a leading <code class="doc-inline-code">app.</code>, <code class="doc-inline-code">www.</code>, <code class="doc-inline-code">blog.</code> or <code class="doc-inline-code">demo.</code>, and the <code class="doc-inline-code">app</code> and <code class="doc-inline-code">demo</code> hosts and every schedule's subdomain are then built back from it automatically. The <code class="doc-inline-code">blog</code> host belongs to the Event Schedule marketing site and is not served on your platform.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">APP_MARKETING_URL</code></td>
                         <td><code class="doc-inline-code">https://eventschedule.com</code></td>
-                        <td>Your own marketing site. This is where the footer strip on your free tier's public pages sends visitors, so point it at your site rather than leaving the default.</td>
+                        <td>Your own marketing site, and the base of every link the app builds to a page it does not serve itself: the footer strip on your free tier's public pages, the logo in the admin portal's sidebar and on the sign-in pages, the <strong>Help</strong> button (<code class="doc-inline-code">/docs/...</code>), the <strong>Learn more</strong> and <strong>Compare plans</strong> links on upgrade prompts (<code class="doc-inline-code">/features/...</code>, <code class="doc-inline-code">/pricing</code>), and the privacy policy and terms (<code class="doc-inline-code">/privacy</code>, <code class="doc-inline-code">/terms-of-service</code>) until you <a href="#legal-pages" class="doc-link">publish your own</a>. Point it at your site rather than leaving the default, and have your site answer or redirect those paths.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">IS_NEXUS</code></td>
@@ -157,28 +178,16 @@
             </table>
         </div>
 
-        <h3 class="doc-subheading">Branding Customization</h3>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">One credit a page</div>
-            <p>Your app name, logos and domain make the platform yours, and your free tier's footer
-            strip points at your <code class="doc-inline-code">APP_MARKETING_URL</code> rather than
-            ours. One thing is not yours to repoint: a small "Event Schedule" chip in the corner of
-            the public pages of every customer you charge. It is the
-            attribution the <a href="https://github.com/eventschedule/eventschedule/blob/main/LICENSE" target="_blank" rel="noopener" class="doc-link">Attribution Assurance License</a>
-            asks for in return for the software, so it links to eventschedule.com and
-            <code class="doc-inline-code">APP_MARKETING_URL</code> does not change it. A free schedule
-            shows your footer strip instead of the chip, so no page carries two credits.</p>
-        </div>
+        <h3 id="branding" class="doc-subheading">Branding Customization</h3>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-comment"># Logo for light backgrounds (header, emails)</span>
+            <pre><code><span class="code-comment"># Logo for light backgrounds (dark artwork)</span>
 <span class="code-variable">APP_LOGO_DARK</span>=<span class="code-string">/images/dark_logo.png</span>
 
-<span class="code-comment"># Logo for dark backgrounds (dark mode, footers)</span>
+<span class="code-comment"># Logo for dark backgrounds (light artwork)</span>
 <span class="code-variable">APP_LOGO_LIGHT</span>=<span class="code-string">/images/light_logo.png</span></code></pre>
         </div>
 
@@ -195,35 +204,51 @@
                     <tr>
                         <td><code class="doc-inline-code">APP_LOGO_DARK</code></td>
                         <td><code class="doc-inline-code">/images/dark_logo.png</code></td>
-                        <td>Logo displayed on light backgrounds</td>
+                        <td>Logo displayed on light backgrounds: the sign-in and sign-up pages, the first-run page that asks for a schedule type, the <strong>About</strong> dialog and the legal pages you write in the app, all in the light theme</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">APP_LOGO_LIGHT</code></td>
                         <td><code class="doc-inline-code">/images/light_logo.png</code></td>
-                        <td>Logo displayed on dark backgrounds</td>
+                        <td>Logo displayed on dark backgrounds: the same places in the dark theme. It is also the icon in the platform's own web app manifest.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">For the logo files:</p>
+        <ul class="doc-list">
+            <li>Place logo files in <code class="doc-inline-code">public/images/</code></li>
+            <li>Recommended dimensions: 200px width, transparent background</li>
+            <li>Supported formats: PNG, SVG</li>
+            <li>The dark logo should have dark/black text (for light backgrounds)</li>
+            <li>The light logo should have light/white text (for dark backgrounds)</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The logo at the top of the admin portal's sidebar does not read these variables. It always loads <code class="doc-inline-code">public/images/light_logo.webp</code>, with <code class="doc-inline-code">light_logo.png</code> for a browser without WebP, so replace those two files to change it.</p>
+
         <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Logo Guidelines</div>
-            <ul class="doc-list mt-2">
-                <li>Place logo files in <code class="doc-inline-code">public/images/</code></li>
-                <li>Recommended dimensions: 200px width, transparent background</li>
-                <li>Supported formats: PNG, SVG</li>
-                <li>The dark logo should have dark/black text (for light backgrounds)</li>
-                <li>The light logo should have light/white text (for dark backgrounds)</li>
-            </ul>
+            <div class="doc-callout-title">One credit a page</div>
+            <p>Your sender name, logos and domain make the platform yours, and your free tier's footer
+            strip points at your <code class="doc-inline-code">APP_MARKETING_URL</code> rather than
+            ours. One thing is not yours to repoint: a small "Event Schedule" chip in the corner of
+            the public pages of every customer you charge. It is the
+            attribution the <a href="https://github.com/eventschedule/eventschedule/blob/main/LICENSE" target="_blank" rel="noopener" class="doc-link">Attribution Assurance License</a>
+            asks for in return for the software, so it links to eventschedule.com and
+            <code class="doc-inline-code">APP_MARKETING_URL</code> does not change it. A free schedule
+            shows your footer strip instead of the chip, so no page carries two credits.</p>
         </div>
 
-        <h3 class="doc-subheading">Support Configuration</h3>
+        <h3 id="legal-pages" class="doc-subheading">Legal Pages</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The privacy policy, terms of service and cookie policy your customers and their visitors are linked to are yours to publish. Until you do, those links go to <code class="doc-inline-code">/privacy</code> and <code class="doc-inline-code">/terms-of-service</code> on your <code class="doc-inline-code">APP_MARKETING_URL</code>, and with that variable left on its default they open eventschedule.com's documents, which name our company and not yours.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Open <strong>System &rarr; Legal Pages</strong> in the admin panel (<code class="doc-inline-code">/admin/legal</code>). Each of the three documents takes either an <strong>External URL</strong>, for a policy hosted elsewhere, or a <strong>Document</strong> written there in Markdown, which the app then serves on your <code class="doc-inline-code">app</code> subdomain. Saving one replaces the link everywhere it appears, including the sign-up page, the ticket checkout and the cookie banner. While the privacy policy is still the built-in one, the admin dashboard shows <strong>Publish your own privacy policy</strong> under <strong>Needs attention</strong>. The <a href="{{ route('marketing.docs.selfhost.admin') }}#system-legal-pages" class="doc-link">Admin Panel guide</a> covers the page.</p>
+
+        <h3 id="support-email" class="doc-subheading">Support Configuration</h3>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-comment"># Email address for user feedback (displayed in footer)</span>
+            <pre><code><span class="code-comment"># The address your customers are told to write to</span>
 <span class="code-variable">SUPPORT_EMAIL</span>=<span class="code-string">contact@eventschedule.com</span></code></pre>
         </div>
 
@@ -240,19 +265,19 @@
                     <tr>
                         <td><code class="doc-inline-code">SUPPORT_EMAIL</code></td>
                         <td><code class="doc-inline-code">contact@eventschedule.com</code></td>
-                        <td>Shown at the bottom of the admin sidebar as the "questions or suggestions" address, and used as the Reply-To on the notices sent when an account, schedule or event is deleted. Change it or your customers will write to us.</td>
+                        <td>Shown at the foot of every admin portal page ("If you have any questions or suggestions email us at ...") and as <strong>Contact Us</strong> in the <strong>About</strong> dialog. It is also the Reply-To on the notices sent when an account, schedule or event is deleted, and on the email a customer gets when you answer them in the <a href="#support-chat" class="doc-link">support chat</a>. Change it or your customers will write to us.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <h3 class="doc-subheading">Pricing and Trial Configuration</h3>
+        <h3 id="trials" class="doc-subheading">Pricing and Trial Configuration</h3>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code><span class="code-comment"># Free trial length in days for new Pro subscribers</span>
+            <pre><code><span class="code-comment"># Length in days of both free trials</span>
 <span class="code-variable">TRIAL_DAYS</span>=<span class="code-value">7</span></code></pre>
         </div>
 
@@ -269,43 +294,84 @@
                     <tr>
                         <td><code class="doc-inline-code">TRIAL_DAYS</code></td>
                         <td><code class="doc-inline-code">7</code></td>
-                        <td>Length of the Stripe trial granted when a schedule subscribes for the first time. The shipped <code class="doc-inline-code">.env.example</code> sets <code class="doc-inline-code">365</code>, so set it deliberately.</td>
+                        <td>Length, in days, of the two free trials below. The shipped <code class="doc-inline-code">.env.example</code> sets <code class="doc-inline-code">365</code>, so set it deliberately.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">How Trials Work</div>
-            <ul class="doc-list mt-2">
-                <li>A new schedule starts on the <span class="font-semibold text-gray-900 dark:text-white">Free</span> plan. Nothing grants it Pro automatically, so the free tier is what every customer sees first</li>
-                <li>The trial is applied at subscribe time: a schedule that has never had a plan or a subscription gets <code class="doc-inline-code">TRIAL_DAYS</code> before Stripe takes the first payment, and the subscribe page shows a free-trial badge</li>
-                <li>A schedule carrying a legacy expiry date instead gets its remaining days as the trial length</li>
-                <li>Amounts are defined by the Price objects in your Stripe dashboard; the app only stores the Price IDs, plus separate display amounts (see <a href="#stripe" class="doc-link">Stripe Subscription Setup</a>)</li>
-            </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A new schedule starts on the <strong>Free</strong> plan. Nothing grants it Pro automatically, so the free tier is what every customer sees first. Two different trials read <code class="doc-inline-code">TRIAL_DAYS</code>:</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Trial</th>
+                        <th>Where it starts</th>
+                        <th>What it opens</th>
+                        <th>Who gets it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Subscription trial</strong></td>
+                        <td>When the owner subscribes, from <strong>Upgrade to Pro</strong> on the <strong>Plan</strong> tab or any upgrade prompt. A card is entered, and Stripe takes the first payment when the trial ends.</td>
+                        <td>The whole plan they subscribed to</td>
+                        <td>A schedule that has never had a plan or a subscription. A schedule that still has days left on a plan with an expiry date, such as one you granted by hand, gets those remaining days as its trial instead.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Selling trial</strong></td>
+                        <td><strong>Sell tickets free for <em>N</em> days</strong>, on the event form's <strong>Tickets</strong> tab and on the <strong>Plan</strong> tab. No card is asked for, and it is offered whether or not your Stripe keys are set.</td>
+                        <td>Selling tickets that carry a price, and nothing else. The schedule stays on Free, and other Pro features stay locked.</td>
+                        <td>An owner once, across all their schedules, and never one who has had a subscription. A reminder email goes out three days before it ends and again one day before.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A schedule that qualifies for the subscription trial sees a free-trial notice beside <strong>Upgrade to Pro</strong> and at the top of the subscribe page, with the date of the first charge. The notice's label is fixed at "7-day free trial" whatever <code class="doc-inline-code">TRIAL_DAYS</code> holds, so if you use another length, change that string (<code class="doc-inline-code">free_trial_badge</code>) with <a href="#translations" class="doc-link">custom translations</a>.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">What a subscriber is charged after a trial comes from the Price objects in your Stripe dashboard. The app only stores the Price IDs, plus separate display amounts (see <a href="#stripe" class="doc-link">Stripe Subscription Setup</a>). The customer's side of the selling trial is in <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">Selling Tickets</a>.</p>
 
         <h3 id="push-notifications" class="doc-subheading">Push Notifications (Optional)</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can send web push notifications that mirror its email notifications using <a href="https://onesignal.com" target="_blank" rel="noopener noreferrer" class="doc-link">OneSignal</a>. This is a Pro feature and is <strong>off by default</strong>: with no configuration, no push SDK loads and no calls are made to OneSignal. To enable it platform-wide, create a OneSignal app (Web platform) and set:</p>
-        <pre class="doc-code-block"><code>ONESIGNAL_APP_ID=your-onesignal-app-id
-ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Once both values are set, a <strong>Push notifications</strong> panel appears on each schedule's <strong>Settings &rarr; Notifications</strong> tab, where the owner enables push per device and can send a test. Sending is gated on the schedule being Pro or Enterprise, and the demo schedule never receives push. One OneSignal app serves the whole platform; tenants are segmented automatically. Add <code class="doc-inline-code">ONESIGNAL_SAFARI_WEB_ID</code> only if you need legacy macOS Safari support.</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">ONESIGNAL_APP_ID</span>=<span class="code-string">your-onesignal-app-id</span>
+<span class="code-variable">ONESIGNAL_REST_API_KEY</span>=<span class="code-string">your-onesignal-rest-api-key</span></code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Once both values are set, a <strong>Push notifications</strong> panel appears on each schedule's edit page, in the <strong>Notifications</strong> row of the <strong>Settings</strong> tab, where the owner presses <strong>Enable push on this device</strong> and can send a test. Sending is gated on the schedule being Pro or Enterprise, and the demo schedule never receives push. One OneSignal app serves the whole platform; tenants are segmented automatically. Add <code class="doc-inline-code">ONESIGNAL_SAFARI_WEB_ID</code> only if you need legacy macOS Safari support.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Note that enabling push loads the OneSignal SDK from their CDN and sends notification data to OneSignal, and that Apple iOS only supports web push for sites added to the home screen (iOS 16.4+).</p>
 
         <h3 id="google-wallet" class="doc-subheading">Google Wallet Passes (Optional)</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket buyers can keep their ticket in Google Wallet: an <strong>Add to Google Wallet</strong> button appears on the ticket page, the multi-event order page and the confirmation email, and the pass carries the same QR code, so it scans at the door like any other ticket. One Google Wallet issuer account of yours switches it on for every tenant at once, on every plan, and tenants have nothing to connect. Set:</p>
-        <pre class="doc-code-block"><code>GOOGLE_WALLET_ISSUER_ID=your-issuer-id
-GOOGLE_WALLET_SERVICE_ACCOUNT=/absolute/path/to/service-account.json</code></pre>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">GOOGLE_WALLET_ISSUER_ID</span>=<span class="code-string">your-issuer-id</span>
+<span class="code-variable">GOOGLE_WALLET_SERVICE_ACCOUNT</span>=<span class="code-string">/absolute/path/to/service-account.json</span></code></pre>
+        </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The service account setting also takes the key file's contents, base64-encoded, for a host with no writable file mount. Leave either value empty and no button renders and nothing is sent to Google. A new issuer account starts in Google's demo mode, where only the Google accounts you register as testers can save a pass. Give a staging install its own <code class="doc-inline-code">GOOGLE_WALLET_ID_PREFIX</code> (the default is <code class="doc-inline-code">es</code>): Google never deletes a pass class, so two installs sharing an issuer account and a prefix collide for good. The <a href="{{ route('marketing.docs.selfhost.google_wallet') }}" class="doc-link">Google Wallet guide</a> covers creating the issuer account.</p>
 
         <h3 id="reverse-proxy" class="doc-subheading">Running Behind a Reverse Proxy</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A multi-tenant install almost always sits behind a reverse proxy or CDN (Nginx, Apache, Cloudflare, or a control panel such as HestiaCP). Tell Event Schedule which proxies to trust so it reads the <code class="doc-inline-code">X-Forwarded-Proto</code> and <code class="doc-inline-code">X-Forwarded-For</code> headers those proxies set:</p>
-        <pre class="doc-code-block"><code>TRUSTED_PROXIES=*</code></pre>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">TRUSTED_PROXIES</span>=<span class="code-value">*</span></code></pre>
+        </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Use <code class="doc-inline-code">*</code> to trust any proxy, or a comma-separated list of proxy IPs or CIDR ranges (for example <code class="doc-inline-code">10.0.0.0/8,192.168.1.1</code>) when the origin server is reachable directly from the internet. Left unset, your platform trusts no proxies at all: the application then treats every request as plain HTTP even when the browser is on HTTPS, which can produce redirect loops on tenant subdomains, and it records the proxy's IP address as the visitor's IP in analytics and rate limiting.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The setting deliberately lives in <code class="doc-inline-code">config/trustedproxy.php</code> rather than in application bootstrap, so it survives <code class="doc-inline-code">php artisan config:cache</code>. Re-run that command after changing the value.</p>
     </section>
 
-    <!-- DNS Configuration -->
+    {{-- DNS Configuration --}}
     <section id="dns" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -353,7 +419,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
         </ul>
     </section>
 
-    <!-- Web Server Configuration -->
+    {{-- Web Server Configuration --}}
     <section id="webserver" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -414,7 +480,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
         </div>
     </section>
 
-    <!-- Stripe Subscription Setup -->
+    {{-- Stripe Subscription Setup --}}
     <section id="stripe" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -426,7 +492,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">See the <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe integration documentation</a> for step-by-step key, webhook and Connect instructions.</p>
 
-        <h3 class="doc-subheading">Required Environment Variables</h3>
+        <h3 id="stripe-variables" class="doc-subheading">Required Environment Variables</h3>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>.env</span>
@@ -440,7 +506,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 <span class="code-variable">STRIPE_PRICE_YEARLY</span>=<span class="code-string">price_yearly_price_id</span></code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Those five cover the Pro tier. Selling Enterprise, and showing the right numbers in the interface, needs four more:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Those five cover the Pro tier. Selling Enterprise, and showing the right numbers in the interface, needs these as well:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -455,7 +521,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                     <tr>
                         <td><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY</code></td>
                         <td>-</td>
-                        <td>Stripe Price ID for monthly Enterprise. The "Upgrade to Enterprise" button is hidden until both Enterprise Price IDs are set.</td>
+                        <td>Stripe Price ID for monthly Enterprise. The <strong>Upgrade to Enterprise</strong> button is hidden until both Enterprise Price IDs are set.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY</code></td>
@@ -464,36 +530,32 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">STRIPE_PRICE_MONTHLY_AMOUNT</code><br><code class="doc-inline-code">STRIPE_PRICE_YEARLY_AMOUNT</code></td>
-                        <td><code class="doc-inline-code">9</code> / <code class="doc-inline-code">90</code></td>
-                        <td>Display-only Pro amounts shown on the subscribe page, the Plan tab and upgrade prompts. A super-admin can change them at <code class="doc-inline-code">/admin/settings</code>, which overrides these for everything the site displays</td>
+                        <td><code class="doc-inline-code">5</code> / <code class="doc-inline-code">50</code></td>
+                        <td>Display-only Pro amounts shown on the subscribe page, the Plan tab and upgrade prompts. An administrator can change them in the <strong>Plan pricing</strong> card under <strong>System &rarr; Settings</strong> in the admin panel (<code class="doc-inline-code">/admin/settings</code>), which overrides these for everything the site displays</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_MONTHLY_AMOUNT</code><br><code class="doc-inline-code">STRIPE_ENTERPRISE_PRICE_YEARLY_AMOUNT</code></td>
-                        <td><code class="doc-inline-code">29</code> / <code class="doc-inline-code">290</code></td>
-                        <td>Display-only Enterprise amounts, overridable at <code class="doc-inline-code">/admin/settings</code> in the same way</td>
+                        <td><code class="doc-inline-code">15</code> / <code class="doc-inline-code">150</code></td>
+                        <td>Display-only Enterprise amounts, overridable in the same <strong>Plan pricing</strong> card</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">PLATFORM_CURRENCY</code></td>
                         <td><code class="doc-inline-code">USD</code></td>
-                        <td>The currency those amounts are shown in, everywhere the platform quotes its own price. Also the fallback currency for a new event whose schedule has no country. A super-admin can change it at <code class="doc-inline-code">/admin/settings</code>, which overrides this value</td>
+                        <td>The currency those amounts are shown in, everywhere the platform quotes its own price. Also the fallback currency for a new event whose schedule has no country. An administrator can change it in the <strong>Platform currency</strong> card on the same page, which overrides this value</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <code class="doc-inline-code">*_AMOUNT</code> variables and <code class="doc-inline-code">PLATFORM_CURRENCY</code> are labels, not prices. What a customer is charged comes from the Stripe Price the matching Price ID points at, including its currency, and nothing reconciles the two. Set them all, and keep them in step, or your platform will advertise one figure and bill another.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Keep the <code class="doc-inline-code">*_AMOUNT</code> variables set even once you are editing the numbers in the admin panel. Revenue reporting and renewal emails read the variables, not the <strong>Plan pricing</strong> card, so that an amount changed to run a promotion cannot restate revenue you have already booked or quote an existing subscriber a figure their card will never be charged. One thing does turn the advertised amount into money: a <a href="{{ route('marketing.docs.referral_program') }}" class="doc-link">referral</a> credit applied to a subscribed schedule is posted to its Stripe balance at the advertised monthly amount.</p>
+
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">The amounts are labels, not prices</div>
-            <p>The <code class="doc-inline-code">*_AMOUNT</code> and <code class="doc-inline-code">PLATFORM_CURRENCY</code>
-            variables only decide what the interface prints. What a customer is actually charged comes from the Stripe
-            Price the matching Price ID points at, including its currency. Set them all, and keep them in step, or your
-            platform will advertise one figure and bill another.</p>
-            <p>Keep the <code class="doc-inline-code">*_AMOUNT</code> variables set even once you are editing the numbers
-            from <code class="doc-inline-code">/admin/settings</code>. Revenue reporting and renewal emails read these,
-            not the admin panel, so that an amount changed to run a promotion cannot restate revenue you have already
-            booked or quote an existing subscriber a figure their card will never be charged.</p>
+            <div class="doc-callout-title">Do not repoint a Price ID that still has subscribers on it</div>
+            <p>A subscription is matched to its plan by comparing its Stripe Price ID with the four you have configured, and with nothing else. Stripe Prices cannot be edited, so changing what a plan costs means a new Price object. A subscriber left on a Price ID that is no longer in <code class="doc-inline-code">.env</code> stops resolving: an Enterprise subscriber loses the Enterprise features while their card is still charged for them, and revenue reporting counts them at zero. The admin dashboard then shows <strong>subscriptions on an unrecognized price</strong> under <strong>Needs attention</strong>, linking to the list on <strong>Insights &rarr; Revenue</strong>. Move those subscriptions onto the new Price in Stripe, or keep the variable on the Price they are on.</p>
         </div>
 
-        <h3 class="doc-subheading">Webhook Endpoint</h3>
+        <h3 id="stripe-webhook" class="doc-subheading">Webhook Endpoint</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Subscriptions are kept in sync by a webhook that is separate from the ticket-payment one. In your Stripe dashboard add an endpoint pointing at <code class="doc-inline-code">https://app.yourdomain.com/stripe/subscription-webhook</code> and copy its signing secret into <code class="doc-inline-code">STRIPE_PLATFORM_WEBHOOK_SECRET</code>. It is this webhook that downgrades a schedule to Free when its subscription is deleted, and that raises the payment-failed notice, so without it a cancellation in Stripe never reaches your platform.</p>
 
         <div class="doc-callout doc-callout-warning">
@@ -503,18 +565,19 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             upgrade any schedule on your platform. Set it as soon as you create the endpoint.</p>
         </div>
 
-        <h3 class="doc-subheading">How Subscriptions Work</h3>
+        <h3 id="stripe-flow" class="doc-subheading">How Subscriptions Work</h3>
         <ol class="doc-list doc-list-numbered">
             <li>A customer creates a schedule. It starts on the Free plan</li>
-            <li>They open the schedule's admin portal and go to the <span class="font-semibold text-gray-900 dark:text-white">Plan</span> tab, which shows the current plan, status and the ticket, newsletter and photo allowances</li>
-            <li>They click <span class="font-semibold text-gray-900 dark:text-white">Upgrade to Pro</span> and pay. The button only appears once <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is set</li>
+            <li>They open the schedule and select its <strong>Plan</strong> tab, the last of the schedule's tabs, which shows the current plan, its status, and how much of the newsletter email and photo allowances is used</li>
+            <li>The schedule's owner clicks <strong>Upgrade to Pro</strong> and pays. The button only appears once <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is set, and only for the owner: other team members see the plan but none of its actions</li>
             <li>Pro features unlock for that schedule, and the free-tier footer strip and ad slot come off its public pages</li>
-            <li>An active Pro subscriber can then switch to Enterprise, or between monthly and yearly, from the same tab. <span class="font-semibold text-gray-900 dark:text-white">Manage Subscription</span> opens the Stripe billing portal</li>
+            <li>An active Pro subscriber can then use <strong>Upgrade to Enterprise</strong>, or <strong>Switch to Yearly</strong> and <strong>Switch to Monthly</strong>, from the same tab. <strong>Manage Subscription</strong> opens the Stripe billing portal, and <strong>Cancel Subscription</strong> asks for an optional reason and keeps the plan until the end of the paid period</li>
             <li>Subscriptions are per schedule, not per user: a customer with three schedules pays for each one they upgrade</li>
         </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To put a schedule on a plan without a subscription, open <strong>Manage &rarr; Schedules</strong> in the admin panel, press <strong>Edit</strong> on its row, and under <strong>Plan</strong> set <strong>Plan Type</strong> and a <strong>Plan Expires</strong> date. The plan holds until that date, so a plan type saved with no date grants nothing. See <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-plans" class="doc-link">Schedules</a> in the Admin Panel guide.</p>
     </section>
 
-    <!-- Complete Example Configuration -->
+    {{-- Complete Example Configuration --}}
     <section id="example" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -576,14 +639,14 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 <span class="code-variable">STRIPE_PRICE_YEARLY</span>=<span class="code-string">price_...</span></code></pre>
         </div>
 
-        <div class="doc-callout doc-callout-warning mt-6">
-            <div class="doc-callout-title">Important</div>
+        <div class="doc-callout doc-callout-info mt-6">
+            <div class="doc-callout-title">The session cookie spans your subdomains</div>
             <p>Set <code class="doc-inline-code">SESSION_DOMAIN</code> to <code class="doc-inline-code">.yourdomain.com</code> (with leading dot) to allow session sharing across subdomains. If left unset, hosted mode automatically defaults it to your <code class="doc-inline-code">APP_URL</code> base domain; setting it explicitly takes precedence.</p>
             <p class="mt-2">Requests arriving on a customer's own domain are the exception: the session domain is cleared for those requests only, so the cookie is scoped to that origin instead of one the browser would reject. That is also why signing in always happens on your <code class="doc-inline-code">app</code> subdomain rather than on a custom domain.</p>
         </div>
     </section>
 
-    <!-- Verification Steps -->
+    {{-- Verification Steps --}}
     <section id="verification" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -603,6 +666,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             <li>Note the schedule's subdomain (e.g. <code class="doc-inline-code">my-schedule</code>)</li>
             <li>Visit <code class="doc-inline-code">https://my-schedule.yourdomain.com</code></li>
             <li>The schedule's public page should load, and stay signed in when you move back to <code class="doc-inline-code">app.yourdomain.com</code></li>
+            <li>Open the same address in a private window. Signed out, a schedule answers page-not-found until its email address or phone number has been verified, so verify the schedule's email first and then check that the page loads for a visitor</li>
         </ol>
 
         <h3 class="doc-subheading">3. Test SSL Certificate</h3>
@@ -614,35 +678,36 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 
         <h3 class="doc-subheading">4. Test Subscription Flow (if configured)</h3>
         <ol class="doc-list doc-list-numbered">
-            <li>Open a schedule's admin portal and select the <span class="font-semibold text-gray-900 dark:text-white">Plan</span> tab</li>
-            <li>Click <span class="font-semibold text-gray-900 dark:text-white">Upgrade to Pro</span>. If the button is missing, <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is not set</li>
+            <li>Signed in as the schedule's owner, open the schedule and select its <strong>Plan</strong> tab</li>
+            <li>Click <strong>Upgrade to Pro</strong>. If the button is missing, <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> is not set</li>
             <li>Complete checkout with the test card <code class="doc-inline-code">4242 4242 4242 4242</code>, which only works while your keys are the <code class="doc-inline-code">sk_test_</code> / <code class="doc-inline-code">pk_test_</code> pair</li>
             <li>Confirm the Plan tab now reports Pro, and that the free-tier footer strip has gone from the schedule's public page</li>
             <li>Cancel from the Stripe dashboard and confirm the Plan tab picks it up, which proves the subscription webhook is wired correctly</li>
         </ol>
     </section>
 
-    <!-- Demo Mode -->
+    {{-- Demo Mode --}}
     <section id="demo" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
             </svg>
-            Demo Mode (Optional)
+            Demo Mode
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Demo mode lets potential customers try your platform without signing up. Visitors to <code class="doc-inline-code">demo.yourdomain.com</code> are automatically logged in to a demo account with sample data.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Demo mode lets potential customers try your platform without signing up. Visitors to <code class="doc-inline-code">demo.yourdomain.com</code> are automatically logged in to a shared demo account with sample data.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">It is part of every hosted install and has no switch: with <code class="doc-inline-code">IS_HOSTED=true</code> the <a href="#scheduler" class="doc-link">scheduler</a> creates the demo account and its schedules the first time it runs, and rebuilds them every hour after that. On a selfhosted install the command refuses to run and the auto-login stays inert, since demo mode relies on subdomain routing.</p>
 
         <h3 class="doc-subheading">How It Works</h3>
         <ul class="doc-list mb-6">
             <li>A request to the <code class="doc-inline-code">demo</code> subdomain signs the visitor in as the demo user, with no password prompt</li>
-            <li>They land in the <span class="font-semibold text-gray-900 dark:text-white">admin portal</span> for the demo schedule, on its Schedule tab, so what they try is the real product rather than a public page</li>
+            <li>They land in the <strong>admin portal</strong> for the demo schedule, on its <strong>Schedule</strong> tab, so what they try is the real product rather than a public page</li>
             <li>The demo interface follows the visitor's browser language, chosen from your supported languages on first visit</li>
             <li>A visitor already signed in as a real user is bounced back to your app rather than switched into the demo</li>
-            <li>Demo data can be reset periodically to stay fresh</li>
+            <li>The sample data is rebuilt every hour, so what one visitor changed is gone for the next</li>
         </ul>
 
-        <h3 class="doc-subheading">Setting Up Demo Mode</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Run the setup command to create the demo account and sample data:</p>
+        <h3 id="demo-data" class="doc-subheading">What Is Created, and When</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The scheduler runs the setup command once an hour, whichever way you drive it. The first run creates the demo, and every later run resets it. Run it by hand to have the demo at once, or to reset it between two scheduled runs:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -652,45 +717,320 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             <pre><code>php artisan app:setup-demo</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4 mt-4">This creates the demo user and a curator schedule on the <code class="doc-inline-code">simpsons</code> subdomain, then populates a small Springfield-themed network around it: talent and venue schedules, sub-schedules, events with ticket types, followed schedules, sample ticket purchases and analytics history.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It creates the demo user and a curator schedule on the <code class="doc-inline-code">simpsons</code> subdomain, then populates a small Springfield-themed network around it on <code class="doc-inline-code">demo-</code> subdomains: talent and venue schedules, sub-schedules, events with ticket types, followed schedules, sample ticket purchases and analytics history. A reset deletes and recreates the <code class="doc-inline-code">demo-</code> schedules and empties the curator. An event one of your customers created that reached a demo schedule is only detached from it, and keeps its tickets and sales.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Do not add a cron entry of your own for the command. The scheduler already runs it, and a second runner would rebuild the demo twice an hour.</p>
 
         <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Two things to check before you run it</div>
-            <ul class="doc-list mt-2">
-                <li>The demo account is created with the fixed address <code class="doc-inline-code">contact@eventschedule.com</code>. If that address already belongs to a real account on your platform, that account becomes the demo account</li>
-                <li>The demo schedule is created on the Free plan like any other, so Pro-only screens stay locked and its public pages carry your free-tier footer. To show off paid features, open it from <span class="font-semibold text-gray-900 dark:text-white">Manage &rarr; Schedules</span> in the admin panel and set its <span class="font-semibold text-gray-900 dark:text-white">Plan Type</span>. Whatever its plan, it never shows ads or the accommodation map</li>
-            </ul>
+            <div class="doc-callout-title">Let the scheduler run once before you open sign-ups</div>
+            <p>The demo account always has the address <code class="doc-inline-code">contact@eventschedule.com</code>, and its curator schedule is always <code class="doc-inline-code">simpsons</code>. If a real account already holds that address, or a real schedule that subdomain, the scheduler adopts it as the demo: every visitor to the demo host is signed in to that account, and each hourly reset deletes that schedule's events and sub-schedules. Once the demo exists both names are taken.</p>
         </div>
 
-        <h3 class="doc-subheading">Resetting Demo Data</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Running the setup command again will automatically reset the demo data:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The demo schedule is created on the Free plan like any other, so Pro-only screens stay locked and its public pages carry your free-tier footer. To show off paid features, open <strong>Manage &rarr; Schedules</strong> in the admin panel, press <strong>Edit</strong> on the <code class="doc-inline-code">simpsons</code> row, and under <strong>Plan</strong> set <strong>Plan Type</strong> and a <strong>Plan Expires</strong> date. Whatever its plan, it never shows ads or the accommodation map. Its description ends with a line that sends visitors to eventschedule.com.</p>
+    </section>
 
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>bash</span>
-                <button class="doc-copy-btn">Copy</button>
-            </div>
-            <pre><code>php artisan app:setup-demo</code></pre>
-        </div>
+    {{-- Scheduler and queue --}}
+    <section id="scheduler" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Scheduler and queue
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Timed work (reminder emails, calendar sync, installment charges, ticket release, AI translation, the hourly demo reset) is driven by the Laravel scheduler, and the queue is drained from inside it. There are three ways to run it: a cron entry, a worker process, or an HTTP endpoint. Pick one.</p>
 
-        <h3 class="doc-subheading">Scheduling Automatic Resets (Optional)</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">To keep demo data fresh, you can schedule hourly resets by adding this to your cron:</p>
-
+        <h3 id="scheduler-cron" class="doc-subheading">A cron entry, or a worker process</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a server with cron, add the single entry from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a>:</p>
         <div class="doc-code-block">
             <div class="doc-code-header">
                 <span>crontab</span>
                 <button class="doc-copy-btn">Copy</button>
             </div>
-            <pre><code>0 * * * * cd /path/to/eventschedule && php artisan app:setup-demo >> /dev/null 2>&1</code></pre>
+            <pre><code>* * * * * php /path/to/eventschedule/artisan schedule:run</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On a platform with no cron but long-running processes, a container host for example, run the scheduler as the process instead. This is what eventschedule.com does, as a DigitalOcean App Platform worker:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>bash</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>php artisan schedule:work</code></pre>
         </div>
 
-        <div class="doc-callout doc-callout-info mt-6">
-            <div class="doc-callout-title">Note</div>
-            <p>Demo mode only works in hosted mode (<code class="doc-inline-code">IS_HOSTED=true</code>) since it relies on subdomain routing. The setup command refuses to run otherwise, and the auto-login middleware stays inert, so there is nothing to undo on a selfhosted install.</p>
+        <h3 id="http-cron" class="doc-subheading">Or an HTTP cron endpoint</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Shared hosting that offers neither a crontab nor a long-running process can drive the same schedule over HTTP. Set <code class="doc-inline-code">APP_CRON_SECRET</code> to a long random string and have any external cron service request this once a minute:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>http</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>GET https://app.yourdomain.com/translate_data?secret=YOUR_SECRET</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same secret also gates <code class="doc-inline-code">/release_tickets</code>. Leaving <code class="doc-inline-code">APP_CRON_SECRET</code> empty disables both endpoints, which is the right setting on an install that uses cron or a worker.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Do not run two of these at once</div>
+            <p>Each of the three is a complete copy of the same schedule. An install running two of them, or the same one twice, will do some work twice. A handful of commands hold a shared lock and are safe either way, but most rely on there being a single runner.</p>
+        </div>
+
+        <h3 id="queue" class="doc-subheading">Queue</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute, so queued mail and background jobs go out within about a minute with no separate worker to manage. With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> nothing is queued at all and jobs run inline in the request that created them; set it to <code class="doc-inline-code">database</code> to get the queue.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you need lower latency than a minute, run a resident <code class="doc-inline-code">php artisan queue:work</code> as well.</p>
+
+        <h3 id="scheduler-health" class="doc-subheading">Knowing that it stopped</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every scheduler tick stamps a heartbeat. When it goes stale the admin panel shows <strong>Scheduled tasks are not running</strong> under <strong>Needs attention</strong> on the dashboard, puts a badge on the <strong>System</strong> tab, and says so at the top of <strong>System &rarr; Queue</strong>. Tune the threshold with <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 20, and never less than 16). Take it seriously: while the scheduler is down nothing sends email, syncs a calendar or charges an installment.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong>Scheduler</strong> card on <strong>System &rarr; Queue</strong> is where to look first. It shows when the last tick was, each rail that has ticked and how long ago, how many scheduled tasks are reporting, any task that failed, and which cache store holds the heartbeat and whether every server can read it. An install driven only by the HTTP endpoint reports the heartbeat alone, since that rail records no per-task results.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If the scheduler is a container of its own beside the web server, two more variables make a dead one visible:</p>
+
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">SCHEDULER_RAIL</code></td>
+                        <td><code class="doc-inline-code">cron</code></td>
+                        <td>The name this process ticks under on the Scheduler card. Set it to <code class="doc-inline-code">worker</code> on the scheduler container, because <code class="doc-inline-code">schedule:run</code> cannot tell a crontab from a worker. The HTTP endpoint always ticks as <code class="doc-inline-code">http</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">SCHEDULER_EXPECTED_RAIL</code></td>
+                        <td>-</td>
+                        <td>The rail that must be alive for scheduled work to count as happening. Leave it unset with a single cron. Set it, on the web server as well, to the same name as the scheduler container's <code class="doc-inline-code">SCHEDULER_RAIL</code>: without it another rail keeping the shared heartbeat fresh hides a dead worker, and with a name nothing ticks under the panel reports a stall that is not real.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Running more than one app server</div>
+            <p>Set <code class="doc-inline-code">CACHE_STORE</code> to <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code>. Every lock that stops two scheduled runs colliding is held in the cache, so on the <code class="doc-inline-code">file</code> default each server serialises only against itself, and the heartbeat above will report a stall that is not real, because one server cannot see another's cache.</p>
         </div>
     </section>
 
-    <!-- Troubleshooting -->
+    {{-- Backup storage --}}
+    <section id="backup-storage" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+            Backup storage
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Schedule exports are written to <code class="doc-inline-code">storage/app</code> by default, which is correct for a single server. Point them at object storage if your app runs on more than one server or container, or on a host with an ephemeral filesystem: the process that builds an export is not the one that later serves the download, so a local file would be missing or already deleted by then.</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">BACKUP_DISK_DRIVER</span>=<span class="code-value">s3</span>
+<span class="code-variable">BACKUP_SPACES_KEY</span>=<span class="code-string">your-key</span>
+<span class="code-variable">BACKUP_SPACES_SECRET</span>=<span class="code-string">your-secret</span>
+<span class="code-variable">BACKUP_SPACES_REGION</span>=<span class="code-string">nyc3</span>
+<span class="code-variable">BACKUP_SPACES_ENDPOINT</span>=<span class="code-string">https://nyc3.digitaloceanspaces.com</span>
+<span class="code-variable">BACKUP_SPACES_BUCKET</span>=<span class="code-string">your-private-backups-bucket</span></code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The endpoint is your provider's <strong>region</strong> endpoint, not the per-bucket origin endpoint that storage consoles display beside the bucket itself. The bucket name is added to the hostname for you, so an endpoint that already carries it addresses <code class="doc-inline-code">bucket.bucket.region...</code> and every upload fails its TLS handshake. Event Schedule strips a leading bucket name if it finds one, so either form works.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Use a separate private bucket, never your images bucket</div>
+            <p>An export archive contains every sale, attendee email address and phone number for the schedules inside it, and its path is a user id plus a timestamp. Image buckets are public and usually CDN-fronted, so anything landing in one is effectively published at a guessable URL, and a CDN keeps serving it after you make the object private again. Use a bucket with no public policy and no CDN in front of it. <code class="doc-inline-code">BACKUP_SPACES_BUCKET</code> has no default for this reason: a missing value fails rather than quietly writing backups somewhere public.</p>
+            <p>Archive filenames also carry 32 random characters, so the bucket is not the only thing standing between an export and the public.</p>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Imports are unaffected and always stay on the server that received the upload.</p>
+    </section>
+
+    {{-- Support Chat --}}
+    <section id="support-chat" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" class="inline-block w-7 h-7 me-2 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            Support Chat
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule includes a built-in chat system that lets your customers message you for support without leaving the admin portal. It needs no configuration and is present on every hosted install; on a selfhosted install neither the widget nor the admin screen exists. Each customer has one running conversation with you, which reopens if they write again after you have closed it.</p>
+
+        <h3 id="support-chat-customers" class="doc-subheading">For Your Customers</h3>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4>Chat widget</h4>
+                <p>A floating chat bubble in the bottom corner of the screen for signed-in users, with a green dot on it while you are marked available.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Sidebar button</h4>
+                <p>A chat icon beside <strong>Help</strong> at the foot of the admin sidebar opens the same panel, with a red badge for unread replies.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Message limit</h4>
+                <p>Up to 2,000 characters per message, in both directions. A message is stored as typed and escaped wherever it is shown, so HTML in one appears as text.</p>
+            </div>
+        </div>
+
+        <h3 id="support-chat-admin" class="doc-subheading">For You, the Platform Admin</h3>
+        <div class="doc-fields doc-fields--grouped">
+            <div class="doc-field">
+                <h4>Inbox</h4>
+                <p>Manage conversations from <strong>System &rarr; Support</strong> in the admin panel (<code class="doc-inline-code">/admin/support</code>). Every conversation is listed with its unread count, and the <strong>System</strong> tab and its <strong>Support</strong> entry carry a matching badge.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Availability switch</h4>
+                <p>Switch yourself online to show the green dot, either at the top of the Support page or from the chat icon at the foot of the sidebar, which for an admin opens an availability switch and an <strong>Open inbox</strong> link instead of a chat.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Hourly check</h4>
+                <p>While you are online, every hour the admin portal asks whether you are still available. Confirm within 10 minutes or you are switched offline, so you never leave it on overnight by accident. Replying to a conversation counts as confirming.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Away when the admin portal is closed</h4>
+                <p>If no admin portal tab of yours has checked in for 5 minutes (the laptop is closed or the browser quit), customers see you as away until you open it again. Only the admin who switched the chat on counts, so another admin's open tab does not keep you looking available.</p>
+            </div>
+            <div class="doc-field">
+                <h4>New message alerts</h4>
+                <p>While you are online, a new message shows a notice with a <strong>Reply</strong> link, plays a soft chime and flashes the tab title on whichever admin portal page you are on.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Replying</h4>
+                <p>Open a conversation to read the history and reply. The customer sees a typing indicator while you write, and you see "Seen" once they have read your reply.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Closing conversations</h4>
+                <p>Close resolved conversations to keep the list short.</p>
+            </div>
+        </div>
+
+        <h3 id="support-chat-notifications" class="doc-subheading">Who Gets Notified</h3>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4>When a customer writes: email</h4>
+                <p>Every new message emails the first account flagged as a platform admin (the one with the lowest ID), whether you are online or not, so every conversation reaches one inbox. Give that account a monitored address. A burst of messages is one email: the next message is emailed once 10 minutes have passed, or once you have replied to or closed the conversation. While you are available the in-app alert tells you as well.</p>
+            </div>
+            <div class="doc-field">
+                <h4>When a customer writes: push</h4>
+                <p>New messages also send a push notification if OneSignal is configured (for a website visitor, at most one every two minutes). It goes to the admin who switched the chat on, or to the same first admin while nobody is online.</p>
+            </div>
+            <div class="doc-field">
+                <h4>When you reply</h4>
+                <p>Your replies email the customer only once they have left the chat without reading them. The email waits at least two minutes and carries every unread reply at once, so a quick back-and-forth does not fill their inbox. Its Reply-To is your <code class="doc-inline-code">SUPPORT_EMAIL</code>.</p>
+            </div>
+        </div>
+
+        <h3 id="support-chat-visitors" class="doc-subheading">Website Visitors</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On eventschedule.com, the marketing site also offers signed-out visitors a chat with a person, and only while you are available. Visitors can leave an email so a reply reaches them after they leave, and it is required once you are away. Their conversations appear in the same Support inbox, marked Visitor, with the page they are on and their country. This needs the marketing site, so it does not apply to your own SaaS install.</p>
+    </section>
+
+    {{-- Custom translations --}}
+    <section id="translations" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+            </svg>
+            Custom translations
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms to match your customers' vocabulary (for example "Talent" to "Artist", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>. Overrides apply globally across every tenant on your platform.</p>
+
+        <h3 id="translations-manager" class="doc-subheading">The Easy Way: The Translation Manager</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Sign in as a platform admin and open <strong>System &rarr; Translations</strong> in the admin panel (<code class="doc-inline-code">/admin/translations</code>). Search for a phrase, edit it for the locale you want, and save. The database is the source of truth: each save is stored as an override and republished to a file on disk, so nothing is lost on the next upgrade. Reverting an override restores the bundled string. The <a href="{{ route('marketing.docs.selfhost.admin') }}#system-translations" class="doc-link">Admin Panel guide</a> covers the page, including sharing your improvements with the community.</p>
+
+        <h3 id="translations-files" class="doc-subheading">The Manual Way: Override Files</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You can also drop a PHP file in:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>path</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>storage/app/lang/{locale}/{file}.php</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The three files the Translation Manager works on are <code class="doc-inline-code">messages.php</code> (UI strings), <code class="doc-inline-code">accessibility.php</code>, and <code class="doc-inline-code">marketing.php</code>. List the keys you want to change and nothing else; the bundled translations fill in the rest:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>php</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>&lt;?php
+// storage/app/lang/en/messages.php
+return [
+'talent' =&gt; 'Artist',
+'talents' =&gt; 'Artists',
+'curator' =&gt; 'Event Planner',
+'curators' =&gt; 'Event Planners',
+];</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Create one directory per locale you want to override (<code class="doc-inline-code">en</code>, <code class="doc-inline-code">es</code>, <code class="doc-inline-code">fr</code>, &hellip;). The full list of supported locales lives in <code class="doc-inline-code">config/app.php</code> under <code class="doc-inline-code">supported_languages</code>.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A hand-written file for one of those three managed groups is adopted into the database the next time the overrides are republished, after which the file is regenerated from the database. Keep that in mind if you edit both by hand and through the admin panel, and keep nested array values in their own group file (<code class="doc-inline-code">validation.php</code>, <code class="doc-inline-code">auth.php</code> or a custom group), which the loader honours and never rewrites.</p>
+
+        <h3 id="translations-publish" class="doc-subheading">Rebuilding and Moving Servers</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The files are server-local derived state, so rebuild them from the database after restoring a backup or cloning the app to a new machine:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>bash</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>php artisan translations:publish</code></pre>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Run it on each web server, and restart your queue workers afterwards so long-running processes pick up the new strings. If you run several servers behind a load balancer, set <code class="doc-inline-code">LANG_OVERRIDES_PATH</code> to a shared volume instead and publish once. A relative value resolves from the application root; an absolute one is used as given.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Why this works</div>
+            <p>Changes apply on the next request, with no cache clear required. <code class="doc-inline-code">storage/app/</code> is gitignored, so your overrides survive <code class="doc-inline-code">php artisan app:update</code>, <code class="doc-inline-code">git pull</code>, and fresh checkouts.</p>
+        </div>
+    </section>
+
+    {{-- Custom dashboard links --}}
+    <section id="custom-links" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+            </svg>
+            Custom dashboard links
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Add up to three custom links to the admin sidebar (for example a support site, community forum, or status page). On a SaaS deployment these links are <strong>platform-wide</strong>: everyone signed in to the admin portal, on every tenant, sees them just below the <strong>Newsletters</strong> link, and they open in a new tab.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Set the following variables in your <code class="doc-inline-code">.env</code> file. A link only appears when <strong>both</strong> its title and URL are filled in, so you can configure one, two, or three links:</p>
+
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">CUSTOM_LINK_1_TITLE</span>=<span class="code-string">"Help Center"</span>
+<span class="code-variable">CUSTOM_LINK_1_URL</span>=<span class="code-string">"https://help.example.com"</span>
+<span class="code-variable">CUSTOM_LINK_2_TITLE</span>=<span class="code-string">"Status"</span>
+<span class="code-variable">CUSTOM_LINK_2_URL</span>=<span class="code-string">"https://status.example.com"</span>
+<span class="code-variable">CUSTOM_LINK_3_TITLE</span>=
+<span class="code-variable">CUSTOM_LINK_3_URL</span>=</code></pre>
+        </div>
+
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Reload cached config</div>
+            <p>If you have run <code class="doc-inline-code">php artisan config:cache</code>, re-run it (or <code class="doc-inline-code">php artisan config:clear</code>) after editing <code class="doc-inline-code">.env</code> so the new links take effect.</p>
+        </div>
+    </section>
+
+    {{-- Security Considerations --}}
+    <section id="security" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+            Security Considerations
+        </h2>
+        <ul class="doc-list">
+            <li><strong>Environment File:</strong> Never expose <code class="doc-inline-code">.env</code> file publicly, and keep <code class="doc-inline-code">APP_DEBUG=false</code> so stack traces never reach a customer</li>
+            <li><strong>HTTPS Required:</strong> Always use HTTPS in production, and keep <code class="doc-inline-code">SESSION_SECURE_COOKIE=true</code> so the shared subdomain cookie is never sent in the clear</li>
+            <li><strong>API Keys:</strong> Keep all API keys and secrets secure</li>
+            <li><strong>Database:</strong> Use strong database passwords and restrict access</li>
+            <li><strong>File Permissions:</strong> Ensure proper file permissions on the server</li>
+            <li><strong>Admin Accounts:</strong> The admin panel at <code class="doc-inline-code">/admin</code> reaches every tenant's data. Flag as few accounts as possible as platform admins, and protect them with two-factor authentication (<strong>Settings &rarr; Security</strong> in each account). The panel also asks for the password again before it opens, and again after a day without use: see <a href="{{ route('marketing.docs.selfhost.admin') }}#accessing" class="doc-link">Accessing /admin</a></li>
+            <li><strong>Proxy Trust:</strong> Only widen <code class="doc-inline-code">TRUSTED_PROXIES</code> to <code class="doc-inline-code">*</code> when the origin server cannot be reached except through your proxy. Otherwise list the proxy IPs, so a visitor cannot spoof their own address</li>
+        </ul>
+    </section>
+
+    {{-- Troubleshooting --}}
     <section id="troubleshooting" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -702,9 +1042,9 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 
         <h3 class="doc-subheading">Common Issues</h3>
 
-        <div class="space-y-4 mb-8">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Subdomains show 404 or wrong page</h4>
+                <h4>Subdomains show 404 or wrong page</h4>
                 <ul class="doc-list text-sm">
                     <li>Check that <code class="doc-inline-code">IS_HOSTED=true</code> is set</li>
                     <li>Verify wildcard DNS is configured correctly</li>
@@ -713,7 +1053,15 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
 
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Session domain mismatch" or login issues across subdomains</h4>
+                <h4>A schedule's page loads for its owner and is not found for everyone else</h4>
+                <ul class="doc-list text-sm">
+                    <li>Nobody has verified the schedule's email address or phone number yet. Until one is verified only its own team and administrators can open its public pages</li>
+                    <li>Have the owner verify the address, or open <strong>Manage &rarr; Schedules</strong> in the admin panel, press <strong>Edit</strong> on the schedule and use <strong>Mark Email as Verified</strong> under <strong>Verification</strong></li>
+                </ul>
+            </div>
+
+            <div class="doc-field">
+                <h4>Signed in on the app subdomain, signed out on a schedule's subdomain</h4>
                 <ul class="doc-list text-sm">
                     <li>Set <code class="doc-inline-code">SESSION_DOMAIN=.yourdomain.com</code> (with leading dot). If unset, hosted mode defaults it to the <code class="doc-inline-code">APP_URL</code> base domain</li>
                     <li>Make sure <code class="doc-inline-code">APP_URL</code> is set to your app subdomain (e.g. <code class="doc-inline-code">https://app.yourdomain.com</code>)</li>
@@ -722,7 +1070,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
 
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Redirect loop, or every visitor logged with the same IP address</h4>
+                <h4>Redirect loop, or every visitor logged with the same IP address</h4>
                 <ul class="doc-list text-sm">
                     <li>Set <code class="doc-inline-code">TRUSTED_PROXIES</code>. Left unset, your platform trusts no proxies and reads HTTPS requests as HTTP (see <a href="#reverse-proxy" class="doc-link">Running Behind a Reverse Proxy</a>)</li>
                     <li>Re-run <code class="doc-inline-code">php artisan config:cache</code> if you have cached your configuration</li>
@@ -730,7 +1078,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
 
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The root domain shows the sign-in page instead of a landing page</h4>
+                <h4>The root domain shows the sign-in page instead of a landing page</h4>
                 <ul class="doc-list text-sm">
                     <li>This is expected. Marketing pages are only served when <code class="doc-inline-code">IS_NEXUS=true</code>, which is not a setting for your platform</li>
                     <li>Host your own marketing site and point <code class="doc-inline-code">APP_MARKETING_URL</code> at it</li>
@@ -738,7 +1086,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
 
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">SSL certificate errors on subdomains</h4>
+                <h4>SSL certificate errors on subdomains</h4>
                 <ul class="doc-list text-sm">
                     <li>Verify wildcard certificate covers <code class="doc-inline-code">*.yourdomain.com</code></li>
                     <li>Check certificate is properly installed in web server</li>
@@ -746,11 +1094,19 @@ yourdomain.com.    CNAME    your-server.hosting.com.
             </div>
 
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Logo not displaying</h4>
+                <h4>Logo not displaying</h4>
                 <ul class="doc-list text-sm">
                     <li>Verify logo files exist in <code class="doc-inline-code">public/images/</code></li>
                     <li>Check file permissions are readable</li>
                     <li>Ensure paths in <code class="doc-inline-code">.env</code> match actual file locations</li>
+                    <li>The logo in the admin portal's sidebar is not one of the two variables: see <a href="#branding" class="doc-link">Branding Customization</a></li>
+                </ul>
+            </div>
+
+            <div class="doc-field">
+                <h4>The Help button or a Learn more link opens a page that does not exist</h4>
+                <ul class="doc-list text-sm">
+                    <li>Those links are built on <code class="doc-inline-code">APP_MARKETING_URL</code>, so your marketing site has to answer or redirect <code class="doc-inline-code">/docs/...</code>, <code class="doc-inline-code">/features/...</code> and <code class="doc-inline-code">/pricing</code> (see <a href="#core-settings" class="doc-link">Core SaaS Settings</a>)</li>
                 </ul>
             </div>
         </div>
@@ -766,186 +1122,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
         </div>
     </section>
 
-    <!-- Scheduler and queue -->
-    <section id="scheduler" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Scheduler and queue
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Timed work - reminder emails, calendar sync, installment charges, ticket release, AI translation - is driven by the Laravel scheduler, and the queue is drained from inside it. There are two interchangeable ways to run it. Pick one.</p>
-
-        <h3 class="doc-subheading">A cron entry, or a worker process</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">On a server with cron, add the single entry from the <a href="{{ route('marketing.docs.selfhost.installation') }}#cron" class="doc-link">installation guide</a>:</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>* * * * * php /path/to/eventschedule/artisan schedule:run</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">On a platform with no cron but long-running processes - a container host, for example - run the scheduler as the process instead. This is what eventschedule.com does, as a DigitalOcean App Platform worker:</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>php artisan schedule:work</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Either way, do not run more than one. Two schedulers means two of every timed job.</p>
-
-        <h3 id="http-cron" class="doc-subheading">Or an HTTP cron endpoint</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Shared hosting that offers neither a crontab nor a long-running process can drive the same schedule over HTTP. Set <code class="doc-inline-code">APP_CRON_SECRET</code> to a long random string and have any external cron service request this once a minute:</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>GET https://your-domain.com/translate_data?secret=YOUR_SECRET</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The same secret also gates <code class="doc-inline-code">/release_tickets</code>. Leaving <code class="doc-inline-code">APP_CRON_SECRET</code> empty disables both endpoints, which is the right setting on an install that uses cron or a worker.</p>
-
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Do not run two of these at once</div>
-            <p>The HTTP endpoint and the scheduler are two copies of the same schedule. An install running both will do some work twice. A handful of commands hold a shared lock and are safe either way, but most rely on there being a single runner.</p>
-        </div>
-
-        <h3 class="doc-subheading">Queue</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute, so queued mail and background jobs go out within about a minute with no separate worker to manage. With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> nothing is queued at all and jobs run inline in the request that created them; set it to <code class="doc-inline-code">database</code> to get the queue.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">If you need lower latency than a minute, run a resident <code class="doc-inline-code">php artisan queue:work</code> as well.</p>
-
-        <h3 class="doc-subheading">Knowing that it stopped</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every scheduler tick stamps a heartbeat, and the admin panel raises <span class="font-semibold text-gray-900 dark:text-white">"Scheduled tasks are not running"</span> on the dashboard, the nav and <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Queue</span> when it goes stale. Tune the threshold with <code class="doc-inline-code">SCHEDULER_STALE_MINUTES</code> (default 20). Take it seriously: while the scheduler is down nothing sends email, syncs a calendar or charges an installment.</p>
-
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Running more than one app server</div>
-            <p>Set <code class="doc-inline-code">CACHE_STORE</code> to <code class="doc-inline-code">database</code> or <code class="doc-inline-code">redis</code>. Every lock that stops two scheduled runs colliding is held in the cache, so on the <code class="doc-inline-code">file</code> default each server serialises only against itself - and the heartbeat above will report a stall that is not real, because one server cannot see another's cache.</p>
-        </div>
-    </section>
-
-    <!-- Backup storage -->
-    <section id="backup-storage" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-            </svg>
-            Backup storage
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Schedule exports are written to <code class="doc-inline-code">storage/app</code> by default, which is correct for a single server. Point them at object storage if your app runs on more than one server or container, or on a host with an ephemeral filesystem: the process that builds an export is not the one that later serves the download, so a local file would be missing or already deleted by then.</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>BACKUP_DISK_DRIVER=s3
-BACKUP_SPACES_KEY=your-key
-BACKUP_SPACES_SECRET=your-secret
-BACKUP_SPACES_REGION=nyc3
-BACKUP_SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
-BACKUP_SPACES_BUCKET=your-private-backups-bucket</code></pre>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The endpoint is your provider's <span class="font-semibold text-gray-900 dark:text-white">region</span> endpoint, not the per-bucket origin endpoint that storage consoles display beside the bucket itself. The bucket name is added to the hostname for you, so an endpoint that already carries it addresses <code class="doc-inline-code">bucket.bucket.region...</code> and every upload fails its TLS handshake. Event Schedule strips a leading bucket name if it finds one, so either form works.</p>
-
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Use a separate private bucket, never your images bucket</div>
-            <p>An export archive contains every sale, attendee email address and phone number for the schedules inside it, and its path is a user id plus a timestamp. Image buckets are public and usually CDN-fronted, so anything landing in one is effectively published at a guessable URL - and a CDN keeps serving it after you make the object private again. Use a bucket with no public policy and no CDN in front of it. <code class="doc-inline-code">BACKUP_SPACES_BUCKET</code> has no default for this reason: a missing value fails rather than quietly writing backups somewhere public.</p>
-            <p>Archive filenames also carry 32 random characters, so the bucket is not the only thing standing between an export and the public.</p>
-        </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Imports are unaffected and always stay on the server that received the upload.</p>
-    </section>
-
-    <!-- Support Chat -->
-    <section id="support-chat" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" class="inline-block w-7 h-7 me-2 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            Support Chat
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Event Schedule includes a built-in chat system that lets your customers message you for support without leaving the admin portal. It needs no configuration and is present on every hosted install; on a selfhosted install neither the widget nor the admin screen exists. Each customer has one running conversation with you, which reopens if they write again after you have closed it.</p>
-
-        <h3 class="doc-subheading">For Your Customers</h3>
-        <ul class="doc-list">
-            <li><span class="font-semibold text-gray-900 dark:text-white">Chat widget:</span> A floating chat bubble in the bottom corner of the screen for signed-in users</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Availability indicator:</span> A green dot on the bubble while you are marked available</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Sidebar button:</span> A chat icon next to the Help link in the admin sidebar opens the same panel, with a red badge for unread replies</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Message limit:</span> Up to 2,000 characters per message, in both directions. Any HTML is stripped before the message is stored</li>
-        </ul>
-
-        <h3 class="doc-subheading">For You, the Platform Admin</h3>
-        <ul class="doc-list">
-            <li><span class="font-semibold text-gray-900 dark:text-white">Admin panel:</span> Manage conversations from <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Support</span> in the admin panel at <code class="doc-inline-code">/admin</code></li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Availability toggle:</span> Switch yourself online to show the green dot, either at the top of the Support page or from the chat icon in the sidebar footer, which for an admin opens an availability switch and a link to the inbox instead of a chat</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Hourly check:</span> While you are online, every hour the admin portal asks whether you are still available. Confirm within 10 minutes or you are switched offline, so you never leave it on overnight by accident. Replying to a conversation counts as confirming</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Away when the admin portal is closed:</span> If no admin portal tab of yours has checked in for 5 minutes (the laptop is closed or the browser quit), customers see you as away until you open it again. Only the admin who switched the chat on counts, so another admin's open tab does not keep you looking available</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">New message alerts:</span> While you are online, a new message shows a notice with a Reply link, plays a soft chime and flashes the tab title on whichever admin portal page you are on</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Conversations list:</span> Every conversation, with unread badges, and a matching badge on the System menu</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Replying:</span> Open a conversation to read the history and reply. The customer sees a typing indicator while you write, and you see "Seen" once they have read your reply</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Closing conversations:</span> Close resolved conversations to keep the list short</li>
-        </ul>
-
-        <h3 class="doc-subheading">Who Gets Notified</h3>
-        <ul class="doc-list">
-            <li>Every new message emails the first account flagged as a platform admin (the one with the lowest ID), whether you are online or not, so every conversation reaches one inbox. A burst of messages is one email: the next message is emailed once 10 minutes have passed, or once you have replied to or closed the conversation. While you are available the in-app alert tells you as well. New messages also send a push notification if OneSignal is configured (for a website visitor, at most one every two minutes)</li>
-            <li>Your replies email the customer only once they have left the chat without reading them. The email waits at least two minutes, and carries every unread reply at once, so a quick back-and-forth does not fill their inbox</li>
-            <li>Emails always go to that first platform admin account, so give it a monitored address. Push notifications go to the admin who switched the chat on, or to the same first admin while nobody is online</li>
-        </ul>
-
-        <h3 class="doc-subheading">Website Visitors</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">On eventschedule.com, the marketing site also offers signed-out visitors a chat with a person, and only while you are available. Visitors can leave an email so a reply reaches them after they leave, and it is required once you are away. Their conversations appear in the same Support inbox, marked Visitor, with the page they are on and their country. This needs the marketing site, so it does not apply to your own SaaS install.</p>
-    </section>
-
-    <!-- Custom translations -->
-    <section id="translations" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
-            </svg>
-            Custom translations
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms to match your customers' vocabulary (for example "Talent" to "Artist", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>. Overrides apply globally across every tenant on your platform.</p>
-
-        <h3 class="doc-subheading">The Easy Way: The Translation Manager</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Sign in as a platform admin and open <span class="font-semibold text-gray-900 dark:text-white">System &rarr; Translations</span> in the admin panel. Search for a phrase, edit it for the locale you want, and save. The database is the source of truth: each save is stored as an override and republished to a file on disk, so nothing is lost on the next upgrade. Reverting an override restores the bundled string.</p>
-
-        <h3 class="doc-subheading">The Manual Way: Override Files</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">You can also drop a PHP file in:</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>storage/app/lang/{locale}/{file}.php</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The three files you can override are <code class="doc-inline-code">messages.php</code> (UI strings), <code class="doc-inline-code">accessibility.php</code>, and <code class="doc-inline-code">marketing.php</code>. List the keys you want to change and nothing else; the bundled translations fill in the rest:</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>&lt;?php
-// storage/app/lang/en/messages.php
-return [
-'talent' =&gt; 'Artist',
-'talents' =&gt; 'Artists',
-'curator' =&gt; 'Event Planner',
-'curators' =&gt; 'Event Planners',
-];</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Create one directory per locale you want to override (<code class="doc-inline-code">en</code>, <code class="doc-inline-code">es</code>, <code class="doc-inline-code">fr</code>, &hellip;). The full list of supported locales lives in <code class="doc-inline-code">config/app.php</code> under <code class="doc-inline-code">supported_languages</code>.</p>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A hand-written file for one of those three managed groups is adopted into the database the next time the overrides are republished, after which the file is regenerated from the database. Keep that in mind if you edit both by hand and through the admin panel, and keep nested array values in their own group file (<code class="doc-inline-code">validation.php</code>, <code class="doc-inline-code">auth.php</code> or a custom group), which the loader honours and never rewrites.</p>
-
-        <h3 class="doc-subheading">Rebuilding and Moving Servers</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The files are server-local derived state, so rebuild them from the database after restoring a backup or cloning the app to a new machine:</p>
-        <pre class="doc-code-block"><code>php artisan translations:publish</code></pre>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Run it on each web server, and restart your queue workers afterwards so long-running processes pick up the new strings. If you run several servers behind a load balancer, set <code class="doc-inline-code">LANG_OVERRIDES_PATH</code> to a shared volume instead and publish once. A relative value resolves from the application root; an absolute one is used as given.</p>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Why this works</div>
-            <p>Changes apply on the next request, with no cache clear required. <code class="doc-inline-code">storage/app/</code> is gitignored, so your overrides survive <code class="doc-inline-code">php artisan app:update</code>, <code class="doc-inline-code">git pull</code>, and fresh checkouts.</p>
-        </div>
-    </section>
-
-    <!-- Custom dashboard links -->
-    <section id="custom-links" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-            </svg>
-            Custom dashboard links
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Add up to three custom links to the admin sidebar (for example a support site, community forum, or status page). On a SaaS deployment these links are <span class="font-semibold text-gray-900 dark:text-white">platform-wide</span>: every admin on every tenant sees them, just below the <span class="font-semibold text-gray-900 dark:text-white">Newsletters</span> link, and they open in a new tab.</p>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Set the following variables in your <code class="doc-inline-code">.env</code> file. A link only appears when <span class="font-semibold text-gray-900 dark:text-white">both</span> its title and URL are filled in, so you can configure one, two, or three links:</p>
-
-        <div class="doc-code-block">
-            <div class="doc-code-header">
-                <span>.env</span>
-                <button class="doc-copy-btn">Copy</button>
-            </div>
-            <pre><code>CUSTOM_LINK_1_TITLE=<span class="code-string">"Help Center"</span>
-CUSTOM_LINK_1_URL=<span class="code-string">"https://help.example.com"</span>
-CUSTOM_LINK_2_TITLE=<span class="code-string">"Status"</span>
-CUSTOM_LINK_2_URL=<span class="code-string">"https://status.example.com"</span>
-CUSTOM_LINK_3_TITLE=
-CUSTOM_LINK_3_URL=</code></pre>
-        </div>
-
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Reload cached config</div>
-            <p>If you have run <code class="doc-inline-code">php artisan config:cache</code>, re-run it (or <code class="doc-inline-code">php artisan config:clear</code>) after editing <code class="doc-inline-code">.env</code> so the new links take effect.</p>
-        </div>
-    </section>
-
-    <!-- Related Documentation -->
+    {{-- Related Documentation --}}
     <section id="related" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -954,32 +1131,13 @@ CUSTOM_LINK_3_URL=</code></pre>
             Related Documentation
         </h2>
         <ul class="doc-list">
-            <li><x-link href="/docs/saas/custom-domains">Custom Domains</x-link> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
-            <li><x-link href="/docs/saas/twilio">Twilio Integration</x-link> - Set up phone number verification and WhatsApp messaging</li>
-            <li><x-link href="/docs/saas/facebook-login">Facebook Login</x-link> - Let your customers sign up and log in with Facebook</li>
-            <li><x-link href="/docs/saas/federation">Federation</x-link> - Share your customers' public events with the eventschedule.com listings, with every listing linking back to your platform</li>
-            <li><x-link href="/docs/saas/monetization">Monetization</x-link> - Show ads on your free tier's public pages, sell promotional placement to your paid schedules, and earn an accommodation affiliate commission</li>
-            <li><x-link href="/docs/selfhost/admin">Admin Panel</x-link> - Grant plans, edit any tenant's schedule name, subdomain and contact details, and release or restore a squatted subdomain</li>
-            <li><x-link href="/docs/selfhost/stripe">Stripe Integration</x-link> - Keys, webhooks and Stripe Connect for both subscription billing and ticket payments</li>
+            <li><a href="{{ route('marketing.docs.saas.custom_domains') }}" class="doc-link">Custom Domains</a> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
+            <li><a href="{{ route('marketing.docs.saas.twilio') }}" class="doc-link">Twilio Integration</a> - Set up phone number verification and WhatsApp messaging</li>
+            <li><a href="{{ route('marketing.docs.saas.facebook_login') }}" class="doc-link">Facebook Login</a> - Let your customers sign up and log in with Facebook</li>
+            <li><a href="{{ route('marketing.docs.saas.federation') }}" class="doc-link">Federation</a> - Share your customers' public events with the eventschedule.com listings, with every listing linking back to your platform</li>
+            <li><a href="{{ route('marketing.docs.saas.monetization') }}" class="doc-link">Monetization</a> - Show ads on your free tier's public pages, sell promotional placement to your paid schedules, and earn an accommodation affiliate commission</li>
+            <li><a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-link">Admin Panel</a> - Grant plans, edit any tenant's schedule name, subdomain and contact details, and release or restore a squatted subdomain</li>
+            <li><a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe Integration</a> - Keys, webhooks and Stripe Connect for both subscription billing and ticket payments</li>
         </ul>
-    </section>
-
-    <!-- Security Considerations -->
-    <section id="security" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-            Security Considerations
-        </h2>
-        <ol class="doc-list doc-list-numbered">
-            <li><span class="font-semibold text-gray-900 dark:text-white">Environment File:</span> Never expose <code class="doc-inline-code">.env</code> file publicly, and keep <code class="doc-inline-code">APP_DEBUG=false</code> so stack traces never reach a customer</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">HTTPS Required:</span> Always use HTTPS in production, and keep <code class="doc-inline-code">SESSION_SECURE_COOKIE=true</code> so the shared subdomain cookie is never sent in the clear</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">API Keys:</span> Keep all API keys and secrets secure</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Database:</span> Use strong database passwords and restrict access</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">File Permissions:</span> Ensure proper file permissions on the server</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Admin Accounts:</span> The admin panel at <code class="doc-inline-code">/admin</code> reaches every tenant's data. Flag as few accounts as possible as platform admins, and protect them with two-factor authentication</li>
-            <li><span class="font-semibold text-gray-900 dark:text-white">Proxy Trust:</span> Only widen <code class="doc-inline-code">TRUSTED_PROXIES</code> to <code class="doc-inline-code">*</code> when the origin server cannot be reached except through your proxy. Otherwise list the proxy IPs, so a visitor cannot spoof their own address</li>
-        </ol>
     </section>
 </x-docs-page>

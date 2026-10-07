@@ -130,6 +130,15 @@
              day. CI never had a key, so this only makes a local run match it. A test that needs
              the geocode branch sets its own key AND Http::fake(). -->
         <env name="BACKEND_GOOGLE_KEY" value="" force="true"/>
+        <!-- The suite loads the developer's .env, and on the machine that deploys the hosted
+             install that file holds the real DigitalOcean token and app id. With them set,
+             DigitalOceanService::isConfigured() is true in every test: the admin Domains page
+             read the PRODUCTION app from their API on each run of its test, and a test that
+             saves a direct-mode custom domain is one fake short of rewriting that app's spec.
+             CI never had them. A test that needs the service sets its own token together with
+             Http::fake(), as CustomDomainProvisioningTest does. -->
+        <env name="DO_API_TOKEN" value="" force="true"/>
+        <env name="DO_APP_ID" value="" force="true"/>
         <!-- Hosted admins must use two-factor authentication (auth.admin_requires_two_factor).
              Off here so admin tests need no 2FA fixture; AdminTwoFactorRequiredTest turns it on. -->
         <env name="ADMIN_REQUIRE_2FA" value="false" force="true"/>

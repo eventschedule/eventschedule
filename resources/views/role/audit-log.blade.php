@@ -1,76 +1,77 @@
 <x-app-admin-layout>
 
-    <div class="space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.audit_log') }}</h2>
-            <x-secondary-link :href="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])">
-                {{ __('messages.back') }}
-            </x-secondary-link>
-        </div>
+    {{-- What has been done on one schedule, newest first. It hangs from the schedule, so the way
+         back names it; the filters are one row, and the list is the kit's (a stack of rows on a
+         phone, where the table ran off the edge). --}}
+    <div class="page-shell">
+        <x-page-header :title="__('messages.audit_log')" :lead="__('messages.audit_log_lead')"
+            :back="route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'])" :back-label="$role->name" />
 
-        {{-- Filters --}}
-        <form method="GET" action="{{ route('role.audit_log', ['subdomain' => $role->subdomain]) }}" class="ap-card rounded-xl shadow p-4">
-            <div class="flex flex-col lg:flex-row gap-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-w-0">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.category') }}</label>
-                        <select name="category" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                            <option value="">{{ __('messages.all') }}</option>
-                            @foreach (['boost', 'event', 'sale', 'schedule', 'subscription'] as $cat)
-                                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ ucfirst($cat) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.from') }}</label>
-                        <input type="text" name="from" value="{{ request('from') }}" class="datepicker-filter w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="{{ __('messages.from') }}" autocomplete="off">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.to') }}</label>
-                        <input type="text" name="to" value="{{ request('to') }}" class="datepicker-filter w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="{{ __('messages.to') }}" autocomplete="off">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.search') }}</label>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_action_or_details') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
-                    </div>
-                </div>
-                <div class="flex items-end gap-2 shrink-0">
-                    <x-brand-button type="submit">
-                        {{ __('messages.filter') }}
-                    </x-brand-button>
-                    <x-secondary-link :href="route('role.audit_log', ['subdomain' => $role->subdomain])">
-                        {{ __('messages.clear') }}
-                    </x-secondary-link>
-                </div>
+        @php
+            // The categories were printed as their keys with a capital letter, in English, in
+            // every language.
+            $categories = ['boost' => __('messages.boost'), 'event' => __('messages.event'), 'sale' => __('messages.sales'), 'schedule' => __('messages.schedule'), 'subscription' => __('messages.subscription')];
+        @endphp
+        <form method="GET" action="{{ route('role.audit_log', ['subdomain' => $role->subdomain]) }}" class="page-filters">
+            <label class="page-filter">
+                <span>{{ __('messages.category') }}</span>
+                <select name="category" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                    <option value="">{{ __('messages.all') }}</option>
+                    @foreach ($categories as $cat => $catLabel)
+                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $catLabel }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <div class="page-filter-pair">
+                <label class="page-filter">
+                    <span>{{ __('messages.from') }}</span>
+                    <input type="text" name="from" value="{{ request('from') }}" class="datepicker-filter w-36 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="{{ __('messages.from') }}">
+                </label>
+                <label class="page-filter">
+                    <span>{{ __('messages.to') }}</span>
+                    <input type="text" name="to" value="{{ request('to') }}" class="datepicker-filter w-36 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm" placeholder="{{ __('messages.to') }}">
+                </label>
+            </div>
+            <label class="page-filter is-grow">
+                <span>{{ __('messages.search') }}</span>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search_action_or_details') }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+            </label>
+            <div class="is-end">
+                @if (request()->hasAny(['category', 'from', 'to', 'search']) && collect(request()->only(['category', 'from', 'to', 'search']))->filter()->isNotEmpty())
+                <x-secondary-link :href="route('role.audit_log', ['subdomain' => $role->subdomain])">{{ __('messages.clear') }}</x-secondary-link>
+                @endif
+                <x-brand-button type="submit">{{ __('messages.filter') }}</x-brand-button>
             </div>
         </form>
 
-        {{-- Results --}}
-        <div class="ap-card rounded-xl shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900">
+        @if ($logs->isEmpty())
+        <div class="ap-card rounded-xl">
+            <x-page-empty :title="__('messages.no_audit_log_entries')"
+                icon="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+        </div>
+        @else
+        <div class="ap-card rounded-xl overflow-hidden">
+                <table class="page-table">
+                    <thead>
                         <tr>
-                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.time') }}</x-sortable-header>
-                            <x-sortable-header column="user_id" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.user') }}</x-sortable-header>
-                            <x-sortable-header column="action" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.action') }}</x-sortable-header>
-                            <x-sortable-header column="metadata" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.details') }}</x-sortable-header>
+                            <x-page-sort column="created_at" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.time') }}</x-page-sort>
+                            <x-page-sort column="user_id" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.user') }}</x-page-sort>
+                            <x-page-sort column="action" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.action') }}</x-page-sort>
+                            <x-page-sort column="metadata" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.details') }}</x-page-sort>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse ($logs as $log)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                {{ $log->created_at->format('M j, Y H:i:s') }}
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                    <tbody>
+                        @foreach ($logs as $log)
+                        <tr>
+                            <td class="c-date">{{ $log->created_at->translatedFormat('M j, Y H:i:s') }}</td>
+                            <td class="c-main c-strong">
                                 @if ($log->user)
-                                    {{ $log->user->name }}
+                                    <bdi>{{ $log->user->name }}</bdi>
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500">{{ __('messages.system') }}</span>
+                                    <span class="c-quiet">{{ __('messages.system') }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap">
+                            <td>
                                 @php
                                     $actionLabel = match($log->action) {
                                         'event.create' => __('messages.audit_event_created'),
@@ -113,31 +114,25 @@
                                         'sale.seat_booked' => __('messages.audit_seat_booked'),
                                         default => $log->action,
                                     };
-                                    $actionColor = match(explode('.', $log->action)[0] ?? '') {
-                                        'event' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
-                                        'schedule' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                        'subscription' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-                                        'boost' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-                                        'sale' => match($log->action) {
-                                            'sale.paid', 'sale.checkout' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                            'sale.cancel' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-                                            'sale.refund' => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
-                                            'sale.expired' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-                                            'sale.installment_paid' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                            'sale.installment_failed' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-                                            'sale.seat_released' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-                                            'sale.seat_booked' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                            'sale.seat_blocked', 'sale.seat_unblocked', 'sale.seat_exchanged' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-                                            default => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-                                        },
-                                        default => 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+                                    // The kit's status mark, by what the entry means: something went
+                                    // through, something was called off or removed, something needs a
+                                    // look. Everything else is quiet. The pill used to be coloured by
+                                    // CATEGORY, so a cancelled order and a paid one could not be told
+                                    // apart from across the room, and a new event was cyan for no reason.
+                                    $actionTone = match($log->action) {
+                                        'sale.paid', 'sale.checkout', 'sale.checkin', 'sale.installment_paid', 'sale.seat_booked',
+                                        'event.accept', 'event.publish', 'schedule.transfer_accept',
+                                        'subscription.create', 'subscription.resume' => 'is-on',
+                                        'sale.cancel', 'sale.seat_released', 'event.delete', 'event.decline', 'schedule.delete',
+                                        'schedule.member_remove', 'schedule.transfer_decline', 'schedule.transfer_cancel',
+                                        'subscription.cancel', 'boost.cancel' => 'is-bad',
+                                        'sale.expired', 'sale.installment_failed' => 'is-warn',
+                                        default => '',
                                     };
                                 @endphp
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $actionColor }}">
-                                    {{ $actionLabel }}
-                                </span>
+                                <span class="event-status {{ $actionTone }}">{{ $actionLabel }}</span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                            <td class="c-quiet c-wrap">
                                 @php
                                     $actionPrefix = explode('.', $log->action)[0] ?? '';
                                     if (in_array($actionPrefix, ['event', 'schedule', 'subscription', 'boost'])) {
@@ -161,22 +156,13 @@
                                     }
                                 @endphp
                                 @if ($detailLabel)
-                                    {{ Str::limit($detailLabel, 80) }}
-                                @else
-                                    <span class="text-gray-400 dark:text-gray-500">-</span>
+                                    <bdi>{{ Str::limit($detailLabel, 80) }}</bdi>
                                 @endif
                             </td>
                         </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                {{ __('messages.no_audit_log_entries') }}
-                            </td>
-                        </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
-            </div>
 
             @if ($logs->hasPages())
             <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
@@ -184,6 +170,7 @@
             </div>
             @endif
         </div>
+        @endif
     </div>
 
     <script {!! nonce_attr() !!}>
@@ -209,6 +196,8 @@
                 var sortBy = header.getAttribute('data-sort');
                 url.searchParams.set('sort_by', sortBy);
                 url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+                // A new order starts at its first page: page 3 of the old order is no place in the new one.
+                url.searchParams.delete('page');
                 window.location.href = url.toString();
             }
         });

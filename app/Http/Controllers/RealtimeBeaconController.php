@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\DB;
  * The mode is the client's choice and the server enforces it: a count-only page view is stored
  * with no visitor key, user, title, browser or OS whatever its context carries.
  *
- * Whether a schedule's owner may see an identified visitor as a row of their own Realtime page
+ * Whether a schedule's owner may see an identified visitor as a row of their own Realtime tab
  * (owner_visible) is the one thing read from a cookie here, and it is the server's reading, not a
  * bit the page sends: RealtimeTracker::consentCoversOrganizers() looks at the visitor's own
  * recorded choice, which the browser sends with this same-origin request. Reading a cookie
@@ -255,7 +255,7 @@ class RealtimeBeaconController extends Controller
             'is_admin' => $context['is_admin'] ? 1 : 0,
             'is_demo' => $context['is_demo'] ? 1 : 0,
             // Known from the signed-in session at render, so it holds for a team member who
-            // declined cookies too. The owner's Realtime page reads neither of these two for
+            // declined cookies too. The owner's Realtime tab reads neither of these two for
             // anything but leaving a row out or in (App\Services\ScheduleRealtime).
             'is_team' => ! empty($context['is_team']) ? 1 : 0,
             'owner_visible' => $identified && RealtimeTracker::consentCoversOrganizers($request) ? 1 : 0,

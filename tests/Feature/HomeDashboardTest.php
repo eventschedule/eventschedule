@@ -453,8 +453,9 @@ class HomeDashboardTest extends TestCase
         $page = $this->actingAs($owner)->get(route('home'))->assertOk();
         $page->assertSee(__('messages.dash_page_views_30m'))
             ->assertSee(__('messages.dash_quiet_now'))
-            ->assertSee('href="'.route('realtime').'"', false)
-            ->assertSee('realtime\/summary', false);
+            // The tile opens the Realtime tab of Analytics, and refreshes from the poll beside it.
+            ->assertSee('href="'.e(route('analytics', ['tab' => 'realtime'])).'"', false)
+            ->assertSee('analytics\/realtime\/summary', false);
 
         DB::table('realtime_hits')->insert([
             'hit_key' => str_repeat('a', 32), 'visitor_key' => str_repeat('b', 16), 'consented' => true, 'owner_visible' => true,
@@ -541,18 +542,30 @@ class HomeDashboardTest extends TestCase
         $this->assertSame($six, $fifteen, "6 schedules: {$six} queries, 15 schedules: {$fifteen}");
     }
 
-    /** The sidebar offers Realtime exactly where the page exists. */
-    public function test_the_sidebar_offers_realtime_only_where_there_is_a_page(): void
+    /**
+     * Realtime is a tab of Analytics, so the sidebar has no entry of its own for it, with the
+     * view on or off: one entry answers "how are my pages doing". Every link to the view goes to
+     * that tab, the new organizer's card included.
+     * Mutation: put the entry back in layouts/navigation, or link the card to /realtime.
+     */
+    public function test_realtime_has_no_sidebar_entry_and_every_link_goes_to_the_analytics_tab(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner);
         $this->createEvent($role);
-        $link = 'href="'.route('realtime').'"';
+        $tab = e(route('analytics', ['tab' => 'realtime']));
 
-        $this->actingAs($owner)->get(route('sales'))->assertOk()->assertSee($link, false);
+        // A page that is not the dashboard: whatever links to Realtime there is the sidebar's.
+        $sales = $this->actingAs($owner)->get(route('sales'))->assertOk()->getContent();
+        $this->assertStringNotContainsString('tab=realtime', $sales);
+        $this->assertStringNotContainsString('href="'.url('/realtime').'"', $sales);
+        $this->assertStringContainsString('href="'.route('analytics').'"', $sales, 'Analytics is the way in');
 
-        Setting::set('realtime_owner_view', '0');
-        $this->actingAs($owner)->get(route('sales'))->assertOk()->assertDontSee($link, false);
+        // Day one: the card that waits for the first visitor opens the tab.
+        $home = $this->actingAs($owner)->get(route('home'))->assertOk();
+        $this->assertTrue($home->viewData('dashboard')['fresh']);
+        $home->assertSee('href="'.$tab.'"', false);
+        $this->assertStringNotContainsString('href="'.url('/realtime').'"', $home->getContent());
     }
 
     // ---- What the review of 2026-10-06 found -----------------------------------------------------

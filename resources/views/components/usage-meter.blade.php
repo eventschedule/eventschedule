@@ -41,6 +41,10 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => $divider ? 'mt-6 pt-6 border-t border-gray-200 dark:border-gray-700' : '']) }}>
+    {{-- A bar and the two figures at its ends read across a column: as wide as a 1280px card the
+         figure on the right was 1,200px from the one it is compared with. The rule above it still
+         runs the card. --}}
+    <div @class(['max-w-3xl' => $variant === 'panel'])>
     @if ($variant === 'panel')
         <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ $label }}</h5>
     @endif
@@ -84,4 +88,5 @@
             <a href="{{ $upgradeUrl }}" class="text-[var(--brand-blue)] hover:underline font-medium">{{ $upgradeLabel }}</a>
         </p>
     @endif
+    </div>
 </div>

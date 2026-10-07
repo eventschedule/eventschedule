@@ -4,6 +4,29 @@
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
         <style {!! nonce_attr() !!}>
             [v-cloak] { display: none !important; }
+
+            /* The tab strip. Four tabs do not fit a phone (in French or Russian the fourth is
+               wholly off the screen), so the strip scrolls sideways there. It says so: it fades
+               at the edge it runs on from, and the script at the foot of the page brings the tab
+               that is open into view. Without the fade the last tab was simply not there. */
+            .an-tabs-wrap { position: relative; }
+            .an-tabs-wrap::before,
+            .an-tabs-wrap::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 1px;
+                width: 2.5rem;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+            .an-tabs-wrap::before { inset-inline-start: 0; background: linear-gradient(to right, rgb(var(--ap-bg)), rgb(var(--ap-bg) / 0)); }
+            .an-tabs-wrap::after { inset-inline-end: 0; background: linear-gradient(to left, rgb(var(--ap-bg)), rgb(var(--ap-bg) / 0)); }
+            [dir="rtl"] .an-tabs-wrap::before { background: linear-gradient(to left, rgb(var(--ap-bg)), rgb(var(--ap-bg) / 0)); }
+            [dir="rtl"] .an-tabs-wrap::after { background: linear-gradient(to right, rgb(var(--ap-bg)), rgb(var(--ap-bg) / 0)); }
+            .an-tabs-wrap.more-before::before,
+            .an-tabs-wrap.more-after::after { opacity: 1; }
         </style>
     </x-slot>
 
@@ -24,7 +47,9 @@
                     </select>
                 </div>
                 @endif
-                @if ($selectedRoleId)
+                {{-- The Realtime tab is every page of the schedule over the last half hour, so it
+                     has neither an event to pick nor a date range: only the schedule. --}}
+                @if ($selectedRoleId && $tab !== 'realtime')
                 <div id="event-picker-app" class="min-w-[200px]">
                     <div class="relative" id="event-selector-dropdown">
                         <select @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
@@ -93,6 +118,7 @@
                     </div>
                 </div>
                 @endif
+                @if ($tab !== 'realtime')
                 <div class="min-w-[180px]">
                     <select id="date-range"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
@@ -105,6 +131,7 @@
                         <option value="all_time" {{ $range === 'all_time' ? 'selected' : '' }}>{{ __('messages.all_time') }}</option>
                     </select>
                 </div>
+                @endif
             </div>
             @if ($tab === 'web')
             <div class="flex gap-2 items-center">
@@ -124,20 +151,40 @@
             @endif
         </div>
 
-        {{-- Tab Navigation --}}
-        <div class="flex gap-6 border-b border-gray-200 dark:border-gray-700">
+        {{-- Tab Navigation. Realtime is the second tab, beside Web Analytics, whose question it
+             answers for the last half hour; only for someone who has a live view of their own
+             pages (AnalyticsController: $realtimeAvailable). Four tabs do not fit a phone, more
+             so in a longer language, so the strip scrolls sideways there, fades at the edge it
+             runs on from (.an-tabs-wrap in the head) and the script at the foot of this page
+             brings the current tab into view; aria-current marks it. --}}
+        <div class="an-tabs-wrap">
+        <div id="analytics-tabs" class="flex gap-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-hide">
             <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range])) }}"
-                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'web' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                @if ($tab === 'web') aria-current="page" @endif
+                class="shrink-0 whitespace-nowrap pb-3 text-base font-medium border-b-2 transition-colors rounded-t focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)] {{ $tab === 'web' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.web_analytics') }}
             </a>
+            @if (! empty($realtimeAvailable))
+            {{-- The schedule goes along only when the live view covers it ($realtimeRoleId): a
+                 schedule whose plan closed it to its admins is on this page's picker, and pressing
+                 this tab with it selected must show all of theirs, not a refusal. --}}
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($realtimeRoleId ?? null), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range, 'tab' => 'realtime'])) }}"
+                @if ($tab === 'realtime') aria-current="page" @endif
+                class="shrink-0 whitespace-nowrap pb-3 text-base font-medium border-b-2 transition-colors rounded-t focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)] {{ $tab === 'realtime' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                {{ __('messages.realtime') }}
+            </a>
+            @endif
             <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range, 'tab' => 'revenue'])) }}"
-                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'revenue' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                @if ($tab === 'revenue') aria-current="page" @endif
+                class="shrink-0 whitespace-nowrap pb-3 text-base font-medium border-b-2 transition-colors rounded-t focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)] {{ $tab === 'revenue' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.revenue') }}
             </a>
             <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($tabEventId), 'range' => $range, 'tab' => 'checkins'])) }}"
-                class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'checkins' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
+                @if ($tab === 'checkins') aria-current="page" @endif
+                class="shrink-0 whitespace-nowrap pb-3 text-base font-medium border-b-2 transition-colors rounded-t focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)] {{ $tab === 'checkins' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.check_ins') }}
             </a>
+        </div>
         </div>
 
         @if ($tab === 'revenue')
@@ -715,6 +762,8 @@
                 </p>
             </div>
         @endif
+        @elseif ($tab === 'realtime')
+            @include('analytics._realtime')
         @else
         {{-- Web Analytics Content --}}
 
@@ -1060,7 +1109,7 @@
             });
         }
 
-        @if ($selectedRoleId)
+        @if ($selectedRoleId && $tab !== 'realtime')
         (function() {
             const { createApp } = Vue;
 
@@ -1191,11 +1240,51 @@
         })();
         @endif
 
-        document.getElementById('date-range').addEventListener('change', function() {
-            var url = new URL(window.location.href);
-            url.searchParams.set('range', this.value);
-            window.location.href = url.toString();
-        });
+        var dateRange = document.getElementById('date-range');
+        if (dateRange) {
+            dateRange.addEventListener('change', function() {
+                var url = new URL(window.location.href);
+                url.searchParams.set('range', this.value);
+                window.location.href = url.toString();
+            });
+        }
+
+        // The tab strip scrolls sideways on a phone. The tab that is open must not be off its
+        // edge, and where there are more tabs to a side the strip fades there. The strip's own
+        // scrollLeft and not scrollIntoView(), which may move the PAGE as well.
+        var tabStrip = document.getElementById('analytics-tabs');
+        if (tabStrip && tabStrip.parentElement) {
+            var tabWrap = tabStrip.parentElement;
+            var paintTabs = function() {
+                var start = Math.abs(tabStrip.scrollLeft);
+                tabWrap.classList.toggle('more-before', start > 4);
+                tabWrap.classList.toggle('more-after', start + tabStrip.clientWidth < tabStrip.scrollWidth - 4);
+            };
+            var currentTab = tabStrip.querySelector('[aria-current="page"]');
+            // Where the strip was left the last time this brought the tab into view. If it has
+            // moved since, somebody swiped it, and it is not snapped back from under them.
+            var centredAt = null;
+            var showCurrentTab = function() {
+                if (centredAt !== null && Math.abs(tabStrip.scrollLeft - centredAt) > 2) {
+                    paintTabs();
+                    return;
+                }
+                if (currentTab) {
+                    // By how far the tab is from the middle of the strip as it stands, so it is
+                    // right whatever the strip has already been scrolled to, and in Hebrew, where
+                    // scrollLeft counts down from zero.
+                    var strip = tabStrip.getBoundingClientRect(), tabBox = currentTab.getBoundingClientRect();
+                    tabStrip.scrollLeft += (tabBox.left + tabBox.width / 2) - (strip.left + strip.width / 2);
+                }
+                centredAt = tabStrip.scrollLeft;
+                paintTabs();
+            };
+            showCurrentTab();
+            // Again once the fonts are in: the labels change width and the tab moves.
+            window.addEventListener('load', showCurrentTab);
+            tabStrip.addEventListener('scroll', paintTabs, { passive: true });
+            window.addEventListener('resize', paintTabs);
+        }
 
         @if ($tab === 'checkins' && isset($checkinStats) && $checkinStats['has_data'])
         function initCheckinCharts() {

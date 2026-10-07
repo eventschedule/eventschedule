@@ -1,16 +1,298 @@
 <x-app-admin-layout>
+    <x-slot name="head">
+        <style {!! nonce_attr() !!}>
+            /* The inbox: who is writing, and the conversation that is open. Two panes from a
+               tablet up; on a phone the list comes first, a conversation opens over it and its
+               head has the way back. Which pane shows on a phone is the page's own script
+               (isMobile, mobileShowConversation); this is only how they look. */
+            .sup-avail {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 1rem;
+            }
+            .sup-avail-text {
+              min-width: 0;
+            }
+            .sup-avail-text strong {
+              display: block;
+              font-size: 0.875rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .sup-avail-text .event-status {
+              align-items: baseline;
+            }
+            .sup-avail-text .event-status::before {
+              flex: none;
+              transform: translateY(-1px);
+            }
+            .sup-frame {
+              display: flex;
+              gap: 1rem;
+              height: calc(100vh - 27rem);
+              height: calc(100dvh - 27rem);
+              min-height: 24rem;
+            }
+            .sup-pane {
+              display: flex;
+              flex-direction: column;
+              min-width: 0;
+              overflow: hidden;
+            }
+            .sup-list {
+              flex: 0 0 min(22rem, 36%);
+            }
+            .sup-thread {
+              flex: 1 1 0;
+            }
+            @media (max-width: 767.98px) {
+              .sup-frame {
+                height: calc(100vh - 25rem);
+                height: calc(100dvh - 25rem);
+              }
+              .sup-list,
+              .sup-thread {
+                flex: 1 1 100%;
+              }
+            }
+            .sup-pane-head {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.75rem;
+              border-bottom: 1px solid rgb(var(--ap-border));
+              padding: 0.875rem 1rem;
+            }
+            .sup-scroll {
+              flex: 1;
+              overflow-y: auto;
+            }
+            .sup-none {
+              margin: 0;
+              padding: 2rem 1rem;
+              font-size: 0.875rem;
+              text-align: center;
+              color: rgb(var(--ap-ink-3));
+            }
+            /* One conversation in the list. A button, so a keyboard reaches it: it was a div
+               with a click handler. */
+            button.sup-conv {
+              display: block;
+              width: 100%;
+              border: 0;
+              border-bottom: 1px solid var(--ap-hairline);
+              padding: 0.75rem 1rem;
+              background: none;
+              text-align: start;
+              cursor: pointer;
+              transition: background-color 0.2s;
+            }
+            button.sup-conv:hover {
+              background: var(--ap-tint-1);
+            }
+            button.sup-conv[aria-current="true"] {
+              background: var(--ap-tint-2);
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+            }
+            .dark button.sup-conv[aria-current="true"] {
+              box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            button.sup-conv:focus-visible {
+              outline: 2px solid var(--brand-blue);
+              outline-offset: -2px;
+            }
+            .sup-conv-top {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.5rem;
+            }
+            .sup-conv-who {
+              display: flex;
+              align-items: center;
+              gap: 0.375rem;
+              min-width: 0;
+            }
+            .sup-conv-who b {
+              overflow: hidden;
+              font-size: 0.875rem;
+              font-weight: 600;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              color: rgb(var(--ap-ink));
+            }
+            .sup-conv-who .event-chip {
+              flex: none;
+              margin-inline-start: 0;
+            }
+            .sup-dot {
+              flex: none;
+              width: 0.5rem;
+              height: 0.5rem;
+              border-radius: 50%;
+              background: #22c55e;
+            }
+            .sup-conv-text,
+            .sup-conv-time {
+              display: block;
+              overflow: hidden;
+              font-size: 0.8125rem;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              color: rgb(var(--ap-ink-3));
+            }
+            .sup-conv-text {
+              margin-top: 0.125rem;
+            }
+            .sup-conv.is-unread .sup-conv-text {
+              font-weight: 500;
+              color: rgb(var(--ap-ink));
+            }
+            .sup-conv-time {
+              margin-top: 0.125rem;
+              font-size: 0.75rem;
+              color: rgb(var(--ap-ink-4));
+            }
+            .sup-who {
+              display: flex;
+              align-items: flex-start;
+              gap: 0.625rem;
+              min-width: 0;
+            }
+            .sup-who > div {
+              min-width: 0;
+            }
+            .sup-who-name {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              gap: 0.125rem 0.625rem;
+              font-size: 0.9375rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+              overflow-wrap: anywhere;
+            }
+            .sup-who-line {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              gap: 0.25rem 0.5rem;
+              margin-top: 0.125rem;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-3));
+              overflow-wrap: anywhere;
+            }
+            .sup-who-line .event-chip {
+              margin-inline-start: 0;
+            }
+            a.event-chip:hover {
+              color: var(--brand-blue);
+            }
+            .sup-back {
+              flex: none;
+              border: 0;
+              border-radius: 0.5rem;
+              padding: 0.25rem;
+              background: none;
+              color: rgb(var(--ap-ink-3));
+              cursor: pointer;
+            }
+            .sup-back:hover {
+              background: var(--ap-tint-2);
+              color: rgb(var(--ap-ink));
+            }
+            .sup-back svg {
+              width: 1.25rem;
+              height: 1.25rem;
+            }
+            [dir="rtl"] .sup-back svg {
+              transform: scaleX(-1);
+            }
+            .sup-messages {
+              display: flex;
+              flex: 1;
+              flex-direction: column;
+              gap: 0.625rem;
+              overflow-y: auto;
+              padding: 1rem;
+            }
+            .sup-stamp {
+              padding: 0.375rem 0;
+              font-size: 0.75rem;
+              text-align: center;
+              color: rgb(var(--ap-ink-4));
+            }
+            .sup-msg {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+            }
+            .sup-msg.is-mine {
+              align-items: flex-end;
+            }
+            .sup-bubble {
+              max-width: min(34rem, 80%);
+              border-radius: 1rem;
+              border-end-start-radius: 0.25rem;
+              padding: 0.5rem 0.875rem;
+              background: var(--ap-tint-2);
+              font-size: 0.875rem;
+              line-height: 1.45;
+              white-space: pre-wrap;
+              overflow-wrap: anywhere;
+              color: rgb(var(--ap-ink));
+            }
+            .sup-msg.is-mine .sup-bubble {
+              border-end-start-radius: 1rem;
+              border-end-end-radius: 0.25rem;
+              background: var(--brand-button-bg);
+              color: #fff;
+            }
+            .sup-seen {
+              margin-top: 0.125rem;
+              font-size: 0.6875rem;
+              color: rgb(var(--ap-ink-4));
+            }
+            .sup-compose {
+              display: flex;
+              align-items: flex-end;
+              gap: 0.5rem;
+              border-top: 1px solid rgb(var(--ap-border));
+              padding: 0.75rem 1rem;
+            }
+            .sup-compose textarea {
+              flex: 1;
+              min-width: 0;
+              max-height: 8rem;
+              resize: none;
+            }
+            .sup-empty {
+              display: flex;
+              flex: 1;
+              align-items: center;
+              justify-content: center;
+              padding: 2rem;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-3));
+            }
+        </style>
+    </x-slot>
+
     @include('admin.partials._navigation', ['active' => 'support'])
 
-    <div id="support-admin-app" class="mt-6">
-        {{-- Top bar with availability toggle --}}
-        <div class="ap-card rounded-xl p-4 mb-4 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0"
-                    :class="presence.available ? 'bg-green-500' : (presence.online ? 'bg-amber-500' : 'bg-gray-400 dark:bg-gray-500')"></span>
-                <div class="min-w-0">
-                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">Support availability</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">@{{ availabilityText }}</div>
-                </div>
+    {{-- Outside the Vue mount on purpose: Vue compiles every text node inside one as a template,
+         and this line is a translation an admin can override. --}}
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.admin_support_lead') }}</p>
+    </div>
+
+    <div id="support-admin-app" class="page-shell page-stack" v-cloak>
+        {{-- Whether the chat is shown as staffed. A dot and its words, then the switch. --}}
+        <div class="ap-card rounded-xl page-card sup-avail">
+            <div class="sup-avail-text">
+                <strong>Support availability</strong>
+                <span class="event-status" :class="presence.available ? 'is-on' : (presence.online ? 'is-warn' : '')">@{{ availabilityText }}</span>
             </div>
             <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                 <input type="checkbox" :checked="presence.online" @change="toggleAvailability($event.target)" class="sr-only peer" aria-label="Available for chat">
@@ -19,120 +301,100 @@
             </label>
         </div>
 
-        {{-- Split panel layout --}}
-        <div class="flex gap-4" style="height: calc(100vh - 280px); min-height: 400px;">
-            {{-- Left panel: conversation list --}}
-            <div v-show="!mobileShowConversation || !isMobile" :class="isMobile ? 'w-full' : 'w-1/3'" class="ap-card rounded-xl flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Conversations</h3>
+        <div class="sup-frame">
+            {{-- The list of conversations --}}
+            <section v-show="!mobileShowConversation || !isMobile" class="ap-card rounded-xl sup-pane sup-list" aria-label="Conversations">
+                <div class="sup-pane-head">
+                    <h2 class="page-card-title">Conversations</h2>
                 </div>
-                <div class="flex-1 overflow-y-auto">
-                    <div v-if="conversations.length === 0" class="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-                        No conversations yet
-                    </div>
-                    <div v-for="conv in conversations" :key="conv.id"
+                <div class="sup-scroll">
+                    <p v-if="conversations.length === 0" class="sup-none">No conversations yet</p>
+                    <button type="button" v-for="conv in conversations" :key="conv.id" data-conv
                         @click="selectConversation(conv)"
-                        :class="[
-                            'p-4 cursor-pointer border-b border-gray-100 dark:border-gray-700/50 transition-all duration-200',
-                            selectedConversation && selectedConversation.id === conv.id
-                                ? 'bg-gray-100 dark:bg-gray-700'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                        ]">
-                        <div class="flex items-center justify-between gap-2 mb-1">
-                            <div class="flex items-center gap-1.5 min-w-0">
-                                <span v-if="conv.online" class="w-2 h-2 rounded-full bg-green-500 shrink-0" :title="conv.is_guest ? 'On the site now' : 'In the app now'"></span>
+                        class="sup-conv" :class="{ 'is-unread': conv.unread_count > 0 }"
+                        :aria-current="selectedConversation && selectedConversation.id === conv.id ? 'true' : null">
+                        <span class="sup-conv-top">
+                            <span class="sup-conv-who">
+                                <span v-if="conv.online" class="sup-dot" :title="conv.is_guest ? 'On the site now' : 'In the app now'"></span>
                                 <span v-if="conv.guest_country" class="shrink-0 text-sm leading-none" :title="countryName(conv.guest_country)">@{{ countryFlag(conv.guest_country) }}</span>
-                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">@{{ conv.display_name }}</span>
-                                <span v-if="conv.is_guest" class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">Visitor</span>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <span v-if="conv.unread_count > 0" class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">@{{ conv.unread_count }}</span>
-                                <span v-if="conv.status === 'closed'" class="text-xs text-gray-400 dark:text-gray-500">closed</span>
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate">@{{ conv.last_message_preview }}</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">@{{ formatTime(conv.last_message_at) }}</div>
-                    </div>
+                                <b><bdi>@{{ conv.display_name }}</bdi></b>
+                                <span v-if="conv.is_guest" class="event-chip">Visitor</span>
+                            </span>
+                            <span class="flex items-center gap-2 shrink-0">
+                                <span v-if="conv.unread_count > 0" class="ap-tab-count is-waiting">@{{ conv.unread_count }}</span>
+                                <span v-if="conv.status === 'closed'" class="event-status">Closed</span>
+                            </span>
+                        </span>
+                        <span class="sup-conv-text"><bdi>@{{ conv.last_message_preview }}</bdi></span>
+                        <span class="sup-conv-time">@{{ formatTime(conv.last_message_at) }}</span>
+                    </button>
                 </div>
-            </div>
+            </section>
 
-            {{-- Right panel: message thread --}}
-            <div v-show="!isMobile || mobileShowConversation" :class="isMobile ? 'w-full' : 'w-2/3'" class="ap-card rounded-xl flex flex-col overflow-hidden">
+            {{-- The conversation that is open --}}
+            <section v-show="!isMobile || mobileShowConversation" class="ap-card rounded-xl sup-pane sup-thread" aria-label="Messages">
                 <template v-if="selectedConversation">
-                    {{-- Header --}}
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <button v-if="isMobile" @click="mobileShowConversation = false" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0" aria-label="Back">
-                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    <div class="sup-pane-head">
+                        <div class="sup-who">
+                            <button type="button" v-if="isMobile" @click="mobileShowConversation = false" class="sup-back" aria-label="Conversations">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
                             </button>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">@{{ conversationUser.name || conversationUser.email || 'Website visitor' }}</span>
-                                    <span v-if="conversationUser.online" class="shrink-0 inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>@{{ conversationUser.is_guest ? 'On the site now' : 'In the app now' }}
-                                    </span>
+                            <div>
+                                <div class="sup-who-name">
+                                    <bdi>@{{ conversationUser.name || conversationUser.email || 'Website visitor' }}</bdi>
+                                    <span v-if="conversationUser.online" class="event-status is-on">@{{ conversationUser.is_guest ? 'On the site now' : 'In the app now' }}</span>
                                 </div>
                                 <template v-if="conversationUser.is_guest">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    <div class="sup-who-line">
                                         <x-link v-if="conversationUser.email" v-bind:href="'mailto:' + conversationUser.email">@{{ conversationUser.email }}</x-link>
                                         <span v-else>No email left yet</span>
-                                        <template v-if="conversationUser.country"> · @{{ countryFlag(conversationUser.country) }} @{{ countryName(conversationUser.country) }}</template>
+                                        <span v-if="conversationUser.country">@{{ countryFlag(conversationUser.country) }} @{{ countryName(conversationUser.country) }}</span>
                                     </div>
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="sup-who-line">
                                         <span v-if="conversationUser.current_page">Now on <x-link v-bind:href="marketingUrl(conversationUser.current_page)" target="_blank">@{{ conversationUser.current_page }}</x-link></span>
                                         <span v-if="conversationUser.started_on">Started on <x-link v-bind:href="marketingUrl(conversationUser.started_on)" target="_blank">@{{ conversationUser.started_on }}</x-link></span>
                                         {{-- The visitor typed this address and nobody verified it, so it only MATCHES an account. --}}
-                                        <a v-if="conversationUser.has_account" :href="'/admin/users?search=' + encodeURIComponent(conversationUser.email)" class="inline-flex items-center px-2 py-0.5 rounded-full font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3d3d40] transition-colors">Email matches an account</a>
+                                        <a v-if="conversationUser.has_account" :href="'/admin/users?search=' + encodeURIComponent(conversationUser.email)" class="event-chip">Email matches an account</a>
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <a :href="'/admin/users?search=' + encodeURIComponent(conversationUser.email)" class="text-xs text-[var(--brand-blue)] hover:underline truncate block">@{{ conversationUser.email }}</a>
-                                    <div v-if="conversationUser.roles && conversationUser.roles.length" class="flex flex-wrap gap-1 mt-1">
-                                        <a v-for="role in conversationUser.roles" :key="role.subdomain" :href="'/' + role.subdomain" target="_blank" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3d3d40] transition-colors">@{{ role.name }}</a>
+                                    <div class="sup-who-line">
+                                        <a :href="'/admin/users?search=' + encodeURIComponent(conversationUser.email)" class="event-link">@{{ conversationUser.email }}</a>
+                                    </div>
+                                    <div v-if="conversationUser.roles && conversationUser.roles.length" class="sup-who-line">
+                                        <a v-for="role in conversationUser.roles" :key="role.subdomain" :href="'/' + role.subdomain" target="_blank" class="event-chip"><bdi>@{{ role.name }}</bdi></a>
                                     </div>
                                 </template>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <button v-if="conversationStatus === 'open'" @click="closeConversation" class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200">
-                                Close
-                            </button>
-                            <span v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg">Closed</span>
+                        <div class="shrink-0">
+                            <button type="button" v-if="conversationStatus === 'open'" @click="closeConversation" class="page-tool">Close</button>
+                            <span v-else class="event-status">Closed</span>
                         </div>
                     </div>
 
                     {{-- Messages --}}
-                    <div ref="adminMessagesContainer" class="flex-1 overflow-y-auto p-4 space-y-3" aria-live="polite">
+                    <div ref="adminMessagesContainer" class="sup-messages" aria-live="polite">
                         <template v-for="(msg, idx) in conversationMessages" :key="msg.id">
-                            <div v-if="showTimestamp(idx)" class="text-center text-xs text-gray-400 dark:text-gray-500 py-2">@{{ formatGroupTime(msg.created_at) }}</div>
-                            <div :class="msg.is_from_admin ? 'flex flex-col items-end' : 'flex flex-col items-start'">
-                                <div :class="[
-                                    'max-w-[75%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words',
-                                    msg.is_from_admin
-                                        ? 'bg-[var(--brand-button-bg)] text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                                ]" v-html="linkify(msg.body)"></div>
-                                <div v-if="idx === lastSeenAdminIndex" class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">Seen</div>
+                            <div v-if="showTimestamp(idx)" class="sup-stamp">@{{ formatGroupTime(msg.created_at) }}</div>
+                            <div class="sup-msg" :class="{ 'is-mine': msg.is_from_admin }">
+                                <div class="sup-bubble" dir="auto" v-html="linkify(msg.body)"></div>
+                                <div v-if="idx === lastSeenAdminIndex" class="sup-seen">Seen</div>
                             </div>
                         </template>
                     </div>
 
-                    {{-- Input --}}
-                    <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex gap-2">
-                            <textarea v-model="adminReplyText" @keydown.enter.exact.prevent="sendAdminReply" @input="sendTyping" rows="1" placeholder="Type a reply..." aria-label="Reply" class="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent"></textarea>
-                            <button @click="sendAdminReply" :disabled="!adminReplyText.trim()" class="px-4 py-2.5 rounded-xl bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                Send
-                            </button>
-                        </div>
+                    {{-- The reply --}}
+                    <div class="sup-compose">
+                        <textarea v-model="adminReplyText" @keydown.enter.exact.prevent="sendAdminReply" @input="sendTyping" rows="1" dir="auto" placeholder="Type a reply..." aria-label="Reply"
+                            class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm text-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                        <x-brand-button size="sm" @click="sendAdminReply" v-bind:disabled="!adminReplyText.trim()">Send</x-brand-button>
                     </div>
                 </template>
                 <template v-else>
-                    <div class="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
-                        Select a conversation
-                    </div>
+                    <div class="sup-empty">Select a conversation</div>
                 </template>
-            </div>
+            </section>
         </div>
     </div>
 

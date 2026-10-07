@@ -1,137 +1,94 @@
 <x-app-admin-layout>
-    @if ($roles->isNotEmpty())
-        <div class="flex justify-between items-center mb-6">
-            {{-- Schedule Selector --}}
-            <div class="min-w-[200px] max-w-xs">
-                <select id="role-filter" data-searchable
-                    class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
-                    @foreach ($roles as $r)
-                        <option value="{{ \App\Utils\UrlUtils::encodeId($r->id) }}" {{ $selectedRoleId == $r->id ? 'selected' : '' }}>
-                            {{ $r->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+    <x-slot name="head">
+        @include('newsletter.partials._styles')
+    </x-slot>
 
-            @if ($role)
-            <div class="flex gap-3">
-                <x-secondary-link href="{{ route('newsletter.templates', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
-                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-                    </svg>
-                    {{ __('messages.templates') }}
-                </x-secondary-link>
-                <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
-                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>
-                    </svg>
-                    {{ __('messages.segments') }}
-                </x-secondary-link>
-                <x-secondary-link href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
-                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
-                    {{ __('messages.import_emails') }}
-                </x-secondary-link>
-                <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
-                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    {{ __('messages.create_newsletter') }}
-                </x-brand-link>
-            </div>
-            @endif
+    {{-- The first tab of the newsletters section: what has been written and sent for one
+         schedule. One list for every width (.page-table): a table from a tablet up, a stack of
+         rows on a phone, where the old table ran off the edge with Delete out of reach. --}}
+    <div class="page-shell">
+        @include('newsletter.partials._section', ['tab' => 'newsletters'])
+
+        @if (! $role)
+        <div class="ap-card rounded-xl">
+            <x-page-empty
+                :title="__('messages.no_schedules')"
+                :text="__('messages.create_schedule_first')"
+                icon="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
         </div>
-
-        @if ($role)
+        @else
         @include('newsletter.partials._verification-warning')
-        @endif
 
-        @include('newsletter.partials._usage-meter')
-
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
+        <div class="page-head">
+            <p class="page-lead">{{ __('messages.newsletters_list_lead') }}</p>
+            @include('newsletter.partials._usage-meter')
         </div>
-        @endif
-
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
 
         @if ($newsletters->count() > 0)
-        <div class="ap-card shadow-md sm:rounded-xl overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+        @php
+            $roleParam = \App\Utils\UrlUtils::encodeId($role->id);
+            $readerZone = auth()->user()->timezone ?? $role->timezone ?? 'UTC';
+            $timeFormat = get_use_24_hour_time($role) ? 'M j, H:i' : 'M j, g:i A';
+            $statusTones = ['scheduled' => 'is-warn', 'sending' => 'is-info', 'sent' => 'is-on'];
+        @endphp
+        <div class="ap-card rounded-xl overflow-hidden">
+            <table class="page-table is-hover">
+                <thead>
                     <tr>
-                        <x-sortable-header column="subject" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.subject') }}</x-sortable-header>
-                        <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.status') }}</x-sortable-header>
-                        <x-sortable-header column="sent_count" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.sent') }}</x-sortable-header>
-                        <x-sortable-header column="open_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.open_rate') }}</x-sortable-header>
-                        <x-sortable-header column="click_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.click_rate') }}</x-sortable-header>
-                        <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.created') }}</x-sortable-header>
-                        <th class="px-6 py-3"></th>
+                        <x-page-sort column="subject" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.subject') }}</x-page-sort>
+                        <x-page-sort column="status" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.status') }}</x-page-sort>
+                        <x-page-sort column="sent_count" :sortBy="$sortBy" :sortDir="$sortDir" class="c-num">{{ __('messages.recipients') }}</x-page-sort>
+                        <x-page-sort column="open_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="c-num">{{ __('messages.open_rate') }}</x-page-sort>
+                        <x-page-sort column="click_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="c-num">{{ __('messages.click_rate') }}</x-page-sort>
+                        <x-page-sort column="created_at" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.created') }}</x-page-sort>
+                        <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody>
                     @foreach ($newsletters as $newsletter)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                            <a href="{{ in_array($newsletter->status, ['sent', 'sending']) ? route('newsletter.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) : route('newsletter.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                                class="hover:text-[var(--brand-blue)]">
-                                {{ $newsletter->subject }}
-                            </a>
+                    @php
+                        $hash = \App\Utils\UrlUtils::encodeId($newsletter->id);
+                        $wasSent = in_array($newsletter->status, ['sent', 'sending']);
+                        $opens = $newsletter->sent_count > 0 ? round(($newsletter->open_count / $newsletter->sent_count) * 100, 1) . '%' : null;
+                        $clicks = $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : null;
+                        // The day that goes with the status: when it went out, or when it will.
+                        $statusAt = $newsletter->status === 'scheduled' ? $newsletter->scheduled_at : ($wasSent ? $newsletter->sent_at : null);
+                    @endphp
+                    <tr>
+                        <td class="c-main c-strong">
+                            <a href="{{ $wasSent ? route('newsletter.stats', ['hash' => $hash, 'role_id' => $roleParam]) : route('newsletter.edit', ['hash' => $hash, 'role_id' => $roleParam]) }}" class="event-link"><bdi>{{ $newsletter->subject }}</bdi></a>
                             @if ($newsletter->ab_variant)
-                            <span class="ms-1 text-xs text-gray-500">({{ $newsletter->ab_variant }})</span>
+                            <span class="event-chip">{{ $newsletter->ab_variant }}</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-sm">
-                            @php
-                                $statusColors = [
-                                    'draft' => 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200',
-                                    'scheduled' => 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300',
-                                    'sending' => 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300',
-                                    'sent' => 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300',
-                                ];
-                            @endphp
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$newsletter->status] ?? $statusColors['draft'] }}">
-                                {{ __('messages.newsletter_status_' . $newsletter->status) }}
-                            </span>
+                        <td>
+                            <span class="event-status {{ $statusTones[$newsletter->status] ?? '' }}">{{ __('messages.newsletter_status_' . $newsletter->status) }}</span>
+                            @if ($statusAt)
+                            <span class="c-sub whitespace-nowrap">{{ $statusAt->copy()->timezone($readerZone)->translatedFormat($timeFormat) }}</span>
+                            @endif
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ number_format($newsletter->sent_count) }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $newsletter->sent_count > 0 ? round(($newsletter->open_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $newsletter->created_at->format('M j, Y') }}
-                        </td>
-                        <td class="px-6 py-4 text-sm {{ is_rtl() ? 'text-left' : 'text-right' }}">
-                            <div class="flex gap-2 {{ is_rtl() ? 'justify-start' : 'justify-end' }}">
-                                @if ($newsletter->status === 'draft' || $newsletter->status === 'scheduled')
-                                <a href="{{ route('newsletter.edit', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                                    class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</a>
-                                @endif
-                                @if (in_array($newsletter->status, ['sent', 'sending']))
-                                <a href="{{ route('newsletter.stats', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                                    class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.newsletter_stats') }}</a>
-                                @endif
-                                <form method="POST" action="{{ route('newsletter.clone', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('messages.clone') }}</button>
-                                </form>
-                                @if ($newsletter->status !== 'sending')
-                                <form method="POST" action="{{ route('newsletter.delete', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="inline js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">{{ __('messages.delete') }}</button>
-                                </form>
-                                @endif
-                            </div>
+                        <td class="c-num" data-label="{{ __('messages.recipients') }}">{{ $wasSent ? number_format($newsletter->sent_count) : '' }}</td>
+                        <td class="c-num" data-label="{{ __('messages.open_rate') }}">{{ $opens }}</td>
+                        <td class="c-num" data-label="{{ __('messages.click_rate') }}">{{ $clicks }}</td>
+                        <td class="c-date">{{ $newsletter->created_at->translatedFormat('M j, Y') }}</td>
+                        <td class="c-actions">
+                            @if ($newsletter->status === 'draft' || $newsletter->status === 'scheduled')
+                            <a href="{{ route('newsletter.edit', ['hash' => $hash, 'role_id' => $roleParam]) }}" class="event-link">{{ __('messages.edit') }}</a>
+                            @endif
+                            @if ($wasSent)
+                            <a href="{{ route('newsletter.stats', ['hash' => $hash, 'role_id' => $roleParam]) }}" class="event-link">{{ __('messages.newsletter_stats') }}</a>
+                            @endif
+                            <form method="POST" action="{{ route('newsletter.clone', ['hash' => $hash, 'role_id' => $roleParam]) }}">
+                                @csrf
+                                <button type="submit" class="event-link event-link-quiet">{{ __('messages.clone') }}</button>
+                            </form>
+                            @if ($newsletter->status !== 'sending')
+                            <form method="POST" action="{{ route('newsletter.delete', ['hash' => $hash, 'role_id' => $roleParam]) }}" class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="event-link is-danger">{{ __('messages.delete') }}</button>
+                            </form>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -139,71 +96,23 @@
             </table>
         </div>
 
-        <div class="mt-4">
+        @if ($newsletters->hasPages())
+        <div class="page-pager">
             {{ $newsletters->links() }}
         </div>
+        @endif
         @else
-        <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 8L12 13L4 8V6L12 11L20 6M20 4H4C2.89 4 2 4.89 2 6V18C2 19.1 2.89 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.89 21.1 4 20 4Z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_newsletters') }}</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_newsletters_description') }}</p>
-            <div class="mt-6">
-                <a href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                    class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)]">
-                    {{ __('messages.create_newsletter') }}
-                </a>
-            </div>
+        <div class="ap-card rounded-xl">
+            <x-page-empty
+                :title="__('messages.no_newsletters')"
+                :text="__('messages.no_newsletters_description')"
+                icon="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75">
+                <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">{{ __('messages.create_newsletter') }}</x-brand-link>
+            </x-page-empty>
         </div>
         @endif
-
-        @else
-        {{-- Empty state: no schedules --}}
-        <div class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 8L12 13L4 8V6L12 11L20 6M20 4H4C2.89 4 2 4.89 2 6V18C2 19.1 2.89 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.89 21.1 4 20 4Z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_schedules') }}</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.create_schedule_first') }}</p>
-        </div>
         @endif
+    </div>
 
-    <script {!! nonce_attr() !!}>
-        document.getElementById('role-filter').addEventListener('change', function() {
-            var url = new URL(window.location.href);
-            if (this.value) {
-                url.searchParams.set('role_id', this.value);
-            } else {
-                url.searchParams.delete('role_id');
-            }
-            url.searchParams.delete('sort_by');
-            url.searchParams.delete('sort_dir');
-            url.searchParams.delete('page');
-            window.location.href = url.toString();
-        });
-
-        document.addEventListener('click', function(e) {
-            var header = e.target.closest('[data-sort]');
-            if (header) {
-                var url = new URL(window.location.href);
-                var currentSort = url.searchParams.get('sort_by') || 'created_at';
-                var currentDir = url.searchParams.get('sort_dir') || 'desc';
-                var sortBy = header.getAttribute('data-sort');
-                url.searchParams.set('sort_by', sortBy);
-                url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
-                url.searchParams.delete('page');
-                window.location.href = url.toString();
-            }
-        });
-
-        document.addEventListener('submit', function(e) {
-            var form = e.target.closest('.js-confirm-form');
-            if (form) {
-                if (!confirm(form.getAttribute('data-confirm'))) {
-                    e.preventDefault();
-                }
-            }
-        });
-    </script>
+    @include('newsletter.partials._list-script', ['defaultSort' => 'created_at'])
 </x-app-admin-layout>

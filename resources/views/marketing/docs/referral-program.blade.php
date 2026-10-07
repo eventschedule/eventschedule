@@ -27,7 +27,10 @@
             The referral program lets you earn credit towards Event Schedule by inviting other event organizers to the platform. When someone signs up through your referral link and then pays for a Pro or Enterprise plan, you earn a credit worth one month of the plan they are on. You choose which of your schedules the credit lands on.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Open it from <strong class="text-gray-900 dark:text-white">Referrals</strong> in the admin panel sidebar. The <strong class="text-gray-900 dark:text-white">Plan</strong> tab of any schedule also carries a <strong class="text-gray-900 dark:text-white">View Referral Dashboard</strong> link to the same page.
+            Open it from <strong class="text-gray-900 dark:text-white">Referrals</strong> in the admin panel sidebar; the page that opens is titled <strong class="text-gray-900 dark:text-white">Referral Program</strong>. The <strong class="text-gray-900 dark:text-white">Plan</strong> tab of any schedule also carries a <strong class="text-gray-900 dark:text-white">View Referral Dashboard</strong> link to the same page.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            From top to bottom the page holds <a href="#referral-link" class="doc-link">your referral link</a>, a <a href="#dashboard" class="doc-link">strip of four figures</a>, any <a href="#applying-credits" class="doc-link">credits ready to apply</a>, a <strong class="text-gray-900 dark:text-white">How It Works</strong> card, and your <a href="#history" class="doc-link">referral history</a>.
         </p>
 
         <div class="doc-callout doc-callout-info">
@@ -45,7 +48,7 @@
             How It Works
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The Referrals page sums this up in three steps: share your link, they subscribe, you earn your credit. In full, a referral moves through five stages:
+            The <strong class="text-gray-900 dark:text-white">How It Works</strong> card on the Referrals page sums this up in three steps, <strong class="text-gray-900 dark:text-white">Share Your Link</strong>, <strong class="text-gray-900 dark:text-white">They Subscribe</strong> and <strong class="text-gray-900 dark:text-white">Earn Your Credit</strong>, with the value of each credit underneath. In full, a referral moves through five stages:
         </p>
 
         <ol class="doc-list doc-list-numbered mb-6">
@@ -59,6 +62,7 @@
         <h3 class="doc-subheading">What counts as a referral</h3>
         <ul class="doc-list mb-6">
             <li>The visitor has to reach Event Schedule through your link and sign up in the same browsing session. The code is held only for that session, not in a long-lived cookie, so a visit today and a signup next week will not be linked.</li>
+            <li>The code travels from the page they land on to the sign-up form in a browser cookie, and that cookie is written only once the visitor has allowed marketing cookies in the cookie notice. If they decline, or never answer it, the code normally does not reach sign-up and no referral is recorded.</li>
             <li>The first referral link counts. If they followed another organizer's link earlier in the same session, that organizer gets the referral, not you.</li>
             <li>Each person can be referred once. If someone already has an Event Schedule account, or was already referred by another organizer, a new referral is not created for them.</li>
             <li>You cannot refer yourself. A signup that matches your own account is ignored.</li>
@@ -81,10 +85,10 @@
             Your Referral Link
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Your Referral Link</strong> panel sits at the top of the Referrals page. Click <strong class="text-gray-900 dark:text-white">Copy Link</strong> and the button confirms with <strong class="text-gray-900 dark:text-white">Copied!</strong>, then paste the link into an email, a post or a message.
+            The <strong class="text-gray-900 dark:text-white">Your Referral Link</strong> card sits at the top of the Referrals page. Click <strong class="text-gray-900 dark:text-white">Copy Link</strong> and the button confirms with <strong class="text-gray-900 dark:text-white">Copied!</strong>, then paste the link into an email, a post or a message. If your browser will not let the page copy for you, the link is selected instead, ready to copy by hand.
         </p>
 
-        <x-doc-screenshot id="referral-link" alt="Referral link panel" loading="eager" />
+        <x-doc-screenshot id="referral-link" alt="The Your Referral Link card, with the link and its Copy Link button" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             The link is the Event Schedule home page with an eight-character code on the end, in the form <code class="doc-inline-code">/?ref=a1b2c3d4</code>. The code is created the first time you open the Referrals page and never changes after that.
@@ -108,16 +112,16 @@
             Referral Dashboard
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Four summary cards sit under the referral link, one per stage of the funnel:
+            A strip of four figures sits under the referral link, one per stage of the funnel:
         </p>
 
-        <x-doc-screenshot id="referral-dashboard" alt="Referral dashboard statistics" />
+        <x-doc-screenshot id="referral-dashboard" alt="The four referral figures: Total Referrals, Awaiting Subscription, Awaiting Qualification and Credits Earned" />
 
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Card</th>
+                        <th>Figure</th>
                         <th>What it counts</th>
                     </tr>
                 </thead>
@@ -136,7 +140,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Credits Earned</span></td>
-                        <td>Credits you have already applied to a schedule. Credits that are earned but not yet spent are not counted here, they are listed below in Credits Ready to Apply</td>
+                        <td>Credits you have already applied to a schedule. Credits that are earned but not yet spent are not counted here: they are listed just below, in Credits Ready to Apply</td>
                     </tr>
                 </tbody>
             </table>
@@ -191,17 +195,22 @@
             Applying Credits
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Once a referral qualifies, it appears in the green <strong class="text-gray-900 dark:text-white">Credits Ready to Apply</strong> panel on the Referrals page. The panel is only there while you have at least one unspent credit.
+            Once a referral qualifies, it appears in the <strong class="text-gray-900 dark:text-white">Credits Ready to Apply</strong> card on the Referrals page, between the four figures and How It Works. The card is only there while you have at least one unspent credit, and it lists one row per credit.
         </p>
 
-        <x-doc-screenshot id="referral-credits" alt="Available referral credits" />
+        <x-doc-screenshot id="referral-credits" alt="The Credits Ready to Apply card, with a schedule picker and an Apply Credit button on each credit" />
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Referrals</strong> in the admin panel sidebar</li>
-            <li>Find the credit in <strong class="text-gray-900 dark:text-white">Credits Ready to Apply</strong>. Each one shows its tier and value, such as Pro {{ plan_price($proMonthly) }} credit</li>
-            <li>Choose a schedule from the <strong class="text-gray-900 dark:text-white">Select schedule</strong> dropdown. Only schedules you own are listed, not ones where you were added as a team member</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">Apply Credit</strong></li>
+            <li>Find the credit in <strong class="text-gray-900 dark:text-white">Credits Ready to Apply</strong>. Each row shows the value followed by the plan, such as {{ plan_price($proMonthly) }} credit with a Pro chip beside it</li>
+            <li>Choose a schedule from the <strong class="text-gray-900 dark:text-white">Select schedule</strong> dropdown on that row. Only schedules you own are listed, not ones where you were added as a team member</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">Apply Credit</strong>. The page comes back with <strong class="text-gray-900 dark:text-white">Referral credit applied successfully.</strong> at the top, and the referral moves to Credited in the history</li>
         </ol>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Applying a credit cannot be undone</div>
+            <p>There is no confirmation step: the credit is spent on the schedule you chose as soon as you click Apply Credit. It cannot be split across schedules or moved afterwards, so check the dropdown first.</p>
+        </div>
 
         <h3 class="doc-subheading">What applying a credit does</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -229,15 +238,12 @@
             </table>
         </div>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Tip</div>
-            <p>Applying a credit is final: it is spent on the schedule you choose and cannot be split across schedules or moved afterwards. To try a paid tier on a schedule that is not paying yet, spend the credit there, since that is the case where it buys 30 days of the plan outright rather than {{ plan_price($proMonthly) }} or {{ plan_price($entMonthly) }} off a bill.</p>
-        </div>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Earned plans are unbranded</div>
-            <p>A month of Pro or Enterprise you earned through a referral counts as a plan you earned, not one handed to you, so it takes the Event Schedule credit chip off your public pages like a plan you pay for, rather than keeping it the way an admin-granted plan does.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            To try a paid tier on a schedule that is not paying yet, spend the credit there: that is the case where it buys 30 days of the plan outright rather than {{ plan_price($proMonthly) }} or {{ plan_price($entMonthly) }} off a bill.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A month of Pro or Enterprise you earned through a referral counts as a plan you earned, not one handed to you. It takes the Event Schedule credit chip off your public pages like a plan you pay for, rather than keeping it the way an admin-granted plan does.
+        </p>
     </section>
 
     <!-- Referral Statuses -->
@@ -249,7 +255,7 @@
             Referral Statuses
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Every referral carries one of five statuses, shown as a coloured badge in the history table:
+            Every referral carries one of five statuses, shown in the <strong class="text-gray-900 dark:text-white">Status</strong> column of the history table as a coloured dot beside the word: grey for Pending, blue for Subscribed, amber for Qualified, green for Credited and red for Expired.
         </p>
 
         <div class="doc-table-wrap">
@@ -263,7 +269,7 @@
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Pending</span></td>
-                        <td>They have created an account through your link but have not paid for a plan yet. No tier is shown while a referral is at this stage</td>
+                        <td>They have created an account through your link but have not paid for a plan yet. The Plan Tier column stays empty while a referral is at this stage</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Subscribed</span></td>
@@ -300,10 +306,10 @@
             Referral History
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Referral History</strong> table at the bottom of the page lists every referral you have made. It appears once you have at least one.
+            The <strong class="text-gray-900 dark:text-white">Referral History</strong> card at the bottom of the page lists every referral you have made, one row each. It appears once you have at least one. On a phone each referral is a stacked block with the same details and no column headings, so sorting needs a wider screen.
         </p>
 
-        <x-doc-screenshot id="referral-history" alt="Referral history table" />
+        <x-doc-screenshot id="referral-history" alt="The Referral History list, with a masked email address, date, plan and status for each referral" />
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -315,16 +321,16 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Date</span></td>
-                        <td>When they signed up through your link. Click the heading to sort, newest first by default</td>
-                    </tr>
-                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Referred User</span></td>
                         <td>Their email address, partly masked, in the form <code class="doc-inline-code">li***@example.com</code>. You never see a referred organizer's full address or name</td>
                     </tr>
                     <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Date</span></td>
+                        <td>When they signed up through your link. Click the heading to sort; the list starts newest first</td>
+                    </tr>
+                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Plan Tier</span></td>
-                        <td>Pro or Enterprise, shown once they subscribe. A dash means the referral is still Pending or expired without one</td>
+                        <td>A Pro or Enterprise chip, shown once they subscribe. The cell is empty while the referral is still Pending, or if it expired without a subscription</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Status</span></td>
@@ -332,14 +338,14 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Credited To</span></td>
-                        <td>The schedule you applied the credit to, or a dash if it has not been applied</td>
+                        <td>The schedule you applied the credit to. Empty until a credit has been applied</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The table shows 20 referrals per page, with paging links underneath once you pass that.
+            The list shows 20 referrals per page, with paging links underneath once you pass that.
         </p>
     </section>
 

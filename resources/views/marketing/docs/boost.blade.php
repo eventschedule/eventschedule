@@ -8,7 +8,11 @@
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#on-network">On-Network Promotions</x-doc-nav-link>
+        <x-doc-nav-link href="#on-network-pricing" sub>Choosing How You Pay</x-doc-nav-link>
+        <x-doc-nav-link href="#on-network-review" sub>Review</x-doc-nav-link>
+        <x-doc-nav-link href="#on-network-hosting" sub>Hosting Other Schedules' Promotions</x-doc-nav-link>
         <x-doc-nav-link href="#quick-mode">Quick Mode</x-doc-nav-link>
+        <x-doc-nav-link href="#boost-from-event" sub>The Boost Event Button on an Event</x-doc-nav-link>
         <x-doc-nav-link href="#advanced-mode">Advanced Mode</x-doc-nav-link>
         <x-doc-nav-link href="#smart-defaults">Smart Defaults</x-doc-nav-link>
         <x-doc-nav-link href="#managing-campaigns">Managing Campaigns</x-doc-nav-link>
@@ -29,10 +33,10 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Boost turns an event you have already published into a paid promotion, without needing ad manager experience. It sells two different things from the same page, and each one is set up, priced and reported separately.
+            Boost turns an event you have already published into a paid promotion, without needing ad manager experience. It lives under <strong class="text-gray-900 dark:text-white">Boost</strong> in the sidebar, an entry that is there only when the site has at least one of the two channels below set up. It sells two different things from the same page, and each one is set up, priced and reported separately.
         </p>
 
-        <x-doc-screenshot id="boost--page" alt="Boost event creation form" loading="eager" />
+        <x-doc-screenshot id="boost--page" alt="The Boost Event form for Facebook and Instagram: the event summary, the ad budget slider and the ad preview" loading="eager" />
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -59,7 +63,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Both are bought the same way: open <strong class="text-gray-900 dark:text-white">Boost</strong> in the admin panel, press <strong class="text-gray-900 dark:text-white">Boost Event</strong>, pick one of your upcoming events, then choose a channel. A channel button only appears if the site you are on has that channel configured, so you may see one, both, or neither.
+            Both are bought the same way: open <strong class="text-gray-900 dark:text-white">Boost</strong>, press <strong class="text-gray-900 dark:text-white">Boost Event</strong> at the end of the title row, pick one of your upcoming events in the dialog, then press the channel's button: <strong class="text-gray-900 dark:text-white">On this site</strong> or <strong class="text-gray-900 dark:text-white">Facebook &amp; Instagram</strong>. A channel's button appears only if the site has that channel set up, so you may see one or both. If the schedule you have picked is on the Free plan, or all of your schedules are, the page shows a Pro plan notice and no Boost Event button.
         </p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -106,7 +110,7 @@
             <p class="mt-2">Promoted cards are only ever shown on <strong>free-plan</strong> schedules' public pages. Pro and Enterprise schedules never carry them, so the pool of pages your promotion can appear on is smaller than the site's total traffic.</p>
         </div>
 
-        <h3 class="doc-subheading">What you can promote</h3>
+        <h3 id="on-network-eligibility" class="doc-subheading">What you can promote</h3>
         <ul class="doc-list mb-6">
             <li>The schedule buying the promotion must be on a <strong class="text-gray-900 dark:text-white">Pro plan</strong> or higher, and you must be a member of it.</li>
             <li>The event must be <strong class="text-gray-900 dark:text-white">publicly visible</strong>. Draft (internal) and unlisted events are rejected, because nobody clicking the card could open them.</li>
@@ -114,9 +118,9 @@
             <li>You can run up to <strong class="text-gray-900 dark:text-white">2</strong> on-network campaigns at a time by default. This cap is separate from the Facebook and Instagram one, so neither channel uses up the other's slots.</li>
         </ul>
 
-        <h3 class="doc-subheading">Writing the card</h3>
+        <h3 id="on-network-card" class="doc-subheading">Writing the card</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The form asks for two pieces of copy and previews the result using the exact card component visitors will see, so what you approve is what ships:
+            The form is one page, <strong class="text-gray-900 dark:text-white">Promote on the Event Schedule network</strong>, with a link back to Boost above its title and three cards: Creative, Budget &amp; Duration and Targeting. The Creative card asks for two pieces of copy, and <strong class="text-gray-900 dark:text-white">How it will look</strong> previews the result using the exact card component visitors will see, so what you approve is what ships:
         </p>
         <ul class="doc-list mb-6">
             <li><strong>Headline</strong> - up to 80 characters. Leave it empty and the event name is used.</li>
@@ -126,9 +130,9 @@
             The image is your event's flyer, and the card is labelled <strong class="text-gray-900 dark:text-white">Promoted</strong> with your schedule name underneath. There is nothing else to design.
         </p>
 
-        <h3 class="doc-subheading">Choosing how you pay</h3>
+        <h3 id="on-network-pricing" class="doc-subheading">Choosing how you pay</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            You prepay a fixed budget and pick one of two pricing models. The rates are set by the site operator and are shown next to each option:
+            You prepay a fixed budget and, under <strong class="text-gray-900 dark:text-white">How you want to pay</strong>, pick one of two pricing models. The rates are set by the site operator and are shown next to each option:
         </p>
         <ul class="doc-list mb-6">
             <li><strong>Per 1,000 views (CPM)</strong> - you pay for every thousand times your promotion is shown. Best when you want maximum visibility for an event with broad appeal.</li>
@@ -144,48 +148,48 @@
             Start and end dates are optional. With no end date the campaign runs until the budget is exhausted or the event is over.
         </p>
 
-        <h3 class="doc-subheading">Targeting</h3>
+        <h3 id="on-network-targeting" class="doc-subheading">Targeting</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Targeting is optional, and leaving it empty reaches the widest audience:
         </p>
         <ul class="doc-list mb-6">
+            <li><strong>Show on these kinds of schedules</strong> - restrict to talent, venue or curator schedules, so a gig promotion can run on venue pages and nowhere else.</li>
             <li><strong>Show to visitors in these countries</strong> - your promotion is only shown to visitors in the countries you tick. Useful for a local event on a site with international traffic.</li>
-            <li><strong>Show on these kinds of schedules</strong> - restrict to talent, venue or curator schedules, so a gig promotion can run on venue pages rather than everywhere.</li>
         </ul>
-        <div class="doc-callout doc-callout-warning">
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Narrow targeting can stall a campaign</div>
             <p>Every filter you add reduces the pages your promotion can appear on. If you target a country the site gets little traffic from, the campaign may spend slowly or not at all. Your budget is not lost: unspent money is refunded when the campaign ends.</p>
         </div>
 
-        <h3 class="doc-subheading">Review</h3>
+        <h3 id="on-network-review" class="doc-subheading">Review</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Because your promotion appears on other people's schedules, your first campaigns are checked by the site operator before they go live. You will see <strong class="text-gray-900 dark:text-white">Awaiting review</strong> on the campaign until then, usually for about one business day, and you get an email either way. A rejected campaign is refunded in full, and the reason the operator gave is shown on the campaign page.
+            Press <strong class="text-gray-900 dark:text-white">Submit promotion</strong> to pay and send it in. Because your promotion appears on other people's schedules, your first campaigns are checked by the site operator before they go live. You will see <strong class="text-gray-900 dark:text-white">Awaiting review</strong> on the campaign until then, usually for about one business day, and you get an email either way. A rejected campaign is refunded in full, and the reason the operator gave is shown on the campaign page.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Once you have a track record of approved campaigns that actually delivered, three by default, later ones start immediately. A single rejection puts your schedule back into the review queue for good.
         </p>
 
-        <h3 class="doc-subheading">Results</h3>
+        <h3 id="on-network-results" class="doc-subheading">Results</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The campaign page reports impressions, clicks, click-through rate and spend, a delivery bar showing how much of the budget is left, effective cost per click and per thousand views, unique visitors, and any ticket sales attributed to the campaign along with their revenue. A daily chart appears once there is more than one day of data.
+            The campaign page opens with four figures: Views, Clicks, CTR and Spend. The <strong class="text-gray-900 dark:text-white">Delivery</strong> card under them shows a bar of what is spent against what remains, then the budget, the cost per click, the cost per 1,000 views, unique visitors, and the tickets sold through the campaign with their revenue. <strong class="text-gray-900 dark:text-white">Daily delivery</strong> charts views against clicks once there is more than one day of data.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            It also breaks results down by country, with impressions and clicks for each, and by the kind of schedule your promotion ran on. Individual host schedules are never named: placement is reported by type and by count, not by page.
+            Two more cards break the results down: <strong class="text-gray-900 dark:text-white">Where your viewers are</strong>, by country, with views and clicks for each, and <strong class="text-gray-900 dark:text-white">Where it ran</strong>, by the kind of schedule your promotion appeared on. Individual host schedules are never named: placement is reported by type and by count, not by page.
         </p>
 
-        <h3 class="doc-subheading">When a campaign pauses itself</h3>
+        <h3 id="on-network-pauses" class="doc-subheading">When a campaign pauses itself</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Two housekeeping rules can pause a live promotion. If the event stops being publicly visible, for example it is switched to draft or deleted, the campaign is paused rather than left looking live while it silently cannot serve. And a per-click campaign whose click-through rate stays extremely low after several thousand impressions is paused too, so weak creative does not consume host pages indefinitely without ever billing. In both cases the budget is still yours, and is settled and refunded if the campaign stays paused.
         </p>
 
-        <h3 class="doc-subheading">Cancelling</h3>
+        <h3 id="on-network-cancelling" class="doc-subheading">Cancelling</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             You can cancel at any time, including while a campaign is awaiting review. You keep what has already been delivered and the unspent remainder of your budget is returned, to your card if you paid by card, or to your account balance if you paid from credit. The same applies when a campaign ends on its own, whether it ran out of budget, reached its end date, or its event finished.
         </p>
 
-        <h3 class="doc-subheading">Hosting other schedules' promotions</h3>
+        <h3 id="on-network-hosting" class="doc-subheading">Hosting other schedules' promotions</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The network works both ways: if promotions can appear on other schedules' pages, they can appear on yours. If you would rather they did not, turn on <strong class="text-gray-900 dark:text-white">Do not show other schedules' promotions</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>. It is free on every plan, including Free, and it does not stop you buying promotions of your own.
+            The network works both ways: if promotions can appear on other schedules' pages, they can appear on yours. If you would rather they did not, turn on <strong class="text-gray-900 dark:text-white">Do not show other schedules' promotions</strong> in the <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Advanced</a> row of the schedule's Settings tab. It is free on every plan, including Free, and it does not stop you buying promotions of your own.
         </p>
         <p class="text-gray-600 dark:text-gray-300">
             The one toggle covers everything a site might place on your pages, so it also turns off <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">ads</a> if the site you are on runs those as well. Paid schedules never carry either, so the toggle only changes anything while you are on the Free plan.
@@ -204,19 +208,48 @@
             Quick Mode is the fastest way to launch a Facebook and Instagram campaign. It is what you get by default when you choose that channel.
         </p>
 
-        <ul class="doc-list doc-list-numbered mb-6">
-            <li><strong>Select an event</strong> - press <strong class="text-gray-900 dark:text-white">Boost Event</strong> on the Boost page and pick an upcoming event, or start from the event itself. Boost pulls in the name, date, venue and image automatically.</li>
-            <li><strong>Read the warnings</strong> - if the event has no image, no description, no location, starts within 24 hours or is more than 90 days away, Boost says so before you spend anything.</li>
-            <li><strong>Set your budget</strong> - drag the slider. It starts at the site minimum, $10 by default, and stops at whichever is lower, your current spending limit or $500. The cost breakdown and the amount on the button update as you drag.</li>
-            <li><strong>Check the run dates</strong> - a line under the slider tells you how many days the ad will run and the date it ends. Boost picks that window from the event date; use Advanced Mode to change it.</li>
-            <li><strong>Preview the ad</strong> - a mockup shows the headline, text, image and call to action exactly as Meta will render them.</li>
-            <li><strong>Pay and launch</strong> - pay by card, or straight from your boost credit if the balance covers the whole total. The campaign is created on Meta in the background and appears on your Boost page.</li>
-        </ul>
+        <ol class="doc-steps doc-steps--compact">
+            <li class="doc-step">
+                <h4 class="doc-step-title">Select an event</h4>
+                <p class="text-gray-600 dark:text-gray-300">Press <strong class="text-gray-900 dark:text-white">Boost Event</strong> on the Boost page and pick an upcoming event, or press <strong class="text-gray-900 dark:text-white">Boost Event</strong> on the event's own edit page. Boost pulls in the name, date, venue and image automatically.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Read the warnings</h4>
+                <p class="text-gray-600 dark:text-gray-300">If the event has no image, no description, no location, starts within 24 hours or is more than 90 days away, Boost says so before you spend anything.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Set your budget</h4>
+                <p class="text-gray-600 dark:text-gray-300">Drag the slider under <strong class="text-gray-900 dark:text-white">Ad Budget</strong>. It runs from the site minimum, $10 by default, in steps of 5, up to whichever is lower, your current spending limit or $500, and opens on the budget Boost suggests. The cost breakdown and the amount on the button update as you drag. While your limit is no higher than the minimum, as it is for a new schedule, there is nothing to choose and the budget is shown as a figure with no slider.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Check the run dates</h4>
+                <p class="text-gray-600 dark:text-gray-300">A line under the slider tells you how many days the ad will run and the date it ends. Boost picks that window from the event date; use Advanced Mode to change it.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Preview the ad</h4>
+                <p class="text-gray-600 dark:text-gray-300">The <strong class="text-gray-900 dark:text-white">Ad Preview</strong> card, beside the form on a wide screen and under the budget on a phone, shows the headline, text, image and call to action exactly as Meta will render them.</p>
+            </li>
+            <li class="doc-step">
+                <h4 class="doc-step-title">Pay and launch</h4>
+                <p class="text-gray-600 dark:text-gray-300">Pay by card, or straight from your boost credit if the balance covers the whole total, and press <strong class="text-gray-900 dark:text-white">Boost for</strong> with the amount. You land on the campaign's own page while the campaign is created on Meta in the background, and it is listed on your Boost page from then on.</p>
+            </li>
+        </ol>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
             <p>Quick Mode uses <a href="#smart-defaults" class="doc-link">smart defaults</a> based on your event's details. For most events this is all you need. If you want to change the audience or the wording, use the <strong>Customize targeting &amp; creative</strong> link at the bottom of the form to switch to Advanced Mode.</p>
         </div>
+
+        <h3 id="boost-from-event" class="doc-subheading">The Boost Event Button on an Event</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Once an event has been saved, its edit page carries a <strong class="text-gray-900 dark:text-white">Boost Event</strong> button: beside <strong class="text-gray-900 dark:text-white">Actions</strong> at the top on a wide screen, and as the first entry of the Actions menu on a smaller one. A new event has no Boost button until it is saved. The button always opens the Facebook and Instagram form above; on-network promotions are started from the Boost page.
+        </p>
+        <ul class="doc-list mb-6">
+            <li>If the event has no name or start date yet, or has already started, the button says so and goes no further.</li>
+            <li>If the schedule is on the Free plan, the button opens the upgrade prompt.</li>
+            <li>If the site has no Facebook and Instagram channel, the button says that Boost requires Meta Ads to be configured.</li>
+            <li>While the event has an active or paused campaign, the button reads <strong class="text-gray-900 dark:text-white">Boosted</strong> with the campaign's reach, and opens that campaign.</li>
+        </ul>
     </section>
 
     <!-- Advanced Mode -->
@@ -228,7 +261,7 @@
             Advanced Mode
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Advanced Mode gives you control over the Facebook and Instagram campaign. Open it with the <strong class="text-gray-900 dark:text-white">Customize targeting &amp; creative</strong> link at the bottom of the Quick Mode form; <strong class="text-gray-900 dark:text-white">Use simple boost</strong> takes you back. It walks through four numbered steps: Budget &amp; Duration, Targeting, Creative, then Review &amp; Pay.
+            Advanced Mode gives you control over the Facebook and Instagram campaign. Open it with the <strong class="text-gray-900 dark:text-white">Customize targeting &amp; creative</strong> link at the bottom of the Quick Mode form; <strong class="text-gray-900 dark:text-white">Use simple boost</strong>, in the same place on the page that opens, takes you back. The page is titled <strong class="text-gray-900 dark:text-white">Advanced Boost</strong> and runs down four numbered cards: Budget &amp; Duration, Targeting, Creative, then Review &amp; Pay, which ends in <strong class="text-gray-900 dark:text-white">Launch Boost</strong>.
         </p>
 
         <div class="doc-table-wrap">
@@ -242,17 +275,17 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Ad budget</span></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Ad Budget</span></td>
                         <td>1</td>
                         <td>Typed rather than dragged, so the full range up to your spending limit is available</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Budget type</span></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Budget Type</span></td>
                         <td>1</td>
                         <td>Lifetime budget (total spend over the campaign) or daily budget (spend per day). Lifetime is the default</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Start and end date</span></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Start Date and End Date</span></td>
                         <td>1</td>
                         <td>Replace the dates Boost worked out from the event</td>
                     </tr>
@@ -262,7 +295,7 @@
                         <td>Awareness, Traffic or Engagement. Awareness is the default</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Age range</span></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Min Age and Max Age</span></td>
                         <td>2</td>
                         <td>Narrow the audience within Meta's 18 to 65 range</td>
                     </tr>
@@ -287,7 +320,7 @@
                         <td>Up to 40 characters, replacing the generated headline</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Primary text</span></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Primary Text</span></td>
                         <td>3</td>
                         <td>Up to 125 characters, the main body of the ad</td>
                     </tr>
@@ -297,7 +330,7 @@
                         <td>Up to 30 characters, the link description shown below the headline</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Call to action</span></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Call to Action</span></td>
                         <td>3</td>
                         <td>Learn More, Get Tickets, Sign Up or Book Now</td>
                     </tr>
@@ -307,7 +340,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">The location is not editable</div>
-            <p>Advanced Mode shows the geographic targeting Boost derived from the event, but it is read-only. To change where the ad runs, change the event's venue or its online URL and start a new boost.</p>
+            <p>The Targeting card opens with the <strong>Location</strong> Boost derived from the event, but it is read-only. To change where the ad runs, change the event's venue or its online URL and start a new boost.</p>
         </div>
     </section>
 
@@ -395,7 +428,10 @@
             Managing Campaigns
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Active and past campaigns from both channels are listed together on the <strong class="text-gray-900 dark:text-white">Boost</strong> page in your admin panel, newest first. If you run more than one schedule, use the schedule dropdown at the top to filter. Open a campaign to pause, resume or cancel it.
+            The <strong class="text-gray-900 dark:text-white">Boost</strong> page lists the campaigns you started on both channels, active and past, newest first and 20 to a page. A campaign a teammate started is in their list, not yours. If you run more than one schedule, the picker at the end of the title row narrows the list to one.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Each row gives the event, with its schedule, its channel and the day the campaign was bought, then the status, impressions, clicks, spend and budget. While a campaign is active or paused a bar under the spend shows how much of the budget has gone. The event's name opens the campaign's own page, where <strong class="text-gray-900 dark:text-white">Pause</strong> or <strong class="text-gray-900 dark:text-white">Resume</strong> and <strong class="text-gray-900 dark:text-white">Cancel Campaign</strong> sit at the end of the title row and a link above the title leads back to Boost. Cancelling asks first.
         </p>
 
         <h3 class="doc-subheading">Campaign Statuses</h3>
@@ -446,7 +482,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">How many campaigns can run at once</div>
-            <p>On hosted sites, the number of concurrent Facebook and Instagram campaigns per schedule depends on your history: new schedules start with 1, rising to 2 after 3 completed campaigns and 3 after 10. On-network promotions are capped separately, at 2 by default, so one channel never uses up the other's slots. Selfhosted installations use a single fixed limit instead.</p>
+            <p>On hosted sites, the number of concurrent Facebook and Instagram campaigns per schedule depends on your history: new schedules start with 1, rising to 2 after 3 completed campaigns and 3 after 10. On-network promotions are capped separately, at 2 by default, so one channel never uses up the other's slots. Selfhosted installations use a single fixed limit instead. While a schedule is at its Facebook and Instagram limit, the Quick Mode form is replaced by a notice saying so.</p>
         </div>
     </section>
 
@@ -512,13 +548,11 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The limit is per schedule, and your current one is shown at the top of every boost form. Only completed <strong class="text-gray-900 dark:text-white">Facebook and Instagram</strong> campaigns count towards it, and the increase lands when the campaign is settled, about a day after it finishes. On-network promotions are capped by the same ceiling but never raise it. The limit only ever goes up.
+            The limit is per schedule, and your current one is shown under the budget heading of both Facebook and Instagram forms. Only completed <strong class="text-gray-900 dark:text-white">Facebook and Instagram</strong> campaigns count towards it, and the increase lands when the campaign is settled, about a day after it finishes. On-network promotions are capped by the same ceiling but never raise it. The ladder only ever raises it, and one completed campaign is enough to move it from $10 to $25, so a small first campaign is the way to build a history.
         </p>
-
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Tip</div>
-            <p>Start with a small campaign to build your history. After just one completed campaign, your limit increases to $25.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The top of the ladder is also the most the form accepts: a budget above the site's maximum, $1,000 by default, is refused on both channels however long your history is. A site administrator can also set a schedule's limit by hand, higher or lower, and that too stops at the same maximum.
+        </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Selfhosted installations</div>
@@ -535,7 +569,7 @@
             Analytics
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            A Facebook and Instagram campaign reports the following. Figures come from Meta and are pulled in every 15 minutes; the campaign page shows when they were last updated.
+            A Facebook and Instagram campaign's own page reports the following, in this order. Figures come from Meta and are pulled in every 15 minutes; the <strong class="text-gray-900 dark:text-white">Campaign Details</strong> card says when they were last updated, beside the campaign's dates and, on hosted sites, the total charged.
         </p>
 
         <div class="doc-table-wrap">
@@ -564,6 +598,10 @@
                         <td>Actions Meta attributed to the ad, which requires a Meta Pixel to be configured for the site</td>
                     </tr>
                     <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Budget Utilization</span></td>
+                        <td>How much of your budget has been delivered so far, as a bar and as an amount</td>
+                    </tr>
+                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">CTR</span></td>
                         <td>Click-through rate (clicks divided by impressions)</td>
                     </tr>
@@ -575,16 +613,12 @@
                         <td><span class="font-semibold text-gray-900 dark:text-white">CPM</span></td>
                         <td>Cost per 1,000 impressions</td>
                     </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Budget utilization</span></td>
-                        <td>How much of your budget has been delivered so far, as a bar and as an amount</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Once the campaign has run for more than a day, a daily performance chart plots impressions against clicks. On-network promotions report a different set of numbers, described under <a href="#on-network" class="doc-link">On-Network Promotions</a>.
+            Once the campaign has run for more than a day, a <strong class="text-gray-900 dark:text-white">Daily Performance</strong> chart plots impressions against clicks, and <strong class="text-gray-900 dark:text-white">Ad Creative</strong> at the foot of the page shows the ad as it runs, with the state Meta gives it. On-network promotions report a different set of numbers, described under <a href="#on-network" class="doc-link">On-Network Promotions</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300">
             Every link in a boosted ad or promoted card is tagged, so traffic and ticket sales from a campaign are also visible in your own <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a>, where boost views, attributed sales, cost per view and cost per sale are reported alongside the rest of your traffic.
@@ -604,25 +638,33 @@
         </p>
 
         <h3 class="doc-subheading">How Pricing Works</h3>
-        <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-5 border border-gray-200 dark:border-white/10 mb-6">
-            <div class="space-y-3">
-                <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Ad budget (you choose)</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">$75.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Service fee (20%)</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">$15.00</span>
-                </div>
-                <div class="border-t border-gray-200 dark:border-white/10 pt-3 flex justify-between">
-                    <span class="font-bold text-gray-900 dark:text-white">Total charged</span>
-                    <span class="font-bold text-gray-900 dark:text-white">$90.00</span>
-                </div>
-            </div>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Line on the form</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ad Budget (you choose)</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">$75.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>Service fee (20%)</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">$15.00</span></td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">$90.00</span></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            On-network promotions carry <strong class="text-gray-900 dark:text-white">no service fee</strong>: there is no outside ad platform to buy from, so your whole budget is the price. Selfhosted installations add no fee to either channel.
+            On-network promotions carry <strong class="text-gray-900 dark:text-white">no service fee</strong>: there is no outside ad platform to buy from, so your whole budget is the price. Selfhosted installations add no fee to either channel, and their Facebook and Instagram form has no payment step: Meta bills the site's own ad account.
         </p>
 
         <h3 class="doc-subheading">How you pay</h3>

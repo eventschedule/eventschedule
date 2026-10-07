@@ -1,187 +1,160 @@
 <x-app-admin-layout>
-    <div class="max-w-3xl mx-auto">
-        <div class="flex justify-between items-center gap-6 mb-6">
-            @if (is_rtl())
-                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    {{ __('messages.cancel') }}
-                </a>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('messages.advanced_boost') }}</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->translatedName() }}</p>
-                </div>
-            @else
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('messages.advanced_boost') }}</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $event->translatedName() }}</p>
-                </div>
-                <a href="{{ route('event.edit_admin', $event->hashedId()) }}"
-                   class="js-cancel-btn inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                    {{ __('messages.cancel') }}
-                </a>
-            @endif
-        </div>
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+    <x-slot name="head">
+        @include('boost.partials.styles')
+    </x-slot>
 
-        {{-- Spending limit info --}}
-        @if ($isHosted)
-        <div class="mb-0 p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
-            <p class="text-sm text-gray-600 dark:text-gray-300">
-                {{ __('messages.boost_limit_info', ['limit' => $currencySymbol . number_format($maxBudget, 0)]) }}
-                {{ __('messages.boost_limit_grows') }}
-            </p>
-        </div>
-        @endif
+    @php
+        // The card is asked for where a card is charged: on the hosted service, outside testing.
+        // In testing the page used to call Stripe with no key, which threw and took the whole
+        // script with it (the interest search, the totals, Launch).
+        $useStripe = $isHosted && empty($isTesting);
+        $boostField = 'block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]';
+        $boostCheck = 'rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]';
+    @endphp
 
-        <form id="boost-form" class="space-y-6">
+    {{-- The long way to boost an event on Facebook and Instagram: four steps down one column, each
+         a card, then the button that spends the money. --}}
+    <div class="page-shell page-col is-narrow">
+        <x-page-header :title="__('messages.advanced_boost')" :lead="$event->translatedName()"
+            :back="route('boost.index')" :back-label="__('messages.boost')" />
+
+        <x-page-flash :keys="['error' => 'error']" class="mb-4" />
+
+        <form id="boost-form" class="page-stack">
             @csrf
             <input type="hidden" name="event_id" value="{{ $event->hashedId() }}">
             <input type="hidden" name="role_id" value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">
             <input type="hidden" id="payment_intent_id" name="payment_intent_id" value="">
 
             {{-- Step 1: Budget & Duration --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. {{ __('messages.budget_and_duration') }}</h2>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ad_budget') }}</label>
-                        <div class="flex items-center gap-3">
-                            <span class="text-gray-500 dark:text-gray-400">{{ $currencySymbol }}</span>
+            <x-page-card :title="'1. '.__('messages.budget_and_duration')"
+                :lead="$isHosted ? __('messages.boost_limit_info', ['limit' => $currencySymbol . number_format($maxBudget, 0)]).' '.__('messages.boost_limit_grows') : null">
+                <div class="boost-fields">
+                    <div class="boost-fields-2 is-words">
+                        <div>
+                            <x-input-label for="budget-input" :value="__('messages.ad_budget').' ('.$currencySymbol.')'" />
                             <input type="number" name="budget" id="budget-input" value="{{ $defaults['budget'] }}"
-                                min="{{ $minBudget }}" max="{{ $maxBudget }}" step="1"
-                                class="block w-32 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                min="{{ $minBudget }}" max="{{ $maxBudget }}" step="1" inputmode="numeric"
+                                class="mt-1 {{ $boostField }}">
+                        </div>
+                        <div>
+                            <x-input-label for="budget-type" :value="__('messages.budget_type')" />
+                            <select name="budget_type" id="budget-type" class="mt-1 {{ $boostField }}">
+                                <option value="lifetime" selected>{{ __('messages.lifetime_budget') }}</option>
+                                <option value="daily">{{ __('messages.daily_budget') }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="boost-fields-2">
+                        <div>
+                            <x-input-label for="scheduled-start" :value="__('messages.start_date')" />
+                            <input type="text" name="scheduled_start" id="scheduled-start" value="{{ $defaults['scheduled_start']->format('Y-m-d') }}"
+                                autocomplete="off" class="mt-1 boost-date {{ $boostField }}">
+                        </div>
+                        <div>
+                            <x-input-label for="scheduled-end" :value="__('messages.end_date')" />
+                            <input type="text" name="scheduled_end" id="scheduled-end" value="{{ $defaults['scheduled_end']->format('Y-m-d') }}"
+                                autocomplete="off" class="mt-1 boost-date {{ $boostField }}">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.budget_type') }}</label>
-                        <select name="budget_type" class="block w-48 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <option value="lifetime" selected>{{ __('messages.lifetime_budget') }}</option>
-                            <option value="daily">{{ __('messages.daily_budget') }}</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.start_date') }}</label>
-                            <input type="date" name="scheduled_start" value="{{ $defaults['scheduled_start']->format('Y-m-d') }}"
-                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.end_date') }}</label>
-                            <input type="date" name="scheduled_end" value="{{ $defaults['scheduled_end']->format('Y-m-d') }}"
-                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.objective') }}</label>
-                        <select name="objective" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <x-input-label for="objective" :value="__('messages.objective')" />
+                        <select name="objective" id="objective" class="mt-1 {{ $boostField }}">
                             <option value="OUTCOME_AWARENESS">{{ __('messages.objective_awareness') }}</option>
                             <option value="OUTCOME_TRAFFIC">{{ __('messages.objective_traffic') }}</option>
                             <option value="OUTCOME_ENGAGEMENT">{{ __('messages.objective_engagement') }}</option>
                         </select>
                     </div>
                 </div>
-            </div>
+            </x-page-card>
 
             {{-- Step 2: Targeting --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">2. {{ __('messages.targeting') }}</h2>
-
-                <div class="space-y-4">
+            <x-page-card :title="'2. '.__('messages.targeting')">
+                <div class="boost-fields">
                     @if (!empty($geoDescription))
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.location') }}</label>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $geoDescription }}</p>
+                    <div class="boost-fixed">
+                        <strong>{{ __('messages.location') }}</strong>
+                        <bdi>{{ $geoDescription }}</bdi>
                     </div>
                     @endif
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="boost-fields-2">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.age_min') }}</label>
+                            <x-input-label for="age-min" :value="__('messages.age_min')" />
                             <input type="number" id="age-min" value="{{ $defaults['targeting']['age_min'] ?? 18 }}" min="18" max="65"
-                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                class="mt-1 {{ $boostField }}">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.age_max') }}</label>
+                            <x-input-label for="age-max" :value="__('messages.age_max')" />
                             <input type="number" id="age-max" value="{{ $defaults['targeting']['age_max'] ?? 65 }}" min="18" max="65"
-                                class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                class="mt-1 {{ $boostField }}">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.interests') }}</label>
-                        <input type="text" id="interest-search" placeholder="{{ __('messages.search_interests') }}"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <x-input-label for="interest-search" :value="__('messages.interests')" />
+                        <input type="text" id="interest-search" placeholder="{{ __('messages.search_interests') }}" autocomplete="off"
+                            class="mt-1 {{ $boostField }}">
                         <div id="interest-results" class="mt-1 hidden border border-gray-200 dark:border-gray-600 rounded-lg max-h-40 overflow-y-auto"></div>
                         <div id="selected-interests" class="flex flex-wrap gap-2 mt-2"></div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.placements') }}</label>
-                        <div class="space-y-2">
-                            <label class="inline-flex items-center gap-2">
-                                <input type="checkbox" name="placement_facebook_feed" value="1" checked
-                                    class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.placement_facebook_feed') }}</span>
+                    <fieldset>
+                        <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.placements') }}</legend>
+                        <div class="boost-checks">
+                            <label class="boost-check">
+                                <input type="checkbox" name="placement_facebook_feed" value="1" checked class="{{ $boostCheck }}">
+                                <span>{{ __('messages.placement_facebook_feed') }}</span>
                             </label>
-                            <label class="inline-flex items-center gap-2">
-                                <input type="checkbox" name="placement_instagram" value="1" checked
-                                    class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.placement_instagram') }}</span>
+                            <label class="boost-check">
+                                <input type="checkbox" name="placement_instagram" value="1" checked class="{{ $boostCheck }}">
+                                <span>{{ __('messages.placement_instagram') }}</span>
                             </label>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <input type="hidden" name="targeting" id="targeting-json" value="{{ json_encode($defaults['targeting']) }}">
                     <input type="hidden" name="placements" id="placements-json" value="">
                 </div>
-            </div>
+            </x-page-card>
 
             {{-- Step 3: Creative --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">3. {{ __('messages.creative') }}</h2>
-
-                <div class="space-y-4">
+            <x-page-card :title="'3. '.__('messages.creative')">
+                <div class="boost-fields">
                     @if ($roleLanguage && $roleLanguage !== 'en')
-                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <label class="inline-flex items-center gap-2">
-                            <input type="checkbox" name="translate_to_english" id="translate-to-english" value="1"
-                                class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.translate_ad_to_english') }}</span>
+                    <div class="boost-fixed">
+                        <label class="boost-check">
+                            <input type="checkbox" name="translate_to_english" id="translate-to-english" value="1" class="{{ $boostCheck }}">
+                            <span>{{ __('messages.translate_ad_to_english') }}</span>
                         </label>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.translate_ad_to_english_desc') }}</p>
+                        <p class="boost-note" style="margin-top: 0.25rem">{{ __('messages.translate_ad_to_english_desc') }}</p>
                     </div>
                     @endif
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.headline') }} ({{ __('messages.max_chars', ['count' => 40]) }})</label>
-                        <input type="text" name="headline" value="{{ $defaults['headline'] }}" maxlength="40"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <x-input-label for="headline" :value="__('messages.headline').' ('.__('messages.max_chars', ['count' => 40]).')'" />
+                        <input type="text" name="headline" id="headline" value="{{ $defaults['headline'] }}" maxlength="40" dir="auto"
+                            class="mt-1 {{ $boostField }}">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.primary_text') }} ({{ __('messages.max_chars', ['count' => 125]) }})</label>
-                        <textarea name="primary_text" maxlength="125" rows="2"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">{{ $defaults['primary_text'] }}</textarea>
+                        <x-input-label for="primary-text" :value="__('messages.primary_text').' ('.__('messages.max_chars', ['count' => 125]).')'" />
+                        <textarea name="primary_text" id="primary-text" maxlength="125" rows="2" dir="auto"
+                            class="mt-1 {{ $boostField }}">{{ $defaults['primary_text'] }}</textarea>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.description') }} ({{ __('messages.max_chars', ['count' => 30]) }})</label>
-                        <input type="text" name="description" value="{{ $defaults['description'] }}" maxlength="30"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <x-input-label for="description" :value="__('messages.description').' ('.__('messages.max_chars', ['count' => 30]).')'" />
+                        <input type="text" name="description" id="description" value="{{ $defaults['description'] }}" maxlength="30" dir="auto"
+                            class="mt-1 {{ $boostField }}">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.call_to_action') }}</label>
-                        <select name="call_to_action" class="block w-48 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <x-input-label for="call-to-action" :value="__('messages.call_to_action')" />
+                        <select name="call_to_action" id="call-to-action" class="mt-1 {{ $boostField }}">
                             <option value="LEARN_MORE" {{ $defaults['call_to_action'] === 'LEARN_MORE' ? 'selected' : '' }}>{{ __('messages.cta_learn_more') }}</option>
                             <option value="GET_TICKETS" {{ $defaults['call_to_action'] === 'GET_TICKETS' ? 'selected' : '' }}>{{ __('messages.cta_get_tickets') }}</option>
                             <option value="SIGN_UP" {{ $defaults['call_to_action'] === 'SIGN_UP' ? 'selected' : '' }}>{{ __('messages.cta_sign_up') }}</option>
@@ -189,60 +162,96 @@
                         </select>
                     </div>
                 </div>
-            </div>
+            </x-page-card>
 
             {{-- Step 4: Review & Pay --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">4. {{ __('messages.review_and_pay') }}</h2>
-
-                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm mb-4">
-                    <div class="flex justify-between text-gray-600 dark:text-gray-300">
-                        <span>{{ __('messages.ad_budget') }}</span>
-                        <span id="review-budget">{{ $currencySymbol }}{{ number_format($defaults['budget'], 2) }}</span>
-                    </div>
-                    @if ($isHosted)
-                    <div class="flex justify-between text-gray-600 dark:text-gray-300 mt-1">
-                        <span>{{ __('messages.service_fee') }} ({{ intval($markupRate * 100) }}%)</span>
-                        <span id="review-fee">{{ $currencySymbol }}{{ number_format($defaults['budget'] * $markupRate, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between font-semibold text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <span>{{ __('messages.total') }}</span>
-                        <span id="review-total">{{ $currencySymbol }}{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</span>
-                    </div>
-                    @endif
+            <x-page-card :title="'4. '.__('messages.review_and_pay')">
+                <div class="boost-costs" style="margin-top: 0">
+                    <dl class="page-kv">
+                        <div>
+                            <dt>{{ __('messages.ad_budget') }}</dt>
+                            <dd id="review-budget">{{ $currencySymbol }}{{ number_format($defaults['budget'], 2) }}</dd>
+                        </div>
+                        @if ($isHosted)
+                        <div>
+                            <dt>{{ __('messages.service_fee') }} ({{ intval($markupRate * 100) }}%)</dt>
+                            <dd id="review-fee">{{ $currencySymbol }}{{ number_format($defaults['budget'] * $markupRate, 2) }}</dd>
+                        </div>
+                        <div>
+                            <dt>{{ __('messages.total') }}</dt>
+                            <dd id="review-total">{{ $currencySymbol }}{{ number_format($defaults['budget'] * (1 + $markupRate), 2) }}</dd>
+                        </div>
+                        @endif
+                    </dl>
                 </div>
 
-                @if ($isHosted)
+                @if ($useStripe)
                 @if (!empty($pmLastFour))
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                <p class="boost-note" style="margin: 0.75rem 0">
                     {{ __('messages.saved_card_on_file', ['brand' => ucfirst($pmType ?? 'card'), 'last4' => $pmLastFour]) }}
                 </p>
                 @endif
-                <div id="payment-element" class="mb-4"></div>
+                <div id="payment-element" class="mt-4"></div>
+                @elseif (!empty($isTesting))
+                <x-page-notice tone="warn" class="mt-4">{{ __('messages.boost_testing_mode') }}</x-page-notice>
                 @endif
-                <div id="payment-errors" class="text-sm text-red-600 dark:text-red-400 hidden"></div>
-            </div>
+                <div id="payment-errors" class="mt-3 text-sm text-red-600 dark:text-red-400 hidden" role="alert"></div>
+            </x-page-card>
 
-            <div class="flex items-center justify-between">
+            {{-- The other way to do this at the start of the row, then Cancel, and the button that
+                 spends the money last. --}}
+            <div class="page-form-actions is-split" style="margin-top: 0">
                 <a href="{{ route('boost.create', ['event_id' => $event->hashedId(), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                   class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                   class="event-link">
                     {{ __('messages.use_simple_boost') }}
                 </a>
-                <button type="submit" id="submit-btn"
-                    class="inline-flex items-center px-6 py-3 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span id="submit-text">{{ __('messages.launch_boost') }}</span>
-                    <span id="submit-spinner" class="hidden ml-2">
-                        <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                    </span>
-                </button>
+                <div class="page-actions">
+                    <x-secondary-link href="{{ route('boost.index') }}" class="js-cancel-btn">{{ __('messages.cancel') }}</x-secondary-link>
+                    <x-brand-button type="submit" id="submit-btn">
+                        <span id="submit-text">{{ __('messages.launch_boost') }}</span>
+                        <span id="submit-spinner" class="hidden ms-2">
+                            <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </span>
+                    </x-brand-button>
+                </div>
             </div>
         </form>
     </div>
 
-    @if ($isHosted)
+    {{-- The two dates use the portal's date picker. What is sent is the same Y-m-d the browser's
+         own date box sent, and the start is not held to "today or later" here: the day the server
+         fills in is the server's today, which a browser a few hours ahead would refuse and blank. --}}
+    <script {!! nonce_attr() !!}>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof flatpickr === 'undefined') {
+                return;
+            }
+            var fpLocale = window.flatpickrLocales ? window.flatpickrLocales[window.appLocale] : null;
+            var localeConfig = fpLocale ? { locale: fpLocale } : {};
+            var pickers = {};
+            document.querySelectorAll('#boost-form .boost-date').forEach(function(el) {
+                pickers[el.name] = flatpickr(el, Object.assign({
+                    altInput: true,
+                    altFormat: "M j, Y",
+                    dateFormat: "Y-m-d",
+                }, localeConfig));
+            });
+            // Choosing a start moves the earliest end with it: the server refuses an end before
+            // the start, and by then the card has been charged.
+            if (pickers.scheduled_start && pickers.scheduled_end) {
+                pickers.scheduled_start.config.onChange.push(function(dates, value) {
+                    if (value) {
+                        pickers.scheduled_end.set('minDate', value);
+                    }
+                });
+            }
+        });
+    </script>
+
+    @if ($useStripe)
     <script src="https://js.stripe.com/v3/" {!! nonce_attr() !!}></script>
     @endif
     <script {!! nonce_attr() !!}>
@@ -300,7 +309,7 @@
         })();
         @endif
 
-        @if ($isHosted)
+        @if ($useStripe)
         const stripe = Stripe('{{ $stripeKey }}');
         let elements, paymentElement;
         let clientSecret = null;
@@ -317,7 +326,7 @@
             @endif
         });
 
-        @if ($isHosted)
+        @if ($useStripe)
         // Re-create payment intent when budget changes (debounced)
         let debounceTimer;
         budgetInput.addEventListener('change', function() {
@@ -342,11 +351,13 @@
         const selectedInterests = document.getElementById('selected-interests');
         let interests = @json($defaults['targeting']['interests'] ?? []);
 
+        const removeLabel = @json(__('messages.remove'));
+
         function renderSelectedInterests() {
             selectedInterests.innerHTML = interests.map((i, idx) =>
-                `<span class="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-sm text-blue-700 dark:text-blue-300">
+                `<span class="boost-interest">
                     <span data-interest-name="${idx}"></span>
-                    <button type="button" data-remove-idx="${idx}" class="text-blue-500 hover:text-blue-700">&times;</button>
+                    <button type="button" data-remove-idx="${idx}" aria-label="${removeLabel}">&times;</button>
                 </span>`
             ).join('');
             selectedInterests.querySelectorAll('[data-interest-name]').forEach(el => {
@@ -400,7 +411,7 @@
 
         renderSelectedInterests();
 
-        @if ($isHosted)
+        @if ($useStripe)
         // Initialize Stripe Payment Element
         async function initPayment() {
             const budget = parseFloat(budgetInput.value);
@@ -484,7 +495,7 @@
 
             buildFormData();
 
-            @if ($isHosted)
+            @if ($useStripe)
             // Ensure payment intent matches current budget
             const currentBudget = parseFloat(budgetInput.value);
             if (!clientSecret || intentBudget !== currentBudget) {
@@ -550,7 +561,7 @@
                 }
             }
             @else
-            // Selfhosted: submit directly without Stripe
+            // No card to charge here (selfhosted, or testing): submit directly without Stripe
             const formData = new FormData(document.getElementById('boost-form'));
 
             try {
@@ -582,7 +593,7 @@
             @endif
         });
 
-        @if ($isHosted)
+        @if ($useStripe)
         initPayment().catch(function() {
             document.getElementById('payment-errors').textContent = @json(__("messages.payment_error"));
             document.getElementById('payment-errors').classList.remove('hidden');

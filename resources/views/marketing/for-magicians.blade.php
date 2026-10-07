@@ -3,6 +3,14 @@
     <x-slot name="description">Every show, residency and private booking on one link. Sell tickets with zero platform fees and keep corporate gigs off your public schedule. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Magicians</x-slot>
 
+    <x-slot name="headMeta">
+        {{-- The page's own typefaces, from the fonts the app already bundles (never a CDN). --}}
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Oranienbaum') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Cinzel') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Jost') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Italianno') }}">
+    </x-slot>
+
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Magicians"
@@ -50,1034 +58,1367 @@
 
     <style {!! nonce_attr() !!}>
         /* ==============================================================
-           For-magicians "Pick a Card" styles. The page is a close-up
-           card routine at a baize table: an ivory parlor in light mode,
-           green-tinged near-black rooms in dark mode, and fixed-dark
-           green felt table bands that never change with the room
-           lights. Playing cards stay card-stock ivory in BOTH modes
-           (the deck is a physical object; only the room changes), so
-           card internals deliberately carry no dark: variants.
-           Features are dealt face down and flip face up on scroll.
+           For-magicians "Now You See It" styles. A bare stage: bone and
+           black, one red, a great deal of air. The decoration is the
+           act itself, and every act is plain CSS:
 
-           BLADE RULE for this block: never use @supports probes here.
-           A "#" hex inside a parenthesized at-rule condition breaks
-           Blade compilation of every later parenthesized directive.
+             the inversion   a disc that turns type inside out as it passes
+             the vanish      one word of the headline that leaves and returns
+             levitation      cards that hang over their own shadows
+             the saw         a word cut through the middle and put back
+             the turn        six flaps that turn over, three cards that
+                             come back marked once you have picked them
+             the rings       three solid rings that link as you scroll
+             lights down     a stage whose words only show in your light
+             the prestige    a card that takes your signature
+
+           Everything is scoped under #mg. Each trick rests in its
+           finished, readable state without JS and under reduced motion.
            ============================================================== */
 
-        /* --- Accent text: red ink --- */
-        .es-pick-red {
-            background-image: linear-gradient(135deg, #991b1b, #dc2626 55%, #ef4444);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
-        }
-        .dark .es-pick-red {
-            background-image: linear-gradient(135deg, #f87171, #fca5a5 55%, #fecaca);
-        }
-        /* Always-bright variant for the fixed-dark felt bands (both modes). */
-        .es-pick-red-lit {
-            background-image: linear-gradient(135deg, #fca5a5, #f87171 45%, #fecaca);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
+        @property --mg-pitch {
+            syntax: '<length>';
+            inherits: true;
+            initial-value: 0px;
         }
 
-        /* --- Eyebrow tags --- */
-        .es-pick-tag {
-            font-size: 0.7rem;
+        #mg {
+            --mg-ground: #f6f4ef;
+            --mg-ground-2: #eeebe3;
+            --mg-card: #ffffff;
+            --mg-ink: #0b0b0c;
+            --mg-ink-2: #3a3936;
+            --mg-ink-3: #605e5a;
+            --mg-line: rgba(11, 11, 12, 0.2);
+            --mg-red: #c8102e;
+            --mg-on-red: #ffffff;
+            --mg-floor: rgba(11, 11, 12, 0.36);
+            --mg-display: 'Oranienbaum', 'Didot', 'Bodoni MT', 'Playfair Display', Georgia, serif;
+            --mg-caps: 'Cinzel', 'Trajan Pro', Georgia, serif;
+            --mg-text: 'Jost', 'Futura', 'Century Gothic', 'Avenir Next', system-ui, sans-serif;
+            --mg-hand: 'Italianno', 'Snell Roundhand', 'Segoe Script', cursive;
+            position: relative;
+            background: var(--mg-ground);
+            color: var(--mg-ink);
+            font-family: var(--mg-text);
+            font-size: 1.125rem;
+            line-height: 1.6;
+        }
+        .dark #mg {
+            --mg-ground: #0b0b0c;
+            --mg-ground-2: #131314;
+            --mg-card: #18181a;
+            --mg-ink: #f1ede4;
+            --mg-ink-2: #c9c5bc;
+            --mg-ink-3: #9a968e;
+            --mg-line: rgba(241, 237, 228, 0.22);
+            --mg-red: #f0443a;
+            --mg-on-red: #0b0b0c;
+            --mg-floor: rgba(241, 237, 228, 0.17);
+        }
+
+        /* The bar above is part of the same bare stage. */
+        body > header.sticky {
+            background-color: rgba(246, 244, 239, 0.88);
+            border-bottom-color: rgba(11, 11, 12, 0.14);
+        }
+        .dark body > header.sticky {
+            background-color: rgba(11, 11, 12, 0.88);
+            border-bottom-color: rgba(241, 237, 228, 0.14);
+        }
+
+        #mg ::selection { background: var(--mg-red); color: var(--mg-on-red); }
+        #mg a:focus-visible,
+        #mg summary:focus-visible,
+        #mg button:focus-visible,
+        #mg input:focus-visible {
+            outline: 2px solid var(--mg-red);
+            outline-offset: 4px;
+        }
+
+        .mg-wrap { width: min(100% - 3rem, 76rem); margin-inline: auto; }
+        .mg-section { padding-block: clamp(5.5rem, 12vw, 11rem); }
+        .mg-alt { background: var(--mg-ground-2); }
+
+        /* Three voices: the bill's serif, the engraved small caps, the plain text. */
+        .mg-d { font-family: var(--mg-display); font-weight: 400; letter-spacing: -0.015em; line-height: 0.98; }
+        .mg-k {
+            font-family: var(--mg-caps);
             font-weight: 700;
+            font-size: 0.75rem;
             letter-spacing: 0.3em;
             text-transform: uppercase;
-            color: #065f46;
+            line-height: 1.5;
+            color: var(--mg-ink-3);
         }
-        .dark .es-pick-tag,
-        .es-pick-felt .es-pick-tag { color: #6ee7b7; }
+        .mg-h2 { font-size: clamp(2.7rem, 6.4vw, 6.25rem); text-wrap: balance; }
+        .mg-red { color: var(--mg-red); }
+        .mg-head { display: grid; gap: 1.6rem; max-width: 66rem; }
+        .mg-sub { max-width: 34rem; color: var(--mg-ink-2); font-size: 1.2rem; }
+        .mg-rule { height: 1px; background: var(--mg-line); }
 
-        /* --- Links and buttons --- */
-        .es-pick-link { color: #b91c1c; }
-        .es-pick-link:hover { color: #991b1b; }
-        .dark .es-pick-link { color: #f87171; }
-        .dark .es-pick-link:hover { color: #fca5a5; }
-
-        .es-pick-btn {
-            background-image: linear-gradient(to right, #b91c1c, #dc2626);
-            box-shadow: 0 20px 40px -12px rgba(185, 28, 28, 0.45);
-        }
-        .es-pick-btn:hover {
-            background-image: linear-gradient(to right, #991b1b, #b91c1c);
-            box-shadow: 0 24px 48px -12px rgba(185, 28, 28, 0.55);
-        }
-
-        /* --- FAQ / related-card hover recolor --- */
-        .es-pick-hover:hover { border-color: rgba(185, 28, 28, 0.35); }
-        .dark .es-pick-hover:hover { border-color: rgba(248, 113, 113, 0.3); }
-        .es-pick-hover:hover .es-pick-hover-title,
-        .es-pick-hover:hover .es-pick-hover-arrow { color: #b91c1c; }
-        .dark .es-pick-hover:hover .es-pick-hover-title,
-        .dark .es-pick-hover:hover .es-pick-hover-arrow { color: #f87171; }
-
-        /* --- The felt: fixed-dark baize table band, identical in both modes --- */
-        .es-pick-felt {
-            background-color: #093425;
-            background-image: radial-gradient(120% 100% at 50% 0%, #11543a 0%, #0a3a27 55%, #072a1c 100%);
-            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-        }
-
-        /* --- Card anatomy: faces are fixed ivory in both modes --- */
-        .es-pick-card {
-            position: relative;
-            background: linear-gradient(160deg, #fffdf6, #f3ecd8);
-            border: 1px solid #d9cfb4;
-            border-radius: 0.8rem;
-            color: #1f2937;
-            box-shadow: 0 10px 24px -12px rgba(7, 42, 28, 0.35);
-        }
-        .es-pick-index,
-        .es-pick-index-flip {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1;
-            font-weight: 900;
-            font-size: 0.85rem;
-        }
-        .es-pick-index { top: 0.6rem; left: 0.65rem; }
-        .es-pick-index-flip { bottom: 0.6rem; right: 0.65rem; transform: rotate(180deg); }
-        .es-pick-index svg,
-        .es-pick-index-flip svg { width: 0.6rem; height: 0.6rem; margin-top: 0.2rem; }
-        .es-pick-pip-red { color: #b91c1c; }
-        .es-pick-pip-black { color: #1f2937; }
-
-        /* Patterned card back: ivory frame around a baize crosshatch panel. */
-        .es-pick-back {
-            background: linear-gradient(160deg, #fffdf6, #f3ecd8);
-            border: 1px solid #d9cfb4;
-            border-radius: 0.8rem;
-            padding: 0.5rem;
-            box-shadow: 0 10px 24px -12px rgba(7, 42, 28, 0.35);
-        }
-        .es-pick-back-inner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            border-radius: 0.5rem;
-            border: 1px solid rgba(9, 52, 37, 0.35);
-            background-color: #f3ecd8;
-            background-image:
-                repeating-linear-gradient(45deg, rgba(10, 58, 39, 0.8) 0, rgba(10, 58, 39, 0.8) 2px, transparent 2px, transparent 8px),
-                repeating-linear-gradient(-45deg, rgba(185, 28, 28, 0.45) 0, rgba(185, 28, 28, 0.45) 2px, transparent 2px, transparent 8px);
-            color: #f6efe2;
-        }
-        .es-pick-back-inner svg {
-            width: 2.5rem;
-            height: 2.5rem;
-            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
-        }
-        /* Ivory medallion on the mystery backs so the "?" reads on the
-           crosshatch. */
-        .es-pick-back-badge {
+        /* The button fills with red from the hand that holds it. */
+        .mg-btn {
             display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 3.25rem;
-            height: 3.25rem;
-            border-radius: 9999px;
-            background: #f6efe2;
-            border: 1px solid rgba(9, 52, 37, 0.4);
-            color: #b91c1c;
-            font-size: 1.6rem;
-            font-weight: 900;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        /* --- Section corner-index chip (the A, 2, 3... rank device) --- */
-        .es-pick-corner {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 2.4rem;
-            height: 3.3rem;
-            line-height: 1;
-            font-weight: 900;
-            font-size: 1rem;
-        }
-        .es-pick-corner svg { width: 0.8rem; height: 0.8rem; margin-top: 0.25rem; }
-
-        /* --- Suit-symbol divider --- */
-        .es-pick-divider {
-            display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.9rem;
+            padding: 1.25rem 1.9rem 1.15rem;
+            background: linear-gradient(var(--mg-red), var(--mg-red)) 0 0 / 0% 100% no-repeat, var(--mg-ink);
+            color: var(--mg-ground);
+            font-family: var(--mg-caps);
+            font-weight: 700;
+            font-size: 0.8125rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            line-height: 1;
+            transition: background-size 0.55s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.3s ease 0.1s;
         }
-        .es-pick-divider::before,
-        .es-pick-divider::after {
-            content: "";
-            height: 1px;
-            flex: 1;
-            max-width: 9rem;
-            background: linear-gradient(to right, transparent, rgba(185, 28, 28, 0.35));
-        }
-        .es-pick-divider::after {
-            background: linear-gradient(to left, transparent, rgba(185, 28, 28, 0.35));
-        }
-        .dark .es-pick-divider::before { background: linear-gradient(to right, transparent, rgba(248, 113, 113, 0.3)); }
-        .dark .es-pick-divider::after { background: linear-gradient(to left, transparent, rgba(248, 113, 113, 0.3)); }
-        .es-pick-divider svg { width: 0.9rem; height: 0.9rem; }
-
-        /* --- Hero fan: seven card backs fanning open on the table --- */
-        .es-pick-fan {
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            width: 0;
-            height: 0;
-        }
-        .es-pick-fan-card {
-            position: absolute;
-            left: -2.25rem;
-            bottom: 0.5rem;
-            width: 4.5rem;
-            height: 6.5rem;
-            /* Origin stays on the ALWAYS-ACTIVE rule so the pivot never
-               snaps when the open animation lands. */
-            transform-origin: 50% 190%;
-            transform: rotate(var(--rot));
-        }
-        html.es-anim .es-pick-fan-card {
-            animation: es-pick-fan-open 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
-            animation-delay: var(--fd, 0s);
-        }
-        @keyframes es-pick-fan-open {
-            from { transform: rotate(0deg) translateY(26px) scale(0.92); opacity: 0; }
-            to { transform: rotate(var(--rot)) translateY(0) scale(1); opacity: 1; }
-        }
-
-        /* --- Ambient drifting suit pips in the hero --- */
-        .es-pick-float { position: absolute; color: rgba(185, 28, 28, 0.16); }
-        .es-pick-float-dim { color: rgba(31, 41, 55, 0.12); }
-        .dark .es-pick-float { color: rgba(248, 113, 113, 0.13); }
-        .dark .es-pick-float-dim { color: rgba(209, 213, 219, 0.09); }
-        .es-pick-float svg { width: 100%; height: 100%; }
-        html.es-anim .es-pick-float {
-            animation: es-pick-drift 9s ease-in-out infinite;
-            animation-delay: var(--d, 0s);
-        }
-        @keyframes es-pick-drift {
-            0%, 100% { transform: translateY(0) rotate(-6deg); }
-            50% { transform: translateY(-18px) rotate(6deg); }
-        }
-
-        /* --- Show-type marquee chips --- */
-        .es-pick-chip {
+        .mg-btn:hover { background-size: 100% 100%, auto; color: var(--mg-on-red); }
+        .mg-btn svg, .mg-link svg { width: 1.05rem; height: 1.05rem; flex: none; transition: translate 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+        .mg-btn:hover svg { translate: 0.3rem 0; }
+        .mg-link {
+            position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
-            margin: 0 0.9rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.22em;
+            gap: 0.7rem;
+            padding-block: 0.6rem 0.5rem;
+            font-family: var(--mg-caps);
+            font-weight: 700;
+            font-size: 0.8125rem;
+            letter-spacing: 0.24em;
             text-transform: uppercase;
-            white-space: nowrap;
-            color: #6b7280;
+            line-height: 1;
+            color: var(--mg-ink);
         }
-        .dark .es-pick-chip { color: #9ca3af; }
-        .es-pick-chip svg { width: 0.55rem; height: 0.55rem; opacity: 0.6; }
+        /* A hairline that a red one is drawn over, from the left. */
+        .mg-link::before,
+        .mg-link::after { content: ""; position: absolute; inset: auto 0 0 0; }
+        .mg-link::before { height: 1px; background: var(--mg-line); }
+        .mg-link::after { height: 2px; background: var(--mg-red); scale: 0 1; transform-origin: 0 50%; transition: scale 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+        .mg-link:hover::after { scale: 1 1; }
+        .mg-link:hover svg { translate: 0.3rem 0; }
+        .mg-link-down:hover svg { translate: 0 0.3rem; }
 
-        /* ==============================================================
-           The flip system. perspective, transform-origin, and the
-           transition live on ALWAYS-ACTIVE rules; only the face-down
-           pre-state is gated, so the default resting state everywhere
-           (no JS, crawlers, reduced motion, touch) is FACE UP.
-           ============================================================== */
-        .es-pick-flip { perspective: 1200px; }
-        .es-pick-flip-inner {
+        /* ---------------------------------------------------------------
+           Hero: the inversion and the vanish
+           --------------------------------------------------------------- */
+        .mg-hero { position: relative; overflow: clip; }
+        .mg-hero-in {
+            position: relative;
+            container-type: inline-size;
+            background: var(--mg-ground);
+            padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 6vw, 5.5rem);
+        }
+        @media (min-width: 1024px) {
+            .mg-hero-in { min-height: calc(94svh - 4rem - 4.5rem); display: flex; flex-direction: column; justify-content: center; }
+        }
+        .mg-act { position: absolute; top: clamp(2.5rem, 6vw, 5rem); right: 0; display: none; }
+        .mg-act b { margin-inline-end: 0.8em; color: var(--mg-red); font-weight: 700; }
+        @media (min-width: 900px) { .mg-act { display: block; } }
+        .mg-eyebrow { display: inline-block; max-width: 24rem; margin-bottom: clamp(1.75rem, 4cqi, 3.5rem); }
+        .mg-h1 { font-size: clamp(3.9rem, 18.4cqi, 16.5rem); line-height: 0.92; letter-spacing: -0.03em; }
+        #mg .mg-h1 .es-mask { padding-bottom: 0.24em; margin-bottom: -0.24em; }
+        .mg-h1 .es-mask-line { white-space: nowrap; }
+        .mg-line-2 { position: relative; z-index: 3; margin-inline-start: 0.62em; }
+        /* On a narrow stage the first line runs almost wall to wall. */
+        @container (max-width: 44rem) {
+            .mg-h1 { font-size: 22.6cqi; }
+            .mg-line-2 { margin-inline-start: 0.2em; }
+            #mg .es-spot { left: var(--mx, 81%); top: var(--my, 25%); width: 37cqi; }
+        }
+
+        /* The disc is plain white set to difference: over the ground it reads black
+           (bone at night), and any type it passes over turns inside out. The shared
+           pointer engine hands it --mx and --my; it glides there, never jumps. */
+        #mg .es-spot {
+            display: block;
+            position: absolute;
+            left: var(--mx, 79%);
+            top: var(--my, 40%);
+            z-index: 2;
+            width: clamp(11rem, 31cqi, 27rem);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: #fff;
+            mix-blend-mode: difference;
+            translate: -50% -50%;
+            opacity: 1 !important;
+            pointer-events: none;
+            transition: left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @media (hover: none) {
+            html.es-anim #mg .es-spot { animation: mg-drift 16s ease-in-out infinite alternate; }
+        }
+        @keyframes mg-drift {
+            from { translate: -80% -66%; }
+            to { translate: -24% -46%; }
+        }
+
+        /* One word leaves, in no hurry, and is back before you can say where it went. */
+        .mg-vanish { display: inline-block; transform-origin: 0 60%; }
+        html.es-anim #mg .mg-vanish { animation: mg-vanish 13s cubic-bezier(0.5, 0, 0.3, 1) 4s infinite; }
+        @keyframes mg-vanish {
+            0%, 68% { opacity: 1; filter: blur(0); transform: none; }
+            76% { opacity: 0; filter: blur(0.14em); transform: translateY(-0.12em) scaleX(1.18); }
+            86% { opacity: 0; filter: blur(0.14em); transform: translateY(0.1em) scaleX(0.9); }
+            94%, 100% { opacity: 1; filter: blur(0); transform: none; }
+        }
+
+        .mg-hero-foot {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 2rem;
+            margin-top: clamp(2rem, 5cqi, 4.5rem);
+        }
+        @media (min-width: 900px) {
+            .mg-hero-foot { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 4rem; }
+        }
+        .mg-lede { max-width: 31rem; font-size: clamp(1.15rem, 1.5vw, 1.35rem); color: var(--mg-ink-2); }
+        .mg-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem 2.25rem; }
+
+        .mg-ticker { border-block: 1px solid var(--mg-line); padding-block: 1.15rem 1rem; }
+        .mg-ticker .es-marquee-track { gap: 0; padding-right: 0; align-items: center; }
+        .mg-show { display: inline-flex; align-items: center; gap: 2.2rem; padding-inline-end: 2.2rem; white-space: nowrap; color: var(--mg-ink-2); }
+        .mg-show::after { content: ""; width: 0.42rem; aspect-ratio: 1; border-radius: 50%; background: var(--mg-red); }
+        @media (prefers-reduced-motion: reduce) {
+            .mg-ticker .es-marquee-track { row-gap: 0.75rem; }
+        }
+
+        /* ---------------------------------------------------------------
+           The gigs on the table: levitation
+           --------------------------------------------------------------- */
+        .mg-gigs { display: grid; gap: 4.5rem 2.5rem; margin-top: clamp(5rem, 9vw, 8rem); }
+        @media (min-width: 900px) { .mg-gigs { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem; } }
+        .mg-gig { position: relative; padding-bottom: 3.25rem; }
+        .mg-gig-card {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            padding: 2rem 1.9rem 2.1rem;
+            background: var(--mg-card);
+            border: 1px solid var(--mg-ink);
+            translate: 0 -0.9rem;
+            transition: translate 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+        }
+        .mg-gig-card h3 { margin-top: 1.4rem; font-size: clamp(1.9rem, 2.6vw, 2.5rem); }
+        .mg-gig-card p { margin-top: 0.9rem; color: var(--mg-ink-2); }
+        /* The shadow is its own thing on the floor: the higher the card, the smaller and fainter. */
+        .mg-floor {
+            position: absolute;
+            left: 9%;
+            right: 9%;
+            bottom: 0.6rem;
+            height: 1.6rem;
+            border-radius: 50%;
+            background: radial-gradient(closest-side, var(--mg-floor), transparent);
+            filter: blur(5px);
+            transition: scale 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.9s ease;
+        }
+        html.es-anim #mg .mg-gig-card { animation: mg-rise var(--t, 6.5s) ease-in-out var(--w, 0s) infinite alternate; }
+        html.es-anim #mg .mg-gig .mg-floor { animation: mg-shade var(--t, 6.5s) ease-in-out var(--w, 0s) infinite alternate; }
+        @keyframes mg-rise { from { translate: 0 -0.5rem; } to { translate: 0 -2.3rem; } }
+        @keyframes mg-shade { from { scale: 1; opacity: 1; } to { scale: 0.66 0.8; opacity: 0.5; } }
+        .mg-gig:hover .mg-gig-card { animation-play-state: paused; }
+        .mg-gig:hover .mg-floor { animation-play-state: paused; }
+        .mg-after { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem 2rem; margin-top: 1.75rem; padding-top: 2rem; border-top: 1px solid var(--mg-ink); color: var(--mg-ink-2); }
+
+        /* ---------------------------------------------------------------
+           The saw: a word cut through the middle, and restored
+           --------------------------------------------------------------- */
+        .mg-saw {
+            position: relative;
+            container-type: inline-size;
+            padding-block: clamp(3.5rem, 8vw, 7rem);
+            border-block: 1px solid var(--mg-line);
+            overflow: clip;
+            view-timeline: --mg-saw block;
+        }
+        .mg-saw-word {
+            position: relative;
+            width: max-content;
+            margin-inline: auto;
+            font-size: clamp(3.4rem, 19cqi, 17rem);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            white-space: nowrap;
+        }
+        .mg-saw-top { display: block; clip-path: inset(-10% -10% 48% -10%); translate: -0.045em -0.19em; }
+        .mg-saw-bot { position: absolute; inset: 0; clip-path: inset(52% -10% -20% -10%); translate: 0.045em 0.19em; }
+        .mg-saw-cap {
+            position: absolute;
+            inset: 50% 0 auto 0;
+            translate: 0 -50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            color: var(--mg-red);
+            white-space: nowrap;
+        }
+        .mg-saw-cap::before,
+        .mg-saw-cap::after { content: ""; flex: 1; height: 1px; background: var(--mg-red); }
+        @container (max-width: 44rem) {
+            .mg-saw-cap { gap: 0; font-size: 0; }
+        }
+        @supports (animation-timeline: view()) {
+            html.es-anim #mg .mg-saw-top { animation: mg-saw-up linear both; animation-timeline: --mg-saw; animation-range: entry 25% exit 75%; }
+            html.es-anim #mg .mg-saw-bot { animation: mg-saw-down linear both; animation-timeline: --mg-saw; animation-range: entry 25% exit 75%; }
+            html.es-anim #mg .mg-saw-cap { animation: mg-saw-cap linear both; animation-timeline: --mg-saw; animation-range: entry 25% exit 75%; }
+        }
+        @keyframes mg-saw-up { 0%, 14% { translate: 0 0; } 40%, 62% { translate: -0.045em -0.19em; } 90%, 100% { translate: 0 0; } }
+        @keyframes mg-saw-down { 0%, 14% { translate: 0 0; } 40%, 62% { translate: 0.045em 0.19em; } 90%, 100% { translate: 0 0; } }
+        @keyframes mg-saw-cap { 0%, 20% { opacity: 0; scale: 0.2 1; } 40%, 62% { opacity: 1; scale: 1 1; } 84%, 100% { opacity: 0; scale: 0.2 1; } }
+
+        /* ---------------------------------------------------------------
+           The deal: six flaps, face down, that turn as they arrive
+           --------------------------------------------------------------- */
+        .mg-deal { display: grid; gap: clamp(1rem, 2vw, 1.6rem); margin-top: clamp(3.5rem, 7vw, 6rem); }
+        .mg-flap { perspective: 1700px; }
+        html.es-anim #mg [data-reveal="turn"] { opacity: 1; }
+        .mg-flap-in {
             position: relative;
             transform-style: preserve-3d;
-            transform-origin: 50% 50%;
-            transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 1.5s cubic-bezier(0.2, 0.75, 0.15, 1);
+            transition-delay: 0.15s;
         }
-        .es-pick-face {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
+        html.es-anim #mg [data-reveal="turn"]:not(.is-revealed) .mg-flap-in { transform: rotateX(-180deg); }
+        .mg-flap-face,
+        .mg-flap-back { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+        .mg-flap-face {
+            display: grid;
+            gap: 1.25rem;
+            padding: 2rem 1.6rem 2.1rem;
+            background: var(--mg-card);
+            border: 1px solid var(--mg-ink);
         }
-        .es-pick-face-back {
+        @media (min-width: 900px) {
+            .mg-flap-face {
+                grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+                align-items: center;
+                gap: 2.5rem;
+                padding: 2.6rem 3rem 2.7rem 2.6rem;
+            }
+        }
+        .mg-flap-no { font-size: clamp(2.2rem, 3.6vw, 3.4rem); color: var(--mg-ink-3); line-height: 1; }
+        .mg-flap-face h3 { font-size: clamp(1.9rem, 3vw, 2.8rem); }
+        .mg-flap-face p { margin-top: 0.75rem; max-width: 40rem; color: var(--mg-ink-2); }
+        .mg-flap-back {
+            position: absolute;
+            inset: 0;
+            transform: rotateX(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-inline: clamp(1.6rem, 4vw, 3rem);
+            background: var(--mg-ink);
+            color: var(--mg-ground);
+            box-shadow: inset 0 0 0 0.6rem var(--mg-ink), inset 0 0 0 calc(0.6rem + 1px) color-mix(in srgb, var(--mg-ground) 45%, transparent);
+        }
+        .mg-flap-back .mg-k { color: inherit; opacity: 0.8; }
+        .mg-flap-back .mg-k:last-child { rotate: 180deg; }
+        .mg-flap-back i { width: 0.9rem; aspect-ratio: 1; border-radius: 50%; background: var(--mg-red); }
+
+        /* ---------------------------------------------------------------
+           Pick a card: the turn, and the card comes back marked
+           --------------------------------------------------------------- */
+        .mg-pick { display: grid; gap: 2.5rem 2rem; max-width: 25rem; margin: clamp(3.5rem, 7vw, 6rem) auto 0; }
+        @media (min-width: 900px) { .mg-pick { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; max-width: 64rem; margin-inline: auto; } }
+        .mg-pcard { position: relative; display: block; perspective: 1500px; padding-bottom: 2.75rem; }
+        .mg-pcard-in {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.1s cubic-bezier(0.25, 0.8, 0.2, 1), translate 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+        }
+        @media (min-width: 900px) { .mg-pcard-in { aspect-ratio: 5 / 7; } }
+        .mg-pcard-face,
+        .mg-pcard-back { -webkit-backface-visibility: hidden; backface-visibility: hidden; border: 1px solid var(--mg-ink); }
+        .mg-pcard-face {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 1.9rem 1.75rem 1.75rem;
+            background: var(--mg-card);
+        }
+        .mg-pcard-face h3 { margin-top: 1.25rem; font-size: clamp(1.9rem, 2.5vw, 2.4rem); }
+        .mg-pcard-face p { margin-block: 0.9rem 1.75rem; color: var(--mg-ink-2); font-size: 1.0625rem; }
+        .mg-pcard-go { margin-top: auto; align-self: flex-start; }
+        .mg-pcard:hover .mg-pcard-go::after { scale: 1 1; }
+        .mg-pcard:hover .mg-pcard-go svg { translate: 0.3rem 0; }
+        .mg-pcard-back {
             position: absolute;
             inset: 0;
             transform: rotateY(180deg);
+            display: grid;
+            place-items: center;
+            background: var(--mg-ink);
+            box-shadow: inset 0 0 0 0.7rem var(--mg-ink), inset 0 0 0 calc(0.7rem + 1px) color-mix(in srgb, var(--mg-ground) 45%, transparent);
         }
-
-        /* Scroll-dealt cards: page-local data-reveal token. The shared
-           base rule handles opacity + --reveal-delay; the transforms
-           below are this page's. Deal cards are standalone [data-reveal]
-           elements with inline delays (never inside data-reveal-group,
-           which clobbers inline delays) and never carry data-tilt. */
-        html.es-anim [data-reveal="deal"] { transform: translateY(20px); }
-        html.es-anim [data-reveal="deal"]:not(.is-revealed) .es-pick-flip-inner { transform: rotateY(180deg); }
-
-        /* Pick-a-card choice cards: face down only for hover-capable,
-           motion-enabled visitors; hover or keyboard focus turns them. */
-        @media (hover: hover) {
-            html.es-anim .es-pick-choice .es-pick-flip-inner { transform: rotateY(180deg); }
-            html.es-anim .es-pick-choice:hover .es-pick-flip-inner,
-            html.es-anim .es-pick-choice:focus-visible .es-pick-flip-inner { transform: rotateY(0deg); }
+        .mg-pcard-back i { position: absolute; width: 3.4rem; aspect-ratio: 1; border-radius: 50%; }
+        .mg-pcard-ring { border: 1px solid color-mix(in srgb, var(--mg-ground) 70%, transparent); }
+        /* The latch: the mark arrives at once and takes a very long time to think
+           about leaving, so a card you have looked at comes back with a red spot. */
+        .mg-pcard-mark { background: var(--mg-red); opacity: 0; scale: 0.4; transition: opacity 0s linear 99999s, scale 0s linear 99999s; }
+        .mg-pcard:hover .mg-pcard-mark,
+        .mg-pcard:focus-visible .mg-pcard-mark { opacity: 1; scale: 1; transition-delay: 0s; }
+        @media (hover: hover) and (pointer: fine) {
+            html.es-anim #mg .mg-pcard:not(:hover):not(:focus-visible) .mg-pcard-in { transform: rotateY(180deg); }
+            html.es-anim #mg .mg-pcard:hover .mg-pcard-in,
+            html.es-anim #mg .mg-pcard:focus-visible .mg-pcard-in { translate: 0 -1rem; }
+            html.es-anim #mg .mg-pcard:hover .mg-floor,
+            html.es-anim #mg .mg-pcard:focus-visible .mg-floor { scale: 0.74 0.8; opacity: 0.55; }
         }
+        .mg-pick-foot { margin: clamp(3rem, 5vw, 4.5rem) auto 0; max-width: 40rem; text-align: center; color: var(--mg-ink-2); }
 
-        /* Finale card: turns face up ~1s after the panel reveal lands. */
-        .es-pick-finale-flip { perspective: 1200px; }
-        .es-pick-finale-inner {
+        /* ---------------------------------------------------------------
+           The routine: three solid rings, linked
+           --------------------------------------------------------------- */
+        .mg-rings {
+            --mg-d: clamp(5.4rem, 22vw, 13.5rem);
+            --mg-pitch: calc(var(--mg-d) * 0.73);
             position: relative;
-            transform-style: preserve-3d;
-            transform-origin: 50% 50%;
-            transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.9s;
+            width: calc(var(--mg-d) * 3.4);
+            max-width: 100%;
+            height: var(--mg-d);
+            margin: clamp(3.5rem, 7vw, 6rem) auto 0;
+            view-timeline: --mg-rings block;
         }
-        html.es-anim [data-reveal] .es-pick-finale-inner { transform: rotateY(180deg); }
-        html.es-anim [data-reveal].is-revealed .es-pick-finale-inner { transform: rotateY(0deg); }
-
-        /* The signed card's red-ink signature. */
-        .es-pick-sign {
-            font-style: italic;
-            font-weight: 800;
-            color: #b91c1c;
-            transform: rotate(-4deg);
-            overflow-wrap: anywhere;
+        .mg-ring {
+            position: absolute;
+            top: 0;
+            left: calc(50% - var(--mg-d) / 2 + (var(--i) - 1) * var(--mg-pitch));
+            width: var(--mg-d);
+            height: var(--mg-d);
+            display: grid;
+            place-items: center;
+            font-size: calc(var(--mg-d) * 0.36);
+            color: var(--c, var(--mg-ink));
         }
-
-        /* --- Emerald recolor of the shared cursor spotlight in the hero --- */
-        .es-hero .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(5, 150, 105, 0.1), transparent 60%);
+        .mg-ring::before,
+        .mg-ring::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: max(3px, calc(var(--mg-d) * 0.028)) solid var(--c, var(--mg-ink));
         }
-        .dark .es-hero .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(52, 211, 153, 0.12), transparent 60%);
-        }
-
-        /* --- Reduced motion: every card rests face up and readable --- */
-        @media (prefers-reduced-motion: reduce) {
-            .es-pick-fan-card,
-            .es-pick-float { animation: none !important; }
-            .es-pick-flip-inner,
-            .es-pick-finale-inner {
-                transition: none !important;
-                transform: none !important;
+        /* Each ring is drawn twice: whole, and again as its upper right quarter laid
+           over the next ring. Over at the top, under at the bottom: linked. */
+        .mg-ring::before { z-index: calc(var(--i) + 1); }
+        .mg-ring::after { z-index: calc(var(--i) + 5); clip-path: inset(0 0 50% 50%); }
+        @supports (animation-timeline: view()) {
+            html.es-anim #mg .mg-rings {
+                animation: mg-link linear both;
+                animation-timeline: --mg-rings;
+                animation-range: entry 10% cover 48%;
             }
+        }
+        @keyframes mg-link {
+            from { --mg-pitch: calc(var(--mg-d) * 1.2); }
+            to { --mg-pitch: calc(var(--mg-d) * 0.73); }
+        }
+        .mg-moves { display: grid; gap: 3rem 3.5rem; margin-top: clamp(3.5rem, 6vw, 5.5rem); }
+        @media (min-width: 900px) { .mg-moves { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .mg-move { padding-top: 1.5rem; border-top: 1px solid var(--mg-ink); }
+        .mg-move h3 { margin-top: 1rem; font-size: clamp(1.9rem, 2.6vw, 2.5rem); }
+        .mg-move p { margin-top: 0.8rem; color: var(--mg-ink-2); }
+
+        /* ---------------------------------------------------------------
+           Sleight of hand: lights down. Black in both modes; the words
+           are there all along, and only show in the light you carry.
+           --------------------------------------------------------------- */
+        .mg-stage {
+            position: relative;
+            overflow: clip;
+            background-color: #0b0b0c;
+            color: #f1ede4;
+        }
+        .mg-stage::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--sx, 50%) var(--sy, 40%), #f6f4ef 0, #f6f4ef 8.5rem, rgba(246, 244, 239, 0) 18rem);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        .mg-stage.is-dark::before { opacity: 1; }
+        .mg-stage > .mg-wrap { position: relative; }
+        .mg-stage .mg-k { color: #9a968e; }
+        .mg-stage .mg-sub, .mg-stage .mg-unseen p { color: #c9c5bc; }
+        .mg-stage .mg-red { color: #f0443a; }
+        .mg-stage .mg-k,
+        .mg-stage .mg-h2,
+        .mg-stage .mg-red,
+        .mg-stage .mg-sub,
+        .mg-stage .mg-unseen,
+        .mg-stage .mg-unseen p,
+        .mg-stage .mg-unseen-no { transition: color 0.8s ease, border-color 0.8s ease; }
+        .mg-stage.is-dark .mg-k,
+        .mg-stage.is-dark .mg-h2,
+        .mg-stage.is-dark .mg-sub,
+        .mg-stage.is-dark .mg-unseen,
+        .mg-stage.is-dark .mg-unseen p { color: #0b0b0c; }
+        .mg-stage.is-dark .mg-red,
+        .mg-stage.is-dark .mg-unseen-no { color: #c8102e; }
+        .mg-stage.is-dark .mg-unseen { border-color: #0b0b0c; }
+        .mg-stage-head { display: grid; gap: 2rem; align-items: end; }
+        @media (min-width: 900px) { .mg-stage-head { grid-template-columns: minmax(0, 1fr) auto; } }
+        .mg-lights {
+            justify-self: start;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.95rem 1.2rem 0.85rem;
+            background: #f1ede4;
+            color: #0b0b0c;
+            font-family: var(--mg-caps);
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .mg-lights[hidden] { display: none; }
+        .mg-lights i { width: 0.6rem; aspect-ratio: 1; border-radius: 50%; border: 1px solid #0b0b0c; }
+        .mg-lights[aria-pressed="true"] i { background: #c8102e; border-color: #c8102e; }
+        #mg .mg-stage .mg-lights:focus-visible { outline-color: #f0443a; }
+        .mg-unseens { display: grid; gap: 0 3.5rem; margin-top: clamp(3.5rem, 6vw, 5.5rem); }
+        @media (min-width: 720px) { .mg-unseens { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1100px) { .mg-unseens { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .mg-unseen { padding-block: 1.75rem 2.6rem; border-top: 1px solid rgba(241, 237, 228, 0.3); }
+        .mg-stage .mg-unseen-no { color: #f0443a; }
+        .mg-unseen h3 { margin-top: 0.9rem; font-size: clamp(1.7rem, 2.2vw, 2.1rem); }
+        .mg-unseen p { margin-top: 0.7rem; font-size: 1.0625rem; }
+        .mg-stage-hint { margin-top: 1.5rem; color: #f0443a; visibility: hidden; }
+        .mg-stage.can-dark .mg-stage-hint { visibility: visible; }
+
+        /* ---------------------------------------------------------------
+           Every kind of act: the bill
+           --------------------------------------------------------------- */
+        .mg-bill { display: grid; margin-top: clamp(3.5rem, 6vw, 5.5rem); border-top: 1px solid var(--mg-ink); }
+        @media (min-width: 900px) { .mg-bill { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 5rem; } }
+        .mg-act-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: 2.6rem minmax(0, 1fr);
+            gap: 0.5rem 1.25rem;
+            padding-block: 2rem 2.2rem;
+            border-bottom: 1px solid var(--mg-line);
+        }
+        .mg-act-row .mg-k { padding-top: 0.9rem; }
+        .mg-act-row h3 { font-size: clamp(2rem, 3vw, 2.9rem); transition: translate 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+        .mg-act-row p { grid-column: 2; max-width: 30rem; color: var(--mg-ink-2); }
+        .mg-act-row a { grid-column: 2; justify-self: start; margin-top: 0.6rem; }
+        /* A small production: the red ball was not there, and then it is. */
+        .mg-act-row::before {
+            content: "";
+            position: absolute;
+            left: 3.85rem;
+            top: 2.95rem;
+            width: 0.7rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: var(--mg-red);
+            scale: 0;
+            transition: scale 0.5s cubic-bezier(0.3, 1.5, 0.5, 1);
+        }
+        .mg-act-row:hover::before { scale: 1; }
+        .mg-act-row:hover h3 { translate: 1.5rem 0; }
+
+        /* ---------------------------------------------------------------
+           The programme: key features
+           --------------------------------------------------------------- */
+        .mg-prog-grid { display: grid; gap: 2.5rem 5rem; align-items: start; }
+        @media (min-width: 960px) { .mg-prog-grid { grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr); } }
+        .mg-prog { border-top: 1px solid var(--mg-ink); }
+        .mg-prog a {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 0.4rem 1.5rem;
+            padding-block: 1.6rem 1.7rem;
+            border-bottom: 1px solid var(--mg-line);
+        }
+        .mg-prog strong { font-family: var(--mg-display); font-weight: 400; font-size: clamp(1.9rem, 2.8vw, 2.6rem); line-height: 1; letter-spacing: -0.015em; transition: color 0.4s ease; }
+        .mg-prog small { grid-column: 1; font-size: 1.0625rem; color: var(--mg-ink-2); }
+        .mg-prog svg { grid-row: 1 / span 2; grid-column: 2; width: 1.6rem; height: 1.6rem; transition: translate 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.4s ease; }
+        .mg-prog a:hover strong, .mg-prog a:hover svg { color: var(--mg-red); }
+        .mg-prog a:hover svg { translate: 0.5rem 0; }
+        .mg-prog-more { margin-top: 2rem; }
+
+        /* ---------------------------------------------------------------
+           The plan band and the closing strip are shared partials. They
+           keep their words and their prices; only the dress changes.
+           --------------------------------------------------------------- */
+        #mg .mg-plans > section { background: var(--mg-ground-2); }
+        #mg .mg-plans h2 { font-family: var(--mg-display); font-weight: 400; letter-spacing: -0.015em; line-height: 1; font-size: clamp(2.4rem, 5vw, 4.2rem); color: var(--mg-ink); }
+        #mg .mg-plans h2 + p { color: var(--mg-ink-2); font-size: 1.125rem; }
+        #mg .mg-plans .grid > div { background: var(--mg-card); border: 1px solid var(--mg-ink); border-radius: 0; box-shadow: none; color: var(--mg-ink); }
+        #mg .mg-plans .grid > div:hover { box-shadow: 0 1.6rem 1.6rem -1.5rem var(--mg-floor); }
+        #mg .mg-plans .grid > div:nth-child(2) { outline: 1px solid var(--mg-red); outline-offset: -0.5rem; }
+        #mg .mg-plans .grid > div span,
+        #mg .mg-plans .grid > div p,
+        #mg .mg-plans .grid > div li { color: var(--mg-ink-2); }
+        #mg .mg-plans .grid > div .text-3xl { font-family: var(--mg-display); font-weight: 400; font-size: 3.2rem; letter-spacing: -0.02em; color: var(--mg-ink); }
+        #mg .mg-plans .grid > div .uppercase { font-family: var(--mg-caps); letter-spacing: 0.24em; color: var(--mg-ink); }
+        #mg .mg-plans .grid > div .rounded-full { background: var(--mg-red); color: var(--mg-on-red); border-radius: 0; font-family: var(--mg-caps); letter-spacing: 0.14em; }
+        #mg .mg-plans .grid > div svg { color: var(--mg-red); }
+        #mg .mg-plans a.font-medium { color: var(--mg-ink); font-family: var(--mg-caps); font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.2em; text-transform: uppercase; border-bottom: 1px solid var(--mg-red); padding-bottom: 0.3rem; }
+        #mg .mg-plans a.rounded-2xl { background: var(--mg-ink); color: var(--mg-ground); border-radius: 0; box-shadow: none; font-family: var(--mg-caps); font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.24em; text-transform: uppercase; padding: 1.25rem 1.9rem 1.15rem; }
+        #mg .mg-plans a.rounded-2xl:hover { background: var(--mg-red); color: var(--mg-on-red); transform: none; }
+
+        #mg .mg-keep > section { background: var(--mg-ground); border-top: 1px solid var(--mg-line); }
+        #mg .mg-keep h2 { font-family: var(--mg-display); font-weight: 400; letter-spacing: -0.015em; font-size: clamp(2.2rem, 4vw, 3.2rem); line-height: 1; color: var(--mg-ink); }
+        #mg .mg-keep p.uppercase { font-family: var(--mg-caps); font-weight: 700; letter-spacing: 0.3em; font-size: 0.75rem; color: var(--mg-red); }
+        #mg .mg-keep .grid > a { background: var(--mg-card); border: 1px solid var(--mg-ink); border-radius: 0; }
+        #mg .mg-keep .grid > a:hover { border-color: var(--mg-ink); box-shadow: 0 1.6rem 1.6rem -1.5rem var(--mg-floor); }
+        #mg .mg-keep .grid > a > span:first-child { display: none; }
+        #mg .mg-keep .grid > a h3 { font-family: var(--mg-display); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: var(--mg-ink); }
+        #mg .mg-keep .grid > a p { color: var(--mg-ink-2); }
+        #mg .mg-keep .grid > a > span:last-child,
+        #mg .mg-keep a.self-start { color: var(--mg-red); }
+
+        /* ---------------------------------------------------------------
+           Also on the bill: related pages
+           --------------------------------------------------------------- */
+        .mg-others-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1.5rem; }
+        .mg-others { display: grid; margin-top: clamp(2.5rem, 5vw, 4rem); border-top: 1px solid var(--mg-ink); }
+        @media (min-width: 700px) { .mg-others { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1100px) { .mg-others { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .mg-others a { display: grid; gap: 0.8rem; align-content: space-between; padding: 1.75rem 1.5rem 1.6rem 0; border-bottom: 1px solid var(--mg-line); }
+        @media (min-width: 700px) {
+            .mg-others a { min-height: 11rem; padding-inline: 1.75rem; border-inline-start: 1px solid var(--mg-line); }
+            .mg-others a:nth-child(odd) { padding-inline-start: 0; border-inline-start: 0; }
+        }
+        @media (min-width: 1100px) {
+            .mg-others a:nth-child(odd) { padding-inline-start: 1.75rem; border-inline-start: 1px solid var(--mg-line); }
+            .mg-others a:first-child { padding-inline-start: 0; border-inline-start: 0; }
+        }
+        .mg-others strong { font-family: var(--mg-display); font-weight: 400; font-size: clamp(1.8rem, 2.4vw, 2.3rem); line-height: 1.02; letter-spacing: -0.015em; text-wrap: balance; transition: color 0.4s ease; }
+        .mg-others a:hover strong { color: var(--mg-red); }
+
+        /* ---------------------------------------------------------------
+           The secrets we can tell: questions
+           --------------------------------------------------------------- */
+        .mg-faq-grid { display: grid; gap: 3rem 5rem; align-items: start; }
+        @media (min-width: 1000px) {
+            .mg-faq-grid { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); }
+            .mg-faq-head { position: sticky; top: 7rem; }
+        }
+        .mg-faq-head .mg-h2 { margin-block: 1.5rem 1.4rem; font-size: clamp(2.6rem, 4.8vw, 4.5rem); }
+        .mg-qa { border-top: 1px solid var(--mg-ink); }
+        .mg-qa details { border-bottom: 1px solid var(--mg-line); }
+        .mg-qa summary { display: grid; grid-template-columns: minmax(0, 1fr) 1.1rem; align-items: center; gap: 1.5rem; padding-block: 1.6rem 1.5rem; cursor: pointer; }
+        .mg-qa h3 { font-family: var(--mg-display); font-size: clamp(1.45rem, 2vw, 1.8rem); line-height: 1.15; letter-spacing: -0.01em; }
+        /* An empty ring that is somehow holding the ball when the answer opens. */
+        .mg-qa summary i { width: 1.1rem; aspect-ratio: 1; border-radius: 50%; border: 1px solid var(--mg-ink); background: radial-gradient(circle, var(--mg-red) 0 99%, transparent 100%) center / 0% 0% no-repeat; transition: background-size 0.5s cubic-bezier(0.3, 1.5, 0.5, 1), border-color 0.4s ease; }
+        .mg-qa details[open] summary i { background-size: 100% 100%; border-color: var(--mg-red); }
+        .mg-qa details p { max-width: 46rem; padding-bottom: 2rem; color: var(--mg-ink-2); }
+
+        /* ---------------------------------------------------------------
+           The prestige: black in both modes, one white card, signed
+           --------------------------------------------------------------- */
+        .mg-prestige { position: relative; overflow: clip; background-color: #0b0b0c; color: #f1ede4; padding-block: clamp(5.5rem, 12vw, 10.5rem); }
+        .mg-prestige .mg-k { color: #9a968e; }
+        .mg-prestige .mg-red { color: #f0443a; }
+        /* The one column is minmax(0, 1fr), not auto: the signature never wraps, so a long name
+           typed on a phone widened an auto track and pushed the text and the box off the side. */
+        .mg-prestige-in { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3.5rem; }
+        @media (min-width: 1000px) {
+            .mg-prestige-in { grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); grid-template-rows: auto auto; column-gap: 5rem; row-gap: 3rem; align-items: start; }
+            .mg-yours { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+        }
+        .mg-prestige .mg-h2 { margin-top: 1.5rem; font-size: clamp(3.2rem, 8.4vw, 8.2rem); }
+        .mg-prestige .mg-sub { margin-top: 1.75rem; color: #c9c5bc; }
+        /* The iris is cut into the CHILDREN, never into the element the reveal observer watches:
+           Chrome counts an element's own clip-path when it asks whether the element is on screen,
+           so a watched element clipped to nothing is never seen and never revealed. */
+        #mg [data-reveal="appear"] { transition: opacity 0.6s ease 0.2s; }
+        #mg [data-reveal="appear"] > * { clip-path: circle(150% at 50% 50%); transition: clip-path 1.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s; }
+        html.es-anim #mg [data-reveal="appear"]:not(.is-revealed) > * { clip-path: circle(0% at 50% 50%); }
+        .mg-claim-form { display: grid; gap: 1rem; }
+        .mg-claim-row { display: grid; gap: 1rem; }
+        @media (min-width: 620px) { .mg-claim-row { grid-template-columns: minmax(0, 1fr) auto; } }
+        /* Where the finale first goes to two columns the left one cannot hold the box and the
+           button side by side: the name was left 12px at 1000 wide and 26px at 1024. */
+        @media (min-width: 1000px) and (max-width: 1199px) { .mg-claim-row { grid-template-columns: minmax(0, 1fr); } }
+        #mg .mg-claim {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            padding: 1rem 1.2rem;
+            border: 1px solid rgba(241, 237, 228, 0.55);
+            background: transparent;
+            font-size: 1.125rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #mg .mg-claim:focus-within { border-color: #f1ede4; box-shadow: 0 0 0 3px rgba(240, 68, 58, 0.55); }
+        #mg .mg-claim input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            background: transparent;
+            padding-inline: 0;
+            text-align: right;
+            font: inherit;
+            color: #f1ede4;
+            box-shadow: none;
+            outline: none;
+        }
+        #mg .mg-claim input::placeholder { color: #9a968e; }
+        .mg-claim span { flex: none; color: #9a968e; user-select: none; }
+        #mg .mg-prestige .mg-btn { background: linear-gradient(#f0443a, #f0443a) 0 0 / 0% 100% no-repeat, #f1ede4; color: #0b0b0c; }
+        #mg .mg-prestige .mg-btn:hover { background-size: 100% 100%, auto; color: #0b0b0c; }
+        #mg .mg-prestige a:focus-visible, #mg .mg-prestige input:focus-visible { outline-color: #f0443a; }
+        .mg-note { color: #9a968e; font-size: 1rem; }
+        .mg-yours { position: relative; width: min(78%, 21rem); margin-inline: auto; padding-bottom: 3.5rem; }
+        .mg-yours-card {
+            position: relative;
+            z-index: 1;
+            aspect-ratio: 5 / 7;
+            display: flex;
+            flex-direction: column;
+            padding: 1.6rem 1.5rem 1.5rem;
+            background: #f6f4ef;
+            color: #0b0b0c;
+            rotate: -4deg;
+            translate: 0 -1.2rem;
+        }
+        .mg-yours-card .mg-k { color: #605e5a; }
+        .mg-yours-card i { align-self: flex-end; margin-top: -1rem; width: 1rem; aspect-ratio: 1; border-radius: 50%; background: #c8102e; }
+        .mg-sign-box { margin-block: auto; min-width: 0; text-align: center; }
+        .mg-sign {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            padding: 0.1em 0.12em 0.05em;
+            font-family: var(--mg-hand);
+            font-size: clamp(2.6rem, 9vw, 3.9rem);
+            line-height: 1.05;
+            color: #c8102e;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            rotate: -5deg;
+        }
+        .mg-sign.is-writing { animation: mg-write 0.5s cubic-bezier(0.3, 0.6, 0.3, 1); }
+        @keyframes mg-write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+        .mg-sign-line { display: block; height: 1px; margin-top: 0.4rem; background: rgba(11, 11, 12, 0.3); }
+        .mg-yours-url { display: block; margin-top: 0.6rem; font-size: 0.95rem; color: #605e5a; }
+        .mg-yours .mg-floor { background: radial-gradient(closest-side, rgba(241, 237, 228, 0.22), transparent); left: 12%; right: 12%; }
+        html.es-anim #mg .mg-yours-card { animation: mg-hang 7s ease-in-out infinite alternate; }
+        html.es-anim #mg .mg-yours .mg-floor { animation: mg-shade 7s ease-in-out infinite alternate; }
+        @keyframes mg-hang { from { translate: 0 -0.6rem; } to { translate: 0 -2.4rem; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            #mg .es-spot,
+            .mg-btn, .mg-btn svg, .mg-link::after, .mg-link svg,
+            .mg-flap-in, .mg-pcard-in, .mg-gig-card, .mg-floor,
+            .mg-act-row::before, .mg-act-row h3, .mg-prog svg,
+            .mg-stage::before, .mg-qa summary i,
+            #mg [data-reveal="appear"], #mg [data-reveal="appear"] > * { transition: none; }
+            .mg-sign.is-writing { animation: none; }
         }
     </style>
 
     @php
-        $suitSpade = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C9.5 5.5 4 9.3 4 13a4 4 0 0 0 6.2 3.3C9.9 18 9 19.6 7.5 21h9c-1.5-1.4-2.4-3-2.7-4.7A4 4 0 0 0 20 13c0-3.7-5.5-7.5-8-11z"/></svg>';
-        $suitHeart = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21C6.5 16.5 2 12.8 2 8.6 2 5.9 4.1 4 6.7 4 8.8 4 10.6 5.2 12 7c1.4-1.8 3.2-3 5.3-3C19.9 4 22 5.9 22 8.6c0 4.2-4.5 7.9-10 12.4z"/></svg>';
-        $suitDiamond = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l7 10-7 10-7-10z"/></svg>';
-        $suitClub = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a4 4 0 0 0-3.1 6.5A4 4 0 1 0 11 15.4c-.2 2-.9 4.1-2.5 5.6h7c-1.6-1.5-2.3-3.6-2.5-5.6a4 4 0 1 0 2.1-6.9A4 4 0 0 0 12 2z"/></svg>';
-        $suits = ['spade' => $suitSpade, 'heart' => $suitHeart, 'diamond' => $suitDiamond, 'club' => $suitClub];
+        $mgArrow = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16m0 0l-6-6m6 6l-6 6" /></svg>';
+        $mgDown = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m0 0l-6-6m6 6l6-6" /></svg>';
+        $mgRoman = ['I', 'II', 'III', 'IV', 'V', 'VI'];
     @endphp
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: the table (A of spades)                             -->
-    <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-[#fdfbf4] py-16 dark:bg-[#0b0f0c] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.26), rgba(16, 185, 129, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(220, 38, 38, 0.2), rgba(220, 38, 38, 0) 65%);"></div>
-            <div class="es-spot absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <div class="es-pick-float left-[10%] top-[22%] h-8 w-8" style="--d: 0s;">{!! $suitHeart !!}</div>
-            <div class="es-pick-float es-pick-float-dim left-[84%] top-[18%] h-10 w-10" style="--d: 2.2s;">{!! $suitSpade !!}</div>
-            <div class="es-pick-float left-[88%] top-[62%] h-7 w-7" style="--d: 4.1s;">{!! $suitDiamond !!}</div>
-            <div class="es-pick-float es-pick-float-dim left-[7%] top-[66%] h-9 w-9" style="--d: 5.6s;">{!! $suitClub !!}</div>
-        </div>
+    <div id="mg">
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
-                    <span class="inline-flex h-5 w-5 items-center justify-center text-red-700 dark:text-red-400" aria-hidden="true">{!! $suitHeart !!}</span>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event schedule for magicians, mentalists, and illusionists</span>
-                </x-marketing.hero-eyebrow>
-                <span class="es-mask"><span class="es-mask-line">Pick a card.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-pick-red">Any card.</span></span></span>
-            </h1>
+        <!-- ============================================================ -->
+        <!-- 1. Hero: the inversion, and one word that vanishes           -->
+        <!-- ============================================================ -->
+        <section class="mg-hero es-hero" id="top">
+            <div class="mg-wrap mg-hero-in">
+                <div class="es-spot" aria-hidden="true"></div>
+                <p class="mg-k mg-act es-fade-up es-d-1" aria-hidden="true"><b>I</b>The pledge</p>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-                Every magic show, residency, and private booking on one schedule link. Planners request a booking from it. Fans never miss the reveal.
-            </p>
+                <h1 class="mg-d mg-h1">
+                    <x-marketing.hero-eyebrow class="mg-k mg-eyebrow es-fade-up es-d-1">
+                        Event schedule for magicians, mentalists, and illusionists
+                    </x-marketing.hero-eyebrow>
+                    <span class="es-mask"><span class="es-mask-line">Pick a card.</span></span>
+                    <span class="es-mask es-mask-2 mg-line-2"><span class="es-mask-line"><span class="mg-red"><span class="mg-vanish" data-contrast-skip>Any</span> card.</span></span></span>
+                </h1>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#deal" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the deal
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="es-pick-btn group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                    Create your schedule
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- The deck fans open on the table -->
-            <div class="es-fade-up es-d-4 relative mx-auto mt-10 h-36 w-full max-w-md" aria-hidden="true">
-                <div class="es-pick-fan">
-                    @foreach (['-36deg' => '0s', '-24deg' => '0.06s', '-12deg' => '0.12s', '0deg' => '0.18s', '12deg' => '0.24s', '24deg' => '0.3s', '36deg' => '0.36s'] as $rot => $fd)
-                        <div class="es-pick-fan-card es-pick-back" style="--rot: {{ $rot }}; --fd: {{ $fd }};">
-                            <div class="es-pick-back-inner"></div>
-                        </div>
-                    @endforeach
+                <div class="mg-hero-foot">
+                    <p class="mg-lede es-fade-up es-d-2">
+                        Every magic show, residency, and private booking on one schedule link. Planners request a booking from it. Fans never miss the reveal.
+                    </p>
+                    <div class="mg-cta es-fade-up es-d-3">
+                        <a href="#deal" class="mg-link mg-link-down">
+                            See the deal
+                            {!! $mgDown !!}
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="mg-btn">
+                            Create your schedule
+                            {!! $mgArrow !!}
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <!-- Show-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-6 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1">
-                        <div class="es-marquee-track">
-                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
-                                @foreach ([['Close-Up', 'heart'], ['Parlor', 'spade'], ['Stage', 'diamond'], ['Corporate', 'club'], ['Weddings', 'heart'], ['Kids Shows', 'spade'], ['Mentalism', 'diamond'], ['Trade Shows', 'club'], ['Street Magic', 'heart'], ['Cruise Ships', 'spade']] as [$chip, $chipSuit])
-                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-pick-chip">{{ $chip }} <span class="@if (in_array($chipSuit, ['heart', 'diamond'])) text-red-700 dark:text-red-400 @endif" aria-hidden="true">{!! $suits[$chipSuit] !!}</span></span>
-                                @endforeach
-                            @endfor
-                        </div>
+            <div class="mg-ticker es-fade-up es-d-4">
+                <div class="es-marquee" data-marquee="1">
+                    <div class="es-marquee-track">
+                        @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                            @foreach (['Close-Up', 'Parlor', 'Stage', 'Corporate', 'Weddings', 'Kids Shows', 'Mentalism', 'Trade Shows', 'Street Magic', 'Cruise Ships'] as $chip)
+                                <span @if ($chipCopy === 1) aria-hidden="true" @endif class="mg-k mg-show">{{ $chip }}</span>
+                            @endforeach
+                        @endfor
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 2. The stakes: the gigs on the table (felt band, 2 of hearts) -->
-    <!-- ============================================================ -->
-    <section id="stakes" class="relative scroll-mt-24 bg-[#fdfbf4] px-2 py-14 dark:bg-[#0b0f0c] sm:px-4 lg:py-20">
-        <div class="es-pick-felt noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="grid-overlay absolute inset-0 opacity-20"></div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-pick-card es-pick-corner es-pick-pip-red mb-6" data-reveal aria-hidden="true">
-                        <span>2</span>
-                        {!! $suitHeart !!}
-                    </div>
-                    <p class="es-pick-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gigs on the table</p>
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Your next three gigs live in three inboxes. <span class="es-pick-red-lit">Deal them onto one table.</span>
+        <!-- ============================================================ -->
+        <!-- 2. The stakes: three gigs, hanging in the air                -->
+        <!-- ============================================================ -->
+        <section id="stakes" class="mg-section" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-head">
+                    <p class="mg-k" data-reveal>The gigs on the table</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Your next three gigs live in three inboxes. <span class="mg-red">Deal them onto one table.</span>
                     </h2>
                 </div>
 
-                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
-                    <div class="es-pick-card -rotate-2 p-6 pt-9 text-center" data-reveal="panel">
-                        <div class="es-pick-index es-pick-pip-black" aria-hidden="true"><span>?</span>{!! $suitSpade !!}</div>
-                        <div class="es-pick-index-flip es-pick-pip-black" aria-hidden="true"><span>?</span>{!! $suitSpade !!}</div>
-                        <h3 class="mb-2 text-lg font-bold">The corporate inquiry</h3>
-                        <p class="text-sm text-gray-600">Sitting in an email thread from three weeks ago. Subject line: Re: Re: Fwd: Holiday party?</p>
+                <div class="mg-gigs" data-reveal-group="140">
+                    <div class="mg-gig" data-reveal style="--t: 6.2s; --w: 0s;">
+                        <div class="mg-gig-card">
+                            <span class="mg-k" aria-hidden="true">Inbox one &middot; Email</span>
+                            <h3 class="mg-d">The corporate inquiry</h3>
+                            <p>Sitting in an email thread from three weeks ago. Subject line: Re: Re: Fwd: Holiday party?</p>
+                        </div>
+                        <i class="mg-floor" aria-hidden="true"></i>
                     </div>
-                    <div class="es-pick-card p-6 pt-9 text-center" data-reveal="panel">
-                        <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>?</span>{!! $suitHeart !!}</div>
-                        <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>?</span>{!! $suitHeart !!}</div>
-                        <h3 class="mb-2 text-lg font-bold">The wedding close-up set</h3>
-                        <p class="text-sm text-gray-600">An Instagram DM you starred so you would not lose it. You lost it.</p>
+                    <div class="mg-gig" data-reveal style="--t: 7.4s; --w: -2.5s;">
+                        <div class="mg-gig-card">
+                            <span class="mg-k" aria-hidden="true">Inbox two &middot; A message</span>
+                            <h3 class="mg-d">The wedding close-up set</h3>
+                            <p>An Instagram DM you starred so you would not lose it. You lost it.</p>
+                        </div>
+                        <i class="mg-floor" aria-hidden="true"></i>
                     </div>
-                    <div class="es-pick-card rotate-2 p-6 pt-9 text-center" data-reveal="panel">
-                        <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>?</span>{!! $suitDiamond !!}</div>
-                        <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>?</span>{!! $suitDiamond !!}</div>
-                        <h3 class="mb-2 text-lg font-bold">The Tuesday residency</h3>
-                        <p class="text-sm text-gray-600">On a napkin behind the bar. The bar knows the date. Your fans do not.</p>
+                    <div class="mg-gig" data-reveal style="--t: 6.8s; --w: -4.6s;">
+                        <div class="mg-gig-card">
+                            <span class="mg-k" aria-hidden="true">Inbox three &middot; A napkin</span>
+                            <h3 class="mg-d">The Tuesday residency</h3>
+                            <p>On a napkin behind the bar. The bar knows the date. Your fans do not.</p>
+                        </div>
+                        <i class="mg-floor" aria-hidden="true"></i>
                     </div>
                 </div>
 
-                <p class="mt-10 text-center text-gray-300" data-reveal>
-                    One schedule holds every gig, and shows each audience only what they should see.
-                    <a href="#deal" class="inline-flex items-center gap-1 font-semibold text-red-300 transition-all hover:gap-2">
+                <p class="mg-after" data-reveal>
+                    <span>One schedule holds every gig, and shows each audience only what they should see.</span>
+                    <a href="#deal" class="mg-link mg-link-down">
                         Watch the deal
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        {!! $mgDown !!}
                     </a>
                 </p>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 3. The deal: six features dealt face down (3 of diamonds)    -->
-    <!-- ============================================================ -->
-    <section id="deal" class="scroll-mt-24 bg-[#f7f1e4] py-20 dark:bg-[#0e130f] lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-red mb-6" data-reveal aria-hidden="true">
-                    <span>3</span>
-                    {!! $suitDiamond !!}
-                </div>
-                <p class="es-pick-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The deal</p>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Six cards, face down. <span class="es-pick-red">Watch them turn.</span>
-                </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
-                    Everything a working magician needs, dealt one card at a time.
-                </p>
+        <!-- The saw: act two -->
+        <div class="mg-saw" aria-hidden="true">
+            <div class="mg-d mg-saw-word">
+                <span class="mg-saw-top">The turn</span>
+                <span class="mg-saw-bot">The turn</span>
             </div>
+            <span class="mg-k mg-saw-cap">Act two</span>
+        </div>
 
-            @php
-                $dealCards = [
-                    [
-                        'rank' => 'A', 'suit' => 'spade', 'pip' => 'es-pick-pip-black', 'delay' => '0s',
-                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />',
-                        'title' => 'Zero-fee ticketing',
-                        'copy' => 'Take payment through Stripe or PayPal, or cash at the door, for general admission, VIP, and meet-and-greet tickets. Every ticket carries a QR code for the door, and Event Schedule takes no platform fee.',
-                        'url' => '/features/ticketing', 'link' => 'Sell tickets',
-                    ],
-                    [
-                        'rank' => 'K', 'suit' => 'heart', 'pip' => 'es-pick-pip-red', 'delay' => '0.08s',
-                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />',
-                        'title' => 'Show posters, produced',
-                        'copy' => 'Every event auto-generates a poster sized for socials. Post the date, not a blank story.',
-                        'url' => '/features/event-graphics', 'link' => 'See event graphics',
-                    ],
-                    [
-                        'rank' => 'Q', 'suit' => 'diamond', 'pip' => 'es-pick-pip-red', 'delay' => '0.16s',
-                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />',
-                        'title' => 'Residencies on repeat',
-                        'copy' => 'Set the Tuesday parlor show once. Day-of-week recurrence, with date exceptions for the weeks you tour.',
-                        'url' => '/features/recurring-events', 'link' => 'Set up recurring shows',
-                    ],
-                    [
-                        'rank' => 'J', 'suit' => 'club', 'pip' => 'es-pick-pip-black', 'delay' => '0.24s',
-                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />',
-                        'title' => 'Private stays private',
-                        'copy' => 'Unlimited free drafts keep corporate dates off your public schedule. Enterprise adds internal and unlisted events with an optional password.',
-                        'url' => '/pricing', 'link' => 'Compare plans',
-                    ],
-                    [
-                        'rank' => '10', 'suit' => 'heart', 'pip' => 'es-pick-pip-red', 'delay' => '0.32s',
-                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />',
-                        'title' => 'Passes and gift cards',
-                        'copy' => 'On Pro, sell a season pass for the parlor run, and balance-tracked gift cards fans send by email. Zero platform fees on both.',
-                        'url' => '/features/gift-cards', 'link' => 'Sell gift cards',
-                    ],
-                    [
-                        'rank' => '9', 'suit' => 'spade', 'pip' => 'es-pick-pip-black', 'delay' => '0.4s',
-                        'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />',
-                        'title' => 'Calendars that agree',
-                        'copy' => 'Two-way Google, Outlook, and CalDAV sync. Every gig lands in the calendar you already check, so a booked Saturday looks booked before you say yes.',
-                        'url' => '/features/calendar-sync', 'link' => 'Sync your calendar',
-                    ],
-                ];
-            @endphp
+        <!-- ============================================================ -->
+        <!-- 3. The deal: six features, face down, that turn              -->
+        <!-- ============================================================ -->
+        <section id="deal" class="mg-section" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-head">
+                    <p class="mg-k" data-reveal>The deal</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Six cards, face down. <span class="mg-red">Watch them turn.</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Everything a working magician needs, dealt one card at a time.
+                    </p>
+                </div>
 
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                @foreach ($dealCards as $card)
-                    <div data-reveal="deal" style="--reveal-delay: {{ $card['delay'] }};">
-                        <div class="es-pick-flip h-full">
-                            <div class="es-pick-flip-inner h-full">
-                                <div class="es-pick-face es-pick-card flex h-full flex-col p-7 pt-10">
-                                    <div class="es-pick-index {{ $card['pip'] }}" aria-hidden="true"><span>{{ $card['rank'] }}</span>{!! $suits[$card['suit']] !!}</div>
-                                    <div class="es-pick-index-flip {{ $card['pip'] }}" aria-hidden="true"><span>{{ $card['rank'] }}</span>{!! $suits[$card['suit']] !!}</div>
-                                    <div class="mb-4 inline-flex h-11 w-11 items-center justify-center self-center rounded-xl bg-red-700/10 text-red-700">
-                                        <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $card['icon'] !!}</svg>
+                @php
+                    $dealCards = [
+                        [
+                            'title' => 'Zero-fee ticketing',
+                            'copy' => 'Take payment through Stripe or PayPal, or cash at the door, for general admission, VIP, and meet-and-greet tickets. Every ticket carries a QR code for the door, and Event Schedule takes no platform fee.',
+                            'url' => '/features/ticketing', 'link' => 'Sell tickets',
+                        ],
+                        [
+                            'title' => 'Show posters, produced',
+                            'copy' => 'Every event auto-generates a poster sized for socials. Post the date, not a blank story.',
+                            'url' => '/features/event-graphics', 'link' => 'See event graphics',
+                        ],
+                        [
+                            'title' => 'Residencies on repeat',
+                            'copy' => 'Set the Tuesday parlor show once. Day-of-week recurrence, with date exceptions for the weeks you tour.',
+                            'url' => '/features/recurring-events', 'link' => 'Set up recurring shows',
+                        ],
+                        [
+                            'title' => 'Private stays private',
+                            'copy' => 'Unlimited free drafts keep corporate dates off your public schedule. Enterprise adds internal and unlisted events with an optional password.',
+                            'url' => '/pricing', 'link' => 'Compare plans',
+                        ],
+                        [
+                            'title' => 'Passes and gift cards',
+                            'copy' => 'On Pro, sell a season pass for the parlor run, and balance-tracked gift cards fans send by email. Zero platform fees on both.',
+                            'url' => '/features/gift-cards', 'link' => 'Sell gift cards',
+                        ],
+                        [
+                            'title' => 'Calendars that agree',
+                            'copy' => 'Two-way Google, Outlook, and CalDAV sync. Every gig lands in the calendar you already check, so a booked Saturday looks booked before you say yes.',
+                            'url' => '/features/calendar-sync', 'link' => 'Sync your calendar',
+                        ],
+                    ];
+                @endphp
+
+                <ol class="mg-deal">
+                    @foreach ($dealCards as $cardIndex => $card)
+                        <li class="mg-flap" data-reveal="turn">
+                            <div class="mg-flap-in">
+                                <article class="mg-flap-face">
+                                    <span class="mg-d mg-flap-no" aria-hidden="true">{{ $mgRoman[$cardIndex] }}</span>
+                                    <div>
+                                        <h3 class="mg-d">{{ $card['title'] }}</h3>
+                                        <p>{{ $card['copy'] }}</p>
                                     </div>
-                                    <h3 class="mb-2 text-center text-lg font-bold">{{ $card['title'] }}</h3>
-                                    <p class="mb-4 text-center text-sm text-gray-600">{{ $card['copy'] }}</p>
-                                    <a href="{{ marketing_url($card['url']) }}" class="es-pick-link mt-auto inline-flex items-center justify-center gap-1 text-sm font-semibold transition-all hover:gap-2">
+                                    <a href="{{ marketing_url($card['url']) }}" class="mg-link" style="justify-self: start;">
                                         {{ $card['link'] }}
-                                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                        {!! $mgArrow !!}
                                     </a>
-                                </div>
-                                <div class="es-pick-face es-pick-face-back es-pick-back" aria-hidden="true">
-                                    <div class="es-pick-back-inner">{!! $suits[$card['suit']] !!}</div>
+                                </article>
+                                <div class="mg-flap-back" aria-hidden="true">
+                                    <span class="mg-k">{{ $mgRoman[$cardIndex] }}</span>
+                                    <i></i>
+                                    <span class="mg-k">{{ $mgRoman[$cardIndex] }}</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                @endforeach
+                        </li>
+                    @endforeach
+                </ol>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 4. Pick a card: the interactive moment (felt, 4 of clubs)    -->
-    <!-- ============================================================ -->
-    <section id="pick" class="relative scroll-mt-24 bg-[#f7f1e4] px-2 py-14 dark:bg-[#0e130f] sm:px-4 lg:py-20">
-        <div class="es-pick-felt noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="grid-overlay absolute inset-0 opacity-20"></div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <div class="es-pick-card es-pick-corner es-pick-pip-black mb-6" data-reveal aria-hidden="true">
-                        <span>4</span>
-                        {!! $suitClub !!}
-                    </div>
-                    <p class="es-pick-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Your routine</p>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Pick a card. <span class="es-pick-red-lit">Go on.</span>
+        <!-- ============================================================ -->
+        <!-- 4. Pick a card: the interactive moment                       -->
+        <!-- ============================================================ -->
+        <section id="pick" class="mg-section mg-alt" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-head" style="margin-inline: auto; text-align: center; justify-items: center;">
+                    <p class="mg-k" data-reveal>Your routine</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Pick a card. <span class="mg-red">Go on.</span>
                     </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
                         Hover, or tab across with your keyboard. Whichever gig you run, there is a setup for it.
                     </p>
                 </div>
 
-                <div class="mx-auto grid max-w-3xl gap-6 sm:grid-cols-3">
-                    <a href="{{ marketing_url('/pricing') }}" class="es-pick-choice group block rounded-[0.8rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent" data-reveal style="--reveal-delay: 0s;">
-                        <div class="es-pick-flip h-full">
-                            <div class="es-pick-flip-inner h-full">
-                                <div class="es-pick-face es-pick-card flex h-full min-h-[19rem] flex-col p-6 pt-10 text-center">
-                                    <div class="es-pick-index es-pick-pip-black" aria-hidden="true"><span>J</span>{!! $suitClub !!}</div>
-                                    <div class="es-pick-index-flip es-pick-pip-black" aria-hidden="true"><span>J</span>{!! $suitClub !!}</div>
-                                    <h3 class="mb-2 text-lg font-bold">The corporate gala</h3>
-                                    <p class="text-sm text-gray-600">Internal and unlisted events, password-protected pages, and the days your team marks as unavailable. The gig nobody hears about until the invoice clears.</p>
-                                    <span class="es-pick-link mt-auto inline-flex items-center justify-center gap-1 text-sm font-semibold">See Enterprise
-                                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                    </span>
-                                </div>
-                                <div class="es-pick-face es-pick-face-back es-pick-back" aria-hidden="true">
-                                    <div class="es-pick-back-inner"><span class="es-pick-back-badge">?</span></div>
-                                </div>
+                <div class="mg-pick" data-reveal-group="120">
+                    <a href="{{ marketing_url('/pricing') }}" class="mg-pcard" data-reveal>
+                        <div class="mg-pcard-in">
+                            <div class="mg-pcard-face">
+                                <span class="mg-k" aria-hidden="true">The first card</span>
+                                <h3 class="mg-d">The corporate gala</h3>
+                                <p>Internal and unlisted events, password-protected pages, and the days your team marks as unavailable. The gig nobody hears about until the invoice clears.</p>
+                                <span class="mg-link mg-pcard-go">See Enterprise {!! $mgArrow !!}</span>
                             </div>
+                            <div class="mg-pcard-back" aria-hidden="true"><i class="mg-pcard-ring"></i><i class="mg-pcard-mark"></i></div>
                         </div>
+                        <i class="mg-floor" aria-hidden="true"></i>
                     </a>
-
-                    <a href="{{ marketing_url('/features/recurring-events') }}" class="es-pick-choice group block rounded-[0.8rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent" data-reveal style="--reveal-delay: 0.12s;">
-                        <div class="es-pick-flip h-full">
-                            <div class="es-pick-flip-inner h-full">
-                                <div class="es-pick-face es-pick-card flex h-full min-h-[19rem] flex-col p-6 pt-10 text-center">
-                                    <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>Q</span>{!! $suitDiamond !!}</div>
-                                    <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>Q</span>{!! $suitDiamond !!}</div>
-                                    <h3 class="mb-2 text-lg font-bold">The residency</h3>
-                                    <p class="text-sm text-gray-600">A recurring Tuesday show, a season pass for the regulars, and a poster that makes itself every week.</p>
-                                    <span class="es-pick-link mt-auto inline-flex items-center justify-center gap-1 text-sm font-semibold">Set the pattern
-                                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                    </span>
-                                </div>
-                                <div class="es-pick-face es-pick-face-back es-pick-back" aria-hidden="true">
-                                    <div class="es-pick-back-inner"><span class="es-pick-back-badge">?</span></div>
-                                </div>
+                    <a href="{{ marketing_url('/features/recurring-events') }}" class="mg-pcard" data-reveal>
+                        <div class="mg-pcard-in">
+                            <div class="mg-pcard-face">
+                                <span class="mg-k" aria-hidden="true">The second card</span>
+                                <h3 class="mg-d">The residency</h3>
+                                <p>A recurring Tuesday show, a season pass for the regulars, and a poster that makes itself every week.</p>
+                                <span class="mg-link mg-pcard-go">Set the pattern {!! $mgArrow !!}</span>
                             </div>
+                            <div class="mg-pcard-back" aria-hidden="true"><i class="mg-pcard-ring"></i><i class="mg-pcard-mark"></i></div>
                         </div>
+                        <i class="mg-floor" aria-hidden="true"></i>
                     </a>
-
-                    <a href="{{ marketing_url('/features/ticketing') }}" class="es-pick-choice group block rounded-[0.8rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent" data-reveal style="--reveal-delay: 0.24s;">
-                        <div class="es-pick-flip h-full">
-                            <div class="es-pick-flip-inner h-full">
-                                <div class="es-pick-face es-pick-card flex h-full min-h-[19rem] flex-col p-6 pt-10 text-center">
-                                    <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>A</span>{!! $suitHeart !!}</div>
-                                    <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>A</span>{!! $suitHeart !!}</div>
-                                    <h3 class="mb-2 text-lg font-bold">The parlor show</h3>
-                                    <p class="text-sm text-gray-600">Twenty seats, sold through your own link. QR check-in at the door, and on Pro a waitlist for when the room is full.</p>
-                                    <span class="es-pick-link mt-auto inline-flex items-center justify-center gap-1 text-sm font-semibold">Sell the room
-                                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                    </span>
-                                </div>
-                                <div class="es-pick-face es-pick-face-back es-pick-back" aria-hidden="true">
-                                    <div class="es-pick-back-inner"><span class="es-pick-back-badge">?</span></div>
-                                </div>
+                    <a href="{{ marketing_url('/features/ticketing') }}" class="mg-pcard" data-reveal>
+                        <div class="mg-pcard-in">
+                            <div class="mg-pcard-face">
+                                <span class="mg-k" aria-hidden="true">The third card</span>
+                                <h3 class="mg-d">The parlor show</h3>
+                                <p>Twenty seats, sold through your own link. QR check-in at the door, and on Pro a waitlist for when the room is full.</p>
+                                <span class="mg-link mg-pcard-go">Sell the room {!! $mgArrow !!}</span>
                             </div>
+                            <div class="mg-pcard-back" aria-hidden="true"><i class="mg-pcard-ring"></i><i class="mg-pcard-mark"></i></div>
                         </div>
+                        <i class="mg-floor" aria-hidden="true"></i>
                     </a>
                 </div>
 
-                <p class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
+                <p class="mg-pick-foot" data-reveal>
                     On phones the cards are already face up. A magician never repeats a trick. A schedule should.
                 </p>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 5. The routine: how it works (5 of diamonds)                 -->
-    <!-- ============================================================ -->
-    <section id="routine" class="scroll-mt-24 bg-[#fdfbf4] py-20 dark:bg-[#101511] lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-red mb-6" data-reveal aria-hidden="true">
-                    <span>5</span>
-                    {!! $suitDiamond !!}
+        <!-- ============================================================ -->
+        <!-- 5. The routine: how it works, on three linked rings          -->
+        <!-- ============================================================ -->
+        <section id="routine" class="mg-section" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-head" style="margin-inline: auto; text-align: center; justify-items: center;">
+                    <p class="mg-k" data-reveal>The routine</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Three moves. <span class="mg-red">No sleight required.</span>
+                    </h2>
                 </div>
-                <p class="es-pick-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The routine</p>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Three moves. <span class="es-pick-red">No sleight required.</span>
-                </h2>
+
+                <div class="mg-rings mg-d" aria-hidden="true">
+                    <span class="mg-ring" style="--i: 0;">1</span>
+                    <span class="mg-ring" style="--i: 1; --c: var(--mg-red);">2</span>
+                    <span class="mg-ring" style="--i: 2;">3</span>
+                </div>
+
+                <div class="mg-moves" data-reveal-group="140">
+                    <div class="mg-move" data-reveal>
+                        <span class="mg-k" aria-hidden="true">Move one</span>
+                        <h3 class="mg-d">Add your shows</h3>
+                        <p>Paste a booking email and AI parsing drafts the event for you, or import from Google Calendar. Set a weekly residency once as a recurring event.</p>
+                    </div>
+                    <div class="mg-move" data-reveal>
+                        <span class="mg-k" aria-hidden="true">Move two</span>
+                        <h3 class="mg-d">Share one link</h3>
+                        <p>Add your schedule link to your bio, EPK, and booking website, or embed the calendar on any page. Planners see your dates and send a booking request from the same link.</p>
+                    </div>
+                    <div class="mg-move" data-reveal>
+                        <span class="mg-k" aria-hidden="true">Move three</span>
+                        <h3 class="mg-d">Fill the room</h3>
+                        <p>Fans who sign up with their email get a digest automatically when you add shows, at most one every three days. The newsletters you write reach their inboxes directly.</p>
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="120">
-                <div class="es-pick-card p-7 pt-10" data-reveal="panel">
-                    <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>1</span>{!! $suitDiamond !!}</div>
-                    <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>1</span>{!! $suitDiamond !!}</div>
-                    <h3 class="mb-3 text-center text-xl font-bold">Add your shows</h3>
-                    <p class="text-center text-sm text-gray-600">Paste a booking email and AI parsing drafts the event for you, or import from Google Calendar. Set a weekly residency once as a recurring event.</p>
+        <!-- ============================================================ -->
+        <!-- 6. Sleight of hand: lights down                              -->
+        <!-- ============================================================ -->
+        <section id="sleight" class="mg-section mg-stage" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap">
+                <div class="mg-stage-head">
+                    <div class="mg-head">
+                        <p class="mg-k">Sleight of hand</p>
+                        <h2 class="mg-d mg-h2">
+                            The moves the audience <span class="mg-red">never sees.</span>
+                        </h2>
+                        <p class="mg-sub">
+                            Small utilities that handle the prep, so the audience only sees the act.
+                        </p>
+                    </div>
+                    <button type="button" class="mg-lights" id="mg-lights" aria-pressed="false" hidden><i aria-hidden="true"></i>House lights</button>
                 </div>
-                <div class="es-pick-card p-7 pt-10" data-reveal="panel">
-                    <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>2</span>{!! $suitDiamond !!}</div>
-                    <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>2</span>{!! $suitDiamond !!}</div>
-                    <h3 class="mb-3 text-center text-xl font-bold">Share one link</h3>
-                    <p class="text-center text-sm text-gray-600">Add your schedule link to your bio, EPK, and booking website, or embed the calendar on any page. Planners see your dates and send a booking request from the same link.</p>
-                </div>
-                <div class="es-pick-card p-7 pt-10" data-reveal="panel">
-                    <div class="es-pick-index es-pick-pip-red" aria-hidden="true"><span>3</span>{!! $suitDiamond !!}</div>
-                    <div class="es-pick-index-flip es-pick-pip-red" aria-hidden="true"><span>3</span>{!! $suitDiamond !!}</div>
-                    <h3 class="mb-3 text-center text-xl font-bold">Fill the room</h3>
-                    <p class="text-center text-sm text-gray-600">Fans who sign up with their email get a digest automatically when you add shows, at most one every three days. The newsletters you write reach their inboxes directly.</p>
+                <p class="mg-k mg-stage-hint" aria-hidden="true">Step in and the lights go down. Your pointer carries the only light.</p>
+
+                <div class="mg-unseens">
+                    @foreach ([
+                        ['Event templates', 'Load the trick once. On Pro, save any show as a template and produce the next one in two clicks.'],
+                        ['Custom fields', 'On Pro, track what only you need: stage size, mic setup, table count, load-in time.'],
+                        ['AI event parsing', 'Paste a booking email and a draft event appears, date and venue filled in. Included on every plan.'],
+                        ['Ticket waitlist', 'Sold-out parlor show? On Pro, the waitlist tells the next fan in line when a seat frees up.'],
+                        ['Embed ticket widget', 'On Pro, sell tickets from your own website with an embedded checkout.'],
+                        ['Availability management', 'On Enterprise, you and your team mark the days you cannot work, and see them on the calendar before you accept a date.'],
+                    ] as $moveIndex => [$moveTitle, $moveCopy])
+                        <div class="mg-unseen">
+                            <span class="mg-k mg-unseen-no" aria-hidden="true">No. {{ $moveIndex + 1 }}</span>
+                            <h3 class="mg-d">{{ $moveTitle }}</h3>
+                            <p>{{ $moveCopy }}</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <div class="bg-[#fdfbf4] pb-4 dark:bg-[#101511]">
-        <div class="es-pick-divider mx-auto max-w-3xl px-4" aria-hidden="true">
-            <span class="es-pick-pip-black">{!! $suitSpade !!}</span>
-            <span class="es-pick-pip-red">{!! $suitHeart !!}</span>
-            <span class="es-pick-pip-red">{!! $suitDiamond !!}</span>
-            <span class="es-pick-pip-black">{!! $suitClub !!}</span>
+        <!-- ============================================================ -->
+        <!-- 7. Perfect for: the bill                                     -->
+        <!-- ============================================================ -->
+        <section class="mg-section">
+            <div class="mg-wrap">
+                <div class="mg-head">
+                    <p class="mg-k" data-reveal>Every kind of act</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Perfect for <span class="mg-red">every performer.</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Close-up or grand illusion, one schedule carries the whole act.
+                    </p>
+                </div>
+
+                @php
+                    $mgActs = [
+                        ['Close-Up Magicians', 'Card tricks, coin magic, sleight of hand for intimate gatherings and table-hopping at events.', 'for-close-up-magicians'],
+                        ['Stage Illusionists', 'Large-scale illusions and theatrical magic shows that fill theaters and wow audiences.', 'for-stage-illusionists'],
+                        ['Mentalists', 'Mind reading, predictions, and psychological entertainment that leaves audiences amazed.', 'for-mentalists'],
+                        ['Children\'s Entertainers', 'Birthday parties, school shows, and family events with fun, interactive magic for kids.', 'for-childrens-entertainers'],
+                        ['Corporate Magicians', 'Trade shows, conferences, and product launches with customized magic presentations.', 'for-corporate-magicians'],
+                        ['Variety Artists', 'Ventriloquists, escape artists, hypnotists, and specialty acts that defy categorization.', 'for-variety-artists'],
+                    ];
+                @endphp
+
+                <div class="mg-bill" data-reveal-group="70">
+                    @foreach ($mgActs as $actIndex => [$actName, $actDesc, $actSlug])
+                        @php $mgPost = get_sub_audience_blog($actSlug); @endphp
+                        <article class="mg-act-row" data-reveal>
+                            <span class="mg-k" aria-hidden="true">{{ str_pad($actIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <h3 class="mg-d">{{ $actName }}</h3>
+                            <p>{{ $actDesc }}</p>
+                            @if ($mgPost)
+                                <a href="{{ blog_url('/' . $mgPost->slug) }}" class="mg-link" aria-label="Learn more about Event Schedule for {{ $actName }}">
+                                    Learn more
+                                    {!! $mgArrow !!}
+                                </a>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Key features: the programme                               -->
+        <!-- ============================================================ -->
+        <section class="mg-section mg-alt">
+            <div class="mg-wrap mg-prog-grid">
+                <div>
+                    <p class="mg-k" data-reveal>The programme</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s; margin-top: 1.5rem;">Key <span class="mg-red">features</span></h2>
+                    <p class="mg-prog-more" data-reveal style="--reveal-delay: 0.16s;">
+                        <a href="{{ marketing_url('/features') }}" class="mg-link">
+                            See all features
+                            {!! $mgArrow !!}
+                        </a>
+                    </p>
+                </div>
+
+                <div class="mg-prog" data-reveal-group="70">
+                    @foreach ([
+                        ['Ticketing', 'Sell tickets with QR check-in and zero platform fees', '/features/ticketing'],
+                        ['Event Graphics', 'Show posters generated from your events', '/features/event-graphics'],
+                        ['Newsletters', 'Send event updates directly to followers\' inboxes', '/features/newsletters'],
+                        ['Calendar Sync', 'Two-way sync with Google, Outlook and CalDAV', '/features/calendar-sync'],
+                    ] as [$progName, $progDesc, $progUrl])
+                        <a href="{{ marketing_url($progUrl) }}" data-reveal>
+                            <strong>{{ $progName }}</strong>
+                            <small>{{ $progDesc }}</small>
+                            {!! $mgArrow !!}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <div class="mg-plans">
+            @include('marketing.partials.pricing-nudge')
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 9. Related pages: also on the bill                           -->
+        <!-- ============================================================ -->
+        <section class="mg-section">
+            <div class="mg-wrap">
+                <div class="mg-others-head">
+                    <div>
+                        <p class="mg-k" data-reveal>Also on the bill</p>
+                        <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s; margin-top: 1.5rem;">Related <span class="mg-red">pages</span></h2>
+                    </div>
+                    <a href="{{ marketing_url('/use-cases') }}" class="mg-link" data-reveal>
+                        See all use cases
+                        {!! $mgArrow !!}
+                    </a>
+                </div>
+
+                <div class="mg-others" data-reveal-group="80">
+                    @foreach ([['/for-comedians', 'Comedians'], ['/for-circus-acrobatics', 'Circus & Acrobatics'], ['/for-theater-performers', 'Theater Performers'], ['/for-spoken-word', 'Spoken Word Artists']] as [$relHref, $relName])
+                        <a href="{{ marketing_url($relHref) }}" data-reveal>
+                            <span class="mg-k">Event Schedule for</span>
+                            <strong>{{ $relName }}</strong>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 10. FAQ: the secrets we can tell                             -->
+        <!-- ============================================================ -->
+        <section id="faq" class="mg-section mg-alt" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap mg-faq-grid">
+                <div class="mg-faq-head">
+                    <p class="mg-k" data-reveal>The secrets we can tell</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Frequently asked <span class="mg-red">questions</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Everything magicians ask about Event Schedule.
+                    </p>
+                </div>
+
+                <div class="mg-qa" data-reveal>
+                    @php
+                        $faqs = [
+                            ['q' => 'Is Event Schedule free for magicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Free registration is unlimited on it, and the QR on each place is scanned at the door on any plan. Putting a price on a ticket is the Pro half. Newsletters are free at 10 a month, counted per recipient rather than per send. Zero platform fees on ticket sales, on any plan.'],
+                            ['q' => 'Can I keep private and corporate bookings off my public schedule?', 'a' => 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
+                            ['q' => 'Can I sell gift cards or season passes for my shows?', 'a' => 'Yes. On the Pro plan, once your schedule has its own email settings on eventschedule.com, you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
+                            ['q' => 'Can I sell tickets to my magic shows?', 'a' => 'Yes, on the Pro plan, which is what a ticket carrying a price needs; free registration for a show you are not charging for is unlimited without it. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Invoice Ninja, a payment link or cash. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. On Pro, a waitlist tells fans when a sold-out show frees a seat. If a show is called off, a Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Zero platform fees, so the only deduction is your payment provider\'s own.'],
+                            ['q' => 'Can I run a weekly residency without re-entering the same show?', 'a' => 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
+                            ['q' => 'How do planners and fans find my shows?', 'a' => 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page, and planners send a booking request from the same link. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Fans who would rather not give an email can subscribe to your calendar feed instead. On a single show, once you switch on the "Notify me" card, anyone can leave just an email address to hear when its tickets go on sale, if it is cancelled, and shortly before it starts, plus any change notice you send. Two-way Google, Outlook, and CalDAV sync keeps your own calendar current.'],
+                            ['q' => 'A venue listed my show before I signed up. Is there a page for me already?', 'a' => 'There may be. When a venue or promoter names an act that is not on Event Schedule, its event page still shows that act on the bill by name, and the app creates a page for the act. That page says which schedule created it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. If it carries your email address, create an account or sign in with that address and press Claim this page: it becomes your schedule, and the venues that already listed you keep listing you without asking again, while anyone new sends a request you accept. If it is not you, This is not me takes it down.'],
+                        ];
+                    @endphp
+                    @foreach ($faqs as ['q' => $q, 'a' => $a])
+                        <details name="faq">
+                            <summary>
+                                <h3>{{ $q }}</h3>
+                                <i aria-hidden="true"></i>
+                            </summary>
+                            <p>{{ $a }}</p>
+                        </details>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <x-seo.faq-schema :items="$faqs" />
+
+        <!-- The saw: act three -->
+        <div class="mg-saw" aria-hidden="true">
+            <div class="mg-d mg-saw-word">
+                <span class="mg-saw-top">The prestige</span>
+                <span class="mg-saw-bot">The prestige</span>
+            </div>
+            <span class="mg-k mg-saw-cap">Act three</span>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 11. Finale: is this your card?                               -->
+        <!-- ============================================================ -->
+        <section id="claim" class="mg-prestige" style="scroll-margin-top: 4rem;">
+            <div class="mg-wrap mg-prestige-in">
+                <div>
+                    <p class="mg-k" data-reveal>The reveal</p>
+                    <h2 class="mg-d mg-h2" data-reveal style="--reveal-delay: 0.08s;">
+                        Is this <span class="mg-red">your card?</span>
+                    </h2>
+                    <p class="mg-sub" data-reveal style="--reveal-delay: 0.16s;">
+                        Type a name and watch the signature appear. Your schedule link works the same way: one card, always yours.
+                    </p>
+                </div>
+
+                <!-- The signed card, hanging in the air -->
+                <div class="mg-yours" aria-hidden="true" data-reveal="appear">
+                    <div class="mg-yours-card">
+                        <span class="mg-k">Signed by</span>
+                        <div class="mg-sign-box">
+                            <span class="mg-sign" id="mg-sign">your-name</span>
+                            <span class="mg-sign-line"></span>
+                            <span class="mg-yours-url">.eventschedule.com</span>
+                        </div>
+                        <i></i>
+                    </div>
+                    <i class="mg-floor"></i>
+                </div>
+
+                <div class="mg-claim-form" data-reveal="appear">
+                    <label for="es-claim-input" class="mg-k">Your schedule name</label>
+                    <div class="mg-claim-row">
+                        <div dir="ltr" class="es-claim mg-claim">
+                            <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30">
+                            <span>.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="mg-btn">
+                            Claim your card
+                            {!! $mgArrow !!}
+                        </a>
+                    </div>
+                    <p class="mg-note">No credit card required. Well. One card.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="mg-keep">
+            <x-marketing.related-pages />
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- 6. Sleight of hand: the utility moves (6 of spades)          -->
-    <!-- ============================================================ -->
-    <section id="sleight" class="scroll-mt-24 bg-[#f7f1e4] py-20 dark:bg-[#0e130f] lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-black mb-6" data-reveal aria-hidden="true">
-                    <span>6</span>
-                    {!! $suitSpade !!}
-                </div>
-                <p class="es-pick-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Sleight of hand</p>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    The moves the audience <span class="es-pick-red">never sees.</span>
-                </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
-                    Small utilities that handle the prep, so the audience only sees the act.
-                </p>
-            </div>
-
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
-                @foreach ([
-                    ['Event templates', 'Load the trick once. On Pro, save any show as a template and produce the next one in two clicks.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
-                    ['Custom fields', 'On Pro, track what only you need: stage size, mic setup, table count, load-in time.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />'],
-                    ['AI event parsing', 'Paste a booking email and a draft event appears, date and venue filled in. Included on every plan.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />'],
-                    ['Ticket waitlist', 'Sold-out parlor show? On Pro, the waitlist tells the next fan in line when a seat frees up.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-                    ['Embed ticket widget', 'On Pro, sell tickets from your own website with an embedded checkout.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />'],
-                    ['Availability management', 'On Enterprise, you and your team mark the days you cannot work, and see them on the calendar before you accept a date.', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />'],
-                ] as [$moveTitle, $moveCopy, $moveIcon])
-                    <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                        <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                            <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-700/10 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-                                <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $moveIcon !!}</svg>
-                            </div>
-                            <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">{{ $moveTitle }}</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $moveCopy }}</p>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. Perfect for (7 of hearts)                                 -->
-    <!-- ============================================================ -->
-    <section class="bg-[#fdfbf4] py-20 dark:bg-[#0b0f0c] lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-red mb-6" data-reveal aria-hidden="true">
-                    <span>7</span>
-                    {!! $suitHeart !!}
-                </div>
-                <p class="es-pick-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Every kind of act</p>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Perfect for <span class="es-pick-red">every performer.</span>
-                </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
-                    Close-up or grand illusion, one schedule carries the whole act.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                <x-sub-audience-card
-                    name="Close-Up Magicians"
-                    description="Card tricks, coin magic, sleight of hand for intimate gatherings and table-hopping at events."
-                    icon-color="red"
-                    blog-slug="for-close-up-magicians"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Stage Illusionists"
-                    description="Large-scale illusions and theatrical magic shows that fill theaters and wow audiences."
-                    icon-color="amber"
-                    blog-slug="for-stage-illusionists"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" /></svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Mentalists"
-                    description="Mind reading, predictions, and psychological entertainment that leaves audiences amazed."
-                    icon-color="emerald"
-                    blog-slug="for-mentalists"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Children's Entertainers"
-                    description="Birthday parties, school shows, and family events with fun, interactive magic for kids."
-                    icon-color="orange"
-                    blog-slug="for-childrens-entertainers"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Corporate Magicians"
-                    description="Trade shows, conferences, and product launches with customized magic presentations."
-                    icon-color="red"
-                    blog-slug="for-corporate-magicians"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Variety Artists"
-                    description="Ventriloquists, escape artists, hypnotists, and specialty acts that defy categorization."
-                    icon-color="amber"
-                    blog-slug="for-variety-artists"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 8. Key features (8 of clubs)                                 -->
-    <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-[#f7f1e4] py-20 dark:border-white/5 dark:bg-[#101511]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-8 text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-black mb-6" data-reveal aria-hidden="true">
-                    <span>8</span>
-                    {!! $suitClub !!}
-                </div>
-                <h2 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="es-pick-red">features</span></h2>
-            </div>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="red">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Event Graphics" description="Show posters generated from your events" :url="marketing_url('/features/event-graphics')" icon-color="red">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="red">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google, Outlook and CalDAV" :url="marketing_url('/features/calendar-sync')" icon-color="red">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-pick-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    @include('marketing.partials.pricing-nudge')
-
-    <!-- ============================================================ -->
-    <!-- 9. Related pages (9 of diamonds)                             -->
-    <!-- ============================================================ -->
-    <section class="bg-[#f7f1e4] py-20 dark:bg-[#0e130f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-8 text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-red mb-6" data-reveal aria-hidden="true">
-                    <span>9</span>
-                    {!! $suitDiamond !!}
-                </div>
-                <h2 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="es-pick-red">pages</span></h2>
-            </div>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-comedians', 'Comedians'], ['/for-circus-acrobatics', 'Circus & Acrobatics'], ['/for-theater-performers', 'Theater Performers'], ['/for-spoken-word', 'Spoken Word Artists']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-pick-hover group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="es-pick-hover-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="es-pick-hover-arrow w-5 h-5 text-gray-500 dark:text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </a>
-                @endforeach
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-pick-link inline-flex items-center font-medium hover:underline">
-                    See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 10. FAQ (10 of spades)                                       -->
-    <!-- ============================================================ -->
-    <section class="bg-[#fdfbf4] py-20 dark:bg-[#101511] lg:py-28">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-pick-card es-pick-corner es-pick-pip-black mb-6" data-reveal aria-hidden="true">
-                    <span>10</span>
-                    {!! $suitSpade !!}
-                </div>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="es-pick-red">questions</span>
-                </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything magicians ask about Event Schedule.
-                </p>
-            </div>
-
-            <div class="space-y-4" data-reveal-group="80">
-                @php
-                    $faqs = [
-                        ['q' => 'Is Event Schedule free for magicians?', 'a' => 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Free registration is unlimited on it, and the QR on each place is scanned at the door on any plan. Putting a price on a ticket is the Pro half. Newsletters are free at 10 a month, counted per recipient rather than per send. Zero platform fees on ticket sales, on any plan.'],
-                        ['q' => 'Can I keep private and corporate bookings off my public schedule?', 'a' => 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
-                        ['q' => 'Can I sell gift cards or season passes for my shows?', 'a' => 'Yes. On the Pro plan, once your schedule has its own email settings on eventschedule.com, you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
-                        ['q' => 'Can I sell tickets to my magic shows?', 'a' => 'Yes, on the Pro plan, which is what a ticket carrying a price needs; free registration for a show you are not charging for is unlimited without it. Take payment through Stripe or PayPal straight to your own account, or through Payfast (rand only), Invoice Ninja, a payment link or cash. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. On Pro, a waitlist tells fans when a sold-out show frees a seat. If a show is called off, a Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. Zero platform fees, so the only deduction is your payment provider\'s own.'],
-                        ['q' => 'Can I run a weekly residency without re-entering the same show?', 'a' => 'Yes. Set up your show once as a recurring event with a day-of-week pattern, and add date exceptions for the weeks you are away. On the Pro plan you can also save any event as a template, so repeat corporate formats take two clicks instead of a blank form.'],
-                        ['q' => 'How do planners and fans find my shows?', 'a' => 'Share one schedule link in your bio, EPK, and booking website, or embed the calendar on any page, and planners send a booking request from the same link. Fans who sign up for email get a digest automatically when you add a show, and newsletters reach their inboxes directly. Fans who would rather not give an email can subscribe to your calendar feed instead. On a single show, once you switch on the "Notify me" card, anyone can leave just an email address to hear when its tickets go on sale, if it is cancelled, and shortly before it starts, plus any change notice you send. Two-way Google, Outlook, and CalDAV sync keeps your own calendar current.'],
-                        ['q' => 'A venue listed my show before I signed up. Is there a page for me already?', 'a' => 'There may be. When a venue or promoter names an act that is not on Event Schedule, its event page still shows that act on the bill by name, and the app creates a page for the act. That page says which schedule created it and that you have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. If it carries your email address, create an account or sign in with that address and press Claim this page: it becomes your schedule, and the venues that already listed you keep listing you without asking again, while anyone new sends a request you accept. If it is not you, This is not me takes it down.'],
-                    ];
-                @endphp
-                @foreach ($faqs as ['q' => $q, 'a' => $a])
-                    <details name="faq" data-reveal class="group/faq es-pick-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <x-seo.faq-schema :items="$faqs" />
-
-    <!-- ============================================================ -->
-    <!-- 11. Finale: is this your card? (A of hearts)                 -->
-    <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-[#fdfbf4] px-2 py-16 dark:bg-[#0b0f0c] sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-pick-felt noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-emerald-900/30 sm:px-12 lg:py-20" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="grid-overlay absolute inset-0 opacity-20"></div>
-                </div>
-
-                <div class="relative z-10">
-                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-1.5">
-                        <span class="inline-flex h-3 w-3 items-center justify-center text-red-400" aria-hidden="true">{!! $suitHeart !!}</span>
-                        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">The reveal</span>
-                    </div>
-                    <h2 class="es-balance mx-auto mb-4 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Is this <span class="es-pick-red-lit">your card?</span>
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.15s;">
-                        Type a name and watch the signature appear. Your schedule link works the same way: one card, always yours.
-                    </p>
-
-                    <!-- The signed card, turned face up after the panel settles -->
-                    <div class="es-pick-finale-flip mx-auto mb-10 w-64 -rotate-2 sm:w-72" aria-hidden="true">
-                        <div class="es-pick-finale-inner">
-                            <div class="es-pick-face es-pick-card flex aspect-[5/7] flex-col items-center justify-center p-6">
-                                <div class="es-pick-index es-pick-pip-red"><span>A</span>{!! $suitHeart !!}</div>
-                                <div class="es-pick-index-flip es-pick-pip-red"><span>A</span>{!! $suitHeart !!}</div>
-                                <div class="es-pick-pip-red mb-4 h-9 w-9">{!! $suitHeart !!}</div>
-                                <div class="es-pick-sign text-2xl sm:text-3xl"><span id="es-pick-signtext">your-name</span></div>
-                                <div class="mt-3 font-mono text-xs text-gray-500">.eventschedule.com</div>
-                            </div>
-                            <div class="es-pick-face es-pick-face-back es-pick-back">
-                                <div class="es-pick-back-inner">{!! $suitHeart !!}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
-                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
-                        </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-pick-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Claim your card
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                        </a>
-                    </div>
-
-                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required. Well. One card.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <x-marketing.related-pages />
-
-    {{-- Mirror the claimed name onto the signed card, applying the same
-         slug transform as the shared claim-input sanitizer. --}}
+    {{-- Two small hands off stage. The first signs the card: it mirrors the claimed name,
+         applying the same slug transform as the shared claim-input sanitizer. The second
+         works the lights over "Sleight of hand", and only for a fine pointer that has not
+         asked for less motion; everyone else simply reads the section with the lights up. --}}
     <script {!! nonce_attr() !!}>
         (function () {
+            var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
             var input = document.getElementById('es-claim-input');
-            var sign = document.getElementById('es-pick-signtext');
-            if (!input || !sign) { return; }
-            var fallback = sign.textContent;
-            input.addEventListener('input', function () {
-                var slug = input.value.toLowerCase()
-                    .replace(/['’]/g, '')
-                    .replace(/[^a-z0-9-]+/g, '-')
-                    .replace(/-{2,}/g, '-')
-                    .replace(/^-+/, '')
-                    .slice(0, 30);
-                sign.textContent = slug || fallback;
+            var sign = document.getElementById('mg-sign');
+            if (input && sign) {
+                var fallback = sign.textContent;
+                input.addEventListener('input', function () {
+                    var slug = input.value.toLowerCase()
+                        .replace(/['’]/g, '')
+                        .replace(/[^a-z0-9-]+/g, '-')
+                        .replace(/-{2,}/g, '-')
+                        .replace(/^-+/, '')
+                        .slice(0, 30);
+                    sign.textContent = slug || fallback;
+                    if (!still) {
+                        sign.classList.remove('is-writing');
+                        void sign.offsetWidth;
+                        sign.classList.add('is-writing');
+                    }
+                });
+            }
+
+            var stage = document.getElementById('sleight');
+            var lights = document.getElementById('mg-lights');
+            if (!stage || !lights || still || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                return;
+            }
+            var houseLights = false;
+            stage.classList.add('can-dark');
+            lights.hidden = false;
+            var carry = function (event) {
+                var box = stage.getBoundingClientRect();
+                stage.style.setProperty('--sx', (event.clientX - box.left) + 'px');
+                stage.style.setProperty('--sy', (event.clientY - box.top) + 'px');
+            };
+            stage.addEventListener('pointerenter', function (event) {
+                carry(event);
+                if (!houseLights) {
+                    stage.classList.add('is-dark');
+                }
+            });
+            stage.addEventListener('pointermove', carry);
+            stage.addEventListener('pointerleave', function () {
+                stage.classList.remove('is-dark');
+            });
+            lights.addEventListener('click', function () {
+                houseLights = !houseLights;
+                lights.setAttribute('aria-pressed', houseLights ? 'true' : 'false');
+                stage.classList.toggle('is-dark', !houseLights && stage.matches(':hover'));
             });
         })();
     </script>
-
-    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

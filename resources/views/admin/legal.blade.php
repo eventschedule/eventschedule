@@ -9,35 +9,38 @@
     a <textarea> inside a Vue mount also gets its contents compiled as a template,
     so a policy containing {{ ... }} would execute rather than render. That is also
     why both fields are always visible instead of being toggled by a radio group:
-    precedence is stated in the help text.
+    precedence is stated in the help text, and each card says which of the three
+    (built-in page, external URL, own document) is in force right now.
 --}}
 <x-app-admin-layout>
-    <div class="space-y-4">
+    <x-slot name="head">
+        <style {!! nonce_attr() !!}>
+            .sys-help {
+              margin: 0.375rem 0 0;
+              font-size: 0.75rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .page-card .page-form-actions {
+              margin-top: 1.25rem;
+            }
+            .sys-off {
+              opacity: 0.5;
+              pointer-events: none;
+            }
+        </style>
+    </x-slot>
 
-        {{-- Navigation --}}
-        @include('admin.partials._navigation', ['active' => 'legal'])
+    {{-- Navigation --}}
+    @include('admin.partials._navigation', ['active' => 'legal'])
 
-        @if (session('success'))
-        <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
-        </div>
-        @endif
+    <div class="page-head">
+        <p class="page-lead">{{ __('messages.legal_pages_intro') }}</p>
+    </div>
 
-        <div class="ap-card rounded-xl p-6">
-            <div class="mb-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.legal_pages')</h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@lang('messages.legal_pages_intro')</p>
-            </div>
+    <div class="page-shell page-stack">
+        <x-page-flash :keys="['success' => 'success']" />
 
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>@lang('messages.legal_pages_warning')</span>
-                </p>
-            </div>
-        </div>
+        <x-page-notice tone="warn">{{ __('messages.legal_pages_warning') }}</x-page-notice>
 
         @foreach (\App\Models\LegalDocument::TYPES as $type)
             @php
@@ -46,67 +49,69 @@
                 // Purifier strips to nothing is not a published document.
                 $hasContent = $document && filled($document->content_html);
                 $hasUrl = $document && filled($document->url);
+                // Which of the three is in force: the URL wins over the document, and the
+                // built-in page is what is left. It used to be told only by the line of help
+                // under the editor.
+                // The three forms share their field names, so a refused save has to say which
+                // card it came from: the value that was typed and the reason it was refused
+                // used to come back on all three cards, and Save on a neighbour would then
+                // have written one document's text into another.
+                $refused = old('_card', $type) === $type;
+                [$inForceTone, $inForce] = match (true) {
+                    $hasUrl => ['is-info', __('messages.legal_document_url')],
+                    $hasContent => ['is-on', __('messages.legal_status_own')],
+                    default => ['', __('messages.legal_status_builtin')],
+                };
             @endphp
-            <div id="{{ $type }}" class="ap-card rounded-xl p-6 scroll-mt-24">
-                <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.legal_'.$type.'_title')</h2>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            @if ($hasContent || $hasUrl)
-                                {{ __('messages.legal_last_updated', ['date' => $document->updated_at->isoFormat('LL')]) }}
-                            @else
-                                @lang('messages.legal_using_builtin')
-                            @endif
-                        </p>
-                    </div>
+            <x-page-card beside :id="$type" class="scroll-mt-24" :title="__('messages.legal_'.$type.'_title')"
+                :lead="$hasContent || $hasUrl ? __('messages.legal_last_updated', ['date' => $document->updated_at->isoFormat('LL')]) : __('messages.legal_using_builtin')">
+                <x-slot name="aside">
+                    <span class="event-status {{ $inForceTone }}">{{ $inForce }}</span>
                     @if ($hasContent || $hasUrl)
-                        <x-link :href="policy_url($type)" target="_blank">@lang('messages.legal_view_page')</x-link>
+                        <x-link :href="policy_url($type)" target="_blank">{{ __('messages.legal_view_page') }}</x-link>
                     @endif
-                </div>
+                </x-slot>
 
-                <form method="POST" action="{{ route('admin.legal.update', ['type' => $type]) }}" class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                <form method="POST" action="{{ route('admin.legal.update', ['type' => $type]) }}" class="{{ is_demo_mode() ? 'sys-off' : '' }}">
                     @csrf
+                    <input type="hidden" name="_card" value="{{ $type }}">
 
-                    <div class="mb-6">
-                        <x-input-label :for="$type.'_url'" :value="__('messages.legal_document_url')" />
-                        <x-text-input :id="$type.'_url'" name="url" type="url"
-                            class="mt-1 block w-full text-sm"
-                            placeholder="https://example.com{{ \App\Models\LegalDocument::PATHS[$type] }}"
-                            :value="old('url', $document->url ?? '')"
-                            :disabled="is_demo_mode()" />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.legal_document_url_help')</p>
-                        <x-input-error class="mt-2" :messages="$errors->get('url')" />
+                    <div class="page-form-fields">
+                        <div>
+                            <x-input-label :for="$type.'_url'" :value="__('messages.legal_document_url')" />
+                            <x-text-input :id="$type.'_url'" name="url" type="url" dir="ltr"
+                                class="mt-1 block w-full text-sm"
+                                placeholder="https://example.com{{ \App\Models\LegalDocument::PATHS[$type] }}"
+                                :value="$refused ? old('url', $document->url ?? '') : ($document->url ?? '')"
+                                :disabled="is_demo_mode()" />
+                            <p class="sys-help">{{ __('messages.legal_document_url_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$refused ? $errors->get('url') : []" />
+                        </div>
+
+                        <div>
+                            <x-input-label :for="$type.'_content'" :value="__('messages.legal_document_content')" />
+                            <textarea id="{{ $type }}_content" name="content" rows="18" {{ is_demo_mode() ? 'disabled' : '' }}
+                                class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ $refused ? old('content', $document->content ?? '') : ($document->content ?? '') }}</textarea>
+                            <p class="sys-help">{{ __('messages.legal_document_content_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$refused ? $errors->get('content') : []" />
+                        </div>
+
+                        {{-- A document nobody is shown: said as a notice, where it was a line of
+                             amber text at the end of the help. --}}
+                        @if ($hasUrl && $hasContent)
+                        <x-page-notice tone="warn">{{ __('messages.legal_document_url_in_use') }}</x-page-notice>
+                        @endif
+
+                        @if (is_demo_mode())
+                        <x-page-notice tone="warn">{{ __('messages.demo_mode_settings_disabled') }}</x-page-notice>
+                        @endif
                     </div>
 
-                    <div class="mb-6">
-                        <x-input-label :for="$type.'_content'" :value="__('messages.legal_document_content')" />
-                        <textarea id="{{ $type }}_content" name="content" rows="18" {{ is_demo_mode() ? 'disabled' : '' }}
-                            class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ old('content', $document->content ?? '') }}</textarea>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            @lang('messages.legal_document_content_help')
-                            @if ($hasUrl && $hasContent)
-                                <span class="text-amber-700 dark:text-amber-300">@lang('messages.legal_document_url_in_use')</span>
-                            @endif
-                        </p>
-                        <x-input-error class="mt-2" :messages="$errors->get('content')" />
-                    </div>
-
-                    @if (is_demo_mode())
-                    <div class="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                        <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <span>@lang('messages.demo_mode_settings_disabled')</span>
-                        </p>
-                    </div>
-                    @endif
-
-                    <div class="flex justify-end">
-                        <x-brand-button type="submit">@lang('messages.save')</x-brand-button>
+                    <div class="page-form-actions">
+                        <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
                     </div>
                 </form>
-            </div>
+            </x-page-card>
         @endforeach
     </div>
 </x-app-admin-layout>

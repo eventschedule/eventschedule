@@ -16,11 +16,28 @@
         <x-doc-nav-link href="#environment">Environment variables</x-doc-nav-link>
     </x-slot:toc>
 
-    <!-- Overview -->
+    {{-- Overview --}}
     <section id="overview" class="doc-section">
-        <h2 class="doc-heading">Overview</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Overview
+        </h2>
         <p>
             Monetization lets you earn from the schedules on your instance that are not paying you.
+            It is off by default and is for multi-tenant hosted installs only: nothing exists until
+            you set <code class="doc-inline-code">ADS_ENABLED=true</code>, and after that you
+            configure it in the <strong>Monetization</strong> card under
+            <strong>System &rarr; Settings</strong> in the admin panel
+            (<code class="doc-inline-code">/admin/settings</code>). The card is shown only when that
+            variable is set <em>and</em> the install runs in hosted mode
+            (<code class="doc-inline-code">IS_HOSTED=true</code>) and is not eventschedule.com
+            itself. A single-tenant selfhost resolves every schedule to Enterprise, so it has no
+            free tier and nothing could ever render.
+        </p>
+        <p>
             It has two independent halves, and you can run either one on its own:
         </p>
         <ul class="doc-list">
@@ -49,19 +66,19 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Google AdSense</span></td>
+                        <td><strong>Google AdSense</strong></td>
                         <td>Free only</td>
                         <td>You, through your AdSense account</td>
                         <td><code class="doc-inline-code">ADS_ENABLED</code></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Promotions network</span></td>
+                        <td><strong>Promotions network</strong></td>
                         <td>Free only</td>
                         <td>You, in full, with no outside network</td>
                         <td><code class="doc-inline-code">ADS_ENABLED</code></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Accommodation affiliate</span></td>
+                        <td><strong>Accommodation affiliate</strong></td>
                         <td>Any plan, opt-in per schedule</td>
                         <td>The schedule owner, or you when they have no affiliate ID</td>
                         <td><code class="doc-inline-code">STAY22_ENABLED</code></td>
@@ -80,21 +97,16 @@
             swaps your strip for our chip rather than clearing the page. Say so on your own pricing
             page before a customer finds it.</p>
         </div>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Off by default, and only for multi-tenant hosted installs</div>
-            <p>Nothing is enabled until you set <code class="doc-inline-code">ADS_ENABLED=true</code>
-            and configure it in the admin panel. The Monetization card is shown only when that
-            variable is set <em>and</em> the install runs in hosted mode
-            (<code class="doc-inline-code">IS_HOSTED=true</code>) and is not eventschedule.com
-            itself. A single-tenant selfhost resolves every schedule to Enterprise, so it has no
-            free tier and nothing could ever render.</p>
-        </div>
     </section>
 
-    <!-- Consent and privacy -->
+    {{-- Consent and privacy --}}
     <section id="consent" class="doc-section">
-        <h2 class="doc-heading">Consent and privacy</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+            Consent and privacy
+        </h2>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Read this before enabling AdSense</div>
@@ -110,22 +122,26 @@
             fully configured, this application's content security policy automatically allows
             Google's ad and consent domains, so no header changes are needed either.
         </p>
+        <h3 id="consent-adsense" class="doc-subheading">AdSense</h3>
         <p>
             Event Schedule defaults to <strong>non-personalized ads</strong>, which is the safer
             setting and the one that requires the least of you. The <strong>Allow personalized
             ads</strong> toggle in the Monetization card is off until you turn it on, and doing so
             is your decision and your legal responsibility. Even non-personalized ads use cookies, so the
-            AdSense script itself is not loaded until a visitor allows <strong>Marketing</strong> in the
-            cookie banner; until then the ad slot stays empty and collapses. A visitor whose browser
+            AdSense script itself is not loaded until a visitor allows <strong>Marketing and embedded
+            content</strong> in the cookie banner, or presses <strong>Allow all</strong>; until then
+            the ad slot stays empty and collapses. A visitor whose browser
             sends the <code class="doc-inline-code">Sec-GPC</code> (Global Privacy Control) header is
-            treated as declining Marketing, so no ad loads for them at all.
+            treated as declining it, so no ad loads for them at all.
         </p>
         <p>
             Two more things are yours to handle: enabling AdSense means your visitors' browsers
-            contact Google, so your privacy policy and cookie notice have to say so; and your
-            AdSense account standing is between you and Google. Do not click your own ads, and do
+            contact Google, so your privacy policy and cookie notice have to say so (you publish both
+            under <a href="{{ route('marketing.docs.saas.setup') }}#legal-pages" class="doc-link">System &rarr; Legal Pages</a>);
+            and your AdSense account standing is between you and Google. Do not click your own ads, and do
             not ask anyone else to.
         </p>
+        <h3 id="consent-promotions" class="doc-subheading">The promotions network and the accommodation map</h3>
         <p>
             The promotions network has none of these obligations. It is served entirely by your own
             install, sets no third-party cookies, and makes no external requests. When a promotion
@@ -138,10 +154,12 @@
             applies, but it is never loaded on page load. A visitor who has not allowed marketing
             cookies sees an explanation and a button, and nothing reaches Stay22 until they click it.
         </p>
+        <h3 id="cookie-banner" class="doc-subheading">The cookie banner and attribution cookies</h3>
         <p>
             The consent banner that all of this hangs off appears as soon as any of these is on, so
             turning on <code class="doc-inline-code">ADS_ENABLED</code> brings it with you. Allowing
-            marketing also enables three first-party attribution cookies,
+            <strong>Marketing and embedded content</strong> also enables three first-party
+            attribution cookies,
             <code class="doc-inline-code">utm_params</code>,
             <code class="doc-inline-code">utm_referrer_url</code> and
             <code class="doc-inline-code">utm_landing_page</code>, which remember for 30 days which
@@ -153,44 +171,75 @@
         </p>
     </section>
 
-    <!-- Turning it on -->
+    {{-- Turning it on --}}
     <section id="enable" class="doc-section">
-        <h2 class="doc-heading">Turning it on</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            Turning it on
+        </h2>
         <ol class="doc-list doc-list-numbered">
             <li>Set <code class="doc-inline-code">ADS_ENABLED=true</code> in your
                 <code class="doc-inline-code">.env</code> and deploy. This is a deliberate
                 deploy-time gate: it cannot be switched on from the admin panel, so a misclick can
                 never start serving ads across your whole instance.</li>
-            <li>Sign in as an administrator and open <strong>Admin &rarr; Settings</strong>. A
-                <strong>Monetization</strong> card appears once the gate above is on.</li>
-            <li>Configure whichever half you want, and save. The card writes to the settings
-                table, so these values take effect immediately with no redeploy.</li>
-            <li>Confirm your cron entry is running. Promotions are settled, reconciled and
-                refunded by a scheduled command that runs every fifteen minutes, so without
-                <code class="doc-inline-code">* * * * * php artisan schedule:run</code> campaigns
-                never complete and unspent budget is never returned.</li>
+            <li>Sign in as an administrator, open <strong>Admin</strong> in the sidebar, then
+                <strong>System &rarr; Settings</strong>. A <strong>Monetization</strong> card appears
+                there once the gate above is on.</li>
+            <li>Configure whichever half you want, and press the card's own <strong>Save</strong>.
+                The card writes to the settings table, so these values take effect immediately with
+                no redeploy.</li>
+            <li>Confirm the <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">scheduler</a>
+                is running, whichever way you drive it. Promotions are settled, reconciled and
+                refunded by a scheduled command that runs every fifteen minutes, so without it
+                campaigns never complete and unspent budget is never returned.</li>
         </ol>
-        <div class="doc-callout doc-callout-warning">
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Selling promotions needs Stripe</div>
             <p>
                 On-network promotions are prepaid, so your instance needs
                 <code class="doc-inline-code">STRIPE_PLATFORM_KEY</code> and
                 <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> set, the same
                 platform keys that handle subscriptions and boosts. Without them the purchase form
-                offers only promotion credit you have granted by hand, and nobody can pay by card.
-                Google AdSense has no such requirement.
+                offers only promotion credit you have granted by hand, from the
+                <strong>Grant Boost Credit</strong> card under <strong>Manage &rarr; Boost</strong>,
+                and nobody can pay by card. Google AdSense has no such requirement.
+            </p>
+        </div>
+
+        <h3 id="disable" class="doc-subheading">Turning it off</h3>
+        <p>
+            Either half can be switched off in the <strong>Monetization</strong> card at any time.
+            Switching the promotions network off there is safe with campaigns outstanding: they stop
+            being shown, and the scheduled command keeps settling and refunding what has already
+            been paid for.
+        </p>
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Do not set ADS_ENABLED back to false while campaigns are outstanding</div>
+            <p>
+                The master switch stops that scheduled command as well, so a campaign that is still
+                running is never completed and its unspent budget is never refunded. Switch the
+                network off in the card first, and leave
+                <code class="doc-inline-code">ADS_ENABLED=true</code> until every campaign has
+                completed and refunded.
             </p>
         </div>
     </section>
 
-    <!-- Google AdSense -->
+    {{-- Google AdSense --}}
     <section id="adsense" class="doc-section">
-        <h2 class="doc-heading">Google AdSense</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+            </svg>
+            Google AdSense
+        </h2>
         <ol class="doc-list doc-list-numbered">
             <li>Create an AdSense account and add your instance's domain as a site.</li>
             <li>Create a <strong>display</strong> ad unit. Note its numeric slot ID.</li>
-            <li>In <strong>Admin &rarr; Settings &rarr; Monetization</strong>, switch on
-                <strong>Show Google AdSense on free schedules</strong> and fill in
+            <li>In the <strong>Monetization</strong> card under <strong>System &rarr; Settings</strong>,
+                switch on <strong>Show Google AdSense on free schedules</strong> and fill in
                 <strong>AdSense publisher ID</strong> (<code class="doc-inline-code">ca-pub-…</code>)
                 and <strong>AdSense ad slot ID</strong>.</li>
         </ol>
@@ -206,21 +255,29 @@
         </p>
     </section>
 
-    <!-- The promotions network -->
+    {{-- The promotions network --}}
     <section id="promotions" class="doc-section">
-        <h2 class="doc-heading">The promotions network</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+            </svg>
+            The promotions network
+        </h2>
         <p>
-            Switch on <strong>Enable the promotions network</strong> and set
+            In the same <strong>Monetization</strong> card, switch on
+            <strong>Enable the promotions network</strong> and set
             <strong>Price per 1,000 impressions</strong> and <strong>Price per click</strong>.
             Both rates are copied onto each campaign at the moment it is bought, so changing them
             later never re-prices a campaign someone has already paid for.
         </p>
 
-        <h3 class="doc-subheading">What an advertiser buys</h3>
+        <h3 id="promotions-buying" class="doc-subheading">What an advertiser buys</h3>
         <p>
-            A schedule on a paid plan promotes one of its public events from
-            <strong>Boost &rarr; On this site</strong>. Four things have to be true before the form
-            will open:
+            A schedule on a paid plan promotes one of its public events from the
+            <strong>Boost</strong> page in its sidebar: <strong>Boost Event</strong>, pick the event,
+            then <strong>On this site</strong>. Their side of it is in
+            <a href="{{ route('marketing.docs.boost') }}#on-network" class="doc-link">Boost</a>.
+            Four things have to be true before the form will open:
         </p>
         <ul class="doc-list">
             <li>the schedule is on <strong>Pro or Enterprise</strong>; free schedules host promotions but cannot buy them;</li>
@@ -234,8 +291,9 @@
             to the lower of <code class="doc-inline-code">PROMOTIONS_MAX_BUDGET</code> and the schedule's own
             boost spending limit, which starts at <code class="doc-inline-code">META_BOOST_DEFAULT_LIMIT</code>
             (10 by default) and grows only as the schedule completes Facebook and Instagram boosts. So a
-            new advertiser's first promotion is capped at 10 unless you raise that schedule's limit with
-            <strong>Set Limit</strong> under <strong>Admin &rarr; Boost</strong>. Targeting is
+            new advertiser's first promotion is capped at 10 unless you raise that schedule's limit in
+            the <strong>Set Spending Limit</strong> card under <strong>Manage &rarr; Boost</strong>
+            in the admin panel. Targeting is
             optional: a campaign can be limited to particular kinds of schedule (talent, venue or
             curator) and to visitors in particular countries. Leaving both untouched shows it
             everywhere.
@@ -247,7 +305,7 @@
             is shared: only Stripe's own fee comes off what the advertiser pays.
         </p>
 
-        <h3 class="doc-subheading">How a promotion is chosen</h3>
+        <h3 id="promotions-serving" class="doc-subheading">How a promotion is chosen</h3>
         <p>
             <strong>Prefer promotions over AdSense</strong> is on by default, and it is what makes
             a matching promotion win the slot with AdSense filling in only when nothing matches.
@@ -264,38 +322,48 @@
             <li>a per-click campaign whose click-through rate is still under 0.02% after 5,000 views is paused automatically, so weak creative cannot occupy your inventory for free.</li>
         </ul>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Any schedule can opt out</div>
-            <p><strong>Do not show other schedules' promotions</strong>, under
-            <strong>Settings &rarr; Advanced</strong> on the schedule, is free on every plan and
-            appears as soon as either half of monetization is live. Despite the label it removes
-            <strong>both</strong> paid promotions and AdSense from that schedule's public pages, so
-            a schedule always has a way to decline. Opting out only removes that schedule's own
-            inventory, and has no other effect on its plan.</p>
-        </div>
+        <h3 id="promotions-opt-out" class="doc-subheading">Any schedule can opt out</h3>
+        <p>
+            <strong>Do not show other schedules' promotions</strong> is a switch on the schedule's
+            edit page, in the <strong>Advanced</strong> row of the <strong>Settings</strong> tab. It
+            is free on every plan and appears as soon as either half of monetization is live.
+            Despite the label it removes <strong>both</strong> paid promotions and AdSense from that
+            schedule's public pages, so a schedule always has a way to decline. Opting out only
+            removes that schedule's own inventory, and has no other effect on its plan.
+        </p>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">What advertisers can see</div>
-            <p>Advertisers see views, clicks, click-through rate, spend and tickets sold on their
+        <h3 id="promotions-reporting" class="doc-subheading">What advertisers can see</h3>
+        <p>
+            Advertisers see views, clicks, click-through rate, spend and tickets sold on their
             campaign page, along with which countries their viewers were in. They are told how many
             schedules carried the promotion, but never which ones: the schedules hosting it did not
-            agree to have their traffic disclosed.</p>
-        </div>
+            agree to have their traffic disclosed.
+        </p>
     </section>
 
-    <!-- Reviewing promotions -->
+    {{-- Reviewing promotions --}}
     <section id="review" class="doc-section">
-        <h2 class="doc-heading">Reviewing promotions</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75" />
+            </svg>
+            Reviewing promotions
+        </h2>
         <p>
             Every promotion is reviewed before it runs. A paid schedule putting its event in front of
-            every free schedule's audience is worth a look first, so new campaigns queue up under
-            <strong>Admin &rarr; Boost</strong> and appear in the dashboard's "Needs attention" list.
+            every free schedule's audience is worth a look first, so new campaigns queue up in a card
+            near the top of <strong>Manage &rarr; Boost</strong> in the admin panel
+            (<code class="doc-inline-code">/admin/boost</code>), titled with how many are awaiting
+            review, and appear under <strong>Needs attention</strong> on the admin dashboard.
             The advertiser has already been charged and is waiting, so the queue is worth clearing
             promptly.
         </p>
         <p>
-            Approving one starts it immediately. Rejecting it refunds the advertiser in full, back
-            to promotion credit if that is how they paid, and emails them the reason you give.
+            Each campaign in the card shows its headline, description and image, the schedule and
+            account that bought it, its budget and pricing model, and where a click will lead.
+            <strong>Approve</strong> starts it immediately. <strong>Reject</strong> refunds the
+            advertiser in full, back to promotion credit if that is how they paid, and emails them
+            the reason you type in the box beside the button.
         </p>
         <p>
             A schedule stops going through the queue once it has a track record: it needs
@@ -306,9 +374,14 @@
         </p>
     </section>
 
-    <!-- Where ads appear -->
+    {{-- Where ads appear --}}
     <section id="where" class="doc-section">
-        <h2 class="doc-heading">Where ads appear</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            Where ads appear
+        </h2>
         <p>
             Ads and promotions appear in one place: a single slot at the bottom of a free schedule's
             public schedule page and public event pages, above the footer. They never appear:
@@ -333,9 +406,14 @@
         </p>
     </section>
 
-    <!-- Accommodation affiliate -->
+    {{-- Accommodation affiliate --}}
     <section id="accommodation" class="doc-section">
-        <h2 class="doc-heading">Accommodation affiliate</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+            </svg>
+            Accommodation affiliate
+        </h2>
         <p>
             A separate, independent way to earn from your instance: schedules can show a map of hotels
             and rentals near an event's venue, powered by <a href="https://www.stay22.com" target="_blank" rel="noopener" class="doc-link">Stay22</a>,
@@ -352,8 +430,8 @@
         </div>
 
         <p>Set <code class="doc-inline-code">STAY22_ENABLED=true</code> and an
-        <strong>Accommodation</strong> tab appears in every schedule's <strong>Engagement</strong>
-        settings, holding a <strong>Show nearby accommodation</strong> toggle and a
+        <strong>Accommodation</strong> row appears in the <strong>Engagement</strong> tab of every
+        schedule's edit page, holding a <strong>Show nearby accommodation</strong> toggle and a
         <strong>Stay22 affiliate ID</strong> field. Nothing is shown to visitors until a schedule
         owner turns it on there; it is off by default for every schedule, on every plan.</p>
 
@@ -361,8 +439,9 @@
         <p>
             A schedule that enters its own Stay22 affiliate ID keeps its own commission. A schedule that
             leaves the field blank falls back to the <strong>Fallback Stay22 affiliate ID</strong> you
-            set in the <strong>Accommodation affiliate</strong> card at
-            <strong>Admin &rarr; Settings</strong>, so the commission comes to you instead. The
+            set in the <strong>Accommodation affiliate</strong> card under
+            <strong>System &rarr; Settings</strong> in the admin panel, so the commission comes to
+            you instead. The
             settings page states this plainly to the schedule owner, both on the toggle itself and as a
             warning once the map is live without their own ID.
         </p>
@@ -410,9 +489,15 @@
         </p>
     </section>
 
-    <!-- Environment variables -->
+    {{-- Environment variables --}}
     <section id="environment" class="doc-section">
-        <h2 class="doc-heading">Environment variables</h2>
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Environment variables
+        </h2>
         <p>
             The two master switches, <code class="doc-inline-code">ADS_ENABLED</code> and
             <code class="doc-inline-code">STAY22_ENABLED</code>, can only be set here. Some of the
@@ -435,19 +520,19 @@
                     </tr>
                     <tr>
                         <td>AdSense toggle, publisher ID, slot ID, personalized ads</td>
-                        <td>Admin &rarr; Settings &rarr; Monetization, which wins over the variable</td>
+                        <td>The Monetization card under System &rarr; Settings, which wins over the variable</td>
                     </tr>
                     <tr>
                         <td>Promotions network toggle, priority, CPM and CPC rates</td>
-                        <td>Admin &rarr; Settings &rarr; Monetization, which wins over the variable</td>
+                        <td>The Monetization card under System &rarr; Settings, which wins over the variable</td>
                     </tr>
                     <tr>
                         <td>Fallback Stay22 affiliate ID</td>
-                        <td>Admin &rarr; Settings &rarr; Accommodation affiliate, which wins over the variable</td>
+                        <td>The Accommodation affiliate card under System &rarr; Settings, which wins over the variable</td>
                     </tr>
                     <tr>
                         <td>One schedule's boost spending limit</td>
-                        <td>Admin &rarr; Boost, per schedule; <code class="doc-inline-code">META_BOOST_DEFAULT_LIMIT</code> is where every schedule starts</td>
+                        <td>The Set Spending Limit card under Manage &rarr; Boost, per schedule; <code class="doc-inline-code">META_BOOST_DEFAULT_LIMIT</code> is where every schedule starts</td>
                     </tr>
                     <tr>
                         <td>Budgets, caps, currency, auto-approval threshold</td>
@@ -458,7 +543,10 @@
         </div>
 
         <div class="doc-code-block">
-            <div class="doc-code-header"><span>.env</span></div>
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
             <pre><code><span class="code-comment"># Master switch. Cannot be overridden from the admin panel.</span>
 <span class="code-variable">ADS_ENABLED</span>=<span class="code-value">true</span>
 

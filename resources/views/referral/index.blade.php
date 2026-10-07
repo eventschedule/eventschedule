@@ -1,209 +1,246 @@
 <x-app-admin-layout>
 
-    <div class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ __('messages.referral_program') }}</h2>
+    <x-slot name="head">
+        {{-- The link and its Copy button on one line, and the three steps as a numbered row. --}}
+        <style {!! nonce_attr() !!}>
+            .referral-link-row {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 0.5rem;
+            }
+            .referral-link-row input {
+              flex: 1 1 14rem;
+              min-width: 0;
+            }
+            .referral-steps {
+              display: grid;
+              grid-template-columns: repeat(3, minmax(0, 1fr));
+              gap: 1.25rem;
+              margin: 0;
+              padding: 0;
+              list-style: none;
+            }
+            .referral-step {
+              display: flex;
+              gap: 0.75rem;
+            }
+            .referral-step-number {
+              display: flex;
+              flex: none;
+              align-items: center;
+              justify-content: center;
+              width: 1.75rem;
+              height: 1.75rem;
+              border-radius: 0.5rem;
+              background: var(--ap-tint-2);
+              font-size: 0.8125rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink-2));
+            }
+            .referral-step h3 {
+              margin: 0.1875rem 0 0;
+              font-size: 0.875rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .referral-step p {
+              margin: 0.125rem 0 0;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            /* A chip that opens its cell has nothing to stand off from. */
+            .event-chip.referral-plan {
+              margin-inline-start: 0;
+            }
+            /* Written with the list's own selector: the kit sets a form in a row's last cell
+               inline, for the one-word forms most rows hold. */
+            .page-table .c-actions form.referral-apply {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: flex-end;
+              gap: 0.5rem;
+              white-space: normal;
+            }
+            @media (max-width: 767.98px) {
+              .referral-steps {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 1rem;
+              }
+            }
+            @media (max-width: 639.98px) {
+              .referral-link-row > button {
+                flex: 1 1 100%;
+              }
+              .page-table .c-actions form.referral-apply {
+                justify-content: flex-start;
+              }
+              /* The schedule picker (a select, or the box the searchable select puts in its place). */
+              .referral-apply > select,
+              .referral-apply > div {
+                flex: 1 1 10rem;
+              }
+            }
+        </style>
+    </x-slot>
 
-        @if (session('message'))
-            <div class="mb-6 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700">
-                <p class="text-green-800 dark:text-green-200">{{ session('message') }}</p>
-            </div>
-        @endif
+    @php
+        // The name of a plan in the reader's language: it was printed as ucfirst('enterprise').
+        $planName = fn ($plan) => in_array($plan, ['pro', 'enterprise'], true) ? __('messages.' . $plan) : ucfirst((string) $plan);
+        $statusTones = ['subscribed' => 'is-info', 'qualified' => 'is-warn', 'credited' => 'is-on', 'expired' => 'is-bad'];
+        $statusLabels = [
+            'pending' => __('messages.pending'),
+            'subscribed' => __('messages.status_subscribed'),
+            'qualified' => __('messages.qualified'),
+            'credited' => __('messages.credited'),
+            'expired' => __('messages.expired'),
+        ];
+    @endphp
 
-        @if (session('error'))
-            <div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
-                <p class="text-red-800 dark:text-red-200">{{ session('error') }}</p>
-            </div>
-        @endif
+    <div class="page-shell">
+        <x-page-header :title="__('messages.referral_program')" :lead="__('messages.referral_plan_page_description')" />
 
-        {{-- Referral Link --}}
-        <div id="referral-link" class="mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.your_referral_link') }}</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('messages.referral_link_description') }}</p>
-            <div class="flex gap-2">
-                <input type="text" value="{{ $referralUrl }}" readonly
-                    id="referral-url-input"
-                    class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                <button type="button" id="copy-referral-link"
-                    class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                    <svg class="w-4 h-4 me-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                    <span id="copy-btn-text">{{ __('messages.copy_link') }}</span>
-                </button>
-            </div>
-        </div>
+        <div class="page-stack">
+            <x-page-flash :keys="['message' => 'success', 'error' => 'error']" />
 
-        {{-- Stats --}}
-        <div id="referral-dashboard" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalReferrals }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.total_referrals') }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $awaitingSubscription }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.awaiting_subscription') }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $awaitingQualification }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.awaiting_qualification') }}</div>
-            </div>
-            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 text-center">
-                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $creditsEarned }}</div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.credits_earned') }}</div>
-            </div>
-        </div>
+            {{-- The link --}}
+            <x-page-card id="referral-link" :title="__('messages.your_referral_link')" :lead="__('messages.referral_link_description')">
+                <div class="referral-link-row">
+                    <label for="referral-url-input" class="sr-only">{{ __('messages.your_referral_link') }}</label>
+                    <input type="text" value="{{ $referralUrl }}" readonly dir="ltr"
+                        id="referral-url-input"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <x-brand-button id="copy-referral-link" class="gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        <span id="copy-btn-text" aria-live="polite">{{ __('messages.copy_link') }}</span>
+                    </x-brand-button>
+                </div>
+            </x-page-card>
 
-        {{-- Pending Credits --}}
-        @if ($qualifiedCredits->isNotEmpty())
-        <div id="referral-credits" class="mb-8 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                <svg class="w-5 h-5 inline-block text-green-600 dark:text-green-400 me-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                {{ __('messages.credits_ready_to_apply') }}
-            </h3>
-
-            @foreach ($qualifiedCredits as $credit)
-            <div class="ap-card rounded-lg border border-gray-200 dark:border-transparent p-4 mb-3 last:mb-0">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $credit->plan_type === 'enterprise' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' }}">
-                            {{ ucfirst($credit->plan_type) }}
-                        </span>
-                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
-                            {{ plan_price($credit->plan_type === 'enterprise' ? $entMonthly : $proMonthly) }} {{ __('messages.credit') }}
-                        </span>
-                    </div>
-                    <form action="{{ route('referrals.apply_credit') }}" method="POST" class="flex items-center gap-2">
-                        @csrf
-                        <input type="hidden" name="referral_id" value="{{ \App\Utils\UrlUtils::encodeId($credit->id) }}">
-                        <select name="role_id" required data-searchable
-                            class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <option value="">{{ __('messages.select_schedule') }}</option>
-                            @foreach ($ownedRoles as $role)
-                            <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="inline-flex items-center rounded-lg bg-[var(--brand-button-bg)] px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                            {{ __('messages.apply_credit') }}
-                        </button>
-                    </form>
+            {{-- The four figures, as one strip: they were four cards, two rows of a phone. --}}
+            <div id="referral-dashboard" class="ap-card rounded-xl page-stats is-auto">
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($totalReferrals) }}</div>
+                    <div class="page-stat-label">{{ __('messages.total_referrals') }}</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($awaitingSubscription) }}</div>
+                    <div class="page-stat-label">{{ __('messages.awaiting_subscription') }}</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($awaitingQualification) }}</div>
+                    <div class="page-stat-label">{{ __('messages.awaiting_qualification') }}</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-value {{ $creditsEarned > 0 ? 'is-good' : '' }}">{{ number_format($creditsEarned) }}</div>
+                    <div class="page-stat-label">{{ __('messages.credits_earned') }}</div>
                 </div>
             </div>
-            @endforeach
-        </div>
-        @endif
 
-        {{-- How It Works --}}
-        <div id="referral-how-it-works" class="mb-8 ap-card rounded-lg border border-gray-200 dark:border-transparent p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.how_it_works') }}</h3>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[var(--brand-blue)] flex items-center justify-center mx-auto mb-3 text-lg font-bold">1</div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.referral_step_1_title') }}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_step_1_description') }}</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[var(--brand-blue)] flex items-center justify-center mx-auto mb-3 text-lg font-bold">2</div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.referral_step_2_title') }}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_step_2_description') }}</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[var(--brand-blue)] flex items-center justify-center mx-auto mb-3 text-lg font-bold">3</div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-1">{{ __('messages.referral_step_3_title') }}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_step_3_description') }}</p>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {{-- Pre-formatted by plan_price(), so the symbol follows the installation's
-                         currency and a translator cannot desync it. This replaced a scheme where
-                         each locale carried its own symbol and placement (English "$5", French
-                         "5 $"); the trade-off is that every locale now prefixes, which is what
-                         MoneyUtils::format() already does for every other price in the app. --}}
-                    {{ __('messages.referral_credit_values', ['pro' => plan_price($proMonthly), 'enterprise' => plan_price($entMonthly)]) }}
-                </p>
-            </div>
-        </div>
-
-        {{-- Referral History --}}
-        @if ($referralHistory->isNotEmpty())
-        <div id="referral-history" class="ap-card rounded-lg border border-gray-200 dark:border-transparent overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.referral_history') }}</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900/50">
+            {{-- Credits waiting to be put on a schedule --}}
+            @if ($qualifiedCredits->isNotEmpty())
+            <x-page-card id="referral-credits" :title="__('messages.credits_ready_to_apply')" flush>
+                <table class="page-table">
+                    <thead>
                         <tr>
-                            <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.date') }}</x-sortable-header>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.referred_user') }}</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.plan_tier') }}</th>
-                            <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.status') }}</x-sortable-header>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('messages.credited_to') }}</th>
+                            <th scope="col">{{ __('messages.referral_credit') }}</th>
+                            <th scope="col"><span class="sr-only">{{ __('messages.apply_credit') }}</span></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($referralHistory as $referral)
+                    <tbody>
+                        @foreach ($qualifiedCredits as $credit)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ $referral->created_at->format('M j, Y') }}
+                            <td class="c-main c-strong">
+                                {{ plan_price($credit->plan_type === 'enterprise' ? $entMonthly : $proMonthly) }} {{ __('messages.credit') }}
+                                <span class="event-chip">{{ $planName($credit->plan_type) }}</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                @php
-                                    $email = $referral->referredUser->email ?? '';
-                                    $parts = explode('@', $email);
-                                    $masked = substr($parts[0], 0, 2) . '***@' . ($parts[1] ?? '');
-                                @endphp
-                                {{ $masked }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($referral->plan_type)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $referral->plan_type === 'enterprise' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' }}">
-                                    {{ ucfirst($referral->plan_type) }}
-                                </span>
-                                @else
-                                <span class="text-sm text-gray-400">-</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($referral->status === 'pending')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                    {{ __('messages.pending') }}
-                                </span>
-                                @elseif ($referral->status === 'subscribed')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                    {{ __('messages.status_subscribed') }}
-                                </span>
-                                @elseif ($referral->status === 'qualified')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                    {{ __('messages.qualified') }}
-                                </span>
-                                @elseif ($referral->status === 'credited')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
-                                    {{ __('messages.credited') }}
-                                </span>
-                                @elseif ($referral->status === 'expired')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                    {{ __('messages.expired') }}
-                                </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {{ $referral->creditedRole->name ?? '-' }}
+                            <td class="c-actions">
+                                <form action="{{ route('referrals.apply_credit') }}" method="POST" class="referral-apply">
+                                    @csrf
+                                    <input type="hidden" name="referral_id" value="{{ \App\Utils\UrlUtils::encodeId($credit->id) }}">
+                                    <select name="role_id" required data-searchable aria-label="{{ __('messages.select_schedule') }}"
+                                        class="w-56 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        <option value="">{{ __('messages.select_schedule') }}</option>
+                                        @foreach ($ownedRoles as $role)
+                                        <option value="{{ \App\Utils\UrlUtils::encodeId($role->id) }}">{{ $role->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-brand-button type="submit">{{ __('messages.apply_credit') }}</x-brand-button>
+                                </form>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-            </div>
-            @if ($referralHistory->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $referralHistory->links() }}
-            </div>
+            </x-page-card>
+            @endif
+
+            {{-- How it works --}}
+            <x-page-card id="referral-how-it-works" :title="__('messages.how_it_works')">
+                <ol class="referral-steps">
+                    @foreach ([1, 2, 3] as $step)
+                    <li class="referral-step">
+                        <span class="referral-step-number" aria-hidden="true">{{ $step }}</span>
+                        <div>
+                            <h3>{{ __('messages.referral_step_' . $step . '_title') }}</h3>
+                            <p>{{ __('messages.referral_step_' . $step . '_description') }}</p>
+                        </div>
+                    </li>
+                    @endforeach
+                </ol>
+                <x-slot name="foot">
+                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        {{-- Pre-formatted by plan_price(), so the symbol follows the installation's
+                             currency and a translator cannot desync it. This replaced a scheme where
+                             each locale carried its own symbol and placement (English "$5", French
+                             "5 $"); the trade-off is that every locale now prefixes, which is what
+                             MoneyUtils::format() already does for every other price in the app. --}}
+                        {{ __('messages.referral_credit_values', ['pro' => plan_price($proMonthly), 'enterprise' => plan_price($entMonthly)]) }}
+                    </div>
+                </x-slot>
+            </x-page-card>
+
+            {{-- Who signed up through the link, and where each one stands --}}
+            @if ($referralHistory->isNotEmpty())
+            <x-page-card id="referral-history" :title="__('messages.referral_history')" flush>
+                <table class="page-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ __('messages.referred_user') }}</th>
+                            <x-page-sort column="created_at" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.date') }}</x-page-sort>
+                            <th scope="col">{{ __('messages.plan_tier') }}</th>
+                            <x-page-sort column="status" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.status') }}</x-page-sort>
+                            <th scope="col">{{ __('messages.credited_to') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($referralHistory as $referral)
+                        @php
+                            // Enough of the address to recognise who it is, and no more.
+                            $email = $referral->referredUser->email ?? '';
+                            $parts = explode('@', $email);
+                            $masked = $email === '' ? '' : substr($parts[0], 0, 2) . '***@' . ($parts[1] ?? '');
+                        @endphp
+                        <tr>
+                            <td class="c-main c-strong c-wrap"><bdi dir="ltr">{{ $masked !== '' ? $masked : '-' }}</bdi></td>
+                            <td class="c-date">{{ $referral->created_at->translatedFormat('M j, Y') }}</td>
+                            <td>@if ($referral->plan_type)<span class="event-chip referral-plan">{{ $planName($referral->plan_type) }}</span>@endif</td>
+                            <td>
+                                <span class="event-status {{ $statusTones[$referral->status] ?? '' }}">{{ $statusLabels[$referral->status] ?? ucfirst((string) $referral->status) }}</span>
+                            </td>
+                            <td class="c-wrap" data-label="{{ __('messages.credited_to') }}">@if ($referral->creditedRole)<bdi>{{ $referral->creditedRole->name }}</bdi>@endif</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @if ($referralHistory->hasPages())
+                <x-slot name="foot">{{ $referralHistory->links() }}</x-slot>
+                @endif
+            </x-page-card>
             @endif
         </div>
-        @endif
     </div>
 
     <script {!! nonce_attr() !!}>
@@ -221,15 +258,24 @@
             }
         });
 
+        // The label is read once: a second press inside the two seconds used to take "Copied!"
+        // for the button's own name and leave it there.
+        var copyText = document.getElementById('copy-btn-text');
+        var copyLabel = copyText.textContent;
+        var copyTimer = null;
         document.getElementById('copy-referral-link').addEventListener('click', function() {
             var input = document.getElementById('referral-url-input');
             navigator.clipboard.writeText(input.value).then(function() {
-                var btnText = document.getElementById('copy-btn-text');
-                var original = btnText.textContent;
-                btnText.textContent = '{{ __("messages.link_copied") }}';
-                setTimeout(function() {
-                    btnText.textContent = original;
+                copyText.textContent = @json(__('messages.link_copied'));
+                clearTimeout(copyTimer);
+                copyTimer = setTimeout(function() {
+                    copyText.textContent = copyLabel;
                 }, 2000);
+            }).catch(function() {
+                // No clipboard here (an old browser, a page not served over https): the link is
+                // selected instead, ready to be copied by hand.
+                input.focus();
+                input.select();
             });
         });
     </script>

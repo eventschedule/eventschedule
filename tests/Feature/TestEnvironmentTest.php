@@ -107,6 +107,27 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * No test may reach the production app on DigitalOcean.
+     *
+     * The developer's .env on the machine that deploys the hosted install holds the real API token
+     * and app id, and the suite loads that file. Unpinned, DigitalOceanService::isConfigured() was
+     * true in every test: ApAdminInsightPagesTest rendered the admin Domains page, which asked
+     * DigitalOcean for the production app on every run, and a test that saves a direct-mode
+     * custom domain was one missing Http::fake() away from a PUT of that app's spec. CI has no
+     * token, so nothing there could show it.
+     *
+     * Asserted on the default every test inherits, like the geocoding pin above: removing either
+     * phpunit.xml entry fails this on any machine that has the real values. A test that needs the
+     * service sets its own token together with Http::fake().
+     */
+    public function test_no_test_can_reach_the_production_app_on_digitalocean(): void
+    {
+        $this->assertSame('', (string) config('services.digitalocean.api_token'), 'phpunit.xml must pin DO_API_TOKEN empty.');
+        $this->assertSame('', (string) config('services.digitalocean.app_id'), 'phpunit.xml must pin DO_APP_ID empty.');
+        $this->assertFalse(app(\App\Services\DigitalOceanService::class)->isConfigured());
+    }
+
+    /**
      * The other half of the harness that only CI can disprove.
      *
      * public/build is gitignored and .github/workflows/test.yml never builds assets, so the real

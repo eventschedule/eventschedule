@@ -81,6 +81,61 @@ class BoostStoreCharacterizationTest extends TestCase
         $this->assertSame('active', $campaign->status);
     }
 
+    /**
+     * The advanced form opens with its own dates filled in: start today, end some days on, as
+     * plain days ("2026-10-07"). The rule was `after_or_equal:now`, and a day is midnight, which
+     * is before now at every moment but one: the form's own default was refused. On a hosted
+     * install the card is confirmed BEFORE this request is made, so the advertiser had paid and
+     * was told the campaign could not be saved.
+     */
+    public function test_the_advanced_forms_own_default_dates_are_accepted(): void
+    {
+        [$owner, $role, $event] = $this->advertiser();
+
+        $this->actingAs($owner)->post(route('boost.store'), $this->payload($role, $event, [
+            'scheduled_start' => now()->format('Y-m-d'),
+            'scheduled_end' => now()->addDays(5)->format('Y-m-d'),
+        ]))->assertSessionHasNoErrors();
+
+        $campaign = BoostCampaign::first();
+        $this->assertNotNull($campaign, 'the campaign is created');
+        // A start that is already behind us starts now: the ad set is never handed a start time
+        // in the past, and "today" does not mean "since midnight".
+        $this->assertTrue($campaign->scheduled_start->gte(now()->subMinute()), 'it starts now, not at midnight');
+        $this->assertSame(now()->addDays(5)->format('Y-m-d'), $campaign->scheduled_end->format('Y-m-d'));
+    }
+
+    /** A day somebody picked in their own evening can be yesterday on the server's clock. */
+    public function test_a_start_that_is_yesterday_on_the_servers_clock_starts_now(): void
+    {
+        [$owner, $role, $event] = $this->advertiser();
+
+        $this->actingAs($owner)->post(route('boost.store'), $this->payload($role, $event, [
+            'scheduled_start' => now()->subDay()->format('Y-m-d'),
+            'scheduled_end' => now()->addDays(3)->format('Y-m-d'),
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertTrue(BoostCampaign::firstOrFail()->scheduled_start->gte(now()->subMinute()));
+    }
+
+    /** What is still refused: a start days in the past, and an end that is not after the start. */
+    public function test_dates_that_make_no_campaign_are_still_refused(): void
+    {
+        [$owner, $role, $event] = $this->advertiser();
+
+        $this->actingAs($owner)->post(route('boost.store'), $this->payload($role, $event, [
+            'scheduled_start' => now()->subDays(3)->format('Y-m-d'),
+            'scheduled_end' => now()->addDays(3)->format('Y-m-d'),
+        ]))->assertSessionHasErrors('scheduled_start');
+
+        $this->actingAs($owner)->post(route('boost.store'), $this->payload($role, $event, [
+            'scheduled_start' => now()->addDays(4)->format('Y-m-d'),
+            'scheduled_end' => now()->addDays(2)->format('Y-m-d'),
+        ]))->assertSessionHasErrors('scheduled_end');
+
+        $this->assertSame(0, BoostCampaign::count());
+    }
+
     public function test_the_markup_is_zero_on_selfhost_and_twenty_percent_hosted(): void
     {
         [$owner, $role, $event] = $this->advertiser();

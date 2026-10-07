@@ -171,7 +171,7 @@ return [
             'blurb' => 'Create your account and set up your first schedule.',
             'icon' => 'bolt',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'creating-schedules' => [
@@ -183,7 +183,7 @@ return [
             'blurb' => 'Configure details, settings, sub-schedules, auto import, and integrations.',
             'icon' => 'cog',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'schedule-styling' => [
@@ -196,7 +196,7 @@ return [
             'blurb' => 'Customize colors, fonts, and branding for your schedule.',
             'icon' => 'swatch',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'creating-events' => [
@@ -208,7 +208,7 @@ return [
             'blurb' => 'Add events and configure event settings.',
             'icon' => 'plus',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'ai-import' => [
@@ -218,10 +218,10 @@ return [
             'path' => '/docs/ai-import',
             'feature' => 'marketing.ai',
             'title' => 'AI Import',
-            'blurb' => 'Import events from a link, text or images.',
+            'blurb' => 'Import events from a link, text, images, a Google calendar or Eventbrite.',
             'icon' => 'sparkles',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-10-07',
         ],
 
         'scan-agenda' => [
@@ -234,7 +234,7 @@ return [
             'blurb' => 'Use AI to scan a photo of a printed agenda and automatically create event parts.',
             'icon' => 'camera',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'tickets' => [
@@ -247,7 +247,7 @@ return [
             'blurb' => 'Set up ticketing and manage sales.',
             'icon' => 'ticket',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'subscriptions' => [
@@ -261,7 +261,7 @@ return [
             'blurb' => 'Sell one pass a guest reuses across many events.',
             'icon' => 'pass',
             'published' => '2026-06-11',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'allocated-seating' => [
@@ -274,7 +274,7 @@ return [
             'blurb' => 'Sell reserved seats from a plan of your venue.',
             'icon' => 'ticket',
             'published' => '2026-08-23',
-            'modified' => '2026-08-23',
+            'modified' => '2026-10-07',
         ],
 
         'gift-cards' => [
@@ -287,7 +287,7 @@ return [
             'blurb' => 'Sell prepaid gift cards buyers send to someone else.',
             'icon' => 'gift',
             'published' => '2026-07-16',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'appointments' => [
@@ -300,7 +300,7 @@ return [
             'blurb' => 'Let guests book a time with you on a public page.',
             'icon' => 'clock',
             'published' => '2026-07-26',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-07',
         ],
 
         'sharing' => [
@@ -314,7 +314,7 @@ return [
             'blurb' => 'Embed, share on social, and grow followers.',
             'icon' => 'share',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-07',
         ],
 
         'event-graphics' => [
@@ -327,7 +327,7 @@ return [
             'blurb' => 'Generate shareable images for social media.',
             'icon' => 'image',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'newsletters' => [
@@ -340,7 +340,7 @@ return [
             'blurb' => 'Send branded emails to your audience.',
             'icon' => 'mail',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-10-07',
         ],
 
         'boost' => [
@@ -353,7 +353,7 @@ return [
             'blurb' => 'Promote events with automated Facebook and Instagram ads.',
             'icon' => 'megaphone',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-07',
         ],
 
         'managing-schedules' => [
@@ -366,7 +366,7 @@ return [
             'blurb' => 'Manage events, team, availability, requests, and more.',
             'icon' => 'clipboard',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'analytics' => [
@@ -379,7 +379,7 @@ return [
             'blurb' => 'Track views, devices, traffic sources, and conversions.',
             'icon' => 'chart',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'account-settings' => [
@@ -391,7 +391,7 @@ return [
             'blurb' => 'Manage your profile, payments, and API access.',
             'icon' => 'account',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'referral-program' => [
@@ -403,7 +403,7 @@ return [
             'blurb' => 'Earn free months by referring other organizers.',
             'icon' => 'referral',
             'published' => '2024-01-01',
-            'modified' => '2026-03-01',
+            'modified' => '2026-10-07',
         ],
 
         // ---- Selfhost -------------------------------------------------------
@@ -419,7 +419,7 @@ return [
             'blurb' => 'Install, configure and run Event Schedule on your own server.',
             'icon' => 'server',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/installation' => [
@@ -431,7 +431,7 @@ return [
             'blurb' => 'Step-by-step server setup: database, web server, and first run.',
             'icon' => 'terminal',
             'published' => '2024-01-01',
-            'modified' => '2026-07-30',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/stripe' => [
@@ -441,10 +441,10 @@ return [
             'feature' => 'marketing.stripe',
             'title' => 'Stripe Integration',
             'nav_title' => 'Stripe',
-            'blurb' => 'Set up Stripe payments for a selfhost or SaaS deployment.',
+            'blurb' => 'Stripe, PayPal, Payfast and Invoice Ninja on a selfhost or SaaS install, and how refunds work.',
             'icon' => 'credit-card',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/google-calendar' => [
@@ -456,7 +456,7 @@ return [
             'blurb' => 'Bidirectional Google Calendar sync.',
             'icon' => 'calendar',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/google-wallet' => [
@@ -467,7 +467,7 @@ return [
             'blurb' => 'Let buyers save tickets to Google Wallet.',
             'icon' => 'ticket',
             'published' => '2026-09-07',
-            'modified' => '2026-09-07',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/microsoft-calendar' => [
@@ -479,7 +479,7 @@ return [
             'blurb' => 'Bidirectional Outlook sync via Microsoft Graph.',
             'icon' => 'calendar',
             'published' => '2026-07-14',
-            'modified' => '2026-07-14',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/email' => [
@@ -491,7 +491,7 @@ return [
             'blurb' => 'Set up SMTP, Amazon SES or another mail driver, and see which emails go out automatically.',
             'icon' => 'mail',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/ai' => [
@@ -504,7 +504,7 @@ return [
             'blurb' => 'Configure Google Gemini or OpenAI for import, scanning and translation.',
             'icon' => 'sparkles',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/boost' => [
@@ -517,7 +517,7 @@ return [
             'blurb' => 'Configure the Meta ads integration behind the boost feature.',
             'icon' => 'megaphone',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/admin' => [
@@ -528,7 +528,7 @@ return [
             'blurb' => 'Monitor users, revenue and analytics, and manage platform settings.',
             'icon' => 'shield',
             'published' => '2024-01-01',
-            'modified' => '2026-10-06',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/federation' => [
@@ -539,7 +539,7 @@ return [
             'blurb' => 'Share your public events with the eventschedule.com listings.',
             'icon' => 'globe',
             'published' => '2026-07-26',
-            'modified' => '2026-07-26',
+            'modified' => '2026-10-07',
         ],
 
         'selfhost/accessibility' => [
@@ -551,7 +551,7 @@ return [
             'blurb' => 'Accessibility declarations, configuration and user-generated content.',
             'icon' => 'accessibility',
             'published' => '2026-05-03',
-            'modified' => '2026-05-03',
+            'modified' => '2026-10-07',
         ],
 
         // ---- SaaS -----------------------------------------------------------
@@ -567,7 +567,7 @@ return [
             'blurb' => 'Subdomain-based multi-tenant routing, branding and plans.',
             'icon' => 'cloud',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'saas/custom-domains' => [
@@ -579,7 +579,7 @@ return [
             'blurb' => 'Automatic SSL for tenant domains on DigitalOcean App Platform.',
             'icon' => 'link',
             'published' => '2026-02-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-10-07',
         ],
 
         'saas/twilio' => [
@@ -592,7 +592,7 @@ return [
             'blurb' => 'Phone verification and WhatsApp messaging.',
             'icon' => 'phone',
             'published' => '2026-02-27',
-            'modified' => '2026-02-27',
+            'modified' => '2026-10-07',
         ],
 
         'saas/facebook-login' => [
@@ -604,7 +604,7 @@ return [
             'blurb' => 'Let your customers sign up and log in with Facebook.',
             'icon' => 'account',
             'published' => '2026-09-23',
-            'modified' => '2026-09-23',
+            'modified' => '2026-10-07',
         ],
 
         'saas/federation' => [
@@ -616,7 +616,7 @@ return [
             'blurb' => 'Share your public events with the eventschedule.com listings.',
             'icon' => 'globe',
             'published' => '2026-07-26',
-            'modified' => '2026-07-26',
+            'modified' => '2026-10-07',
         ],
 
         // SaaS group only: a single-tenant selfhost has no free tier, so nothing is ever
@@ -630,7 +630,7 @@ return [
             'blurb' => 'Show ads on free schedules and sell promotional placement to paid ones.',
             'icon' => 'megaphone',
             'published' => '2026-07-28',
-            'modified' => '2026-07-28',
+            'modified' => '2026-10-07',
         ],
 
         // ---- Developer ------------------------------------------------------
@@ -646,7 +646,7 @@ return [
             'blurb' => 'Programmatically manage schedules and events over REST.',
             'icon' => 'code',
             'published' => '2024-01-01',
-            'modified' => '2026-08-12',
+            'modified' => '2026-10-07',
         ],
 
         'developer/webhooks' => [
@@ -657,7 +657,7 @@ return [
             'blurb' => 'HMAC-signed POST notifications for sales, events and check-ins.',
             'icon' => 'webhook',
             'published' => '2026-03-01',
-            'modified' => '2026-08-12',
+            'modified' => '2026-10-07',
         ],
 
     ],

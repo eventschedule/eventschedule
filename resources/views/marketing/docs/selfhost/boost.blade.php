@@ -53,11 +53,11 @@
                 <tbody>
                     <tr>
                         <td><code class="doc-inline-code">META_ACCESS_TOKEN</code> is set</td>
-                        <td>The switch that makes the Meta channel exist. It turns on the <strong class="text-gray-900 dark:text-white">Facebook &amp; Instagram</strong> button in the boost dashboard's event picker, and it is what the scheduler checks before running <code class="doc-inline-code">boost:sync</code>. Nothing is ever sent to Meta without it.</td>
+                        <td>The switch that makes the Meta channel exist. It puts <strong class="text-gray-900 dark:text-white">Boost</strong> in the sidebar, turns on the <strong class="text-gray-900 dark:text-white">Facebook &amp; Instagram</strong> button in the <strong class="text-gray-900 dark:text-white">Boost Event</strong> dialog on that page, and is what the scheduler checks before running <code class="doc-inline-code">boost:sync</code>. Nothing is ever sent to Meta without it.</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_APP_ID</code> is set</td>
-                        <td>Enables the <strong class="text-gray-900 dark:text-white">Boost Event</strong> button in the header of the event edit page. Without it the button is disabled and says "Boost requires Meta Ads to be configured."</td>
+                        <td>Makes the <strong class="text-gray-900 dark:text-white">Boost Event</strong> button at the top of a saved event's form open the boost form. Without it, pressing the button only shows "Boost requires Meta Ads to be configured."</td>
                     </tr>
                     <tr>
                         <td>The schedule is on a paid plan</td>
@@ -83,9 +83,11 @@
             </table>
         </div>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Set <code class="doc-inline-code">META_APP_ID</code> and <code class="doc-inline-code">META_ACCESS_TOKEN</code> together, or neither.</strong> With the app ID set and the token blank, the <strong class="text-gray-900 dark:text-white">Boost Event</strong> button on an event still opens the boost form, and a campaign created there is recorded as active under placeholder IDs. Nothing is sent to Meta, no ad runs, and nothing on screen says so.</p>
+
         <h3 class="doc-subheading">Boost has a second channel you configure elsewhere</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The Boost section of the admin panel covers two channels. Everything on this page is the <strong class="text-gray-900 dark:text-white">Meta</strong> channel: paid ads bought from Facebook and Instagram. The other is <strong class="text-gray-900 dark:text-white">on-network promotions</strong>, where a paid schedule buys placement on the public pages of free schedules on your own instance. It shares the same campaign records and the same dashboard, but none of the variables on this page apply to it.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">That is why <strong class="text-gray-900 dark:text-white">Boost</strong> can appear in the admin panel sidebar on an instance with no Meta configuration at all: the sidebar item shows when <code class="doc-inline-code">META_ACCESS_TOKEN</code> is set <em>or</em> the promotions engine is enabled. Promotions need three separate things - <code class="doc-inline-code">ADS_ENABLED=true</code> in <code class="doc-inline-code">.env</code>, the promotions engine switched on in the admin panel's monetization settings, and a multi-tenant hosted install - and they are covered in the <a href="{{ route('marketing.docs.saas.monetization') }}" class="doc-link">Monetization guide</a>. None of that is required for Meta boosts.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Boost</strong> page covers two channels. Everything in this guide is the <strong class="text-gray-900 dark:text-white">Meta</strong> channel: paid ads bought from Facebook and Instagram. The other is <strong class="text-gray-900 dark:text-white">on-network promotions</strong>, where a paid schedule buys placement on the public pages of free schedules on your own instance. It shares the same campaign records and the same page, but none of the variables in this guide apply to it.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">That is why <strong class="text-gray-900 dark:text-white">Boost</strong> can appear in the sidebar on an instance with no Meta configuration at all: the entry shows when <code class="doc-inline-code">META_ACCESS_TOKEN</code> is set <em>or</em> the promotions network is enabled. Promotions need three separate things: <code class="doc-inline-code">ADS_ENABLED=true</code> in <code class="doc-inline-code">.env</code>, a multi-tenant hosted install, and <strong class="text-gray-900 dark:text-white">Enable the promotions network</strong> switched on in the <strong class="text-gray-900 dark:text-white">Monetization</strong> card of the admin panel's <strong class="text-gray-900 dark:text-white">Settings</strong> page, under <strong class="text-gray-900 dark:text-white">System</strong>. They are covered in the <a href="{{ route('marketing.docs.saas.monetization') }}#promotions" class="doc-link">Monetization guide</a>. None of that is required for Meta boosts.</p>
 
         <p class="text-gray-600 dark:text-gray-300">The rest of this guide walks through the Facebook and Meta configuration, in the order it is easiest to do it.</p>
     </section>
@@ -217,7 +219,7 @@
             <pre><code><span class="code-variable">META_ACCESS_TOKEN</span>=<span class="code-string">your_system_user_token</span></code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6">This variable is the master switch for the feature. With it set, <strong class="text-gray-900 dark:text-white">Boost</strong> appears in the admin panel sidebar and the <code class="doc-inline-code">boost:sync</code> scheduled command starts running. With it blank, the sidebar item is hidden and nothing is ever sent to Meta.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-6">This variable is the master switch for the feature. With it set, <strong class="text-gray-900 dark:text-white">Boost</strong> appears in the sidebar and the <code class="doc-inline-code">boost:sync</code> scheduled command starts running. With it blank, the sidebar entry is hidden (unless the promotions network is on) and nothing is ever sent to Meta.</p>
     </section>
 
     <!-- Step 5: Meta Pixel -->
@@ -229,7 +231,11 @@
             Step 5: Meta Pixel
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The pixel is <strong class="text-gray-900 dark:text-white">optional</strong>. Campaigns run without it; what you lose is conversion tracking, so ads can only be optimized and reported on by reach, impressions and clicks.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">When <code class="doc-inline-code">META_PIXEL_ID</code> is set, two things happen, both scoped to events with an <em>active</em> Meta campaign. The browser pixel is injected into that event's public page, tracking a page view and a content view. And when a ticket sale for that event is paid online, through Stripe, PayPal, Payfast, Invoice Ninja or a payment link, including the first payment of an installment plan, the server sends a Purchase conversion to Meta's Conversions API using the system user token, with the buyer's email address SHA-256 hashed rather than sent in the clear. A free registration is reported the same way with a value of zero, and a sale you mark as paid by hand, such as cash at the door, sends nothing.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When <code class="doc-inline-code">META_PIXEL_ID</code> is set, two things happen, both scoped to events with an <em>active</em> Meta campaign, and both only for a visitor who has allowed the <strong class="text-gray-900 dark:text-white">Marketing and embedded content</strong> category in the cookie banner:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">The browser pixel</strong> loads on that event's public page and tracks a page view and a content view. Until the visitor allows the category nothing is requested from Facebook, and withdrawing it later stops the pixel sending. The pixel is never loaded inside an embedded page.</li>
+            <li><strong class="text-gray-900 dark:text-white">A server-side Purchase conversion</strong> is sent to Meta's Conversions API, using the system user token, when a ticket sale for that event is paid online: through Stripe, PayPal, Payfast, Invoice Ninja or a payment link, including the first payment of an installment plan. The buyer's email address is SHA-256 hashed rather than sent in the clear. A free registration is reported the same way with a value of zero, and a sale you mark as paid by hand, such as cash at the door, sends nothing. Whether the buyer had allowed the category is recorded with the sale at checkout; without it, nothing about the sale is sent.</li>
+        </ul>
 
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In <strong class="text-gray-900 dark:text-white">Events Manager</strong> (<code class="doc-inline-code">business.facebook.com/events_manager</code>), click <strong class="text-gray-900 dark:text-white">Connect Data Sources</strong></li>
@@ -247,8 +253,8 @@
         </div>
 
         <div class="doc-callout doc-callout-warning mt-6">
-            <div class="doc-callout-title">This loads third-party code for your visitors</div>
-            <p>Setting this variable makes guest pages for boosted events load Facebook's script from <code class="doc-inline-code">connect.facebook.net</code>. Setting it also widens the Content Security Policy on every response, adding <code class="doc-inline-code">connect.facebook.net</code> to <code class="doc-inline-code">script-src</code> and <code class="doc-inline-code">www.facebook.com</code> to <code class="doc-inline-code">connect-src</code>, since a script-inserted tag carries no nonce. Guests of events that are not being boosted still load nothing from Facebook, and leaving the variable blank means no Facebook code is loaded and no external request is made. If you do enable it, say so in your privacy policy.</p>
+            <div class="doc-callout-title">This turns on the cookie banner and loads third-party code</div>
+            <p>Setting this variable switches the cookie banner on for every visitor of the install, because consent now has something to cover. For visitors who allow the marketing category, guest pages of boosted events then load Facebook's script from <code class="doc-inline-code">connect.facebook.net</code>. Setting it also widens the Content Security Policy on every response, adding <code class="doc-inline-code">connect.facebook.net</code> to <code class="doc-inline-code">script-src</code> and <code class="doc-inline-code">www.facebook.com</code> to <code class="doc-inline-code">connect-src</code>. Guests of events that are not being boosted still load nothing from Facebook, and leaving the variable blank means no Facebook code is loaded and no external request is made. If you do enable it, say so in your privacy policy.</p>
         </div>
     </section>
 
@@ -412,7 +418,7 @@
                     <tr>
                         <td><code class="doc-inline-code">META_PIXEL_ID</code></td>
                         <td>No</td>
-                        <td>Meta Pixel ID. Enables the browser pixel on boosted events and server-side Purchase conversions</td>
+                        <td>Meta Pixel ID. Enables the browser pixel on boosted events and server-side Purchase conversions, both only for visitors who allow marketing cookies. Also switches the cookie banner on</td>
                     </tr>
                     <tr>
                         <td><code class="doc-inline-code">META_WEBHOOK_VERIFY_TOKEN</code></td>
@@ -458,10 +464,9 @@
             </table>
         </div>
 
-        <div class="doc-callout doc-callout-info mt-6">
-            <div class="doc-callout-title">Hosted-only controls</div>
-            <p>The <strong class="text-gray-900 dark:text-white">Grant Boost Credit</strong> and <strong class="text-gray-900 dark:text-white">Set Spending Limit</strong> panels under <strong class="text-gray-900 dark:text-white">Manage &gt; Boost</strong> in the admin panel, and the per-schedule limit that grows as a schedule completes campaigns, are all part of the hosted billing model. The panels are still drawn on a selfhosted install, but the values they write are never read: with <code class="doc-inline-code">IS_HOSTED=false</code> the per-campaign cap is always <code class="doc-inline-code">META_MAX_BUDGET</code> and there is nothing to charge credit against.</p>
-        </div>
+        <h3 id="admin-boost-page" class="doc-subheading">What the admin panel shows</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every campaign on the install is listed on the admin panel's <a href="{{ route('marketing.docs.selfhost.admin') }}#manage-boost" class="doc-link">Boost</a> page, under <strong class="text-gray-900 dark:text-white">Manage</strong>: campaign counts, total ad spend, the average rates, a notice for campaigns that are stuck, failed or disapproved, <strong class="text-gray-900 dark:text-white">Status Distribution</strong>, <strong class="text-gray-900 dark:text-white">Top Boosters</strong> and the <strong class="text-gray-900 dark:text-white">Campaigns</strong> list.</p>
+        <p class="text-gray-600 dark:text-gray-300">The parts that belong to the hosted billing model are drawn only when <code class="doc-inline-code">IS_HOSTED=true</code>: markup revenue and refunds, the <strong class="text-gray-900 dark:text-white">Revenue Trend</strong> chart, the <strong class="text-gray-900 dark:text-white">Grant Boost Credit</strong> and <strong class="text-gray-900 dark:text-white">Set Spending Limit</strong> cards, and <strong class="text-gray-900 dark:text-white">Recent Billing Records</strong>. So is the per-schedule limit that grows as a schedule completes campaigns: with <code class="doc-inline-code">IS_HOSTED=false</code> the per-campaign cap is always <code class="doc-inline-code">META_MAX_BUDGET</code> and there is no credit to grant.</p>
 
         <h3 class="doc-subheading">Applying the changes</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">No code changes are needed - every key above is already wired up in <code class="doc-inline-code">config/services.php</code>. Clear the config cache after editing <code class="doc-inline-code">.env</code>, or the app keeps reading the old values:</p>
@@ -506,6 +511,6 @@
         </div>
 
         <h3 class="doc-subheading">Queue workers</h3>
-        <p class="text-gray-600 dark:text-gray-300">Creating the campaign on Meta and fetching its analytics are queued jobs. With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately inside the web request or the scheduled command, so nothing extra is required. If you have switched to a real queue driver, make sure a worker is running, or campaigns will be created inside the app and never reach Meta.</p>
+        <p class="text-gray-600 dark:text-gray-300">Creating the campaign on Meta and fetching its analytics are queued jobs. With the default <code class="doc-inline-code">QUEUE_CONNECTION=sync</code> they run immediately inside the web request or the scheduled command, so nothing extra is required. If you have switched to a real queue driver, the same cron entry is the worker: the scheduler runs <code class="doc-inline-code">queue:work --stop-when-empty</code> every minute, so jobs wait up to about a minute and no separate worker process is needed. Without the cron entry, campaigns are created inside the app and never reach Meta.</p>
     </section>
 </x-docs-page>

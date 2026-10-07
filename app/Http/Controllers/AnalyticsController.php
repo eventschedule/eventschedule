@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Services\AnalyticsService;
+use App\Services\ScheduleActivity;
+use App\Services\ScheduleRealtime;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,8 +35,28 @@ class AnalyticsController extends Controller
         // page traffic, so they authorize the selected event more strictly and get a narrower
         // picker list. Whitelisted rather than passed through, so the strictness flag and the
         // dispatch branches below can never be reading different values.
-        $tab = in_array($request->tab, ['web', 'revenue', 'checkins'], true) ? $request->tab : 'web';
+        //
+        // Realtime is the second tab, and only for someone who has a live view of their own pages
+        // (ScheduleRealtime::available(): Realtime and the owners' switch both on, a schedule they
+        // manage, not the shared demo account). For anyone else the value is not a tab at all, so
+        // a link to it shows Web, like any other value this page does not know.
+        $realtimeAvailable = ScheduleRealtime::available($user);
+        $tabs = $realtimeAvailable ? ['web', 'realtime', 'revenue', 'checkins'] : ['web', 'revenue', 'checkins'];
+        $tab = in_array($request->tab, $tabs, true) ? $request->tab : 'web';
         $ownedDataOnly = $tab !== 'web';
+
+        // The schedule the Realtime tab is narrowed to, and what the tab strip's link to it
+        // carries. Live traffic follows manageableRoles(), which on hosted is narrower than the
+        // schedules this page lists: a schedule whose plan no longer includes a team is still on
+        // the picker here and is closed to its admins there. Such a selection is dropped on the
+        // way to that tab, never refused: the tab strip carries the selection forward, and a 403
+        // for pressing a tab would be this page's own fault. (The poll, which is asked for one
+        // schedule by id, does refuse it: RealtimeController::data().)
+        $realtimeRoleId = $realtimeAvailable && $selectedRoleId && $user->manageableRoles()->contains('id', $selectedRoleId)
+            ? $selectedRoleId
+            : null;
+        // What every return below hands the tab strip.
+        $realtimeTab = ['realtimeAvailable' => $realtimeAvailable, 'realtimeRoleId' => $realtimeRoleId];
 
         // Get selected event for filtering (decode from URL-safe format)
         $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;
@@ -98,8 +120,9 @@ class AnalyticsController extends Controller
             }
         }
 
-        // Get events list for the dropdown (only when a schedule is selected)
-        $events = $selectedRoleId ? $analytics->getEventsForSchedule($selectedRoleId, $ownedDataOnly) : collect();
+        // Get events list for the dropdown (only when a schedule is selected). The Realtime tab
+        // has no event picker: it is every page of the schedule, for the last half hour.
+        $events = $selectedRoleId && $tab !== 'realtime' ? $analytics->getEventsForSchedule($selectedRoleId, $ownedDataOnly) : collect();
 
         // Resolve the selected event's display name for the initial (pre-Vue-mount) render of the
         // picker. From the event itself, never from the list: the id below filters every panel
@@ -132,6 +155,36 @@ class AnalyticsController extends Controller
         // "no upper bound"; a closed historical range keeps both ends.
         $eventDateEnd = $range === 'last_month' ? $end : null;
 
+        if ($tab === 'realtime') {
+            // The picker on this tab lists the schedules the live view covers, and nothing it
+            // would have to turn away. $range and $tabEventId stay as they came, so the links back
+            // to the other tabs still carry them.
+            $roles = $user->manageableRoles()->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+            $selectedRoleId = $realtimeRoleId;
+            $realtime = [
+                'payload' => ScheduleActivity::trafficPayload($request, $user, $realtimeRoleId),
+                'activity' => ScheduleActivity::railPayload($request, $user, $realtimeRoleId),
+                'schedules' => ScheduleRealtime::scheduleOptions($user),
+                'selected' => $realtimeRoleId ? UrlUtils::encodeId($realtimeRoleId) : null,
+                // manageableRoles() leaves out a schedule whose plan has no team, so a team
+                // member would find it missing from this tab with no reason given. Sales and
+                // Check-in say why; so does this.
+                'planBlockedRoles' => $user->planBlockedRoles(),
+            ];
+
+            return view('analytics.index', compact(
+                'roles',
+                'selectedRoleId',
+                'selectedEventId',
+                'selectedEventName',
+                'tabEventId',
+                'events',
+                'range',
+                'tab',
+                'realtime'
+            ))->with($realtimeTab);
+        }
+
         if ($tab === 'checkins') {
             $checkinStats = $analytics->getCheckinStats($user, $start, $end, $selectedRoleId, $selectedEventId, $eventDateEnd);
 
@@ -145,7 +198,7 @@ class AnalyticsController extends Controller
                 'range',
                 'tab',
                 'checkinStats'
-            ));
+            ))->with($realtimeTab);
         }
 
         if ($tab === 'revenue') {
@@ -180,7 +233,7 @@ class AnalyticsController extends Controller
                 'topEventsByRevenue',
                 'boostStats',
                 'newsletterStats'
-            ));
+            ))->with($realtimeTab);
         }
 
         // Period determines chart grouping
@@ -299,6 +352,6 @@ class AnalyticsController extends Controller
             'topUtmCampaigns',
             'socialClickStats',
             'locationBreakdown'
-        ));
+        ))->with($realtimeTab);
     }
 }

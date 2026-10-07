@@ -71,7 +71,7 @@ class AdminRealtimeController extends Controller
             Setting::set('realtime_enabled_at', (string) now()->getTimestamp());
         }
 
-        // Whether schedule owners see their own pages' traffic at /realtime. Written only when the
+        // Whether schedule owners see their own pages' traffic on the Realtime tab of /analytics. Written only when the
         // form that showed the switch was the one posted: absent is not "off", and a client that
         // sends the first switch alone must not take the live view away from every organizer.
         $ownerViewBefore = RealtimeTracker::ownerViewSetting();

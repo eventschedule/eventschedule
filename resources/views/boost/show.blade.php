@@ -1,250 +1,235 @@
 <x-app-admin-layout>
-    <div class="max-w-4xl mx-auto">
-        <div class="mb-6">
-            <a href="{{ route('boost.index') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">&larr; {{ __('messages.back_to_boost') }}</a>
-        </div>
 
-        @if (session('success'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('success') }}
-        </div>
-        @endif
+    <x-slot name="head">
+        @include('boost.partials.styles')
+    </x-slot>
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+    @php
+        $boostSymbol = $campaign->getCurrencySymbol();
+        $hasDailySeries = $campaign->daily_analytics && count($campaign->daily_analytics) > 1;
+        // Meta's own word for an ad's state, in the reader's language where the portal has one.
+        $adStates = ['ACTIVE' => 'active', 'PAUSED' => 'paused', 'DISAPPROVED' => 'rejected', 'COMPLETED' => 'completed'];
+    @endphp
 
-        {{-- Header --}}
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $campaign->event?->translatedName() ?? __('messages.deleted_event') }}</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $campaign->role?->name ?? __('messages.deleted') }}</p>
-            </div>
-            @php
-                $statusColors = [
-                    'draft' => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-                    'pending_payment' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-                    'active' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-                    'paused' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-                    'completed' => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-                    'failed' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-                    'rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-                    'cancelled' => 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
-                ];
-            @endphp
-            <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {{ $statusColors[$campaign->status] ?? $statusColors['draft'] }}">
-                {{ __('messages.boost_status_' . $campaign->status) }}
-            </span>
-        </div>
+    {{-- A campaign bought on Facebook and Instagram: what it is doing, what it has cost, the ad
+         itself. What can be done to it (pause, cancel) is in the title row, where every page of
+         the portal keeps its actions; they used to be a card at the foot of the page. --}}
+    <div class="page-shell">
+        <x-page-header
+            :title="$campaign->event?->translatedName() ?? __('messages.deleted_event')"
+            :lead="($campaign->role?->name ?? __('messages.deleted')).' · '.__('messages.promotion_channel_meta')"
+            :back="route('boost.index')" :back-label="__('messages.boost')">
+            <x-slot name="actions">
+                @include('boost.partials.status', ['status' => $campaign->status])
 
-        {{-- Rejection banner --}}
-        @if ($campaign->status === 'rejected' && $campaign->meta_rejection_reason)
-        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-            <h3 class="font-semibold text-red-700 dark:text-red-300 mb-1">{{ __('messages.ad_rejected') }}</h3>
-            <p class="text-sm text-red-600 dark:text-red-400">{{ $campaign->meta_rejection_reason }}</p>
-        </div>
-        @endif
-
-        {{-- Key metrics --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div class="ap-card shadow-md rounded-lg p-4 text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->impressions) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.impressions') }}</p>
-            </div>
-            <div class="ap-card shadow-md rounded-lg p-4 text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->reach) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.reach') }}</p>
-            </div>
-            <div class="ap-card shadow-md rounded-lg p-4 text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->clicks) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.clicks') }}</p>
-            </div>
-            <div class="ap-card shadow-md rounded-lg p-4 text-center">
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($campaign->conversions ?? 0) }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.conversions') }}</p>
-            </div>
-        </div>
-
-        {{-- Detailed metrics --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            {{-- Budget utilization --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.budget_utilization') }}</h3>
-                <div class="mb-2">
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                        <div class="bg-blue-500 h-3 rounded-full transition-all" style="width: {{ $campaign->getBudgetUtilization() }}%"></div>
-                    </div>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-500 dark:text-gray-400">{{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->actual_spend ?? 0, 2) }} {{ __('messages.spent') }}</span>
-                    <span class="text-gray-500 dark:text-gray-400">{{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->user_budget, 2) }} {{ __('messages.budget') }}</span>
-                </div>
-
-                <div class="mt-4 space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.ctr') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ number_format($campaign->ctr, 2) }}%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.cpc') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->cpc, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.cpm') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->cpm, 2) }}</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Campaign info --}}
-            <div class="ap-card shadow-md rounded-lg p-6">
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.campaign_details') }}</h3>
-                <div class="space-y-2 text-sm">
-                    @if (config('app.hosted'))
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.total_charged') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ $campaign->getCurrencySymbol() }}{{ number_format($campaign->total_charged ?? $campaign->getTotalCost(), 2) }}</span>
-                    </div>
-                    @endif
-                    @if ($campaign->scheduled_start)
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.start_date') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ $campaign->scheduled_start->format('M j, Y') }}</span>
-                    </div>
-                    @endif
-                    @if ($campaign->scheduled_end)
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.end_date') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ $campaign->scheduled_end->format('M j, Y') }}</span>
-                    </div>
-                    @endif
-                    @if ($campaign->analytics_synced_at)
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 dark:text-gray-400">{{ __('messages.last_updated') }}</span>
-                        <span class="text-gray-900 dark:text-white">{{ $campaign->analytics_synced_at->diffForHumans() }}</span>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Daily performance chart --}}
-        @if ($campaign->daily_analytics && count($campaign->daily_analytics) > 1)
-        <div class="ap-card shadow-md rounded-lg p-6 mb-6">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.daily_performance') }}</h3>
-            <canvas id="performance-chart" height="200"></canvas>
-        </div>
-        @endif
-
-        {{-- Ad creative(s) --}}
-        @if ($campaign->ads->isNotEmpty())
-        <div class="ap-card shadow-md rounded-lg p-6 mb-6">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.ad_creative') }}</h3>
-            @foreach ($campaign->ads as $ad)
-            <div class="@if (!$loop->first) mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 @endif">
-                @if ($campaign->ads->count() > 1)
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.variant') }} {{ $ad->variant }}</span>
-                    @if ($ad->is_winner)
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">{{ __('messages.winner') }}</span>
-                    @endif
-                </div>
-                @endif
-                @include('boost.partials.ad-preview-mockup', [
-                    'headline' => $ad->headline,
-                    'primaryText' => $ad->primary_text,
-                    'imageUrl' => $ad->image_url,
-                    'cta' => $ad->call_to_action,
-                ])
-                @if ($ad->meta_status)
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">{{ $ad->meta_status }}</p>
-                @endif
-            </div>
-            @endforeach
-        </div>
-        @endif
-
-        {{-- Campaign controls --}}
-        @if ($campaign->canBePaused() || $campaign->canBeResumed() || $campaign->canBeCancelled())
-        <div class="ap-card shadow-md rounded-lg p-6">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.campaign_controls') }}</h3>
-            <div class="flex gap-3">
                 @if ($campaign->canBeCancelled())
                 <form method="POST" action="{{ route('boost.cancel', ['hash' => $campaign->hashedId()]) }}"
                       data-confirm="{{ __('messages.boost_cancel_confirm') }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
-                        {{ __('messages.cancel_campaign') }}
-                    </button>
+                    <x-danger-button class="boost-danger">{{ __('messages.cancel_campaign') }}</x-danger-button>
                 </form>
                 @endif
 
                 @if ($campaign->canBePaused() || $campaign->canBeResumed())
                 <form method="POST" action="{{ route('boost.toggle_pause', ['hash' => $campaign->hashedId()]) }}">
                     @csrf
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-medium rounded-lg">
-                        {{ $campaign->isActive() ? __('messages.pause') : __('messages.resume') }}
+                    @if ($campaign->isActive())
+                    <button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        {{ __('messages.pause') }}
                     </button>
+                    @else
+                    <x-brand-button type="submit">{{ __('messages.resume') }}</x-brand-button>
+                    @endif
                 </form>
                 @endif
+            </x-slot>
+        </x-page-header>
+
+        <div class="page-stack">
+            <x-page-flash :keys="['success' => 'success', 'error' => 'error']" />
+
+            @if ($campaign->status === 'rejected' && $campaign->meta_rejection_reason)
+            <x-page-notice tone="error" :title="__('messages.ad_rejected')">
+                <bdi>{{ $campaign->meta_rejection_reason }}</bdi>
+            </x-page-notice>
+            @endif
+
+            <div class="ap-card rounded-xl page-stats is-auto">
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($campaign->impressions) }}</div>
+                    <div class="page-stat-label">{{ __('messages.impressions') }}</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($campaign->reach) }}</div>
+                    <div class="page-stat-label">{{ __('messages.reach') }}</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($campaign->clicks) }}</div>
+                    <div class="page-stat-label">{{ __('messages.clicks') }}</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-value">{{ number_format($campaign->conversions ?? 0) }}</div>
+                    <div class="page-stat-label">{{ __('messages.conversions') }}</div>
+                </div>
             </div>
+
+            <div class="page-grid2">
+                <x-page-card :title="__('messages.budget_utilization')">
+                    <div class="boost-meter-ends">
+                        <span>{{ $boostSymbol }}{{ number_format($campaign->actual_spend ?? 0, 2) }} {{ __('messages.spent') }}</span>
+                        <span>{{ $boostSymbol }}{{ number_format($campaign->user_budget, 2) }} {{ __('messages.budget') }}</span>
+                    </div>
+                    <div class="boost-meter" role="img" aria-label="{{ $campaign->getBudgetUtilization() }}%"><i style="width: {{ $campaign->getBudgetUtilization() }}%"></i></div>
+
+                    <dl class="page-kv">
+                        <div>
+                            <dt>{{ __('messages.ctr') }}</dt>
+                            <dd>{{ number_format($campaign->ctr, 2) }}%</dd>
+                        </div>
+                        <div>
+                            <dt>{{ __('messages.cpc') }}</dt>
+                            <dd>{{ $boostSymbol }}{{ number_format($campaign->cpc, 2) }}</dd>
+                        </div>
+                        <div>
+                            <dt>{{ __('messages.cpm') }}</dt>
+                            <dd>{{ $boostSymbol }}{{ number_format($campaign->cpm, 2) }}</dd>
+                        </div>
+                    </dl>
+                </x-page-card>
+
+                <x-page-card :title="__('messages.campaign_details')">
+                    <dl class="page-kv">
+                        @if (config('app.hosted'))
+                        <div>
+                            <dt>{{ __('messages.total_charged') }}</dt>
+                            <dd>{{ $boostSymbol }}{{ number_format($campaign->total_charged ?? $campaign->getTotalCost(), 2) }}</dd>
+                        </div>
+                        @endif
+                        @if ($campaign->scheduled_start)
+                        <div>
+                            <dt>{{ __('messages.start_date') }}</dt>
+                            <dd>{{ $campaign->scheduled_start->translatedFormat('M j, Y') }}</dd>
+                        </div>
+                        @endif
+                        @if ($campaign->scheduled_end)
+                        <div>
+                            <dt>{{ __('messages.end_date') }}</dt>
+                            <dd>{{ $campaign->scheduled_end->translatedFormat('M j, Y') }}</dd>
+                        </div>
+                        @endif
+                        @if ($campaign->analytics_synced_at)
+                        <div>
+                            <dt>{{ __('messages.last_updated') }}</dt>
+                            <dd>{{ $campaign->analytics_synced_at->diffForHumans() }}</dd>
+                        </div>
+                        @endif
+                    </dl>
+                </x-page-card>
+            </div>
+
+            @if ($hasDailySeries)
+            <x-page-card :title="__('messages.daily_performance')">
+                <div class="boost-chart"><canvas id="performance-chart" role="img" aria-label="{{ __('messages.daily_performance') }}"></canvas></div>
+            </x-page-card>
+            @endif
+
+            @if ($campaign->ads->isNotEmpty())
+            <x-page-card :title="__('messages.ad_creative')">
+                <div class="boost-ads">
+                    @foreach ($campaign->ads as $ad)
+                    <div>
+                        @if ($campaign->ads->count() > 1)
+                        <div class="boost-ad-head">
+                            <span>{{ __('messages.variant') }} {{ $ad->variant }}</span>
+                            @if ($ad->is_winner)
+                            <span class="event-status is-on">{{ __('messages.winner') }}</span>
+                            @endif
+                        </div>
+                        @endif
+                        @include('boost.partials.ad-preview-mockup', [
+                            'headline' => $ad->headline,
+                            'primaryText' => $ad->primary_text,
+                            'imageUrl' => $ad->image_url,
+                            'cta' => $ad->call_to_action,
+                        ])
+                        @if ($ad->meta_status)
+                        <p class="boost-ad-foot">
+                            @if (isset($adStates[$ad->meta_status]))
+                            @include('boost.partials.status', ['status' => $adStates[$ad->meta_status]])
+                            @else
+                            <span class="event-status">{{ \Illuminate\Support\Str::headline(strtolower($ad->meta_status)) }}</span>
+                            @endif
+                        </p>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </x-page-card>
+            @endif
         </div>
-        @endif
     </div>
 
-    @if ($campaign->daily_analytics && count($campaign->daily_analytics) > 1)
+    @if ($hasDailySeries)
     <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
-        const dailyData = @json($campaign->daily_analytics);
-        const labels = Object.keys(dailyData);
-        const impressions = labels.map(d => dailyData[d].impressions || 0);
-        const clicks = labels.map(d => dailyData[d].clicks || 0);
+        (function () {
+            const dailyData = @json($campaign->daily_analytics);
+            const labels = Object.keys(dailyData);
+            const impressions = labels.map(d => dailyData[d].impressions || 0);
+            const clicks = labels.map(d => dailyData[d].clicks || 0);
 
-        const isDark = document.documentElement.classList.contains('dark');
-        const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-        const textColor = isDark ? '#9ca3af' : '#6b7280';
-        const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
+            @include('boost.partials.chart-palette')
 
-        new Chart(document.getElementById('performance-chart'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: @json(__("messages.impressions")),
-                        data: impressions,
-                        borderColor: brandBlue,
-                        backgroundColor: 'rgba(59,130,246,0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        yAxisID: 'y',
+            let chart = null;
+            function draw() {
+                const palette = boostChartPalette();
+                if (chart) {
+                    chart.destroy();
+                }
+                chart = new Chart(document.getElementById('performance-chart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels.map(boostDayLabel),
+                        datasets: [
+                            {
+                                label: @json(__("messages.impressions")),
+                                data: impressions,
+                                borderColor: palette.blue,
+                                backgroundColor: palette.blueSoft,
+                                fill: true,
+                                tension: 0.3,
+                                yAxisID: 'y',
+                            },
+                            {
+                                label: @json(__("messages.clicks")),
+                                data: clicks,
+                                borderColor: palette.green,
+                                backgroundColor: 'transparent',
+                                tension: 0.3,
+                                yAxisID: 'y1',
+                            },
+                        ],
                     },
-                    {
-                        label: @json(__("messages.clicks")),
-                        data: clicks,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16,185,129,0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        yAxisID: 'y1',
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: palette.ink, maxRotation: 0, autoSkipPadding: 12 } },
+                            y: { position: 'left', beginAtZero: true, grid: { color: palette.grid }, ticks: { color: palette.ink, precision: 0 } },
+                            y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { color: palette.ink, precision: 0 } },
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: palette.ink, usePointStyle: true, boxHeight: 6 } },
+                        },
                     },
-                ],
-            },
-            options: {
-                responsive: true,
-                interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor }, ticks: { color: textColor } },
-                    y: { position: 'left', grid: { color: gridColor }, ticks: { color: textColor } },
-                    y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: textColor } },
-                },
-                plugins: {
-                    legend: { labels: { color: textColor } },
-                },
-            },
-        });
+                });
+            }
+
+            draw();
+            // The theme picker changes the palette without a reload; the chart re-reads its colours.
+            new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+        })();
     </script>
     @endif
 </x-app-admin-layout>

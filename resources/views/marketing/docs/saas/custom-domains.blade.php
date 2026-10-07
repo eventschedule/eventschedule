@@ -14,7 +14,7 @@
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
     </x-slot:toc>
 
-    <!-- Overview -->
+    {{-- Overview --}}
     <section id="overview" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -24,14 +24,15 @@
             Overview
             <x-doc-badge plan="enterprise" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A custom domain lets a schedule be reached at its owner's own address (for example <code class="doc-inline-code">events.example.com</code>) instead of the default <code class="doc-inline-code">subdomain.yourdomain.com</code> URL.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A custom domain lets a schedule be reached at its owner's own address (for example <code class="doc-inline-code">events.example.com</code>) instead of the default <code class="doc-inline-code">subdomain.yourdomain.com</code> URL.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The work is split in two. Each owner sets the domain on their own schedule's edit page. You configure DigitalOcean once, in <code class="doc-inline-code">.env</code>, and afterwards follow every domain on your platform at <strong>Manage &rarr; Domains</strong> in the admin panel (<code class="doc-inline-code">/admin/domains</code>).</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Enterprise only</div>
-            <p>Custom domains are an Enterprise feature. On a schedule that is not on Enterprise, the Redirect and Direct options render disabled with an upgrade prompt, and the server re-applies the schedule's existing values on save, so a hand-crafted POST cannot set a domain either. A schedule that later drops off Enterprise keeps the domain it already has: only <em>changing</em> it is blocked. Remove it from the admin panel if you need it gone.</p>
+            <p>Custom domains are an Enterprise feature. On a schedule that is not on Enterprise, the Redirect and Direct options render disabled with an upgrade prompt, and the server re-applies the schedule's existing values on save, so a hand-crafted POST cannot set a domain either. A schedule that later drops off Enterprise keeps the domain it already has: only <em>changing</em> it is blocked. <a href="#admin-management" class="doc-link">Remove it from the admin panel</a> if you need it gone.</p>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Owners choose the mode themselves. In the schedule's settings, on the <strong class="text-gray-900 dark:text-white">General</strong> tab, the <strong class="text-gray-900 dark:text-white">Schedule URL</strong> has an <strong class="text-gray-900 dark:text-white">Edit</strong> button that reveals a <strong class="text-gray-900 dark:text-white">Mode</strong> chooser with three options.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Owners choose the mode themselves. On the schedule's edit page (<strong class="text-gray-900 dark:text-white">Edit Schedule</strong>), the <strong class="text-gray-900 dark:text-white">Settings</strong> tab opens with the <strong class="text-gray-900 dark:text-white">Schedule URL</strong>. Its <strong class="text-gray-900 dark:text-white">Edit</strong> link reveals a <strong class="text-gray-900 dark:text-white">Mode</strong> chooser with three options, and for the two custom modes a <strong class="text-gray-900 dark:text-white">Custom Domain</strong> field. Nothing changes until the form is saved. The owner's side of this is in <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">Creating Schedules</a>.</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -66,20 +67,51 @@
             </table>
         </div>
 
-        <h3 class="doc-subheading">What changes on a direct custom domain</h3>
+        <h3 id="direct-differences" class="doc-subheading">What changes on a direct custom domain</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Direct mode is not only a different address. Once the domain is active, several parts of the product behave differently on that host:</p>
-        <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">The custom domain becomes the SEO canonical</strong> for that schedule's guest portal, and the schedule serves its own <code class="doc-inline-code">/sitemap.xml</code> on that host. Your platform's global sitemap never lists custom-domain URLs. In Redirect mode the subdomain stays canonical, because the custom domain only 301s away from itself.</li>
-            <li><strong class="text-gray-900 dark:text-white">Ads are never served.</strong> If you run AdSense on free schedules, ad slots are suppressed on any custom domain, whatever the schedule's plan. Serving ads on a domain you do not own would breach AdSense policy.</li>
-            <li><strong class="text-gray-900 dark:text-white">The accommodation map only runs on the owner's own affiliate ID.</strong> Your instance-wide Stay22 fallback ID is never used on a customer's custom domain, so the map simply does not render for a schedule that has not set its own ID.</li>
-            <li><strong class="text-gray-900 dark:text-white">The embedded Google map is omitted</strong> on event pages served from a custom domain, so your Maps API key is never handed out on a host you do not control. The address and its link are still shown.</li>
-            <li><strong class="text-gray-900 dark:text-white">Emails send readers to it.</strong> Event links in newsletters, in the automatic new-event digest to confirmed subscribers, and in interest-list and waitlist emails land on the custom domain. Ticket links in purchase confirmations stay on your app subdomain.</li>
-            <li><strong class="text-gray-900 dark:text-white">The calendar feed and short links answer on it.</strong> The live calendar feed at <code class="doc-inline-code">/feed/ical</code> works on the custom domain and links its events there, and so does the short address each of the schedule's social and website links gets, such as <code class="doc-inline-code">/instagram</code>.</li>
-            <li><strong class="text-gray-900 dark:text-white">Sign-in, admin and follow links stay on the app subdomain.</strong> Only the schedule's own URLs are rewritten to the custom domain, so the session cookie keeps working.</li>
-        </ul>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Part of the product</th>
+                        <th>On an active direct domain</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Canonical URL and sitemap</td>
+                        <td>The custom domain becomes the SEO canonical for that schedule's guest portal, and the schedule serves its own <code class="doc-inline-code">/sitemap.xml</code> on that host. Your platform's global sitemap never lists custom-domain URLs. In Redirect mode the subdomain stays canonical, because the custom domain only 301s away from itself.</td>
+                    </tr>
+                    <tr>
+                        <td>Ads</td>
+                        <td>Never served. If you run AdSense on free schedules, ad slots are suppressed on any custom domain, whatever the schedule's plan. Serving ads on a domain you do not own would breach AdSense policy.</td>
+                    </tr>
+                    <tr>
+                        <td>Accommodation map</td>
+                        <td>Only runs on the owner's own affiliate ID. Your instance-wide Stay22 fallback ID is never used on a customer's custom domain, so the map does not render for a schedule that has not set its own ID.</td>
+                    </tr>
+                    <tr>
+                        <td>Embedded Google map</td>
+                        <td>Omitted on event pages served from a custom domain, so your Maps API key is never handed out on a host you do not control. The address and its link are still shown.</td>
+                    </tr>
+                    <tr>
+                        <td>Emails</td>
+                        <td>Send readers to it. Event links in newsletters, in the automatic new-event digest to confirmed subscribers, and in interest-list and waitlist emails land on the custom domain. Ticket links in purchase confirmations stay on your app subdomain.</td>
+                    </tr>
+                    <tr>
+                        <td>Calendar feed and short links</td>
+                        <td>Answer on it. The live calendar feed at <code class="doc-inline-code">/feed/ical</code> works on the custom domain and links its events there, and so does the short address each of the schedule's social and website links gets, such as <code class="doc-inline-code">/instagram</code>.</td>
+                    </tr>
+                    <tr>
+                        <td>Sign-in, admin and follow links</td>
+                        <td>Stay on the app subdomain. Only the schedule's own URLs are rewritten to the custom domain, so the session cookie keeps working.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
-    <!-- Prerequisites -->
+    {{-- Prerequisites --}}
     <section id="prerequisites" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -102,18 +134,15 @@
             <li><strong class="text-gray-900 dark:text-white">App hostname</strong> - the app's <code class="doc-inline-code">.ondigitalocean.app</code> starter domain, which is the CNAME target customers point at.</li>
         </ul>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Note</div>
-            <p>Redirect mode needs no server-side configuration at all. Owners set up their own Cloudflare redirect, and nothing is registered with DigitalOcean. It is still Enterprise-gated, so it is not a way around the plan.</p>
-        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Redirect mode needs no server-side configuration at all. Owners set up their own Cloudflare redirect, and nothing is registered with DigitalOcean. It is still Enterprise-gated, so it is not a way around the plan.</p>
 
-        <div class="doc-callout doc-callout-warning">
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Direct mode is hidden until it is configured</div>
-            <p>The <strong>Direct</strong> option only appears in schedule settings when <code class="doc-inline-code">DO_APP_HOSTNAME</code> is set, because the CNAME instructions have nothing to show without it. Until you set it, Enterprise schedules see only Subdomain and Redirect.</p>
+            <p>The <strong>Direct</strong> option only appears in the mode chooser when <code class="doc-inline-code">DO_APP_HOSTNAME</code> is set, because the CNAME instructions have nothing to show without it. Until you set it, Enterprise schedules see only Subdomain and Redirect.</p>
         </div>
     </section>
 
-    <!-- Environment Setup -->
+    {{-- Environment Setup --}}
     <section id="environment" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -124,38 +153,53 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Add the following variables to your <code class="doc-inline-code">.env</code> file:</p>
 
-        <pre class="doc-code-block"><code>DO_API_TOKEN=your_digitalocean_api_token
-DO_APP_ID=your_app_id
-DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
-
-        <div class="space-y-4 mb-6 mt-6">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">DO_API_TOKEN</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your DigitalOcean personal access token. Generate one at <code class="doc-inline-code">cloud.digitalocean.com/account/api/tokens</code>. Select <strong>Custom Scopes</strong>, then expand the <strong>app</strong> resource and check <strong>read</strong> and <strong>update</strong>.</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
             </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">DO_APP_ID</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your App Platform app ID. Find it in the DigitalOcean dashboard URL: <code class="doc-inline-code">cloud.digitalocean.com/apps/YOUR_APP_ID</code>.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">DO_APP_HOSTNAME</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The starter domain of your DigitalOcean app. Find it under <strong>Settings</strong> &gt; <strong>Domains</strong>, it ends in <code class="doc-inline-code">.ondigitalocean.app</code>. Customers will create CNAME records pointing to this value.</p>
-            </div>
+            <pre><code><span class="code-variable">DO_API_TOKEN</span>=<span class="code-string">your_digitalocean_api_token</span>
+<span class="code-variable">DO_APP_ID</span>=<span class="code-string">your_app_id</span>
+<span class="code-variable">DO_APP_HOSTNAME</span>=<span class="code-string">your-app.ondigitalocean.app</span></code></pre>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The three values are read once into the <code class="doc-inline-code">digitalocean</code> block of <code class="doc-inline-code">config/services.php</code>, and they do different jobs:</p>
-        <ul class="doc-list mb-6">
-            <li><code class="doc-inline-code">DO_API_TOKEN</code> and <code class="doc-inline-code">DO_APP_ID</code> together decide whether provisioning runs at all. If either is missing, nothing is registered with DigitalOcean: a Direct domain is saved with no status and never goes live, re-provisioning refuses to run, and the status sync skips itself. Once you add them, the next sync marks such a domain <strong class="text-gray-900 dark:text-white">Setup failed</strong>, and <strong class="text-gray-900 dark:text-white">Re-provision</strong> registers it.</li>
-            <li><code class="doc-inline-code">DO_APP_HOSTNAME</code> decides whether Direct mode is offered to owners, and is the value shown in the copy-to-clipboard CNAME instructions.</li>
-        </ul>
 
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Note</div>
-            <p>If you have run <code class="doc-inline-code">php artisan config:cache</code>, re-run it (or <code class="doc-inline-code">php artisan config:clear</code>) after editing <code class="doc-inline-code">.env</code> so the new values take effect.</p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Where to find it</th>
+                        <th>What it decides</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code class="doc-inline-code">DO_API_TOKEN</code></td>
+                        <td>Your DigitalOcean personal access token. Generate one at <code class="doc-inline-code">cloud.digitalocean.com/account/api/tokens</code>. Select <strong>Custom Scopes</strong>, then expand the <strong>app</strong> resource and check <strong>read</strong> and <strong>update</strong>.</td>
+                        <td>With <code class="doc-inline-code">DO_APP_ID</code>, whether provisioning runs at all</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">DO_APP_ID</code></td>
+                        <td>Your App Platform app ID. Find it in the DigitalOcean dashboard URL: <code class="doc-inline-code">cloud.digitalocean.com/apps/YOUR_APP_ID</code>.</td>
+                        <td>Which app the domains are added to</td>
+                    </tr>
+                    <tr>
+                        <td><code class="doc-inline-code">DO_APP_HOSTNAME</code></td>
+                        <td>The starter domain of your DigitalOcean app. Find it under <strong>Settings</strong> &gt; <strong>Domains</strong>, it ends in <code class="doc-inline-code">.ondigitalocean.app</code>.</td>
+                        <td>Whether Direct mode is offered to owners, and the CNAME target their instructions show</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If the token or the app ID is missing, nothing is registered with DigitalOcean: a Direct domain is saved with no status and never goes live, re-provisioning refuses to run, and the status sync skips itself. Once you add them, the next sync marks such a domain <strong class="text-gray-900 dark:text-white">Setup failed</strong>, and <strong class="text-gray-900 dark:text-white">Re-provision</strong> registers it.</p>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If you have run <code class="doc-inline-code">php artisan config:cache</code>, re-run it (or <code class="doc-inline-code">php artisan config:clear</code>) after editing <code class="doc-inline-code">.env</code> so the new values take effect.</p>
     </section>
 
-    <!-- How It Works -->
+    {{-- How It Works --}}
     <section id="how-it-works" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -172,14 +216,14 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
         <p class="text-gray-600 dark:text-gray-300 mb-4">When an owner saves their domain in Direct mode:</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>The domain is normalized to <code class="doc-inline-code">https://host</code>, its hostname is stored separately for fast lookup, and it is rejected if another schedule already claims it, if the hostname contains <code class="doc-inline-code">eventschedule.com</code>, or if it is your own base domain or one of its subdomains.</li>
-            <li>The hostname is added to your DigitalOcean App Platform app spec over the API, and the schedule's domain status is set to <strong class="text-gray-900 dark:text-white">pending</strong> (or <strong class="text-gray-900 dark:text-white">failed</strong> if the API call did not succeed).</li>
+            <li>The hostname is added to your DigitalOcean App Platform app spec over the API, and the schedule's domain status is set to <strong class="text-gray-900 dark:text-white">pending</strong> (or <strong class="text-gray-900 dark:text-white">failed</strong> if the API call did not succeed). DigitalOcean has no call for a single domain, so the app reads the whole spec and writes it back, and every such write starts a new deployment of your app.</li>
             <li>The owner adds a CNAME record pointing at your app's hostname.</li>
             <li>DigitalOcean verifies the record and provisions an SSL certificate.</li>
             <li>A scheduled sync notices the domain has gone live and flips the status to <strong class="text-gray-900 dark:text-white">active</strong>.</li>
             <li>From then on, requests arriving on the custom domain are matched to the schedule and served, and the schedule's own subdomain URLs in the response are rewritten to the custom domain.</li>
         </ol>
 
-        <div class="doc-callout doc-callout-warning">
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Only the schedule's own URLs are rewritten</div>
             <p>The rewrite deliberately leaves app URLs such as login, the admin panel and the follow flow pointing at <code class="doc-inline-code">app.yourdomain.com</code>. Those pages need the session cookie that is scoped to your base domain, so moving them onto the customer's host would sign the visitor out. Redirects issued during the structured guest-submit flow opt out of the rewrite for the same reason.</p>
         </div>
@@ -218,17 +262,23 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The transition out of pending is done by a scheduled command that runs <strong class="text-gray-900 dark:text-white">every five minutes</strong> on hosted deployments:</p>
 
-        <pre class="doc-code-block"><code>php artisan app:sync-domain-statuses</code></pre>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>bash</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>php artisan app:sync-domain-statuses</code></pre>
+        </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6 mb-4">It reads every domain on your app from the DigitalOcean API and, for each schedule still pending, marks it active once DigitalOcean reports the domain as live, or failed if the domain is no longer on the app at all. If the API returns nothing at all it stops rather than marking everything failed, so an API outage cannot take working domains offline. It needs the scheduler running, whichever way you drive it (see <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">Scheduler and queue</a>).</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It reads every domain on your app from the DigitalOcean API and, for each schedule still pending, marks it active once DigitalOcean reports the domain as live, or failed if the domain is no longer on the app at all. If the API returns nothing at all it stops rather than marking everything failed, so an API outage cannot take working domains offline. It needs the scheduler running, whichever way you drive it (see <a href="{{ route('marketing.docs.saas.setup') }}#scheduler" class="doc-link">Scheduler and queue</a>).</p>
 
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Technical Detail</div>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">How a request on a custom domain is matched</div>
             <p>Incoming requests are handled by the <code class="doc-inline-code">ResolveCustomDomain</code> middleware, which runs before everything else. It looks the host up against active direct-mode schedules, caches the result for 10 minutes, and rewrites the HTTP Host header to the schedule's subdomain so the existing subdomain routes match with no route changes. It also nulls the session cookie domain so the cookie is scoped to the customer's origin, then rewrites the schedule's subdomain URLs to the custom domain in HTML bodies, JSON bodies and redirect <code class="doc-inline-code">Location</code> headers. An unknown host gets a 404.</p>
         </div>
     </section>
 
-    <!-- DNS Setup -->
+    {{-- DNS Setup --}}
     <section id="dns-setup" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -236,7 +286,7 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
             </svg>
             DNS Setup for Customers
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">When an owner selects Direct mode, the settings page shows these steps and the exact hostname to copy. They need to create one CNAME record at their domain registrar:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When an owner selects Direct mode and types a domain, the schedule's edit page shows these steps and the exact hostname to copy. They need to create one CNAME record at their domain registrar:</p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -264,18 +314,15 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
             <li>Save, and wait for DNS to propagate. SSL is provisioned automatically once DigitalOcean can resolve the record.</li>
         </ol>
 
-        <div class="doc-callout doc-callout-warning">
+        <p class="text-gray-600 dark:text-gray-300 mb-4">DNS propagation can take up to 48 hours, though it is usually much faster. The status badge beside the <strong>Schedule URL</strong> moves from <strong>Setting up...</strong> to <strong>Active</strong> within five minutes of DigitalOcean reporting the domain live, and the same change shows in the admin domains list.</p>
+
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Apex domains need CNAME flattening</div>
             <p>A plain CNAME is not valid at the apex of a zone. If the owner wants <code class="doc-inline-code">example.com</code> rather than <code class="doc-inline-code">events.example.com</code>, their DNS provider has to support CNAME flattening, ALIAS or ANAME records (Cloudflare and several registrars do). A subdomain such as <code class="doc-inline-code">events</code> avoids the problem entirely and is the easier recommendation.</p>
         </div>
-
-        <div class="doc-callout doc-callout-info">
-            <div class="doc-callout-title">Note</div>
-            <p>DNS propagation can take up to 48 hours, though it is usually much faster. The status badge on the schedule URL moves from <strong>Setting up...</strong> to <strong>Active</strong> within five minutes of DigitalOcean reporting the domain live, and the same change shows in the admin domains list.</p>
-        </div>
     </section>
 
-    <!-- Admin Management -->
+    {{-- Admin Management --}}
     <section id="admin-management" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -284,30 +331,32 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
             </svg>
             Admin Management
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule with a custom domain, in either mode, is listed at <code class="doc-inline-code">/admin/domains</code>, reached from <strong class="text-gray-900 dark:text-white">Manage</strong> &gt; <strong class="text-gray-900 dark:text-white">Domains</strong> in the admin navigation. The tab is hosted-only and admin-only.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every schedule with a custom domain, in either mode, is listed at <strong class="text-gray-900 dark:text-white">Manage</strong> &rarr; <strong class="text-gray-900 dark:text-white">Domains</strong> in the admin panel (<code class="doc-inline-code">/admin/domains</code>): the <strong class="text-gray-900 dark:text-white">Manage</strong> tab, then <strong class="text-gray-900 dark:text-white">Domains</strong> in the row of pages under it. The page is hosted-only and admin-only.</p>
 
         <h3 class="doc-subheading">Reading the page</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Summary cards</strong> - Total (every schedule with a custom domain), Direct, Active and Setting up... The last three count direct-mode schedules only.</li>
-            <li><strong class="text-gray-900 dark:text-white">Search and filters</strong> - search by schedule name, subdomain or domain, and filter by mode or by status.</li>
-            <li><strong class="text-gray-900 dark:text-white">Domain table</strong> - Schedule, Custom Domain, Mode, Status and DO Status, 20 rows to a page. <strong class="text-gray-900 dark:text-white">DO Status</strong> is the live phase read straight from the DigitalOcean API on page load, so it is the column to trust when the stored status looks wrong. It is blank if the API is unreachable or unconfigured.</li>
+            <li><strong class="text-gray-900 dark:text-white">Summary cards</strong> - <strong class="text-gray-900 dark:text-white">Total</strong> (every schedule with a custom domain), <strong class="text-gray-900 dark:text-white">Direct</strong>, <strong class="text-gray-900 dark:text-white">Active</strong> and <strong class="text-gray-900 dark:text-white">Setting up...</strong> The last three count direct-mode schedules only.</li>
+            <li><strong class="text-gray-900 dark:text-white">Search and filters</strong> - search by schedule name, subdomain or domain, and narrow the list with the <strong class="text-gray-900 dark:text-white">Mode</strong> and <strong class="text-gray-900 dark:text-white">Status</strong> selects.</li>
+            <li><strong class="text-gray-900 dark:text-white">Domain table</strong> - <strong class="text-gray-900 dark:text-white">Schedule</strong>, <strong class="text-gray-900 dark:text-white">Custom Domain</strong>, <strong class="text-gray-900 dark:text-white">Mode</strong> and <strong class="text-gray-900 dark:text-white">Status</strong>, 20 rows to a page, with each row's actions at its end. Only a direct-mode domain has anything in the Status column: the status badge, DigitalOcean's own reason under it when the setup failed, and a <strong class="text-gray-900 dark:text-white">DO Status</strong> line. That line is the live phase read straight from the DigitalOcean API as the page loads, so it is the one to trust when the stored status looks wrong. It is missing if the API is unreachable or unconfigured.</li>
         </ul>
 
         <h3 class="doc-subheading">Actions</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Re-provision</strong> - writes the domain into your DigitalOcean app spec if it is missing (one write, reported as already registered when there was nothing to add) and resets the status to pending. Use it when SSL provisioning gets stuck or after fixing a bad DNS record. Direct mode only.</li>
+            <li><strong class="text-gray-900 dark:text-white">Re-provision</strong> - writes the domain into your DigitalOcean app spec if it is missing (one write, reported as already registered when there was nothing to add) and resets the status to pending. Use it when SSL provisioning gets stuck or after fixing a bad DNS record. Direct mode only. It asks first, because a write to the app spec briefly redeploys your app.</li>
             <li><strong class="text-gray-900 dark:text-white">Remove</strong> - removes the domain from DigitalOcean and clears the schedule's domain, mode, host and status, sending it back to its subdomain URL. This is also how you take a domain off a schedule that has dropped off Enterprise. If DigitalOcean refuses the removal, nothing is cleared: the domain is marked <strong class="text-gray-900 dark:text-white">Setup failed</strong> and the error is shown.</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Both actions are written to the audit log, and both clear the middleware's cached lookup, so the change takes effect on the next request rather than after 10 minutes.</p>
 
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A schedule's owner deleting it outright also removes its domain from DigitalOcean. Marking a schedule deleted from <strong class="text-gray-900 dark:text-white">Manage</strong> &rarr; <strong class="text-gray-900 dark:text-white">Schedules</strong> does not: the domain stops resolving but stays connected to that schedule until you remove it here.</p>
+
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">You do not have to go looking</div>
-            <p>Domains sitting in <strong>Setting up...</strong> or <strong>Setup failed</strong> raise a badge on the Domains tab and an entry in the admin panel's "Needs attention" list, each linking straight to the filtered list. Deleting a schedule outright also removes its domain from DigitalOcean.</p>
+            <p>Domains sitting in <strong>Setting up...</strong> or <strong>Setup failed</strong> raise a badge on the <strong>Manage</strong> tab and on its <strong>Domains</strong> entry, and an entry under <strong>Needs attention</strong> on the admin dashboard, each linking straight to the filtered list.</p>
         </div>
     </section>
 
-    <!-- Troubleshooting -->
+    {{-- Troubleshooting --}}
     <section id="troubleshooting" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -317,10 +366,10 @@ DO_APP_HOSTNAME=your-app.ondigitalocean.app</code></pre>
             Troubleshooting
         </h2>
 
-        <div class="doc-fields">
+        <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Domain stuck on "Setting up..."</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Check the DO Status column first. If it is blank the domain was never registered on your app, and by far the most common reason is DNS: DigitalOcean will not accept a domain whose CNAME does not resolve to your app yet. Verify the record before anything else, remembering propagation can take up to 48 hours. A blank column can also mean the API credentials are missing or wrong. If it shows a phase but the stored status has not moved, confirm your scheduler is running, since only <code class="doc-inline-code">app:sync-domain-statuses</code> promotes a domain to active.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Domain stuck on "Setting up..."</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Check the DO Status line under the status first. If there is none the domain was never registered on your app, and by far the most common reason is DNS: DigitalOcean will not accept a domain whose CNAME does not resolve to your app yet. Verify the record before anything else, remembering propagation can take up to 48 hours. A missing line can also mean the API credentials are missing or wrong. If it shows a phase but the stored status has not moved, confirm your scheduler is running, since only <code class="doc-inline-code">app:sync-domain-statuses</code> promotes a domain to active.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">SSL certificate not provisioning</h4>

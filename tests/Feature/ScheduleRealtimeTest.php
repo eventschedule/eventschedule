@@ -17,7 +17,7 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * /realtime: a schedule owner's live view of their own guest pages.
+ * The Realtime tab of /analytics: a schedule owner's live view of their own guest pages.
  *
  * Most of this file is about what the page must NOT do, because the table it reads holds every
  * visit to every schedule on the install and, for visitors who accepted cookies, who they are.
@@ -69,18 +69,34 @@ class ScheduleRealtimeTest extends TestCase
         return (new ScheduleRealtime($user, $user->manageableRoles()->pluck('id'), $salt))->payload($only?->id);
     }
 
-    public function test_an_owner_gets_the_page_and_the_poll(): void
+    /**
+     * The live view is the Realtime tab of the Analytics page, not a page of its own.
+     * Mutation: leave 'realtime' out of the tabs AnalyticsController accepts.
+     */
+    public function test_an_owner_gets_the_tab_and_the_poll(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['name' => 'The Vinyl Room']);
         $event = $this->createEvent($role, ['name' => 'Halloween Warehouse Party']);
         $this->hit($role, ['event_id' => $event->id, 'country' => 'GB', 'device' => 'mobile']);
 
-        $this->actingAs($owner)->get('/realtime')
+        $tab = $this->actingAs($owner)->get('/analytics?tab=realtime')
             ->assertOk()
-            ->assertSee('id="schedule-realtime"', false);
+            ->assertSee('id="schedule-realtime"', false)
+            // It polls the route this file reads below, and the page it sits on is Analytics.
+            ->assertSee('analytics\/realtime\/data', false)
+            ->assertSee('id="analytics-tabs"', false);
+        $this->assertSame('realtime', $tab->viewData('tab'));
+        $this->assertSame(1, $tab->viewData('realtime')['payload']['overview']['views_30m']);
+        // The filters that mean nothing for the last half hour are not on this tab.
+        $tab->assertDontSee('id="date-range"', false)->assertDontSee('id="event-picker-app"', false);
 
-        $this->actingAs($owner)->getJson('/realtime/data')
+        // The other tabs offer it, and it is not in the sidebar: one entry for "how are my pages doing".
+        $web = $this->actingAs($owner)->get('/analytics')->assertOk();
+        $web->assertSee('tab=realtime', false)->assertSee('id="date-range"', false);
+        $this->assertSame(1, substr_count($web->getContent(), 'tab=realtime'), 'the tab, and no second way in on the page');
+
+        $this->actingAs($owner)->getJson('/analytics/realtime/data')
             ->assertOk()
             ->assertJsonPath('state', 'ok')
             ->assertJsonPath('overview.views_5m', 1)
@@ -106,7 +122,7 @@ class ScheduleRealtimeTest extends TestCase
         $this->hit($theirs, ['event_id' => $secret->id, 'country' => 'DE']);
         $this->hit($theirs, ['consented' => false, 'visitor_key' => null, 'owner_visible' => false, 'country' => 'FR']);
 
-        $response = $this->actingAs($owner)->getJson('/realtime/data')->assertOk();
+        $response = $this->actingAs($owner)->getJson('/analytics/realtime/data')->assertOk();
 
         $response->assertJsonPath('overview.views_30m', 1)->assertJsonPath('overview.visitors_now', 1);
         $this->assertSame(['US'], array_column($response->json('breakdowns.countries'), 'key'));
@@ -117,16 +133,19 @@ class ScheduleRealtimeTest extends TestCase
     }
 
     /** Mutation: answer a schedule that is not theirs with "all of yours" instead of refusing. */
-    public function test_a_schedule_that_is_not_mine_is_refused_on_the_page_and_the_poll(): void
+    public function test_a_schedule_that_is_not_mine_is_refused_on_the_tab_and_the_poll(): void
     {
         $owner = $this->createOwner();
         $this->createRole($owner);
         $theirs = $this->createRole($this->createOwner());
-        $param = '?schedule='.UrlUtils::encodeId($theirs->id);
+        $id = UrlUtils::encodeId($theirs->id);
+        $param = '?schedule='.$id;
 
-        $this->actingAs($owner)->get('/realtime'.$param)->assertForbidden();
-        $this->actingAs($owner)->getJson('/realtime/data'.$param)->assertForbidden();
-        $this->actingAs($owner)->getJson('/realtime/data?schedule=not-an-id')->assertForbidden();
+        // The tab is narrowed by the Analytics page's own picker (role_id), and that page has
+        // always refused a schedule the person has no part in.
+        $this->actingAs($owner)->get('/analytics?tab=realtime&role_id='.$id)->assertForbidden();
+        $this->actingAs($owner)->getJson('/analytics/realtime/data'.$param)->assertForbidden();
+        $this->actingAs($owner)->getJson('/analytics/realtime/data?schedule=not-an-id')->assertForbidden();
     }
 
     public function test_the_picker_narrows_to_one_of_my_schedules(): void
@@ -138,8 +157,8 @@ class ScheduleRealtimeTest extends TestCase
         $this->hit($second);
         $this->hit($second);
 
-        $this->actingAs($owner)->getJson('/realtime/data')->assertJsonPath('overview.views_30m', 3);
-        $this->actingAs($owner)->getJson('/realtime/data?schedule='.UrlUtils::encodeId($second->id))
+        $this->actingAs($owner)->getJson('/analytics/realtime/data')->assertJsonPath('overview.views_30m', 3);
+        $this->actingAs($owner)->getJson('/analytics/realtime/data?schedule='.UrlUtils::encodeId($second->id))
             ->assertOk()->assertJsonPath('overview.views_30m', 2);
     }
 
@@ -159,8 +178,57 @@ class ScheduleRealtimeTest extends TestCase
         $this->hit($own);
         $this->hit($closed);
 
-        $this->actingAs($member)->getJson('/realtime/data')->assertOk()->assertJsonPath('overview.views_30m', 1);
-        $this->actingAs($member)->getJson('/realtime/data?schedule='.UrlUtils::encodeId($closed->id))->assertForbidden();
+        $this->actingAs($member)->getJson('/analytics/realtime/data')->assertOk()->assertJsonPath('overview.views_30m', 1);
+        $this->actingAs($member)->getJson('/analytics/realtime/data?schedule='.UrlUtils::encodeId($closed->id))->assertForbidden();
+
+        // On the Analytics page that schedule is still on the picker (it lists what they edit),
+        // and the tab strip carries the selection from tab to tab. Arriving at Realtime with it
+        // selected shows all of theirs: a 403 for pressing a tab would be the page's own doing.
+        // Mutation: narrow the tab to whatever role_id says.
+        $closedId = UrlUtils::encodeId($closed->id);
+        $web = $this->actingAs($member)->get('/analytics?role_id='.$closedId)->assertOk();
+        $this->assertStringNotContainsString('role_id='.$closedId.'&amp;tab=realtime', $web->getContent());
+        $this->assertStringNotContainsString('tab=realtime&amp;role_id='.$closedId, $web->getContent());
+
+        $tab = $this->actingAs($member)->get('/analytics?tab=realtime&role_id='.$closedId)->assertOk();
+        $this->assertNull($tab->viewData('realtime')['selected']);
+        $this->assertSame(1, $tab->viewData('realtime')['payload']['overview']['views_30m'], 'their own schedule only');
+        $this->assertSame(['My Own'], $tab->viewData('roles')->pluck('name')->all(), 'the picker on this tab lists what the view covers');
+    }
+
+    /** The tab is narrowed by the page's own picker, and its poll is narrowed to the same one. */
+    public function test_the_tab_is_narrowed_by_the_analytics_pages_own_picker(): void
+    {
+        $owner = $this->createOwner();
+        $first = $this->createRole($owner, 'venue', ['name' => 'First']);
+        $second = $this->createRole($owner, 'venue', ['name' => 'Second']);
+        $this->hit($first);
+        $this->hit($second);
+        $this->hit($second);
+
+        $all = $this->actingAs($owner)->get('/analytics?tab=realtime')->assertOk();
+        $this->assertSame(3, $all->viewData('realtime')['payload']['overview']['views_30m']);
+        $all->assertSee('id="role-filter"', false);
+
+        $id = UrlUtils::encodeId($second->id);
+        $one = $this->actingAs($owner)->get('/analytics?tab=realtime&role_id='.$id)->assertOk();
+        $this->assertSame(2, $one->viewData('realtime')['payload']['overview']['views_30m']);
+        $this->assertSame($id, $one->viewData('realtime')['selected'], 'what the poll is then asked for');
+    }
+
+    /**
+     * The view had a page of its own at /realtime for one release. A bookmark, or a dashboard left
+     * open since, still arrives: at the tab, narrowed to the schedule it named.
+     */
+    public function test_the_old_address_leads_to_the_tab(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $id = UrlUtils::encodeId($role->id);
+
+        $this->actingAs($owner)->get('/realtime')->assertRedirect(route('analytics', ['tab' => 'realtime']));
+        $this->actingAs($owner)->get('/realtime?schedule='.$id)->assertRedirect(route('analytics', ['tab' => 'realtime', 'role_id' => $id]));
+        $this->get('/realtime')->assertRedirect();
     }
 
     /**
@@ -187,7 +255,7 @@ class ScheduleRealtimeTest extends TestCase
             'is_entrance' => true,
         ]);
 
-        $response = $this->actingAs($owner)->getJson('/realtime/data')->assertOk();
+        $response = $this->actingAs($owner)->getJson('/analytics/realtime/data')->assertOk();
         $raw = $response->getContent();
 
         foreach ([
@@ -364,7 +432,7 @@ class ScheduleRealtimeTest extends TestCase
     }
 
     /**
-     * The two Realtime pages read the same table through different queries; "now" and the minute
+     * The two Realtime views read the same table through different queries; "now" and the minute
      * a page view belongs to must not come to mean two things. Mutation: change either rule in
      * one service instead of in RealtimeRows.
      */
@@ -389,8 +457,9 @@ class ScheduleRealtimeTest extends TestCase
     }
 
     /**
-     * Either switch off, the shared demo account, or nobody's schedule to show: no page, no poll,
-     * no tile data. Mutation: gate on RealtimeTracker::enabled() alone.
+     * Either switch off, the shared demo account, or nobody's schedule to show: no tab, no poll,
+     * no tile data. The Analytics page itself still opens, on Web, as for any tab it does not
+     * know. Mutation: gate on RealtimeTracker::enabled() alone.
      */
     public function test_where_the_install_does_not_offer_it_there_is_nothing_to_reach(): void
     {
@@ -399,10 +468,16 @@ class ScheduleRealtimeTest extends TestCase
         $attendee = $this->createOwner();
 
         $reach = function (User $user): array {
+            app()->forgetInstance('userRoles');
+            $page = $this->actingAs($user)->get('/analytics?tab=realtime')->assertOk();
+            $shown = $page->viewData('tab') === 'realtime' && str_contains($page->getContent(), 'id="schedule-realtime"');
+            // Offered and shown go together: a tab in the strip that opens Web would be a lie.
+            $this->assertSame($shown, str_contains($page->getContent(), 'tab=realtime'));
+
             return [
-                $this->actingAs($user)->get('/realtime')->status(),
-                $this->actingAs($user)->getJson('/realtime/data')->status(),
-                $this->actingAs($user)->getJson('/realtime/summary')->status(),
+                $shown ? 200 : 404,
+                $this->actingAs($user)->getJson('/analytics/realtime/data')->status(),
+                $this->actingAs($user)->getJson('/analytics/realtime/summary')->status(),
             ];
         };
 
@@ -453,7 +528,7 @@ class ScheduleRealtimeTest extends TestCase
         $this->hit($second);
         $this->hit($second, ['consented' => false, 'visitor_key' => null, 'owner_visible' => false]);
 
-        $response = $this->actingAs($owner)->getJson('/realtime/summary')->assertOk();
+        $response = $this->actingAs($owner)->getJson('/analytics/realtime/summary')->assertOk();
 
         $response->assertJsonPath('views_5m', 4)->assertJsonPath('visitors_now', 3)->assertJsonPath('views_30m', 4);
         $this->assertSame(4, array_sum($response->json('minutes')));
@@ -473,22 +548,76 @@ class ScheduleRealtimeTest extends TestCase
         $owner = $this->createOwner();
         $this->createRole($owner);
 
-        $this->actingAs($owner)->getJson('/realtime/data')->assertOk();
-        $this->actingAs($owner)->getJson('/realtime/summary')->assertOk();
+        $this->actingAs($owner)->getJson('/analytics/realtime/data')->assertOk();
+        $this->actingAs($owner)->getJson('/analytics/realtime/activity')->assertOk();
+        $this->actingAs($owner)->getJson('/analytics/realtime/summary')->assertOk();
 
         $this->assertSame(0, DB::table('user_active_days')->where('user_id', $owner->id)->count());
+    }
+
+    /**
+     * An appointment booking is an event named after its guest ("Consultation - Dana Whitlock"),
+     * and it has a page a visitor can be on. The page is labelled by what was booked.
+     * Mutation: label an event's page with `$event->name` again.
+     */
+    public function test_a_bookings_page_is_labelled_by_its_type_and_never_by_its_guest(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['name' => 'Studio North']);
+        $type = $this->createAppointmentType($role, ['name' => 'Consultation']);
+        $booking = $this->createEvent($role, ['name' => 'Consultation - Dana Whitlock', 'appointment_type_id' => $type->id, 'creator_role_id' => $role->id]);
+        $show = $this->createEvent($role, ['name' => 'Halloween Warehouse Party']);
+
+        $this->hit($role, ['event_id' => $booking->id]);
+        $this->hit($role, ['event_id' => $show->id]);
+
+        $payload = $this->payload($owner);
+
+        $this->assertStringNotContainsString('Dana', json_encode($payload));
+        $this->assertEqualsCanonicalizing(['Consultation', 'Halloween Warehouse Party'], array_column($payload['visitors']['now'], 'page'));
+        $this->assertEqualsCanonicalizing(['Consultation', 'Halloween Warehouse Party'], array_column($payload['breakdowns']['pages'], 'label'));
+    }
+
+    /**
+     * "3 now" beside a page is who is on it at this moment, of the visitors who can be told
+     * apart: counted from all of them and not from the fifty the list shows, so the figures
+     * beside the pages add up to "visitors now". Someone who left, and a page view by a visitor
+     * who cannot be listed, are not "now".
+     * Mutation: count from the capped list (`take(self::NOW_CAP)`), or from every live row.
+     */
+    public function test_now_beside_a_page_counts_everyone_listed_as_here_and_adds_up(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'The Vinyl Room']);
+        $event = $this->createEvent($role, ['name' => 'Halloween Warehouse Party']);
+
+        foreach (range(1, ScheduleRealtime::NOW_CAP + 2) as $visitor) {
+            $this->hit($role, ['event_id' => $event->id]);
+        }
+        $this->hit($role);
+        // On the event's page too, and neither is somebody who is here now.
+        $this->hit($role, ['event_id' => $event->id, 'ended_at' => now()]);
+        $this->hit($role, ['event_id' => $event->id, 'consented' => false, 'owner_visible' => false, 'visitor_key' => null]);
+
+        $payload = $this->payload($owner);
+        $pages = collect($payload['breakdowns']['pages'])->keyBy('label');
+
+        $this->assertCount(ScheduleRealtime::NOW_CAP, $payload['visitors']['now'], 'The list is capped.');
+        $this->assertSame(ScheduleRealtime::NOW_CAP + 2, $pages['Halloween Warehouse Party']['now']);
+        $this->assertSame(1, $pages['The Vinyl Room']['now']);
+        $this->assertSame($payload['overview']['visitors_now'], $pages->sum('now'));
     }
 
     /**
      * /admin/realtime is about people across the whole install; none of its page belongs in a
      * document an organizer can open. Mutation: include an admin/realtime partial in the view.
      */
-    public function test_the_owner_page_carries_none_of_the_admin_page(): void
+    public function test_the_owner_tab_carries_none_of_the_admin_page(): void
     {
         $owner = $this->createOwner();
         $this->createRole($owner);
 
-        $html = $this->actingAs($owner)->get('/realtime')->assertOk()->getContent();
+        $html = $this->actingAs($owner)->get('/analytics?tab=realtime')->assertOk()->assertSee('id="schedule-realtime"', false)->getContent();
 
         foreach (['realtime-app', __('messages.realtime_show_admins'), __('messages.realtime_signed_in'), __('messages.realtime_open_chat'), 'admin/realtime'] as $needle) {
             $this->assertStringNotContainsString($needle, $html);

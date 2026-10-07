@@ -3,6 +3,13 @@
     <x-slot name="description">Run weekly classes as recurring events with per-class capacity, and sell 10-visit cards, unlimited memberships and show tickets with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
+    <x-slot name="headMeta">
+        {{-- The page's own typefaces, from the fonts the app already bundles (never a CDN). --}}
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Italiana') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Josefin Sans') }}">
+        <link rel="stylesheet" href="{{ font_stylesheet_url('Mulish') }}">
+    </x-slot>
+
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Dance Groups"
@@ -21,377 +28,810 @@
 
     <style {!! nonce_attr() !!}>
         /* ==============================================================
-           For-dance-groups "The Barre" styles.
+           For-dance-groups "Eight Counts" styles. A company's own site:
+           almost nothing on the page but type, and the type moves like
+           a body. Five, six, seven, eight into the piece, then eight
+           counts of content, each numbered on the studio floor.
 
-           NAME: not "The Studio Wall" - /for-visual-artists already uses
-           that nickname for a painter's wall (es-brush-*). "The Barre"
-           matches this page's own es-barre-* prefix anyway.
-
-           CONCEPT: the wall every dancer faces - mirror, barre, floor.
-           The editorial spine is that the SAME WALL sees three different
-           things (the class, the rehearsal, the show) belonging to three
-           different audiences, which is exactly what sub-schedules plus
-           visibility states plus one public link are for.
-
-           WHY NOT "MOTION": the outgoing page was nicknamed "In Motion"
-           and drew drifting curves via .es-flow - but the neighbouring
-           /for-fitness-and-yoga is literally "The Flow" and owns that
-           idea. Anything flowing, trailing or curving is off limits here.
-
-           THE BARRE is built from CSS BOXES (a rounded bar plus bracket
-           blocks), never an outline SVG - CLAUDE.md bans decorative line
-           drawings of objects. Same construction as /for-nightclubs' door
-           and /for-bars' A-frame legs.
-
-           REFLECTIONS are CSS gradients only. Never duplicate text into a
-           flipped copy: it would be read twice by assistive tech and
-           indexed twice.
-
-           COLOUR: mirror glass. After ten rebuilds no hue is unclaimed, so
-           the accent comes from the MATERIAL rather than the wheel - real
-           mirror glass is green-tinted from its iron content, which is why
-           a mirror tunnel looks green. Same move as /for-nightclubs'
-           brushed steel. Teal is unclaimed as a primary by any rebuilt
-           page. Measured on this page's grounds:
-             #115e59  6.97 studio / 6.51 panel   <- accent TEXT
-             #0f766e  5.47 under white           <- fills, borders, CTA only
-                      (only 4.70 on the light panel, so never body text)
-             #2dd4bf  9.88 band / 9.24 panel     <- dark-mode accent text
-           NEVER use text-gray-500: it measures 4.83 on white but only
-           4.2-4.5 on a tinted ground like this one. Use .es-barre-muted
-           (7.35 studio / 6.87 panel light, 7.12 / 6.66 dark).
-
-           Dark mode is the same wall at night - an ordinary dark mode, NOT
-           a single lit object floating in blackness. /for-theater-performers
-           is "The Ghost Light" and owns that.
+           Display words are set one letter to a span (see $dgSet below)
+           so letters can arrive in canon, lift in a wave and leave a
+           long-exposure trail. Bone, ink and one strip of yellow spike
+           tape. Everything is scoped under #dg; every moving thing rests
+           in its finished pose without JS and under reduced motion,
+           because all of it is gated on html.es-anim.
            ============================================================== */
 
-        /* --- Ground and ink --- */
-        .es-barre-page { background-color: #f3f6f5; color: #0f1a18; }
-        .dark .es-barre-page { background-color: #0b1211; color: #e6edeb; }
-        .es-barre-ink { color: #0f1a18; }
-        .dark .es-barre-ink { color: #e6edeb; }
-        .es-barre-muted { color: #48534f; }
-        .dark .es-barre-muted { color: #93a5a0; }
-        .es-barre-accent { color: #115e59; }
-        .dark .es-barre-accent { color: #2dd4bf; }
-        /* Always-lit accent for the dark band, in both colour modes. */
-        .es-barre-lit { color: #2dd4bf; }
-
-        .es-barre-grad {
-            background-image: linear-gradient(100deg, #115e59, #0f766e);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @property --dg-p {
+            syntax: '<number>';
+            inherits: true;
+            initial-value: 0;
         }
-        .dark .es-barre-grad,
-        .es-barre-band .es-barre-grad {
-            background-image: linear-gradient(100deg, #5eead4, #2dd4bf);
+        @property --dg-sweep {
+            syntax: '<percentage>';
+            inherits: false;
+            initial-value: 0%;
         }
 
-        /* --- The barre: a rounded rail on two bracket blocks --------
-           CSS boxes, not an SVG drawing. The rail draws from its left
-           bracket on reveal; the FINISHED state lives on the always-active
-           rule so no-JS and reduced-motion visitors see a complete barre. */
-        .es-barre-rail {
-            display: flex;
-            align-items: center;
-            gap: 0;
-        }
-        .es-barre-bracket {
-            width: 0.6rem;
-            height: 1.5rem;
-            flex: 0 0 auto;
-            border-radius: 0.2rem;
-            background: linear-gradient(180deg, #c3cfcb, #94a6a1 55%, #74857f);
-        }
-        .dark .es-barre-bracket {
-            background: linear-gradient(180deg, #3d4d49, #2a3733 55%, #1c2521);
-        }
-        .es-barre-bar {
-            flex: 1 1 auto;
-            height: 0.5rem;
-            border-radius: 999px;
-            background: linear-gradient(180deg, #cbd6d2, #8fa19c 42%, #63756f);
-            box-shadow: 0 1px 2px rgba(15, 26, 24, 0.18);
-            transform-origin: left center;
-            transform: scaleX(1);
-            transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .dark .es-barre-bar {
-            background: linear-gradient(180deg, #536660, #35443f 42%, #212c28);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        html.es-anim [data-reveal]:not(.is-revealed) .es-barre-bar { transform: scaleX(0); }
-
-        /* --- The floor reflection under a panel ---------------------
-           A gradient only. Nothing here is readable, so nothing here is
-           duplicated content. */
-        .es-barre-reflect { position: relative; }
-        .es-barre-reflect::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 8%;
-            right: 8%;
-            height: 2.4rem;
-            background: radial-gradient(ellipse 62% 100% at 50% 0%, rgba(17, 94, 89, 0.16), rgba(17, 94, 89, 0) 72%);
-            pointer-events: none;
-        }
-        .dark .es-barre-reflect::after {
-            background: radial-gradient(ellipse 62% 100% at 50% 0%, rgba(45, 212, 191, 0.15), rgba(45, 212, 191, 0) 72%);
-        }
-
-        /* --- Surfaces --- */
-        .es-barre-card {
-            background-color: #ffffff;
-            border: 1px solid rgba(15, 26, 24, 0.1);
-            border-radius: 1rem;
-        }
-        .dark .es-barre-card {
-            background-color: #141d1b;
-            border-color: rgba(230, 237, 235, 0.12);
-        }
-        .es-barre-sub {
-            background-color: #e9efed;
-            border: 1px solid rgba(15, 26, 24, 0.07);
-            border-radius: 0.65rem;
-        }
-        .dark .es-barre-sub {
-            background-color: #0f1917;
-            border-color: rgba(230, 237, 235, 0.09);
-        }
-        .es-barre-hover { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-        .es-barre-hover:hover { border-color: rgba(15, 118, 110, 0.45); box-shadow: 0 10px 30px -18px rgba(15, 26, 24, 0.45); }
-        .dark .es-barre-hover:hover { border-color: rgba(45, 212, 191, 0.4); box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.8); }
-
-        /* --- The mirror duplex ---------------------------------------
-           One section only. Left is the wall the company sees, right is
-           the wall the audience sees. The seam is the mirror's edge.
-           (The wrapper needs no rule of its own: .es-barre-reflect already
-           makes it the positioning context.) */
-        .es-barre-seam {
-            background: linear-gradient(180deg, rgba(15, 26, 24, 0), rgba(15, 26, 24, 0.16) 18%, rgba(15, 26, 24, 0.16) 82%, rgba(15, 26, 24, 0));
-        }
-        .dark .es-barre-seam {
-            background: linear-gradient(180deg, rgba(230, 237, 235, 0), rgba(230, 237, 235, 0.18) 18%, rgba(230, 237, 235, 0.18) 82%, rgba(230, 237, 235, 0));
-        }
-        /* A single soft specular sweep, the way a lit mirror catches the
-           room. Static: no animation to kill.
-
-           The card is WHITE in light mode, so an additive white sweep is
-           invisible - white over white is white. The light-mode sweep is
-           therefore SUBTRACTIVE: two faint glass-tinted bands with the card
-           left untouched between them, which is how a highlight reads on a
-           pale surface. Dark mode can stay additive. Both stops are weak
-           enough that text over them keeps its AA margin. */
-        .es-barre-glass { position: relative; overflow: hidden; }
-        .es-barre-glass::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(118deg,
-                rgba(17, 94, 89, 0) 28%,
-                rgba(17, 94, 89, 0.05) 41%,
-                rgba(17, 94, 89, 0) 50%,
-                rgba(17, 94, 89, 0.05) 59%,
-                rgba(17, 94, 89, 0) 72%);
-            pointer-events: none;
-        }
-        .dark .es-barre-glass::before {
-            background: linear-gradient(118deg,
-                rgba(255, 255, 255, 0) 34%,
-                rgba(255, 255, 255, 0.055) 47%,
-                rgba(255, 255, 255, 0) 60%);
-        }
-
-        /* --- Eyebrow, numerals, plan tags --- */
-        .es-barre-tag {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: #115e59;
-        }
-        .dark .es-barre-tag { color: #2dd4bf; }
-        .es-barre-band .es-barre-tag { color: #2dd4bf; }
-
-        .es-barre-corner {
+        #dg {
+            --dg-ground: #f3efe8;
+            --dg-ground-2: #eae5db;
+            --dg-lit: #faf7f2;
+            --dg-ink: #0f0f10;
+            --dg-ink-2: #45433f;
+            --dg-ink-3: #68645d;
+            --dg-line: rgba(15, 15, 16, 0.16);
+            --dg-hair: rgba(15, 15, 16, 0.5);
+            --dg-ghost: 15, 15, 16;
+            --dg-tape: #ffc21a;
+            --dg-on-tape: #0f0f10;
+            /* What a marked word wears: a strip of tape under ink by day, the tape's own yellow by night. */
+            --dg-mark-ink: #0f0f10;
+            --dg-mark-strip: linear-gradient(#ffc21a, #ffc21a);
+            --dg-display: 'Italiana', 'Didot', 'Bodoni 72', 'Bodoni MT', Georgia, serif;
+            --dg-caps: 'Josefin Sans', 'Avenir Next', 'Century Gothic', Futura, sans-serif;
+            --dg-text: 'Mulish', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
             position: relative;
+            background: var(--dg-ground);
+            color: var(--dg-ink);
+            font-family: var(--dg-text);
+            font-size: 1.0625rem;
+            line-height: 1.65;
+        }
+        .dark #dg {
+            --dg-ground: #0f0f10;
+            --dg-ground-2: #18181a;
+            --dg-lit: #f3efe8;
+            --dg-ink: #f3efe8;
+            --dg-ink-2: #cbc6bc;
+            --dg-ink-3: #9d988f;
+            --dg-line: rgba(243, 239, 232, 0.18);
+            --dg-hair: rgba(243, 239, 232, 0.55);
+            --dg-ghost: 243, 239, 232;
+            --dg-mark-ink: #ffc21a;
+            --dg-mark-strip: none;
+        }
+
+        /* The bar above takes the floor's colour, so the page starts at the very top. */
+        body > header.sticky {
+            background-color: rgba(243, 239, 232, 0.9);
+            border-bottom-color: rgba(15, 15, 16, 0.1);
+        }
+        .dark body > header.sticky {
+            background-color: rgba(15, 15, 16, 0.9);
+            border-bottom-color: rgba(243, 239, 232, 0.12);
+        }
+
+        #dg ::selection { background: #ffc21a; color: #0f0f10; }
+        #dg a:focus-visible,
+        #dg summary:focus-visible,
+        #dg input:focus-visible {
+            outline: 2px solid var(--dg-ink);
+            outline-offset: 4px;
+        }
+        #dg .dg-band a:focus-visible,
+        #dg .dg-band input:focus-visible,
+        #dg .dg-wings a:focus-visible { outline-color: #ffc21a; }
+
+        .dg-wrap { width: min(100% - 3rem, 80rem); margin-inline: auto; }
+        .dg-sec { position: relative; padding-block: clamp(5.5rem, 12vw, 11rem); }
+        .dg-sec + .dg-sec { border-top: 1px solid var(--dg-line); }
+
+        /* ---------------------------------------------------------------
+           The voices: a hairline display face, letterspaced caps, a text face
+           --------------------------------------------------------------- */
+        .dg-d { font-family: var(--dg-display); font-weight: 400; letter-spacing: -0.01em; line-height: 1.04; }
+        .dg-label {
+            font-family: var(--dg-caps);
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            line-height: 1.4;
+            color: var(--dg-ink-2);
+        }
+        .dg-num { font-family: var(--dg-caps); font-weight: 400; font-variant-numeric: lining-nums tabular-nums; }
+        .dg-tier {
+            display: inline-block;
+            padding: 0.34rem 0.6rem 0.2rem;
+            border: 1px solid var(--dg-hair);
+            font-family: var(--dg-caps);
+            font-weight: 700;
+            font-size: 0.64rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            line-height: 1.2;
+            color: var(--dg-ink);
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .dg-tier-pro { background: var(--dg-ink); border-color: var(--dg-ink); color: var(--dg-ground); }
+        .dg-tier-ent { background: var(--dg-tape); border-color: var(--dg-tape); color: var(--dg-on-tape); }
+
+        /* Letters. A word never breaks inside itself; a letter is a box so it can move alone. */
+        .dg-w { white-space: nowrap; }
+        .dg-l { display: inline-block; }
+        .dg-m {
+            color: var(--dg-mark-ink);
+            background-image: var(--dg-mark-strip);
+            background-repeat: no-repeat;
+            background-position: 0 90%;
+            background-size: 100% 0.075em;
+            transition: background-size 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.25s;
+        }
+        .dg-amp { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 0.8em; }
+        .dg-br { display: none; }
+        @media (min-width: 900px) { .dg-br { display: inline; } }
+
+        /* Canon: a heading arrives one letter after another, on to tape that is already down. */
+        html.es-anim #dg [data-reveal="canon"],
+        html.es-anim #dg [data-reveal="turn"] { opacity: 1; }
+        .dg-l { transition: opacity 0.7s ease, translate 1s cubic-bezier(0.22, 1, 0.36, 1), rotate 1s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: calc(var(--i, 0) * 26ms); }
+        html.es-anim #dg [data-reveal="canon"]:not(.is-revealed) .dg-l { opacity: 0; translate: 0 0.42em; rotate: 7deg; }
+        html.es-anim #dg [data-reveal="canon"]:not(.is-revealed) .dg-m { background-size: 0% 0.075em; }
+
+        /* ---------------------------------------------------------------
+           Spike tape: the marks a stage manager leaves on the floor
+           --------------------------------------------------------------- */
+        .dg-x,
+        .dg-t { position: relative; display: inline-block; width: 1.1rem; height: 1.1rem; flex: none; }
+        .dg-x::before,
+        .dg-x::after,
+        .dg-t::before,
+        .dg-t::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: calc(50% - 2px);
+            width: 100%;
+            height: 4px;
+            background: var(--dg-tape);
+            box-shadow: 0 1px 1.5px rgba(15, 15, 16, 0.3);
+        }
+        .dg-x::before { rotate: 43deg; }
+        .dg-x::after { rotate: -48deg; }
+        .dg-t::before { top: 0; }
+        .dg-t::after { rotate: 90deg; top: calc(50% - 1px); scale: 0.82 1; }
+
+        /* Two corners of a set piece, taped where it stands. */
+        .dg-spike { position: relative; }
+        .dg-spike::before,
+        .dg-spike::after {
+            content: "";
+            position: absolute;
+            width: 1.6rem;
+            height: 1.6rem;
+            border: 0 solid var(--dg-tape);
+            filter: drop-shadow(0 1px 1px rgba(15, 15, 16, 0.3));
+            pointer-events: none;
+        }
+        .dg-spike::before { top: 0; left: 0; border-top-width: 4px; border-left-width: 4px; }
+        .dg-spike::after { bottom: 0; right: 0; border-bottom-width: 4px; border-right-width: 4px; }
+
+        .dg-marks { display: grid; gap: 1.6rem; }
+        .dg-marks li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+        .dg-marks li > i { margin-top: 0.3rem; }
+        .dg-marks strong { font-weight: 700; color: var(--dg-ink); }
+        .dg-marks span { color: var(--dg-ink-2); }
+
+        /* ---------------------------------------------------------------
+           Buttons and links
+           --------------------------------------------------------------- */
+        .dg-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 2.6rem;
-            height: 2rem;
-            border: 1px solid rgba(15, 26, 24, 0.18);
-            border-radius: 0.35rem;
-            background: rgba(15, 26, 24, 0.03);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.8rem;
+            gap: 0.9rem;
+            padding: 1.25rem 1.7rem 1.05rem;
+            background: var(--dg-tape);
+            color: var(--dg-on-tape);
+            font-family: var(--dg-caps);
             font-weight: 700;
-            color: #0f1a18;
+            font-size: 0.8125rem;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            line-height: 1;
+            box-shadow: 0 1px 2px rgba(15, 15, 16, 0.35);
+            transition: gap 0.35s cubic-bezier(0.22, 1, 0.36, 1), padding 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .dark .es-barre-corner { border-color: rgba(230, 237, 235, 0.2); background: rgba(230, 237, 235, 0.05); color: #e6edeb; }
-        .es-barre-band .es-barre-corner { border-color: rgba(230, 237, 235, 0.2); background: rgba(230, 237, 235, 0.05); color: #e6edeb; }
-        .es-barre-corner::before {
+        .dg-btn:hover { gap: 1.5rem; }
+        .dg-btn svg { width: 1.05rem; height: 1.05rem; margin-top: -0.2rem; flex: none; }
+        .dg-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            /* the top padding and its negative margin make the link 24px tall without moving it */
+            padding-top: 0.2rem;
+            margin-top: -0.2rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid var(--dg-ink);
+            font-family: var(--dg-caps);
+            font-weight: 700;
+            font-size: 0.8125rem;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            line-height: 1.2;
+            color: var(--dg-ink);
+            transition: gap 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .dg-link:hover { gap: 1.2rem; }
+        .dg-link svg { width: 1rem; height: 1rem; margin-top: -0.2rem; flex: none; }
+
+        /* ---------------------------------------------------------------
+           The count rail: one to eight down the edge of a wide screen,
+           with a beat marker that keeps time with the scroll
+           --------------------------------------------------------------- */
+        .dg-rail,
+        .dg-rail-beat { display: none; }
+        @media (min-width: 1420px) {
+            /* White set to difference against the page, so one rail reads on bone and on the dark floor alike.
+               The nav is a box the size of the page that clips the list, so the list stays fixed to the
+               screen and still ends where the page does: without the scroll-driven fade below (Firefox,
+               reduced motion) it rode over the site footer. The box is the stacking context the fixed
+               list lives in, so the blend has to sit on the box itself. */
+            .dg-rail {
+                display: block;
+                position: absolute;
+                inset: 0;
+                z-index: 40;
+                clip-path: inset(0);
+                mix-blend-mode: difference;
+                pointer-events: none;
+            }
+            .dg-rail ol { position: fixed; left: 1.5rem; top: calc(50% - 7.95rem); display: grid; gap: 0.1rem; padding-inline-start: 0.9rem; border-inline-start: 1px solid #474747; pointer-events: auto; }
+            .dg-rail a { position: relative; display: flex; align-items: center; min-width: 1.5rem; height: 1.5rem; }
+            .dg-rail b { width: 0.9rem; font-family: var(--dg-caps); font-weight: 700; font-size: 0.8125rem; line-height: 1; text-align: center; color: #a3a3a3; transition: color 0.3s ease; }
+            .dg-rail a:hover b,
+            .dg-rail a:focus-visible b,
+            .dg-rail a.is-active b { color: #fff; }
+            #dg .dg-rail a:focus-visible { outline-color: #fff; }
+            .dg-rail span {
+                position: absolute;
+                left: 1.7rem;
+                top: 50%;
+                translate: -0.3rem -50%;
+                padding: 0.45rem 0.7rem 0.3rem;
+                background: #fff;
+                color: #000;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease, translate 0.3s ease;
+            }
+            .dg-rail a:hover span,
+            .dg-rail a:focus-visible span { opacity: 1; translate: 0 -50%; }
+            /* The beat is tape, so it stays out of the blend: its own fixed mark, travelling the same 15.9rem. */
+            .dg-rail-beat { position: fixed; left: calc(1.5rem - 3px); top: calc(50% - 7.95rem + var(--dg-p) * (15.9rem - 3px)); z-index: 41; width: 7px; height: 3px; background: var(--dg-tape); box-shadow: 0 1px 1px rgba(15, 15, 16, 0.3); pointer-events: none; }
+        }
+        @supports (animation-timeline: scroll()) {
+            html.es-anim #dg .dg-rail { animation: dg-rail-out linear both; animation-timeline: scroll(root block); }
+            html.es-anim #dg .dg-rail-beat { animation: dg-p linear both, dg-rail-out linear both; animation-timeline: scroll(root block), scroll(root block); }
+            @media (min-width: 1420px) {
+                html.es-anim #dg .dg-rail-beat { display: block; }
+            }
+        }
+        @keyframes dg-rail-out { 0%, 94.5% { opacity: 1; visibility: visible; } 96.5%, 100% { opacity: 0; visibility: hidden; } }
+        @keyframes dg-p { from { --dg-p: 0; } to { --dg-p: 1; } }
+
+        /* ---------------------------------------------------------------
+           Hero: five, six, seven, eight, and the headline on the floor
+           --------------------------------------------------------------- */
+        .dg-hero { position: relative; overflow: clip; padding-block: clamp(2.25rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem); }
+        .dg-hero-in { container-type: inline-size; }
+        .dg-countin { display: flex; align-items: flex-end; gap: clamp(1.1rem, 2.4vw, 2rem); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+        .dg-countin b {
+            position: relative;
+            padding-bottom: 0.7rem;
+            font-family: var(--dg-caps);
+            font-weight: 400;
+            font-size: 1.25rem;
+            line-height: 1;
+            color: var(--dg-ink-3);
+        }
+        .dg-countin b::after {
             content: "";
             position: absolute;
-            left: 0.42rem;
-            top: 0.42rem;
-            bottom: 0.42rem;
-            width: 2px;
-            border-radius: 1px;
-            background: #115e59;
+            inset: auto -0.2rem 0 -0.2rem;
+            height: 3px;
+            background: var(--dg-tape);
+            box-shadow: 0 1px 1px rgba(15, 15, 16, 0.3);
+            scale: 0 1;
         }
-        .dark .es-barre-corner::before { background: #2dd4bf; }
-        .es-barre-band .es-barre-corner::before { background: #2dd4bf; }
+        .dg-countin b:last-of-type { color: var(--dg-ink); }
+        .dg-countin b:last-of-type::after { scale: 1 1; }
+        html.es-anim #dg .dg-countin b { animation: dg-count 2.4s linear infinite; animation-delay: calc(var(--b) * 0.6s); }
+        html.es-anim #dg .dg-countin b::after { animation: dg-count-mark 2.4s linear infinite; animation-delay: calc(var(--b) * 0.6s); }
+        @keyframes dg-count { 0%, 24.9% { color: var(--dg-ink); } 25%, 100% { color: var(--dg-ink-3); } }
+        @keyframes dg-count-mark { 0%, 24.9% { scale: 1 1; } 25%, 100% { scale: 0 1; } }
+        /* The metronome: a hairline arm with a weight on it, one swing to the beat. */
+        .dg-metro { position: relative; width: 2.4rem; height: 2.6rem; margin-inline-start: 0.4rem; }
+        .dg-metro i { position: absolute; left: 50%; bottom: 0; width: 1px; height: 100%; background: var(--dg-ink); transform-origin: 50% 100%; }
+        .dg-metro i::after { content: ""; position: absolute; left: -4px; top: 26%; width: 9px; height: 6px; background: var(--dg-tape); box-shadow: 0 1px 1px rgba(15, 15, 16, 0.3); }
+        .dg-metro::after { content: ""; position: absolute; left: 20%; right: 20%; bottom: 0; height: 1px; background: var(--dg-ink); }
+        html.es-anim #dg .dg-metro i { animation: dg-swing 1.2s ease-in-out infinite; }
+        @keyframes dg-swing { 0%, 100% { rotate: -15deg; } 50% { rotate: 15deg; } }
 
-        .es-barre-plan {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            padding: 0.1rem 0.5rem;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+        #dg .dg-eyebrow { display: block; margin-bottom: clamp(1.25rem, 3vw, 2rem); font-family: var(--dg-caps); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.32em; text-transform: uppercase; line-height: 1.4; color: var(--dg-ink-2); }
+        .dg-h1 { font-family: var(--dg-display); font-weight: 400; }
+        .dg-h1-rows { position: relative; display: block; font-size: clamp(3.6rem, 11.2cqi, 10.25rem); line-height: 0.98; letter-spacing: -0.012em; --dg-base: 0.15em; }
+        .dg-row { display: block; }
+        /* The second row stands on the floor: its box ends at the baseline, and the floor gives it back. */
+        .dg-stand {
+            position: relative;
+            width: fit-content;
+            margin-inline-start: 8cqi;
+            -webkit-box-reflect: below -0.3em linear-gradient(transparent 52%, rgba(255, 255, 255, 0.26));
         }
-        .es-barre-plan-free { border-color: rgba(15, 26, 24, 0.2); color: #48534f; }
-        .dark .es-barre-plan-free { border-color: rgba(230, 237, 235, 0.24); color: #93a5a0; }
-        .es-barre-plan-pro { border-color: rgba(15, 118, 110, 0.45); color: #115e59; background: rgba(15, 118, 110, 0.08); }
-        .dark .es-barre-plan-pro { border-color: rgba(45, 212, 191, 0.4); color: #2dd4bf; background: rgba(45, 212, 191, 0.1); }
-        .es-barre-plan-ent { border-color: rgba(15, 26, 24, 0.28); color: #0f1a18; background: rgba(15, 26, 24, 0.06); }
-        .dark .es-barre-plan-ent { border-color: rgba(230, 237, 235, 0.3); color: #e6edeb; background: rgba(230, 237, 235, 0.08); }
+        .dg-h1 .dg-m { background-image: none; }
+        .dg-floor {
+            position: absolute;
+            inset-inline: calc((100% - 100vw) / 2);
+            bottom: calc(var(--dg-base) - clamp(4px, 0.05em, 7px));
+            height: clamp(4px, 0.05em, 7px);
+            background: var(--dg-tape);
+            box-shadow: 0 1px 2px rgba(15, 15, 16, 0.28);
+            transform-origin: 0 50%;
+        }
+        html.es-anim #dg .dg-floor { animation: dg-lay 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+        @keyframes dg-lay { from { scale: 0 1; } to { scale: 1 1; } }
 
-        /* --- Visibility states are NOT plan tiers -------------------
-           These must not borrow the plan palette. A teal pill means Pro
-           everywhere else on the page, so styling "Public" teal reads as
-           "Public needs Pro" - the exact opposite of this section's point,
-           which is that Draft is free. States are distinguished by SHAPE:
-           published is solid, a draft is hollow with a dashed edge, the
-           way an unpublished thing is drawn everywhere else in the app. */
-        .es-barre-state {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 0.3rem;
-            border: 1px solid transparent;
-            padding: 0.1rem 0.45rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+        /* Entrance in canon, then a slow wave through the marked words with a long-exposure trail. */
+        html.es-anim #dg .dg-h1 .dg-l {
+            animation: dg-enter 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation-delay: calc(var(--i) * 46ms + 0.45s);
+            transition: none;
         }
-        .es-barre-state-public {
-            border-color: rgba(15, 26, 24, 0.16);
-            background: rgba(15, 26, 24, 0.075);
-            color: #2f3a36;
+        html.es-anim #dg .dg-h1 .dg-m .dg-l {
+            animation: dg-enter 1.15s cubic-bezier(0.22, 1, 0.36, 1) both, dg-wave 7.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            animation-delay: calc(var(--i) * 46ms + 0.45s), calc(var(--i) * 130ms + 0.4s);
         }
-        .dark .es-barre-state-public {
-            border-color: rgba(230, 237, 235, 0.2);
-            background: rgba(230, 237, 235, 0.1);
-            color: #cbd6d2;
+        @keyframes dg-enter { from { opacity: 0; translate: 0 0.55em; rotate: 9deg; } to { opacity: 1; translate: 0 0; rotate: 0deg; } }
+        @keyframes dg-wave {
+            0%, 16%, 100% { translate: 0 0; rotate: 0deg; text-shadow: 0 0 0 rgba(var(--dg-ghost), 0), 0 0 0 rgba(var(--dg-ghost), 0), 0 0 0 rgba(var(--dg-ghost), 0); }
+            7% { translate: 0.015em -0.075em; rotate: -3deg; text-shadow: -0.035em 0.03em 0 rgba(var(--dg-ghost), 0.2), -0.07em 0.06em 0 rgba(var(--dg-ghost), 0.11), -0.105em 0.09em 0 rgba(var(--dg-ghost), 0.05); }
         }
-        .es-barre-state-draft {
-            border-style: dashed;
-            border-color: rgba(15, 26, 24, 0.32);
+        .dark #dg .dg-h1 .dg-m .dg-l { --dg-ghost: 255, 194, 26; }
+
+        .dg-hero-foot { display: grid; gap: 2rem 3rem; align-items: end; margin-top: clamp(5.5rem, 10cqi, 9rem); }
+        @media (min-width: 900px) { .dg-hero-foot { grid-template-columns: minmax(0, 34rem) minmax(0, 1fr); } }
+        .dg-hero-lede { font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.55; color: var(--dg-ink-2); }
+        .dg-hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem 2.25rem; }
+        @media (min-width: 900px) { .dg-hero-cta { justify-content: flex-end; } }
+
+        /* A phone: one step to a line, travelling across the floor. */
+        @media (max-width: 719px) {
+            .dg-h1-rows { font-size: clamp(3rem, 19.2cqi, 5.2rem); line-height: 0.96; }
+            .dg-step { display: block; margin-inline-start: var(--s, 0%); }
+            .dg-stand { width: auto; margin-inline-start: 0; -webkit-box-reflect: below -0.28em linear-gradient(transparent 80%, rgba(255, 255, 255, 0.26)); }
+            .dg-hero-foot { margin-top: clamp(4.25rem, 20cqi, 6rem); }
+        }
+
+        /* ---------------------------------------------------------------
+           Three strands: a word, and the echoes it leaves as it crosses
+           --------------------------------------------------------------- */
+        .dg-strands { position: relative; padding-bottom: clamp(5rem, 10vw, 9rem); }
+        .dg-strand { position: relative; padding-block: clamp(1.1rem, 2.2vw, 2rem); border-top: 1px solid var(--dg-line); }
+        .dg-echo { display: flex; justify-content: center; overflow: clip; overflow-clip-margin: 2rem; padding-block: 0.4rem 0; }
+        .dg-echo-row {
+            flex: none;
+            display: flex;
+            align-items: baseline;
+            gap: 0.3em;
+            font-family: var(--dg-display);
+            font-size: clamp(5.5rem, 16vw, 15rem);
+            line-height: 0.92;
+            letter-spacing: -0.012em;
+            white-space: nowrap;
+            translate: var(--x0, 0) 0;
+        }
+        .dg-echo-row span { color: rgba(var(--dg-ghost), var(--o)); }
+        .dg-echo-row .dg-on { position: relative; color: var(--dg-mark-ink); }
+        .dg-echo-row .dg-on::after {
+            content: "";
+            position: absolute;
+            left: -0.05em;
+            right: -0.05em;
+            bottom: 0.13em;
+            height: 0.05em;
+            background: var(--dg-tape);
+            box-shadow: 0 1px 2px rgba(15, 15, 16, 0.28);
+            rotate: -0.8deg;
+        }
+        @supports (animation-timeline: view()) {
+            html.es-anim #dg .dg-echo-row {
+                animation: dg-drift linear both;
+                animation-timeline: view();
+                animation-range: entry 0% exit 100%;
+            }
+        }
+        @keyframes dg-drift {
+            from { translate: calc(var(--x0, 0px) + var(--dir, 1) * -11vw) 0; }
+            to { translate: calc(var(--x0, 0px) + var(--dir, 1) * 11vw) 0; }
+        }
+        .dg-strand-cap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.35rem 2.5rem; align-items: baseline; padding-top: 0.6rem; }
+        @media (min-width: 760px) { .dg-strand-cap { grid-template-columns: 9rem minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); } }
+        .dg-strand-cap strong { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.1; }
+        .dg-strand-when { font-family: var(--dg-caps); font-size: 0.875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dg-ink-2); }
+        .dg-strand-note { font-weight: 700; color: var(--dg-ink); }
+        @media (min-width: 760px) { .dg-strand-note { text-align: end; } }
+        .dg-strand-note.is-draft { font-weight: 400; color: var(--dg-ink-3); }
+        .dg-strands-foot { margin-top: clamp(3rem, 6vw, 5rem); padding-top: clamp(2.5rem, 5vw, 4rem); border-top: 1px solid var(--dg-line); }
+        .dg-strands-foot p { max-width: 30ch; font-family: var(--dg-display); font-size: clamp(1.7rem, 3.2vw, 2.7rem); line-height: 1.16; letter-spacing: -0.01em; text-wrap: balance; }
+
+        /* ---------------------------------------------------------------
+           A count: the numeral on the floor, its place in the eight, the heading
+           --------------------------------------------------------------- */
+        .dg-head { display: grid; gap: 1.25rem 3rem; margin-bottom: clamp(3rem, 7vw, 6rem); }
+        @media (min-width: 900px) { .dg-head { grid-template-columns: minmax(0, 13.5rem) minmax(0, 1fr); align-items: start; } }
+        .dg-count { font-family: var(--dg-caps); font-weight: 400; font-size: clamp(6.5rem, 14vw, 12.5rem); line-height: 0.74; letter-spacing: -0.03em; padding-bottom: 0.3em; }
+        .dg-count-n { display: inline-block; padding-top: 0.14em; -webkit-box-reflect: below -0.24em linear-gradient(transparent 58%, rgba(255, 255, 255, 0.22)); }
+        html.es-anim #dg [data-reveal="turn"]:not(.is-revealed) .dg-count-n { opacity: 0; }
+        html.es-anim #dg [data-reveal="turn"].is-revealed .dg-count-n { animation: dg-turn 1.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        @keyframes dg-turn { from { opacity: 0; transform: perspective(40rem) rotateY(-200deg); } to { opacity: 1; transform: perspective(40rem) rotateY(0deg); } }
+        .dg-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; margin-bottom: clamp(1.25rem, 2.5vw, 2rem); }
+        .dg-bar { display: inline-flex; align-items: flex-end; gap: 0.5rem; height: 1rem; }
+        .dg-bar i { width: 1px; height: 0.5rem; background: var(--dg-hair); opacity: 0.55; }
+        .dg-bar i.is-past { opacity: 1; background: var(--dg-ink); }
+        .dg-bar i.is-on { width: 4px; height: 1rem; opacity: 1; background: var(--dg-tape); box-shadow: 0 1px 1px rgba(15, 15, 16, 0.3); }
+        .dg-h2 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(2.5rem, 6.1vw, 5.5rem); line-height: 1.03; letter-spacing: -0.012em; text-wrap: balance; }
+        .dg-lede { margin-top: clamp(1.5rem, 3vw, 2.25rem); max-width: 37rem; font-size: 1.125rem; color: var(--dg-ink-2); }
+        .dg-h3 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.6rem, 2.5vw, 2rem); line-height: 1.12; letter-spacing: -0.005em; }
+        .dg-two { display: grid; gap: clamp(3rem, 6vw, 5rem) clamp(3rem, 7vw, 7rem); }
+        @media (min-width: 960px) { .dg-two { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: start; } }
+        .dg-note { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 0.9rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--dg-line); font-size: 0.95rem; color: var(--dg-ink-2); }
+
+        /* 1. The week: a timetable set as type, every place a mark */
+        .dg-tt { padding: clamp(1.75rem, 3.5vw, 2.75rem); }
+        .dg-tt-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.5rem 1rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--dg-ink); }
+        .dg-tt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.3rem 1.5rem; align-items: end; padding-block: 1.5rem; border-bottom: 1px solid var(--dg-line); }
+        /* On a phone the name takes the whole line and the count sits under it: beside each other,
+           "Contemporary" was wider than its column and ran into the figure. */
+        @media (max-width: 480px) {
+            #dg .dg-tt-row { grid-template-columns: minmax(0, 1fr); }
+            #dg .dg-tt-left { display: flex; align-items: baseline; gap: 0.9rem; text-align: start; }
+            #dg .dg-tt-left p + p { margin-top: 0; }
+        }
+        .dg-tt-when { margin-top: 0.4rem; font-family: var(--dg-caps); font-size: 0.8125rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dg-ink-2); }
+        .dg-tt-left { text-align: end; }
+        .dg-tt-left p:first-child { font-family: var(--dg-caps); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; line-height: 1; }
+        .dg-tt-left p:first-child b { display: inline-block; margin-inline-end: 0.2rem; font-weight: 400; font-size: 2.4rem; letter-spacing: -0.02em; vertical-align: -0.12em; }
+        .dg-tt-left .is-full { color: var(--dg-ink-3); }
+        .dg-tt-left p + p { margin-top: 0.45rem; font-family: var(--dg-caps); font-size: 0.75rem; letter-spacing: 0.14em; color: var(--dg-ink-3); }
+        .dg-cap { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 0.7rem; }
+        .dg-cap i { width: 3px; height: 1.05rem; background: var(--dg-ink); }
+        .dg-cap i.is-free { background: var(--dg-tape); box-shadow: 0 1px 1px rgba(15, 15, 16, 0.3); }
+        html.es-anim #dg [data-reveal]:not(.is-revealed) .dg-cap i { scale: 1 0; }
+        .dg-cap i { transform-origin: 50% 100%; transition: scale 0.5s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: calc(var(--k, 0) * 22ms + 0.3s); }
+        .dg-closed { padding-top: 1.5rem; }
+        .dg-closed ul { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; margin-top: 0.9rem; }
+        .dg-closed li { display: inline-flex; align-items: center; gap: 0.7rem; font-family: var(--dg-caps); font-size: 0.875rem; letter-spacing: 0.12em; text-transform: uppercase; }
+        .dg-closed li i { width: 0.85rem; height: 0.85rem; }
+        .dg-closed p:last-child { margin-top: 1rem; font-size: 0.9rem; color: var(--dg-ink-2); }
+
+        /* 2. The rehearsal: the wings are dark, the house is lit */
+        .dg-duplex { position: relative; display: grid; }
+        @media (min-width: 900px) { .dg-duplex { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+        .dg-duplex > i { display: none; }
+        @media (min-width: 900px) {
+            .dg-duplex > i { display: block; position: absolute; left: 50%; top: -0.55rem; z-index: 2; translate: -50% 0; width: 1.4rem; height: 1.4rem; }
+        }
+        .dg-side { padding: clamp(1.75rem, 4vw, 3.5rem); }
+        .dg-wings {
+            background-color: #0f0f10;
+            background-image: linear-gradient(104deg, transparent 0 34%, rgba(255, 255, 255, 0.045) 46%, transparent 60% 100%);
+            color: #f3efe8;
+        }
+        .dark .dg-wings { background-color: #1b1b1e; }
+        .dg-house { background-color: var(--dg-lit); color: #0f0f10; box-shadow: inset 0 0 0 1px rgba(15, 15, 16, 0.14); }
+        .dg-side-kick { display: block; font-family: var(--dg-caps); font-weight: 400; font-size: 0.75rem; letter-spacing: 0.32em; text-transform: uppercase; }
+        .dg-wings .dg-side-kick { color: #b9b4aa; }
+        .dg-house .dg-side-kick { color: #5c5852; }
+        .dg-side-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem 1rem; margin-top: 0.5rem; padding-bottom: 1.1rem; border-bottom: 1px solid currentColor; }
+        .dg-side-head .dg-label { color: inherit; }
+        .dg-wings .dg-tier { border-color: rgba(243, 239, 232, 0.6); color: #f3efe8; }
+        .dg-side-url { font-family: var(--dg-caps); font-size: 0.8125rem; letter-spacing: 0.08em; color: #5c5852; }
+        .dg-ev { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.2rem 1rem; padding-block: 1rem; border-bottom: 1px solid rgba(243, 239, 232, 0.16); }
+        .dg-house .dg-ev { border-bottom-color: rgba(15, 15, 16, 0.14); }
+        .dg-ev-name { font-family: var(--dg-display); font-size: clamp(1.35rem, 2vw, 1.7rem); line-height: 1.15; }
+        .dg-ev-when { margin-top: 0.3rem; font-family: var(--dg-caps); font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; }
+        .dg-wings .dg-ev-when { color: #b9b4aa; }
+        .dg-house .dg-ev-when { color: #5c5852; }
+        .dg-state { padding: 0.36rem 0.6rem 0.22rem; border: 1px solid currentColor; font-family: var(--dg-caps); font-weight: 700; font-size: 0.64rem; letter-spacing: 0.24em; text-transform: uppercase; line-height: 1.2; }
+        .dg-state-public { background: #f3efe8; border-color: #f3efe8; color: #0f0f10; }
+        .dg-state-draft { border-style: dashed; color: #cbc6bc; }
+        .dg-ev.is-draft .dg-ev-name { color: #cbc6bc; }
+        .dg-side-foot { margin-top: 1.4rem; font-size: 0.9rem; }
+        .dg-wings .dg-side-foot { color: #cbc6bc; }
+        .dg-house .dg-side-foot { color: #45433f; }
+        @media (min-width: 900px) {
+            .dg-ev { height: 5.75rem; padding-block: 0; }
+            /* The house prints the same four rows; the two calls are not on them. */
+            .dg-house-list {
+                display: grid;
+                grid-template-rows: repeat(4, 5.75rem);
+                background: repeating-linear-gradient(to bottom, transparent 0 calc(5.75rem - 1px), rgba(15, 15, 16, 0.14) calc(5.75rem - 1px) 5.75rem);
+            }
+            .dg-house-list .dg-ev { border-bottom: 0; }
+            .dg-house-list .dg-ev:nth-child(2) { grid-row: 4; }
+        }
+        .dg-after { display: grid; gap: 2.5rem clamp(3rem, 7vw, 7rem); margin-top: clamp(3.5rem, 7vw, 6rem); }
+        @media (min-width: 800px) { .dg-after { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .dg-after-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-bottom: 0.9rem; }
+        .dg-after p { color: var(--dg-ink-2); max-width: 34rem; }
+
+        /* 3. The card: ten counts, punched one at a time */
+        .dg-punch-wrap { container-type: inline-size; max-width: 31rem; }
+        .dg-punch {
+            position: relative;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 1.25rem;
+            aspect-ratio: 1.72;
+            padding: clamp(1.1rem, 5cqi, 1.75rem);
+            background: var(--dg-ink);
+            color: var(--dg-ground);
+            rotate: -2.2deg;
+            box-shadow: 0 1.5rem 2.5rem -1.5rem rgba(15, 15, 16, 0.55);
+            transition: rotate 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .dg-punch-wrap:hover .dg-punch { rotate: 0.6deg; }
+        .dg-punch::before { content: ""; position: absolute; left: -1.1rem; top: 0.9rem; width: 3.6rem; height: 1.15rem; background: var(--dg-tape); box-shadow: 0 1px 2px rgba(15, 15, 16, 0.35); rotate: -38deg; }
+        .dg-punch-top,
+        .dg-punch-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-family: var(--dg-caps); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; }
+        .dg-punch-top span:first-child { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.4rem, 7cqi, 2rem); letter-spacing: 0; text-transform: none; line-height: 1; }
+        .dg-punch-holes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; align-content: center; justify-items: center; }
+        .dg-punch-holes i {
+            display: grid;
+            place-items: center;
+            width: min(100%, 2.7rem);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dg-ground) 55%, transparent);
+            font-family: var(--dg-caps);
+            font-style: normal;
+            font-size: 0.8125rem;
+            line-height: 1;
+            padding-top: 0.15rem;
+        }
+        .dg-punch-holes i.is-out { background: var(--dg-ground); box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.4); color: transparent; }
+        .dg-punch-holes i.is-out:nth-child(2) { translate: 1px -1px; }
+        .dg-punch-holes i.is-out:nth-child(3) { translate: -1px 2px; }
+        .dg-buy { margin-top: clamp(2.75rem, 6vw, 4rem); }
+        .dg-buy-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--dg-ink); }
+        .dg-buy-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.2rem 1.5rem; align-items: baseline; padding-block: 1.2rem; border-bottom: 1px solid var(--dg-line); }
+        .dg-buy-name { font-family: var(--dg-display); font-size: clamp(1.45rem, 2.2vw, 1.85rem); line-height: 1.15; }
+        .dg-buy-price { font-family: var(--dg-caps); font-size: 1.5rem; line-height: 1; }
+        .dg-buy-kind { grid-column: 1 / -1; font-size: 0.95rem; color: var(--dg-ink-2); }
+        .dg-buy-kind b { margin-inline-end: 0.6rem; font-family: var(--dg-caps); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--dg-ink); }
+        .dg-buy-foot { margin-top: 1.2rem; font-size: 0.9rem; color: var(--dg-ink-2); }
+        .dg-facts { display: grid; gap: 2.25rem; }
+        .dg-facts h3 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.5rem, 2.3vw, 1.9rem); line-height: 1.15; }
+        .dg-facts p { margin-top: 0.5rem; color: var(--dg-ink-2); }
+        .dg-facts li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); gap: 1.4rem; }
+        .dg-facts li > i { margin-top: 0.55rem; }
+
+        /* 4. The show: the house list for the night */
+        .dg-bill { padding: clamp(1.75rem, 3.5vw, 2.75rem); }
+        .dg-bill-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.4rem 1rem; }
+        .dg-bill-head h3 { font-size: clamp(2.2rem, 4vw, 3.4rem); line-height: 1; }
+        .dg-bill-sub { margin-top: 0.6rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--dg-ink); color: var(--dg-ink-2); }
+        .dg-bill-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0.2rem 1.5rem; align-items: baseline; padding-block: 1.15rem; border-bottom: 1px solid var(--dg-line); }
+        .dg-bill-name { font-family: var(--dg-display); font-size: clamp(1.4rem, 2.1vw, 1.8rem); line-height: 1.15; }
+        .dg-bill-win { grid-column: 1 / -1; grid-row: 2; font-family: var(--dg-caps); font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dg-ink-2); }
+        .dg-bill-qty { font-family: var(--dg-caps); font-size: 0.875rem; letter-spacing: 0.08em; color: var(--dg-ink-3); }
+        .dg-bill-price { min-width: 3.2rem; text-align: end; font-family: var(--dg-caps); font-size: 1.5rem; line-height: 1; }
+        .dg-bill-foot { margin-top: 1.3rem; font-size: 0.9rem; color: var(--dg-ink-2); }
+        .dg-notes { display: grid; gap: 2.5rem; }
+        .dg-notes-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-bottom: 0.7rem; }
+        .dg-notes p { color: var(--dg-ink-2); }
+        .dg-notes li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); gap: 1.4rem; }
+        .dg-notes li > i { margin-top: 0.6rem; }
+
+        /* 5. In public: one address, and what hangs from it */
+        .dg-url { margin-bottom: clamp(3rem, 6vw, 5rem); border-block: 1px solid var(--dg-line); }
+        .dg-url .dg-echo-row { font-size: clamp(2.6rem, 7.4vw, 7rem); gap: 0.6em; padding-block: 0.28em 0.2em; }
+        .dg-url .dg-echo-row .dg-on::after { bottom: 0.02em; }
+        .dg-six { display: grid; gap: 0 clamp(2.5rem, 5vw, 5rem); }
+        @media (min-width: 720px) { .dg-six { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1100px) { .dg-six { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .dg-six article { padding-block: 2rem 2.25rem; border-top: 1px solid var(--dg-line); }
+        .dg-six-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; margin-bottom: 0.8rem; }
+        .dg-six p { color: var(--dg-ink-2); }
+
+        /* 6. Who it is for: the company list */
+        .dg-who { border-bottom: 1px solid var(--dg-line); }
+        .dg-who-row { display: grid; gap: 0.6rem 2.5rem; padding-block: clamp(1.5rem, 3vw, 2.4rem); border-top: 1px solid var(--dg-line); }
+        @media (min-width: 900px) { .dg-who-row { grid-template-columns: 3rem minmax(0, 1.25fr) minmax(0, 1fr); align-items: baseline; } }
+        .dg-who-no { font-family: var(--dg-caps); font-size: 0.8125rem; letter-spacing: 0.2em; color: var(--dg-ink-3); }
+        .dg-who-name { position: relative; width: fit-content; font-family: var(--dg-display); font-weight: 400; font-size: clamp(2rem, 4.7vw, 4.1rem); line-height: 1.04; letter-spacing: -0.012em; transform-origin: 0 100%; transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+        .dg-who-name::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0.02em; height: 0.06em; background: var(--dg-tape); box-shadow: 0 1px 1.5px rgba(15, 15, 16, 0.28); scale: 0 1; transform-origin: 0 50%; transition: scale 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+        @media (hover: hover) {
+            .dg-who-row:hover .dg-who-name { transform: skewX(-9deg) translateX(0.12em); }
+            .dg-who-row:hover .dg-who-name::after { scale: 1 1; }
+        }
+        .dg-who-row p { color: var(--dg-ink-2); }
+        .dg-who-row a { display: inline-flex; margin-top: 0.9rem; }
+
+        /* 7. How it works: the dark band, a marley floor under work light */
+        .dg-band {
+            position: relative;
+            overflow: clip;
+            background-color: #0f0f10;
+            background-image:
+                linear-gradient(103deg, transparent 0 36%, rgba(255, 255, 255, 0.04) 47%, transparent 60% 100%),
+                repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), rgba(255, 255, 255, 0.05) calc(25% - 1px) 25%);
+            color: #f3efe8;
+            border-top: 0;
+        }
+        .dark .dg-band { background-color: #18181a; }
+        #dg .dg-band + .dg-sec,
+        #dg .dg-sec + .dg-band { border-top: 0; }
+        .dg-band .dg-label { color: #cbc6bc; }
+        .dg-band .dg-m { color: #ffc21a; background-image: none; }
+        .dg-band .dg-bar i { background: rgba(243, 239, 232, 0.55); }
+        .dg-band .dg-bar i.is-past { background: #f3efe8; }
+        .dg-band .dg-bar i.is-on { background: #ffc21a; }
+        .dg-steps { position: relative; display: grid; gap: 3.5rem 3rem; }
+        @media (min-width: 860px) { .dg-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .dg-steps .dg-step-n { display: inline-block; margin: 0; max-width: none; font-family: var(--dg-caps); font-weight: 400; font-size: clamp(4.5rem, 8vw, 7rem); line-height: 0.74; letter-spacing: -0.03em; color: #ffc21a; padding-top: 0.14em; -webkit-box-reflect: below -0.24em linear-gradient(transparent 55%, rgba(255, 255, 255, 0.24)); }
+        .dg-steps h3 { margin-top: 3.25rem; font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.8rem, 2.8vw, 2.4rem); line-height: 1.1; }
+        .dg-steps p { margin-top: 0.9rem; max-width: 24rem; color: #cbc6bc; }
+        /* The beat crossing the floor: one hairline, eased, that the three steps keep time with. */
+        .dg-sweep { display: none; }
+        @media (min-width: 860px) {
+            .dg-sweep { display: block; position: absolute; top: -1.5rem; bottom: -1.5rem; left: var(--dg-sweep); width: 1px; background: linear-gradient(to bottom, transparent, #ffc21a 18%, #ffc21a 82%, transparent); opacity: 0; }
+            html.es-anim #dg .dg-sweep { animation: dg-sweep 7.2s cubic-bezier(0.65, 0, 0.35, 1) infinite, dg-sweep-show 7.2s linear infinite; }
+        }
+        /* Two sets of keyframes on purpose: Safari stops animating an ordinary property that
+           shares its keyframes with a custom property, which left the hairline at opacity 0. */
+        @keyframes dg-sweep {
+            0% { --dg-sweep: 0%; }
+            30% { --dg-sweep: 33.4%; }
+            38% { --dg-sweep: 33.4%; }
+            60% { --dg-sweep: 66.8%; }
+            68% { --dg-sweep: 66.8%; }
+            100% { --dg-sweep: 100%; }
+        }
+        @keyframes dg-sweep-show {
+            0% { opacity: 0; }
+            8% { opacity: 0.8; }
+            92% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        /* Between counts: the repertoire, the plans, the neighbours */
+        .dg-aside-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.5rem 2rem; margin-bottom: clamp(2rem, 4vw, 3rem); }
+        .dg-aside-head h2 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(2.2rem, 4.6vw, 3.8rem); line-height: 1.04; letter-spacing: -0.012em; }
+        .dg-rep { border-bottom: 1px solid var(--dg-line); }
+        .dg-rep a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.3rem 2rem; align-items: baseline; padding-block: 1.5rem; border-top: 1px solid var(--dg-line); transition: padding 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        @media (min-width: 900px) { .dg-rep a { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) auto; } }
+        .dg-rep a:hover { padding-inline-start: 1.25rem; }
+        .dg-rep strong { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.7rem, 3vw, 2.6rem); line-height: 1.1; }
+        .dg-rep span { grid-column: 1; color: var(--dg-ink-2); }
+        @media (min-width: 900px) { .dg-rep span { grid-column: 2; } }
+        .dg-rep svg { grid-column: 2; grid-row: 1; width: 1.4rem; height: 1.4rem; align-self: center; transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        @media (min-width: 900px) { .dg-rep svg { grid-column: 3; } }
+        .dg-rep a:hover svg { translate: 0.4rem 0; }
+        .dg-next { display: grid; gap: 0 clamp(2rem, 4vw, 4rem); border-bottom: 1px solid var(--dg-line); }
+        @media (min-width: 640px) { .dg-next { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1100px) { .dg-next { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .dg-next a { display: block; padding-block: 1.6rem 1.75rem; border-top: 1px solid var(--dg-line); }
+        .dg-next small { display: block; font-family: var(--dg-caps); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: var(--dg-ink-3); }
+        .dg-next strong { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-top: 0.6rem; font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.6rem, 2.3vw, 2.1rem); line-height: 1.1; }
+        .dg-next svg { width: 1.2rem; height: 1.2rem; flex: none; transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .dg-next a:hover svg { translate: 0.4rem 0; }
+
+        /* The plan band and the closing strip are shared partials: same words, same prices, this floor. */
+        #dg .dg-plans > section { background: var(--dg-ground); border-top: 1px solid var(--dg-line); }
+        #dg .dg-plans h2 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(2.2rem, 4.6vw, 3.8rem); line-height: 1.06; letter-spacing: -0.012em; color: var(--dg-ink); }
+        #dg .dg-plans h2 + p { color: var(--dg-ink-2); font-size: 1.0625rem; }
+        #dg .dg-plans .grid > div { background: transparent; border: 0; border-top: 1px solid var(--dg-ink); border-radius: 0; box-shadow: none; color: var(--dg-ink); padding: 1.75rem 0.25rem 1.5rem; }
+        #dg .dg-plans .grid > div:hover { transform: none; box-shadow: none; }
+        #dg .dg-plans .grid > div:nth-child(2) { border-top: 4px solid var(--dg-tape); padding-top: calc(1.75rem - 3px); }
+        #dg .dg-plans .grid > div span,
+        #dg .dg-plans .grid > div p,
+        #dg .dg-plans .grid > div li { color: var(--dg-ink-2); }
+        #dg .dg-plans .grid > div .text-3xl { font-family: var(--dg-caps); font-weight: 400; font-size: 3.2rem; letter-spacing: -0.02em; color: var(--dg-ink); }
+        #dg .dg-plans .grid > div .uppercase { font-family: var(--dg-caps); letter-spacing: 0.28em; color: var(--dg-ink); }
+        #dg .dg-plans .grid > div .rounded-full { background: var(--dg-tape); color: #0f0f10; border-radius: 0; font-family: var(--dg-caps); letter-spacing: 0.18em; padding: 0.3rem 0.5rem 0.15rem; }
+        #dg .dg-plans .grid > div svg { color: var(--dg-ink); }
+        #dg .dg-plans a.font-medium { color: var(--dg-ink); border-bottom: 1px solid var(--dg-ink); font-family: var(--dg-caps); font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.24em; text-transform: uppercase; padding-bottom: 0.3rem; }
+        #dg .dg-plans a.rounded-2xl { background: var(--dg-tape); color: #0f0f10; border-radius: 0; box-shadow: 0 1px 2px rgba(15, 15, 16, 0.35); font-family: var(--dg-caps); font-weight: 700; font-size: 0.8125rem; letter-spacing: 0.26em; text-transform: uppercase; padding: 1.25rem 1.7rem 1.05rem; }
+        #dg .dg-plans a.rounded-2xl:hover { transform: none; box-shadow: 0 1px 2px rgba(15, 15, 16, 0.35); }
+
+        #dg .dg-keep > section { background: var(--dg-ground-2); border-top: 1px solid var(--dg-line); }
+        #dg .dg-keep h2 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.05; color: var(--dg-ink); }
+        #dg .dg-keep p.uppercase { font-family: var(--dg-caps); font-weight: 700; letter-spacing: 0.32em; color: var(--dg-ink-2); }
+        #dg .dg-keep .grid > a { background: transparent; border: 0; border-top: 1px solid var(--dg-ink); border-radius: 0; padding: 1.4rem 0.25rem 1rem; }
+        #dg .dg-keep .grid > a:hover { transform: none; box-shadow: none; border-top-color: var(--dg-tape); }
+        #dg .dg-keep .grid > a > span:first-child { display: none; }
+        #dg .dg-keep .grid > a h3 { font-family: var(--dg-display); font-weight: 400; font-size: 1.6rem; line-height: 1.15; color: var(--dg-ink); }
+        #dg .dg-keep .grid > a p { color: var(--dg-ink-2); }
+        #dg .dg-keep .grid > a > span:last-child,
+        #dg .dg-keep a.self-start { color: var(--dg-ink); }
+
+        /* 8. Questions */
+        .dg-qa { border-top: 1px solid var(--dg-ink); counter-reset: dg-q; }
+        .dg-qa details { border-bottom: 1px solid var(--dg-line); counter-increment: dg-q; }
+        .dg-qa summary { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) 1.4rem; gap: 1rem; align-items: baseline; padding: 1.7rem 0.25rem 1.5rem; cursor: pointer; }
+        .dg-qa summary::before { content: counter(dg-q); font-family: var(--dg-caps); font-size: 1.5rem; line-height: 1; color: var(--dg-ink-3); }
+        .dg-qa h3 { font-family: var(--dg-display); font-weight: 400; font-size: clamp(1.45rem, 2.4vw, 2rem); line-height: 1.18; }
+        .dg-qa summary i { position: relative; align-self: center; width: 1.1rem; height: 1.1rem; }
+        .dg-qa summary i::before,
+        .dg-qa summary i::after { content: ""; position: absolute; left: 0; top: calc(50% - 2px); width: 100%; height: 4px; background: var(--dg-tape); box-shadow: 0 1px 1.5px rgba(15, 15, 16, 0.3); transition: rotate 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .dg-qa summary i::after { rotate: 90deg; }
+        .dg-qa details[open] summary i::before { rotate: 45deg; }
+        .dg-qa details[open] summary i::after { rotate: -45deg; }
+        .dg-qa details p { padding: 0 0.25rem 2rem 3.85rem; max-width: 50rem; color: var(--dg-ink-2); }
+        @media (max-width: 560px) { .dg-qa details p { padding-inline-start: 0.25rem; } }
+
+        /* Finale: a pool of light on the floor, and the headline crossing it */
+        .dg-end { padding-block: clamp(6rem, 13vw, 12rem); isolation: isolate; }
+        /* The pool is measured from the headline it lights, so it can never spill on to the line below. */
+        .dg-end-head { position: relative; width: fit-content; max-width: 100%; }
+        .dg-pool {
+            position: absolute;
+            z-index: -1;
+            inset: 20% -7% -5% auto;
+            width: 64%;
+            border-radius: 50%;
+            background: #ffc21a;
+            translate: -8% 0;
+        }
+        html.es-anim #dg .dg-pool { animation: dg-follow 12s ease-in-out infinite alternate; }
+        @keyframes dg-follow { from { translate: -42% -3%; } to { translate: 6% 2%; } }
+        /* The type is the tape's own yellow, set to difference: yellow on the floor, ink inside the light. */
+        .dg-end .dg-h2 { font-size: clamp(3rem, 9.2vw, 8.6rem); line-height: 0.98; max-width: 14ch; color: #ffc21a; mix-blend-mode: difference; }
+        .dg-end .dg-m { color: inherit; }
+        .dg-end-sub { margin-top: clamp(2rem, 4vw, 3rem); max-width: 30rem; font-size: 1.2rem; color: #f3efe8; }
+        .dg-claim-row { display: grid; gap: 1.5rem 2.5rem; align-items: end; margin-top: clamp(3rem, 6vw, 5rem); }
+        @media (min-width: 560px) { .dg-claim-row .dg-btn { justify-self: start; } }
+        @media (min-width: 820px) { .dg-claim-row { grid-template-columns: minmax(0, 1fr) auto; max-width: 62rem; } }
+        #dg .dg-claim {
+            display: flex;
+            align-items: baseline;
+            min-width: 0;
+            padding-block: 1rem 0.6rem;
+            border-bottom: 1px solid rgba(243, 239, 232, 0.6);
+            font-family: var(--dg-display);
+            font-size: clamp(1.5rem, 3.6vw, 2.6rem);
+            line-height: 1.1;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        /* The narrowest phones: a size down, so "your-studio" is not cut short. */
+        @media (max-width: 350px) {
+            #dg .dg-claim { font-size: 1.3rem; }
+            .dg-btn { line-height: 1.25; }
+        }
+        #dg .dg-claim:focus-within { border-color: #ffc21a; box-shadow: 0 2px 0 0 #ffc21a; }
+        #dg .dg-claim input {
+            flex: 1;
+            min-width: 0;
+            margin-block: -1rem -0.6rem;
+            padding: 1rem 0 0.6rem;
+            border: 0;
             background: transparent;
-            color: #48534f;
+            box-shadow: none;
+            outline: none;
+            text-align: right;
+            font: inherit;
+            color: #f3efe8;
         }
-        .dark .es-barre-state-draft {
-            border-color: rgba(230, 237, 235, 0.34);
-            color: #93a5a0;
-        }
-
-        /* --- Buttons --- */
-        .es-barre-btn {
-            background-color: #0f766e;
-            color: #ffffff;
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .es-barre-btn:hover { background-color: #115e59; transform: translateY(-1px); box-shadow: 0 14px 30px -16px rgba(15, 118, 110, 0.9); }
-        .es-barre-ghost {
-            border: 1px solid rgba(15, 26, 24, 0.2);
-            color: #0f1a18;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
-        }
-        .es-barre-ghost:hover { border-color: rgba(15, 118, 110, 0.5); background-color: rgba(15, 118, 110, 0.06); }
-        .dark .es-barre-ghost { border-color: rgba(230, 237, 235, 0.22); color: #e6edeb; }
-        .dark .es-barre-ghost:hover { border-color: rgba(45, 212, 191, 0.45); background-color: rgba(45, 212, 191, 0.08); }
-
-        /* --- The dark band --- */
-        .es-barre-band {
-            /* A resolvable colour under the gradients: it is what paints if the
-               gradients fail, and it is what a contrast audit can actually read. */
-            background-color: #0d1614;
-            background-image:
-                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(15, 118, 110, 0.16), rgba(15, 118, 110, 0) 70%),
-                linear-gradient(180deg, #0f1a18, #0d1614);
-        }
-
-        /* --- The band does not change between colour modes, so nothing
-               inside it may either ----------------------------------
-           .es-barre-band has no .dark variant. Anything within it that DOES
-           have one renders differently on an identical ground. That covers
-           two shared classes which carry their own .dark rules in
-           marketing.css and are invisible to a grep of this file's markup
-           (.grid-overlay flips its lines black->white, .animate-shimmer
-           flips white 0.3->0.15), AND the page's own barre, whose dark
-           gradient would drop from silver to gunmetal here. Pin all three. */
-        .es-barre-band .grid-overlay {
-            background-image:
-                linear-gradient(rgba(230, 237, 235, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(230, 237, 235, 0.05) 1px, transparent 1px);
-        }
-        .es-barre-band .animate-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            background-size: 200% 100%;
-        }
-        .es-barre-band .es-barre-bar {
-            background: linear-gradient(180deg, #cbd6d2, #8fa19c 42%, #63756f);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-        }
-        .es-barre-band .es-barre-bracket {
-            background: linear-gradient(180deg, #c3cfcb, #94a6a1 55%, #74857f);
-        }
-
-        /* --- Shared-chrome recolour --- */
-        .es-barre-band .es-claim:focus-within {
-            border-color: rgba(45, 212, 191, 0.75);
-            box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.22);
-        }
-        .es-dot:hover .es-dot-pip { background-color: rgba(15, 118, 110, 0.6); }
-        .dark .es-dot:hover .es-dot-pip { background-color: rgba(45, 212, 191, 0.6); }
-        .es-dot.is-active .es-dot-pip { background: #115e59; }
-        .dark .es-dot.is-active .es-dot-pip { background: #2dd4bf; }
-
-        /* Focus rings. Never set border-radius here: an outline already
-           follows the element's own radius, and overriding it changes the
-           element's shape on focus. */
-        #es-barre-page a:focus-visible,
-        #es-barre-page summary:focus-visible,
-        #es-barre-page button:focus-visible,
-        #es-barre-page input:focus-visible {
-            outline: 2px solid #0f766e;
-            outline-offset: 2px;
-        }
-        .dark #es-barre-page a:focus-visible,
-        .dark #es-barre-page summary:focus-visible,
-        .dark #es-barre-page button:focus-visible,
-        .dark #es-barre-page input:focus-visible {
-            outline-color: #2dd4bf;
-        }
-        .es-barre-band a:focus-visible,
-        .es-barre-band summary:focus-visible,
-        .es-barre-band button:focus-visible,
-        .es-barre-band input:focus-visible {
-            outline-color: #2dd4bf !important;
-        }
+        #dg .dg-claim input::placeholder { color: #9d988f; }
+        .dg-claim span { flex: none; color: #b9b4aa; user-select: none; }
+        .dg-end-note { margin-top: 1.5rem; font-size: 0.95rem; color: #b9b4aa; }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-barre-bar { transition: none; transform: scaleX(1); }
-            .es-barre-btn:hover { transform: none; }
+            #dg .dg-l,
+            #dg .dg-m,
+            #dg .dg-cap i,
+            #dg .dg-btn,
+            #dg .dg-link,
+            #dg .dg-punch,
+            #dg .dg-who-name,
+            #dg .dg-who-name::after,
+            #dg .dg-rep a,
+            #dg .dg-rep svg,
+            #dg .dg-next svg { transition: none; }
         }
     </style>
 
@@ -453,819 +893,802 @@
             ['faq', 'Questions'],
             ['claim', 'Get started'],
         ];
+
+        // Display type, one letter to a span so each can move on its own. A part given as an
+        // array is a marked phrase (the strip of tape); "\n" is a break on wide screens. The words
+        // reach assistive tech once, through the heading's aria-label, and the letters are
+        // aria-hidden; a crawler still reads the same words in the same order. Words are glued so a
+        // line can never start with a full stop.
+        $dgSet = function (array $parts, int $from = 0): array {
+            $label = '';
+            $chars = [];
+            foreach ($parts as $part) {
+                [$text, $marked] = is_array($part) ? [$part[0], true] : [$part, false];
+                if ($text === "\n") {
+                    $chars[] = ["\n", false];
+                    $label = rtrim($label).' ';
+
+                    continue;
+                }
+                $label .= $text;
+                foreach (mb_str_split($text) as $ch) {
+                    $chars[] = [$ch, $marked];
+                }
+            }
+
+            $html = '';
+            $i = $from;
+            $inWord = false;
+            $inMark = false;
+            foreach ($chars as $k => [$ch, $marked]) {
+                if ($ch === ' ' || $ch === "\n") {
+                    if ($inMark) {
+                        $html .= '</span>';
+                        $inMark = false;
+                    }
+                    if ($inWord) {
+                        $html .= '</span>';
+                        $inWord = false;
+                    }
+                    if ($ch === "\n") {
+                        $html .= ' <br class="dg-br">';
+                    } else {
+                        $html .= ($marked && ($chars[$k + 1][1] ?? false)) ? '<span class="dg-m"> </span>' : ' ';
+                    }
+
+                    continue;
+                }
+                if (! $inWord) {
+                    $html .= '<span class="dg-w">';
+                    $inWord = true;
+                }
+                if ($marked && ! $inMark) {
+                    $html .= '<span class="dg-m">';
+                    $inMark = true;
+                } elseif (! $marked && $inMark) {
+                    $html .= '</span>';
+                    $inMark = false;
+                }
+                $html .= '<span class="dg-l" style="--i:'.$i.'">'.e($ch).'</span>';
+                $i++;
+            }
+            if ($inMark) {
+                $html .= '</span>';
+            }
+            if ($inWord) {
+                $html .= '</span>';
+            }
+
+            return ['label' => trim($label), 'html' => $html];
+        };
+
+        // Where a count sits in the eight: eight ticks, this one taped.
+        $dgBar = function (int $n): string {
+            $out = '<span class="dg-bar" aria-hidden="true">';
+            for ($b = 1; $b <= 8; $b++) {
+                $out .= '<i'.($b === $n ? ' class="is-on"' : ($b < $n ? ' class="is-past"' : '')).'></i>';
+            }
+
+            return $out.'</span>';
+        };
+
+        $dgArrow = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H4" /></svg>';
+        $dgDown = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>';
+        $dgEchoes = [0.06, 0.13, 0.28, 1, 0.28, 0.13, 0.06];
+        $dgAmp = fn (string $html): string => str_replace('&amp;', '<span class="dg-amp">&amp;</span>', $html);
     @endphp
 
-    <div id="es-barre-page" class="es-barre-page">
+    <div id="dg">
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: the wall                                            -->
-    <!-- ============================================================ -->
-    {{-- The nav overlays the top of the page, so the hero carries extra top
-         padding: the barre's brackets are the first thing in the right column
-         and would otherwise be clipped by it. --}}
-    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 26%, rgba(15, 118, 110, 0.22), rgba(15, 118, 110, 0) 62%); opacity: 0.55;"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 62%, rgba(45, 212, 191, 0.16), rgba(45, 212, 191, 0) 62%); opacity: 0.5;"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_72%_62%_at_50%_38%,black_22%,transparent_74%)]"></div>
-        </div>
+        <!-- The count rail (wide screens): top, the eight counts, and the bow -->
+        <span class="dg-rail-beat" aria-hidden="true"></span>
+        <nav class="dg-rail es-dotnav" aria-label="Page sections">
+            <ol>
+                @foreach ($dotSections as $railIndex => [$sectionId, $sectionLabel])
+                    <li>
+                        <a href="#{{ $sectionId }}" class="es-dot" aria-label="{{ $sectionLabel }}">
+                            <b aria-hidden="true">{{ $railIndex === 0 ? '·' : ($railIndex === 9 ? '&' : $railIndex) }}</b>
+                            <span class="dg-label" aria-hidden="true">{{ $sectionLabel }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ol>
+        </nav>
 
-        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-                <div>
-                    <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
-                        <x-marketing.hero-eyebrow class="block es-barre-tag es-fade-up es-d-1 mb-5">Dance schedules for studios and crews</x-marketing.hero-eyebrow>
-                        <span class="es-mask"><span class="es-mask-line">Three things happen</span></span>
-                        <span class="es-mask es-mask-2"><span class="es-mask-line">at <span class="es-barre-grad">the same wall</span>.</span></span>
-                    </h1>
+        <!-- ============================================================ -->
+        <!-- Hero: five, six, seven, eight                                -->
+        <!-- ============================================================ -->
+        <section id="top" class="dg-hero">
+            <div class="dg-wrap dg-hero-in">
+                <div class="dg-countin" aria-hidden="true">
+                    <b style="--b: 0;">5</b><b style="--b: 1;">6</b><b style="--b: 2;">7</b><b style="--b: 3;">8</b>
+                    <span class="dg-metro"><i></i></span>
+                </div>
 
-                    <p class="es-barre-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
+                <h1 class="dg-h1" aria-label="Dance schedules for studios and crews. Three things happen at the same wall.">
+                    <x-marketing.hero-eyebrow class="dg-eyebrow es-fade-up es-d-1">Dance schedules for studios and crews</x-marketing.hero-eyebrow>
+                    <span class="dg-h1-rows" aria-hidden="true">
+                        <span class="dg-row"><span class="dg-step" style="--s: 0%;">{!! $dgSet(['Three'], 0)['html'] !!}</span> <span class="dg-step" style="--s: 17%;">{!! $dgSet(['things'], 5)['html'] !!}</span> <span class="dg-step" style="--s: 36%;">{!! $dgSet(['happen'], 11)['html'] !!}</span></span>
+                        <span class="dg-row dg-stand"><span class="dg-step" style="--s: 5%;">{!! $dgSet(['at ', ['the']], 17)['html'] !!}</span> <span class="dg-step" style="--s: 27%;">{!! $dgSet([['same']], 22)['html'] !!}</span> <span class="dg-step" style="--s: 50%;">{!! $dgSet([['wall'], '.'], 26)['html'] !!}</span></span>
+                        <span class="dg-floor"></span>
+                    </span>
+                </h1>
+
+                <div class="dg-hero-foot">
+                    <p class="dg-hero-lede es-fade-up es-d-3">
                         The class, the rehearsal, the show. Three different audiences, one schedule -
                         and only the parts you choose are public.
                     </p>
-
-                    <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-barre-btn inline-flex items-center justify-center gap-2 rounded-xl px-7 py-4 text-base font-semibold">
-                            Create your schedule
-                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </a>
-                        <a href="#week" class="es-barre-ghost inline-flex items-center justify-center gap-2 rounded-xl px-7 py-4 text-base font-semibold">
+                    <div class="dg-hero-cta es-fade-up es-d-4">
+                        <a href="#week" class="dg-link">
                             See how the week works
-                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                            {!! $dgDown !!}
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="dg-btn">
+                            Create your schedule
+                            {!! $dgArrow !!}
                         </a>
                     </div>
-                </div>
-
-                <!-- The barre, with the week's three strands hanging from it. -->
-                <div class="es-fade-up es-d-4" data-reveal>
-                    <div class="es-barre-rail mb-6 mt-2" aria-hidden="true">
-                        <span class="es-barre-bracket"></span>
-                        <span class="es-barre-bar"></span>
-                        <span class="es-barre-bracket"></span>
-                    </div>
-
-                    <div class="es-barre-reflect grid gap-3">
-                        @foreach ([
-                            ['Class', 'Ballet I', 'Tue &amp; Thu &middot; 6:00pm', '3 spots left', false],
-                            ['Rehearsal', 'Spring Gala, act two', 'Sat &middot; 10:00am', 'Draft &middot; members only', true],
-                            ['Show', 'Spring Gala', 'Sat 30 May &middot; 7:30pm', 'Tickets from $12', false],
-                        ] as [$strand, $name, $when, $note, $isDraft])
-                            <div class="es-barre-card es-barre-hover p-4 sm:p-5">
-                                <div class="mb-1.5 flex items-center justify-between gap-3">
-                                    <span class="es-barre-tag">{{ $strand }}</span>
-                                    <span class="es-barre-muted font-mono text-xs">{!! $when !!}</span>
-                                </div>
-                                <p class="es-barre-ink text-base font-bold">{!! $name !!}</p>
-                                <p class="@if ($isDraft) es-barre-muted @else es-barre-accent @endif mt-1 text-sm font-semibold">{!! $note !!}</p>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <p class="es-barre-muted mt-10 text-xs">
-                        One schedule. The class takes sign-ups, the rehearsal never reaches the public page,
-                        and the show sells tickets.
-                    </p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 2. The week (01)                                             -->
-    <!-- ============================================================ -->
-    <section id="week" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
-                <div>
-                    <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>01</span></div>
-                    <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The week</p>
-                    <h2 class="es-balance es-barre-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        A weekly class is <span class="es-barre-grad">one event</span>, not forty.
-                    </h2>
-                    <p class="es-barre-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        Set the class up once as a recurring event: the days it runs, the time it starts, and
-                        date exceptions for the weeks the studio is closed. Change the time in September and
-                        every Tuesday after it follows.
-                    </p>
-
-                    <ul class="space-y-4" data-reveal-group="90">
-                        @foreach ([
-                            ['Day-of-week patterns', 'Tuesday and Thursday, or just Saturdays. The pattern is the event.'],
-                            ['Date exceptions', 'Take individual dates out for a closure, or add a one-off extra date in.'],
-                            ['Capacity per class', 'A limit applies to each date on its own, so a full Tuesday does not close the Thursday.'],
-                        ] as [$t, $d])
-                            <li class="flex items-start gap-3" data-reveal>
-                                <svg aria-hidden="true" class="es-barre-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                <span><span class="es-barre-ink font-semibold">{{ $t }}</span> <span class="es-barre-muted">- {{ $d }}</span></span>
-                            </li>
-                        @endforeach
-                    </ul>
-
-                    <p class="mt-7" data-reveal>
-                        <span class="es-barre-plan es-barre-plan-free">Free</span>
-                        <span class="es-barre-muted ml-2 text-sm">Recurring events, date exceptions and registration are all on the free plan.</span>
-                    </p>
+        <!-- The three strands: a word, and the echoes it leaves as it crosses the floor -->
+        <section class="dg-strands">
+            @foreach ([
+                ['Class', 'Ballet I', 'Tue &amp; Thu &middot; 6:00pm', '3 spots left', false],
+                ['Rehearsal', 'Spring Gala, act two', 'Sat &middot; 10:00am', 'Draft &middot; members only', true],
+                ['Show', 'Spring Gala', 'Sat 30 May &middot; 7:30pm', 'Tickets from $12', false],
+            ] as $strandIndex => [$strand, $name, $when, $note, $isDraft])
+                <div class="dg-strand" style="--dir: {{ $strandIndex % 2 === 0 ? -1 : 1 }}; --x0: {{ ['-9vw', '7vw', '-3vw'][$strandIndex] }};">
+                    <div class="dg-echo" aria-hidden="true">
+                        <div class="dg-echo-row">@foreach ($dgEchoes as $echo)<span @class(['dg-on' => $echo == 1]) style="--o: {{ $echo }};">{{ strtolower($strand) }}</span>@endforeach</div>
+                    </div>
+                    <div class="dg-wrap dg-strand-cap" data-reveal>
+                        <span class="dg-label">{{ $strand }}</span>
+                        <strong>{!! $name !!}</strong>
+                        <span class="dg-strand-when">{!! $when !!}</span>
+                        <span class="dg-strand-note @if ($isDraft) is-draft @endif">{!! $note !!}</span>
+                    </div>
                 </div>
+            @endforeach
 
-                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner es-barre-card overflow-hidden p-6 sm:p-7">
-                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-                            <h3 class="es-barre-ink text-lg font-bold">This week</h3>
-                            <span class="es-barre-muted font-mono text-xs">3 recurring events</span>
+            <div class="dg-wrap dg-strands-foot">
+                <p data-reveal>
+                    One schedule. The class takes sign-ups, the rehearsal never reaches the public page,
+                    and the show sells tickets.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 1. The week                                                  -->
+        <!-- ============================================================ -->
+        <section id="week" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['A weekly class is ', ['one event'], ', not forty.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">1</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>The week</p>{!! $dgBar(1) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                        <p class="dg-lede" data-reveal>
+                            Set the class up once as a recurring event: the days it runs, the time it starts, and
+                            date exceptions for the weeks the studio is closed. Change the time in September and
+                            every Tuesday after it follows.
+                        </p>
+                    </div>
+                </header>
+
+                <div class="dg-two">
+                    <div>
+                        <ul class="dg-marks" data-reveal-group="90">
+                            @foreach ([
+                                ['Day-of-week patterns', 'Tuesday and Thursday, or just Saturdays. The pattern is the event.'],
+                                ['Date exceptions', 'Take individual dates out for a closure, or add a one-off extra date in.'],
+                                ['Capacity per class', 'A limit applies to each date on its own, so a full Tuesday does not close the Thursday.'],
+                            ] as [$t, $d])
+                                <li data-reveal>
+                                    <i class="dg-x" aria-hidden="true"></i>
+                                    <span><strong>{{ $t }}</strong> <span>- {{ $d }}</span></span>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <p class="dg-note" data-reveal>
+                            <span class="dg-tier">Free</span>
+                            <span>Recurring events, date exceptions and registration are all on the free plan.</span>
+                        </p>
+                    </div>
+
+                    <div class="dg-tt dg-spike" data-reveal="panel">
+                        <div class="dg-tt-head">
+                            <h3 class="dg-h3">This week</h3>
+                            <span class="dg-label">3 recurring events</span>
                         </div>
 
-                        <div class="space-y-2.5">
-                            @foreach ($classes as [$cName, $cDays, $cTime, $cCap, $cTaken])
-                                @php $left = $cCap - $cTaken; @endphp
-                                <div class="es-barre-sub flex items-center justify-between gap-3 p-3.5">
-                                    <div class="min-w-0">
-                                        <p class="es-barre-ink truncate text-sm font-semibold">{{ $cName }}</p>
-                                        <p class="es-barre-muted font-mono text-xs">{!! $cDays !!} &middot; {{ $cTime }}</p>
+                        @foreach ($classes as [$cName, $cDays, $cTime, $cCap, $cTaken])
+                            @php $left = $cCap - $cTaken; @endphp
+                            <div class="dg-tt-row">
+                                <div>
+                                    <p class="dg-h3">{{ $cName }}</p>
+                                    <p class="dg-tt-when">{!! $cDays !!} &middot; {{ $cTime }}</p>
+                                </div>
+                                <div class="dg-tt-left">
+                                    @if ($left > 0)
+                                        <p><b>{{ $left }}</b> spots left</p>
+                                    @else
+                                        <p class="is-full">Full</p>
+                                    @endif
+                                    <p>{{ $cTaken }} of {{ $cCap }}</p>
+                                </div>
+                                <div class="dg-cap" aria-hidden="true">@for ($place = 0; $place < $cCap; $place++)<i @class(['is-free' => $place >= $cTaken]) style="--k: {{ $place }};"></i>@endfor</div>
+                            </div>
+                        @endforeach
+
+                        <div class="dg-closed">
+                            <p class="dg-label">Date exceptions</p>
+                            <ul>
+                                @foreach ($closures as $closed)
+                                    <li><i class="dg-x" aria-hidden="true"></i>{{ $closed }} &middot; closed</li>
+                                @endforeach
+                            </ul>
+                            <p>
+                                Both fall on a Thursday, so Ballet I skips them and the Tuesday runs as normal.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 2. The rehearsal: the wings and the house                    -->
+        <!-- ============================================================ -->
+        <section id="rehearsal" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['The wall the company sees.', "\n", 'The wall ', ['the audience sees'], '.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">2</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>The rehearsal</p>{!! $dgBar(2) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                        <p class="dg-lede" data-reveal>
+                            A rehearsal call belongs on the same schedule as the show it is for. It just does not
+                            belong on your public page.
+                        </p>
+                    </div>
+                </header>
+
+                <div class="dg-duplex" data-reveal="panel">
+                    <i class="dg-t" aria-hidden="true"></i>
+
+                    <!-- Company side -->
+                    <div class="dg-side dg-wings">
+                        <span class="dg-side-kick" aria-hidden="true">The wings</span>
+                        <div class="dg-side-head">
+                            <p class="dg-label">Signed in</p>
+                            <span class="dg-tier">Free</span>
+                        </div>
+                        <div>
+                            @foreach ([
+                                ['Ballet I', 'Tue & Thu 6:00pm', 'Public'],
+                                ['Spring Gala, act two', 'Sat 10:00am', 'Draft'],
+                                ['Spacing call, main stage', 'Fri 4:00pm', 'Draft'],
+                                ['Spring Gala', 'Sat 30 May 7:30pm', 'Public'],
+                            ] as [$eName, $eWhen, $eState])
+                                <div class="dg-ev @if ($eState === 'Draft') is-draft @endif">
+                                    <div>
+                                        <p class="dg-ev-name">{!! $eName !!}</p>
+                                        <p class="dg-ev-when">{{ $eWhen }}</p>
                                     </div>
-                                    <div class="shrink-0 text-right">
-                                        @if ($left > 0)
-                                            <p class="es-barre-accent text-sm font-bold">{{ $left }} spots left</p>
-                                        @else
-                                            <p class="es-barre-muted text-sm font-bold">Full</p>
-                                        @endif
-                                        <p class="es-barre-muted font-mono text-[0.65rem]">{{ $cTaken }} of {{ $cCap }}</p>
+                                    <span class="dg-state @if ($eState === 'Draft') dg-state-draft @else dg-state-public @endif">{{ $eState }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="dg-side-foot">Everything the company needs, in one place.</p>
+                    </div>
+
+                    <!-- Audience side -->
+                    <div class="dg-side dg-house">
+                        <span class="dg-side-kick" aria-hidden="true">Front of house</span>
+                        <div class="dg-side-head">
+                            <p class="dg-label">Your public page</p>
+                            <span class="dg-side-url">yourstudio.eventschedule.com</span>
+                        </div>
+                        <div class="dg-house-list">
+                            @foreach ([
+                                ['Ballet I', 'Tue & Thu 6:00pm'],
+                                ['Spring Gala', 'Sat 30 May 7:30pm'],
+                            ] as [$pName, $pWhen])
+                                <div class="dg-ev">
+                                    <div>
+                                        <p class="dg-ev-name">{!! $pName !!}</p>
+                                        <p class="dg-ev-when">{{ $pWhen }}</p>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
+                        <p class="dg-side-foot">The two rehearsal calls are simply not here.</p>
+                    </div>
+                </div>
 
-                        <div class="mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 dark:border-[rgba(230,237,235,0.12)]">
-                            <p class="es-barre-tag mb-2">Date exceptions</p>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($closures as $closed)
-                                    <span class="es-barre-sub es-barre-muted px-2.5 py-1 font-mono text-xs">{{ $closed }} &middot; closed</span>
-                                @endforeach
+                <div class="dg-after" data-reveal-group="100">
+                    <div data-reveal>
+                        <div class="dg-after-head">
+                            <h3 class="dg-h3">Two more states</h3>
+                            <span class="dg-tier dg-tier-ent">Enterprise</span>
+                        </div>
+                        <p>
+                            Internal events are never public at all, and Unlisted events are hidden from the
+                            schedule but still reachable by direct link, with an optional password - useful for a
+                            preview you want the board to see and nobody else.
+                        </p>
+                    </div>
+                    <div data-reveal>
+                        <div class="dg-after-head">
+                            <h3 class="dg-h3">Who can edit</h3>
+                            <span class="dg-tier dg-tier-ent">Enterprise</span>
+                        </div>
+                        <p>
+                            A schedule includes one team member on the free plan. Enterprise raises that to
+                            multiple team members and adds availability tracking, so you can see who is free
+                            before you call the rehearsal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. The card                                                  -->
+        <!-- ============================================================ -->
+        <section id="card" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['Nobody buys ', ['one ballet class'], '.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">3</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>The card</p>{!! $dgBar(3) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                        <p class="dg-lede" data-reveal>
+                            They buy ten of them, or a month of them. A pass is one purchase that covers many
+                            visits, so the dancer books in without paying again and you are not reconciling a
+                            punch card at the desk.
+                        </p>
+                    </div>
+                </header>
+
+                <div class="dg-two">
+                    <div>
+                        <div class="dg-punch-wrap" aria-hidden="true" data-reveal="zoom">
+                            <div class="dg-punch">
+                                <div class="dg-punch-top"><span>Class card</span><span>Ten counts</span></div>
+                                <div class="dg-punch-holes">@for ($hole = 1; $hole <= 10; $hole++)<i @class(['is-out' => $hole <= 4])>{{ $hole }}</i>@endfor</div>
+                                <div class="dg-punch-foot"><span>Punch one each visit</span><span>No. 0412</span></div>
                             </div>
-                            <p class="es-barre-muted mt-3 text-xs">
-                                Both fall on a Thursday, so Ballet I skips them and the Tuesday runs as normal.
-                            </p>
                         </div>
 
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. The rehearsal - the mirror duplex (02)                    -->
-    <!-- ============================================================ -->
-    <section id="rehearsal" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
-                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The rehearsal</p>
-                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    The wall the company sees.<br class="hidden sm:block">
-                    The wall <span class="es-barre-grad">the audience sees</span>.
-                </h2>
-                <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    A rehearsal call belongs on the same schedule as the show it is for. It just does not
-                    belong on your public page.
-                </p>
-            </div>
-
-            <div class="es-barre-reflect" data-reveal="panel">
-                <div class="es-barre-card es-barre-glass">
-                    <div class="relative z-10 grid lg:grid-cols-[1fr_1px_1fr]">
-                        <!-- Company side -->
-                        <div class="p-6 sm:p-8">
-                            <div class="mb-5 flex items-center justify-between gap-3">
-                                <p class="es-barre-tag">Signed in</p>
-                                <span class="es-barre-plan es-barre-plan-free">Free</span>
-                            </div>
-                            <div class="space-y-2.5">
-                                @foreach ([
-                                    ['Ballet I', 'Tue & Thu 6:00pm', 'Public'],
-                                    ['Spring Gala, act two', 'Sat 10:00am', 'Draft'],
-                                    ['Spacing call, main stage', 'Fri 4:00pm', 'Draft'],
-                                    ['Spring Gala', 'Sat 30 May 7:30pm', 'Public'],
-                                ] as [$eName, $eWhen, $eState])
-                                    <div class="es-barre-sub flex items-center justify-between gap-3 p-3">
-                                        <div class="min-w-0">
-                                            <p class="es-barre-ink truncate text-sm font-semibold">{!! $eName !!}</p>
-                                            <p class="es-barre-muted font-mono text-xs">{{ $eWhen }}</p>
-                                        </div>
-                                        <span class="es-barre-state shrink-0 @if ($eState === 'Draft') es-barre-state-draft @else es-barre-state-public @endif">{{ $eState }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <p class="es-barre-muted mt-4 text-xs">Everything the company needs, in one place.</p>
-                        </div>
-
-                        <!-- The mirror's edge -->
-                        <div class="es-barre-seam mx-6 my-0 h-px lg:mx-0 lg:my-8 lg:h-auto lg:w-px" aria-hidden="true"></div>
-
-                        <!-- Audience side -->
-                        <div class="p-6 sm:p-8">
-                            <div class="mb-5 flex items-center justify-between gap-3">
-                                <p class="es-barre-tag">Your public page</p>
-                                <span class="es-barre-muted font-mono text-xs">yourstudio.eventschedule.com</span>
-                            </div>
-                            <div class="space-y-2.5">
-                                @foreach ([
-                                    ['Ballet I', 'Tue & Thu 6:00pm'],
-                                    ['Spring Gala', 'Sat 30 May 7:30pm'],
-                                ] as [$pName, $pWhen])
-                                    <div class="es-barre-sub flex items-center justify-between gap-3 p-3">
-                                        <div class="min-w-0">
-                                            <p class="es-barre-ink truncate text-sm font-semibold">{!! $pName !!}</p>
-                                            <p class="es-barre-muted font-mono text-xs">{{ $pWhen }}</p>
-                                        </div>
-                                        <svg aria-hidden="true" class="es-barre-accent h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <p class="es-barre-muted mt-4 text-xs">The two rehearsal calls are simply not here.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-16 grid gap-4 md:grid-cols-2" data-reveal-group="100">
-                <div class="es-barre-card p-6" data-reveal>
-                    <div class="mb-3 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Two more states</h3>
-                        <span class="es-barre-plan es-barre-plan-ent">Enterprise</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        Internal events are never public at all, and Unlisted events are hidden from the
-                        schedule but still reachable by direct link, with an optional password - useful for a
-                        preview you want the board to see and nobody else.
-                    </p>
-                </div>
-                <div class="es-barre-card p-6" data-reveal>
-                    <div class="mb-3 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Who can edit</h3>
-                        <span class="es-barre-plan es-barre-plan-ent">Enterprise</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        A schedule includes one team member on the free plan. Enterprise raises that to
-                        multiple team members and adds availability tracking, so you can see who is free
-                        before you call the rehearsal.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. The card (03)                                             -->
-    <!-- ============================================================ -->
-    <section id="card" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
-                <div class="order-2 lg:order-1">
-                    <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                        <div class="es-tilt-inner es-barre-card overflow-hidden p-6 sm:p-7">
-                            <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-                                <h3 class="es-barre-ink text-lg font-bold">What people buy</h3>
-                                <span class="es-barre-plan es-barre-plan-pro">Pro</span>
+                        <div class="dg-buy" data-reveal>
+                            <div class="dg-buy-head">
+                                <h3 class="dg-h3">What people buy</h3>
+                                <span class="dg-tier dg-tier-pro">Pro</span>
                             </div>
 
-                            <div class="space-y-2.5">
-                                @foreach ([
-                                    ['Ten-class card', 'Visit pass', '10 visits, used one at a time', '$180'],
-                                    ['Unlimited month', 'Membership', 'Every class until it expires', '$140'],
-                                    ['Spring Gala season pass', 'Season pass', 'Every performance of the run, once each', '$95'],
-                                    ['Drop-in', 'Single ticket', 'One class', '$22'],
-                                ] as [$pName, $pKind, $pScope, $pPrice])
-                                    <div class="es-barre-sub p-3.5">
-                                        <div class="flex items-baseline justify-between gap-3">
-                                            <p class="es-barre-ink min-w-0 flex-1 truncate text-sm font-semibold">{{ $pName }}</p>
-                                            <p class="es-barre-ink shrink-0 font-mono text-sm">{{ $pPrice }}</p>
-                                        </div>
-                                        <div class="mt-1 flex flex-wrap items-baseline gap-x-2">
-                                            <span class="es-barre-accent text-xs font-semibold">{{ $pKind }}</span>
-                                            <span class="es-barre-muted text-xs">{{ $pScope }}</span>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                            @foreach ([
+                                ['Ten-class card', 'Visit pass', '10 visits, used one at a time', '$180'],
+                                ['Unlimited month', 'Membership', 'Every class until it expires', '$140'],
+                                ['Spring Gala season pass', 'Season pass', 'Every performance of the run, once each', '$95'],
+                                ['Drop-in', 'Single ticket', 'One class', '$22'],
+                            ] as [$pName, $pKind, $pScope, $pPrice])
+                                <div class="dg-buy-row">
+                                    <p class="dg-buy-name">{{ $pName }}</p>
+                                    <p class="dg-buy-price">{{ $pPrice }}</p>
+                                    <p class="dg-buy-kind"><b>{{ $pKind }}</b> <span>{{ $pScope }}</span></p>
+                                </div>
+                            @endforeach
 
-                            <p class="es-barre-muted mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 text-xs dark:border-[rgba(230,237,235,0.12)]">
+                            <p class="dg-buy-foot">
                                 Usage is tracked per visit, so you can see how much of a card is left without
                                 anyone keeping a paper tally.
                             </p>
-
-                            <div class="es-glare" aria-hidden="true"></div>
-                            <div class="es-ring-glow" aria-hidden="true"></div>
                         </div>
                     </div>
-                </div>
 
-                <div class="order-1 lg:order-2">
-                    <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
-                    <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The card</p>
-                    <h2 class="es-balance es-barre-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Nobody buys <span class="es-barre-grad">one ballet class</span>.
-                    </h2>
-                    <p class="es-barre-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        They buy ten of them, or a month of them. A pass is one purchase that covers many
-                        visits, so the dancer books in without paying again and you are not reconciling a
-                        punch card at the desk.
-                    </p>
-
-                    <div class="space-y-3" data-reveal-group="90">
+                    <ul class="dg-facts" data-reveal-group="90">
                         @foreach ([
                             ['A set number of visits', 'A visit pass covers a fixed count across the classes you attach it to - a ten-visit card is one purchase used ten times.'],
                             ['Unlimited until it expires', 'A membership covers every covered class until the expiry date, with no per-visit counting at all.'],
                             ['Every date of one class', 'A season pass covers each occurrence of a single recurring event, once per occurrence.'],
                             ['Cancellation, decided in advance', 'Each pass can carry its own cancellation deadline and a late-cancel policy - forfeit the visit, or block the cancellation.'],
                         ] as [$t, $d])
-                            <div class="es-barre-card es-barre-hover p-4" data-reveal>
-                                <p class="es-barre-ink text-sm font-bold">{{ $t }}</p>
-                                <p class="es-barre-muted mt-1 text-sm">{{ $d }}</p>
-                            </div>
+                            <li data-reveal>
+                                <i class="dg-x" aria-hidden="true"></i>
+                                <div>
+                                    <h3>{{ $t }}</h3>
+                                    <p>{{ $d }}</p>
+                                </div>
+                            </li>
                         @endforeach
-                    </div>
+                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 5. The show (04)                                             -->
-    <!-- ============================================================ -->
-    <section id="show" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
-                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The show</p>
-                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    The night the whole year <span class="es-barre-grad">points at</span>.
-                </h2>
-                <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Named ticket types, each with its own price, quantity and sales window - so the family
-                    rate closes when you want it to and the door price does not open early. Announce the
-                    show before tickets are ready, switch on the "Notify me" card, and parents can ask to hear when they go on sale.
-                </p>
-            </div>
-
-            <div class="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-                <div class="es-barre-card es-barre-reflect p-6 sm:p-7" data-reveal="panel">
-                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Spring Gala</h3>
-                        <span class="es-barre-muted font-mono text-xs">Sat 30 May &middot; 7:30pm</span>
+        <!-- ============================================================ -->
+        <!-- 4. The show                                                  -->
+        <!-- ============================================================ -->
+        <section id="show" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['The night the whole year ', ['points at'], '.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">4</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>The show</p>{!! $dgBar(4) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                        <p class="dg-lede" data-reveal>
+                            Named ticket types, each with its own price, quantity and sales window - so the family
+                            rate closes when you want it to and the door price does not open early. Announce the
+                            show before tickets are ready, switch on the "Notify me" card, and parents can ask to hear when they go on sale.
+                        </p>
                     </div>
-                    <p class="es-barre-muted mb-5 text-sm">Four ticket types on one event.</p>
+                </header>
 
-                    <div class="space-y-2.5">
+                <div class="dg-two">
+                    <div class="dg-bill dg-spike" data-reveal="panel">
+                        <div class="dg-bill-head">
+                            <h3 class="dg-d">Spring Gala</h3>
+                            <span class="dg-label">Sat 30 May &middot; 7:30pm</span>
+                        </div>
+                        <p class="dg-bill-sub">Four ticket types on one event.</p>
+
                         @foreach ([
                             ['Adult', 'On sale now', '$28', '120'],
                             ['Student &amp; senior', 'On sale now', '$18', '80'],
                             ['Under 12', 'On sale now', '$12', '60'],
                             ['Family of four', 'Closes 7 days before', '$72', '40'],
                         ] as [$tName, $tWindow, $tPrice, $tQty])
-                            <div class="es-barre-sub flex items-baseline gap-3 p-3.5">
-                                <span class="es-barre-ink min-w-0 flex-1 truncate text-sm font-semibold">{!! $tName !!}</span>
-                                <span class="es-barre-muted hidden truncate text-xs sm:inline">{{ $tWindow }}</span>
-                                <span class="es-barre-muted font-mono text-xs">{{ $tQty }}</span>
-                                <span class="es-barre-ink font-mono text-sm">{{ $tPrice }}</span>
+                            <div class="dg-bill-row">
+                                <span class="dg-bill-name">{!! $dgAmp($tName) !!}</span>
+                                <span class="dg-bill-win">{{ $tWindow }}</span>
+                                <span class="dg-bill-qty">{{ $tQty }}</span>
+                                <span class="dg-bill-price">{{ $tPrice }}</span>
                             </div>
                         @endforeach
+
+                        <p class="dg-bill-foot">
+                            Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), a payment link or cash at the door. Event Schedule takes no cut of it.
+                        </p>
                     </div>
 
-                    <p class="es-barre-muted mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 text-xs dark:border-[rgba(230,237,235,0.12)]">
-                        Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), a payment link or cash at the door. Event Schedule takes no cut of it.
-                    </p>
-                </div>
-
-                <div class="grid gap-4" data-reveal-group="100">
-                    @foreach ([
-                        ['Zero platform fees', 'You keep the whole ticket price minus what your payment provider charges to process it. There is no per-ticket cut on top, on any plan.', 'free'],
-                        ['Live check-in view', 'Scanning tickets from a phone is free on every plan. Pro adds the running count and the per-ticket breakdown, so two people can work the queue and both see the same total.', 'pro'],
-                        ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent - collected with the sale instead of chased afterwards.', 'pro'],
-                    ] as [$t, $d, $tier])
-                        <div class="es-barre-card es-barre-hover p-6" data-reveal>
-                            <div class="mb-2 flex items-center gap-2">
-                                <h3 class="es-barre-ink text-base font-bold">{{ $t }}</h3>
-                                <span class="es-barre-plan {{ $tier === 'pro' ? 'es-barre-plan-pro' : 'es-barre-plan-free' }}">{{ $tier === 'pro' ? 'Pro' : 'Free' }}</span>
-                            </div>
-                            <p class="es-barre-muted text-sm">{{ $d }}</p>
-                        </div>
-                    @endforeach
+                    <ul class="dg-notes" data-reveal-group="100">
+                        @foreach ([
+                            ['Zero platform fees', 'You keep the whole ticket price minus what your payment provider charges to process it. There is no per-ticket cut on top, on any plan.', 'free'],
+                            ['Live check-in view', 'Scanning tickets from a phone is free on every plan. Pro adds the running count and the per-ticket breakdown, so two people can work the queue and both see the same total.', 'pro'],
+                            ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent - collected with the sale instead of chased afterwards.', 'pro'],
+                        ] as [$t, $d, $tier])
+                            <li data-reveal>
+                                <i class="dg-t" aria-hidden="true"></i>
+                                <div>
+                                    <div class="dg-notes-head">
+                                        <h3 class="dg-h3">{{ $t }}</h3>
+                                        <span class="dg-tier {{ $tier === 'pro' ? 'dg-tier-pro' : '' }}">{{ $tier === 'pro' ? 'Pro' : 'Free' }}</span>
+                                    </div>
+                                    <p>{{ $d }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 6. The wall in public (05)                                   -->
-    <!-- ============================================================ -->
-    <section id="public" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
-                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">In public</p>
-                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    One link, on <span class="es-barre-grad">everything you print</span>.
-                </h2>
-                <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    The studio window, the programme, the bio on your profile. It is the same address all
-                    year and it is never out of date.
-                </p>
+        <!-- ============================================================ -->
+        <!-- 5. In public                                                 -->
+        <!-- ============================================================ -->
+        <section id="public" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['One link, on ', ['everything you print'], '.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">5</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>In public</p>{!! $dgBar(5) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                        <p class="dg-lede" data-reveal>
+                            The studio window, the programme, the bio on your profile. It is the same address all
+                            year and it is never out of date.
+                        </p>
+                    </div>
+                </header>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
-                <div class="es-bento group relative md:col-span-2" data-tilt="3" data-reveal="panel">
-                    <div class="es-tilt-inner es-barre-card h-full overflow-hidden p-6">
-                        <div class="mb-2 flex items-center gap-2">
-                            <h3 class="es-barre-ink text-lg font-bold">Embed it on the site you already have</h3>
-                            <span class="es-barre-plan es-barre-plan-free">Free</span>
+            <div class="dg-url" style="--dir: 1; --x0: 4vw;">
+                <div class="dg-echo" aria-hidden="true">
+                    <div class="dg-echo-row">@foreach ([0.08, 0.2, 1, 0.2, 0.08] as $echo)<span @class(['dg-on' => $echo == 1]) style="--o: {{ $echo }};">yourstudio.eventschedule.com</span>@endforeach</div>
+                </div>
+            </div>
+
+            <div class="dg-wrap">
+                <div class="dg-six" data-reveal-group="80">
+                    <article data-reveal>
+                        <div class="dg-six-head">
+                            <h3 class="dg-h3">Embed it on the site you already have</h3>
+                            <span class="dg-tier">Free</span>
                         </div>
-                        <p class="es-barre-muted text-sm">
+                        <p>
                             Drop the calendar into your existing website in an iframe. It keeps itself current,
                             so the term timetable on your homepage stops being a screenshot somebody has to
                             remember to replace. Dancers can also subscribe to it in their own calendar app,
                             as a live feed that picks up a moved class or a closure by itself.
                         </p>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
+                    </article>
 
-                <div class="es-barre-card es-barre-hover p-6" data-reveal>
-                    <div class="mb-2 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Followers</h3>
-                        <span class="es-barre-plan es-barre-plan-free">Free</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        People follow your schedule and hear about a new date from you, in their inbox,
-                        rather than from a feed that decides who sees it.
-                    </p>
-                </div>
+                    <article data-reveal>
+                        <div class="dg-six-head">
+                            <h3 class="dg-h3">Followers</h3>
+                            <span class="dg-tier">Free</span>
+                        </div>
+                        <p>
+                            People follow your schedule and hear about a new date from you, in their inbox,
+                            rather than from a feed that decides who sees it.
+                        </p>
+                    </article>
 
-                <div class="es-barre-card es-barre-hover p-6" data-reveal>
-                    <div class="mb-2 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Newsletters</h3>
-                        <span class="es-barre-plan es-barre-plan-free">Free</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        Write and send from the same place, with open and click rates afterwards. Ten emails a
-                        month on the free plan, a hundred on Pro and a thousand on Enterprise, counted per recipient rather than per send.
-                    </p>
-                </div>
+                    <article data-reveal>
+                        <div class="dg-six-head">
+                            <h3 class="dg-h3">Newsletters</h3>
+                            <span class="dg-tier">Free</span>
+                        </div>
+                        <p>
+                            Write and send from the same place, with open and click rates afterwards. Ten emails a
+                            month on the free plan, a hundred on Pro and a thousand on Enterprise, counted per recipient rather than per send.
+                        </p>
+                    </article>
 
-                <div class="es-barre-card es-barre-hover p-6 md:col-span-2" data-reveal>
-                    <div class="mb-2 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Calendar sync</h3>
-                        <span class="es-barre-plan es-barre-plan-free">Free</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        Two-way sync with Google, Outlook and CalDAV, so a rehearsal moved on your phone moves
-                        on the schedule too.
-                    </p>
-                </div>
+                    <article data-reveal>
+                        <div class="dg-six-head">
+                            <h3 class="dg-h3">Calendar sync</h3>
+                            <span class="dg-tier">Free</span>
+                        </div>
+                        <p>
+                            Two-way sync with Google, Outlook and CalDAV, so a rehearsal moved on your phone moves
+                            on the schedule too.
+                        </p>
+                    </article>
 
-                <div class="es-barre-card es-barre-hover p-6" data-reveal>
-                    <div class="mb-2 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Share graphics</h3>
-                        <span class="es-barre-plan es-barre-plan-free">Free</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        Every event can generate a post-sized and a story-sized image with your own branding
-                        on it, ready to download.
-                    </p>
-                </div>
+                    <article data-reveal>
+                        <div class="dg-six-head">
+                            <h3 class="dg-h3">Share graphics</h3>
+                            <span class="dg-tier">Free</span>
+                        </div>
+                        <p>
+                            Every event can generate a post-sized and a story-sized image with your own branding
+                            on it, ready to download.
+                        </p>
+                    </article>
 
-                <div class="es-barre-card es-barre-hover p-6 lg:col-span-2" data-reveal>
-                    <div class="mb-2 flex items-center gap-2">
-                        <h3 class="es-barre-ink text-lg font-bold">Online classes</h3>
-                        <span class="es-barre-plan es-barre-plan-free">Free</span>
-                    </div>
-                    <p class="es-barre-muted text-sm">
-                        Mark an event as online and add the link people join on - any platform that gives you
-                        a URL. Ticket holders get it with their ticket.
-                    </p>
+                    <article data-reveal>
+                        <div class="dg-six-head">
+                            <h3 class="dg-h3">Online classes</h3>
+                            <span class="dg-tier">Free</span>
+                        </div>
+                        <p>
+                            Mark an event as online and add the link people join on - any platform that gives you
+                            a URL. Ticket holders get it with their ticket.
+                        </p>
+                    </article>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 7. Who it is for (06)                                        -->
-    <!-- ============================================================ -->
-    <section id="who" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
-                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
-                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Every kind of room with <span class="es-barre-grad">a mirror in it</span>.
-                </h2>
-            </div>
+        <!-- ============================================================ -->
+        <!-- 6. Who it is for                                             -->
+        <!-- ============================================================ -->
+        <section id="who" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['Every kind of room with ', ['a mirror in it'], '.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">6</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>Who it is for</p>{!! $dgBar(6) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                    </div>
+                </header>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                <x-sub-audience-card
-                    name="Ballet Companies"
-                    description="A repertory season, a Nutcracker run and a studio showcase, each set up once and sold from the same link."
-                    icon-color="teal"
-                    blog-slug="for-ballet-companies"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v9m0 0a3 3 0 103 3M12 12a3 3 0 11-3 3m0 0v3m6-3v3" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Hip-Hop Crews"
-                    description="Battles, showcases and cyphers. Post the date, take sign-ups with a capacity, sell at the door with QR check-in."
-                    icon-color="amber"
-                    blog-slug="for-hip-hop-crews"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l11-2v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm11-2a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Ballroom & Latin Studios"
-                    description="Weekly technique, a social every month and a showcase in the spring - three sub-schedules, one public page."
-                    icon-color="rose"
-                    blog-slug="for-ballroom-latin-studios"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="h-6 w-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 21V9m8 12V9M8 9a3 3 0 116 0m-6 0h8M6 4h4m4 0h4" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Contemporary & Modern"
-                    description="Residencies, site-specific work and shared bills. Keep the making private and publish only the dates that are ready."
-                    icon-color="emerald"
-                    blog-slug="for-contemporary-modern-dance"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 18c2.5 0 2.5-4 5-4s2.5 4 5 4 2.5-4 5-4M4 10c2.5 0 2.5-4 5-4s2.5 4 5 4 2.5-4 5-4" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Folk & Cultural Ensembles"
-                    description="Festival appearances, heritage nights and community performances, in a calendar people can subscribe to."
-                    icon-color="sky"
-                    blog-slug="for-folk-cultural-dance"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.5-2.5 3.5-5.5 3.5-9S14.5 5.5 12 3m0 18c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3M3.5 9h17M3.5 15h17" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Dance Schools & Academies"
-                    description="A full timetable of graded classes with a capacity on each, and a recital at the end of it that sells its own tickets."
-                    icon-color="slate"
-                    blog-slug="for-dance-schools-academies"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="h-6 w-6 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 8. How it works (07, dark band)                              -->
-    <!-- ============================================================ -->
-    <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
-        <div class="es-barre-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="grid-overlay absolute inset-0 opacity-20"></div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
-                    <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        A term takes <span class="es-barre-grad">an afternoon</span> to set up.
-                    </h2>
+                @php
+                    $dgCompany = [
+                        ['Ballet Companies', 'A repertory season, a Nutcracker run and a studio showcase, each set up once and sold from the same link.', 'for-ballet-companies'],
+                        ['Hip-Hop Crews', 'Battles, showcases and cyphers. Post the date, take sign-ups with a capacity, sell at the door with QR check-in.', 'for-hip-hop-crews'],
+                        ['Ballroom & Latin Studios', 'Weekly technique, a social every month and a showcase in the spring - three sub-schedules, one public page.', 'for-ballroom-latin-studios'],
+                        ['Contemporary & Modern', 'Residencies, site-specific work and shared bills. Keep the making private and publish only the dates that are ready.', 'for-contemporary-modern-dance'],
+                        ['Folk & Cultural Ensembles', 'Festival appearances, heritage nights and community performances, in a calendar people can subscribe to.', 'for-folk-cultural-dance'],
+                        ['Dance Schools & Academies', 'A full timetable of graded classes with a capacity on each, and a recital at the end of it that sells its own tickets.', 'for-dance-schools-academies'],
+                    ];
+                @endphp
+                <div class="dg-who" data-reveal-group="70">
+                    @foreach ($dgCompany as $companyIndex => [$companyName, $companyDesc, $companySlug])
+                        @php $companyPost = get_sub_audience_blog($companySlug); @endphp
+                        <article class="dg-who-row" data-reveal>
+                            <span class="dg-who-no" aria-hidden="true">{{ ['i', 'ii', 'iii', 'iv', 'v', 'vi'][$companyIndex] }}</span>
+                            <h3 class="dg-who-name">{!! $dgAmp(e($companyName)) !!}</h3>
+                            <div>
+                                <p>{{ $companyDesc }}</p>
+                                @if ($companyPost)
+                                    <a href="{{ blog_url('/' . $companyPost->slug) }}" class="dg-link" aria-label="Learn more about Event Schedule for {{ $companyName }}">
+                                        Learn more
+                                        {!! $dgArrow !!}
+                                    </a>
+                                @endif
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
+            </div>
+        </section>
 
-                <div class="es-barre-rail mb-12" data-reveal aria-hidden="true">
-                    <span class="es-barre-bracket"></span>
-                    <span class="es-barre-bar"></span>
-                    <span class="es-barre-bracket"></span>
-                </div>
+        <!-- ============================================================ -->
+        <!-- 7. How it works: the dark floor                              -->
+        <!-- ============================================================ -->
+        <section id="how" class="dg-sec dg-band" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['A term takes ', ['an afternoon'], ' to set up.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">7</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>How it works</p>{!! $dgBar(7) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                    </div>
+                </header>
 
-                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                <div class="dg-steps" data-reveal-group="110">
+                    <span class="dg-sweep" aria-hidden="true"></span>
                     @foreach ([
                         ['01', 'Put the timetable up', 'One recurring event per class, with the days it runs and the weeks you are closed. Sub-schedules keep classes, rehearsals and shows on their own strands.'],
                         ['02', 'Decide what is public', 'Classes and shows go out. Rehearsal calls stay as Drafts, on the same schedule, members-only.'],
                         ['03', 'Sell the card, not the class', 'A ten-visit card, an unlimited month, or a ticket to the gala - all from the one link you already share.'],
                     ] as [$n, $t, $d])
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
-                            <p class="es-barre-lit mb-3 font-mono text-sm font-bold">{{ $n }}</p>
-                            <h3 class="mb-2 text-lg font-bold text-white">{{ $t }}</h3>
-                            <p class="text-sm text-gray-400">{{ $d }}</p>
+                        <div data-reveal>
+                            <p class="dg-step-n">{{ $n }}</p>
+                            <h3>{{ $t }}</h3>
+                            <p>{{ $d }}</p>
                         </div>
                     @endforeach
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- ============================================================ -->
-    <!-- 9. Key features                                              -->
-    <!-- ============================================================ -->
-    <section class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-barre-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Recurring Events" description="A weekly class set up once, with date exceptions for the weeks you are closed" :url="marketing_url('/features/recurring-events')" icon-color="teal">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Class cards, memberships and show tickets with zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Passes" description="Ten-class cards, unlimited memberships and season passes, on Pro" :url="marketing_url('/features/passes')" icon-color="teal">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Sub-schedules" description="Keep classes, rehearsals and performances on their own strands" :url="marketing_url('/features/sub-schedules')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Email the people who follow your studio, with open and click rates" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-barre-accent inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    @include('marketing.partials.pricing-nudge')
-
-    <!-- ============================================================ -->
-    <!-- 10. Keep exploring                                           -->
-    <!-- ============================================================ -->
-    <section class="border-t border-[rgba(15,26,24,0.08)] py-16 dark:border-[rgba(230,237,235,0.08)]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-barre-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([
-                    ['/for-theaters', 'Theaters'],
-                    ['/for-theater-performers', 'Theater Performers'],
-                    ['/for-fitness-and-yoga', 'Fitness &amp; Yoga'],
-                    ['/for-workshop-instructors', 'Workshop Instructors'],
-                ] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-barre-card es-barre-hover group flex items-center justify-between p-5">
-                        <div>
-                            <div class="es-barre-muted text-sm">Event Schedule for</div>
-                            <div class="es-barre-ink text-lg font-semibold">{!! $relName !!}</div>
-                        </div>
-                        <svg aria-hidden="true" class="es-barre-accent h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+        <!-- ============================================================ -->
+        <!-- Between counts: key features                                 -->
+        <!-- ============================================================ -->
+        <section class="dg-sec">
+            <div class="dg-wrap">
+                <div class="dg-aside-head">
+                    <h2 data-reveal>Key features</h2>
+                    <a href="{{ marketing_url('/features') }}" class="dg-link" data-reveal>
+                        See all features
+                        {!! $dgArrow !!}
                     </a>
-                @endforeach
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-barre-accent inline-flex items-center font-medium hover:underline">
-                    See all use cases
-                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <x-marketing.related-pages />
-
-    <!-- ============================================================ -->
-    <!-- 11. FAQ (08)                                                 -->
-    <!-- ============================================================ -->
-    <section id="faq" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
-                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
-                <h2 class="es-balance es-barre-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Asked in <span class="es-barre-grad">the studio office</span>.
-                </h2>
-            </div>
-
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ($faqs as $faq)
-                    <details name="faq" data-reveal class="es-barre-card group/faq overflow-hidden">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
-                            <h3 class="es-barre-ink text-lg font-semibold">{{ $faq['q'] }}</h3>
-                            <svg aria-hidden="true" class="es-barre-muted h-5 w-5 shrink-0 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="es-barre-muted faq-answer px-6 pb-6">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <x-seo.faq-schema :items="$faqs" />
-
-    <!-- ============================================================ -->
-    <!-- 12. Finale                                                   -->
-    <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-barre-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 </div>
 
-                <div class="relative z-10">
-                    <div class="es-barre-rail mx-auto mb-10 max-w-md" aria-hidden="true">
-                        <span class="es-barre-bracket"></span>
-                        <span class="es-barre-bar"></span>
-                        <span class="es-barre-bracket"></span>
-                    </div>
-
-                    <p class="es-barre-tag mb-6">Free forever</p>
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
-                        Put the timetable <span class="es-barre-grad">where people look</span>.
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        Classes, rehearsal calls and the gala, on one schedule with one address.
-                    </p>
-
-                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
-                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-studio" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
-                        </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-barre-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Create your schedule
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                @php
+                    $dgRepertoire = [
+                        ['Recurring Events', 'A weekly class set up once, with date exceptions for the weeks you are closed', marketing_url('/features/recurring-events')],
+                        ['Ticketing', 'Class cards, memberships and show tickets with zero platform fees', marketing_url('/features/ticketing')],
+                        ['Passes', 'Ten-class cards, unlimited memberships and season passes, on Pro', marketing_url('/features/passes')],
+                        ['Sub-schedules', 'Keep classes, rehearsals and performances on their own strands', marketing_url('/features/sub-schedules')],
+                        ['Newsletters', 'Email the people who follow your studio, with open and click rates', marketing_url('/features/newsletters')],
+                    ];
+                @endphp
+                <div class="dg-rep" data-reveal-group="70">
+                    @foreach ($dgRepertoire as [$repName, $repDesc, $repUrl])
+                        <a href="{{ $repUrl }}" data-reveal>
+                            <strong>{{ $repName }}</strong>
+                            <span>{{ $repDesc }}</span>
+                            {!! $dgArrow !!}
                         </a>
-                    </div>
-
-                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                    @endforeach
                 </div>
             </div>
+        </section>
+
+        <div class="dg-plans">
+            @include('marketing.partials.pricing-nudge')
         </div>
-    </section>
 
-    <!-- Section dot navigation -->
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#141d1b] dark:text-gray-300">{{ $sectionLabel }}</span>
+        <!-- ============================================================ -->
+        <!-- Between counts: the neighbours                               -->
+        <!-- ============================================================ -->
+        <section class="dg-sec">
+            <div class="dg-wrap">
+                <div class="dg-aside-head">
+                    <h2 data-reveal>Related pages</h2>
+                    <a href="{{ marketing_url('/use-cases') }}" class="dg-link" data-reveal>
+                        See all use cases
+                        {!! $dgArrow !!}
                     </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
+                </div>
 
+                <div class="dg-next" data-reveal-group="70">
+                    @foreach ([
+                        ['/for-theaters', 'Theaters'],
+                        ['/for-theater-performers', 'Theater Performers'],
+                        ['/for-fitness-and-yoga', 'Fitness &amp; Yoga'],
+                        ['/for-workshop-instructors', 'Workshop Instructors'],
+                    ] as [$relHref, $relName])
+                        <a href="{{ marketing_url($relHref) }}" data-reveal>
+                            <small>Event Schedule for</small>
+                            <strong><span>{!! $dgAmp($relName) !!}</span>{!! $dgArrow !!}</strong>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 8. Questions                                                 -->
+        <!-- ============================================================ -->
+        <section id="faq" class="dg-sec" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['Asked in ', ['the studio office'], '.']); @endphp
+                <header class="dg-head">
+                    <div class="dg-count" aria-hidden="true" data-reveal="turn"><span class="dg-count-n">8</span></div>
+                    <div>
+                        <div class="dg-meta"><p class="dg-label" data-reveal>Questions</p>{!! $dgBar(8) !!}</div>
+                        <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                    </div>
+                </header>
+
+                <div class="dg-qa" data-reveal>
+                    @foreach ($faqs as $faq)
+                        <details name="faq">
+                            <summary>
+                                <h3>{{ $faq['q'] }}</h3>
+                                <i aria-hidden="true"></i>
+                            </summary>
+                            <p>{{ $faq['a'] }}</p>
+                        </details>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <x-seo.faq-schema :items="$faqs" />
+
+        <!-- ============================================================ -->
+        <!-- Finale: from the top                                         -->
+        <!-- ============================================================ -->
+        <section id="claim" class="dg-sec dg-band dg-end" style="scroll-margin-top: 4rem;">
+            <div class="dg-wrap">
+                @php $dgHead = $dgSet(['Put the timetable ', ['where people look'], '.']); @endphp
+                <div class="dg-meta"><p class="dg-label" data-reveal>Free forever</p><span class="dg-label" aria-hidden="true">&middot; From the top</span></div>
+                <div class="dg-end-head">
+                    <div class="dg-pool" aria-hidden="true"></div>
+                    <h2 class="dg-h2" data-reveal="canon" aria-label="{{ $dgHead['label'] }}"><span aria-hidden="true">{!! $dgHead['html'] !!}</span></h2>
+                </div>
+                <p class="dg-end-sub" data-reveal>
+                    Classes, rehearsal calls and the gala, on one schedule with one address.
+                </p>
+
+                <div class="dg-claim-row" data-reveal>
+                    <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                    <div dir="ltr" class="es-claim dg-claim">
+                        <input id="es-claim-input" type="text" placeholder="your-studio" autocomplete="off" spellcheck="false" maxlength="30">
+                        <span>.eventschedule.com</span>
+                    </div>
+                    <a href="{{ app_url('/sign_up?type=talent') }}" class="dg-btn">
+                        Create your schedule
+                        {!! $dgArrow !!}
+                    </a>
+                </div>
+
+                <p class="dg-end-note">No credit card required</p>
+            </div>
+        </section>
+
+        <div class="dg-keep">
+            <x-marketing.related-pages />
+        </div>
     </div>
 
-    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

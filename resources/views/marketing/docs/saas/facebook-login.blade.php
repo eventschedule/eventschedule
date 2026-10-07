@@ -23,15 +23,16 @@
             </svg>
             Overview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Adds <span class="font-semibold text-gray-900 dark:text-white">Continue with Facebook</span> to the login and sign-up pages, and a <span class="font-semibold text-gray-900 dark:text-white">Facebook Settings</span> section where your customers connect or disconnect Facebook, or verify with it before setting a password. It is optional and <span class="font-semibold text-gray-900 dark:text-white">off by default</span>. Until both values under <a href="#configure" class="doc-link">Configure Event Schedule</a> are set there is no Facebook button, settings section or sidebar link, no Facebook entry in the bundled privacy policy's processor list, and every <code class="doc-inline-code">/auth/facebook</code> URL returns 404.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Adds <strong>Continue with Facebook</strong> to the login and sign-up pages, and a <strong>Facebook Settings</strong> section on the <strong>Integrations</strong> tab of each account's <strong>Settings</strong>, where your customers connect or disconnect Facebook. An account with no password can also verify with Facebook before setting one.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It is optional and <strong>off by default</strong>, and it is set up entirely in the Meta developer console and <code class="doc-inline-code">.env</code>: there is no screen for it in the admin panel. Until both values under <a href="#configure" class="doc-link">Configure Event Schedule</a> are set there is no Facebook button and no Facebook Settings section, no Facebook entry in the bundled privacy policy's processor list, and every <code class="doc-inline-code">/auth/facebook</code> URL returns 404.</p>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Events are not synced</div>
             <p>Facebook login only signs people in. It does not import events from Facebook or publish events there: Meta limits reading Page and personal events to its approved Marketing Partners, and publishing them to its Official Events API partners, which is closed to new applicants. To promote an event on Facebook, share its link, post an image from <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">event graphics</a>, or run a paid <a href="{{ route('marketing.docs.boost') }}" class="doc-link">Boost</a>.</p>
         </div>
 
         <h3 id="reuse-boost-app" class="doc-subheading">Reusing the Boost app</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">We recommend a new Consumer app just for login, as described below. The app the <a href="{{ route('marketing.docs.selfhost.boost') }}#facebook-app" class="doc-link">Boost setup</a> creates (<code class="doc-inline-code">META_APP_ID</code>) is a Business app, and Business apps usually offer only <span class="font-semibold text-gray-900 dark:text-white">Facebook Login for Business</span>, which Event Schedule does not support.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">You can reuse the Boost app only if its dashboard lets you add the <span class="font-semibold text-gray-900 dark:text-white">Authenticate and request data from users with Facebook Login</span> use case. If it does, follow steps 2 to 6 on that app and set <code class="doc-inline-code">FACEBOOK_CLIENT_ID</code> and <code class="doc-inline-code">FACEBOOK_CLIENT_SECRET</code> to its App ID and App Secret. Both features then share one App Secret, so rotating it means updating <code class="doc-inline-code">META_APP_SECRET</code> too.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">We recommend a new Consumer app just for login, as described below. The app the <a href="{{ route('marketing.docs.selfhost.boost') }}#facebook-app" class="doc-link">Boost setup</a> creates (<code class="doc-inline-code">META_APP_ID</code>) is a Business app, and Business apps usually offer only <strong>Facebook Login for Business</strong>, which Event Schedule does not support.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">You can reuse the Boost app only if its dashboard lets you add the <strong>Authenticate and request data from users with Facebook Login</strong> use case. If it does, follow steps 2 to 6 on that app and set <code class="doc-inline-code">FACEBOOK_CLIENT_ID</code> and <code class="doc-inline-code">FACEBOOK_CLIENT_SECRET</code> to its App ID and App Secret. Both features then share one App Secret, so rotating it means updating <code class="doc-inline-code">META_APP_SECRET</code> too.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Decide before launch. Facebook links belong to one app, so switching apps later disconnects everyone who linked Facebook (see <a href="#account-matching" class="doc-link">How accounts are matched</a>).</p>
     </section>
 
@@ -43,9 +44,9 @@
             1. Create the app
         </h2>
         <ol class="doc-list doc-list-numbered">
-            <li>At <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" class="doc-link">developers.facebook.com</a>, click <span class="font-semibold text-gray-900 dark:text-white">Create App</span>.</li>
-            <li>Choose the use case <span class="font-semibold text-gray-900 dark:text-white">Authenticate and request data from users with Facebook Login</span>.</li>
-            <li>If you are asked for an app type, choose <span class="font-semibold text-gray-900 dark:text-white">Consumer</span>. A Business app needs business verification before the email permission works for anyone outside the app's roles.</li>
+            <li>At <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" class="doc-link">developers.facebook.com</a>, click <strong>Create App</strong>.</li>
+            <li>Choose the use case <strong>Authenticate and request data from users with Facebook Login</strong>.</li>
+            <li>If you are asked for an app type, choose <strong>Consumer</strong>. A Business app needs business verification before the email permission works for anyone outside the app's roles.</li>
         </ol>
     </section>
 
@@ -56,7 +57,7 @@
             </svg>
             2. Basic settings
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Under <span class="font-semibold text-gray-900 dark:text-white">App settings &rarr; Basic</span>:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Under <strong>App settings &rarr; Basic</strong>:</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -67,29 +68,29 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">App domains</span></td>
+                        <td><strong>App domains</strong></td>
                         <td>Your domain, e.g. <code class="doc-inline-code">yourdomain.com</code></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Privacy policy URL</span></td>
-                        <td>Your privacy policy. If you replaced it at <code class="doc-inline-code">/admin/legal</code>, use that one.</td>
+                        <td><strong>Privacy policy URL</strong></td>
+                        <td>Your privacy policy. If you replaced it under <strong>System &rarr; Legal Pages</strong> in the admin panel (<code class="doc-inline-code">/admin/legal</code>), use that one.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Terms of service URL</span></td>
+                        <td><strong>Terms of service URL</strong></td>
                         <td>Your terms of service</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">User data deletion</span></td>
-                        <td>Choose <span class="font-semibold text-gray-900 dark:text-white">Data deletion instructions URL</span> and point it at your privacy policy. Customers delete their account under Settings &rarr; Delete Account, and only the Facebook account ID is stored, so no callback endpoint is needed.</td>
+                        <td><strong>User data deletion</strong></td>
+                        <td>Choose <strong>Data deletion instructions URL</strong> and point it at your privacy policy. Customers delete their account under <strong>Settings &rarr; Data &rarr; Delete Account</strong>, and only the Facebook account ID is stored, so no callback endpoint is needed.</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">App icon and category</span></td>
+                        <td><strong>App icon and category</strong></td>
                         <td>Both are required before the app can go Live</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Copy the <span class="font-semibold text-gray-900 dark:text-white">App ID</span> and <span class="font-semibold text-gray-900 dark:text-white">App Secret</span>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Copy the <strong>App ID</strong> and <strong>App Secret</strong>.</p>
     </section>
 
     <section id="login-settings" class="doc-section">
@@ -99,11 +100,17 @@
             </svg>
             3. Facebook Login settings
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Under <span class="font-semibold text-gray-900 dark:text-white">Use cases &rarr; Facebook Login &rarr; Settings</span>, turn on Client OAuth login, Web OAuth login, Enforce HTTPS and Strict Mode for redirect URIs. Then add these three <span class="font-semibold text-gray-900 dark:text-white">Valid OAuth Redirect URIs</span>. In SaaS mode signing in lives on the <code class="doc-inline-code">app</code> subdomain, so use that host:</p>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>https://app.yourdomain.com/auth/facebook/callback
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Under <strong>Use cases &rarr; Facebook Login &rarr; Settings</strong>, turn on Client OAuth login, Web OAuth login, Enforce HTTPS and Strict Mode for redirect URIs. Then add these three <strong>Valid OAuth Redirect URIs</strong>. In SaaS mode signing in lives on the <code class="doc-inline-code">app</code> subdomain, so use that host:</p>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>Valid OAuth Redirect URIs</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code>https://app.yourdomain.com/auth/facebook/callback
 https://app.yourdomain.com/auth/facebook/connect/callback
 https://app.yourdomain.com/auth/facebook/set-password/callback</code></pre>
-        <div class="doc-callout doc-callout-warning">
+        </div>
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Register all three</div>
             <p>Facebook rejects any redirect that is not on the list, so a missing one breaks only its own flow (signing in, connecting from Settings, or verifying before setting a password), and Facebook's error does not say which. For local testing, add the same three paths on your local <code class="doc-inline-code">APP_URL</code>; Facebook accepts <code class="doc-inline-code">http://localhost</code> only while the app is in Development mode.</p>
         </div>
@@ -116,7 +123,7 @@ https://app.yourdomain.com/auth/facebook/set-password/callback</code></pre>
             </svg>
             4. Permissions
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Under <span class="font-semibold text-gray-900 dark:text-white">Use cases &rarr; Facebook Login &rarr; Customize</span>, make sure <code class="doc-inline-code">email</code> and <code class="doc-inline-code">public_profile</code> are added. On a Consumer app both have Advanced Access by default, so no App Review is needed.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Under <strong>Use cases &rarr; Facebook Login &rarr; Customize</strong>, make sure <code class="doc-inline-code">email</code> and <code class="doc-inline-code">public_profile</code> are added. On a Consumer app both have Advanced Access by default, so no App Review is needed.</p>
     </section>
 
     <section id="configure" class="doc-section">
@@ -126,8 +133,14 @@ https://app.yourdomain.com/auth/facebook/set-password/callback</code></pre>
             </svg>
             5. Configure Event Schedule
         </h2>
-        <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>FACEBOOK_CLIENT_ID=your-facebook-app-id
-FACEBOOK_CLIENT_SECRET=your-facebook-app-secret</code></pre>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">FACEBOOK_CLIENT_ID</span>=<span class="code-string">your-facebook-app-id</span>
+<span class="code-variable">FACEBOOK_CLIENT_SECRET</span>=<span class="code-string">your-facebook-app-secret</span></code></pre>
+        </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Both values are required; with only one set, Facebook login stays off. Run <code class="doc-inline-code">php artisan config:clear</code> afterwards. <code class="doc-inline-code">FACEBOOK_REDIRECT_URI</code> can stay unset, because every request passes its own redirect URI.</p>
     </section>
 
@@ -138,17 +151,17 @@ FACEBOOK_CLIENT_SECRET=your-facebook-app-secret</code></pre>
             </svg>
             6. Test, then go Live
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">While the app is in Development mode only people with a role on it can sign in. Add yourself under <span class="font-semibold text-gray-900 dark:text-white">App roles &rarr; Roles</span> and create a test user under <span class="font-semibold text-gray-900 dark:text-white">App roles &rarr; Test users</span>, then check:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">While the app is in Development mode only people with a role on it can sign in. Add yourself under <strong>App roles &rarr; Roles</strong> and create a test user under <strong>App roles &rarr; Test users</strong>, then check:</p>
         <ul class="doc-list">
             <li>A new sign-up with Facebook lands on the getting-started page with a verified email</li>
             <li>An existing account with the same email is asked to log in once the usual way, and Facebook is linked as soon as it does</li>
-            <li>Pressing <span class="font-semibold text-gray-900 dark:text-white">Cancel</span> on the Facebook dialog returns to the login page with no error</li>
-            <li>Unticking the email permission shows <span class="font-semibold text-gray-900 dark:text-white">Try again</span>, which asks for the email again</li>
-            <li>Settings &rarr; Facebook Settings connects and disconnects, and refuses to disconnect when Facebook is the account's only way in</li>
-            <li>A Facebook-only account can use <span class="font-semibold text-gray-900 dark:text-white">Verify with Facebook</span> under Settings &rarr; Set Password</li>
-            <li>The login page marks the button last used with a <span class="font-semibold text-gray-900 dark:text-white">Last used</span> chip</li>
+            <li>Pressing <strong>Cancel</strong> on the Facebook dialog returns to the login page with no error</li>
+            <li>Unticking the email permission shows <strong>Try again</strong>, which asks for the email again</li>
+            <li><strong>Settings &rarr; Integrations &rarr; Facebook Settings</strong> connects and disconnects, and offers no <strong>Disconnect</strong> when Facebook is the account's only way in</li>
+            <li>A Facebook-only account can use <strong>Verify with Facebook</strong> under <strong>Settings &rarr; Security &rarr; Set Password</strong></li>
+            <li>The login page marks the button last used with a <strong>Last used</strong> chip</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Then switch <span class="font-semibold text-gray-900 dark:text-white">App Mode</span> to <span class="font-semibold text-gray-900 dark:text-white">Live</span> at the top of the app dashboard. Until you do, everyone else sees "App not active".</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Then switch <strong>App Mode</strong> to <strong>Live</strong> at the top of the app dashboard. Until you do, everyone else sees "App not active".</p>
     </section>
 
     <section id="account-matching" class="doc-section">
@@ -173,7 +186,7 @@ FACEBOOK_CLIENT_SECRET=your-facebook-app-secret</code></pre>
                     </tr>
                     <tr>
                         <td>No email from Facebook</td>
-                        <td>Back to the login page with a <span class="font-semibold text-gray-900 dark:text-white">Try again</span> that re-requests the email permission</td>
+                        <td>Back to the login page with a <strong>Try again</strong> that re-requests the email permission</td>
                     </tr>
                     <tr>
                         <td>An invited placeholder account with this email (no password, Google or Facebook yet)</td>
@@ -197,7 +210,7 @@ FACEBOOK_CLIENT_SECRET=your-facebook-app-secret</code></pre>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">Keep the same Meta app</div>
-            <p>Facebook gives every app its own ID for each person, and that ID is what Event Schedule stores. Pointing the install at a different Meta app later disconnects everyone who linked Facebook: people with a password or Google are asked to log in once to re-link, and Facebook-only people have to use <span class="font-semibold text-gray-900 dark:text-white">Reset password</span>. To rotate credentials, reset the App Secret on the same app.</p>
+            <p>Facebook gives every app its own ID for each person, and that ID is what Event Schedule stores. Pointing the install at a different Meta app later disconnects everyone who linked Facebook: people with a password or Google are asked to log in once to re-link, and Facebook-only people have to use <strong>Reset password</strong>. To rotate credentials, reset the App Secret on the same app.</p>
         </div>
     </section>
 
@@ -208,6 +221,6 @@ FACEBOOK_CLIENT_SECRET=your-facebook-app-secret</code></pre>
             </svg>
             Turning it off
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">To turn Facebook login off, unset either value. All Facebook UI disappears and the routes return 404, while stored links are kept, so turning it back on restores them. In the meantime, people who only ever signed in with Facebook get back in with <span class="font-semibold text-gray-900 dark:text-white">Reset password</span> on the login page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To turn Facebook login off, unset either value. All Facebook UI disappears and the routes return 404, while stored links are kept, so turning it back on restores them. In the meantime, people who only ever signed in with Facebook get back in with <strong>Reset password</strong> on the login page.</p>
     </section>
 </x-docs-page>

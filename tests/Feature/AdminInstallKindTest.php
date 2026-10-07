@@ -54,7 +54,7 @@ class AdminInstallKindTest extends TestCase
             ->assertDontSee(__('messages.funnel_visitor_to_event'))
             ->assertSee(__('messages.funnel_onboarding_subtitle_signup'));
 
-        $this->page('/admin/usage')->assertDontSee('tracking-wider">Plan</th>', false);
+        $this->page('/admin/usage')->assertDontSee('data-col="plan"', false);
 
         $this->page('/admin/schedules')
             ->assertDontSee('name="plan_type"', false)

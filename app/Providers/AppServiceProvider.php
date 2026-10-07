@@ -141,7 +141,6 @@ class AppServiceProvider extends ServiceProvider
                 // and not memoized here: what it reads is already cached (the settings map, and
                 // manageableRoles() on the user), and a value kept on this provider would outlive
                 // a request wherever one process serves several.
-                'realtimeAvailable' => \App\Services\ScheduleRealtime::available(auth()->user()),
                 // A selfhost shows the Tickets entry only to someone who holds a ticket. Hosted
                 // shows it to everyone, so it does not ask.
                 'hasTickets' => ! config('app.hosted') && auth()->check() && (function () {

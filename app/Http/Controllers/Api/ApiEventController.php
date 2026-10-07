@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\BoostCampaign;
 use App\Models\Event;
+use App\Models\EventPart;
+use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\RoleUser;
+use App\Models\Ticket;
 use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
@@ -287,6 +290,30 @@ class ApiEventController extends Controller
             'members', 'schedule', 'tickets', 'event_parts', 'addons',
         ]));
 
+        // On a new event every row is a new row. An id copied from a read of another event names
+        // a row that is not this event's, and saveEvent() skips a row whose id it cannot find: the
+        // ticket type was left out of the event it was posted to, under a 201. Custom fields are
+        // the JSON string the form posts, as in update().
+        foreach (['tickets', 'addons', 'event_parts'] as $list) {
+            if (! is_array($request->input($list))) {
+                continue;
+            }
+
+            $request->merge([$list => array_map(function ($row) use ($list) {
+                if (! is_array($row)) {
+                    return $row;
+                }
+
+                unset($row['id']);
+
+                if ($list === 'tickets' && is_array($row['custom_fields'] ?? null)) {
+                    $row['custom_fields'] = json_encode($row['custom_fields']);
+                }
+
+                return $row;
+            }, $request->input($list))]);
+        }
+
         // Honour DEFAULT_PAYMENT_METHOD when the caller said nothing, the same as the event form
         // does. Only on create: an update that omits the field must leave the stored value alone.
         // saveEvent() builds the row with fill($request->all()), so an absent key would otherwise
@@ -417,7 +444,10 @@ class ApiEventController extends Controller
                 'members' => 'nullable|array',
                 'schedule' => 'nullable|string|max:255',
                 'tickets' => 'nullable|array',
-                'tickets.*.type' => 'required_with:tickets|string|max:255',
+                // Nullable here, unlike on create: an event with one ticket type usually has no
+                // name on it (the form only asks once there are two), a read returns
+                // "type": null, and that row has to be able to come back.
+                'tickets.*.type' => 'nullable|string|max:255',
                 'tickets.*.quantity' => 'nullable|integer|min:0',
                 'tickets.*.price' => 'nullable|numeric|min:0',
                 'tickets.*.description' => 'nullable|string|max:1000',
@@ -490,6 +520,16 @@ class ApiEventController extends Controller
             'members', 'schedule', 'tickets', 'event_parts', 'addons',
         ]));
 
+        // What the caller named, read before the blocks below start carrying over what it did
+        // not. EventRepo::saveEvent() was written for the event form, which posts every section
+        // on every save, so a section that is absent there means "emptied". Everything this
+        // method does not carry over is therefore REMOVED by a request that never mentioned it.
+        // ApiEventUpdateProtectionTest.
+        //
+        // filled(), not has(): a client that reads an event and writes the object back sends
+        // "venue_id": null for an event that has no venue, and that names nothing.
+        $sentVenue = $request->filled('venue_id') || $request->filled('venue_name') || $request->filled('venue_address1');
+
         // Determine the current role from the event's roles (first where user is owner/admin)
         $currentRole = null;
         foreach ($event->roles as $role) {
@@ -507,6 +547,10 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'No schedule found for this event that you have access to'], 422);
         }
 
+        // On a talent schedule the schedule itself is the performer and preprocessEventRequest()
+        // sets the sent list aside, so it is not the caller replacing the performers.
+        $sentMembers = $request->has('members') && ! $currentRole->isTalent();
+
         $encodedRoleId = UrlUtils::encodeId($currentRole->id);
 
         // Preserve recurring config if not explicitly being changed
@@ -522,6 +566,17 @@ class ApiEventController extends Controller
             if (! $request->has('days_of_week') && $event->days_of_week) {
                 $request->merge(['days_of_week' => $event->days_of_week]);
             }
+        }
+
+        // The dates added to a series and the ones skipped from it. The API has no field for
+        // either, and saveEvent() reads a recurring save that lacks them as "there are none", so
+        // every update of a recurring event cleared both. An event that stops repeating loses
+        // them in saveEvent(), as it does on the form.
+        if ($request->input('schedule_type') === 'recurring') {
+            $request->merge([
+                'recurring_include_dates' => $event->recurring_include_dates ?? [],
+                'recurring_exclude_dates' => $event->recurring_exclude_dates ?? [],
+            ]);
         }
 
         // Express starts_at in the SCHEDULE's local time, because saveEvent() interprets the
@@ -551,55 +606,123 @@ class ApiEventController extends Controller
             $request->merge(['tickets_enabled' => $event->tickets_enabled]);
         }
 
+        // Rows the caller sent back. Each one that carries an id is laid over the stored row that
+        // id names, so a row keeps what it did not send; a row with no id is a new one; a stored
+        // row the list leaves out is retired by saveEvent(), as on the form.
+        //
+        // The ids are the ones this API returned, which are ENCODED, and saveEvent() looks a row
+        // up by its raw id: a row sent back as it was read matched nothing, was neither updated
+        // nor created, and every stored row was then retired for not being in the list.
+        $passEventsSent = [];
+
+        foreach ([
+            'tickets' => [$event->tickets, fn (Ticket $ticket) => $this->ticketRow($ticket)],
+            'addons' => [$event->addons, fn (Ticket $addon) => $this->addonRow($addon)],
+            'event_parts' => [$event->parts, fn (EventPart $part) => $this->partRow($part)],
+        ] as $list => [$stored, $asRow]) {
+            if (! is_array($request->input($list))) {
+                continue;
+            }
+
+            $rows = [];
+            foreach ($request->input($list) as $index => $row) {
+                if (! is_array($row) || empty($row['id'])) {
+                    if (is_array($row)) {
+                        unset($row['id']);
+                    }
+                    $rows[] = $row;
+
+                    continue;
+                }
+
+                $id = is_scalar($row['id']) ? UrlUtils::decodeId((string) $row['id']) : null;
+                $match = $id ? $stored->firstWhere('id', $id) : null;
+
+                // Refused, not skipped: a row that is silently dropped takes its stored row with
+                // it, and the caller is told the update worked.
+                if (! $match) {
+                    return response()->json([
+                        'error' => 'Validation failed',
+                        'errors' => [$list.'.'.$index.'.id' => ['No row with this id belongs to this event.']],
+                    ], 422);
+                }
+
+                if ($list === 'tickets' && array_key_exists('pass_event_ids', $row)) {
+                    $passEventsSent[] = $match->id;
+                }
+
+                unset($row['id']);
+                $rows[] = array_merge($asRow($match), $row);
+            }
+
+            // saveEvent() reads a ticket type's custom fields as the JSON string the form posts.
+            if ($list === 'tickets') {
+                foreach ($rows as $index => $row) {
+                    if (is_array($row) && is_array($row['custom_fields'] ?? null)) {
+                        $rows[$index]['custom_fields'] = json_encode($row['custom_fields']);
+                    }
+                }
+            }
+
+            $request->merge([$list => $rows]);
+        }
+
         // Preserve existing tickets if not being changed
         if (! $request->has('tickets') && $event->tickets_enabled) {
-            $existingTickets = $event->tickets->map(function ($ticket) {
-                return [
-                    'id' => $ticket->id,
-                    'type' => $ticket->type,
-                    'quantity' => $ticket->quantity,
-                    // Omitted, EventRepo writes null - so a PATCH that only renames the event
-                    // would silently turn every allocated ticket into general admission while its
-                    // sold seats stayed bound to it.
-                    'seating_band' => $ticket->seating_band,
-                    'price' => $ticket->price,
-                    'description' => $ticket->description,
-                    'custom_fields' => $ticket->custom_fields,
-                    'volume_discount' => $ticket->volume_discount,
-                    'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->format('Y-m-d H:i:s') : null,
-                    'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->format('Y-m-d H:i:s') : null,
-                ];
-            })->toArray();
-            $request->merge(['tickets' => $existingTickets]);
+            $request->merge(['tickets' => $event->tickets->map(fn (Ticket $ticket) => $this->ticketRow($ticket))->all()]);
         }
 
         // Preserve existing add-ons if not being changed
         if (! $request->has('addons') && $event->tickets_enabled) {
-            $existingAddons = $event->addons->map(function ($addon) {
-                return [
-                    'id' => $addon->id,
-                    'type' => $addon->type,
-                    'quantity' => $addon->quantity,
-                    'price' => $addon->price,
-                    'description' => $addon->description,
-                    'url' => $addon->url,
-                ];
-            })->toArray();
-            $request->merge(['addons' => $existingAddons]);
+            $request->merge(['addons' => $event->addons->map(fn (Ticket $addon) => $this->addonRow($addon))->all()]);
         }
 
         // Preserve existing event parts if not being changed
         if (! $request->has('event_parts')) {
-            $existingParts = $event->parts->map(function ($part) {
-                return [
-                    'id' => $part->id,
-                    'name' => $part->name,
-                    'description' => $part->description,
-                    'start_time' => $part->start_time,
-                    'end_time' => $part->end_time,
-                ];
-            })->toArray();
-            $request->merge(['event_parts' => $existingParts]);
+            $request->merge(['event_parts' => $event->parts->map(fn (EventPart $part) => $this->partRow($part))->all()]);
+        }
+
+        // Promo codes have no field in the API at all, and saveEvent() deletes every code the
+        // request does not list: each update, a rename included, deleted them all.
+        $request->merge(['promo_codes' => PromoCode::where('event_id', $event->id)->get()->map(fn (PromoCode $promo) => [
+            'id' => $promo->id,
+            'code' => $promo->code,
+            'type' => $promo->type,
+            'value' => $promo->value,
+            'max_uses' => $promo->max_uses,
+            'expires_at' => $promo->expires_at?->format('Y-m-d H:i:s'),
+            'is_active' => $promo->is_active,
+            'ticket_ids' => $promo->ticket_ids,
+        ])->all()]);
+
+        // A pass counted per date only exists on a recurring event. saveEvent() turns one on any
+        // other event into a pass with a number of visits and NO number, which its own
+        // validatePassConfiguration() then refuses on every later save: making a series single
+        // (or adding such a pass to a single event) locked the event out of this endpoint, for
+        // a field the next caller never sent. Refused here, where the caller can still act on it.
+        if ($request->input('schedule_type') !== 'recurring') {
+            foreach ((array) $request->input('tickets', []) as $index => $row) {
+                if (is_array($row) && ! empty($row['is_pass']) && ($row['pass_usage_type'] ?? 'per_occurrence') === 'per_occurrence') {
+                    return response()->json([
+                        'error' => 'Validation failed',
+                        'errors' => ['tickets.'.$index.'.pass_usage_type' => [
+                            'A pass counted per date (per_occurrence) needs a recurring event. Give the pass another pass_usage_type first, or keep the event recurring.',
+                        ]],
+                    ], 422);
+                }
+            }
+        }
+
+        // saveEvent() keeps only the covered events that belong to the schedule the save runs
+        // through, which is right for what a person picks on the form and wrong for a list this
+        // request never sent: an update through another of the event's schedules emptied the
+        // pass, and the empty list then failed validation on the update after that. Put back
+        // below, for every pass whose covered events the caller did not send.
+        $passEventsKept = [];
+        foreach ($event->tickets as $ticket) {
+            if ($ticket->is_pass && $ticket->pass_scope === 'specific_events' && ! in_array($ticket->id, $passEventsSent, true)) {
+                $passEventsKept[$ticket->id] = array_values(array_map('intval', $ticket->pass_event_ids ?? []));
+            }
         }
 
         // Convert days_of_week string to individual checkbox params for saveEvent()
@@ -612,7 +735,18 @@ class ApiEventController extends Controller
             return $errorResponse;
         }
 
+        $this->keepAttachments($request, $event, $currentRole, $sentVenue, $sentMembers);
+
         $event = $this->eventRepo->saveEvent($currentRole, $request, $event, true, $scheduleTz);
+
+        foreach ($passEventsKept as $ticketId => $ids) {
+            $ticket = Ticket::where('event_id', $event->id)->where('is_deleted', false)->find($ticketId);
+
+            if ($ticket && $ticket->is_pass && $ticket->pass_scope === 'specific_events'
+                && array_values(array_map('intval', $ticket->pass_event_ids ?? [])) !== $ids) {
+                Ticket::whereKey($ticketId)->update(['pass_event_ids' => json_encode($ids)]);
+            }
+        }
 
         $event->load(['roles', 'tickets', 'addons', 'parts']);
 
@@ -665,6 +799,18 @@ class ApiEventController extends Controller
             AuditService::log(AuditService::EVENT_CANCEL, auth()->id(), 'Event', $event->id, null, null, $event->name);
 
             return response()->json(['message' => 'Appointment cancelled']);
+        }
+
+        // sales.event_id cascades on delete, so this would destroy the buyers' sale rows outright:
+        // no refund trail, no inventory released, nobody told. The admin portal has refused it
+        // since EventController::delete() gained the same check; this endpoint went straight to
+        // $event->delete(). Refunded and cancelled sales count too: they ARE the trail. One the
+        // organizer removed from the Sales list does not (Event::sales() leaves those out), as
+        // on the form.
+        if ($event->sales()->exists()) {
+            return response()->json([
+                'error' => 'This event has sales and cannot be deleted. Cancel it in the admin portal instead, so buyers keep their records and can be notified.',
+            ], 422);
         }
 
         AuditService::log(AuditService::EVENT_DELETE, auth()->id(), 'Event', $event->id, null, null, $event->name);
@@ -877,7 +1023,9 @@ class ApiEventController extends Controller
         }
 
         // Resolve venue by name/address for non-venue schedules
-        if (! $role->isVenue() && $request->has('venue_address1') && $request->has('venue_name')) {
+        // filled(), not has(): a read-and-write-back sends both as null for an event with no venue,
+        // and looking those up answered 422 "Venue not found: ".
+        if (! $role->isVenue() && $request->filled('venue_address1') && $request->filled('venue_name')) {
             $roleIds = RoleUser::where('user_id', auth()->user()->id)
                 ->whereIn('level', ['owner', 'follower'])
                 ->orderBy('id')->pluck('role_id')->toArray();
@@ -930,6 +1078,157 @@ class ApiEventController extends Controller
 
             $request->merge(['members' => $processedMembers]);
         }
+    }
+
+    /**
+     * A stored ticket type as the row saveEvent() needs to leave it exactly as it is.
+     *
+     * Every field saveEvent() writes has to be here. It reads an absent one as empty: Max Per
+     * Order became unlimited and a pass became an ordinary ticket on any update that did not
+     * mention tickets, because this row used to stop at the fields the API documents.
+     */
+    private function ticketRow(Ticket $ticket): array
+    {
+        return [
+            'id' => $ticket->id,
+            'type' => $ticket->type,
+            'quantity' => $ticket->quantity,
+            // Omitted, EventRepo writes null - so a PATCH that only renames the event
+            // would silently turn every allocated ticket into general admission while its
+            // sold seats stayed bound to it.
+            'seating_band' => $ticket->seating_band,
+            'max_per_order' => $ticket->max_per_order,
+            'price' => $ticket->price,
+            'description' => $ticket->description,
+            // The JSON string the form posts: saveEvent() json_decode()s it, and an array there
+            // is a TypeError after the event row has already been written.
+            'custom_fields' => $ticket->custom_fields ? json_encode($ticket->custom_fields) : null,
+            'volume_discount' => $ticket->volume_discount,
+            'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->format('Y-m-d H:i:s') : null,
+            'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->format('Y-m-d H:i:s') : null,
+            'is_pass' => (bool) $ticket->is_pass,
+            'pass_usage_type' => $ticket->pass_usage_type,
+            'pass_max_uses' => $ticket->pass_max_uses,
+            'pass_valid_days' => $ticket->pass_valid_days,
+            'pass_scope' => $ticket->pass_scope,
+            // Encoded, both of them: saveEvent() decodes what the form sends.
+            'pass_scope_group_id' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : null,
+            'pass_event_ids' => array_map(fn ($id) => UrlUtils::encodeId($id), $ticket->pass_event_ids ?? []),
+            'pass_allow_booking' => (bool) $ticket->pass_allow_booking,
+            'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
+            'pass_cancel_cutoff_hours' => $ticket->pass_cancel_cutoff_hours,
+            'pass_late_cancel_policy' => $ticket->pass_late_cancel_policy,
+            'pass_admits_per_event' => $ticket->pass_admits_per_event,
+        ];
+    }
+
+    /** The same for an add-on. Its picture is not in the row, so saveEvent() leaves it alone. */
+    private function addonRow(Ticket $addon): array
+    {
+        return [
+            'id' => $addon->id,
+            'type' => $addon->type,
+            'quantity' => $addon->quantity,
+            'max_per_order' => $addon->max_per_order,
+            'price' => $addon->price,
+            'description' => $addon->description,
+            'url' => $addon->url,
+        ];
+    }
+
+    private function partRow(EventPart $part): array
+    {
+        return [
+            'id' => $part->id,
+            'name' => $part->name,
+            'description' => $part->description,
+            'start_time' => $part->start_time,
+            'end_time' => $part->end_time,
+        ];
+    }
+
+    /**
+     * Keep the event on the venue, the performers and the schedules this request did not mention,
+     * each in the state it was in.
+     *
+     * The event form posts all three on every save: the venue field, the participants, and the
+     * "Also list on" boxes. saveEvent() then detaches whatever the saving user can see and the
+     * request does not list. An API update that carried none of them took the event off its
+     * venue, its other performers and the owner's own curator schedules, by renaming it.
+     *
+     * So this posts what is attached. Each venue and performer goes in curators[] as well as in
+     * its own field, because without the form's venue_submitted / members_submitted markers
+     * saveEvent() only keeps an attached schedule that curators[] names: naming the venue the
+     * event already had used to detach it.
+     *
+     * Kept is not accepted. Every schedule saveEvent() is handed goes through its accept loop,
+     * which answers for any schedule the caller manages, any nobody has claimed and any that
+     * takes requests without approval, so carrying a venue that had turned the event down
+     * accepted it. acceptance_kept_for names the schedules carried here, and saveEvent() leaves
+     * their answer alone. The schedule the update runs through is not one of them: saving an
+     * event from its own schedule has always accepted it there.
+     *
+     * A venue the caller NAMES is different. venue_submitted is the form's way of saying "the
+     * venue field was on the page", and it is what takes the event off the venue it was at when
+     * that one is not a schedule the caller can see (a venue typed into a form, which nobody
+     * owns, is the usual kind): without it the event ended up at both.
+     */
+    private function keepAttachments(Request $request, Event $event, Role $currentRole, bool $sentVenue, bool $sentMembers): void
+    {
+        $listed = array_values((array) $request->input('curators', []));
+        $kept = [];
+
+        if (! $currentRole->isVenue()) {
+            if ($sentVenue) {
+                $request->merge(['venue_submitted' => 1]);
+            } elseif ($venue = $event->roles->first(fn (Role $role) => $role->isVenue() && ! $role->is_deleted)) {
+                $request->merge(['venue_id' => UrlUtils::encodeId($venue->id)]);
+                $kept[] = $venue->id;
+            }
+        }
+
+        if ($request->input('venue_id')) {
+            $listed[] = $request->input('venue_id');
+        }
+
+        $members = (array) $request->input('members', []);
+
+        if (! $sentMembers) {
+            foreach ($event->members() as $member) {
+                $memberId = UrlUtils::encodeId($member->id);
+
+                if ($member->is_deleted || $member->id === $currentRole->id || array_key_exists($memberId, $members)) {
+                    continue;
+                }
+
+                $members[$memberId] = ['name' => $member->name];
+                $kept[] = $member->id;
+            }
+
+            $request->merge(['members' => $members]);
+        }
+
+        foreach (array_keys($members) as $memberId) {
+            if ($memberId && ! str_starts_with((string) $memberId, 'new_')) {
+                $listed[] = (string) $memberId;
+            }
+        }
+
+        $visible = auth()->user()->availableEventSchedules()->pluck('id')->all();
+
+        foreach ($event->roles as $role) {
+            if (! $role->isCurator() || $role->id === $currentRole->id || ! in_array($role->id, $visible)) {
+                continue;
+            }
+
+            $listed[] = UrlUtils::encodeId($role->id);
+            $kept[] = $role->id;
+        }
+
+        $request->merge([
+            'curators' => array_values(array_unique($listed)),
+            'acceptance_kept_for' => array_values(array_unique($kept)),
+        ]);
     }
 
     /**

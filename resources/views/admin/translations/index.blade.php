@@ -1,204 +1,274 @@
 <x-app-admin-layout>
-    <style {!! nonce_attr() !!}>[v-cloak] { display: none; }</style>
+    <x-slot name="head">
+        <style {!! nonce_attr() !!}>
+            /* The editor's list: a key, the text it ships with, and the box for your own. On a
+               phone each of the three takes a line, where the table ran off the edge. */
+            .tr-table td {
+              vertical-align: top;
+            }
+            .tr-table .event-status {
+              margin-inline-end: 0.625rem;
+            }
+            .tr-table p {
+              margin: 0;
+              white-space: pre-wrap;
+              overflow-wrap: anywhere;
+              color: rgb(var(--ap-ink));
+            }
+            .tr-table p + p {
+              margin-top: 0.25rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .tr-table .c-key {
+              width: 24%;
+            }
+            .tr-table .c-text {
+              width: 33%;
+            }
+            .tr-revert {
+              border: 0;
+              border-radius: 0.5rem;
+              padding: 0.375rem;
+              background: none;
+              color: rgb(var(--ap-ink-4));
+              cursor: pointer;
+              transition: color 0.2s, background-color 0.2s;
+            }
+            .tr-revert:hover {
+              background: var(--ap-tint-2);
+              color: rgb(var(--ap-ink));
+            }
+            .tr-revert svg {
+              width: 1.25rem;
+              height: 1.25rem;
+            }
+            .tr-foot {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.5rem 1rem;
+              border-top: 1px solid rgb(var(--ap-border));
+              padding: 0.75rem 1.25rem;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .tr-state {
+              padding: 3rem 1.5rem;
+              text-align: center;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            /* The bar that holds Save: fixed to the foot of the window, clear of the sidebar. */
+            .tr-dock {
+              position: fixed;
+              inset-inline: 0;
+              bottom: 0;
+              z-index: 40;
+              border-top: 1px solid rgb(var(--ap-border));
+              padding: 0.75rem 1rem;
+              background: rgb(var(--ap-surface));
+              box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+            }
+            @media (min-width: 1024px) {
+              /* What the bar holds keeps to the page's frame (layouts/app-admin: 80rem in the
+                 middle of the room beside the 18rem sidebar); the bar itself runs the room. A percentage here is of the window without its
+                 scrollbar, which is what the frame is laid out in; 100vw is not. */
+              .tr-dock {
+                inset-inline-start: 18rem;
+                padding-inline: max(2rem, calc((100% - 18rem - 80rem) / 2));
+              }
+            }
+            .tr-dock-row {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.5rem 1rem;
+              font-size: 0.875rem;
+              color: rgb(var(--ap-ink-2));
+            }
+            @media (max-width: 639.98px) {
+              .tr-table td {
+                flex: 1 1 100%;
+              }
+              .tr-table td.c-actions {
+                flex: none;
+              }
+            }
+        </style>
+    </x-slot>
 
-    <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'translations'])
+    @include('admin.partials._navigation', ['active' => 'translations'])
 
-        {{--
-            CSP/Vue note: this page edits the very messages.* strings it renders,
-            and Vue compiles every text node inside the mount as a template. All
-            text inside #translations-app therefore comes from the MSG object
-            (passed via @json) and Vue's own interpolation - never from @lang/__()
-            text nodes. Blade output is only safe in HTML attributes here.
-        --}}
-        <div id="translations-app" class="space-y-4" v-cloak>
+    {{--
+        CSP/Vue note: this page edits the very messages.* strings it renders,
+        and Vue compiles every text node inside the mount as a template. All
+        text inside #translations-app therefore comes from the MSG object
+        (passed via @json) and Vue's own interpolation - never from @lang/__()
+        text nodes. Blade output is only safe in HTML attributes here. That is
+        also why the cards below are written out rather than given to the
+        page-card component, whose title would be such a text node; and why a
+        Vue binding on a component is spelled v-bind:, since Blade reads a
+        leading colon as its own.
+    --}}
+    <div id="translations-app" v-cloak>
 
-            {{-- Toolbar --}}
-            <div class="ap-card rounded-xl p-4 sm:p-6">
-                <div class="mb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@{{ msg.title }}</h2>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@{{ msg.intro }}</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 shrink-0">
-                        @if (config('app.is_nexus'))
-                            <a href="{{ route('admin.translations.suggestions') }}"
-                                class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                                @{{ msg.reviewSuggestions }}
-                                <span v-if="pendingSuggestions > 0"
-                                    class="ms-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">@{{ pendingSuggestions }}</span>
-                            </a>
-                        @else
-                            <button v-if="unsharedCount > 0" type="button" @click="openShareModal"
-                                class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                                <svg class="w-5 h-5 me-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                                </svg>
-                                @{{ msg.shareCount.replace(':count', unsharedCount) }}
-                            </button>
-                        @endif
-                        <button type="button" @click="copyAsPhp" :disabled="!hasOverrides"
-                            :title="hasOverrides ? msg.copyAsPhp : msg.noCustomizationsToCopy"
-                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg v-if="!copiedPhp" class="w-5 h-5 me-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-                            </svg>
-                            <svg v-else class="w-5 h-5 me-1.5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                            @{{ copiedPhp ? msg.copied : msg.copyAsPhp }}
-                        </button>
-                    </div>
-                </div>
-
-                {{-- Demo mode notice --}}
-                <div v-if="isDemo" class="mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        <div class="page-head">
+            <p class="page-lead">@{{ msg.intro }}</p>
+            <div class="page-actions">
+                @if (config('app.is_nexus'))
+                    <a href="{{ route('admin.translations.suggestions') }}" class="page-tool">
+                        @{{ msg.reviewSuggestions }}
+                        <span v-if="pendingSuggestions > 0" class="ap-tab-count is-waiting">@{{ pendingSuggestions }}</span>
+                    </a>
+                @else
+                    <button v-if="unsharedCount > 0" type="button" @click="openShareModal" class="page-tool">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                         </svg>
-                        <span>@{{ msg.demoDisabled }}</span>
-                    </p>
-                </div>
+                        @{{ msg.shareCount.replace(':count', unsharedCount) }}
+                    </button>
+                @endif
+                <button type="button" @click="copyAsPhp" :disabled="!hasOverrides"
+                    :title="hasOverrides ? msg.copyAsPhp : msg.noCustomizationsToCopy" class="page-tool">
+                    <svg v-if="!copiedPhp" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                    </svg>
+                    <svg v-else class="text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    @{{ copiedPhp ? msg.copied : msg.copyAsPhp }}
+                </button>
+            </div>
+        </div>
 
-                {{-- Selectors --}}
-                <div class="flex flex-col lg:flex-row gap-4">
-                    <div class="w-full lg:w-56">
-                        <label for="tr-locale" class="sr-only">@{{ msg.language }}</label>
-                        <select id="tr-locale" v-model="locale" @change="onScopeChange"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <option v-for="l in locales" :key="l.code" :value="l.code">@{{ l.label }}</option>
-                        </select>
-                    </div>
-                    <div class="w-full lg:w-48">
-                        <label for="tr-file" class="sr-only">@{{ msg.file }}</label>
-                        <select id="tr-file" v-model="group" @change="onScopeChange"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <option v-for="g in groups" :key="g" :value="g">@{{ g }}</option>
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="tr-search" class="sr-only">@{{ msg.search }}</label>
-                        <input id="tr-search" v-model.trim="searchQuery" type="search" autocomplete="off"
-                            placeholder="{{ __('messages.search_keys_and_text') }}"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                    </div>
-                    <div class="w-full lg:w-64">
-                        <label for="tr-status" class="sr-only">@{{ msg.status }}</label>
-                        <select id="tr-status" v-model="statusFilter"
-                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                            <option value="all">@{{ msg.allKeys }} (@{{ rows.length }})</option>
-                            <option value="customized">@{{ msg.customized }} (@{{ customizedCount }})</option>
-                            <option value="missing">@{{ msg.missingTranslations }} (@{{ missingCount }})</option>
-                        </select>
-                    </div>
-                </div>
+        <div class="page-shell page-stack">
+            {{-- Demo mode notice --}}
+            <x-page-notice tone="warn" v-if="isDemo">@{{ msg.demoDisabled }}</x-page-notice>
+
+            {{-- What narrows the list. Four boxes with no visible names stood here. --}}
+            <div class="page-filters" style="margin-bottom: 0">
+                <label class="page-filter">
+                    <span>@{{ msg.language }}</span>
+                    <select id="tr-locale" v-model="locale" @change="onScopeChange"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                        <option v-for="l in locales" :key="l.code" :value="l.code">@{{ l.label }}</option>
+                    </select>
+                </label>
+                <label class="page-filter">
+                    <span>@{{ msg.file }}</span>
+                    <select id="tr-file" v-model="group" @change="onScopeChange"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                        <option v-for="g in groups" :key="g" :value="g">@{{ g }}</option>
+                    </select>
+                </label>
+                <label class="page-filter">
+                    <span>@{{ msg.status }}</span>
+                    <select id="tr-status" v-model="statusFilter"
+                        class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                        <option value="all">@{{ msg.allKeys }} (@{{ rows.length }})</option>
+                        <option value="customized">@{{ msg.customized }} (@{{ customizedCount }})</option>
+                        <option value="missing">@{{ msg.missingTranslations }} (@{{ missingCount }})</option>
+                    </select>
+                </label>
+                <label class="page-filter is-grow">
+                    <span>@{{ msg.search }}</span>
+                    <input id="tr-search" v-model.trim="searchQuery" type="search" autocomplete="off"
+                        placeholder="{{ __('messages.search_keys_and_text') }}"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm text-sm">
+                </label>
             </div>
 
             {{-- Table --}}
-            <div class="ap-card rounded-xl shadow overflow-hidden">
+            <div class="ap-card rounded-xl overflow-hidden">
                 {{-- Loading --}}
-                <div v-if="loading" class="p-12 text-center" role="status">
+                <div v-if="loading" class="tr-state" role="status">
                     <svg class="animate-spin h-8 w-8 mx-auto text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">@{{ msg.loading }}</p>
+                    <p class="mt-3">@{{ msg.loading }}</p>
                 </div>
 
                 {{-- Load error --}}
-                <div v-else-if="loadError" class="p-6">
-                    <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center justify-between gap-4">
-                        <span class="text-sm text-red-700 dark:text-red-300">@{{ msg.loadFailed }}</span>
-                        <button type="button" @click="loadData"
-                            class="px-3 py-1.5 text-sm font-medium rounded-lg border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all duration-200">
-                            @{{ msg.tryAgain }}
-                        </button>
-                    </div>
+                <div v-else-if="loadError" class="page-card">
+                    <x-page-notice tone="error">
+                        @{{ msg.loadFailed }}
+                        <x-slot name="action"><button type="button" @click="loadData" class="page-tool">@{{ msg.tryAgain }}</button></x-slot>
+                    </x-page-notice>
                 </div>
 
                 {{-- Empty --}}
-                <div v-else-if="filteredRows.length === 0" class="p-12 text-center">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <div v-else-if="filteredRows.length === 0" class="page-empty">
+                    <svg class="page-empty-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
-                    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">@{{ msg.noMatchingKeys }}</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@{{ msg.noMatchingKeysHint }}</p>
-                    <button v-if="searchQuery || statusFilter !== 'all'" type="button" @click="clearFilters"
-                        class="mt-4 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                        @{{ msg.clear }}
-                    </button>
+                    <h3>@{{ msg.noMatchingKeys }}</h3>
+                    <p>@{{ msg.noMatchingKeysHint }}</p>
+                    <div v-if="searchQuery || statusFilter !== 'all'" class="page-actions">
+                        <button type="button" @click="clearFilters" class="page-tool">@{{ msg.clear }}</button>
+                    </div>
                 </div>
 
                 {{-- Rows --}}
                 <template v-else>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-1/4">@{{ msg.key }}</th>
-                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-[35%]">@{{ msg.originalText }}</th>
-                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">@{{ msg.yourTranslation }}</th>
-                                    <th class="px-6 py-3 w-12"><span class="sr-only">@{{ msg.actions }}</span></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr v-for="row in pagedRows" :key="row.key" class="align-top">
-                                    <td class="px-6 py-4 text-sm">
-                                        <span class="font-mono text-xs text-gray-900 dark:text-gray-100 break-all" dir="ltr">@{{ row.key }}</span>
-                                        <div class="mt-1.5 flex flex-wrap gap-1">
-                                            <span v-if="isUnsaved(row)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">@{{ msg.unsaved }}</span>
-                                            <span v-else-if="row.override !== null" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">@{{ msg.customized }}</span>
-                                            <span v-if="isMissing(row)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">@{{ msg.missing }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap break-words" dir="auto">@{{ row.en }}</p>
-                                        <p v-if="locale !== 'en' && row.shipped" class="mt-1 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-wrap break-words" dir="auto">@{{ row.shipped }}</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <textarea :rows="rowsFor(row)" dir="auto"
-                                            :value="draftValue(row)" @input="setDraft(row.key, $event.target.value)"
-                                            :placeholder="row.shipped || row.en"
-                                            :aria-label="msg.yourTranslation + ': ' + row.key"
-                                            :aria-describedby="warnings[row.key] ? 'warn-' + row.key : null"
-                                            :disabled="isDemo"
-                                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm resize-y disabled:opacity-60"></textarea>
-                                        <div v-if="warnings[row.key]" :id="'warn-' + row.key"
-                                            class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-2">
-                                            <p class="text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                                </svg>
-                                                <span>@{{ warningText(row.key) }}</span>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-end">
-                                        <button v-if="row.override !== null && !isDemo" type="button" @click="revertRow(row)"
-                                            :aria-label="msg.revertToDefault + ': ' + row.key" :title="msg.revertToDefault"
-                                            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="page-table tr-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="c-key">@{{ msg.key }}</th>
+                                <th scope="col" class="c-text">@{{ msg.originalText }}</th>
+                                <th scope="col">@{{ msg.yourTranslation }}</th>
+                                <th scope="col"><span class="sr-only">@{{ msg.actions }}</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in pagedRows" :key="row.key">
+                                <td class="c-main">
+                                    <span class="c-mono c-wrap c-strong" dir="ltr">@{{ row.key }}</span>
+                                    <div v-if="isUnsaved(row) || row.override !== null || isMissing(row)" class="mt-1">
+                                        <span v-if="isUnsaved(row)" class="event-status is-info">@{{ msg.unsaved }}</span>
+                                        <span v-else-if="row.override !== null" class="event-status is-on">@{{ msg.customized }}</span>
+                                        <span v-if="isMissing(row)" class="event-status is-warn">@{{ msg.missing }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p dir="auto">@{{ row.en }}</p>
+                                    <p v-if="locale !== 'en' && row.shipped" dir="auto">@{{ row.shipped }}</p>
+                                </td>
+                                <td>
+                                    <textarea :rows="rowsFor(row)" dir="auto"
+                                        :value="draftValue(row)" @input="setDraft(row.key, $event.target.value)"
+                                        :placeholder="row.shipped || row.en"
+                                        :aria-label="msg.yourTranslation + ': ' + row.key"
+                                        :aria-describedby="warnings[row.key] ? 'warn-' + row.key : null"
+                                        :disabled="isDemo"
+                                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm resize-y disabled:opacity-60"></textarea>
+                                    <div v-if="warnings[row.key]" :id="'warn-' + row.key"
+                                        class="mt-2 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-2 text-xs text-amber-800 dark:text-amber-200">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                        </svg>
+                                        <span>@{{ warningText(row.key) }}</span>
+                                    </div>
+                                </td>
+                                <td class="c-actions">
+                                    <button v-if="row.override !== null && !isDemo" type="button" @click="revertRow(row)"
+                                        :aria-label="msg.revertToDefault + ': ' + row.key" :title="msg.revertToDefault" class="tr-revert">
+                                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     {{-- Pagination --}}
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">@{{ showingText }}</p>
-                        <div class="flex gap-2">
-                            <button type="button" @click="prevPage" :disabled="page === 1"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                @{{ msg.previous }}
-                            </button>
-                            <button type="button" @click="nextPage" :disabled="page >= totalPages"
-                                class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                @{{ msg.next }}
-                            </button>
+                    <div class="tr-foot">
+                        <span aria-live="polite">@{{ showingText }}</span>
+                        <div class="page-actions">
+                            <button type="button" @click="prevPage" :disabled="page === 1" class="page-tool">@{{ msg.previous }}</button>
+                            <button type="button" @click="nextPage" :disabled="page >= totalPages" class="page-tool">@{{ msg.next }}</button>
                         </div>
                     </div>
                 </template>
@@ -206,143 +276,127 @@
 
             @unless (config('app.is_nexus'))
                 {{-- Community sharing --}}
-                <div class="ap-card rounded-xl p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">@{{ msg.communitySharing }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@{{ msg.communitySharingHelp }}</p>
+                <section class="ap-card rounded-xl page-card">
+                    <div class="page-card-head">
+                        <div class="min-w-0">
+                            <h2 class="page-card-title">@{{ msg.communitySharing }}</h2>
+                            <p class="page-card-lead">@{{ msg.communitySharingHelp }}</p>
+                        </div>
+                    </div>
                     <div class="flex items-center gap-3">
                         <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                            <input type="checkbox" :checked="autoShare" @change="toggleAutoShare" :disabled="isDemo" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
+                            <input type="checkbox" id="tr-auto-share" :checked="autoShare" @change="toggleAutoShare" :disabled="isDemo" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)] transition-colors"></div>
                             <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                         </label>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@{{ msg.autoShare }}</span>
+                        <label for="tr-auto-share" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">@{{ msg.autoShare }}</label>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">@{{ msg.autoShareHelp }}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14">@{{ msg.consentDisclosure }}</p>
-                </div>
+                </section>
             @endunless
 
             {{-- Spacer so the fixed dock never covers the last card (the mount
                  root's own attributes are not compiled by Vue, so this cannot
                  be a :class binding on #translations-app) --}}
             <div v-if="dockVisible" class="h-16" aria-hidden="true"></div>
+        </div>
 
-            {{-- Bottom action dock --}}
-            <div v-if="dockVisible"
-                class="fixed bottom-0 start-0 end-0 lg:start-72 z-40 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg px-4 sm:px-6 lg:px-8 py-3"
-                role="region" aria-live="polite">
-                {{-- Unsaved changes --}}
-                <div v-if="dockState === 'save'" class="flex items-center justify-between gap-4">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">@{{ msg.nUnsavedChanges.replace(':count', unsavedCount) }}</span>
-                    <div class="flex items-center gap-3">
-                        <span v-if="saveError" class="text-sm text-red-600 dark:text-red-400">@{{ msg.saveFailed }}</span>
-                        <button type="button" @click="save" :disabled="saving || isDemo"
-                            class="inline-flex items-center px-4 py-3 text-base font-medium rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg v-if="saving" class="animate-spin w-4 h-4 me-2" fill="none" viewBox="0 0 24 24">
+        {{-- Bottom action dock --}}
+        <div v-if="dockVisible" class="tr-dock" role="region" aria-live="polite">
+            {{-- Unsaved changes --}}
+            <div v-if="dockState === 'save'" class="tr-dock-row">
+                <span class="font-medium">@{{ msg.nUnsavedChanges.replace(':count', unsavedCount) }}</span>
+                <div class="page-actions">
+                    <span v-if="saveError" class="event-status is-bad">@{{ msg.saveFailed }}</span>
+                    <x-brand-button @click="save" v-bind:disabled="saving || isDemo">
+                        <svg v-if="saving" class="animate-spin w-4 h-4 me-2" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        @{{ msg.save }}
+                    </x-brand-button>
+                </div>
+            </div>
+            {{-- After-save share prompt --}}
+            <div v-else-if="dockState === 'prompt'" class="tr-dock-row">
+                <div class="min-w-0">
+                    <p class="font-medium text-gray-900 dark:text-gray-100">
+                        @{{ msg.savedNChanges.replace(':count', lastSavedCount) }} @{{ msg.shareQuestion }}
+                    </p>
+                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">@{{ msg.consentDisclosure }}</p>
+                </div>
+                <div class="page-actions">
+                    <button type="button" @click="notNow" class="event-link">@{{ msg.notNow }}</button>
+                    <button type="button" @click="alwaysShare" class="page-tool">@{{ msg.alwaysShare }}</button>
+                    <x-brand-button size="sm" @click="shareNow">@{{ msg.shareNow }}</x-brand-button>
+                </div>
+            </div>
+            {{-- Transient notice --}}
+            <div v-else-if="dockState === 'notice'" class="tr-dock-row">
+                <span class="event-status" :class="notice.tone === 'error' ? 'is-bad' : 'is-on'">@{{ notice.text }}</span>
+                <button v-if="notice.retry" type="button" @click="retryNotice" class="page-tool">@{{ msg.tryAgain }}</button>
+            </div>
+        </div>
+
+        @unless (config('app.is_nexus'))
+            {{-- Share modal --}}
+            <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                @click.self="closeShareModal" role="dialog" aria-modal="true" :aria-label="msg.shareModalTitle">
+                <div class="ap-card rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col">
+                    <div class="flex items-center justify-between px-5 pt-5 pb-3">
+                        <h3 class="page-card-title">@{{ msg.shareModalTitle }}</h3>
+                        <button ref="shareModalClose" type="button" @click="closeShareModal" :aria-label="msg.close" class="tr-revert">
+                            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="px-5 overflow-y-auto flex-1">
+                        <div v-if="shareLoading" class="py-8 text-center" role="status">
+                            <svg class="animate-spin h-6 w-6 mx-auto text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            @{{ msg.save }}
-                        </button>
-                    </div>
-                </div>
-                {{-- After-save share prompt --}}
-                <div v-else-if="dockState === 'prompt'" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div class="min-w-0">
-                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            @{{ msg.savedNChanges.replace(':count', lastSavedCount) }} @{{ msg.shareQuestion }}
-                        </p>
-                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">@{{ msg.consentDisclosure }}</p>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <button type="button" @click="notNow" class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-all duration-200">@{{ msg.notNow }}</button>
-                        <button type="button" @click="alwaysShare"
-                            class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">@{{ msg.alwaysShare }}</button>
-                        <button type="button" @click="shareNow"
-                            class="px-3 py-2 text-sm font-medium rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200">@{{ msg.shareNow }}</button>
-                    </div>
-                </div>
-                {{-- Transient notice --}}
-                <div v-else-if="dockState === 'notice'" class="flex items-center justify-between gap-4">
-                    <p class="text-sm" :class="notice.tone === 'error' ? 'text-red-600 dark:text-red-400' : 'text-green-700 dark:text-green-400'">@{{ notice.text }}</p>
-                    <button v-if="notice.retry" type="button" @click="retryNotice"
-                        class="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                        @{{ msg.tryAgain }}
-                    </button>
-                </div>
-            </div>
-
-            @unless (config('app.is_nexus'))
-                {{-- Share modal --}}
-                <div v-if="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                    @click.self="closeShareModal" role="dialog" aria-modal="true" :aria-label="msg.shareModalTitle">
-                    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col">
-                        <div class="flex items-center justify-between px-5 pt-5 pb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@{{ msg.shareModalTitle }}</h3>
-                            <button ref="shareModalClose" type="button" @click="closeShareModal" :aria-label="msg.close"
-                                class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
                         </div>
-                        <div class="px-5 overflow-y-auto flex-1">
-                            <div v-if="shareLoading" class="py-8 text-center" role="status">
-                                <svg class="animate-spin h-6 w-6 mx-auto text-[var(--brand-blue)]" fill="none" viewBox="0 0 24 24">
+                        <div v-else-if="shareRows.length === 0" class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">@{{ msg.noUnsharedChanges }}</div>
+                        <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <li v-for="item in shareRows" :key="item.hash" class="py-3 flex gap-3">
+                                <input type="checkbox" v-model="item.checked" :id="'share-' + item.hash"
+                                    class="mt-1 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                <label :for="'share-' + item.hash" class="min-w-0 flex-1 cursor-pointer">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="font-mono text-xs text-gray-900 dark:text-gray-100" dir="ltr">@{{ item.key }}</span>
+                                        <span class="event-chip" style="margin-inline-start: 0">@{{ item.locale }} &middot; @{{ item.group }}</span>
+                                    </div>
+                                    <div class="mt-1 grid sm:grid-cols-[1fr,auto,1fr] items-center gap-2 text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto">@{{ item.before }}</span>
+                                        <svg class="w-4 h-4 text-gray-400 rtl:rotate-180 hidden sm:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                        </svg>
+                                        <span class="text-gray-900 dark:text-gray-100 line-clamp-2" dir="auto">@{{ item.after }}</span>
+                                    </div>
+                                </label>
+                            </li>
+                        </ul>
+                        <x-page-notice tone="warn" class="my-3" v-if="shareError">@{{ msg.shareUnreachable }}</x-page-notice>
+                    </div>
+                    <div class="px-5 py-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">@{{ msg.consentDisclosure }}</p>
+                        <div class="flex justify-end gap-2">
+                            <button type="button" @click="closeShareModal" class="page-tool">@{{ msg.cancel }}</button>
+                            <x-brand-button size="sm" @click="shareSelected" v-bind:disabled="sharing || checkedShareCount === 0">
+                                <svg v-if="sharing" class="animate-spin w-4 h-4 me-2" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
-                            </div>
-                            <div v-else-if="shareRows.length === 0" class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">@{{ msg.noUnsharedChanges }}</div>
-                            <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                                <li v-for="item in shareRows" :key="item.hash" class="py-3 flex gap-3">
-                                    <input type="checkbox" v-model="item.checked" :id="'share-' + item.hash"
-                                        class="mt-1 rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                    <label :for="'share-' + item.hash" class="min-w-0 flex-1 cursor-pointer">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="font-mono text-xs text-gray-900 dark:text-gray-100" dir="ltr">@{{ item.key }}</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">@{{ item.locale }} &middot; @{{ item.group }}</span>
-                                        </div>
-                                        <div class="mt-1 grid sm:grid-cols-[1fr,auto,1fr] items-center gap-2 text-sm">
-                                            <span class="text-gray-500 dark:text-gray-400 line-clamp-2" dir="auto">@{{ item.before }}</span>
-                                            <svg class="w-4 h-4 text-gray-400 rtl:rotate-180 hidden sm:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                            </svg>
-                                            <span class="text-gray-900 dark:text-gray-100 line-clamp-2" dir="auto">@{{ item.after }}</span>
-                                        </div>
-                                    </label>
-                                </li>
-                            </ul>
-                            <div v-if="shareError" class="my-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                    </svg>
-                                    <span>@{{ msg.shareUnreachable }}</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="px-5 py-4 border-t border-gray-200 dark:border-gray-700">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">@{{ msg.consentDisclosure }}</p>
-                            <div class="flex justify-end gap-2">
-                                <button type="button" @click="closeShareModal"
-                                    class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                                    @{{ msg.cancel }}
-                                </button>
-                                <button type="button" @click="shareSelected" :disabled="sharing || checkedShareCount === 0"
-                                    class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <svg v-if="sharing" class="animate-spin w-4 h-4 me-2" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                    </svg>
-                                    @{{ shareError ? msg.tryAgain : msg.shareSelectedCount.replace(':count', checkedShareCount) }}
-                                </button>
-                            </div>
+                                @{{ shareError ? msg.tryAgain : msg.shareSelectedCount.replace(':count', checkedShareCount) }}
+                            </x-brand-button>
                         </div>
                     </div>
                 </div>
-            @endunless
-        </div>
+            </div>
+        @endunless
     </div>
 
     @php

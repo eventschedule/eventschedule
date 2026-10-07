@@ -537,7 +537,6 @@
 
 <x-slot name="head">
   <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
-  @include('partials.form-kit-styles')
   <style {!! nonce_attr() !!}>
     form button {
       min-width: 100px;
@@ -6333,6 +6332,20 @@
     },
   });
 
+  {{-- Names somebody else can write (an event a guest sent in, one a curator listed here, one
+       read from a calendar feed; a sub-schedule's) are built here and handed to the json
+       directive as one plain variable with its options spelled out. Given an expression with a
+       comma in it, the directive reads what follows the comma as its own options and stops
+       escaping tags, and inside a script block the characters of an opening comment followed by
+       an opening script tag keep the block's own closing tag from ending it: one event with
+       such a name stopped this form for every event of the schedule
+       (EventFormTemplateInjectionTest). --}}
+  @php
+    $scriptSafe = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_PARTIAL_OUTPUT_ON_ERROR;
+    $eventNameNow = old('name', $event->name ?? '');
+    $passGroupOptions = $role->groups->map(fn ($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->name])->values()->all();
+    $passEventOptions = $role->events()->whereNotNull('events.starts_at')->orderBy('events.starts_at', 'desc')->limit(200)->get()->map(fn ($e) => ['id' => \App\Utils\UrlUtils::encodeId($e->id), 'name' => $e->name])->unique('id')->values()->all();
+  @endphp
   app = createApp({
     data() {
       return {
@@ -6478,7 +6491,7 @@
         showVenueAddressFields: false,
         isInPerson: false,
         isOnline: false,
-        eventName: @json(old('name', $event->name ?? '')),
+        eventName: @json($eventNameNow, $scriptSafe),
         // What was typed into a save the server refused, or null on an ordinary load. mounted()
         // would otherwise put the saved name (or, on a new event, the schedule's) over it.
         refusedEventName: @json(old('name')),
@@ -6635,8 +6648,8 @@
         origEventUrl: '',
         origIsOnline: false,
         origIsInPerson: false,
-        passGroups: @json($role->groups->map(fn ($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->name])->values()),
-        passEvents: @json($role->events()->whereNotNull('events.starts_at')->orderBy('events.starts_at', 'desc')->limit(200)->get()->map(fn ($e) => ['id' => \App\Utils\UrlUtils::encodeId($e->id), 'name' => $e->name])->unique('id')->values()),
+        passGroups: @json($passGroupOptions, $scriptSafe),
+        passEvents: @json($passEventOptions, $scriptSafe),
         passEventSearch: {},
         isMultiDay: @json($isMultiDay),
         recurringIncludeDates: @json($event->recurring_include_dates ?? []),

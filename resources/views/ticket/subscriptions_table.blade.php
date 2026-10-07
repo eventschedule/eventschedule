@@ -1,88 +1,109 @@
+{{-- The Subscriptions tab of ticket/sales: who holds a pass, how much of it is used, and where.
+     One .page-table whose rows open (ticket/sales owns the script), where the old tab was a
+     stack of disclosure rows that hid the pass's name and its expiry on a phone. --}}
 @php
     $subscriptions = collect($subscriptions ?? []);
     $totalVisits = $subscriptions->sum(fn ($s) => count($s['usages']));
-    $statusStyles = [
-        'active' => 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-        'expired' => 'bg-gray-100 text-gray-600 dark:bg-gray-700/40 dark:text-gray-300',
-        'used_up' => 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    ];
+    $subscriptionTones = ['active' => 'is-on', 'used_up' => 'is-warn'];
     $statusLabels = [
         'active' => __('messages.subscription_active'),
         'expired' => __('messages.subscription_expired'),
         'used_up' => __('messages.subscription_used_up'),
     ];
+    $usageMarks = [
+        'booked' => ['is-info', __('messages.booked')],
+        'forfeited' => ['is-warn', __('messages.forfeited')],
+        'attended' => ['is-on', __('messages.attended')],
+    ];
 @endphp
 
 @if ($subscriptions->isEmpty())
-    <div class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.no_subscriptions_yet') }}</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_subscriptions_yet_help') }}</p>
-    </div>
+<div class="ap-card rounded-xl">
+    <x-page-empty :title="__('messages.no_subscriptions_yet')" :text="__('messages.no_subscriptions_yet_help')"
+        icon="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+</div>
 @else
-<div class="ap-card rounded-xl overflow-hidden">
-    <div class="flex flex-wrap items-center gap-x-6 gap-y-1 p-4 border-b border-gray-200 dark:border-gray-700 text-sm">
-        <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $subscriptions->count() }}</span> {{ __('messages.subscriptions') }}</span>
-        <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $totalVisits }}</span> {{ __('messages.visits_redeemed') }}</span>
+<div class="page-stack">
+    <div class="ap-card rounded-xl page-stats is-auto">
+        <div class="page-stat">
+            <div class="page-stat-value">{{ $subscriptions->count() }}</div>
+            <div class="page-stat-label">{{ __('messages.subscriptions') }}</div>
+        </div>
+        <div class="page-stat">
+            <div class="page-stat-value">{{ $totalVisits }}</div>
+            <div class="page-stat-label">{{ __('messages.visits_redeemed') }}</div>
+        </div>
     </div>
 
-    <div class="divide-y divide-gray-200 dark:divide-gray-700">
-        @foreach ($subscriptions as $sub)
-            <details class="group">
-                <summary class="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none">
-                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ $sub['name'] }}</div>
-                        <a href="mailto:{{ $sub['email'] }}" class="text-xs text-gray-500 dark:text-gray-400 truncate hover:underline">{{ $sub['email'] }}</a>
-                    </div>
-                    <div class="hidden sm:block text-sm text-gray-600 dark:text-gray-300 w-40 truncate">{{ $sub['ticket_type'] }}</div>
-                    <div class="text-sm font-medium text-gray-700 dark:text-gray-200 w-20 text-end">{{ $sub['limit_label'] }}</div>
-                    <div class="hidden md:block text-sm text-gray-500 dark:text-gray-400 w-28 text-end">{{ $sub['expires_at'] ?? '—' }}</div>
-                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $statusStyles[$sub['status']] ?? '' }}">{{ $statusLabels[$sub['status']] ?? $sub['status'] }}</span>
-                </summary>
-
-                <div class="px-4 pb-4 ps-12">
-                    @if (count($sub['usages']) > 0)
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                                    <th class="text-start font-medium pb-1">{{ __('messages.event') }}</th>
-                                    <th class="text-start font-medium pb-1">{{ __('messages.date') }}</th>
-                                    <th class="text-start font-medium pb-1">{{ __('messages.time') }}</th>
-                                    <th class="text-start font-medium pb-1">{{ __('messages.status') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-700 dark:text-gray-300">
-                                @foreach ($sub['usages'] as $usage)
-                                    <tr class="border-t border-gray-100 dark:border-gray-700">
-                                        <td class="py-1.5 pe-4">{{ $usage['event'] }}</td>
-                                        <td class="py-1.5 pe-4 whitespace-nowrap">{{ $usage['date'] }}</td>
-                                        <td class="py-1.5 pe-4 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $usage['time'] }}</td>
-                                        <td class="py-1.5 whitespace-nowrap">
-                                            @if (($usage['kind'] ?? 'attended') === 'booked')
-                                                <span class="inline-block rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-[var(--brand-blue)]">{{ __('messages.booked') }}</span>
-                                            @elseif (($usage['kind'] ?? 'attended') === 'forfeited')
-                                                <span class="inline-block rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">{{ __('messages.forfeited') }}</span>
-                                            @else
-                                                <span class="inline-block rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">{{ __('messages.attended') }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_visits_yet') }}</p>
-                    @endif
-
-                    <div class="mt-3">
-                        <a href="{{ $sub['ticket_url'] }}" target="_blank" class="text-sm text-[var(--brand-blue)] hover:underline">{{ __('messages.view_ticket') }}</a>
-                    </div>
-                </div>
-            </details>
-        @endforeach
+    <div class="ap-card rounded-xl overflow-hidden">
+        <div class="page-scroll">
+            <table class="page-table is-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ __('messages.name') }}</th>
+                        <th scope="col">{{ __('messages.ticket_type') }}</th>
+                        <th scope="col">{{ __('messages.visits_used') }}</th>
+                        <th scope="col">{{ __('messages.expires') }}</th>
+                        <th scope="col">{{ __('messages.status') }}</th>
+                        <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($subscriptions as $sub)
+                    <tr>
+                        <td class="c-main">
+                            <div class="sales-customer">
+                                <button type="button" class="sales-open" data-toggle-row="pass-{{ $loop->index }}" aria-expanded="false">
+                                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                    <span class="sr-only">{{ __('messages.details') }}</span>
+                                </button>
+                                <div class="page-person-text">
+                                    <span class="c-strong"><bdi>{{ $sub['name'] }}</bdi></span>
+                                    <span class="c-sub"><a href="mailto:{{ $sub['email'] }}" class="event-link" dir="ltr" title="{{ $sub['email'] }}">{{ $sub['email'] }}</a></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="c-wrap"><bdi>{{ $sub['ticket_type'] }}</bdi></td>
+                        <td data-label="{{ __('messages.visits_used') }}">{{ $sub['limit_label'] }}</td>
+                        <td class="c-date" @if ($sub['expires_at']) data-label="{{ __('messages.expires') }}" @endif>{{ $sub['expires_at'] }}</td>
+                        <td><span class="event-status {{ $subscriptionTones[$sub['status']] ?? '' }}">{{ $statusLabels[$sub['status']] ?? $sub['status'] }}</span></td>
+                        <td class="c-actions">
+                            <a href="{{ $sub['ticket_url'] }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view_ticket') }}</a>
+                        </td>
+                    </tr>
+                    <tr class="detail-row-pass-{{ $loop->index }} sales-detail hidden">
+                        <td colspan="6" class="c-main">
+                            <div class="sales-detail-body">
+                                @if (count($sub['usages']) > 0)
+                                <ul class="sales-lines">
+                                    @foreach ($sub['usages'] as $usage)
+                                    @php
+                                        $usageMark = $usageMarks[$usage['kind'] ?? 'attended'] ?? $usageMarks['attended'];
+                                        // The occurrence's day as the venue counts it, stored as text.
+                                        try {
+                                            $usageDay = $usage['date'] ? \Carbon\Carbon::parse($usage['date'])->translatedFormat('M j, Y') : '';
+                                        } catch (\Exception $usageDayError) {
+                                            $usageDay = $usage['date'];
+                                        }
+                                    @endphp
+                                    <li>
+                                        <span><bdi>{{ $usage['event'] }}</bdi></span>
+                                        <span>{{ $usageDay }}</span>
+                                        <span class="c-quiet">{{ $usage['time'] }}</span>
+                                        <span class="event-status {{ $usageMark[0] }}">{{ $usageMark[1] }}</span>
+                                    </li>
+                                    @endforeach
+                                </ul>
+                                @else
+                                <p class="c-quiet">{{ __('messages.no_visits_yet') }}</p>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endif

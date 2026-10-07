@@ -22,7 +22,7 @@
      edge-cached marketing page the context is the same for every anonymous visitor; `u` is only
      filled for a signed-in render, which is never cached.
 
-     Whether a schedule's owner may see a visitor as a row of their own Realtime page is NOT
+     Whether a schedule's owner may see a visitor as a row of their own Realtime tab is NOT
      decided here. The server reads it off the cookie choice this request carries
      (RealtimeTracker::consentCoversOrganizers()), which records whether the notice that was
      answered said so. A page deciding it by comparing dates listed people who had answered an

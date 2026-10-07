@@ -12,34 +12,44 @@
             .dark .iti { --iti-dropdown-bg: rgb(var(--ap-bg)); --iti-hover-color: rgb(var(--ap-border)); --iti-border-color: rgb(var(--ap-border)); --iti-dialcode-color: rgb(var(--ap-ink-2)); --iti-arrow-color: rgb(var(--ap-ink-2)); }
             .dark .iti__dropdown-content, .dark .iti__selected-dial-code { color: rgb(var(--ap-ink-2)); }
             .dark .iti__search-input { background: rgb(var(--ap-bg)); color: rgb(var(--ap-ink-2)); border-color: rgb(var(--ap-border)); }
+            .import-shell .page-filters { margin: 0 0 1rem; }
+            .import-shell .page-filter select { min-width: 14rem; }
+            /* The two ways in (type them, or bring a file) are the kit's tabs, inside the card. */
+            .import-tabs.ap-tabs-wrap { margin: 0; padding: 0 1.25rem; }
+            .import-pane { padding: 1.25rem; }
+            .import-sheet { width: 100%; }
+            .import-sheet th { padding: 0 0.5rem 0.5rem 0; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-align: start; text-transform: uppercase; white-space: nowrap; color: rgb(var(--ap-ink-3)); }
+            .import-sheet td { padding: 0.25rem 0.5rem 0.25rem 0; vertical-align: top; }
+            [dir="rtl"] .import-sheet th { padding: 0 0 0.5rem 0.5rem; }
+            [dir="rtl"] .import-sheet td { padding: 0.25rem 0 0.25rem 0.5rem; }
+            .import-sheet input:not([type="checkbox"]), .import-sheet select, .import-sheet textarea { min-width: 7rem; }
+            .import-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; margin-top: 1rem; border-top: 1px solid rgb(var(--ap-border)); padding-top: 1rem; }
+            .import-foot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
+            .import-drop { border: 2px dashed rgb(var(--ap-border-strong)); border-radius: 0.75rem; padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background-color 0.2s; }
+            .import-drop:hover { background: var(--ap-tint-1); }
+            .import-drop.is-over { border-color: var(--brand-blue); background: var(--ap-tint-1); }
         </style>
     </x-slot>
 
-    <div class="space-y-4">
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.import_attendees') }}</h2>
-            <a href="{{ route('sales') }}"
-                class="inline-flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                {{ __('messages.back') }}
-            </a>
-        </div>
+    @php $importRole = $roles->firstWhere('id', $selectedRoleId); @endphp
 
-        @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-        @endif
+    {{-- Attendees brought in from somewhere else. It hangs from Sales, so its way back is named
+         Sales (it used to be a grey "Back" button where the page's own actions belong). The Vue
+         apps (#event-picker-app, #import-attendees-app) and their ids are as they were. --}}
+    <div class="page-shell import-shell">
+        <x-page-header :title="__('messages.import_attendees')" :lead="__('messages.import_attendees_lead')"
+                       :back="route('sales')" :back-label="__('messages.sales')" />
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-        @endif
+        <div class="page-stack">
+        <x-page-flash :keys="['status' => 'success', 'error' => 'error']" />
 
-        {{-- Schedule + Event selectors --}}
-        <div class="flex gap-2 flex-wrap items-center">
+        {{-- Which schedule, then which of its events. A schedule whose plan has no import has no
+             event to pick, so the second select is not drawn for it. --}}
+        @if ($roles->count() > 1 || ($selectedRoleId && ! $requiresPro))
+        <div class="page-filters">
             @if ($roles->count() > 1)
-            <div class="min-w-[200px]">
+            <div class="page-filter">
+                <label for="role-filter">{{ __('messages.schedule') }}</label>
                 <select id="role-filter"
                     class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
                     @foreach ($roles as $r)
@@ -51,19 +61,21 @@
             </div>
             @endif
 
-            @if ($selectedRoleId)
-            <div id="event-picker-app" class="min-w-[200px]">
+            @if ($selectedRoleId && ! $requiresPro)
+            <div class="page-filter">
+                <span id="event-picker-label">{{ __('messages.event') }}</span>
+                <div id="event-picker-app">
                 <div class="relative" id="event-selector-dropdown">
-                    <select @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
+                    <select aria-labelledby="event-picker-label" @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
                         {{-- The event's name is its owner's text, inside a Vue mount: v-pre keeps Vue from compiling it. --}}
                         <option v-pre>{{ $event ? $event->translatedName() : __('messages.select_event_to_begin') }}</option>
                     </select>
-                    <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
+                    <div v-cloak v-if="dropdownOpen" class="ap-dropdown absolute z-50 mt-1 rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] max-h-72 overflow-y-auto" style="min-width: 280px">
                         <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
                             class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-gray-700/50' : ''">
-                            <img v-if="event.image_url" :src="event.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                            <img v-if="event.image_url" :src="event.image_url" alt="" class="w-10 h-10 rounded object-cover flex-shrink-0">
                             <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -82,70 +94,78 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
             @endif
         </div>
+        @endif
 
         @if ($requiresPro)
-        <x-upgrade-prompt tier="pro" :subdomain="$roles->firstWhere('id', $selectedRoleId)?->subdomain">
-            {{ __('messages.pro_feature_required') }}
-        </x-upgrade-prompt>
+        {{-- Told which schedule it is about, so its button goes to that schedule's plan and not to
+             the public pricing page. Only the owner can buy the plan. --}}
+        <x-plan-gate tier="pro" :title="__('messages.import_attendees')" :role="$importRole" :subdomain="$importRole?->subdomain"
+            :canUpgrade="auth()->user()->id == $importRole?->user_id">
+            {{ __('messages.import_attendees_lead') }}
+        </x-plan-gate>
         @elseif (! $event)
-        <div class="ap-card rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
-            {{ __('messages.select_event_to_begin') }}
+        <div class="ap-card rounded-xl">
+            <x-page-empty :title="__('messages.select_event_to_begin')" :text="$events->isEmpty() ? __('messages.no_events') : null"
+                icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
         </div>
         @else
         <div id="import-attendees-app" v-cloak>
             {{-- Event date picker (recurring events only) --}}
-            <div v-if="isRecurring" class="flex items-center gap-3 mb-4">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.event_date') }}:</label>
-                <input ref="eventDatePicker" type="text"
-                    class="w-48 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm">
+            <div v-if="isRecurring" class="page-filters mb-4">
+                <label class="page-filter">
+                    <span>{{ __('messages.event_date') }}</span>
+                    <input ref="eventDatePicker" type="text"
+                        class="w-48 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm text-sm">
+                </label>
             </div>
 
             {{-- Tabs --}}
             <div class="ap-card rounded-xl overflow-hidden">
-                <div class="border-b border-gray-200 dark:border-gray-700">
-                    <nav class="flex -mb-px overflow-x-auto scrollbar-hide">
-                        <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
+                <div class="ap-tabs-wrap import-tabs">
+                    <div class="ap-tabs" role="tablist">
+                        <button type="button" class="ap-tab" role="tab" id="import-tab-form" aria-controls="import-pane-form" :aria-selected="tab === 'form' ? 'true' : 'false'" @click="tab = 'form'">
                             {{ __('messages.form_entry') }}
                         </button>
-                        <button @click="tab = 'csv'" :class="tab === 'csv' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
+                        <button type="button" class="ap-tab" role="tab" id="import-tab-csv" aria-controls="import-pane-csv" :aria-selected="tab === 'csv' ? 'true' : 'false'" @click="tab = 'csv'">
                             {{ __('messages.upload_csv') }}
                         </button>
-                    </nav>
+                    </div>
                 </div>
 
                 {{-- Form tab --}}
-                <div v-show="tab === 'form'" class="p-6">
-                    <div v-if="formErrors.length" class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                        <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+                <div v-show="tab === 'form'" class="import-pane" id="import-pane-form" role="tabpanel" aria-labelledby="import-tab-form">
+                    <x-page-notice tone="error" class="mb-4" v-if="formErrors.length">
+                        <ul class="list-disc list-inside">
                             <li v-for="err in formErrors" :key="err">@{{ err }}</li>
                         </ul>
-                    </div>
+                    </x-page-notice>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full">
+                        <table class="import-sheet">
                             <thead>
-                                <tr class="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                    <th v-if="hasAnyCustomFields" class="pb-2 w-8"></th>
-                                    <th class="pb-2 pr-2">{{ __('messages.name') }}</th>
-                                    <th class="pb-2 pr-2">{{ __('messages.email') }}</th>
-                                    <th v-if="showPhone" class="pb-2 pr-2">{{ __('messages.phone') }}</th>
-                                    <th v-if="tickets.length > 1" class="pb-2 pr-2">{{ __('messages.ticket_type') }}</th>
-                                    <th class="pb-2 pr-2 w-28">{{ __('messages.quantity') }}</th>
-                                    <th v-if="showAmount" class="pb-2 pr-2 w-28">{{ __('messages.amount') }}</th>
-                                    <th v-if="!showAmount" class="pb-2 pr-2 w-32">{{ __('messages.status') }}</th>
-                                    <th v-for="cf in eventCustomFields" :key="'ecf-'+cf.index" class="pb-2 pr-2">
+                                <tr>
+                                    <th v-if="hasAnyCustomFields" class="w-8"></th>
+                                    <th scope="col">{{ __('messages.name') }}</th>
+                                    <th scope="col">{{ __('messages.email') }}</th>
+                                    <th scope="col" v-if="showPhone">{{ __('messages.phone') }}</th>
+                                    <th scope="col" v-if="tickets.length > 1">{{ __('messages.ticket_type') }}</th>
+                                    <th scope="col" class="w-28">{{ __('messages.quantity') }}</th>
+                                    <th scope="col" v-if="showAmount" class="w-28">{{ __('messages.amount') }}</th>
+                                    <th scope="col" v-if="!showAmount" class="w-32">{{ __('messages.status') }}</th>
+                                    <th scope="col" v-for="cf in eventCustomFields" :key="'ecf-'+cf.index">
                                         <span>@{{ cf.name }}</span><span v-if="cf.required" class="text-red-500 ms-0.5">*</span>
                                     </th>
-                                    <th class="pb-2 w-16"></th>
+                                    <th class="w-16"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template v-for="(entry, index) in entries" :key="entry._key">
                                     <tr>
-                                        <td v-if="hasAnyCustomFields" class="py-1 align-top">
+                                        <td v-if="hasAnyCustomFields">
                                             <button v-if="ticketCustomFieldsFor(entry.ticket_id).length" type="button" @click="toggleExpand(index)"
                                                 class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1">
                                                 <svg class="w-4 h-4 transform transition-transform" :class="expanded.includes(index) ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,26 +173,26 @@
                                                 </svg>
                                             </button>
                                         </td>
-                                        <td class="py-1 pr-2"><input v-model="entry.name" type="text" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
-                                        <td class="py-1 pr-2"><input v-model="entry.email" type="email" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" placeholder="email@example.com"></td>
-                                        <td v-if="showPhone" class="py-1 pr-2">
-                                            <input type="tel" :ref="setPhoneRef" :data-key="entry._key" :required="eventHasPhone"
+                                        <td><input v-model="entry.name" type="text" aria-label="{{ __('messages.name') }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
+                                        <td><input v-model="entry.email" type="email" aria-label="{{ __('messages.email') }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" placeholder="email@example.com"></td>
+                                        <td v-if="showPhone">
+                                            <input type="tel" aria-label="{{ __('messages.phone') }}" :ref="setPhoneRef" :data-key="entry._key" :required="eventHasPhone"
                                                 class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                         </td>
-                                        <td v-if="tickets.length > 1" class="py-1 pr-2">
-                                            <select v-model="entry.ticket_id" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                        <td v-if="tickets.length > 1">
+                                            <select v-model="entry.ticket_id" aria-label="{{ __('messages.ticket_type') }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                 <option v-for="t in tickets" :key="t.id" :value="t.id">@{{ t.type }}</option>
                                             </select>
                                         </td>
-                                        <td class="py-1 pr-2"><input v-model.number="entry.quantity" type="number" min="1" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
-                                        <td v-if="showAmount" class="py-1 pr-2"><input v-model="entry.amount" type="number" step="0.01" min="0" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
-                                        <td v-if="!showAmount" class="py-1 pr-2">
-                                            <select v-model="entry.status" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                        <td><input v-model.number="entry.quantity" type="number" min="1" aria-label="{{ __('messages.quantity') }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
+                                        <td v-if="showAmount"><input v-model="entry.amount" type="number" step="0.01" min="0" aria-label="{{ __('messages.amount') }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
+                                        <td v-if="!showAmount">
+                                            <select v-model="entry.status" aria-label="{{ __('messages.status') }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                 <option value="paid">{{ __('messages.paid') }}</option>
                                                 <option value="unpaid">{{ __('messages.unpaid') }}</option>
                                             </select>
                                         </td>
-                                        <td v-for="cf in eventCustomFields" :key="'ecfv-'+cf.index" class="py-1 pr-2">
+                                        <td v-for="cf in eventCustomFields" :key="'ecfv-'+cf.index">
                                             <select v-if="cf.type === 'switch'" v-model="entry.custom_values[cf.index]" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                 <option value=""></option>
                                                 <option value="Yes">{{ __('messages.yes') }}</option>
@@ -186,15 +206,15 @@
                                             <textarea v-else-if="cf.type === 'multiline_string'" v-model="entry.custom_values[cf.index]" :required="cf.required" rows="1" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></textarea>
                                             <input v-else v-model="entry.custom_values[cf.index]" type="text" :required="cf.required" :placeholder="cf.type === 'multiselect' ? commaSeparatedLabel : ''" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                         </td>
-                                        <td class="py-1">
-                                            <button v-if="entries.length > 1" type="button" @click="removeRow(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                        <td>
+                                            <button v-if="entries.length > 1" type="button" @click="removeRow(index)" class="event-link is-danger">
                                                 {{ __('messages.remove') }}
                                             </button>
                                         </td>
                                     </tr>
                                     <tr v-if="expanded.includes(index) && ticketCustomFieldsFor(entry.ticket_id).length">
                                         <td></td>
-                                        <td :colspan="visibleColSpan" class="py-2 pr-2">
+                                        <td :colspan="visibleColSpan">
                                             <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.ticket_custom_fields') }}</p>
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -233,17 +253,17 @@
                     </div>
 
                     <div class="mt-3">
-                        <button type="button" @click="addRow()" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                        <button type="button" @click="addRow()" class="event-link">
                             + {{ __('messages.add_attendee_row') }}
                         </button>
                     </div>
 
-                    <div class="mt-4 space-y-3">
-                        <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="space-y-3">
+                        <div class="import-foot">
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 @{{ validCount }} {{ __('messages.attendees_to_import') }}
                             </p>
-                            <div class="flex items-center gap-4 flex-wrap">
+                            <div class="import-foot-actions">
                                 <div class="flex items-center gap-3">
                                     <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
                                         <input type="checkbox" v-model="sendEmails" class="sr-only peer">
@@ -252,43 +272,34 @@
                                     </label>
                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer" @click="sendEmails = !sendEmails">{{ __('messages.send_email') }}</span>
                                 </div>
-                                <button type="button" @click="submit()" :disabled="submitting || validCount === 0 || (sendEmails && !hasEmailSettings)"
-                                    class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed">
+                                <x-brand-button @click="submit()" ::disabled="submitting || validCount === 0 || (sendEmails && !hasEmailSettings)">
                                     <span v-if="!submitting">{{ __('messages.save_n_attendees') }}</span>
                                     <span v-else>{{ __('messages.loading') }}...</span>
-                                </button>
+                                </x-brand-button>
                             </div>
                         </div>
                         @if (! $hasEmailSettings && $emailSettingsRole)
-                        <div v-if="sendEmails" class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                                <span>
-                                    @if (config('app.hosted'))
-                                    {{ __('messages.notification_requires_email_settings') }}
-                                    <a href="{{ route('role.edit', ['subdomain' => $emailSettingsRole->subdomain]) }}#integration-tab-email"
-                                        target="_blank" rel="noopener"
-                                        class="text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
-                                    @else
-                                    {{-- A selfhosted install has one mailer and no Email Settings tab to link to. --}}
-                                    {{ __('messages.email_not_configured') }}
-                                    @endif
-                                </span>
-                            </p>
-                        </div>
+                        <x-page-notice tone="warn" v-if="sendEmails">
+                            @if (config('app.hosted'))
+                            {{ __('messages.notification_requires_email_settings') }}
+                            <x-link href="{{ route('role.edit', ['subdomain' => $emailSettingsRole->subdomain]) }}#integration-tab-email"
+                                target="_blank" rel="noopener">{{ __('messages.configure_email_settings') }}</x-link>
+                            @else
+                            {{-- A selfhosted install has one mailer and no Email Settings tab to link to. --}}
+                            {{ __('messages.email_not_configured') }}
+                            @endif
+                        </x-page-notice>
                         @endif
                     </div>
                 </div>
 
                 {{-- CSV tab --}}
-                <div v-show="tab === 'csv'" class="p-6">
-                    <div v-if="csvErrors.length" class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                        <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+                <div v-show="tab === 'csv'" class="import-pane" id="import-pane-csv" role="tabpanel" aria-labelledby="import-tab-csv">
+                    <x-page-notice tone="error" class="mb-4" v-if="csvErrors.length">
+                        <ul class="list-disc list-inside">
                             <li v-for="err in csvErrors" :key="err">@{{ err }}</li>
                         </ul>
-                    </div>
+                    </x-page-notice>
 
                     <input ref="csvFileInput" type="file" accept=".csv,text/csv" @change="handleCsvFileInput" class="hidden">
                     <div v-if="!csvHeaders.length" class="mb-4">
@@ -297,8 +308,8 @@
                             @dragenter.prevent="csvDragOver = true"
                             @dragleave.prevent.self="csvDragOver = false"
                             @drop.prevent="handleCsvDrop"
-                            :class="csvDragOver ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)]/5' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
-                            class="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center transition-colors">
+                            :class="{ 'is-over': csvDragOver }"
+                            class="import-drop">
                             <svg class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500 mb-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
@@ -331,41 +342,43 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-end gap-2">
-                            <button type="button" @click="clearCsv()"
-                                class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200">
+                        {{-- Clear first, the button that goes on last. --}}
+                        <div class="page-form-actions">
+                            <button type="button" @click="clearCsv()" class="page-tool">
                                 {{ __('messages.clear') }}
                             </button>
-                            <button type="button" @click="applyCsvToForm()"
-                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50">
+                            <x-brand-button @click="applyCsvToForm()">
                                 {{ __('messages.next') }}
-                            </button>
+                            </x-brand-button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- CSV preview in its own panel --}}
-            <div v-if="tab === 'csv' && csvHeaders.length" class="ap-card rounded-xl p-6 mt-4">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.csv_preview') }}</h4>
-                <div class="overflow-x-auto max-h-60">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
+            <section v-if="tab === 'csv' && csvHeaders.length" class="ap-card rounded-xl page-card is-flush mt-4">
+                <div class="page-card-head">
+                    <h2 class="page-card-title">{{ __('messages.csv_preview') }}</h2>
+                </div>
+                <div class="page-scroll max-h-60">
+                    <table class="page-table">
+                        <thead>
                             <tr>
-                                <th v-for="(h, i) in csvHeaders" :key="'hh-'+i" class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase text-left">@{{ h }}</th>
+                                <th scope="col" v-for="(h, i) in csvHeaders" :key="'hh-'+i">@{{ h }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody>
                             <tr v-for="(row, ri) in csvRows.slice(0, 5)" :key="'rr-'+ri">
-                                <td v-for="(cell, ci) in row" :key="'cc-'+ci" class="px-3 py-2 text-gray-700 dark:text-gray-300">@{{ cell }}</td>
+                                <td v-for="(cell, ci) in row" :key="'cc-'+ci">@{{ cell }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">{{ __('messages.row_count') }}: @{{ csvRows.length }}</p>
-            </div>
+                <div class="page-card-foot">{{ __('messages.row_count') }}: @{{ csvRows.length }}</div>
+            </section>
         </div>
         @endif
+        </div>
     </div>
 
     @if ($selectedRoleId)
@@ -389,6 +402,11 @@
                     url.searchParams.delete('event_id');
                     window.location.href = url.toString();
                 });
+            }
+
+            // No event to pick on a schedule whose plan has no import: the picker is not drawn.
+            if (! document.getElementById('event-picker-app')) {
+                return;
             }
 
             const { createApp } = Vue;

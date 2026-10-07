@@ -94,7 +94,7 @@ class SimulateRealtimeTraffic extends Command
                     'visitor_key' => $visitorKey,
                     'consented' => true,
                     // Four in five accepted cookies after the banner named the organizer, so a
-                    // schedule's own Realtime page (/realtime) has both kinds to show: people it
+                    // schedule's own Realtime tab (/analytics) has both kinds to show: people it
                     // may list, and people it may only count.
                     'owner_visible' => $i % 5 !== 0,
                     'user_id' => $user && ($page > 0 || $pages === 1) ? $user->id : null,

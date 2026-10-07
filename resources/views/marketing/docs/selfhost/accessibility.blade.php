@@ -8,7 +8,7 @@
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#your-declaration">Your declaration</x-doc-nav-link>
-        <x-doc-nav-link href="#configuration">Configuration</x-doc-nav-link>
+        <x-doc-nav-link href="#configuration">Environment variables</x-doc-nav-link>
         <x-doc-nav-link href="#audit">Audit backlog</x-doc-nav-link>
         <x-doc-nav-link href="#template">Template text</x-doc-nav-link>
     </x-slot:toc>
@@ -28,12 +28,12 @@
             Two accessibility features ship in every install: a skip link on every page, and an accessibility panel you can switch on per schedule. Everything else - the legal declaration for your hostname, the audit behind it, and the remediation work - belongs to you as the operator, in the same way the privacy policy on your domain does.
         </p>
 
-        <h3 class="doc-subheading">The skip link</h3>
+        <h3 id="skip-link" class="doc-subheading">The skip link</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Every page starts with a <strong class="text-gray-900 dark:text-white">Skip to main content</strong> link that stays visually hidden until it takes keyboard focus, then jumps to the <code class="doc-inline-code">#main-content</code> landmark. The admin portal, the sign-in and registration screens and the public schedule pages all render it, and it is translated with the rest of the interface. Nothing to configure.
         </p>
 
-        <h3 class="doc-subheading">The accessibility panel <x-doc-badge plan="free" /></h3>
+        <h3 id="panel" class="doc-subheading">The accessibility panel <x-doc-badge plan="free" /></h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             A floating <strong class="text-gray-900 dark:text-white">Accessibility options</strong> button in the bottom corner of a public schedule page opens a small panel of display adjustments. It is <strong class="text-gray-900 dark:text-white">off by default on every schedule</strong> and carries no plan gate, so it is available on Free schedules and on every selfhosted install.
         </p>
@@ -76,7 +76,7 @@
                     <tr>
                         <td>{{ __('accessibility.toolbar_hide_widget') }}</td>
                         <td>Action, signed-in visitors only</td>
-                        <td>Hides the launcher on that browser after a confirmation. It comes back from the <strong class="text-gray-900 dark:text-white">Accessibility</strong> tab on the visitor's own profile settings, which only appears once the widget has been hidden.</td>
+                        <td>Hides the launcher on that browser after a confirmation. It comes back from the <strong class="text-gray-900 dark:text-white">Accessibility</strong> row on the <strong class="text-gray-900 dark:text-white">Profile Information</strong> tab of the visitor's own <a href="{{ route('marketing.docs.account_settings') }}#accessibility" class="doc-link">Settings</a>, a row that is only there once the widget has been hidden. Its one button is <strong class="text-gray-900 dark:text-white">{{ __('accessibility.settings_show_widget') }}</strong>.</td>
                     </tr>
                 </tbody>
             </table>
@@ -87,10 +87,10 @@
             <p>The panel writes to the visitor's browser storage, never to your database, so a preference follows one browser on one device and does not travel with an account. Nothing here needs a cookie banner entry beyond what your own policy already says about local storage.</p>
         </div>
 
-        <h3 class="doc-subheading">Turn the panel on for a schedule</h3>
+        <h3 id="panel-enable" class="doc-subheading">Turn the panel on for a schedule</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open the schedule and go to its edit page</li>
-            <li>Choose <strong class="text-gray-900 dark:text-white">Settings</strong> in the section list, then the <strong class="text-gray-900 dark:text-white">Advanced</strong> tab</li>
+            <li>Choose the <strong class="text-gray-900 dark:text-white">Settings</strong> tab, then open its <strong class="text-gray-900 dark:text-white">Advanced</strong> row</li>
             <li>Turn on <strong class="text-gray-900 dark:text-white">Show Accessibility Widget</strong></li>
             <li>Save. The launcher appears in the bottom corner of that schedule's public pages</li>
         </ol>
@@ -109,13 +109,14 @@
             The <a href="{{ marketing_url('/accessibility') }}" class="doc-link">accessibility statement on eventschedule.com</a> applies to Event Schedule's own marketing and product URLs. It does not cover <strong class="text-gray-900 dark:text-white">your</strong> hostname, your configuration, or the events your users publish. If you offer services to the public in a jurisdiction with web accessibility rules (for example Israel, the EU, or the UK), work with qualified counsel and publish a declaration that matches your deployment, your languages, and your contact channels.
         </p>
 
-        <div class="doc-callout doc-callout-warning">
-            <div class="doc-callout-title">Your install does not serve /accessibility</div>
-            <p>That declaration page is registered only on the network site. On a selfhosted install the path is not a marketing page at all, so you cannot simply point people at <code class="doc-inline-code">/accessibility</code> on your own domain and expect the shipped text to appear. Publish your statement wherever suits you and link it from your footer or a schedule page.</p>
-        </div>
-
+        <h3 id="no-accessibility-page" class="doc-subheading">Your install does not serve /accessibility</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            The accessibility panel carries an <strong class="text-gray-900 dark:text-white">{{ __('accessibility.toolbar_declaration') }}</strong> link at the bottom, and that link is built from your marketing URL setting. Until you change it, the link sends your visitors to Event Schedule's statement rather than yours. See <a href="#configuration" class="doc-link">Environment variables</a> below.
+            That declaration page is registered only on eventschedule.com. On a selfhosted install the path is not a marketing page at all, so you cannot point people at <code class="doc-inline-code">/accessibility</code> on your own domain and expect the shipped text to appear. The <a href="{{ route('marketing.docs.selfhost.admin') }}#system-legal-pages" class="doc-link">Legal Pages</a> screen of the admin panel does not fill the gap either: it replaces the privacy policy, the terms of service and the cookie policy, and has no card for an accessibility statement. Publish your statement wherever suits you, on your main website for example, and link to it from a schedule's page, or from the footer code you add to every public page at <a href="{{ route('marketing.docs.selfhost.admin') }}#settings-header-footer" class="doc-link">Settings</a>.
+        </p>
+
+        <h3 id="statement-links" class="doc-subheading">Where the app links to a statement</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Two places link to an accessibility statement, and both build the address from your marketing URL setting: the <strong class="text-gray-900 dark:text-white">{{ __('accessibility.toolbar_declaration') }}</strong> link at the bottom of the accessibility panel, and the <strong class="text-gray-900 dark:text-white">{{ __('accessibility.footer_link') }}</strong> link under the app's plain error pages (403, 419, 429, 500, 503 and the like). Until you change that setting, both send your visitors to Event Schedule's statement rather than yours. See <a href="#configuration" class="doc-link">Environment variables</a> below.
         </p>
     </section>
 
@@ -183,9 +184,9 @@
             <p>They are read by the shipped declaration page, which your install does not route. Keeping your values here is still worth doing, because the translated clauses take <code class="doc-inline-code">:email</code>, <code class="doc-inline-code">:sla</code>, <code class="doc-inline-code">:wcag_target</code> and <code class="doc-inline-code">:date</code> placeholders, and the measured-coverage clause takes <code class="doc-inline-code">:pages</code> and <code class="doc-inline-code">:total</code> as well, so a statement page of your own can reuse both the strings and the settings instead of hard-coding them. <code class="doc-inline-code">:total</code> is not a setting: the declaration counts it from the list of dated public pages.</p>
         </div>
 
-        <h3 class="doc-subheading">Point the panel's statement link at your site</h3>
+        <h3 id="statement-link" class="doc-subheading">Point the panel's statement link at your site</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            The <strong class="text-gray-900 dark:text-white">{{ __('accessibility.toolbar_declaration') }}</strong> link inside the panel is built from <code class="doc-inline-code">APP_MARKETING_URL</code>, which defaults to <code class="doc-inline-code">https://eventschedule.com</code>. Set it to your own site and the link resolves against your domain instead:
+            The <strong class="text-gray-900 dark:text-white">{{ __('accessibility.toolbar_declaration') }}</strong> link inside the panel, and the one under the error pages, are built from <code class="doc-inline-code">APP_MARKETING_URL</code>, which defaults to <code class="doc-inline-code">https://eventschedule.com</code>. Set it to your own site and both resolve against your domain instead:
         </p>
 
         <div class="doc-code-block">
@@ -224,7 +225,7 @@
             On each one, check keyboard-only navigation, focus order and visible focus, form error messages, and text contrast in both light and dark mode. When you close a gap, update your published declaration and bump <code class="doc-inline-code">ACCESSIBILITY_LAST_REVIEWED</code>.
         </p>
 
-        <h3 class="doc-subheading">Limitations worth naming</h3>
+        <h3 id="limitations" class="doc-subheading">Limitations worth naming</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             The hosted declaration names its known gaps rather than claiming full conformance, and the same code runs on your install, so these are a reasonable starting point for your own list:
         </p>

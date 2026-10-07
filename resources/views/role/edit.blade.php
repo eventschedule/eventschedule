@@ -32,7 +32,6 @@
 
     <x-slot name="head">
 
-        @include('partials.form-kit-styles')
         <style {!! nonce_attr() !!}>
         /* Hide all sections except the first one by default */
         .section-content {

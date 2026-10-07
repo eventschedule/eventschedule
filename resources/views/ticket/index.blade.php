@@ -1,204 +1,63 @@
 <x-app-admin-layout>
 
-    <div class="flow-root">
-        <div class="mb-4">
-            @if($past)
-                <a href="{{ route('tickets') }}" class="inline-flex items-center text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                    <svg class="w-4 h-4 me-1 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    {{ __('messages.back') }}
-                </a>
-            @elseif(!empty($hasPastTickets))
-                <a href="{{ route('tickets', ['past' => 1]) }}" class="inline-flex items-center text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
-                    {{ __('messages.show_past_events') }}
-                </a>
+    {{-- The tickets this person holds, upcoming first. One list for every width: it is a table
+         from a tablet up and a stack of rows on a phone (.page-table), where it used to be drawn
+         twice, once as a table and once as cards with their own status pills. --}}
+    <div class="page-shell">
+        <x-page-header
+            :title="$past ? __('messages.past_events') : __('messages.your_tickets')"
+            :lead="$past ? null : __('messages.your_tickets_lead')"
+            :back="$past ? route('tickets') : null"
+            :back-label="__('messages.your_tickets')">
+            @if (! $past && ! empty($hasPastTickets))
+            <x-slot name="actions">
+                <a href="{{ route('tickets', ['past' => 1]) }}" class="page-tool">{{ __('messages.show_past_events') }}</a>
+            </x-slot>
             @endif
+        </x-page-header>
+
+        @if ($sales->count() > 0)
+        <div class="ap-card rounded-xl overflow-hidden">
+            <table class="page-table is-hover">
+                <thead>
+                    <tr>
+                        <x-page-sort column="event_name" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.event') }}</x-page-sort>
+                        <th scope="col">{{ __('messages.venue') }}</th>
+                        <x-page-sort column="event_date" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.date') }}</x-page-sort>
+                        <x-page-sort column="status" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.status') }}</x-page-sort>
+                        <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($sales as $sale)
+                    <tr>
+                        <td class="c-main c-strong">
+                            <a href="{{ $sale->getEventUrl() }}" target="_blank" rel="noopener" class="event-link"><bdi>{{ $sale->event->name }}</bdi></a>
+                        </td>
+                        <td class="c-wrap">
+                            @if ($sale->event->venue && $sale->event->venue->isClaimed())
+                            <a href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" rel="noopener" class="event-link"><bdi>{{ $sale->event->venue->getDisplayName(false) }}</bdi></a>
+                            @else
+                            <bdi>{{ $sale->event->getVenueDisplayName(false) }}</bdi>
+                            @endif
+                        </td>
+                        <td class="c-date">{{ $sale->event->localStartsAt(true, $sale->event_date) }}</td>
+                        <td><x-sale-status :status="$sale->status" /></td>
+                        <td class="c-actions">
+                            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" rel="noopener" class="page-tool">{{ __('messages.view_ticket') }}</a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
-
-        @if($sales->count() > 0)
-            <!-- Desktop Table View -->
-            <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div class="ap-card overflow-hidden ring-1 ring-black/5 dark:ring-transparent md:rounded-lg">
-                        <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <x-sortable-header column="event_name" :sortBy="$sortBy" :sortDir="$sortDir" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.event') }}</x-sortable-header>
-                                        <th scope="col"
-                                            class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-100 sm:ps-6">
-                                            {{ __('messages.venue') }}
-                                        </th>
-                                        <x-sortable-header column="event_date" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.date') }}</x-sortable-header>
-                                        <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir">{{ __('messages.status') }}</x-sortable-header>
-                                        <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
-                                            <span class="sr-only">{{ __('messages.actions') }}</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                                    @foreach ($sales as $sale)
-                                        <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                            <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                                <a href="{{ $sale->getEventUrl() }}"
-                                                    target="_blank" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline">{{ $sale->event->name }}
-                                                </a>
-                                            </td>
-                                            <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                                @if ($sale->event->venue && $sale->event->venue->isClaimed())
-                                                    <a href="{{ $sale->event->venue->getGuestUrl() }}"   
-                                                        target="_blank" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline">
-                                                        {{ $sale->event->venue->getDisplayName(false) }}
-                                                    </a>
-                                                @else
-                                                    {{ $sale->event->getVenueDisplayName(false) }}
-                                                @endif
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $sale->event->localStartsAt(true, $sale->event_date) }}
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                                @if($sale->status === 'paid')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                                        <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        {{ __('messages.paid') }}
-                                                    </span>
-                                                @elseif($sale->status === 'unpaid')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                                                        <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        {{ __('messages.unpaid') }}
-                                                    </span>
-                                                @elseif($sale->status === 'cancelled')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                                        <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        {{ __('messages.cancelled') }}
-                                                    </span>
-                                                @elseif($sale->status === 'refunded')
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                        <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        {{ __('messages.refunded') }}
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                        {{ __('messages.' . $sale->status) }}
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="inline-flex items-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                                    {{ __('messages.view_ticket') }}                                        
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile List View -->
-            <div class="md:hidden space-y-4">
-                @foreach ($sales as $sale)
-                    <div class="ap-card rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
-                        <div class="space-y-4">
-                            <!-- Header with Status -->
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $sale->event->name }}</h3>
-                                    <x-link href="{{ $sale->getEventUrl() }}" target="_blank" class="text-sm">{{ __('messages.view_event') }}</x-link>
-                                </div>
-                                <div class="ms-4">
-                                    @if($sale->status === 'paid')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                            <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.paid') }}
-                                        </span>
-                                    @elseif($sale->status === 'unpaid')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
-                                            <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.unpaid') }}
-                                        </span>
-                                    @elseif($sale->status === 'cancelled')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                            <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.cancelled') }}
-                                        </span>
-                                    @elseif($sale->status === 'refunded')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                            <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.refunded') }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                            {{ __('messages.' . $sale->status) }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <!-- Event Info -->
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.venue') }}</div>
-                                @if ($sale->event->venue && $sale->event->venue->isClaimed())
-                                    <x-link href="{{ $sale->event->venue->getGuestUrl() }}" target="_blank" class="font-medium">
-                                        {{ $sale->event->venue->getDisplayName(false) }}
-                                    </x-link>
-                                @else
-                                    <span class="text-gray-900 dark:text-gray-100">{{ $sale->event->getVenueDisplayName(false) }}</span>
-                                @endif
-                            </div>
-
-                            <!-- Date Info -->
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.date') }}</div>
-                                <div class="text-gray-900 dark:text-gray-100">{{ $sale->event->localStartsAt(true, $sale->event_date) }}</div>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="pt-2">
-                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
-                                   target="_blank" 
-                                   class="w-full inline-flex items-center justify-center rounded-lg bg-[var(--brand-blue-a10)] px-4 py-3 text-sm font-semibold text-[var(--brand-blue)] shadow-sm ring-1 ring-inset ring-[var(--brand-blue-a30)] hover:bg-[var(--brand-blue-a20)] transition-colors duration-150">
-                                    <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    {{ __('messages.view_ticket') }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
         @else
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $past ? __('messages.no_past_tickets') : __('messages.no_tickets') }}</h3>
-                @if(!$past)
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_tickets_description') }}</p>
-                @endif
-            </div>
+        <div class="ap-card rounded-xl">
+            <x-page-empty
+                :title="$past ? __('messages.no_past_tickets') : __('messages.no_tickets')"
+                :text="$past ? null : __('messages.no_tickets_description')"
+                icon="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+        </div>
         @endif
     </div>
 
@@ -212,6 +71,8 @@
             var sortBy = header.getAttribute('data-sort');
             url.searchParams.set('sort_by', sortBy);
             url.searchParams.set('sort_dir', currentSort === sortBy && currentDir === 'asc' ? 'desc' : 'asc');
+            // A new order starts at its first page: page 3 of the old order is no place in the new one.
+            url.searchParams.delete('page');
             window.location.href = url.toString();
         }
     });

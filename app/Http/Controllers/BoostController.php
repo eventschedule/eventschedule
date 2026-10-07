@@ -239,7 +239,12 @@ class BoostController extends Controller
             'objective' => 'nullable|in:OUTCOME_AWARENESS,OUTCOME_TRAFFIC,OUTCOME_ENGAGEMENT',
             'targeting' => 'nullable|json',
             'placements' => 'nullable|json',
-            'scheduled_start' => 'nullable|date|after_or_equal:now',
+            // The form posts plain days. A day is midnight, so `after_or_equal:now` refused today
+            // itself, which is what the advanced form opens with - and on a hosted install the
+            // card is confirmed before this request, so the advertiser had already paid. A day
+            // back is allowed too: a day picked in somebody's own evening can be yesterday on
+            // this server's clock. Whatever is already behind us starts now (below).
+            'scheduled_start' => 'nullable|date|after_or_equal:yesterday',
             'scheduled_end' => 'nullable|date|after:scheduled_start|after:now',
         ]);
 
@@ -352,6 +357,15 @@ class BoostController extends Controller
                 return back()->with('error', __('messages.boost_max_concurrent'));
             }
 
+            // "Today" means from now on, never from midnight: the ad set is not handed a start
+            // time that has passed.
+            $scheduledStart = $request->scheduled_start
+                ? \Carbon\Carbon::parse($request->scheduled_start)
+                : $defaults['scheduled_start'];
+            if ($scheduledStart->lt(now())) {
+                $scheduledStart = now();
+            }
+
             $campaign = BoostCampaign::create([
                 'event_id' => $eventId,
                 'role_id' => $roleId,
@@ -363,7 +377,7 @@ class BoostController extends Controller
                 'lifetime_budget' => $budgetType === 'lifetime' ? $budget : null,
                 'budget_type' => $budgetType,
                 'currency_code' => config('services.meta.default_currency', 'USD'),
-                'scheduled_start' => $request->scheduled_start ?? $defaults['scheduled_start'],
+                'scheduled_start' => $scheduledStart,
                 'scheduled_end' => $request->scheduled_end ?? $defaults['scheduled_end'],
                 'targeting' => $request->targeting ? json_decode($request->targeting, true) : $defaults['targeting'],
                 'placements' => $request->placements ? json_decode($request->placements, true) : null,

@@ -3745,11 +3745,17 @@ class Role extends Model implements MustVerifyEmail
         return $data;
     }
 
-    public function toApiData()
+    /**
+     * @param  bool  $whateverThePlan  true only where the schedule is being handed to the person
+     *                                 who has just made it: POST /api/schedules creates a Free
+     *                                 schedule on hosted, and answering that with an empty object
+     *                                 told the caller neither its subdomain nor its address.
+     */
+    public function toApiData(bool $whateverThePlan = false)
     {
         $data = new \stdClass;
 
-        if (! $this->isPro()) {
+        if (! $whateverThePlan && ! $this->isPro()) {
             return $data;
         }
 

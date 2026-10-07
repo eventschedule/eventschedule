@@ -1,815 +1,340 @@
-<div class="mt-8 flow-root">
-    @if($sales->count() > 0)
-    <!-- Desktop Table View -->
-    <div class="hidden md:block -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
-                <div class="overflow-x-auto" style="overflow-x: auto; scrollbar-width: thin;">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.customer') }}</x-sortable-header>
-                                <x-sortable-header column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.event') }}</x-sortable-header>
-                                <x-sortable-header column="payment_amount" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.total') }}</x-sortable-header>
-                                <x-sortable-header column="transaction_reference" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.transaction_reference') }}</x-sortable-header>
-                                <x-sortable-header column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-sortable-header>
-                                <x-sortable-header column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-sortable-header>
-                                <th scope="col" class="relative py-3.5 ps-3 pe-4 sm:pe-6">
-                                    <span class="sr-only">{{ __('messages.actions') }}</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                            @foreach ($sales as $sale)
-                            @php
-                                $isGroupedPrimary = $sale->isPrimarySale();
-                                $guestCount = $groupCounts[$sale->id] ?? 0;
-                                $hasGuests = $isGroupedPrimary && $guestCount > 0;
-                                $encodedSaleId = \App\Utils\UrlUtils::encodeId($sale->id);
-                            @endphp
-                            <tr class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                                @php
-                                    $hasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
-                                    $hasTicketCustomFields = false;
-                                    foreach ($sale->saleTickets as $st) {
-                                        if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
-                                            $hasTicketCustomFields = true;
-                                            break;
-                                        }
-                                    }
-                                    $hasAnyCustomValues = false;
-                                    if ($hasEventCustomFields) {
-                                        $eventFallbackIdx = 1;
-                                        foreach ($sale->event->custom_fields as $fk => $fc) {
-                                            $idx = $fc['index'] ?? $eventFallbackIdx;
-                                            $eventFallbackIdx++;
-                                            if ($idx >= 1 && $idx <= 10 && $sale->{"custom_value{$idx}"}) {
-                                                $hasAnyCustomValues = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (!$hasAnyCustomValues && $hasTicketCustomFields) {
-                                        foreach ($sale->saleTickets as $st) {
-                                            if (!$st->ticket || !$st->ticket->custom_fields) continue;
-                                            $ticketFallbackIdx = 1;
-                                            foreach ($st->ticket->custom_fields as $fk => $fc) {
-                                                $idx = $fc['index'] ?? $ticketFallbackIdx;
-                                                $ticketFallbackIdx++;
-                                                if ($idx >= 1 && $idx <= 10 && $st->{"custom_value{$idx}"}) {
-                                                    $hasAnyCustomValues = true;
-                                                    break 2;
-                                                }
-                                            }
-                                        }
-                                    }
-                                @endphp
-                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    <div class="flex items-center gap-2">
-                                        @if ($hasAnyCustomValues || $hasGuests)
-                                            <button type="button" data-toggle-row data-sale-id="{{ $encodedSaleId }}" class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                                                <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                </svg>
-                                            </button>
-                                        @endif
-                                        <div class="flex flex-col">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-semibold">{{ $sale->name }}</span>
-                                                @if ($hasGuests)
-                                                <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                                    + {{ $guestCount }} {{ __('messages.guests') }}
-                                                </span>
-                                                @endif
-                                            </div>
-                                            <a href="mailto:{{ $sale->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $sale->email }}</a>
-                                            @if ($sale->phone)
-                                            <a href="tel:{{ $sale->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $sale->phone }}</a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
-                                    <a href="{{ $sale->getEventUrl() }}"
-                                        target="_blank" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline">{{ $sale->event->name }}
-                                    </a>
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @php
-                                        $rowAmount = $sale->legTotalPayment();
-                                        $rowDiscount = $sale->legTotalDiscount();
-                                        $rowGiftCard = $sale->legTotalGiftCard();
-                                    @endphp
-                                    @if ($sale->isRsvp())
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</span>
-                                    @else
-                                    <span class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($rowAmount, 2, '.', ',') }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400">{{ $sale->event->ticket_currency_code }}</span>
-                                    @endif
-                                    @if ($sale->promo_code_id && $sale->promoCode)
-                                        <span class="ms-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
-                                            {{ $sale->promoCode->code }}
-                                            <span class="ms-1 text-green-600 dark:text-green-400">-{{ number_format($rowDiscount, 2, '.', ',') }}</span>
-                                        </span>
-                                    @endif
-                                    @if ($rowGiftCard > 0)
-                                        <span class="ms-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
-                                            {{ __('messages.gift_card') }}
-                                            <span class="ms-1 text-green-600 dark:text-green-400">-{{ number_format($rowGiftCard, 2, '.', ',') }}</span>
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @php $referenceUrl = payment_gateways()->get($sale->payment_method)?->referenceUrl($sale); @endphp
-                                    @if ($sale->transaction_reference == __('messages.manual_payment'))
-                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
-                                    @elseif ($sale->payment_method == 'import')
-                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
-                                    @elseif ($sale->payment_method == 'box_office')
-                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.seating_box_office_sale') }}</span>
-                                    @elseif ($referenceUrl)
-                                        <x-link href="{{ $referenceUrl }}" target="_blank">
-                                            {{ $sale->transaction_reference }}
-                                        </x-link>
-                                    @else
-                                        <span class="font-mono text-sm">{{ $sale->transaction_reference }}</span>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @if($sale->status === 'paid')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
-                                            <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.paid') }}
-                                        </span>
-                                    @elseif($sale->status === 'unpaid')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
-                                            <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.unpaid') }}
-                                        </span>
-                                    @elseif($sale->status === 'cancelled')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">
-                                            <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.cancelled') }}
-                                        </span>
-                                    @elseif($sale->status === 'refunded')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                            <svg class="w-3 h-3 me-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            {{ __('messages.refunded') }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                            {{ __('messages.' . $sale->status) }}
-                                        </span>
-                                    @endif
-                                    {{-- Outside the status branch on purpose. A partially refunded sale stays `paid`, but a
-                                         sale can also reach `refunded` while a claim is still unconfirmed - refundableRemaining()
-                                         counts pending and awaiting_reconciliation rows against the ceiling - and hiding the
-                                         warning behind `paid` made it vanish at exactly the moment it matters. Reads the
-                                         eager-loaded relation, so this costs no query per row. --}}
-                                    @php
-                                        // Confirmed only. refundedTotal() also counts claims we
-                                        // have not heard back on, and showing those as refunded
-                                        // would tell an owner a customer was paid when the
-                                        // gateway never said so.
-                                        $refundedSoFar = $sale->refundedConfirmedTotal();
-                                    @endphp
-                                    @if($refundedSoFar > 0)
-                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                            {{ __('messages.refunded_so_far') }}:
-                                            {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}
-                                        </div>
-                                    @endif
-                                    @if($sale->hasUnconfirmedRefund())
-                                        <div class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
-                                            <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                                            </svg>
-                                            <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
-                                        </div>
-                                    @endif
-                                    @if ($sale->feedback)
-                                        <svg class="inline-block w-4 h-4 ms-1 text-yellow-400" viewBox="0 0 24 24" fill="currentColor" title="{{ __('messages.feedback') }}: {{ $sale->feedback->rating }}/5">
-                                            <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                                        </svg>
-                                    @endif
-                                </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $sale->created_at->format('M j, Y') }}
-                                </td>
-                                <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <div class="relative inline-block text-start">
-                                            <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" aria-expanded="false" aria-haspopup="true">
-                                                {{ __('messages.actions') }}
-                                                <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                            <div id="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" tabindex="-1">
-                                                <div class="py-2" role="none" data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
-                                                    <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
-                                                        <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
-                                                        </svg>
-                                                        <div>
-                                                            {{ __('messages.view_ticket') }}
-                                                        </div>
-                                                    </a>
-                                                    <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-resend-email="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
-                                                        <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
-                                                        </svg>
-                                                        <div>
-                                                            {{ __('messages.send_email') }}
-                                                        </div>
-                                                    </button>
-                                                    @if($sale->status === 'unpaid')
-                                                    <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="mark_paid" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
-                                                        <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
-                                                        </svg>
-                                                        <div>
-                                                            {{ __('messages.mark_paid') }}
-                                                        </div>
-                                                    </button>
-                                                    @endif
-                                                    @php
-                                                        // Asked of the driver, not inferred from payment_method: a sale marked paid
-                                                        // by hand carries the translated string manual_payment in
-                                                        // transaction_reference, so 'stripe' is not evidence Stripe holds anything.
-                                                        // Prefixed names because @php shares the view's scope with the loop above.
-                                                        $refundDriver = payment_gateways()->get($sale->payment_method);
-                                                        $refundViaGateway = $sale->status === 'paid'
-                                                            && $refundDriver?->supportsRefunds()
-                                                            && $refundDriver->refundReferenceFor($sale) !== null;
-                                                        $refundRemaining = $refundViaGateway ? $sale->refundableRemaining() : 0.0;
-                                                        $refundAskAmount = $refundViaGateway && $refundDriver->supportsPartialRefunds() && $refundRemaining > 0
-                                                            // A payment plan refunds leg by leg and only in full, so there is
-                                                            // no amount to ask for.
-                                                            && ! $sale->installmentPlan;
-                                                        // 'rsvp' is a provenance marker with no driver behind it (config/payments.php
-                                                        // says so), so it can never be a capability question. A free registration took
-                                                        // no money, and Cancel Ticket below is what the action would really be.
-                                                        $refundShow = $sale->status === 'paid'
-                                                            && $sale->payment_method !== 'rsvp'
-                                                            && (! $refundViaGateway || $refundRemaining > 0);
-                                                    @endphp
-                                                    @if($refundShow)
-                                                    <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="refund" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" @if($refundAskAmount) data-refund-remaining="{{ number_format($refundRemaining, 3, '.', '') }}" data-refund-decimals="{{ \App\Utils\MoneyUtils::decimalsFor($sale->event?->ticket_currency_code) }}" data-refund-remaining-formatted="{{ \App\Utils\MoneyUtils::format($refundRemaining, $sale->event?->ticket_currency_code) }}" @endif class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
-                                                        <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M12,18A6,6 0 0,1 6,12C6,11 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12A8,8 0 0,0 12,20C13.57,20 15.03,19.54 16.26,18.76L14.8,17.3C13.97,17.75 13,18 12,18M20,12A8,8 0 0,0 12,4C10.43,4 8.97,4.46 7.74,5.24L9.2,6.7C10.03,6.25 11,6 12,6A6,6 0 0,1 18,12C18,13 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12M14.8,17.3L16.26,18.76L18.76,16.26L17.3,14.8L14.8,17.3M9.2,6.7L7.74,5.24L5.24,7.74L6.7,9.2L9.2,6.7Z" />
-                                                        </svg>
-                                                        <div>
-                                                            {{-- Honest label. A rail that cannot send money back gets "Mark as
-                                                                 Refunded", because the old wording promised a refund and only
-                                                                 ever changed a status. An appointment booking is not a ticket, so
-                                                                 it gets the plain "Refund" the phone menu uses. --}}
-                                                            {{ $refundViaGateway ? ($sale->event?->appointment_type_id ? __('messages.refund') : __('messages.refund_ticket')) : __('messages.mark_as_refunded') }}
-                                                        </div>
-                                                    </button>
-                                                    @endif
-                                                    @if(in_array($sale->status, ['unpaid', 'paid']))
-                                                    <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="cancel" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
-                                                        <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
-                                                        </svg>
-                                                        <div>
-                                                            {{ __('messages.cancel_ticket') }}
-                                                        </div>
-                                                    </button>
-                                                    @endif
-                                                    @if(! $sale->is_deleted)
-                                                    <div class="py-2" role="none">
-                                                        <div class="border-t border-gray-100 dark:border-gray-700"></div>
-                                                    </div>
-                                                    <button data-popup-toggle="sale-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" data-sale-action="delete" data-sale-id="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}" class="group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
-                                                        <svg class="me-3 h-5 w-5 text-red-400 dark:text-red-500 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
-                                                        </svg>
-                                                        <div>
-                                                            {{ __('messages.delete') }}
-                                                        </div>
-                                                    </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @if ($hasAnyCustomValues)
-                            <tr class="custom-fields-row detail-row-{{ $encodedSaleId }} hidden bg-gray-50 dark:bg-gray-700/50" style="border-top: none;">
-                                <td colspan="6" class="px-6 py-3">
-                                    <div class="text-sm space-y-2">
-                                        {{-- Event-level Custom Fields --}}
-                                        @if ($hasEventCustomFields)
-                                            @php $eventFallbackIndex = 1; @endphp
-                                            @foreach ($sale->event->custom_fields as $fieldKey => $fieldConfig)
-                                                @php
-                                                    $index = $fieldConfig['index'] ?? $eventFallbackIndex;
-                                                    $eventFallbackIndex++;
-                                                @endphp
-                                                @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
-                                                    <div class="flex gap-2 items-baseline">
-                                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
-                                                        <span class="text-xs text-gray-900 dark:text-gray-100">{{ $sale->{"custom_value{$index}"} }}</span>
-                                                    </div>
-                                                @endif
-                                            @endforeach
-                                        @endif
+{{-- The orders of the Sales tab. It is drawn into #sales-table by ticket/sales, and again by the
+     same address fetched (X-Requested-With) each time the filter, the sort or "Include past
+     events" changes, so nothing here may depend on the page around it.
 
-                                        {{-- Ticket-level Custom Fields --}}
-                                        @foreach ($sale->saleTickets as $saleTicket)
-                                            @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
-                                                <div class="mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">
-                                                    <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
-                                                    @php $ticketFallbackIndex = 1; @endphp
-                                                    @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
-                                                        @php
-                                                            $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
-                                                            $ticketFallbackIndex++;
-                                                        @endphp
-                                                        @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
-                                                            <div class="flex gap-2 items-baseline ms-3">
-                                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
-                                                                <span class="text-xs text-gray-900 dark:text-gray-100">{{ $saleTicket->{"custom_value{$index}"} }}</span>
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                </td>
-                            </tr>
-                            @endif
-                            @if ($hasGuests)
-                                @foreach ($sale->guestSales as $guest)
-                                <tr class="guest-row detail-row-{{ $encodedSaleId }} hidden bg-gray-50 dark:bg-gray-800/50" style="border-top: none;">
-                                    <td class="whitespace-nowrap py-3 ps-4 pe-3 text-sm text-gray-700 dark:text-gray-300 sm:ps-6">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-4"></div>
-                                            <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
-                                            <div class="flex flex-col">
-                                                <span class="font-medium">{{ $guest->name }}</span>
-                                                <a href="mailto:{{ $guest->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $guest->email }}</a>
-                                                @if ($guest->phone)
-                                                <a href="tel:{{ $guest->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">{{ $guest->phone }}</a>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap py-3 ps-4 pe-3 text-sm text-gray-500 dark:text-gray-400 sm:ps-6">
-                                        <a href="{{ $sale->getEventUrl() }}" target="_blank" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline">{{ $sale->event->name }}</a>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-400 dark:text-gray-500">-</td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400"></td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        @if($guest->status === 'paid')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">{{ __('messages.paid') }}</span>
-                                        @elseif($guest->status === 'cancelled')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">{{ __('messages.cancelled') }}</span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">{{ __('messages.' . $guest->status) }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $guest->created_at->format('M j, Y') }}
-                                    </td>
-                                    <td class="relative whitespace-nowrap py-3 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                        <div class="flex items-center justify-end gap-3">
-                                            <div class="relative inline-block text-start">
-                                                <button type="button" data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" id="guest-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" aria-expanded="false" aria-haspopup="true">
-                                                    {{ __('messages.actions') }}
-                                                    <svg class="-me-1 ms-2 h-5 w-5 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                                <div id="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="guest-actions-menu-button-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" tabindex="-1">
-                                                    <div class="py-2" role="none" data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}">
-                                                        <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
-                                                            <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                                <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
-                                                            </svg>
-                                                            <div>
-                                                                {{ __('messages.view_ticket') }}
-                                                            </div>
-                                                        </a>
-                                                        <button data-popup-toggle="guest-actions-pop-up-menu-{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" data-resend-email="{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors w-full text-start" role="menuitem" tabindex="0">
-                                                            <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                                <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
-                                                            </svg>
-                                                            <div>
-                                                                {{ __('messages.send_email') }}
-                                                            </div>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            @endif
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+     ONE list for every width (.page-table): a table from a tablet up, a stack of rows on a phone.
+     It used to be drawn twice, the second time as cards with an Alpine menu of their own, and the
+     two had drifted: the cards said "Refund" where the table said "Refund ticket", and "Cancel"
+     where the table said "Cancel ticket". --}}
+@php
+    $salesMenuItem = 'flex w-full items-center px-4 py-2.5 text-sm text-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors';
+    $salesMenuDanger = 'flex w-full items-center px-4 py-2.5 text-sm text-start text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:bg-red-50 dark:focus:bg-red-900/20 focus:outline-none transition-colors';
+@endphp
 
-    <!-- Mobile List View -->
-    <div class="md:hidden space-y-4">
-        @foreach ($sales as $sale)
-        @php
-            $mobileIsGroupedPrimary = $sale->isPrimarySale();
-            $mobileGuestCount = $groupCounts[$sale->id] ?? 0;
-            $mobileHasGuests = $mobileIsGroupedPrimary && $mobileGuestCount > 0;
-            $mobileEncodedSaleId = \App\Utils\UrlUtils::encodeId($sale->id);
-        @endphp
-        <div class="ap-card rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
-            <div class="space-y-4">
-                <!-- Header with Status -->
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-1">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $sale->name }}</h3>
-                            @if ($mobileHasGuests)
-                            <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                + {{ $mobileGuestCount }} {{ __('messages.guests') }}
-                            </span>
-                            @endif
-                        </div>
-                        <a href="mailto:{{ $sale->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $sale->email }}</a>
-                        @if ($sale->phone)
-                        <br><a href="tel:{{ $sale->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $sale->phone }}</a>
-                        @endif
-                    </div>
-                    <div class="ms-4">
-                        @if($sale->status === 'paid')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
-                                <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                </svg>
-                                {{ __('messages.paid') }}
-                            </span>
-                        @elseif($sale->status === 'unpaid')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
-                                <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                {{ __('messages.unpaid') }}
-                            </span>
-                        @elseif($sale->status === 'cancelled')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">
-                                <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                </svg>
-                                {{ __('messages.cancelled') }}
-                            </span>
-                        @elseif($sale->status === 'refunded')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                <svg class="w-4 h-4 me-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                {{ __('messages.refunded') }}
-                            </span>
-                        @else
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                {{ __('messages.' . $sale->status) }}
-                            </span>
-                        @endif
-                        @php $refundedSoFar = $sale->refundedConfirmedTotal(); @endphp
-                        @if($refundedSoFar > 0)
-                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ __('messages.refunded_so_far') }}:
-                                {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}
-                            </div>
-                        @endif
-                        @if($sale->hasUnconfirmedRefund())
-                            <div class="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
-                                <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                                </svg>
-                                <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Event Info -->
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.event') }}</div>
-                    <x-link href="{{ $sale->getEventUrl() }}" target="_blank" class="font-medium">{{ $sale->event->name }}</x-link>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $sale->created_at->format('M j, Y') }}</div>
-                </div>
-
-                <!-- Payment Details -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.total') }}</div>
-                        @php
-                            $mobileRowAmount = $sale->legTotalPayment();
-                            $mobileRowDiscount = $sale->legTotalDiscount();
-                            $mobileRowGiftCard = $sale->legTotalGiftCard();
-                        @endphp
-                        @if ($sale->isRsvp())
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</div>
-                        @else
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ number_format($mobileRowAmount, 2, '.', ',') }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $sale->event->ticket_currency_code }}</div>
-                        @endif
-                        @if ($sale->promo_code_id && $sale->promoCode)
-                            <span class="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
-                                {{ $sale->promoCode->code }} -{{ number_format($mobileRowDiscount, 2, '.', ',') }}
-                            </span>
-                        @endif
-                        @if ($mobileRowGiftCard > 0)
-                            <span class="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
-                                {{ __('messages.gift_card') }} -{{ number_format($mobileRowGiftCard, 2, '.', ',') }}
-                            </span>
-                        @endif
-                    </div>
-
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                        <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.transaction_reference') }}</div>
-                        <div class="text-sm text-gray-900 dark:text-gray-100">
-                            {{-- The gateway owns the format of its own reference, so it also owns
-                                 whether there is anywhere to link to. Null means "no dashboard page"
-                                 (an Invoice Ninja 'sub:' subscription id, an unknown legacy method,
-                                 or a marker with no driver at all) and falls through to plain text. --}}
-                            @php $referenceUrl = payment_gateways()->get($sale->payment_method)?->referenceUrl($sale); @endphp
-                            @if ($sale->transaction_reference == __('messages.manual_payment'))
-                                <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
-                            @elseif ($sale->payment_method == 'import')
-                                <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
-                            @elseif ($sale->payment_method == 'box_office')
-                                <span class="text-gray-600 dark:text-gray-400">{{ __('messages.seating_box_office_sale') }}</span>
-                            @elseif ($referenceUrl)
-                                <x-link href="{{ $referenceUrl }}" target="_blank" class="break-all">
-                                    {{ $sale->transaction_reference }}
-                                </x-link>
-                            @else
-                                <span class="font-mono text-sm break-all">{{ $sale->transaction_reference }}</span>
-                            @endif
-                        </div>
-                    </div>                </div>
-
-                <!-- Custom Fields -->
+@if ($sales->count() > 0)
+<div class="ap-card rounded-xl overflow-hidden">
+    <div class="page-scroll">
+        <table class="page-table is-wide is-hover sales-list">
+            <thead>
+                <tr>
+                    <x-page-sort column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.customer') }}</x-page-sort>
+                    <x-page-sort column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.event') }}</x-page-sort>
+                    <x-page-sort column="payment_amount" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.total') }}</x-page-sort>
+                    <x-page-sort column="transaction_reference" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.transaction_reference') }}</x-page-sort>
+                    <x-page-sort column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-page-sort>
+                    <x-page-sort column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-page-sort>
+                    <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($sales as $sale)
                 @php
-                    $mobileHasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
-                    $mobileHasTicketCustomFields = false;
+                    $isGroupedPrimary = $sale->isPrimarySale();
+                    $guestCount = $groupCounts[$sale->id] ?? 0;
+                    $hasGuests = $isGroupedPrimary && $guestCount > 0;
+                    $encodedSaleId = \App\Utils\UrlUtils::encodeId($sale->id);
+
+                    $hasEventCustomFields = $sale->event->custom_fields && count($sale->event->custom_fields) > 0;
+                    $hasTicketCustomFields = false;
                     foreach ($sale->saleTickets as $st) {
                         if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
-                            $mobileHasTicketCustomFields = true;
+                            $hasTicketCustomFields = true;
                             break;
                         }
                     }
-                    $mobileHasAnyCustomValues = false;
-                    if ($mobileHasEventCustomFields) {
-                        $mobileEventFallbackIdx = 1;
+                    $hasAnyCustomValues = false;
+                    if ($hasEventCustomFields) {
+                        $eventFallbackIdx = 1;
                         foreach ($sale->event->custom_fields as $fk => $fc) {
-                            $idx = $fc['index'] ?? $mobileEventFallbackIdx;
-                            $mobileEventFallbackIdx++;
+                            $idx = $fc['index'] ?? $eventFallbackIdx;
+                            $eventFallbackIdx++;
                             if ($idx >= 1 && $idx <= 10 && $sale->{"custom_value{$idx}"}) {
-                                $mobileHasAnyCustomValues = true;
+                                $hasAnyCustomValues = true;
                                 break;
                             }
                         }
                     }
-                    if (!$mobileHasAnyCustomValues && $mobileHasTicketCustomFields) {
+                    if (! $hasAnyCustomValues && $hasTicketCustomFields) {
                         foreach ($sale->saleTickets as $st) {
-                            if (!$st->ticket || !$st->ticket->custom_fields) continue;
-                            $mobileTicketFallbackIdx = 1;
+                            if (! $st->ticket || ! $st->ticket->custom_fields) {
+                                continue;
+                            }
+                            $ticketFallbackIdx = 1;
                             foreach ($st->ticket->custom_fields as $fk => $fc) {
-                                $idx = $fc['index'] ?? $mobileTicketFallbackIdx;
-                                $mobileTicketFallbackIdx++;
+                                $idx = $fc['index'] ?? $ticketFallbackIdx;
+                                $ticketFallbackIdx++;
                                 if ($idx >= 1 && $idx <= 10 && $st->{"custom_value{$idx}"}) {
-                                    $mobileHasAnyCustomValues = true;
+                                    $hasAnyCustomValues = true;
                                     break 2;
                                 }
                             }
                         }
                     }
+
+                    $rowAmount = $sale->legTotalPayment();
+                    $rowDiscount = $sale->legTotalDiscount();
+                    $rowGiftCard = $sale->legTotalGiftCard();
+
+                    // The gateway owns the format of its own reference, so it also owns whether
+                    // there is anywhere to link to. Null means "no dashboard page" (an Invoice
+                    // Ninja 'sub:' subscription id, an unknown legacy method, or a marker with no
+                    // driver at all) and falls through to plain text.
+                    $referenceUrl = payment_gateways()->get($sale->payment_method)?->referenceUrl($sale);
+
+                    // Confirmed only. refundedTotal() also counts claims we have not heard back
+                    // on, and showing those as refunded would tell an owner a customer was paid
+                    // when the gateway never said so.
+                    $refundedSoFar = $sale->refundedConfirmedTotal();
+
+                    // Asked of the driver, not inferred from payment_method: a sale marked paid by
+                    // hand carries the translated string manual_payment in transaction_reference,
+                    // so 'stripe' is not evidence Stripe holds anything. Prefixed names because
+                    // a php block shares the view's scope with the loop above.
+                    $refundDriver = payment_gateways()->get($sale->payment_method);
+                    $refundViaGateway = $sale->status === 'paid'
+                        && $refundDriver?->supportsRefunds()
+                        && $refundDriver->refundReferenceFor($sale) !== null;
+                    $refundRemaining = $refundViaGateway ? $sale->refundableRemaining() : 0.0;
+                    $refundAskAmount = $refundViaGateway && $refundDriver->supportsPartialRefunds() && $refundRemaining > 0
+                        // A payment plan refunds leg by leg and only in full, so there is no
+                        // amount to ask for.
+                        && ! $sale->installmentPlan;
+                    // 'rsvp' is a provenance marker with no driver behind it (config/payments.php
+                    // says so), so it can never be a capability question. A free registration took
+                    // no money, and Cancel Ticket below is what the action would really be.
+                    $refundShow = $sale->status === 'paid'
+                        && $sale->payment_method !== 'rsvp'
+                        && (! $refundViaGateway || $refundRemaining > 0);
                 @endphp
-                @if ($mobileHasAnyCustomValues)
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.details') }}</div>
-                    <div class="space-y-1.5">
-                        {{-- Event-level Custom Fields --}}
-                        @if ($mobileHasEventCustomFields)
-                            @php $mobileEventFallbackIndex = 1; @endphp
-                            @foreach ($sale->event->custom_fields as $fieldKey => $fieldConfig)
-                                @php
-                                    $index = $fieldConfig['index'] ?? $mobileEventFallbackIndex;
-                                    $mobileEventFallbackIndex++;
-                                @endphp
-                                @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
-                                    <div class="flex gap-2 items-baseline">
-                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
-                                        <span class="text-sm text-gray-900 dark:text-gray-100">{{ $sale->{"custom_value{$index}"} }}</span>
-                                    </div>
-                                @endif
-                            @endforeach
-                        @endif
-
-                        {{-- Ticket-level Custom Fields --}}
-                        @foreach ($sale->saleTickets as $saleTicket)
-                            @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
-                                <div class="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-600">
-                                    <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
-                                    @php $mobileTicketFallbackIndex = 1; @endphp
-                                    @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
-                                        @php
-                                            $index = $fieldConfig['index'] ?? $mobileTicketFallbackIndex;
-                                            $mobileTicketFallbackIndex++;
-                                        @endphp
-                                        @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
-                                            <div class="flex gap-2 items-baseline ms-3">
-                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $fieldConfig['name'] }}:</span>
-                                                <span class="text-sm text-gray-900 dark:text-gray-100">{{ $saleTicket->{"custom_value{$index}"} }}</span>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <!-- Actions -->
-                <div class="pt-2">
-                    <div class="relative" x-data="{
-                        open: false,
-                        positionDropdown() {
-                            if (!this.open) return;
-                            const button = this.$refs.button;
-                            const dropdown = this.$refs.dropdown;
-                            const rect = button.getBoundingClientRect();
-                            
-                            dropdown.style.position = 'fixed';
-                            dropdown.style.top = `${rect.bottom + 4}px`;
-                            dropdown.style.left = `${rect.left}px`;
-                            dropdown.style.zIndex = '1000';
-                        }
-                    }">
-                        <button @click="open = !open; $nextTick(() => positionDropdown())" 
-                                x-ref="button"
-                                type="button" 
-                                class="w-full inline-flex items-center justify-center rounded-lg bg-[var(--brand-blue-a10)] px-4 py-3 text-sm font-semibold text-[var(--brand-blue)] shadow-sm ring-1 ring-inset ring-[var(--brand-blue-a30)] hover:bg-[var(--brand-blue-a20)] transition-colors duration-150">
-                            <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                            </svg>
-                            {{ __('messages.select_action') }}
-                        </button>
-
-                        <div x-show="open" 
-                             x-ref="dropdown"
-                             @click.away="open = false"
-                             class="ap-dropdown w-48 origin-top-right rounded-lg py-1 ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" 
-                             role="menu" 
-                             x-cloak
-                             aria-orientation="vertical">
-                            
-                            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" 
-                               target="_blank" 
-                               @click="open = false"
-                               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
-                               role="menuitem">
-                                {{ __('messages.view_ticket') }}
-                            </a>
-
-                            <button @click="open = false; resendEmail('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}')" 
-                                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150" 
-                                    role="menuitem">
-                                {{ __('messages.send_email') }}
-                            </button>
-
-                            @if($sale->status === 'unpaid')
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'mark_paid')"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
-                                        role="menuitem">
-                                    {{ __('messages.mark_paid') }}
-                                </button>
-                            @endif
-
-                            @php
-                                $refundDriver = payment_gateways()->get($sale->payment_method);
-                                $refundViaGateway = $sale->status === 'paid'
-                                    && $refundDriver?->supportsRefunds()
-                                    && $refundDriver->refundReferenceFor($sale) !== null;
-                                $refundRemaining = $refundViaGateway ? $sale->refundableRemaining() : 0.0;
-                                $refundAskAmount = $refundViaGateway && $refundDriver->supportsPartialRefunds() && $refundRemaining > 0
-                                    && ! $sale->installmentPlan;
-                                // See the desktop table: 'rsvp' has no driver and took no money.
-                                $refundShow = $sale->status === 'paid'
-                                    && $sale->payment_method !== 'rsvp'
-                                    && (! $refundViaGateway || $refundRemaining > 0);
-                            @endphp
-                            @if($refundShow)
-                                {{-- Raw, because Js::from() has already made every argument safe for a
-                                     double-quoted attribute (it hex-escapes quotes and delimits with
-                                     single ones). Concatenating pre-escaped values inside {{ }} would
-                                     escape them a second time. --}}
-                                <button @click="open = false; {!! $refundAskAmount
-                                        ? 'openRefundDialog('.\Illuminate\Support\Js::from(\App\Utils\UrlUtils::encodeId($sale->id)).', '.\Illuminate\Support\Js::from(number_format($refundRemaining, 3, '.', '')).', '.\Illuminate\Support\Js::from(\App\Utils\MoneyUtils::format($refundRemaining, $sale->event?->ticket_currency_code)).', '.\Illuminate\Support\Js::from(\App\Utils\MoneyUtils::decimalsFor($sale->event?->ticket_currency_code)).')'
-                                        : 'handleAction('.\Illuminate\Support\Js::from(\App\Utils\UrlUtils::encodeId($sale->id)).", 'refund')" !!}"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
-                                        role="menuitem">
-                                    {{ $refundViaGateway ? __('messages.refund') : __('messages.mark_as_refunded') }}
-                                </button>
-                            @endif
-
-                            @if(in_array($sale->status, ['unpaid', 'paid']))
-                                <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'cancel')"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
-                                        role="menuitem">
-                                    {{ __('messages.cancel') }}
-                                </button>
-                            @endif
-
-                            @if(! $sale->is_deleted)
-                            <button @click="open = false; handleAction('{{ \App\Utils\UrlUtils::encodeId($sale->id) }}', 'delete')"
-                                    class="block px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
-                                    role="menuitem">
-                                {{ __('messages.delete') }}
+                <tr>
+                    <td class="c-main">
+                        <div class="sales-customer">
+                            @if ($hasAnyCustomValues || $hasGuests)
+                            <button type="button" class="sales-open" data-toggle-row data-sale-id="{{ $encodedSaleId }}" aria-expanded="false">
+                                <svg class="w-4 h-4 transition-transform duration-200 rtl:-scale-x-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                                <span class="sr-only">{{ __('messages.details') }}</span>
                             </button>
                             @endif
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Collapsible Guest Section (Mobile) -->
-                @if ($mobileHasGuests)
-                <div>
-                    <button type="button" data-toggle-mobile-guests="{{ $mobileEncodedSaleId }}" class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                        <svg class="w-4 h-4 transform transition-transform duration-200 mobile-guest-chevron-{{ $mobileEncodedSaleId }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                        {{ $mobileGuestCount }} {{ __('messages.guests') }}
-                    </button>
-                    <div class="mobile-guests-{{ $mobileEncodedSaleId }} hidden mt-3 space-y-3">
-                        @foreach ($sale->guestSales as $guest)
-                        <div class="bg-gray-50 dark:bg-gray-700/50 border-s-2 border-blue-300 dark:border-blue-700 rounded-lg p-3 ms-2">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-gray-400 dark:text-gray-500">&#8627;</span>
-                                <span class="font-medium text-gray-900 dark:text-gray-100">{{ $guest->name }}</span>
-                                @if($guest->status === 'paid')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">{{ __('messages.paid') }}</span>
-                                @elseif($guest->status === 'cancelled')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">{{ __('messages.cancelled') }}</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">{{ __('messages.' . $guest->status) }}</span>
+                            <div class="page-person-text">
+                                <span class="c-strong"><bdi>{{ $sale->name }}</bdi></span>
+                                @if ($hasGuests)
+                                <span class="event-chip">+ {{ $guestCount }} {{ __('messages.guests') }}</span>
                                 @endif
+                                <span class="c-sub">
+                                    <a href="mailto:{{ $sale->email }}" class="event-link" dir="ltr" title="{{ $sale->email }}">{{ $sale->email }}</a>
+                                    @if ($sale->phone)
+                                    <a href="tel:{{ $sale->phone }}" class="event-link" dir="ltr">{{ $sale->phone }}</a>
+                                    @endif
+                                </span>
                             </div>
-                            <a href="mailto:{{ $guest->email }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $guest->email }}</a>
-                            @if ($guest->phone)
-                            <br><a href="tel:{{ $guest->phone }}" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] text-sm">{{ $guest->phone }}</a>
-                            @endif
-                            <div class="mt-2 flex items-center gap-3">
-                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" class="inline-flex items-center gap-1 text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">
-                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
+                        </div>
+                    </td>
+                    <td class="c-wrap c-event">
+                        <a href="{{ $sale->getEventUrl() }}" target="_blank" rel="noopener" class="event-link"><bdi>{{ $sale->event->name }}</bdi></a>
+                    </td>
+                    <td class="c-total" @unless ($sale->isRsvp()) data-label="{{ __('messages.total') }}" @endunless>
+                        @if ($sale->isRsvp())
+                        <span class="c-strong">{{ __('messages.registered') }}</span>
+                        @else
+                        <span class="c-strong">{{ number_format($rowAmount, 2, '.', ',') }}</span>
+                        <span class="c-quiet">{{ $sale->event->ticket_currency_code }}</span>
+                        @endif
+                        @if ($sale->promo_code_id && $sale->promoCode)
+                        <span class="event-chip">{{ $sale->promoCode->code }} -{{ number_format($rowDiscount, 2, '.', ',') }}</span>
+                        @endif
+                        @if ($rowGiftCard > 0)
+                        <span class="event-chip">{{ __('messages.gift_card') }} -{{ number_format($rowGiftCard, 2, '.', ',') }}</span>
+                        @endif
+                    </td>
+                    <td class="c-quiet c-wrap c-reference">
+                        @if ($sale->transaction_reference == __('messages.manual_payment'))
+                            {{ __('messages.manual_payment') }}
+                        @elseif ($sale->payment_method == 'import')
+                            {{ __('messages.manual_import') }}
+                        @elseif ($sale->payment_method == 'box_office')
+                            {{ __('messages.seating_box_office_sale') }}
+                        @elseif ($referenceUrl)
+                            <a href="{{ $referenceUrl }}" target="_blank" rel="noopener" class="event-link c-mono c-clip" dir="ltr" title="{{ $sale->transaction_reference }}">{{ $sale->transaction_reference }}</a>
+                        @elseif ($sale->transaction_reference)
+                            <span class="c-mono c-clip" dir="ltr" title="{{ $sale->transaction_reference }}">{{ $sale->transaction_reference }}</span>
+                        @endif
+                    </td>
+                    <td class="c-status">
+                        <x-sale-status :status="$sale->status" />
+                        @if ($sale->feedback)
+                        <span class="sales-rating" title="{{ __('messages.feedback') }}: {{ $sale->feedback->rating }}/5">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                            <span class="sr-only">{{ __('messages.feedback') }}:</span> {{ $sale->feedback->rating }}/5
+                        </span>
+                        @endif
+                        {{-- Outside the status mark on purpose. A partially refunded sale stays `paid`, but a
+                             sale can also reach `refunded` while a claim is still unconfirmed - refundableRemaining()
+                             counts pending and awaiting_reconciliation rows against the ceiling - and hiding the
+                             warning behind `paid` made it vanish at exactly the moment it matters. Reads the
+                             eager-loaded relation, so this costs no query per row. --}}
+                        @if ($refundedSoFar > 0)
+                        <span class="c-sub">{{ __('messages.refunded_so_far') }}: {{ \App\Utils\MoneyUtils::format($refundedSoFar, $sale->event?->ticket_currency_code) }}</span>
+                        @endif
+                        @if ($sale->hasUnconfirmedRefund())
+                        <div class="sales-warning mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+                            <svg class="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            </svg>
+                            <span class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.refund_awaiting_confirmation') }}</span>
+                        </div>
+                        @endif
+                    </td>
+                    <td class="c-date">{{ $sale->created_at->translatedFormat('M j, Y') }}</td>
+                    <td class="c-actions">
+                        {{-- Three dots, named for a screen reader: the word "Actions" on every
+                             row cost the list a column's width on a laptop. --}}
+                        <button type="button" class="page-tool sales-menu" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" id="sale-actions-menu-button-{{ $encodedSaleId }}" aria-expanded="false" aria-haspopup="true" title="{{ __('messages.actions') }}">
+                            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                            </svg>
+                            <span class="sr-only">{{ __('messages.actions') }}</span>
+                        </button>
+                        <div id="sale-actions-pop-up-menu-{{ $encodedSaleId }}" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-56 rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="sale-actions-menu-button-{{ $encodedSaleId }}" tabindex="-1">
+                            <div class="py-1" role="none" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}">
+                                <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]) }}" target="_blank" rel="noopener" class="{{ $salesMenuItem }}" role="menuitem">
                                     {{ __('messages.view_ticket') }}
                                 </a>
-                                <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="js-resend-email inline-flex items-center gap-1 text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">
-                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
+                                <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" data-resend-email="{{ $encodedSaleId }}" class="{{ $salesMenuItem }}" role="menuitem">
                                     {{ __('messages.send_email') }}
-                                </a>
+                                </button>
+                                @if ($sale->status === 'unpaid')
+                                <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" data-sale-action="mark_paid" data-sale-id="{{ $encodedSaleId }}" class="{{ $salesMenuItem }}" role="menuitem">
+                                    {{ __('messages.mark_paid') }}
+                                </button>
+                                @endif
+                                @if ($refundShow)
+                                <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" data-sale-action="refund" data-sale-id="{{ $encodedSaleId }}" @if($refundAskAmount) data-refund-remaining="{{ number_format($refundRemaining, 3, '.', '') }}" data-refund-decimals="{{ \App\Utils\MoneyUtils::decimalsFor($sale->event?->ticket_currency_code) }}" data-refund-remaining-formatted="{{ \App\Utils\MoneyUtils::format($refundRemaining, $sale->event?->ticket_currency_code) }}" @endif class="{{ $salesMenuItem }}" role="menuitem">
+                                    {{-- Honest label. A rail that cannot send money back gets "Mark as
+                                         Refunded", because the old wording promised a refund and only
+                                         ever changed a status. An appointment booking is not a ticket, so
+                                         it gets the plain "Refund". --}}
+                                    {{ $refundViaGateway ? ($sale->event?->appointment_type_id ? __('messages.refund') : __('messages.refund_ticket')) : __('messages.mark_as_refunded') }}
+                                </button>
+                                @endif
+                                @if (in_array($sale->status, ['unpaid', 'paid']))
+                                <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" data-sale-action="cancel" data-sale-id="{{ $encodedSaleId }}" class="{{ $salesMenuItem }}" role="menuitem">
+                                    {{ __('messages.cancel_ticket') }}
+                                </button>
+                                @endif
+                                @if (! $sale->is_deleted)
+                                <div class="my-1 border-t border-gray-100 dark:border-gray-700" role="none"></div>
+                                <button type="button" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" data-sale-action="delete" data-sale-id="{{ $encodedSaleId }}" class="{{ $salesMenuDanger }}" role="menuitem">
+                                    {{ __('messages.delete') }}
+                                </button>
+                                @endif
                             </div>
                         </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endforeach
-    </div>
+                    </td>
+                </tr>
+                @if ($hasAnyCustomValues)
+                <tr class="custom-fields-row detail-row-{{ $encodedSaleId }} sales-detail hidden">
+                    <td colspan="7" class="c-main">
+                        <dl class="sales-fields sales-detail-body">
+                            {{-- What the buyer answered on the event's own questions. --}}
+                            @if ($hasEventCustomFields)
+                                @php $eventFallbackIndex = 1; @endphp
+                                @foreach ($sale->event->custom_fields as $fieldKey => $fieldConfig)
+                                    @php
+                                        $index = $fieldConfig['index'] ?? $eventFallbackIndex;
+                                        $eventFallbackIndex++;
+                                    @endphp
+                                    @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
+                                    <div>
+                                        <dt><bdi>{{ $fieldConfig['name'] }}</bdi>:</dt>
+                                        <dd><bdi>{{ $sale->{"custom_value{$index}"} }}</bdi></dd>
+                                    </div>
+                                    @endif
+                                @endforeach
+                            @endif
 
-    <div class="mt-6 px-4">
-        {{ $sales->links() }}
+                            {{-- And on each ticket type's. --}}
+                            @foreach ($sale->saleTickets as $saleTicket)
+                                @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
+                                <div class="sales-fields-group">
+                                    <dt><bdi>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</bdi></dt>
+                                </div>
+                                    @php $ticketFallbackIndex = 1; @endphp
+                                    @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
+                                        @php
+                                            $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                                            $ticketFallbackIndex++;
+                                        @endphp
+                                        @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
+                                        <div class="is-nested">
+                                            <dt><bdi>{{ $fieldConfig['name'] }}</bdi>:</dt>
+                                            <dd><bdi>{{ $saleTicket->{"custom_value{$index}"} }}</bdi></dd>
+                                        </div>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            @endforeach
+                        </dl>
+                    </td>
+                </tr>
+                @endif
+                @if ($hasGuests)
+                    @foreach ($sale->guestSales as $guest)
+                    <tr class="guest-row detail-row-{{ $encodedSaleId }} sales-detail hidden">
+                        <td class="c-main">
+                            <div class="sales-customer">
+                                <span class="sales-guest-mark" aria-hidden="true">&#8627;</span>
+                                <div class="page-person-text">
+                                    <span class="c-strong"><bdi>{{ $guest->name }}</bdi></span>
+                                    <span class="c-sub">
+                                        <a href="mailto:{{ $guest->email }}" class="event-link" dir="ltr" title="{{ $guest->email }}">{{ $guest->email }}</a>
+                                        @if ($guest->phone)
+                                        <a href="tel:{{ $guest->phone }}" class="event-link" dir="ltr">{{ $guest->phone }}</a>
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        {{-- A guest has no event, total or reference of their own, so what can be
+                             done for them takes that room: at the end of the row, beside the
+                             menu's column, two links ran off the card. --}}
+                        <td colspan="3" class="c-guest-actions">
+                            <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view_ticket') }}</a>
+                            <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="event-link js-resend-email">{{ __('messages.send_email') }}</button>
+                        </td>
+                        <td class="c-status"><x-sale-status :status="$guest->status" /></td>
+                        <td class="c-date">{{ $guest->created_at->translatedFormat('M j, Y') }}</td>
+                        <td></td>
+                    </tr>
+                    @endforeach
+                @endif
+                @endforeach
+            </tbody>
+        </table>
     </div>
-    @elseif (($planBlockedRoles ?? collect())->isNotEmpty())
-    {{-- The notice above already explains the empty table. Falling through to the ordinary empty
-         state here would contradict it: "No sales found. Create events to start selling tickets."
-         is the wrong advice for someone whose schedule has plenty of both. --}}
+</div>
+
+@if ($sales->hasPages())
+<div class="page-pager">
+    {{ $sales->links() }}
+</div>
+@endif
+@elseif (($planBlockedRoles ?? collect())->isNotEmpty())
+{{-- The notice above already explains the empty table. Falling through to the ordinary empty
+     state here would contradict it: "No sales found. Create events to start selling tickets."
+     is the wrong advice for someone whose schedule has plenty of both. --}}
+@else
+{{-- Three ways to have nothing here, and the old page gave the first one's advice for all of
+     them: nothing matches what was typed, nothing is coming up (earlier orders are a switch
+     away), or nothing has been sold at all. --}}
+<div class="ap-card rounded-xl">
+    @if (filled(request()->query('filter')))
+    <x-page-empty :title="__('messages.no_results_found')" icon="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+    @elseif (request()->query('include_past') != 1)
+    <x-page-empty :title="__('messages.no_sales')" :text="__('messages.no_sales_description').' '.__('messages.no_sales_past_hint', ['label' => __('messages.include_past_events')])" icon="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
     @else
-    <div class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.no_sales') }}</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_sales_description') }}</p>
-    </div>
+    <x-page-empty :title="__('messages.no_sales')" :text="__('messages.no_sales_description')" icon="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
     @endif
 </div>
+@endif
