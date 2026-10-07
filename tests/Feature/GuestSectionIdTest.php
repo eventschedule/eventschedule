@@ -36,6 +36,7 @@ class GuestSectionIdTest extends TestCase
         'resources/views/role/show-guest.blade.php',
         'resources/views/event/show-guest.blade.php',
         'resources/views/event/partials/interest-capture.blade.php',
+        'resources/views/event/partials/more-events.blade.php',
         'resources/views/partials/subscribe-panel.blade.php',
         'resources/views/components/sponsor-grid.blade.php',
         'resources/views/components/stay22-map.blade.php',
@@ -239,6 +240,9 @@ class GuestSectionIdTest extends TestCase
             'formatted_address' => '123 Main St, Springfield, IL 62701, USA',
         ]);
         $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        // Something after it on the schedule, so the page has its "more events" section.
+        $this->createEvent($role, ['name' => 'Wednesday Session', 'creator_role_id' => $role->id, 'starts_at' => now()->addDays(9)->setTime(12, 0)->format('Y-m-d H:i:s')]);
 
         // One act with something to show (a card) and one bare name (the compact list). The bare
         // one must be UNCLAIMED as well as empty: isClaimed() alone earns a card of its own.

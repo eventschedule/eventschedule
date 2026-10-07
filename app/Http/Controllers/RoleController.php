@@ -2478,6 +2478,9 @@ class RoleController extends Controller
         // list, and on its own page the title and description (AppGuestLayout::$upcoming).
         $upcoming = null;
 
+        // The event page's "more events" rows (event/partials/more-events).
+        $moreEvents = collect();
+
         // Whether the schedule page loads the poll celebration script. Null leaves the calendar
         // partial to its own check of $events, which the event page and ?graphic=1 still use.
         $hasActivePolls = null;
@@ -2782,6 +2785,14 @@ class RoleController extends Controller
             // registration redirect, so it counts somebody who was shown the event. It leaves out
             // a schedule's own team, embeds and demo schedules (GuestFunnel::counts()).
             GuestFunnel::count('event_view', $request, $role);
+
+            // Three other events for the foot of the page, from the schedule's cached list of
+            // what is next. Never this event again on another date: a weekly night's page does
+            // not need next week's as "more".
+            $moreEvents = $this->eventRepo->upcomingForGuest($role, $selectedGroup, 12)
+                ->reject(fn (array $row) => $row['event']->id === $event->id)
+                ->take(3)
+                ->values();
             $event->loadMissing(['approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')]);
             $photoLimitReached = ! $role->canUploadPhoto();
 
@@ -2867,6 +2878,7 @@ class RoleController extends Controller
                 'subdomain',
                 'events',
                 'upcoming',
+                'moreEvents',
                 'hasEarlierUpcomingEvents',
                 'carouselEvents',
                 'hasActivePolls',

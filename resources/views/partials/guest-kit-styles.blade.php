@@ -52,6 +52,9 @@
 
     {{-- A panel: the translucent card every section of a guest page sits in. --}}
     .gk-panel { background: var(--gk-panel); color: var(--gk-ink); border-radius: var(--gk-radius); box-shadow: var(--gk-shadow); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    {{-- Edge to edge on a phone, where the guest pages' panels have always run to both sides. --}}
+    .gk-panel-flush { border-radius: 0; }
+    @media (min-width: 40rem) { .gk-panel-flush { border-radius: var(--gk-radius); } }
     .gk-pad { padding: 1.125rem 1rem; }
     @media (min-width: 48rem) { .gk-pad { padding: 1.5rem 1.75rem; } }
 
@@ -102,6 +105,52 @@
     .gk-input::placeholder { color: var(--gk-ink-3); }
     .gk-input:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
     .gk-input-bad { border-color: var(--gk-bad); box-shadow: 0 0 0 1px var(--gk-bad); }
+
+    {{-- A list of events as rows: when, what, where, and a small picture. A row is a link. --}}
+    .gk-dayhead { display: flex; align-items: baseline; gap: .5rem; padding: .75rem 1rem; border-bottom: 1px solid var(--gk-line); }
+    .gk-dayhead h2 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
+    .gk-dayhead-link { margin-inline-start: auto; font-size: .875rem; }
+    .gk-rows { margin: 0; padding: 0; list-style: none; }
+    .gk-rows li + li { border-top: 1px solid var(--gk-line); }
+    .gk-row { display: grid; grid-template-columns: minmax(0, 1fr) 4.75rem; grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; column-gap: .75rem; row-gap: .125rem; padding: .75rem 1rem; color: var(--gk-ink); text-decoration: none; transition: background-color var(--gk-swap); }
+    .gk-row-bare { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b"; }
+    .gk-row:hover { background: var(--gk-well); }
+    .gk-row:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: -2px; }
+    .gk-row-time { grid-area: t; font-size: .84375rem; font-weight: 700; color: var(--gk-ink-2); font-variant-numeric: tabular-nums; }
+    .gk-row-time span { margin-inline-start: .375rem; font-weight: 500; color: var(--gk-ink-3); }
+    .gk-row-body { grid-area: b; display: flex; flex-direction: column; gap: .1875rem; min-width: 0; }
+    .gk-row-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 1.03125rem; font-weight: 700; line-height: 1.25; }
+    .gk-row-where { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .875rem; color: var(--gk-ink-3); }
+    .gk-row-img { grid-area: i; align-self: center; width: 4.75rem; height: 4.75rem; border-radius: .625rem; object-fit: cover; }
+
+    {{-- The event page's frame. Two columns from a laptop up, as the page has always been: pictures,
+         performers and the venue beside the facts and the story. On a phone the two columns are
+         dealt into ONE in the order a visitor needs them (picture, facts, form, about, agenda,
+         performers, venue, photos and comments), which is what the order rules are for: a column
+         is display:contents there, so its children are the items. Anything in a column without a
+         place of its own falls at the end of its column's part of the page. --}}
+    .gk-event-page { max-width: 70rem; }
+    .gk-event { display: flex; flex-direction: column; gap: 1rem; }
+    .gk-event-col { display: contents; }
+    .gk-event-side > * { order: 7; }
+    .gk-event-main > * { order: 9; }
+    .gk-event-flat > * { order: 6; }
+    .gk-o1 { order: 1; }
+    .gk-o2 { order: 2; }
+    .gk-o3 { order: 3; }
+    .gk-o4 { order: 4; }
+    .gk-o5 { order: 5; }
+    .gk-o6 { order: 6; }
+    .gk-o8 { order: 8; }
+    .gk-event-foot { display: grid; gap: 1rem; margin-top: 1rem; }
+    .gk-create { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .875rem 1rem; }
+    @media (min-width: 64rem) {
+        .gk-event { display: grid; grid-template-columns: 23.75rem minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+        .gk-event-col { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+        .gk-event-main { gap: 1.5rem; }
+        .gk-event-col > *, .gk-event-flat > * { order: 0; }
+        .gk-event-foot { margin-top: 2.5rem; }
+    }
 
     @media (prefers-reduced-motion: reduce) {
         .gk-btn, .gk-link { transition-duration: 1ms; }

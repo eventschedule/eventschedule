@@ -253,7 +253,8 @@ class GuestImagePerformanceTest extends TestCase
             'srcset="'.url('/storage/flyer_abc_w480.webp').' 480w, '.url('/storage/flyer_abc_w960.webp').' 960w, '.url('/storage/flyer_abc.png').' 1600w"',
             $flyer
         );
-        $this->assertStringContainsString('sizes="(min-width: 1024px) 564px, (min-width: 640px) calc(100vw - 40px), 100vw"', $flyer);
+        // 380px from a laptop up: the flyer leads the narrow column now, beside the facts.
+        $this->assertStringContainsString('sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw"', $flyer);
         $this->assertStringContainsString('width="1600" height="2133"', $flyer);
         $this->assertStringContainsString('fetchpriority="high"', $flyer);
         $this->assertStringNotContainsString('loading="lazy"', $flyer);
@@ -280,9 +281,10 @@ class GuestImagePerformanceTest extends TestCase
 
     /**
      * With no flyer, the square hero is the picture a phone sees: its 960 derivative and a srcset,
-     * and the page's one high-priority image. With a flyer it steps aside.
+     * and the page's one high-priority image. With a flyer it is not drawn at all: the flyer has
+     * the top of that column, and a stand-in for a picture the page has is a second picture.
      */
-    public function test_the_hero_fallback_is_a_derivative_and_high_priority_only_without_a_flyer(): void
+    public function test_the_hero_fallback_is_a_derivative_and_is_drawn_only_without_a_flyer(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue', ['name' => 'Blue Room', 'profile_image_url' => 'profile_abc.png']);
         $role->recordImageVariants(['w480' => 'profile_abc_w480.webp', 'w960' => 'profile_abc_w960.webp']);
@@ -299,8 +301,10 @@ class GuestImagePerformanceTest extends TestCase
         $withFlyer = $this->createEvent($role, ['name' => 'Winter Session', 'creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_abc.png']);
         $html = $this->page($this->guestEventUrl($role, $withFlyer));
 
-        $this->assertSame(1, preg_match('#<div id="gp-event-hero-image"[^>]*>\s*(<img\b[^>]*>)#s', $html, $m), 'fixture: the hero still renders');
-        $this->assertStringNotContainsString('fetchpriority', $m[1]);
+        $this->assertStringNotContainsString('id="gp-event-hero-image"', $html);
+        $this->assertStringContainsString('id="gp-flyer"', $html);
+        // And the flyer comes before the facts in the page, so a phone opens on it.
+        $this->assertLessThan(strpos($html, 'id="gp-event-details"'), strpos($html, 'id="gp-flyer"'));
     }
 
     /**
@@ -321,8 +325,8 @@ class GuestImagePerformanceTest extends TestCase
 
         $event = $this->createEvent($headerOnly, ['name' => 'Autumn Session', 'creator_role_id' => $headerOnly->id, 'flyer_image_url' => 'flyer_abc.png']);
         $html = $this->page($this->guestEventUrl($headerOnly, $event));
-        $this->assertStringContainsString('id="gp-event-hero-image"', $html, 'fixture: a hero AND a flyer on one page');
         $this->assertSame(1, $this->highPriorityCount($html), 'event with a flyer: the flyer');
+        $this->assertStringContainsString('fetchpriority="high"', $this->imgTag($html, 'flyer_abc.png'));
 
         $plain = $this->createEvent($headerOnly, ['name' => 'Winter Session', 'creator_role_id' => $headerOnly->id]);
         $this->assertSame(1, $this->highPriorityCount($this->page($this->guestEventUrl($headerOnly, $plain))), 'event without one: the hero');

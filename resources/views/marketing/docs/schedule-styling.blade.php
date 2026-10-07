@@ -528,7 +528,7 @@
                 </thead>
                 <tbody>
                     <tr><td><code class="doc-inline-code">#gp-status-bar</code></td><td>The bar that says an event is cancelled, draft, internal or awaiting review</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-event-hero-image</code></td><td>The large square image at the top of the sidebar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-hero-image</code></td><td>The large square picture that stands in for a flyer when an event has none</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-talent</code></td><td>All performer cards</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-talent-list</code></td><td>The compact list of performer names</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-venue</code></td><td>The venue card</td></tr>
@@ -536,7 +536,7 @@
                     <tr><td><code class="doc-inline-code">#gp-venue-map</code></td><td>The map at the foot of the venue card</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-accommodation</code></td><td>The places-to-stay map</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-create-your-own</code></td><td>The &ldquo;create your own schedule&rdquo; card</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-upcoming-events</code></td><td>The list of other events in the sidebar</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-upcoming-events</code></td><td>The other events listed at the foot of the page</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-details</code></td><td>The main card: title, date, venue, price and buttons</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-back-link</code></td><td>The &ldquo;back to schedule&rdquo; link</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-title</code></td><td>The event title</td></tr>

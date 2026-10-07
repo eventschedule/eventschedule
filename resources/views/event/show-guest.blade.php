@@ -210,12 +210,14 @@
       $backUrl .= '?' . http_build_query($queryParams);
     }
   @endphp
-  <div class="container mx-auto max-w-5xl px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
-    <div class="flex flex-col gap-4 lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-10">
+  <div class="container mx-auto gk-event-page px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
+    {{-- Two columns on a laptop; on a phone their children are dealt into one, in the order the
+         kit's .gk-o rules give (partials/guest-kit-styles says why). --}}
+    <div class="gk-event">
 
-      {{-- LEFT COLUMN --}}
-      <div class="order-2 lg:order-1 pb-4">
-        <div class="flex flex-col gap-4">
+      {{-- LEFT COLUMN: the flyer, the performers, the venue --}}
+      <div class="contents">
+        <div class="gk-event-col gk-event-side">
 
         {{-- Talent/performer cards --}}
         @php
@@ -239,7 +241,45 @@
           $hasTalentImage = $talentMembers->contains(fn($m) => $m->profile_image_url);
         @endphp
 
-        @if (!$hasTalentImage)
+        {{-- Flyer image, at the top of this column: first on a phone, beside the facts on a
+             laptop. It used to follow the form in the other column, so a phone opened on text.
+             The page's LCP image when there is one: its 960 derivative as the src,
+             the 480, the 960 and the original (where it is wider) for the browser to choose from,
+             the original's recorded size so the box keeps its shape before the file arrives, and
+             fetchpriority="high" - never loading="lazy", which held it back until layout. The
+             link opens the full-size original: the shared viewer at the bottom of this page
+             shows it in place, and without JavaScript the link simply goes there. The #gp-flyer
+             id is a documented custom-CSS hook. pageWidth: an animated flyer is its original
+             here, with no srcset, because every derivative is a still of its first frame. --}}
+        @if ($event->flyer_image_url)
+        @php
+          $flyerSrcset = $event->imageVariantSrcset('default', true, pageWidth: true);
+          $flyerSize = $event->imageSourceDimensions();
+        @endphp
+        <div id="gp-flyer" class="gk-o1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+          <a href="{{ $event->flyer_image_url }}" data-lightbox-set="flyer" data-lightbox-index="0" class="block">
+            <img src="{{ $event->getImageUrl(960, pageWidth: true) }}"
+                 @if ($flyerSrcset) srcset="{{ $flyerSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
+                 @if ($flyerSize) width="{{ $flyerSize[0] }}" height="{{ $flyerSize[1] }}" @endif
+                 alt="{{ $eventName }} - {{ __('messages.flyer') }}"
+                 class="w-full cursor-pointer"
+                 fetchpriority="high"/>
+          </a>
+        </div>
+        @php
+          $flyerLightbox = [[
+            'src' => $event->flyer_image_url,
+            'srcset' => $flyerSrcset,
+            'thumb' => $event->getImageUrl(960, pageWidth: true),
+            'w' => $flyerSize[0] ?? null,
+            'h' => $flyerSize[1] ?? null,
+            'caption' => '',
+          ]];
+        @endphp
+        <script {!! nonce_attr() !!}>(window.EsLightboxSets = window.EsLightboxSets || {}).flyer = @json($flyerLightbox, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);</script>
+        @endif
+
+        @if (! $hasTalentImage && ! $event->flyer_image_url)
         @php
           // The schedule whose photo stands in: with no performer's photo on the page, the
           // venue's, else this one's. Event::pagePhotoRoles() lists them in the page's order, and
@@ -253,7 +293,7 @@
         {{-- The 960 derivative, with the 480 for a phone at 1x. fetchpriority="high" only without
              a flyer: the flyer is the page's largest image when there is one, and on a phone this
              column renders below it. --}}
-        <div id="gp-event-hero-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-event-hero-image" class="gk-o1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
             <img src="{{ $fallbackImageRole->getProfileImageUrl(960) }}"
                  @if ($fallbackImageSrcset) srcset="{{ $fallbackImageSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  alt="{{ $eventName }}"
@@ -272,7 +312,7 @@
         {{-- class="contents" so each card stays a direct flex item of the column above and the
              gap-4 spacing is unchanged; the wrapper exists only to give the whole set one id.
              display:none on a display:contents box still removes the subtree. --}}
-        <div id="gp-talent" class="contents">
+        <div id="gp-talent" class="contents gk-event-flat">
         @foreach ($talentMembers as $talentIndex => $each)
         @php
           // The header this act's own page shows (Role::headerImageUrl()): a built-in one, or an
@@ -510,7 +550,7 @@
              its own claim page where it has one, which is how an act finds out a page exists for
              them without an invitation in hand. --}}
         @if ($bareTalent->isNotEmpty())
-        <div id="gp-talent-list" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5">
+        <div id="gp-talent-list" class="gk-o6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {{ __('messages.talent') }}
           </h2>
@@ -770,47 +810,6 @@
         </div>
         @endif
 
-        {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
-             the page's free-tier credit (the corner chip on eventschedule.com, an operator's
-             footer strip on their own platform), so the two cannot disagree. It used to read
-             `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
-             free curator's page dropped this card while still carrying the free-tier credit. --}}
-        @if ($role->showBranding())
-        <div id="gp-create-your-own" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
-            {{ __('messages.create_your_own_event_schedule') }}
-          </p>
-          <a href="{{ marketing_url() }}" target="_blank" rel="noopener noreferrer">
-            <button
-              type="button"
-              name="login"
-              class="accent-hover-btn inline-flex items-center justify-center rounded-xl text-base duration-300 bg-transparent border-[1px] py-4 px-8 hover:scale-105 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-90 text-gray-900 dark:text-white"
-              style="border-color: {{ $accentColor }};"
-              data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-            >
-              {{ __('messages.create_schedule') }}
-            </button>
-          </a>
-        </div>
-        @endif
-
-        {{-- Calendar widget. The agenda is capped at max_events and its payload starts at THIS
-             event's month, so it is a partial view of the schedule twice over - hence the heading
-             naming what the list is, and view_all_url giving it a way out. --}}
-        @if(count($events) > 0)
-        <div id="gp-upcoming-events" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5 flex flex-col gap-6 {{ $role->isRtl() ? 'rtl' : '' }}">
-          {{-- A real heading, not the <p> the neighbouring cards use for a venue or talent NAME:
-               this titles a section, and the partial's own <h2 id="month-year-title"> is hidden by
-               force_mobile, so without one the list has no accessible label at all. The tighter gap
-               lives on this inner wrapper rather than on the panel, so a future third child of the
-               panel does not silently inherit spacing chosen for a heading. --}}
-          <div class="w-full flex flex-col gap-3">
-            <h2 class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">{{ $role->customLabel('events') }}</h2>
-            @include('role/partials/calendar', ['route' => 'guest', 'tab' => '', 'category' => request('category'), 'schedule' => request('schedule'), 'force_mobile' => true, 'max_events' => 20, 'hide_past_events' => true, 'view_all_url' => $backUrl, 'view_all_has_earlier' => $hasEarlierUpcomingEvents ?? false])
-          </div>
-        </div>
-        @endif
-
         </div>
       </div>
 
@@ -849,9 +848,9 @@
           }
       @endphp
 
-      {{-- RIGHT COLUMN --}}
-      <div class="order-1 lg:order-2 flex flex-col gap-4 lg:gap-6">
-        <div id="gp-event-details" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
+      {{-- RIGHT COLUMN: the facts and the button, the form, the story --}}
+      <div class="gk-event-col gk-event-main">
+        <div id="gp-event-details" class="gk-o2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
 
         {{-- Breadcrumb --}}
         <nav id="gp-back-link" aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
@@ -1396,7 +1395,7 @@
 
         {{-- RSVP form section (hidden by default, shown on CTA click) --}}
         @if ($event->canAcceptRsvp($date))
-        <div id="gp-event-form" class="scroll-mt-4"
+        <div id="gp-event-form" class="gk-o3 scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
              @if (request()->get('rsvp') === 'true' || session('error') || $errors->any())
              data-show-initial="true"
@@ -1424,7 +1423,7 @@
              working buy button and a dead one: the CTA above is gated on canSellTickets() alone, so
              any event that could sell but was not Pro rendered a button whose click target
              (#gp-event-form) had never been rendered. Keep these two conditions identical. --}}
-        <div id="gp-event-form" class="scroll-mt-4"
+        <div id="gp-event-form" class="gk-o3 scroll-mt-4"
              style="display: none; transition: opacity 0.2s ease, transform 0.2s ease;"
              @if (request()->get('tickets') === 'true' || session('error') || $errors->any())
              data-show-initial="true"
@@ -1542,44 +1541,10 @@
         })();
         </script>
 
-        {{-- Flyer image. The page's LCP image when there is one: its 960 derivative as the src,
-             the 480, the 960 and the original (where it is wider) for the browser to choose from,
-             the original's recorded size so the box keeps its shape before the file arrives, and
-             fetchpriority="high" - never loading="lazy", which held it back until layout. The
-             link opens the full-size original: the shared viewer at the bottom of this page
-             shows it in place, and without JavaScript the link simply goes there. The #gp-flyer
-             id is a documented custom-CSS hook. pageWidth: an animated flyer is its original
-             here, with no srcset, because every derivative is a still of its first frame. --}}
-        @if ($event->flyer_image_url)
-        @php
-          $flyerSrcset = $event->imageVariantSrcset('default', true, pageWidth: true);
-          $flyerSize = $event->imageSourceDimensions();
-        @endphp
-        <div id="gp-flyer" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-          <a href="{{ $event->flyer_image_url }}" data-lightbox-set="flyer" data-lightbox-index="0" class="block">
-            <img src="{{ $event->getImageUrl(960, pageWidth: true) }}"
-                 @if ($flyerSrcset) srcset="{{ $flyerSrcset }}" sizes="(min-width: 1024px) 564px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
-                 @if ($flyerSize) width="{{ $flyerSize[0] }}" height="{{ $flyerSize[1] }}" @endif
-                 alt="{{ $eventName }} - {{ __('messages.flyer') }}"
-                 class="w-full cursor-pointer"
-                 fetchpriority="high"/>
-          </a>
-        </div>
-        @php
-          $flyerLightbox = [[
-            'src' => $event->flyer_image_url,
-            'srcset' => $flyerSrcset,
-            'thumb' => $event->getImageUrl(960, pageWidth: true),
-            'w' => $flyerSize[0] ?? null,
-            'h' => $flyerSize[1] ?? null,
-            'caption' => '',
-          ]];
-        @endphp
-        <script {!! nonce_attr() !!}>(window.EsLightboxSets = window.EsLightboxSets || {}).flyer = @json($flyerLightbox, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);</script>
-        @elseif ($galleryInFlyerSlot)
+        @if ($galleryInFlyerSlot)
         {{-- No flyer: the gallery leads the page instead, and its first photo is the page's one
              high-priority image (the hero fallback in the other column gives it up). --}}
-        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => true, 'accentColor' => $accentColor])
         </section>
         @endif
@@ -1590,7 +1555,7 @@
           $descriptionHtml = $eventDescriptionHtml;
           $descriptionDir = content_dir_for_language($descriptionHtml, $displayLang);
         @endphp
-        <article id="gp-about" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
+        <article id="gp-about" class="gk-o4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ $role->customLabel('about') }}
           </h2>
@@ -1606,14 +1571,14 @@
 
         {{-- The organizer's gallery, after the description when a flyer leads the page. --}}
         @if ($galleryImages->isNotEmpty() && ! $galleryInFlyerSlot)
-        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => false, 'accentColor' => $accentColor])
         </section>
         @endif
 
         {{-- Agenda image --}}
         @if ($event->agenda_image_url)
-        <div id="gp-agenda-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-agenda-image" class="gk-o5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           <img src="{{ $event->agenda_image_url }}"
             alt="{{ $eventName }} - {{ $role->customLabel('agenda') }}"
             class="w-full" loading="lazy" decoding="async"/>
@@ -1622,7 +1587,7 @@
 
         {{-- Event parts --}}
         @if ($event->parts->count() > 0)
-        <div id="gp-agenda" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-agenda" class="gk-o5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
           @php
             $hasTimes = $event->parts->contains(fn($part) => !empty($part->start_time));
           @endphp
@@ -2042,7 +2007,7 @@
           }
         @endphp
         @if (!is_demo_role($role) && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoData->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
-        <div id="gp-fan-content" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-fan-content" class="gk-o8 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}
           @if ($role->isPro() && $event->polls->count() > 0)
@@ -2443,6 +2408,29 @@
       </div>
       {{-- End RIGHT COLUMN --}}
 
+    </div>
+
+    {{-- The foot, under both columns: three other events, and the free tier's "create your own".
+         They were the tail of the side column, where a second copy of the calendar app drew up
+         to twenty cards: on a phone that was more than half of the page. --}}
+    <div class="gk-event-foot">
+      @include('event.partials.more-events')
+
+      {{-- Create your own card. Keyed off THIS schedule's tier, the same fact that decides
+           the page's free-tier credit (the corner chip on eventschedule.com, an operator's
+           footer strip on their own platform), so the two cannot disagree. It used to read
+           `! $event->isPro()`, which is true when any schedule on the bill is paid - so a
+           free curator's page dropped this card while still carrying the free-tier credit. --}}
+      @if ($role->showBranding())
+      <div id="gp-create-your-own" class="gk-panel gk-panel-flush gk-create bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}">
+        <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
+          {{ __('messages.create_your_own_event_schedule') }}
+        </p>
+        <x-guest.button variant="secondary" size="sm" href="{{ marketing_url() }}" target="_blank" rel="noopener noreferrer">
+          {{ __('messages.create_schedule') }}
+        </x-guest.button>
+      </div>
+      @endif
     </div>
   </div>
 

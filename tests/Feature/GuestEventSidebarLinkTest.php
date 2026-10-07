@@ -4,19 +4,20 @@ namespace Tests\Feature;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * The guest event page's sidebar agenda is a partial view of the schedule twice over: the Vue app
- * slices it to max_events (20), and its payload is fetched for the VIEWED EVENT's month, so an
- * event a month or more out hides everything upcoming before it.
+ * "More events" at the foot of the guest event page.
  *
- * The cap is only knowable in the browser, so these pin the gate Blade emits, not the count:
- * `v-if="true"` means the server already proved the window skipped events, `v-if="hasMoreEventsThanShown"`
- * means it is down to the client to compare its own lists. The third test is the one that matters
- * for privacy - a draft, cancelled or unlisted event must not be what makes the link appear.
+ * It used to be a second copy of the calendar app in the page's side column: a Vue mount that
+ * fetched the schedule's events for the viewed event's month, sliced them to twenty cards, and had
+ * a footer link whose appearance was decided half by the server and half in the browser. On a
+ * phone it was more than half of the page. It is three rows now, drawn by the server from the
+ * schedule's next public events, and the link to the whole schedule is simply there.
+ *
+ * The test that matters for privacy is still here: a draft, cancelled, unlisted or
+ * password-protected event must never be one of the rows.
  */
 class GuestEventSidebarLinkTest extends TestCase
 {
@@ -27,8 +28,6 @@ class GuestEventSidebarLinkTest extends TestCase
     {
         parent::setUp();
 
-        // Mid-month and mid-week, so "three months out" cannot land on a boundary that moves the
-        // calendar grid's start week across the earlier event.
         Carbon::setTestNow(Carbon::parse('2026-03-11 12:00:00', 'UTC'));
     }
 
@@ -39,176 +38,110 @@ class GuestEventSidebarLinkTest extends TestCase
         parent::tearDown();
     }
 
-    private function futureEventDate(): string
+    private function at(int $days): string
     {
-        return Carbon::now()->addMonths(3)->startOfMonth()->addDays(15)->setTime(12, 0)->format('Y-m-d H:i:s');
+        return Carbon::now()->addDays($days)->setTime(12, 0)->format('Y-m-d H:i:s');
     }
 
-    public function test_an_event_beyond_the_widgets_window_links_out_unconditionally(): void
+    /** The section's own markup, so an assertion cannot be satisfied by the rest of the page. */
+    private function more(string $html): string
     {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        $start = strpos($html, 'id="gp-upcoming-events"');
+        $this->assertNotFalse($start, 'the page has its "more events" section');
 
-        $event = $this->createEvent($role, ['name' => 'Midsummer Set', 'starts_at' => $this->futureEventDate()]);
-        $this->createEvent($role, ['name' => 'Next Week Set', 'starts_at' => Carbon::now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s')]);
-
-        $response = $this->get($this->guestEventUrl($role, $event))->assertOk();
-
-        $response->assertSee('v-if="true" id="viewFullScheduleFooter"', false);
-        $response->assertSee('View Full Schedule');
-
-        // Scoped to the footer on purpose: the breadcrumb at the top of the page renders the same
-        // $backUrl, so asserting the href against the whole document would pass even if the footer
-        // link's own href were empty.
-        $this->assertStringContainsString(
-            'href="'.e(route('role.view_guest', ['subdomain' => $role->subdomain])).'"',
-            $this->footerMarkup($response->getContent()),
-        );
+        return substr($html, $start, strpos($html, '</section>', $start) - $start);
     }
 
-    /**
-     * The footer link's own markup, so an assertion cannot be satisfied by the breadcrumb.
-     */
-    private function footerMarkup(string $html): string
+    public function test_the_next_three_other_events_are_rows_that_link_to_them(): void
     {
-        $start = strpos($html, 'id="viewFullScheduleFooter"');
-        $this->assertNotFalse($start, 'the sidebar footer link was not rendered at all');
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
+        $names = ['Second', 'Third', 'Fourth', 'Fifth'];
+        $others = [];
+        foreach ($names as $i => $name) {
+            $others[$name] = $this->createEvent($role, ['name' => $name.' Night', 'starts_at' => $this->at(2 + $i)]);
+        }
 
-        return substr($html, $start, 900);
+        $more = $this->more($this->get($this->guestEventUrl($role, $event))->assertOk()->getContent());
+
+        $this->assertSame(3, substr_count($more, '<a class="gk-row '), 'three, not twenty');
+        foreach (['Second', 'Third', 'Fourth'] as $name) {
+            $this->assertStringContainsString($name.' Night', $more);
+            $this->assertStringContainsString('href="'.e($others[$name]->fresh()->getGuestUrl($role->subdomain)).'"', $more, 'a real link, not a click handler');
+        }
+        $this->assertStringNotContainsString('Fifth Night', $more);
+        $this->assertStringNotContainsString('Tonight', $more, 'the event the visitor is already on');
     }
 
-    public function test_a_still_running_multi_day_event_is_not_counted_as_hidden(): void
+    public function test_the_way_to_the_whole_schedule_is_always_there_in_the_owners_words(): void
     {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
-
-        $event = $this->createEvent($role, ['name' => 'Midsummer Set', 'starts_at' => $this->futureEventDate()]);
-
-        // Starts inside the gap the window opens, but runs long enough to still be on when the
-        // window opens - so Event::scopeInMonth's third clause hands it to calendarEvents() and the
-        // agenda already lists it. Counting it would promise events the widget is showing.
-        $this->createEvent($role, [
-            'name' => 'Spring Exhibition',
-            'starts_at' => Carbon::now()->addMonths(1)->setTime(12, 0)->format('Y-m-d H:i:s'),
-            'duration' => 2000,
+        $role = $this->createRole($this->createOwner(), 'venue', [
+            'custom_labels' => ['view_full_schedule' => ['value' => 'See the whole season'], 'events' => ['value' => 'Coming up']],
         ]);
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
+        $this->createEvent($role, ['name' => 'Next Week', 'starts_at' => $this->at(8)]);
 
-        $this->get($this->guestEventUrl($role, $event))
-            ->assertOk()
-            ->assertSee('v-if="hasMoreEventsThanShown" id="viewFullScheduleFooter"', false);
+        $more = $this->more($this->get($this->guestEventUrl($role, $event))->assertOk()->getContent());
+
+        $this->assertStringContainsString('See the whole season', $more);
+        $this->assertStringContainsString('Coming up', $more);
+        $this->assertStringContainsString('href="'.e(route('role.view_guest', ['subdomain' => $role->subdomain])).'"', $more);
     }
 
-    public function test_a_multi_day_event_that_ends_before_the_window_is_counted(): void
+    public function test_events_a_visitor_may_not_see_are_never_rows(): void
     {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
+        $this->createEvent($role, ['name' => 'Draft Night', 'starts_at' => $this->at(2), 'is_draft' => true]);
+        $this->createEvent($role, ['name' => 'Cancelled Night', 'starts_at' => $this->at(3), 'is_cancelled' => true]);
+        $this->createEvent($role, ['name' => 'Unlisted Night', 'starts_at' => $this->at(4), 'is_private' => true]);
+        $this->createEvent($role, ['name' => 'Locked Night', 'starts_at' => $this->at(5), 'event_password' => 'hunter2']);
+        $this->createEvent($role, ['name' => 'Yesterday Night', 'starts_at' => $this->at(-2)]);
+        $this->createEvent($role, ['name' => 'Open Night', 'starts_at' => $this->at(6)]);
 
-        $event = $this->createEvent($role, ['name' => 'Midsummer Set', 'starts_at' => $this->futureEventDate()]);
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
+        $more = $this->more($html);
 
-        // Began before today and ends well before the window opens: matched by none of
-        // scopeInMonth's clauses, so it is genuinely absent from the widget even though a visitor
-        // could still walk in today.
-        $this->createEvent($role, [
-            'name' => 'Ten Day Festival',
-            'starts_at' => Carbon::now()->subDays(3)->setTime(12, 0)->format('Y-m-d H:i:s'),
-            'duration' => 240,
-        ]);
-
-        $this->get($this->guestEventUrl($role, $event))
-            ->assertOk()
-            ->assertSee('v-if="true" id="viewFullScheduleFooter"', false);
+        $this->assertSame(1, substr_count($more, '<a class="gk-row '));
+        $this->assertStringContainsString('Open Night', $more);
+        foreach (['Draft', 'Cancelled', 'Unlisted', 'Locked', 'Yesterday'] as $hidden) {
+            $this->assertStringNotContainsString($hidden.' Night', $html, $hidden.' is nowhere on the page');
+        }
     }
 
-    public function test_an_earlier_event_with_no_duration_is_still_counted(): void
+    public function test_an_event_with_nothing_after_it_has_no_empty_section(): void
     {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'The Only One', 'starts_at' => $this->at(1)]);
 
-        $event = $this->createEvent($role, ['name' => 'Midsummer Set', 'starts_at' => $this->futureEventDate()]);
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
 
-        // events.duration is nullable and real rows have NULL in it. This pins the NULL-safety of
-        // the multi-day exclusion rather than the window itself: written as a bare `duration < 24`
-        // the complement evaluates to NULL for this row and drops it silently.
-        $earlier = $this->createEvent($role, [
-            'name' => 'Durationless Set',
-            'starts_at' => Carbon::now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s'),
-        ]);
-        DB::table('events')->where('id', $earlier->id)->update(['duration' => null]);
-
-        $this->get($this->guestEventUrl($role, $event))
-            ->assertOk()
-            ->assertSee('v-if="true" id="viewFullScheduleFooter"', false);
+        $this->assertStringNotContainsString('id="gp-upcoming-events"', $html);
     }
 
-    public function test_an_active_filter_leaves_the_decision_to_the_client(): void
+    public function test_the_event_page_no_longer_carries_a_second_calendar_app(): void
     {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
+        $this->createEvent($role, ['name' => 'Next Week', 'starts_at' => $this->at(8)]);
 
-        $event = $this->createEvent($role, ['name' => 'Midsummer Set', 'starts_at' => $this->futureEventDate()]);
-        $this->createEvent($role, ['name' => 'Next Week Set', 'starts_at' => Carbon::now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s')]);
+        $html = $this->get($this->guestEventUrl($role, $event))->assertOk()->getContent();
 
-        // The server cannot honour ?category=, so it must not claim there is more to see: the
-        // client half compares isEventVisible()-filtered counts and decides alone.
-        $this->get($this->guestEventUrl($role, $event).'?category=99')
-            ->assertOk()
-            ->assertSee('v-if="hasMoreEventsThanShown" id="viewFullScheduleFooter"', false);
+        // The app, its footer link, and the request it made for up to 400 events.
+        $this->assertStringNotContainsString('id="calendar-app"', $html);
+        $this->assertStringNotContainsString('viewFullScheduleFooter', $html);
+        $this->assertStringNotContainsString('api/calendar-events', $html);
     }
 
-    public function test_an_event_in_the_current_window_leaves_the_decision_to_the_client(): void
+    public function test_a_weekly_event_does_not_list_itself_as_more(): void
     {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $weekly = $this->createEvent($role, ['name' => 'Every Thursday', 'starts_at' => $this->at(1), 'days_of_week' => '1111111']);
+        $this->createEvent($role, ['name' => 'One Off', 'starts_at' => $this->at(9)]);
 
-        $event = $this->createEvent($role, ['name' => 'This Month Set']);
+        $more = $this->more($this->get($this->guestEventUrl($role, $weekly))->assertOk()->getContent());
 
-        $this->get($this->guestEventUrl($role, $event))
-            ->assertOk()
-            ->assertSee('v-if="hasMoreEventsThanShown" id="viewFullScheduleFooter"', false);
-    }
-
-    public function test_hidden_earlier_events_do_not_make_the_link_appear(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
-        $otherRole = $this->createRole($this->createOwner(), 'venue');
-
-        $event = $this->createEvent($role, ['name' => 'Midsummer Set', 'starts_at' => $this->futureEventDate()]);
-
-        $soon = Carbon::now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s');
-        $this->createEvent($role, ['name' => 'Draft Set', 'starts_at' => $soon, 'is_draft' => true]);
-        $this->createEvent($role, ['name' => 'Cancelled Set', 'starts_at' => $soon, 'is_cancelled' => true]);
-        $this->createEvent($role, ['name' => 'Unlisted Set', 'starts_at' => $soon, 'is_private' => true]);
-        $this->createEvent($role, ['name' => 'Pending Set', 'starts_at' => $soon, 'is_accepted' => false]);
-        $this->createEvent($otherRole, ['name' => 'Someone Elses Set', 'starts_at' => $soon]);
-
-        $this->get($this->guestEventUrl($role, $event))
-            ->assertOk()
-            ->assertSee('v-if="hasMoreEventsThanShown" id="viewFullScheduleFooter"', false);
-    }
-
-    public function test_the_schedule_page_never_links_to_itself(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
-        $this->createEvent($role);
-
-        $this->get('/'.$role->subdomain)
-            ->assertOk()
-            ->assertDontSee('viewFullScheduleFooter', false);
-    }
-
-    public function test_the_label_honours_an_owners_override(): void
-    {
-        $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue', [
-            'custom_labels' => ['view_full_schedule' => ['value' => 'All our gigs']],
-        ]);
-        $event = $this->createEvent($role, ['name' => 'This Month Set']);
-
-        $this->get($this->guestEventUrl($role, $event))
-            ->assertOk()
-            ->assertSee('All our gigs')
-            ->assertDontSee('View Full Schedule');
+        $this->assertStringNotContainsString('Every Thursday', $more);
+        $this->assertStringContainsString('One Off', $more);
     }
 }

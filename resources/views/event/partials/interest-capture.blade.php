@@ -32,7 +32,7 @@
 @endphp
 
 @if ($interestEligible)
-<div id="gp-event-interest" class="scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
+<div id="gp-event-interest" class="gk-o3 scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
     @if ($interestMessage)
         <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ $interestMessage }}</p>
     @else
@@ -104,7 +104,7 @@
      EventInterestController::respond() redirects to #gp-event-interest and nothing else on the page
      renders interest_message or interest_error, so without this the address is dropped silently.
      The message only - no heading and no form, because there is nothing left to retry. --}}
-<div id="gp-event-interest" class="scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
+<div id="gp-event-interest" class="gk-o3 scroll-mt-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-5 sm:px-8 sm:py-6">
     @if ($interestMessage)
         <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ $interestMessage }}</p>
     @else

@@ -9,7 +9,7 @@
      (the organizer's own payment link) gets "not completed", never "nothing was charged". --}}
 @php $paymentCancelled = \App\Services\Payments\PaymentGatewayDriver::cancelledFor($event); @endphp
 @if ($paymentCancelled)
-<div data-payment-cancelled role="status" class="mb-6 flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
+<div data-payment-cancelled role="status" class="gk-o3 mb-6 flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
     <svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
     </svg>
