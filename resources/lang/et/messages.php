@@ -1012,7 +1012,7 @@ return [
     'include_past_events' => 'Kaasa mineviku sündmused',
     'past_events' => 'Möödunud sündmused',
     'load_more' => 'Laadige rohkem',
-    'later_events_not_listed' => 'Pärast neid on kavas veel sündmusi. Need ilmuvad siia, kui kuupäevad lähemale jõuavad.',
+    'later_events_not_listed' => 'Selles ajakavas on rohkem sündmusi, kui see loend mahutab, seega osa neist siin ei kuvata.',
     'category' => 'Kategooria',
     'all_categories' => 'Kõik kategooriad',
     'subschedule' => 'Alamplaan',

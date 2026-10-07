@@ -53,10 +53,16 @@
     $contrastColor = accent_contrast_color($accentColor);
 
     // What a visitor can do about tickets right now. canSellTickets() says the event is selling;
-    // it does not say there is anything to buy (see Event::ticketSaleState()). The form is only
-    // worth opening when a ticket can be bought, or when it is sold out AND there is a waitlist.
-    $saleState = $event->tickets_enabled ? $event->ticketSaleState($date) : 'open';
-    $saleOffersForm = $saleState === 'open' || ($saleState === 'sold_out' && $event->canOfferWaitlist());
+    // it does not say there is anything to buy (see Event::ticketSale(), which answers from the
+    // rows and the stock the form itself is built from).
+    $ticketSale = $event->tickets_enabled ? $event->ticketSale($date) : ['state' => 'open', 'waitlist' => false, 'rows' => false];
+    $saleState = $ticketSale['state'];
+    // The main button: buy, or join the waitlist where one will be accepted.
+    $saleOffersForm = $saleState === 'open' || $ticketSale['waitlist'];
+    // Nothing to buy, but the owner chose "show unavailable tickets": the form still lists them,
+    // greyed, with their prices, so it stays reachable. By a button that says Tickets, beside the
+    // line that says why none can be bought, and never by one that says Buy.
+    $saleShowsRows = ! $saleOffersForm && $ticketSale['rows'];
     $saleStateLabel = [
         'sold_out' => __('messages.sold_out'),
         'not_started' => __('messages.sales_not_started'),
@@ -73,8 +79,10 @@
         : ($event->canSellTickets($date) ? ($saleOffersForm ? 'tickets' : 'unavailable')
         : ($externalLink ? 'external'
         : ($event->tickets_enabled && ($event->allTicketSalesEnded() || $event->allTicketSalesNotStarted()) ? 'closed' : 'calendar'))));
+    // On a phone the bar has room for the line and ONE button: the tickets where they are shown,
+    // the calendar otherwise.
     $phoneCalendar = ! $event->is_draft
-        && ($phoneBar === 'calendar' || $phoneBar === 'closed' || ($phoneBar === 'unavailable' && $saleState !== 'sold_out'));
+        && ($phoneBar === 'calendar' || $phoneBar === 'closed' || ($phoneBar === 'unavailable' && $saleState !== 'sold_out' && ! $saleShowsRows));
 
     // The ride board. Decided up here because the row of laptop buttons below is hidden on a
     // phone unless this link is in it.
@@ -1095,7 +1103,10 @@
              at the foot of the page vanishes during checkout. --}}
         @if ($showInterestCapture && ($event->canSellTickets($date) || $event->canAcceptRsvp($date)))
         <a href="#gp-event-interest" class="self-start text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
-            {{ __('messages.event_interest_not_ready') }}
+            {{-- "Not buying today?" only where buying today is possible. --}}
+            {{ ($event->canAcceptRsvp($date) || $saleState === 'open')
+                ? __('messages.event_interest_not_ready')
+                : ($saleState === 'not_started' ? __('messages.event_interest_cta') : __('messages.event_interest_cta_changes')) }}
         </a>
         @endif
 
@@ -1117,11 +1128,19 @@
             </button>
         @elseif ($event->canSellTickets($date) || ($event->registrationHref() && (!$event->tickets_enabled || $event->blockedByPlanOnly($date)) && !$event->rsvp_enabled))
           @if ($event->canSellTickets($date) && ! $saleOffersForm)
-            {{-- "Selling" with nothing to sell: sold out where there is no waitlist, or every
-                 ticket outside its sales window. Say which. Offering the form here opened one
-                 with no rows, no total and no Cancel. --}}
+            {{-- "Selling" with nothing to buy: sold out where there is no waitlist, or no ticket
+                 inside its sales window. Say which, and do not say Buy. --}}
             <span class="text-base font-semibold text-gray-700 dark:text-gray-200" data-sale-state="{{ $saleState }}">{{ $saleStateLabel }}</span>
-            @if ($saleState !== 'sold_out')
+            @if ($saleShowsRows)
+            <button type="button" data-sale-rows
+                  @click="$dispatch('show-event-form')"
+                  class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:shadow-md">
+              {{ $role->customLabel('tickets') }}
+            </button>
+            @endif
+            {{-- ! is_draft, as every other branch that offers the calendar and as the phone bar
+                 has it: a draft is on nobody's calendar yet. --}}
+            @if ($saleState !== 'sold_out' && ! $event->is_draft)
               @php $showCalendarPopup = true; @endphp
             @endif
           @elseif ($event->canSellTickets($date))
@@ -1130,7 +1149,7 @@
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
               @if ($saleState === 'sold_out')
-                {{-- Only reached where the waitlist exists: $saleOffersForm is false otherwise. --}}
+                {{-- Only reached where a waitlist will be accepted: $saleOffersForm is false otherwise. --}}
                 {{ __('messages.join_waitlist') }}
               @else
                 {{ $event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets') }}
@@ -1201,7 +1220,7 @@
                         <svg class="me-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        {{ $event->canSellTickets($date) ? __('messages.event_interest_cta_changes') : __('messages.event_interest_cta') }}
+                        {{ ($event->canSellTickets($date) && $saleState !== 'not_started') ? __('messages.event_interest_cta_changes') : __('messages.event_interest_cta') }}
                     </a>
                     @endif
                     <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200 gp-dropdown-item" role="menuitem" tabindex="-1" id="menu-item-4">
@@ -2459,7 +2478,13 @@
         @if ($event->canSellTickets($date) && ! $saleOffersForm)
           {{-- Same rule as the laptop button above: say what is true, do not open an empty form. --}}
           <span class="flex-1 text-center text-base font-semibold text-gray-700 dark:text-gray-200 py-3" data-sale-state="{{ $saleState }}">{{ $saleStateLabel }}</span>
-          @if ($phoneCalendar)
+          @if ($saleShowsRows)
+          <button type="button" data-sale-rows
+                @click="$dispatch('show-event-form')"
+                class="flex-shrink-0 inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:shadow-md">
+            {{ $role->customLabel('tickets') }}
+          </button>
+          @elseif ($phoneCalendar)
           <button type="button"
             id="mobile-calendar-cta"
             class="flex-shrink-0 justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-lg"

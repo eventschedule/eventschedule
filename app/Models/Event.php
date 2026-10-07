@@ -25,6 +25,14 @@ use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
+    /**
+     * ticketSale() per date, for the life of this instance: the guest page asks it for both
+     * buttons and the form asks again, and each answer reads stock.
+     *
+     * @var array<string, array{state: string, waitlist: bool, rows: bool}>
+     */
+    private array $ticketSaleMemo = [];
+
     use HasImageVariants;
 
     /**
@@ -2773,28 +2781,77 @@ class Event extends Model
     }
 
     /**
-     * What a visitor can do about this event's tickets on $date: 'open', 'sold_out',
-     * 'not_started' or 'ended'.
+     * What a visitor can do about this event's tickets on $date.
      *
      * canSellTickets() cannot answer this. It is deliberately blind to stock, and while "show
      * unavailable tickets" is on it is blind to the per-ticket sales windows too, so an event can
      * be "selling" with nothing to sell. The guest page used to offer Buy tickets in all of those
-     * cases and open a form with no rows, no total and no Cancel. Both buttons and the form read
-     * this now, so they cannot disagree.
+     * cases and open a form with nothing to choose.
      *
-     * 'not_started' wins over 'ended' when the rows are split between the two: something will go
-     * on sale, which is the more useful thing to be told. A waitlist belongs to 'sold_out' only:
-     * WaitlistController refuses anything else.
+     * The answer is worked out from the SAME rows and the same stock the form is built from
+     * (event/tickets: the rows this plan may sell, each row's availableQuantity(), the shared
+     * house), which is what keeps the page and the form from disagreeing. The first version asked
+     * two coarser questions (is every row outside its window, is the house full) and said 'open'
+     * where the only row on sale had sold out and another had not opened yet.
+     *
+     *  - state:    'open' when at least one ticket can be bought now. Otherwise why not:
+     *              'not_started' when a ticket will go on sale (the most useful thing to be told,
+     *              so it wins over the other two), 'sold_out' when tickets are on sale and none
+     *              are left, 'ended' when every sales window has closed.
+     *  - waitlist: nothing can be bought because it SOLD, the plan has a waitlist, and
+     *              WaitlistController would accept a join (it asks allTicketsSoldOut(), the house,
+     *              which is not the same question: a full house whose sales have ended is 'ended'
+     *              here, and a waitlist for it would lead nowhere).
+     *  - rows:     nothing can be bought, but the form still has something to show: the owner
+     *              chose "show unavailable tickets", and a ticket outside its window is listed
+     *              greyed with its price.
+     *
+     * @return array{state: string, waitlist: bool, rows: bool}
+     */
+    public function ticketSale($date = null): array
+    {
+        $key = (string) $date;
+
+        if (isset($this->ticketSaleMemo[$key])) {
+            return $this->ticketSaleMemo[$key];
+        }
+
+        // What this plan lets the event sell: a free schedule keeps its $0 rows and loses the paid ones.
+        $rows = $this->tickets->filter(fn ($ticket) => $ticket->setRelation('event', $this)->isSellable());
+        $onSale = $rows->filter(fn ($ticket) => ! $ticket->isSalesEnded() && ! $ticket->isSalesNotStarted());
+        $outside = $rows->count() - $onSale->count();
+
+        $houseFull = $this->allTicketsSoldOut($date);
+        $house = $this->seatsRemainingForSale($date);
+
+        // The form's own bound for a row with nothing chosen yet: its pool, and for a seat (not a
+        // pass, which draws on its own pool) the shared house as well.
+        $open = ! $houseFull && $onSale->contains(function ($ticket) use ($date, $house) {
+            $left = (int) $ticket->availableQuantity($date);
+
+            return ($ticket->is_pass || $house === null ? $left : min($left, $house)) > 0;
+        });
+
+        $state = match (true) {
+            $open => 'open',
+            $rows->contains(fn ($ticket) => $ticket->isSalesNotStarted()) => 'not_started',
+            $onSale->isNotEmpty() => 'sold_out',
+            default => 'ended',
+        };
+
+        return $this->ticketSaleMemo[$key] = [
+            'state' => $state,
+            'waitlist' => $state === 'sold_out' && $houseFull && $this->canOfferWaitlist(),
+            'rows' => $state !== 'open' && (bool) $this->show_unavailable_tickets && $outside > 0,
+        ];
+    }
+
+    /**
+     * 'open', 'sold_out', 'not_started' or 'ended': see ticketSale().
      */
     public function ticketSaleState($date = null): string
     {
-        $rows = $this->tickets->where('is_addon', false);
-
-        if ($rows->isNotEmpty() && $rows->every(fn ($ticket) => $ticket->isSalesEnded() || $ticket->isSalesNotStarted())) {
-            return $rows->contains(fn ($ticket) => $ticket->isSalesNotStarted()) ? 'not_started' : 'ended';
-        }
-
-        return $this->allTicketsSoldOut($date) ? 'sold_out' : 'open';
+        return $this->ticketSale($date)['state'];
     }
 
     public function allTicketSalesEnded()

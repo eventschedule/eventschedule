@@ -87,8 +87,14 @@ class GuestEventPhoneActionsTest extends TestCase
             'nothing to sell' => [[], null, true],
             'ticket sales ended' => [['tickets_enabled' => true], ['price' => 10, 'sales_end_at' => '-1 day'], true],
             'ticket sales not started' => [['tickets_enabled' => true], ['price' => 10, 'sales_start_at' => '+2 days'], true],
-            'not started, rows shown' => [['tickets_enabled' => true, 'show_unavailable_tickets' => true], ['price' => 10, 'sales_start_at' => '+2 days'], true],
-            'registration link, sign-up closed' => [['registration_url' => 'https://tickets.example.org/e/42', 'tickets_enabled' => true], ['price' => 10, 'sales_end_at' => '-1 day'], true],
+            // The bar has room for the line and one button: where the owner shows unavailable
+            // tickets that button is Tickets, so there is no calendar button and no sheet.
+            'not started, rows shown' => [['tickets_enabled' => true, 'show_unavailable_tickets' => true], ['price' => 10, 'sales_start_at' => '+2 days'], false],
+            'registration link, ticket sales ended' => [['registration_url' => 'https://tickets.example.org/e/42', 'tickets_enabled' => true], ['price' => 10, 'sales_end_at' => '-1 day'], true],
+            // THE state that had a button and no sheet behind it: a registration link was enough
+            // to withhold the sheet, while the bar fell through to the calendar button because
+            // sign-up, though switched on, had closed because the event was over.
+            'registration link, sign-up closed with the event' => [['registration_url' => 'https://tickets.example.org/e/42', 'rsvp_enabled' => true, 'starts_at' => '-3 days'], null, true],
             'tickets on sale' => [['tickets_enabled' => true], ['price' => 10], false],
             'sign-up open' => [['rsvp_enabled' => true], null, false],
             'registration link' => [['registration_url' => 'https://tickets.example.org/e/42'], null, false],
@@ -99,6 +105,9 @@ class GuestEventPhoneActionsTest extends TestCase
     public function test_the_phone_calendar_button_and_its_sheet_come_together(array $eventAttrs, ?array $ticketAttrs, bool $expected): void
     {
         $role = $this->createRole($this->createOwner());
+        if (isset($eventAttrs['starts_at'])) {
+            $eventAttrs['starts_at'] = now()->modify($eventAttrs['starts_at'])->format('Y-m-d H:i:s');
+        }
         $event = $this->eventOn($role, $eventAttrs);
 
         if ($ticketAttrs) {

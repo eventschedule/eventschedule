@@ -573,7 +573,7 @@ return [
     'include_past_events' => 'Includi eventi passati',
     'past_events' => 'Eventi passati',
     'load_more' => 'Carica Altro',
-    'later_events_not_listed' => 'Sono in programma altri eventi dopo questi. Appariranno qui man mano che le date si avvicinano.',
+    'later_events_not_listed' => 'Questo calendario ha più eventi di quanti questa lista possa mostrare, quindi alcuni non sono elencati qui.',
     'category' => 'Categoria',
     'all_categories' => 'Tutte le Categorie',
     'search_events' => 'Cerca eventi...',

@@ -1355,7 +1355,7 @@ return [
     'include_past_events' => 'Include past events',
     'past_events' => 'Past Events',
     'load_more' => 'Load More',
-    'later_events_not_listed' => 'More events are scheduled after these. They will appear here as the dates get closer.',
+    'later_events_not_listed' => 'This schedule has more events than this list can show, so some are not listed here.',
     'category' => 'Category',
     'all_categories' => 'All Categories',
     'subschedule' => 'Sub-schedule',

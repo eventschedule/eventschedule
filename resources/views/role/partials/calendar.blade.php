@@ -3579,6 +3579,11 @@ const calendarApp = createApp({
                 this.listDataLoaded = false;
                 this.isLoadingEvents = true;
                 this.fetchCalendarEventsForMonth(this.pageMonth, this.pageYear);
+            } else if (this.loadFailed) {
+                // Neither branch above loads anything when the LIST's load was the one that
+                // failed, so "Failed to load data" used to stay above a month that had loaded
+                // fine. Load for the view just chosen; success takes the notice down.
+                this.retryLoad();
             }
         },
         updatePanelWrapper(view) {

@@ -544,7 +544,7 @@
                     <tr><td><code class="doc-inline-code">#gp-event-date</code></td><td>The date and time row</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-location</code></td><td>The venue row</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-price</code></td><td>The price or free-entry row</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-event-cta</code></td><td>The main buttons on wide screens</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-event-cta</code></td><td>The main buttons on wide screens. On a phone only its carpool button is drawn, and the rest are in <code class="doc-inline-code">#gp-mobile-cta</code></td></tr>
                     <tr><td><code class="doc-inline-code">#gp-mobile-cta</code></td><td>The button bar pinned to the bottom on phones</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-carpool</code></td><td>The carpool button</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-event-share</code></td><td>The share button</td></tr>

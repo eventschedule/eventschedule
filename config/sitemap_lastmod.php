@@ -60,7 +60,7 @@ return [
     '/docs/saas/monetization' => '2026-10-04',
     '/docs/saas/twilio' => '2026-09-25',
     '/docs/scan-agenda' => '2026-10-04',
-    '/docs/schedule-styling' => '2026-10-06',
+    '/docs/schedule-styling' => '2026-10-07',
     '/docs/selfhost' => '2026-09-25',
     '/docs/selfhost/accessibility' => '2026-09-10',
     '/docs/selfhost/admin' => '2026-10-06',

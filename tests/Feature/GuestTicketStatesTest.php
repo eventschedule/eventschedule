@@ -98,7 +98,11 @@ class GuestTicketStatesTest extends TestCase
         $gone = $this->eventOn($role);
         $row = $this->createTicket($gone, ['price' => 10, 'quantity' => 1]);
         $this->createSale($gone, $role, ['status' => 'paid', 'event_date' => $date], $row, 1);
-        $this->assertSame('sold_out', $gone->fresh()->ticketSaleState($date));
+        $this->assertSame(['state' => 'sold_out', 'waitlist' => true, 'rows' => false], $gone->fresh()->ticketSale($date));
+
+        // "rows": nothing to buy, but the owner shows unavailable tickets and there is one to show.
+        $this->assertTrue($soon->fresh()->ticketSale($date)['rows']);
+        $this->assertFalse($open->fresh()->ticketSale($date)['rows'], 'an open event needs no second way in');
     }
 
     public function test_sold_out_without_a_waitlist_says_so_instead_of_offering_to_sell(): void
@@ -130,7 +134,7 @@ class GuestTicketStatesTest extends TestCase
         $this->assertStringContainsString('hideForm', $notice, 'and a way back to the page that does not depend on a ticket being available');
     }
 
-    public function test_tickets_that_are_not_on_sale_yet_are_announced_not_offered(): void
+    public function test_tickets_that_are_not_on_sale_yet_are_announced_and_never_offered_as_buy(): void
     {
         $role = $this->createRole($this->createOwner());
         $event = $this->eventOn($role, ['show_unavailable_tickets' => true]);
@@ -145,12 +149,18 @@ class GuestTicketStatesTest extends TestCase
         foreach (['gp-event-cta', 'gp-mobile-cta'] as $id) {
             $block = $this->block($html, $id);
             $this->assertStringContainsString(__('messages.sales_not_started'), $block);
-            $this->assertStringNotContainsString('show-event-form', $block);
+            $this->assertStringNotContainsString($role->customLabel('buy_tickets'), $block, $id.' does not say Buy');
             $this->assertStringNotContainsString(__('messages.join_waitlist'), $block, 'a waitlist is for sold out, not for "not yet"');
+
+            // The owner asked for unavailable tickets to be shown: the form lists them greyed,
+            // with their prices, so it stays one press away. Taking that away made the setting
+            // change nothing a visitor could see.
+            $this->assertSame(1, substr_count($block, 'data-sale-rows'), $id.' has a way to the ticket list');
+            $this->assertStringContainsString('show-event-form', $block);
         }
     }
 
-    public function test_tickets_whose_sales_ended_are_announced_not_offered(): void
+    public function test_tickets_whose_sales_ended_are_announced_and_never_offered_as_buy(): void
     {
         $role = $this->createRole($this->createOwner());
         $event = $this->eventOn($role, ['show_unavailable_tickets' => true]);
@@ -161,11 +171,125 @@ class GuestTicketStatesTest extends TestCase
         foreach (['gp-event-cta', 'gp-mobile-cta'] as $id) {
             $block = $this->block($html, $id);
             $this->assertStringContainsString(__('messages.ticket_sales_ended'), $block);
+            $this->assertStringNotContainsString($role->customLabel('buy_tickets'), $block);
+            $this->assertSame(1, substr_count($block, 'data-sale-rows'));
+        }
+    }
+
+    public function test_a_gap_between_two_tiers_says_coming_soon_and_the_form_knows_it_has_nothing(): void
+    {
+        // One tier over, the next not open, and the owner does NOT show unavailable tickets. The
+        // event is still "selling" (neither every row ended nor every row to come), and the form
+        // is sent no rows at all. It used to work "sold out" out from its rows and, having none,
+        // conclude nothing: a name field, a total of zero and Checkout.
+        $role = $this->createRole($this->createOwner());
+        $event = $this->eventOn($role);
+        $this->createTicket($event, ['type' => 'Early', 'price' => 10, 'sales_end_at' => now()->subDay()]);
+        $this->createTicket($event, ['type' => 'Door', 'price' => 20, 'sales_start_at' => now()->addDays(2)]);
+        $date = now()->addDays(7)->format('Y-m-d');
+
+        $this->assertTrue($event->fresh()->canSellTickets($date));
+        $this->assertSame(['state' => 'not_started', 'waitlist' => false, 'rows' => false], $event->fresh()->ticketSale($date));
+
+        $html = $this->page($event, $role, '?tickets=true');
+
+        foreach (['gp-event-cta', 'gp-mobile-cta'] as $id) {
+            $block = $this->block($html, $id);
+            $this->assertStringContainsString(__('messages.sales_not_started'), $block);
+            $this->assertStringNotContainsString('show-event-form', $block, 'no rows to show, so nothing opens the form');
+        }
+
+        // The form is told by the server, and everything it hides behind "nothing to buy" hangs off that.
+        $this->assertStringContainsString('saleState: "not_started"', $html);
+        $this->assertStringContainsString("if (this.saleState !== 'open' || this.allSoldOut) return true;", $html);
+        $this->assertStringContainsString('waitlistOpen: false', $html);
+        $this->assertStringContainsString('data-sale-state="not_started"', substr($html, strpos($html, 'id="tickets-unavailable"'), 200));
+    }
+
+    public function test_the_only_ticket_on_sale_has_sold_and_another_opens_later(): void
+    {
+        // The house is not full (the later tier's seats are still there), so "is every ticket
+        // sold" says no and the page used to say Buy tickets. Nothing can be bought.
+        $role = $this->createRole($this->createOwner());
+        $event = $this->eventOn($role);
+        $early = $this->createTicket($event, ['type' => 'Early', 'price' => 10, 'quantity' => 1]);
+        $this->createTicket($event, ['type' => 'General', 'price' => 20, 'quantity' => 100, 'sales_start_at' => now()->addDays(2)]);
+        $date = now()->addDays(7)->format('Y-m-d');
+        $this->createSale($event, $role, ['status' => 'paid', 'event_date' => $date], $early, 1);
+
+        $event = $event->fresh();
+        $this->assertFalse($event->allTicketsSoldOut($date), 'the house still has the later tier\'s seats');
+        $this->assertSame('not_started', $event->ticketSaleState($date));
+        $this->assertFalse($event->ticketSale($date)['waitlist'], 'the endpoint would answer "tickets are still available"');
+
+        $html = $this->page($event, $role);
+        foreach (['gp-event-cta', 'gp-mobile-cta'] as $id) {
+            $block = $this->block($html, $id);
+            $this->assertStringContainsString(__('messages.sales_not_started'), $block);
+            $this->assertStringNotContainsString($role->customLabel('buy_tickets'), $block);
+            $this->assertStringNotContainsString(__('messages.join_waitlist'), $block);
+        }
+    }
+
+    public function test_a_free_schedule_whose_free_ticket_is_gone_does_not_count_the_tickets_it_may_not_sell(): void
+    {
+        // The paid row is not for sale on this plan, and the form leaves it out. Its seats used to
+        // count as "not sold out", so the page offered a form holding one row with none left.
+        $role = $this->createFreeRole($this->createOwner());
+        $event = $this->eventOn($role);
+        $free = $this->createTicket($event, ['type' => 'Free', 'price' => 0, 'quantity' => 1]);
+        $this->createTicket($event, ['type' => 'Paid', 'price' => 25, 'quantity' => 100]);
+        $date = now()->addDays(7)->format('Y-m-d');
+        $this->createSale($event, $role, ['status' => 'paid', 'event_date' => $date], $free, 1);
+
+        $event = $event->fresh();
+        $this->assertTrue($event->canSellTickets($date));
+        $this->assertSame(['state' => 'sold_out', 'waitlist' => false, 'rows' => false], $event->ticketSale($date));
+
+        foreach (['gp-event-cta', 'gp-mobile-cta'] as $id) {
+            $block = $this->block($this->page($event, $role), $id);
+            $this->assertStringContainsString(__('messages.sold_out'), $block);
             $this->assertStringNotContainsString('show-event-form', $block);
         }
     }
 
-    public function test_the_waitlist_in_the_form_follows_the_servers_sold_out_not_the_pages_guess(): void
+    public function test_a_full_house_whose_sales_have_ended_offers_no_waitlist(): void
+    {
+        // WaitlistController would accept this join (the house is full), and nothing could ever
+        // come of it: a seat that came back could not be sold.
+        $role = $this->createRole($this->createOwner());
+        $event = $this->eventOn($role, ['show_unavailable_tickets' => true]);
+        $ticket = $this->createTicket($event, ['price' => 10, 'quantity' => 1, 'sales_end_at' => now()->subDay()]);
+        $date = now()->addDays(7)->format('Y-m-d');
+        $this->createSale($event, $role, ['status' => 'paid', 'event_date' => $date], $ticket, 1);
+
+        $event = $event->fresh();
+        $this->assertTrue($event->allTicketsSoldOut($date));
+        $this->assertTrue($event->canOfferWaitlist());
+        $this->assertSame('ended', $event->ticketSaleState($date));
+        $this->assertFalse($event->ticketSale($date)['waitlist']);
+
+        $html = $this->page($event, $role, '?tickets=true');
+        $this->assertStringContainsString('waitlistOpen: false', $html);
+        $this->assertStringNotContainsString(__('messages.join_waitlist'), $this->block($html, 'gp-event-cta'));
+    }
+
+    public function test_a_draft_gets_add_to_calendar_on_neither_a_laptop_nor_a_phone(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->eventOn($role, ['show_unavailable_tickets' => true, 'is_draft' => true]);
+        $this->createTicket($event, ['price' => 10, 'sales_start_at' => now()->addDays(2)]);
+
+        // A draft is seen by its own team.
+        $html = $this->actingAs($owner)->get($event->fresh()->getGuestUrl($role->subdomain))->assertOk()->getContent();
+
+        $this->assertStringContainsString(__('messages.sales_not_started'), $this->block($html, 'gp-event-cta'));
+        $this->assertStringNotContainsString('calendar-popup-toggle', $this->block($html, 'gp-event-cta'), 'a laptop used to offer it while a phone did not');
+        $this->assertStringNotContainsString('id="mobile-calendar-cta"', $html);
+    }
+
+    public function test_the_waitlist_in_the_form_is_the_servers_decision(): void
     {
         $role = $this->createRole($this->createOwner());
         $event = $this->eventOn($role, ['show_unavailable_tickets' => true]);
@@ -177,9 +301,11 @@ class GuestTicketStatesTest extends TestCase
         $this->assertNotFalse($start, 'a plan with the waitlist renders its block');
         $tag = substr($html, strrpos(substr($html, 0, $start), '<'), 300);
 
-        // isAllSoldOut is also true when nothing is on sale yet; allSoldOut is the server's
-        // answer to "is every ticket sold", which is the only thing WaitlistController accepts.
-        $this->assertStringContainsString('v-if="allSoldOut"', $tag);
+        // Not the page's own "nothing can be bought", which is also true when no ticket is on
+        // sale yet: read there, the form offered a waitlist the endpoint refused.
+        $this->assertStringContainsString('v-if="waitlistOpen"', $tag);
+        $this->assertStringContainsString('waitlistOpen: false', $html);
+        $this->assertStringContainsString('saleState: "not_started"', $html);
     }
 
     public function test_sold_out_with_a_waitlist_still_offers_it(): void
@@ -197,6 +323,10 @@ class GuestTicketStatesTest extends TestCase
             $this->assertStringContainsString(__('messages.join_waitlist'), $block);
             $this->assertStringContainsString('show-event-form', $block);
         }
+
+        $form = $this->page($event, $role, '?tickets=true');
+        $this->assertStringContainsString('saleState: "sold_out"', $form);
+        $this->assertStringContainsString('waitlistOpen: true', $form);
     }
 
     public function test_an_event_with_tickets_on_sale_keeps_its_button(): void

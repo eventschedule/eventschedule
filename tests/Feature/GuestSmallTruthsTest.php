@@ -59,8 +59,10 @@ class GuestSmallTruthsTest extends TestCase
         $this->assertStringContainsString("\$label('free_entry')", $card);
         $this->assertStringNotContainsString("__('messages.free_entry')", $card);
 
-        // And as the page is served: the owner's wording reaches the compact card's template.
-        $this->assertGreaterThanOrEqual(2, substr_count($html, 'No cover charge'), 'the laptop card and the compact card both say it the owner\'s way');
+        // With the owner's wording set, the language file's own is printed nowhere. (Counting the
+        // owner's wording proves nothing: the laptop card has always printed it.)
+        $this->assertStringContainsString('No cover charge', $html);
+        $this->assertStringNotContainsString(__('messages.free_entry'), $html, 'a card still printing the default wording');
     }
 
     /**
@@ -78,7 +80,9 @@ class GuestSmallTruthsTest extends TestCase
         $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
         $this->assertStringNotContainsString('Welcome to the Blue Room,...', $html, 'the five-word stand-in');
-        $this->assertSame(2, preg_match_all('/x-ref="content"[^>]*class="[^"]*\bline-clamp-3\b/', $html), 'the phone and the laptop header both clamp the real text');
+        // The STATIC class attribute, not the bound one beside it: the clamp is in the markup so
+        // the full text never flashes before the script runs.
+        $this->assertSame(2, substr_count($html, '<div x-ref="content" :class="{ \'line-clamp-3\': !expanded }" class="custom-content line-clamp-3">'), 'the phone and the laptop header both clamp the real text');
         $this->assertGreaterThanOrEqual(2, substr_count($html, 'a kitchen that stays open until the band stops'), 'and the whole description is in the page for both');
     }
 
@@ -101,7 +105,7 @@ class GuestSmallTruthsTest extends TestCase
         $this->assertStringContainsString('ברציפות בלי הפסקה', $html);
 
         // One rule for both: clamped by lines, with the button the browser shows only on overflow.
-        $this->assertSame(2, preg_match_all('/x-ref="blurb"[^>]*class="[^"]*\bline-clamp-3\b/', $html));
+        $this->assertSame(2, preg_match_all('/<div x-ref="blurb" :class="[^"]*" class="custom-content line-clamp-3[ "]/', $html), 'the static class, on both');
     }
 
     /**

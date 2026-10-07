@@ -978,7 +978,7 @@ return [
     'include_past_events' => 'Inclure les événements passés',
     'past_events' => 'Événements passés',
     'load_more' => 'Charger plus',
-    'later_events_not_listed' => 'D\'autres événements sont programmés après ceux-ci. Ils apparaîtront ici à mesure que les dates approchent.',
+    'later_events_not_listed' => 'Ce planning contient plus d\'événements que cette liste ne peut en afficher : certains n\'y figurent donc pas.',
     'category' => 'Catégorie',
     'all_categories' => 'Toutes les catégories',
     'search_events' => 'Rechercher des événements...',

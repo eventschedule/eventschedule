@@ -227,7 +227,13 @@
                     scheduleName: @json($role->name),
                     supportEmail: @json($installmentSupportEmail),
                     allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
-                    waitlistOpen: @json($event->canOfferWaitlist() && $event->allTicketsSoldOut($date ?? request()->date)),
+                    {{-- The server's answer to "can anything be bought right now", from the same
+                         rows and stock this form is built from (Event::ticketSale()). The form
+                         used to work it out again from the rows it was sent, and had no answer
+                         when it was sent none: two tiers with a gap between them drew a name
+                         field, a total of zero and a Checkout button. --}}
+                    saleState: @json($event->ticketSale($date ?? request()->date)['state']),
+                    waitlistOpen: @json($event->ticketSale($date ?? request()->date)['waitlist']),
                     waitlistSubmitting: false,
                     waitlistMessage: '',
                     waitlistSuccess: false,
@@ -513,7 +519,7 @@
                     return this.tickets.map(t => t.id + ':' + t.selectedQty).join(',');
                 },
                 isAllSoldOut() {
-                    if (this.allSoldOut) return true;
+                    if (this.saleState !== 'open' || this.allSoldOut) return true;
                     const activeTickets = this.tickets.filter(t => !t.sales_ended && !t.sales_not_started);
                     if (activeTickets.length === 0) return this.tickets.length > 0;
                     return activeTickets.every(t => this.getAvailableQuantity(t) === 0);
@@ -1196,12 +1202,15 @@
         </div>
         @endif
 
-        {{-- Nothing can be bought right now: every ticket is sold, or every ticket is outside its
-             sales window. The rows, the total and the button row below are all hidden in that
-             state, so without this notice the form was a name field and an email field with no
-             way out. The buttons on the event page no longer lead here; an old link, a shared
-             ?tickets=true address or a page left open still can. The wording is the server's
-             (Event::ticketSaleState()), not a guess made from the rows the page was sent. --}}
+        {{-- Nothing can be bought right now: every ticket is sold, or none is inside its sales
+             window. The total and the button row below are hidden in that state, so without this
+             notice the form had no word of explanation and no way out. It is reached by the
+             Tickets button where the owner shows unavailable tickets, and by an old link, a shared
+             ?tickets=true address, the embed or a page left open everywhere else. The wording is
+             the server's (Event::ticketSale()), not a guess made from the rows the page was sent.
+             The [v-cloak] rule is this file's own: the embed has no other, and without one this
+             notice was on screen until Vue started, on an event whose tickets were on sale. --}}
+        <style {!! nonce_attr() !!}>#ticket-selector [v-cloak] { display: none; }</style>
         @php
             $ticketSaleState = $event->ticketSaleState($date ?? request()->date);
             $ticketSaleStateLabel = [
@@ -1230,7 +1239,9 @@
         </div>
         @endif
 
-        <div v-if="!showGuestForms">
+        {{-- Nobody is asked for a name where there is nothing to give it for: nothing to buy,
+             and no waitlist (which reads these same two fields). --}}
+        <div v-if="!showGuestForms && (!isAllSoldOut || waitlistOpen)">
         <div class="mb-6">
             <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
             <input type="text" name="name" id="name" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
@@ -1888,11 +1899,11 @@
              then posted to an endpoint that 404s, surfacing as a bare "Error" - a dead end one
              click past the CTA. Free sold-out events fall through to the plain sold-out state. --}}
         @if ($event->canOfferWaitlist())
-        {{-- allSoldOut is the SERVER's "every ticket is sold" (Event::allTicketsSoldOut()), the only
-             thing WaitlistController accepts. isAllSoldOut is the page's "nothing is available",
-             which is also true when no ticket is on sale yet: read here, it offered a waitlist the
+        {{-- waitlistOpen is Event::ticketSale()'s: nothing can be bought because it sold, and
+             WaitlistController will accept a join. isAllSoldOut is "nothing can be bought", which
+             is also true when no ticket is on sale yet: read here, it offered a waitlist the
              endpoint then answered with "tickets are still available". --}}
-        <div v-if="allSoldOut" data-waitlist-block class="mt-6">
+        <div v-if="waitlistOpen" data-waitlist-block class="mt-6">
             <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
                 @{{ waitlistMessage }}
             </div>

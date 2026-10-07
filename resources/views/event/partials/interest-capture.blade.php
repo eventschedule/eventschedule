@@ -37,7 +37,9 @@
         <p class="text-sm font-medium text-green-700 dark:text-green-400">{{ $interestMessage }}</p>
     @else
         <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-            {{ $interestEvent->canSellTickets($date ?? null)
+            {{-- "When tickets go on sale" for an event whose tickets are not on sale yet, which
+                 canSellTickets() alone cannot tell from one that is selling. --}}
+            {{ ($interestEvent->canSellTickets($date ?? null) && $interestEvent->ticketSaleState($date ?? null) !== 'not_started')
                 ? __('messages.event_interest_cta_changes')
                 : __('messages.event_interest_cta') }}
         </h2>

@@ -966,7 +966,7 @@ return [
     'include_past_events' => 'Vergangene Events einschließen',
     'past_events' => 'Vergangene Events',
     'load_more' => 'Mehr Laden',
-    'later_events_not_listed' => 'Nach diesen sind weitere Veranstaltungen geplant. Sie erscheinen hier, sobald die Termine näher rücken.',
+    'later_events_not_listed' => 'Dieser Kalender enthält mehr Veranstaltungen, als diese Liste anzeigen kann. Einige sind hier daher nicht aufgeführt.',
     'category' => 'Kategorie',
     'all_categories' => 'Alle Kategorien',
     'search_events' => 'Veranstaltungen suchen...',
