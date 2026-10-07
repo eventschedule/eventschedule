@@ -195,7 +195,7 @@ class OnlineJoinLinkTest extends TestCase
         };
 
         $html = $page($this->onlineEvent(self::FREE_TEXT));
-        $this->assertStringContainsString('<span class="print:text-slate-600">'.self::FREE_TEXT.'</span>', $html, 'the ticket holder still reads the instructions');
+        $this->assertStringContainsString('<small>'.self::FREE_TEXT.'</small>', $html, 'the ticket holder still reads the instructions');
         $this->assertStringNotContainsString('href="'.self::FREE_TEXT, $html);
 
         $html = $page($this->onlineEvent('javascript:alert(document.domain)', ['name' => 'Scripted']));

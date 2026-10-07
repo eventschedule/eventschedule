@@ -118,6 +118,23 @@ abstract class PaymentGatewayDriver
     }
 
     /**
+     * Can the buyer be back from paying BEFORE this sale is marked paid?
+     *
+     * True for a rail whose confirmation reaches us on its own, separately from the buyer's
+     * return (a webhook, an ITN): the buyer arrives on their ticket a moment ahead of it, and for
+     * that moment the sale is still unpaid though they have just paid. The ticket page asks this
+     * so it can say "Confirming your payment" and look again, instead of stamping NOT PAID across
+     * the code of somebody who has their receipt open in the next tab.
+     *
+     * It takes the sale because a rail can settle on the return itself and still leave one row
+     * waiting (PayPal: a capture under review).
+     */
+    public function awaitsConfirmation(Sale $sale): bool
+    {
+        return false;
+    }
+
+    /**
      * Does paying navigate the buyer to a third-party page?
      *
      * Embedded ticket widgets need to know: a checkout form inside someone else's iframe has to

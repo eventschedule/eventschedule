@@ -106,7 +106,9 @@
                 @csrf
                 <x-honeypot />
                 <input type="hidden" name="mode" value="next">
-                <button type="submit" class="inline-flex items-center px-[14px] py-[8px] rounded-lg bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-[13px] font-semibold transition-colors">
+                {{-- On the ticket and its pay page (dark) the one filled button is the schedule's
+                     colour, as every other is there; on a light host it is the platform's. --}}
+                <button type="submit" class="{{ $dark ? 'gk-tk-btn gk-tk-btn-fill' : 'inline-flex items-center px-[14px] py-[8px] rounded-lg bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-[13px] font-semibold transition-colors' }}">
                     {{ __('messages.pay_next_installment') }}
                 </button>
             </form>

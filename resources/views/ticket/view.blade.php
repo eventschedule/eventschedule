@@ -1,4 +1,58 @@
-<x-app-layout :title="$event->translatedName() . ' - ' . __('messages.tickets') . ($role ? ' | ' . $role->translatedName() : '')">
+@php
+    // The schedule that sold this ticket: its name in the tab, its logo and its colour on the
+    // page. Not $role, which is the event's performer and null for a venue's or a curator's event.
+    $themeRole = $sale->sellingRole() ?? $role;
+    $eventDate = $sale->event_date;
+    $eventName = $event->translatedName();
+
+    $isUnpaid = $sale->status === 'unpaid';
+    $installmentPlan = $sale->installmentPlan;
+    // The ticket is real and one payment behind: the sale is still `paid`.
+    $planOnHold = $installmentPlan && $installmentPlan->isDelinquent();
+    // A cancelled EVENT keeps its sales paid, so the sale alone would show a working code for
+    // something that is not happening (ticket/order already treats it as released).
+    $eventCancelled = (bool) $event->is_cancelled;
+    // Will this code be accepted at the door.
+    $valid = $sale->status === 'paid' && ! $planOnHold && ! $eventCancelled;
+
+    // Arriving from a checkout: redirectToPurchaseLanding() flashes the legs that were bought.
+    $fresh = collect(session('cart_purchased', []))
+        ->contains(fn ($leg) => ($leg['event_id'] ?? null) === \App\Utils\UrlUtils::encodeId($event->id));
+    // Back from a payment provider before its confirmation has reached us. Not "unpaid": the
+    // buyer has just paid, and a NOT PAID stamp across their code is the last thing to show them.
+    // The page asks again every few seconds (the script at the foot) and gives up after forty.
+    $confirming = $fresh && $isUnpaid && payment_gateways()->awaitsConfirmation($sale->payment_method, $sale);
+
+    $canShowPayNow = $isUnpaid && ! $confirming
+        && payment_gateways()->canResumePayment($sale->payment_method, $sale)
+        && (! $sale->group_id || $sale->isPrimarySale());
+    $payAtDoor = $isUnpaid && ! $confirming && payment_gateways()->usesPaymentInstructions($sale->payment_method);
+
+    $headerPassTicket = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass);
+    $admits = $headerPassTicket ? $headerPassTicket->ticket->admitsPerEvent() : ($sale->isRsvp() ? 1 : $sale->legTotalQuantity());
+
+    // The zone, because a ticket is read by people who travelled. Carbon prints an offset for a
+    // zone with no abbreviation of its own.
+    $zone = $event->getStartDateTime($eventDate, true)->format('T');
+    $zone = preg_match('/^[+-]/', $zone) ? 'GMT'.$zone : $zone;
+
+    $eventUrl = $sale->getEventUrl();
+    $venue = $event->venue;
+    $venueAddress = $venue ? $venue->bestAddress() : null;
+    $joinHref = $event->event_url ? $event->eventUrlHref() : null;
+    $qrUrl = route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+    $ticketNotes = $event->parsedTicketNotesHtml($eventDate);
+
+    $stamp = $planOnHold ? __('messages.ticket_on_hold')
+        : ($isUnpaid ? __('messages.unpaid') : ($eventCancelled ? __('messages.cancelled') : __('messages.void')));
+
+    // Self-cancel is for a free place only. A gift-card order is a purchase: cancelling it would
+    // be an instant refund to the card, so that stays the owner's.
+    $canCancel = $sale->status === 'paid' && ! $eventCancelled
+        && ($sale->isRsvp() || ($sale->payment_amount == 0 && $sale->groupTotalGiftCard() == 0))
+        && (! $sale->group_id || $sale->isPrimarySale());
+@endphp
+<x-app-layout :title="$eventName . ' - ' . __('messages.tickets') . ($themeRole ? ' | ' . $themeRole->translatedName() : '')">
 
     <x-slot name="meta">
         @include('partials.private-page-meta')
@@ -12,799 +66,718 @@
     <x-slot name="head">
         @include('partials.site-head-code')
 
-        {{-- Use the schedule's logo as the favicon (Pro/Enterprise); role() is talent-only and may be null --}}
-        @if ($role && $role->isPro() && $role->profile_image_url)
-            <link rel="icon" href="{{ $role->profile_image_url }}">
-            <link rel="apple-touch-icon" href="{{ $role->profile_image_url }}">
+        {{-- Use the schedule's logo as the favicon (Pro/Enterprise). --}}
+        @if ($themeRole && $themeRole->isPro() && $themeRole->profile_image_url)
+            <link rel="icon" href="{{ $themeRole->profile_image_url }}">
+            <link rel="apple-touch-icon" href="{{ $themeRole->profile_image_url }}">
         @endif
 
         {{-- A ticket belongs to the schedule that sold it, so this page names their app, not ours.
-             Renders nothing when role() came back null, which is the safe half of the trade. --}}
-        @include('partials.web-app-manifest', ['manifestRole' => $role])
+             Renders nothing when there is no schedule to name, which is the safe half of the trade. --}}
+        @include('partials.web-app-manifest', ['manifestRole' => $themeRole])
 
         <link href="/vendor/manrope/manrope.css" rel="stylesheet">
-        <style {!! nonce_attr() !!}>
-            /* Animations */
-            @keyframes pulse-slow {
-                0%, 100% { opacity: 0.6; transform: scale(1); }
-                50% { opacity: 0.3; transform: scale(1.1); }
-            }
-            @keyframes float {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-20px); }
-            }
-            .animate-pulse-slow {
-                animation: pulse-slow 8s ease-in-out infinite;
-            }
-            .animate-float {
-                animation: float 6s ease-in-out infinite;
-            }
-            .animate-float-delayed {
-                animation: float 6s ease-in-out infinite;
-                animation-delay: -3s;
-            }
-
-            /* Glass effect */
-            .glass {
-                background: rgba(255, 255, 255, 0.05);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            .glass-strong {
-                background: rgba(255, 255, 255, 0.08);
-                backdrop-filter: blur(30px);
-                -webkit-backdrop-filter: blur(30px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-            }
-
-            /* Gradient text */
-            .text-gradient {
-                background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #f0abfc 100%);
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
-
-            /* Header gradient */
-            .header-gradient {
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(192, 132, 252, 0.2) 50%, rgba(240, 171, 252, 0.1) 100%);
-            }
-
-            /* Ticket stub cutouts */
-            .ticket-cutout-left {
-                position: absolute;
-                left: -12px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 24px;
-                height: 24px;
-                background: #0a0a0f;
-                border-radius: 50%;
-            }
-            .ticket-cutout-right {
-                position: absolute;
-                right: -12px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 24px;
-                height: 24px;
-                background: #0a0a0f;
-                border-radius: 50%;
-            }
-
-            /* Print styles */
-            @media print {
-                body, html {
-                    background: white !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }
-                .glass, .glass-strong {
-                    background: #f8fafc !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                    border: 1px solid #e2e8f0 !important;
-                }
-                .text-gradient {
-                    background: none !important;
-                    -webkit-text-fill-color: #6366f1 !important;
-                    color: #6366f1 !important;
-                }
-                .header-gradient {
-                    background: #f1f5f9 !important;
-                }
-                .ticket-cutout-left,
-                .ticket-cutout-right {
-                    background: white !important;
-                    border: 1px solid #e2e8f0 !important;
-                }
-                .print-hidden {
-                    display: none !important;
-                }
-                .print-bg-white {
-                    background: white !important;
-                }
-                .print-text-dark {
-                    color: #1e293b !important;
-                    -webkit-text-fill-color: #1e293b !important;
-                }
-                .print-text-gray {
-                    color: #64748b !important;
-                }
-                .print-border {
-                    border-color: #e2e8f0 !important;
-                }
-            }
-        </style>
+        {{-- The selling schedule's colours and the ticket's own sheet. This page stays on the
+             private shell (no social tags, canonical, structured data, pixel, cart or owner CSS,
+             and nothing reported to the owner's Realtime view) and takes only the colours. --}}
+        @include('partials.guest-theme', ['role' => $themeRole, 'otherRole' => null, 'selectedGroup' => null])
+        @include('partials.guest-ticket-styles')
     </x-slot>
 
-    {{-- Dark background with gradient orbs --}}
-    <main
-      id="main-content"
-      class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[16px] flex-1 relative z-0 overflow-y-auto p-[16px] sm:p-[24px] focus:outline-none min-h-screen bg-[#0a0a0f] print:bg-white"
-      tabindex="0"
-    >
-      {{-- Animated gradient orbs (hidden in print and embed) --}}
-      @if (! request()->boolean('embed'))
-      <div class="fixed inset-0 overflow-hidden pointer-events-none print-hidden" aria-hidden="true">
-        <div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div class="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse-slow animate-float"></div>
-        <div class="absolute top-[40%] right-[20%] w-[300px] h-[300px] bg-indigo-600/15 rounded-full blur-[80px] animate-float-delayed"></div>
-      </div>
-      @endif
+    <main id="main-content" class="gk-tkpage" tabindex="-1" data-sale-status="{{ $sale->status }}">
+      <div class="gk-tk-wrap">
 
-      {{-- Ticket Card Container --}}
-      <div class="relative z-10 w-full max-w-[440px] mx-auto">
+        <a href="{{ $eventUrl }}" class="gk-tk-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19l-7-7 7-7"/></svg>
+          <span>{{ __('messages.view_event') }}</span>
+        </a>
 
-        {{-- Header Section --}}
-        <div class="glass-strong header-gradient rounded-t-[24px] p-[24px] sm:p-[32px] text-center print:bg-slate-100">
-          @if ($role && $role->profile_image_url)
-            <div class="mb-[20px]">
-              <img
-                class="w-[100px] h-[100px] mx-auto rounded-2xl object-cover shadow-lg shadow-violet-500/20 print:shadow-none"
-                src="{{ $role->profile_image_url }}"
-                alt="Logo"
-              />
-            </div>
-          @endif
-          <h1 class="text-[28px] sm:text-[32px] font-extrabold leading-[1.1] text-gradient print-text-dark">
-            {{ $event->name }}
-          </h1>
-          @if ($event->event_url || $event->venue)
-            <p class="mt-[12px] text-[13px] text-white/60 print-text-gray">
-              {{-- The whole join link is the ticket holder's to see. Only a web link is linked
-                   (eventUrlHref()); free-text join instructions read as text. --}}
-              @if ($event->event_url && ($joinHref = $event->eventUrlHref()))
-                <a href="{{ $joinHref }}" target="_blank" class="hover:text-white/80 transition-colors print:text-slate-600">
-                  {{ \App\Utils\UrlUtils::clean($event->event_url) }}
-                </a>
-              @elseif ($event->event_url)
-                <span class="print:text-slate-600">{{ \App\Utils\UrlUtils::clean($event->event_url) }}</span>
-              @elseif ($event->venue)
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" class="hover:text-white/80 transition-colors print:text-slate-600">
-                  {{ $event->venue->shortAddress() }}
-                </a>
+        <article class="gk-ticket {{ ($fresh && $valid) ? 'gk-ticket-fresh' : '' }}" id="ticket">
+          <div class="gk-ticket-a">
+
+            <header class="gk-tk-top {{ ($themeRole && $themeRole->profile_image_url) ? 'gk-tk-top-logo' : '' }}">
+              @if ($themeRole && $themeRole->profile_image_url)
+                <img src="{{ $themeRole->profile_image_url }}" alt="">
               @endif
-            </p>
-          @endif
-        </div>
-
-        {{-- Main Details Section --}}
-        <div class="glass p-[20px] sm:p-[24px] relative print:bg-slate-50">
-          @php
-            $isUnpaid = $sale->status === 'unpaid';
-          @endphp
-
-          {{-- Fallback error slot, for a plain ticket that is neither a bookable pass nor on a
-               payment plan. Those two already carry their own session('error') blocks, deliberately
-               placed next to the action that raises one, so this is gated on their absence rather
-               than rendering a third copy over the top of them. Without it a redirect carrying an
-               error - the Google Wallet bail is the first - reloaded the page and said nothing. --}}
-          @if (session('error') && ! $passBookable && ! $sale->installmentPlan)
-            <div class="relative z-10 mb-[16px] rounded-[10px] bg-red-500/15 border border-red-400/30 px-[12px] py-[8px] text-[13px] text-red-200 print:hidden">
-              {{ session('error') }}
-            </div>
-          @endif
-
-          {{-- Status banner for unpaid / cancelled / refunded / expired --}}
-          @if ($sale->status !== 'paid')
-            @php
-              $statusLabel = strtoupper(__('messages.' . $sale->status));
-              $statusSub = match ($sale->status) {
-                  'unpaid'    => __('messages.this_ticket_is_not_paid'),
-                  'cancelled' => __('messages.this_ticket_is_cancelled'),
-                  'refunded'  => __('messages.this_ticket_is_refunded'),
-                  'expired'   => __('messages.this_reservation_has_expired'),
-                  default     => '',
-              };
-              $canShowPayNow = $isUnpaid
-                  && payment_gateways()->canResumePayment($sale->payment_method, $sale)
-                  && (!$sale->group_id || $sale->isPrimarySale());
-              $tierBg     = $isUnpaid ? 'bg-yellow-500/25 print:bg-yellow-50' : 'bg-red-500/25 print:bg-red-50';
-              $tierBorder = $isUnpaid ? 'border-yellow-400/70 print:border-yellow-300' : 'border-red-400/70 print:border-red-300';
-              $tierLabel  = $isUnpaid ? 'text-yellow-100 print:text-yellow-800' : 'text-red-100 print:text-red-800';
-              $tierSub    = $isUnpaid ? 'text-yellow-50 print:text-yellow-700' : 'text-red-50 print:text-red-700';
-              $tierIcon   = $isUnpaid ? 'fill-yellow-300 print:fill-yellow-700' : 'fill-red-300 print:fill-red-700';
-            @endphp
-            <div class="relative z-10 mb-[16px] rounded-xl border {{ $tierBorder }} {{ $tierBg }} p-[14px] sm:p-[16px]">
-              <div class="flex items-start gap-[12px]">
-                <svg width="22" height="22" viewBox="0 0 20 20" class="flex-shrink-0 mt-[2px]" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" class="{{ $tierIcon }}"/>
-                </svg>
-                <div class="flex-1 min-w-0">
-                  <p class="text-[14px] font-bold uppercase tracking-wide {{ $tierLabel }}">
-                    {{ $statusLabel }}
-                  </p>
-                  <p class="text-[12px] mt-[2px] {{ $tierSub }}">
-                    {{ $statusSub }}
-                  </p>
-                  @if ($canShowPayNow)
-                    <a href="{{ $sale->getEventUrl() }}"
-                       class="inline-flex items-center gap-[6px] mt-[10px] px-[14px] py-[8px] rounded-lg bg-yellow-400 hover:bg-yellow-300 text-yellow-900 text-[13px] font-semibold transition-colors print:hidden">
-                      {{ __('messages.complete_payment') }}
-                      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                      </svg>
-                    </a>
-                  @elseif ($isUnpaid && payment_gateways()->usesPaymentInstructions($sale->payment_method))
-                    <p class="text-[12px] mt-[6px] {{ $tierSub }} italic">
-                      {{ __('messages.pay_at_the_door') }}
-                    </p>
-                  @endif
-                </div>
-              </div>
-            </div>
-          @endif
-
-          {{-- ON HOLD: its own amber tier, distinct from both the yellow "unpaid" and the red
-               "void" ones above. Those both say "you have no ticket"; this one says the ticket is
-               real and one payment behind, and that paying restores it at once. The sale is still
-               `paid`, so it never reaches the banner above. --}}
-          @php
-            $installmentPlan = $sale->installmentPlan;
-            $planOnHold = $installmentPlan && $installmentPlan->isDelinquent();
-          @endphp
-          @if ($planOnHold)
-            <div class="relative z-10 mb-[16px] rounded-xl border border-amber-400/70 print:border-amber-300 bg-amber-500/25 print:bg-amber-50 p-[14px] sm:p-[16px]">
-              <div class="flex items-start gap-[12px]">
-                <svg width="22" height="22" viewBox="0 0 20 20" class="flex-shrink-0 mt-[2px]" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" class="fill-amber-300 print:fill-amber-700"/>
-                </svg>
-                <div class="flex-1 min-w-0">
-                  <p class="text-[14px] font-bold uppercase tracking-wide text-amber-100 print:text-amber-800">
-                    {{ __('messages.ticket_payment_overdue') }}
-                  </p>
-                  <p class="text-[12px] mt-[2px] text-amber-50 print:text-amber-700">
-                    {{ __('messages.ticket_on_hold_sub', ['amount' => \App\Utils\MoneyUtils::format($installmentPlan->amountRemaining(), $installmentPlan->currency)]) }}
-                  </p>
-                  <a href="{{ route('installment.view', ['plan_id' => \App\Utils\UrlUtils::encodeId($installmentPlan->id), 'secret' => $installmentPlan->secret]) }}"
-                     class="inline-flex items-center gap-[6px] mt-[10px] px-[14px] py-[8px] rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-900 text-[13px] font-semibold transition-colors print:hidden">
-                    {{ __('messages.pay_now') }}
-                    <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-          @endif
-
-          <div class="grid grid-cols-[1fr,auto] gap-[20px] items-start">
-            {{-- Left: Info badges --}}
-            <div class="space-y-[12px]">
-              {{-- Date --}}
-              <div class="flex items-center gap-[12px]">
-                <div class="w-[40px] h-[40px] rounded-xl bg-violet-500/20 print:bg-violet-100 flex items-center justify-center flex-shrink-0">
-                  <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5.17194 0.665383C5.17194 0.298036 4.87019 0 4.49826 0C4.12633 0 3.82458 0.298036 3.82458 0.665383V2.07239C2.52633 2.17636 1.67721 2.42588 1.05265 3.04274C0.428085 3.65961 0.175454 4.49827 0.0701904 5.78052H17.9298C17.8246 4.49827 17.5719 3.65961 16.9474 3.04274C16.3228 2.42588 15.4737 2.17636 14.1755 2.07239V0.665383C14.1755 0.298036 13.8737 0 13.5018 0C13.1298 0 12.8281 0.298036 12.8281 0.665383V2.01001C12.2316 1.99615 11.5579 1.99615 10.8 1.99615H7.20002C6.44212 1.99615 5.77545 1.99615 5.17194 2.01001V0.665383Z" class="fill-violet-400 print:fill-violet-600"/>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M0 9.11436C0 8.36581 0 7.70735 0.0140351 7.11128H17.993C18.007 7.70042 18.007 8.36581 18.007 9.11436V10.8956C18.007 14.2503 18.007 15.9276 16.9544 16.9673C15.9018 18.0069 14.2035 18.0069 10.807 18.0069H7.20702C3.81053 18.0069 2.11228 18.0069 1.05965 16.9673C0.00701754 15.9276 0.00701754 14.2503 0.00701754 10.8956V9.11436H0ZM13.5018 10.8887C14 10.8887 14.4 10.4936 14.4 10.0015C14.4 9.50943 14 9.11436 13.5018 9.11436C13.0035 9.11436 12.6035 9.50943 12.6035 10.0015C12.6035 10.4936 13.0035 10.8887 13.5018 10.8887ZM13.5018 14.4444C14 14.4444 14.4 14.0493 14.4 13.5572C14.4 13.0651 14 12.67 13.5018 12.67C13.0035 12.67 12.6035 13.0651 12.6035 13.5572C12.6035 14.0493 13.0035 14.4444 13.5018 14.4444ZM9.90175 10.0015C9.90175 10.4936 9.50175 10.8887 9.00351 10.8887C8.50526 10.8887 8.10526 10.4936 8.10526 10.0015C8.10526 9.50943 8.50526 9.11436 9.00351 9.11436C9.50175 9.11436 9.90175 9.50943 9.90175 10.0015ZM9.90175 13.5572C9.90175 14.0493 9.50175 14.4444 9.00351 14.4444C8.50526 14.4444 8.10526 14.0493 8.10526 13.5572C8.10526 13.0651 8.50526 12.67 9.00351 12.67C9.50175 12.67 9.90175 13.0651 9.90175 13.5572ZM4.49825 10.8887C4.99649 10.8887 5.39649 10.4936 5.39649 10.0015C5.39649 9.50943 4.99649 9.11436 4.49825 9.11436C4 9.11436 3.6 9.50943 3.6 10.0015C3.6 10.4936 4 10.8887 4.49825 10.8887ZM4.49825 14.4444C4.99649 14.4444 5.39649 14.0493 5.39649 13.5572C5.39649 13.0651 4.99649 12.67 4.49825 12.67C4 12.67 3.6 13.0651 3.6 13.5572C3.6 14.0493 4 14.4444 4.49825 14.4444Z" class="fill-violet-400 print:fill-violet-600"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.date') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $event->is_multi_day ? $event->getDateRangeDisplay($sale->event_date) : $event->getStartDateTime($sale->event_date, true)->format('F j, Y') }}</p>
-                </div>
-              </div>
-
-              {{-- Time --}}
-              <div class="flex items-center gap-[12px]">
-                <div class="w-[40px] h-[40px] rounded-xl bg-fuchsia-500/20 print:bg-fuchsia-100 flex items-center justify-center flex-shrink-0">
-                  <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M0 9C0 4.02667 4.02667 0 9 0C13.9733 0 18 4.02667 18 9C18 13.9733 13.9733 18 9 18C4.02667 18 0 13.9733 0 9ZM9.67333 5.4C9.67333 5.02667 9.37333 4.72667 9 4.72667C8.62667 4.72667 8.32667 5.02667 8.32667 5.4V9C8.32667 9.18 8.4 9.35333 8.52667 9.48L10.7733 11.7267C11.04 11.9933 11.4667 11.9933 11.7267 11.7267C11.9933 11.46 11.9933 11.0333 11.7267 10.7733L9.67333 8.72V5.4Z" class="fill-fuchsia-400 print:fill-fuchsia-600"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.time') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $event->getStartEndTime($sale->event_date, $event->use24HourTime()) }}</p>
-                </div>
-              </div>
-
-              {{-- Attendee --}}
-              <div class="flex items-center gap-[12px]">
-                <div class="w-[40px] h-[40px] rounded-xl bg-emerald-500/20 print:bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M9 0C6.51472 0 4.5 2.01472 4.5 4.5C4.5 6.98528 6.51472 9 9 9C11.4853 9 13.5 6.98528 13.5 4.5C13.5 2.01472 11.4853 0 9 0Z" class="fill-emerald-400 print:fill-emerald-600"/>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M9 10.5C5.27208 10.5 2.25 12.1863 2.25 14.25C2.25 16.3137 2.25 18 9 18C15.75 18 15.75 16.3137 15.75 14.25C15.75 12.1863 12.7279 10.5 9 10.5Z" class="fill-emerald-400 print:fill-emerald-600"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.attendee') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $sale->name }}</p>
-                </div>
-              </div>
-
-              {{-- Number of guests --}}
-              <div class="flex items-center gap-[12px]">
-                <div class="w-[40px] h-[40px] rounded-xl bg-amber-500/20 print:bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 9C7.65685 9 9 7.65685 9 6C9 4.34315 7.65685 3 6 3C4.34315 3 3 4.34315 3 6C3 7.65685 4.34315 9 6 9Z" class="fill-amber-400 print:fill-amber-600"/>
-                    <path d="M12 9C13.1046 9 14 7.88071 14 6.5C14 5.11929 13.1046 4 12 4C10.8954 4 10 5.11929 10 6.5C10 7.88071 10.8954 9 12 9Z" class="fill-amber-400 print:fill-amber-600"/>
-                    <path d="M6 10.5C2.68629 10.5 0 12.1863 0 14.25V15.75C0 16.1642 0.335786 16.5 0.75 16.5H11.25C11.6642 16.5 12 16.1642 12 15.75V14.25C12 12.1863 9.31371 10.5 6 10.5Z" class="fill-amber-400 print:fill-amber-600"/>
-                    <path d="M13.5 11.25C12.8643 11.25 12.2554 11.3571 11.6952 11.5506C13.0516 12.5047 14 13.8397 14 15.375V15.75C14 15.8372 13.9916 15.9224 13.9755 16.0051C13.9916 16.0018 14.0079 16 14.025 16H17.25C17.6642 16 18 15.6642 18 15.25V14C18 12.4812 16.0212 11.25 13.5 11.25Z" class="fill-amber-400 print:fill-amber-600"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.guests') }}</p>
-                  @php $headerPassTicket = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass); @endphp
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $headerPassTicket ? $headerPassTicket->ticket->admitsPerEvent() : ($sale->isRsvp() ? 1 : ($sale->legTotalQuantity())) }}</p>
-                </div>
-              </div>
-            </div>
-
-            {{-- Right: QR Code --}}
-            <div class="flex flex-col items-center">
-              <div class="relative bg-white rounded-2xl p-[8px] shadow-lg shadow-black/20 print:shadow-md">
-                <img class="w-[120px] h-[120px] {{ ($sale->status !== 'paid' || $planOnHold) ? 'opacity-40 grayscale' : '' }}" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
-                @if ($sale->status !== 'paid' || $planOnHold)
-                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    {{-- Amber ON HOLD, not red VOID: the ticket is real and one payment behind. --}}
-                    <span class="rotate-[-20deg] px-[8px] py-[2px] text-[14px] font-extrabold tracking-wider rounded shadow {{ $planOnHold ? 'bg-amber-400 text-amber-900' : ($isUnpaid ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white') }}">
-                      {{ $planOnHold ? __('messages.ticket_on_hold') : ($isUnpaid ? __('messages.unpaid') : __('messages.void')) }}
-                    </span>
-                  </div>
+              <div>
+                <h1 class="gk-tk-title">{{ $eventName }}</h1>
+                @if ($venue)
+                  <span class="gk-tk-sub">{{ $venue->translatedName() ?: $venue->shortAddress() }}</span>
+                @elseif ($event->event_url)
+                  <span class="gk-tk-sub">{{ __('messages.online') }}</span>
                 @endif
               </div>
-              <p class="text-[10px] text-white/40 print-text-gray mt-[8px] text-center font-medium">
+            </header>
+
+            <div class="gk-tk-note" aria-live="polite">
+              {{-- A redirect that came back with an error and no section of its own to say it in.
+                   The pass bookings and the payment plan each print theirs beside the action
+                   that raised it. --}}
+              @if (session('error') && ! $passBookable && ! $installmentPlan)
+                <div class="gk-tk-msg gk-tk-msg-bad gk-tk-noprint" role="alert">
+                  @include('ticket.partials.icon', ['icon' => 'alert'])
+                  <div>{{ session('error') }}</div>
+                </div>
+              @endif
+
+              @if ($eventCancelled)
+                <div class="gk-tk-msg gk-tk-msg-bad" data-ticket-state="event-cancelled">
+                  @include('ticket.partials.icon', ['icon' => 'alert'])
+                  <div><strong>{{ __('messages.event_cancelled_heading') }}</strong><br>{{ __('messages.this_ticket_is_not_valid') }}</div>
+                </div>
+              @elseif ($confirming)
+                <div class="gk-tk-msg" data-ticket-state="confirming" data-confirming>
+                  @include('ticket.partials.icon', ['icon' => 'clock'])
+                  <div><strong>{{ __('messages.ticket_confirming_payment') }}</strong><br>{{ __('messages.ticket_confirming_payment_hint') }}</div>
+                </div>
+              @elseif ($isUnpaid)
+                <div class="gk-tk-msg gk-tk-msg-warn" data-ticket-state="unpaid">
+                  @include('ticket.partials.icon', ['icon' => 'alert'])
+                  <div>
+                    <strong>{{ __('messages.unpaid') }}</strong><br>{{ __('messages.this_ticket_is_not_paid') }}
+                    @if ($payAtDoor && ! $canShowPayNow)
+                      <br>{{ __('messages.pay_at_the_door') }}
+                    @endif
+                  </div>
+                </div>
+                @if ($canShowPayNow)
+                  <a href="{{ $eventUrl }}" class="gk-tk-btn gk-tk-btn-fill gk-tk-btn-block">{{ __('messages.complete_payment') }}</a>
+                @endif
+              @elseif ($sale->status !== 'paid')
+                <div class="gk-tk-msg gk-tk-msg-bad" data-ticket-state="{{ $sale->status }}">
+                  @include('ticket.partials.icon', ['icon' => 'alert'])
+                  <div>
+                    <strong>{{ __('messages.' . $sale->status) }}</strong><br>
+                    {{ match ($sale->status) {
+                        'cancelled' => __('messages.this_ticket_is_cancelled'),
+                        'refunded' => __('messages.this_ticket_is_refunded'),
+                        'expired' => __('messages.this_reservation_has_expired'),
+                        default => __('messages.this_ticket_is_not_valid'),
+                    } }}
+                  </div>
+                </div>
+              @elseif ($planOnHold)
+                {{-- ON HOLD is its own tier: the ticket is real and one payment behind, and paying
+                     restores it at once. --}}
+                <div class="gk-tk-msg gk-tk-msg-warn" data-ticket-state="on-hold">
+                  @include('ticket.partials.icon', ['icon' => 'alert'])
+                  <div><strong>{{ __('messages.ticket_payment_overdue') }}</strong><br>{{ __('messages.ticket_on_hold_sub', ['amount' => \App\Utils\MoneyUtils::format($installmentPlan->amountRemaining(), $installmentPlan->currency)]) }}</div>
+                </div>
+                <a href="{{ route('installment.view', ['plan_id' => \App\Utils\UrlUtils::encodeId($installmentPlan->id), 'secret' => $installmentPlan->secret]) }}" class="gk-tk-btn gk-tk-btn-fill gk-tk-btn-block gk-tk-noprint">{{ __('messages.pay_now') }}</a>
+              @else
+                {{-- Arriving. In the page for every good ticket and shown once: by the server on
+                     the redirect from checkout, or by the script after a payment that needed a
+                     moment to confirm. --}}
+                <div class="gk-tk-hero gk-tk-noprint" data-ticket-state="going" data-hero @if (! $fresh) hidden @endif>
+                  <span class="gk-tk-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+                  <h2>{{ __('messages.ticket_you_are_going') }}</h2>
+                </div>
+              @endif
+            </div>
+
+            {{-- The code. --}}
+            @if ($valid)
+              <button type="button" class="gk-tk-qr" data-door-open aria-label="{{ __('messages.ticket_enlarge_code') }}">
+                <img src="{{ $qrUrl }}" alt="">
+              </button>
+              <p class="gk-tk-qr-note">{{ __('messages.ticket_show_at_door') }}<span>{{ __('messages.ticket_admits', ['count' => $admits]) }}</span></p>
+              <button type="button" class="gk-tk-btn gk-tk-enlarge gk-tk-noprint" data-door-open>
+                @include('ticket.partials.icon', ['icon' => 'zoom'])
+                {{ __('messages.ticket_enlarge_code') }}
+              </button>
+            @else
+              <div class="gk-tk-qr gk-tk-qr-void">
+                <img src="{{ $qrUrl }}" alt="">
+                @if (! $confirming)
+                  <span class="gk-tk-stamp {{ $planOnHold ? 'gk-tk-stamp-hold' : '' }}">{{ $stamp }}</span>
+                @endif
+              </div>
+              @if (! $confirming)
+              <p class="gk-tk-qr-note">
                 @if ($planOnHold)
                   {{ __('messages.installment_on_hold_door') }}
-                @elseif ($sale->status === 'paid')
-                  {{ __('messages.scan_for_entry') }}
                 @elseif ($isUnpaid)
                   {{ __('messages.payment_required_to_enter') }}
                 @else
                   {{ __('messages.this_ticket_is_not_valid') }}
                 @endif
               </p>
-            </div>
-          </div>
-
-          {{-- Wallet passes. Its own full-width row rather than under the QR: that column is 120px
-               wide and the badge has a 48px minimum height it would overflow. The wrapper is gated
-               on the same predicate as the partial so an unconfigured install renders no stray
-               20px of margin. --}}
-          @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $event))
-            {{-- Its own row above the divider, not tucked under the badges column: centred with no
-                 separator it read as another line of the Guests field directly above it. --}}
-            <div class="mt-[20px] pt-[20px] border-t border-white/10 flex justify-center print:hidden">
-              @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
-            </div>
-          @endif
-        </div>
-
-        @if ($sale->isRsvp())
-        {{-- RSVP Confirmation --}}
-        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
-          <div class="flex items-center gap-[8px]">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" class="fill-emerald-400 print:fill-emerald-600"/>
-            </svg>
-            <span class="text-[14px] text-emerald-400 print:text-emerald-600 font-semibold">{{ __('messages.registered') }}</span>
-          </div>
-        </div>
-        @else
-        {{-- Ticket Stub Divider --}}
-        <div class="relative h-[1px] bg-transparent">
-          <div class="ticket-cutout-left print:bg-white"></div>
-          <div class="ticket-cutout-right print:bg-white"></div>
-          <div class="absolute inset-x-[20px] top-1/2 border-t border-dashed border-white/20 print:border-slate-300"></div>
-        </div>
-
-        {{-- Ticket Types Section --}}
-        @php
-            // For a grouped primary buyer, aggregate seats across the whole group so they see what they paid for
-            if ($sale->isPrimarySale() && $sale->group_id) {
-                $groupSaleTickets = \App\Models\SaleTicket::whereIn('sale_id',
-                    \App\Models\Sale::where('group_id', $sale->group_id)->where('is_deleted', false)->pluck('id')
-                )->with('ticket')->get();
-                $aggregated = [];
-                foreach ($groupSaleTickets as $st) {
-                    if (! $st->ticket) continue;
-                    $key = $st->ticket_id;
-                    if (! isset($aggregated[$key])) {
-                        // seat_labels is carried here rather than looked up in the loop below: these
-                        // rows are stdClass totals for the whole group, not SaleTicket models, so
-                        // seatLabels() cannot be called on them.
-                        $aggregated[$key] = (object) ['ticket' => $st->ticket, 'quantity' => 0, 'seat_labels' => []];
-                    }
-                    $aggregated[$key]->quantity += $st->quantity;
-                    $aggregated[$key]->seat_labels = array_merge($aggregated[$key]->seat_labels, $st->seatLabels());
-                }
-                $aggregatedCollection = collect(array_values($aggregated));
-                $regularTickets = $aggregatedCollection->filter(fn($st) => ! $st->ticket->is_addon);
-                $addonTickets = $aggregatedCollection->filter(fn($st) => $st->ticket->is_addon);
-            } else {
-                $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
-                $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
-            }
-
-            // The two branches hand back different types - real SaleTicket models, or the stdClass
-            // totals a grouped primary buyer gets - and only one of them answers seatLabels().
-            $seatLabelsFor = fn ($st) => $st instanceof \App\Models\SaleTicket
-                ? $st->seatLabels()
-                : ($st->seat_labels ?? []);
-        @endphp
-        @if ($regularTickets->count() > 0)
-        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
-          <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.tickets') }}</h2>
-          <div class="space-y-[8px]">
-            @foreach ($regularTickets as $saleTicket)
-              <div class="flex items-center justify-between">
-                <span class="text-[14px] text-white print-text-dark font-medium">
-                  {{ $saleTicket->ticket->type ?: __('messages.ticket') }}
-                  @if ($saleTicket->ticket->is_pass)
-                  <span class="ms-1 inline-block px-[8px] py-[2px] rounded-full bg-blue-500/20 print:bg-blue-100 text-blue-300 print:text-blue-700 text-[11px] font-semibold">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</span>
-                  @endif
-                  @php $seatLabels = $seatLabelsFor($saleTicket); @endphp
-                  @if (count($seatLabels))
-                  <span class="block text-[12px] text-white/70 print-text-gray mt-[2px]">{{-- A literal dot: an entity here is escaped by the braces and printed as "&middot;". --}}{{ implode(' · ', $seatLabels) }}</span>
-                  @endif
-                </span>
-                <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
-                  x{{ $saleTicket->quantity }}
-                </span>
-              </div>
-            @endforeach
-          </div>
-          @php
-            $ticketDiscountTotal = $sale->legTotalDiscount();
-            $ticketGiftCardTotal = $sale->legTotalGiftCard();
-          @endphp
-          @if ($ticketDiscountTotal > 0 || $ticketGiftCardTotal > 0)
-            <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200 space-y-[6px]">
-              @if ($ticketDiscountTotal > 0)
-              <div class="flex items-center justify-between">
-                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">{{ __('messages.discount') }}@if ($sale->promoCode) ({{ $sale->promoCode->code }})@endif</span>
-                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($ticketDiscountTotal, 2) }} {{ $event->ticket_currency_code }}</span>
-              </div>
               @endif
-              @if ($ticketGiftCardTotal > 0)
-              <div class="flex items-center justify-between">
-                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">{{ __('messages.gift_card') }}</span>
-                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($ticketGiftCardTotal, 2) }} {{ $event->ticket_currency_code }}</span>
+            @endif
+
+            {{-- What the organizer wants a ticket holder to know, directly under the code. --}}
+            @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
+              <div class="gk-tk-info">
+                <h2 class="gk-tk-label">{{ __('messages.important_information') }}</h2>
+                <div class="custom-content">{!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}</div>
               </div>
-              @endif
-            </div>
-          @endif
-        </div>
-        @endif
-        @php
-            $passSaleTicket = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass);
-        @endphp
-        @if ($passSaleTicket)
-            @php
-                $passTicket = $passSaleTicket->ticket;
-                $passUsed = $passSaleTicket->passUsageCount();
-                // Only sub-schedule / specific-events scopes list individual events;
-                // all_events renders a label and per_occurrence (season pass) lists none.
-                $coveredEvents = in_array($passTicket->pass_scope, ['sub_schedule', 'specific_events'])
-                    ? \App\Models\Event::whereIn('id', $passTicket->coveredEventIds($role))->orderBy('starts_at')->limit(50)->get()
-                    : collect();
-            @endphp
-            <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
-                <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.subscription') }}</h2>
-                <div class="space-y-[8px] text-[14px] text-white print-text-dark">
-                    <div class="flex items-center justify-between">
-                        <span class="text-white/70 print-text-gray">{{ __('messages.visits_used') }}</span>
-                        <span class="font-medium">
-                            @if ($passTicket->pass_usage_type === 'total' && $passTicket->pass_max_uses)
-                                {{ $passUsed }} / {{ $passTicket->pass_max_uses }}
-                            @elseif ($passTicket->pass_usage_type === 'unlimited' || $passTicket->pass_usage_type === 'per_occurrence')
-                                {{ __('messages.pass_unlimited_visits') }}
-                            @else
-                                {{ $passUsed }}
-                            @endif
-                        </span>
-                    </div>
-                    @if ($passTicket->admitsPerEvent() > 1)
-                    <div class="flex items-center justify-between">
-                        <span class="text-white/70 print-text-gray">{{ __('messages.pass_admits_per_event') }}</span>
-                        <span class="font-medium">{{ $passTicket->admitsPerEvent() }}</span>
-                    </div>
-                    <div class="text-[13px] text-white/60 print-text-gray">{{ __('messages.pass_admits_includes_holder') }}</div>
+            @endif
+          </div>
+
+          <div class="gk-ticket-b">
+            {{-- What to do next. Not for a ticket that is over. --}}
+            @if (! $eventCancelled && ! in_array($sale->status, ['cancelled', 'refunded', 'expired']))
+              <div class="gk-tk-tiles gk-tk-noprint">
+                <button type="button" class="gk-tk-tile" data-calendar-toggle aria-expanded="false" aria-controls="ticket-calendar">
+                  @include('ticket.partials.icon', ['icon' => 'calendar'])
+                  <span>{{ __('messages.add_to_calendar') }}</span>
+                </button>
+                {{-- The EVENT's public address, never this page's: the ticket's link is the ticket. --}}
+                <button type="button" class="gk-tk-tile" data-invite data-url="{{ $eventUrl }}" data-title="{{ $eventName }}" data-copied="{{ __('messages.link_copied') }}">
+                  @include('ticket.partials.icon', ['icon' => 'share'])
+                  <span data-invite-label>{{ __('messages.ticket_invite_friends') }}</span>
+                </button>
+                @if ($venueAddress)
+                  <a class="gk-tk-tile" href="https://www.google.com/maps/search/?api=1&query={{ urlencode($venueAddress) }}" target="_blank" rel="noopener noreferrer">
+                    @include('ticket.partials.icon', ['icon' => 'pin'])
+                    <span>{{ __('messages.directions') }}</span>
+                  </a>
+                @endif
+              </div>
+              <div class="gk-tk-menu gk-tk-noprint" id="ticket-calendar" hidden>
+                <a href="{{ $event->getGoogleCalendarUrl($eventDate) }}" target="_blank" rel="noopener noreferrer">Google Calendar</a>
+                <a href="{{ $event->getAppleCalendarUrl($eventDate, $sale->subdomain) }}">Apple Calendar</a>
+                <a href="{{ $event->getMicrosoftCalendarUrl($eventDate) }}" target="_blank" rel="noopener noreferrer">{{ __('messages.microsoft_calendar') }}</a>
+              </div>
+            @endif
+
+            <dl class="gk-tk-facts">
+              <div class="gk-tk-fact">
+                <span class="gk-tk-ico gk-tk-ico-a">@include('ticket.partials.icon', ['icon' => 'calendar'])</span>
+                <div>
+                  <dt>{{ __('messages.date') }}</dt>
+                  <dd>
+                    {{ $event->is_multi_day ? $event->getDateRangeDisplay($eventDate) : $event->getStartDateTime($eventDate, true)->format('F j, Y') }}
+                    @if ($time = $event->getStartEndTime($eventDate, $event->use24HourTime()))
+                      <small><bdi>{{ $time }}</bdi> <bdi>{{ $zone }}</bdi></small>
                     @endif
-                    @if ($passSaleTicket->pass_expires_at)
-                    <div class="flex items-center justify-between">
-                        <span class="text-white/70 print-text-gray">{{ __('messages.pass_valid_until') }}</span>
-                        <span class="font-medium">{{ $passSaleTicket->pass_expires_at->format('M j, Y') }}</span>
-                    </div>
-                    @endif
-                    @if ($passTicket->pass_scope === 'all_events')
-                    <div class="text-white/70 print-text-gray">{{ __('messages.pass_scope_all_events') }}</div>
-                    @elseif ($coveredEvents->count() > 0)
-                    <div>
-                        <div class="text-white/70 print-text-gray mb-[4px]">{{ __('messages.covered_events') }}</div>
-                        <ul class="space-y-[2px]">
-                            @foreach ($coveredEvents as $ce)
-                            <li class="text-[13px]">{{ $ce->name }}@if ($ce->starts_at) <span class="text-white/50 print-text-gray">&middot; {{ \Carbon\Carbon::parse($ce->saleEventDateFromStartsAt())->format('M j, Y') }}</span>@endif</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    @endif
+                  </dd>
                 </div>
-            </div>
+              </div>
 
-            @if (!empty($passBookable))
-            @php $openOccurrences = collect($bookableOccurrences)->reject(fn ($o) => $o['booked'])->values(); @endphp
-            <div class="glass p-[20px] sm:p-[24px] print:hidden" id="pass-booking">
-                <h2 class="text-[11px] uppercase tracking-wider text-white/50 font-semibold mb-[12px]">{{ __('messages.book_your_dates') }}</h2>
+              @if ($venue || $event->event_url)
+              <div class="gk-tk-fact">
+                <span class="gk-tk-ico gk-tk-ico-b">@include('ticket.partials.icon', ['icon' => $venue ? 'pin' : 'link'])</span>
+                <div>
+                  <dt>{{ $venue ? __('messages.venue') : __('messages.online') }}</dt>
+                  <dd>
+                    @if ($venue)
+                      {{ $venue->translatedName() ?: $venue->shortAddress() }}
+                      @if ($venueAddress)
+                        <small><a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($venueAddress) }}" target="_blank" rel="noopener noreferrer">{{ $venue->shortAddress() }}</a></small>
+                      @endif
+                    @endif
+                    {{-- The whole join link is the ticket holder's to see. Only a web link is
+                         linked (eventUrlHref()); free-text join instructions read as text. --}}
+                    @if ($event->event_url)
+                      @if ($joinHref)
+                        <small><a href="{{ $joinHref }}" target="_blank" rel="noopener noreferrer">{{ \App\Utils\UrlUtils::clean($event->event_url) }}</a></small>
+                      @else
+                        <small>{{ \App\Utils\UrlUtils::clean($event->event_url) }}</small>
+                      @endif
+                    @endif
+                  </dd>
+                </div>
+              </div>
+              @endif
 
-                @php $passCancelCutoff = ($passPolicyTicket ?? null)?->pass_cancel_cutoff_hours; @endphp
-                @if (! is_null($passCancelCutoff))
-                <p class="text-[12px] text-white/50 mb-[12px]">
-                    {{ $passCancelCutoff == 0 ? __('messages.pass_cancel_window_until_start') : __('messages.pass_cancel_window_hours', ['hours' => $passCancelCutoff]) }}
-                    {{ $passPolicyTicket->passLateCancelPolicy() === 'block' ? __('messages.pass_late_cancel_note_block') : __('messages.pass_late_cancel_note_forfeit') }}
-                </p>
-                @endif
+              <div class="gk-tk-fact">
+                <span class="gk-tk-ico gk-tk-ico-c">@include('ticket.partials.icon', ['icon' => 'person'])</span>
+                <div>
+                  <dt>{{ __('messages.attendee') }}</dt>
+                  <dd>
+                    <bdi>{{ $sale->name }}</bdi>
+                    <small>{{ __('messages.guests') }}: {{ $admits }}</small>
+                  </dd>
+                </div>
+              </div>
 
-                @if (session('message'))
-                <div class="mb-[12px] rounded-[10px] bg-emerald-500/15 border border-emerald-400/30 px-[12px] py-[8px] text-[13px] text-emerald-200">{{ session('message') }}</div>
-                @endif
-                @if (session('error'))
-                <div class="mb-[12px] rounded-[10px] bg-red-500/15 border border-red-400/30 px-[12px] py-[8px] text-[13px] text-red-200">{{ session('error') }}</div>
-                @endif
+              @php
+                  // For a grouped primary buyer, aggregate seats across the whole group so they see what they paid for
+                  if ($sale->isPrimarySale() && $sale->group_id) {
+                      $groupSaleTickets = \App\Models\SaleTicket::whereIn('sale_id',
+                          \App\Models\Sale::where('group_id', $sale->group_id)->where('is_deleted', false)->pluck('id')
+                      )->with('ticket')->get();
+                      $aggregated = [];
+                      foreach ($groupSaleTickets as $st) {
+                          if (! $st->ticket) continue;
+                          $key = $st->ticket_id;
+                          if (! isset($aggregated[$key])) {
+                              // seat_labels is carried here rather than looked up in the loop below: these
+                              // rows are stdClass totals for the whole group, not SaleTicket models, so
+                              // seatLabels() cannot be called on them.
+                              $aggregated[$key] = (object) ['ticket' => $st->ticket, 'quantity' => 0, 'seat_labels' => []];
+                          }
+                          $aggregated[$key]->quantity += $st->quantity;
+                          $aggregated[$key]->seat_labels = array_merge($aggregated[$key]->seat_labels, $st->seatLabels());
+                      }
+                      $aggregatedCollection = collect(array_values($aggregated));
+                      $regularTickets = $aggregatedCollection->filter(fn($st) => ! $st->ticket->is_addon);
+                      $addonTickets = $aggregatedCollection->filter(fn($st) => $st->ticket->is_addon);
+                  } else {
+                      $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
+                      $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
+                  }
 
-                @if (count($bookedOccurrences) > 0)
-                <div class="mb-[16px]">
-                    <div class="text-white/70 text-[13px] mb-[6px]">{{ __('messages.your_booked_dates') }}</div>
-                    <ul class="space-y-[6px]">
-                        @foreach ($bookedOccurrences as $b)
+                  // The two branches hand back different types - real SaleTicket models, or the stdClass
+                  // totals a grouped primary buyer gets - and only one of them answers seatLabels().
+                  $seatLabelsFor = fn ($st) => $st instanceof \App\Models\SaleTicket
+                      ? $st->seatLabels()
+                      : ($st->seat_labels ?? []);
+
+                  $ticketDiscountTotal = $sale->isRsvp() ? 0 : $sale->legTotalDiscount();
+                  $ticketGiftCardTotal = $sale->isRsvp() ? 0 : $sale->legTotalGiftCard();
+              @endphp
+              @if ($sale->isRsvp() || $regularTickets->count() > 0)
+              <div class="gk-tk-fact">
+                <span class="gk-tk-ico gk-tk-ico-d">@include('ticket.partials.icon', ['icon' => 'ticket'])</span>
+                <div>
+                  <dt>{{ __('messages.tickets') }}</dt>
+                  @if ($sale->isRsvp())
+                    <dd>{{ __('messages.registered') }}</dd>
+                  @else
+                    @foreach ($regularTickets as $saleTicket)
+                      <dd>
+                        <bdi>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</bdi> <bdi>&times;&nbsp;{{ $saleTicket->quantity }}</bdi>
+                        @if ($saleTicket->ticket->is_pass)
+                          <span class="gk-tk-pill">{{ __('messages.season_pass') }}</span>
+                        @endif
+                        @php $seatLabels = $seatLabelsFor($saleTicket); @endphp
+                        @if (count($seatLabels))
+                          {{-- A literal dot: an entity here is escaped by the braces and printed as "&middot;". --}}
+                          <small>{{ implode(' · ', $seatLabels) }}</small>
+                        @endif
+                      </dd>
+                    @endforeach
+                  @endif
+                </div>
+              </div>
+              @endif
+            </dl>
+
+            @if ($ticketDiscountTotal > 0 || $ticketGiftCardTotal > 0)
+              <div class="gk-tk-sec">
+                <ul class="gk-tk-rows">
+                  @if ($ticketDiscountTotal > 0)
+                    <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.discount') }}@if ($sale->promoCode) (<bdi>{{ $sale->promoCode->code }}</bdi>)@endif</span><span>-{{ number_format($ticketDiscountTotal, 2) }} {{ $event->ticket_currency_code }}</span></li>
+                  @endif
+                  @if ($ticketGiftCardTotal > 0)
+                    <li class="gk-tk-row gk-tk-good"><span class="gk-tk-good">{{ __('messages.gift_card') }}</span><span>-{{ number_format($ticketGiftCardTotal, 2) }} {{ $event->ticket_currency_code }}</span></li>
+                  @endif
+                </ul>
+              </div>
+            @endif
+
+            @php
+                $passSaleTicket = $sale->isRsvp() ? null : $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass);
+            @endphp
+            @if ($passSaleTicket)
+              @php
+                  $passTicket = $passSaleTicket->ticket;
+                  $passUsed = $passSaleTicket->passUsageCount();
+                  // Only sub-schedule / specific-events scopes list individual events;
+                  // all_events renders a label and per_occurrence (season pass) lists none.
+                  $coveredEvents = in_array($passTicket->pass_scope, ['sub_schedule', 'specific_events'])
+                      ? \App\Models\Event::whereIn('id', $passTicket->coveredEventIds($role))->orderBy('starts_at')->limit(50)->get()
+                      : collect();
+              @endphp
+              <div class="gk-tk-sec">
+                <h2 class="gk-tk-label">{{ __('messages.subscription') }}</h2>
+                <ul class="gk-tk-rows">
+                  <li class="gk-tk-row">
+                    <span>{{ __('messages.visits_used') }}</span>
+                    <span>
+                      @if ($passTicket->pass_usage_type === 'total' && $passTicket->pass_max_uses)
+                        {{ $passUsed }} / {{ $passTicket->pass_max_uses }}
+                      @elseif ($passTicket->pass_usage_type === 'unlimited' || $passTicket->pass_usage_type === 'per_occurrence')
+                        {{ __('messages.pass_unlimited_visits') }}
+                      @else
+                        {{ $passUsed }}
+                      @endif
+                    </span>
+                  </li>
+                  @if ($passTicket->admitsPerEvent() > 1)
+                    <li class="gk-tk-row"><span>{{ __('messages.pass_admits_per_event') }}</span><span>{{ $passTicket->admitsPerEvent() }}</span></li>
+                    <li class="gk-tk-quiet">{{ __('messages.pass_admits_includes_holder') }}</li>
+                  @endif
+                  @if ($passSaleTicket->pass_expires_at)
+                    <li class="gk-tk-row"><span>{{ __('messages.pass_valid_until') }}</span><span>{{ $passSaleTicket->pass_expires_at->format('M j, Y') }}</span></li>
+                  @endif
+                  @if ($passTicket->pass_scope === 'all_events')
+                    <li class="gk-tk-quiet">{{ __('messages.pass_scope_all_events') }}</li>
+                  @elseif ($coveredEvents->count() > 0)
+                    <li>
+                      <div class="gk-tk-quiet">{{ __('messages.covered_events') }}</div>
+                      <ul class="gk-tk-rows">
+                        @foreach ($coveredEvents as $ce)
+                          <li><bdi>{{ $ce->name }}</bdi>@if ($ce->starts_at) <span class="gk-tk-quiet">&middot; {{ \Carbon\Carbon::parse($ce->saleEventDateFromStartsAt())->format('M j, Y') }}</span>@endif</li>
+                        @endforeach
+                      </ul>
+                    </li>
+                  @endif
+                </ul>
+              </div>
+
+              @if (! empty($passBookable))
+                @php
+                    $openOccurrences = collect($bookableOccurrences)->reject(fn ($o) => $o['booked'])->values();
+                    $passCancelCutoff = ($passPolicyTicket ?? null)?->pass_cancel_cutoff_hours;
+                @endphp
+                <div class="gk-tk-sec gk-tk-noprint" id="pass-booking">
+                  <h2 class="gk-tk-label">{{ __('messages.book_your_dates') }}</h2>
+
+                  @if (! is_null($passCancelCutoff))
+                    <p class="gk-tk-quiet">
+                      {{ $passCancelCutoff == 0 ? __('messages.pass_cancel_window_until_start') : __('messages.pass_cancel_window_hours', ['hours' => $passCancelCutoff]) }}
+                      {{ $passPolicyTicket->passLateCancelPolicy() === 'block' ? __('messages.pass_late_cancel_note_block') : __('messages.pass_late_cancel_note_forfeit') }}
+                    </p>
+                  @endif
+
+                  @if (session('message'))
+                    <div class="gk-tk-msg gk-tk-msg-ok" role="status">@include('ticket.partials.icon', ['icon' => 'check'])<div>{{ session('message') }}</div></div>
+                  @endif
+                  @if (session('error'))
+                    <div class="gk-tk-msg gk-tk-msg-bad" role="alert">@include('ticket.partials.icon', ['icon' => 'alert'])<div>{{ session('error') }}</div></div>
+                  @endif
+
+                  @if (count($bookedOccurrences) > 0)
+                    <p class="gk-tk-quiet">{{ __('messages.your_booked_dates') }}</p>
+                    <ul class="gk-tk-rows">
+                      @foreach ($bookedOccurrences as $b)
                         @php
                             $pastCutoff = ! empty($b['past_cutoff']);
                             $latePolicy = $b['late_policy'] ?? null;
                         @endphp
-                        <li class="flex items-center justify-between gap-[8px] rounded-[10px] bg-white/[0.04] px-[12px] py-[8px]">
-                            <span class="text-[13px] text-white">{{ $b['date_label'] ?: $b['date'] }}@if ($b['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $b['event_name'] }}</span>@endif
-                                {{-- Not while the deadline itself has passed (undo grace): a past
-                                     instant must not be presented as a live cutoff. --}}
-                                @if (! empty($b['seat_label']))
-                                <span class="block text-[11px] text-white/60">{{ $b['seat_label'] }}</span>
-                                @endif
-                                @if (! empty($b['cancel_deadline_label']) && ! $pastCutoff && empty($b['deadline_past']))
-                                <span class="block text-[11px] text-white/40">{{ __('messages.pass_cancel_deadline_note', ['deadline' => $b['cancel_deadline_label']]) }}</span>
-                                @endif
-                            </span>
-                            @if ($pastCutoff && $latePolicy === 'block')
-                            <span class="text-[12px] text-white/40">{{ __('messages.pass_cancel_closed') }}</span>
-                            @else
-                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ $pastCutoff && $latePolicy === 'forfeit' ? __('messages.pass_forfeit_warning') : __('messages.are_you_sure') }}">
-                                @csrf
-                                <input type="hidden" name="book_event_id" value="{{ $b['event_id'] }}">
-                                <input type="hidden" name="date" value="{{ $b['date'] }}">
-                                @if ($pastCutoff && $latePolicy === 'forfeit')
+                        <li class="gk-tk-book">
+                          <span>{{ $b['date_label'] ?: $b['date'] }}@if ($b['event_name'] !== $event->name) <span class="gk-tk-quiet">&middot; <bdi>{{ $b['event_name'] }}</bdi></span>@endif
+                            @if (! empty($b['seat_label']))
+                              <small>{{ $b['seat_label'] }}</small>
+                            @endif
+                            {{-- Not while the deadline itself has passed (undo grace): a past
+                                 instant must not be presented as a live cutoff. --}}
+                            @if (! empty($b['cancel_deadline_label']) && ! $pastCutoff && empty($b['deadline_past']))
+                              <small>{{ __('messages.pass_cancel_deadline_note', ['deadline' => $b['cancel_deadline_label']]) }}</small>
+                            @endif
+                          </span>
+                          @if ($pastCutoff && $latePolicy === 'block')
+                            <span class="gk-tk-quiet">{{ __('messages.pass_cancel_closed') }}</span>
+                          @else
+                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ ($pastCutoff && $latePolicy === 'forfeit') ? __('messages.pass_cancel_forfeit_confirm') : __('messages.are_you_sure') }}">
+                              @csrf
+                              <input type="hidden" name="book_event_id" value="{{ $b['event_id'] }}">
+                              <input type="hidden" name="date" value="{{ $b['date'] }}">
+                              @if ($pastCutoff && $latePolicy === 'forfeit')
                                 {{-- The ack tells the server the forfeit warning was actually shown;
                                      without it a stale pre-deadline page gets a confirm bounce instead
                                      of a silent forfeit. --}}
                                 <input type="hidden" name="forfeit_ack" value="1">
-                                <button type="submit" class="text-[12px] text-amber-400 hover:text-amber-300 transition-colors font-medium">{{ __('messages.pass_cancel_no_credit') }}</button>
-                                @else
-                                <button type="submit" class="text-[12px] text-red-400 hover:text-red-300 transition-colors font-medium">{{ __('messages.cancel') }}</button>
-                                @endif
+                                <button type="submit" class="gk-tk-book-warn">{{ __('messages.pass_cancel_no_credit') }}</button>
+                              @else
+                                <button type="submit">{{ __('messages.cancel') }}</button>
+                              @endif
                             </form>
-                            @endif
+                          @endif
                         </li>
-                        @endforeach
+                      @endforeach
                     </ul>
-                </div>
-                @endif
+                  @endif
 
-                @if ($openOccurrences->count() > 0)
-                <div class="text-white/70 text-[13px] mb-[6px]">{{ __('messages.available_dates') }}</div>
-                <ul class="space-y-[6px]">
-                    @foreach ($openOccurrences as $o)
-                    <li class="flex items-center justify-between gap-[8px] rounded-[10px] bg-white/[0.04] px-[12px] py-[8px]">
-                        <span class="text-[13px] text-white">{{ $o['date_label'] ?: $o['date'] }}@if ($o['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $o['event_name'] }}</span>@endif
-                            @if (! is_null($o['seats_left'])) <span class="block text-[11px] {{ $o['sold_out'] ? 'text-red-300' : 'text-white/50' }}">{{ $o['sold_out'] ? __('messages.sold_out') : trans_choice('messages.seats_left', $o['seats_left'], ['count' => $o['seats_left']]) }}</span>@endif
-                        </span>
-                        @if ($o['sold_out'])
-                        <span class="text-[12px] text-white/40">{{ __('messages.sold_out') }}</span>
-                        @else
-                        <form action="{{ route('pass.book', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="book_event_id" value="{{ $o['event_id'] }}">
-                            <input type="hidden" name="date" value="{{ $o['date'] }}">
-                            <button type="submit" class="rounded-[8px] bg-violet-500 hover:bg-violet-400 px-[12px] py-[6px] text-[12px] font-semibold text-white transition-colors">{{ __('messages.book') }}</button>
-                        </form>
-                        @endif
-                    </li>
-                    @endforeach
-                </ul>
-                @elseif (count($bookedOccurrences) === 0)
-                <div class="text-[13px] text-white/50">{{ __('messages.no_dates_to_book') }}</div>
-                @endif
-            </div>
-            @endif
-        @endif
-        @if ($addonTickets->count() > 0)
-        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
-          <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.add_ons') }}</h2>
-          <div class="space-y-[8px]">
-            @foreach ($addonTickets as $saleTicket)
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="text-[14px] text-white print-text-dark font-medium">{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</span>
-                  @if ($saleTicket->ticket->url)
-                    <br>
-                    <a href="{{ $saleTicket->ticket->url }}" target="_blank" rel="noopener noreferrer" class="text-[12px] text-blue-400 print:text-blue-600 hover:underline inline-flex items-center gap-1 break-all">
-                      {{ $saleTicket->ticket->url }}
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    </a>
+                  @if ($openOccurrences->count() > 0)
+                    <p class="gk-tk-quiet">{{ __('messages.available_dates') }}</p>
+                    <ul class="gk-tk-rows">
+                      @foreach ($openOccurrences as $o)
+                        <li class="gk-tk-book">
+                          <span>{{ $o['date_label'] ?: $o['date'] }}@if ($o['event_name'] !== $event->name) <span class="gk-tk-quiet">&middot; <bdi>{{ $o['event_name'] }}</bdi></span>@endif
+                            @if (! is_null($o['seats_left'])) <small>{{ $o['sold_out'] ? __('messages.sold_out') : trans_choice('messages.seats_left', $o['seats_left'], ['count' => $o['seats_left']]) }}</small>@endif
+                          </span>
+                          @if ($o['sold_out'])
+                            <span class="gk-tk-quiet">{{ __('messages.sold_out') }}</span>
+                          @else
+                            <form action="{{ route('pass.book', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST">
+                              @csrf
+                              <input type="hidden" name="book_event_id" value="{{ $o['event_id'] }}">
+                              <input type="hidden" name="date" value="{{ $o['date'] }}">
+                              <button type="submit" class="gk-tk-book-go">{{ __('messages.book') }}</button>
+                            </form>
+                          @endif
+                        </li>
+                      @endforeach
+                    </ul>
+                  @elseif (count($bookedOccurrences) === 0)
+                    <p class="gk-tk-quiet">{{ __('messages.no_dates_to_book') }}</p>
                   @endif
                 </div>
-                <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
-                  x{{ $saleTicket->quantity }}
-                </span>
-              </div>
-            @endforeach
-          </div>
-        </div>
-        @endif
-        @endif
-
-        {{-- Payment plan. The page is already authenticated by $sale->secret, so the panel simply
-             renders here for anyone holding the ticket link.
-
-             The error slot is unconditional: this page's only other session('error') block is
-             nested inside the pass-booking @if, which is empty for an ordinary installment ticket -
-             so every bail from InstallmentController::pay(), including a genuine Stripe failure,
-             was swallowed and the buyer saw the page silently reload. --}}
-        @if ($installmentPlan && session('error'))
-          <div class="glass rounded-2xl p-[16px] mb-[16px] border border-red-400/40 bg-red-500/15">
-            <p class="text-[13px] text-red-100 print:text-red-800">{{ session('error') }}</p>
-          </div>
-        @endif
-
-        @if ($installmentPlan && $installmentPlan->status !== 'cancelled')
-          @include('partials.installment-plan-panel', ['plan' => $installmentPlan, 'variant' => 'dark'])
-        @endif
-
-        {{-- Custom Fields Section --}}
-        @php
-          $hasEventCustomFields = $event->custom_fields && count($event->custom_fields) > 0;
-          $hasTicketCustomFields = false;
-          foreach ($sale->saleTickets as $st) {
-            if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
-              $hasTicketCustomFields = true;
-              break;
-            }
-          }
-        @endphp
-        @if ($hasEventCustomFields || $hasTicketCustomFields)
-          <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
-            <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.details') }}</h2>
-
-            {{-- Event-level Custom Fields --}}
-            @if ($hasEventCustomFields)
-              @php $eventFallbackIndex = 1; @endphp
-              @foreach ($event->custom_fields as $fieldKey => $fieldConfig)
-                @php
-                  $index = $fieldConfig['index'] ?? $eventFallbackIndex;
-                  $eventFallbackIndex++;
-                @endphp
-                @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
-                  <div class="flex gap-[8px] items-start mb-[8px]">
-                    <span class="text-[12px] text-white/60 print-text-gray font-medium">{{ $fieldConfig['name'] }}:</span>
-                    <span class="text-[12px] text-white print-text-dark">{{ $sale->{"custom_value{$index}"} }}</span>
-                  </div>
-                @endif
-              @endforeach
+              @endif
             @endif
 
-            {{-- Ticket-level Custom Fields --}}
-            @foreach ($sale->saleTickets as $saleTicket)
-              @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
-                <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200">
-                  <p class="text-[11px] text-violet-400 print:text-violet-600 font-semibold mb-[8px]">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</p>
-                  @php $ticketFallbackIndex = 1; @endphp
-                  @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
-                    @php
-                      $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
-                      $ticketFallbackIndex++;
-                    @endphp
-                    @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
-                      <div class="flex gap-[8px] items-start mb-[4px] ml-[12px]">
-                        <span class="text-[12px] text-white/60 print-text-gray font-medium">{{ $fieldConfig['name'] }}:</span>
-                        <span class="text-[12px] text-white print-text-dark">{{ $saleTicket->{"custom_value{$index}"} }}</span>
-                      </div>
+            @if (! $sale->isRsvp() && $addonTickets->count() > 0)
+              <div class="gk-tk-sec">
+                <h2 class="gk-tk-label">{{ __('messages.add_ons') }}</h2>
+                <ul class="gk-tk-rows">
+                  @foreach ($addonTickets as $saleTicket)
+                    <li class="gk-tk-row">
+                      <span>
+                        <bdi>{{ $saleTicket->ticket->type ?: __('messages.add_on') }}</bdi>
+                        @if ($saleTicket->ticket->url)
+                          <br><a href="{{ $saleTicket->ticket->url }}" target="_blank" rel="noopener noreferrer" class="gk-tk-quiet">{{ $saleTicket->ticket->url }}</a>
+                        @endif
+                      </span>
+                      <span><bdi>&times;&nbsp;{{ $saleTicket->quantity }}</bdi></span>
+                    </li>
+                  @endforeach
+                </ul>
+              </div>
+            @endif
+
+            {{-- Payment plan. The page is already authenticated by $sale->secret, so the panel
+                 simply renders here for anyone holding the ticket link. The error slot is
+                 unconditional: the only other session('error') block below the code is inside
+                 the pass bookings, which an ordinary installment ticket does not have, so every
+                 bail from InstallmentController::pay() used to reload the page and say nothing. --}}
+            @if ($installmentPlan && session('error'))
+              <div class="gk-tk-sec gk-tk-noprint">
+                <div class="gk-tk-msg gk-tk-msg-bad" role="alert">@include('ticket.partials.icon', ['icon' => 'alert'])<div>{{ session('error') }}</div></div>
+              </div>
+            @endif
+            @if ($installmentPlan && $installmentPlan->status !== 'cancelled')
+              <div class="gk-tk-sec">
+                @include('partials.installment-plan-panel', ['plan' => $installmentPlan, 'variant' => 'dark'])
+              </div>
+            @endif
+
+            {{-- What the buyer answered to the schedule's own questions. --}}
+            @php
+              $hasEventCustomFields = $event->custom_fields && count($event->custom_fields) > 0;
+              $hasTicketCustomFields = false;
+              foreach ($sale->saleTickets as $st) {
+                if ($st->ticket && $st->ticket->custom_fields && count($st->ticket->custom_fields) > 0) {
+                  $hasTicketCustomFields = true;
+                  break;
+                }
+              }
+            @endphp
+            @if ($hasEventCustomFields || $hasTicketCustomFields)
+              <div class="gk-tk-sec">
+                <h2 class="gk-tk-label">{{ __('messages.details') }}</h2>
+                <ul class="gk-tk-rows">
+                  @if ($hasEventCustomFields)
+                    @php $eventFallbackIndex = 1; @endphp
+                    @foreach ($event->custom_fields as $fieldKey => $fieldConfig)
+                      @php
+                        $index = $fieldConfig['index'] ?? $eventFallbackIndex;
+                        $eventFallbackIndex++;
+                      @endphp
+                      @if ($index >= 1 && $index <= 10 && $sale->{"custom_value{$index}"})
+                        <li class="gk-tk-row"><span><bdi>{{ $fieldConfig['name'] }}</bdi></span><span><bdi>{{ $sale->{"custom_value{$index}"} }}</bdi></span></li>
+                      @endif
+                    @endforeach
+                  @endif
+                  @foreach ($sale->saleTickets as $saleTicket)
+                    @if ($saleTicket->ticket && $saleTicket->ticket->custom_fields && count($saleTicket->ticket->custom_fields) > 0)
+                      <li class="gk-tk-quiet"><bdi>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</bdi></li>
+                      @php $ticketFallbackIndex = 1; @endphp
+                      @foreach ($saleTicket->ticket->custom_fields as $fieldKey => $fieldConfig)
+                        @php
+                          $index = $fieldConfig['index'] ?? $ticketFallbackIndex;
+                          $ticketFallbackIndex++;
+                        @endphp
+                        @if ($index >= 1 && $index <= 10 && $saleTicket->{"custom_value{$index}"})
+                          <li class="gk-tk-row"><span><bdi>{{ $fieldConfig['name'] }}</bdi></span><span><bdi>{{ $saleTicket->{"custom_value{$index}"} }}</bdi></span></li>
+                        @endif
+                      @endforeach
                     @endif
                   @endforeach
-                </div>
-              @endif
-            @endforeach
-          </div>
-        @endif
-
-        {{-- Cancel Registration / Free Ticket. Gift-card-paid orders are purchases, not free
-             reservations - self-cancel would be an instant refund-to-card, so it's owner-only. --}}
-        @if ($sale->status === 'paid' && ($sale->isRsvp() || ($sale->payment_amount == 0 && $sale->groupTotalGiftCard() == 0)) && (!$sale->group_id || $sale->isPrimarySale()))
-        <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden flex items-center justify-between">
-          <a href="{{ $event->getGuestUrl() }}" target="_blank" class="text-[13px] text-violet-400 hover:text-violet-300 transition-colors font-medium">
-            {{ __('messages.view_event') }}
-          </a>
-          <form action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST"
-                data-confirm="{{ __('messages.are_you_sure') }}">
-            @csrf
-            <input type="hidden" name="secret" value="{{ $sale->secret }}">
-            <button type="submit" class="text-[13px] text-red-400 print:text-red-600 hover:text-red-300 transition-colors font-medium">
-              {{ $sale->isRsvp() ? __('messages.cancel_registration') : __('messages.cancel_ticket') }}
-            </button>
-          </form>
-        </div>
-        @endif
-
-        {{-- Footer Section --}}
-        <div class="glass rounded-b-[24px] p-[20px] sm:p-[24px] print:bg-slate-50">
-          {{-- Notes --}}
-          @php $ticketNotes = $event->parsedTicketNotesHtml($sale->event_date); @endphp
-          @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
-            <div class="mb-[16px] pb-[16px] border-b border-white/10 print:border-slate-200">
-              <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[8px]">{{ __('messages.important_information') }}</h3>
-              <div class="text-[12px] text-white/80 print-text-dark custom-content leading-relaxed">
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}
+                </ul>
               </div>
-            </div>
-          @endif
+            @endif
 
-          {{-- Terms & Support --}}
-          <div class="grid grid-cols-2 gap-[16px]">
-            <div>
-              <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[6px]">{{ __('messages.terms_and_conditions') }}</h3>
+            {{-- Google's badge keeps its own white ground (partials/wallet-buttons says why). --}}
+            @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $event))
+              <div class="gk-tk-sec gk-tk-noprint" style="display: flex; justify-content: center;">
+                @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $event])
+              </div>
+            @endif
+
+            @if ($canCancel)
+              <div class="gk-tk-actions gk-tk-noprint">
+                <button type="button" class="gk-tk-btn gk-tk-btn-danger" data-cancel-toggle aria-expanded="false" aria-controls="ticket-cancel">
+                  {{ $sale->isRsvp() ? __('messages.cancel_registration') : __('messages.cancel_ticket') }}
+                </button>
+              </div>
+              {{-- Asked in the page, in the page's own words and buttons, not in a browser box
+                   that says "OK" and "Cancel" about a cancellation. --}}
+              <form id="ticket-cancel" class="gk-tk-confirm gk-tk-noprint" hidden action="{{ route('rsvp.cancel', ['sale_id' => \App\Utils\UrlUtils::encodeId($sale->id)]) }}" method="POST">
+                @csrf
+                <input type="hidden" name="secret" value="{{ $sale->secret }}">
+                <p>{{ __('messages.are_you_sure') }}</p>
+                <div>
+                  <button type="button" class="gk-tk-btn" data-cancel-keep>{{ __('messages.ticket_keep') }}</button>
+                  <button type="submit" class="gk-tk-btn gk-tk-btn-danger">{{ $sale->isRsvp() ? __('messages.cancel_registration') : __('messages.cancel_ticket') }}</button>
+                </div>
+              </form>
+            @endif
+
+            <div class="gk-tk-foot">
               @php
                 $termsUrl = $event->terms_url ?: (config('app.hosted')
                   ? policy_url('terms')
                   : policy_url('terms', '/self-hosting-terms-of-service'));
-                // Derived from the resolved URL rather than hardcoded: with an operator's
-                // own terms in place the link no longer goes to the marketing domain, and
-                // the old literal '/terms' was not a real route on any install either.
-                $termsDisplay = preg_replace('#^https?://(www\.)?#', '', rtrim($termsUrl, '/'));
                 // The event's own terms link is owner-typed free text: linked only through
                 // safeHref(), and shown as text when it is no web link.
                 $termsHref = $event->terms_url ? \App\Utils\UrlUtils::safeHref($event->terms_url) : $termsUrl;
+                $organizer = $themeRole ? $themeRole->translatedName() : $event->user->email;
               @endphp
+              <a href="mailto:{{ $event->user->email }}">{{ __('messages.ticket_contact_organizer', ['name' => $organizer]) }}</a>
               @if ($termsHref)
-              <a href="{{ $termsHref }}" target="_blank" class="text-[11px] text-white/60 print-text-gray hover:text-white/80 transition-colors break-all">
-                {{ Str::limit($termsDisplay, 30) }}
-              </a>
+                <a href="{{ $termsHref }}" target="_blank" rel="noopener noreferrer">{{ __('messages.terms_and_conditions') }}</a>
               @else
-              <span class="text-[11px] text-white/60 print-text-gray break-all">{{ Str::limit($termsDisplay, 30) }}</span>
+                <span>{{ __('messages.terms_and_conditions') }}: {{ Str::limit($event->terms_url, 60) }}</span>
               @endif
             </div>
-            <div>
-              <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[6px]">{{ __('messages.event_support_contact') }}</h3>
-              <a href="mailto:{{ $event->user->email }}" target="_blank" class="text-[11px] text-white/60 print-text-gray hover:text-white/80 transition-colors break-all">
-                {{ $event->user->email }}
-              </a>
-            </div>
           </div>
-        </div>
+        </article>
 
-        @if ($sale->status === 'paid')
-          <div class="mt-[16px]">
+        @if ($sale->status === 'paid' && ! $eventCancelled)
+          <div class="gk-tk-noprint" style="width: 100%;">
             @include('partials.push-optin', ['pushEmail' => $sale->email, 'pushName' => $event->name])
           </div>
         @endif
-
       </div>
+
+      {{-- The door view. Outside the ticket on purpose: the ticket has a filter, and a fixed
+           element inside a filtered one is no longer fixed to the screen. --}}
+      @if ($valid)
+        <div class="gk-door" id="ticket-door" role="dialog" aria-modal="true" aria-label="{{ __('messages.ticket_your_code') }}" hidden>
+          <button type="button" class="gk-door-close" data-door-close>{{ __('messages.close') }}</button>
+          <div class="gk-door-code"><img src="{{ $qrUrl }}" alt=""></div>
+          <p class="gk-door-who"><b><bdi>{{ $sale->name }}</bdi></b>{{ __('messages.ticket_admits', ['count' => $admits]) }}</p>
+          <p class="gk-door-hint">{{ __('messages.ticket_brightness_hint') }}</p>
+          {{-- For a door with no signal: the code as a picture on the phone. --}}
+          <a class="gk-door-save" href="{{ $qrUrl }}" download="ticket.png">{{ __('messages.ticket_save_code') }}</a>
+        </div>
+      @endif
     </main>
 
+    <script {!! nonce_attr() !!}>
+    (function () {
+        function each(selector, fn) { Array.prototype.forEach.call(document.querySelectorAll(selector), fn); }
+
+        try {
+            {{-- The door view: the code on white, the screen kept awake, Escape and Close to leave,
+                 and the keyboard kept inside it while it is open. --}}
+            var door = document.getElementById('ticket-door');
+            var opener = null;
+            var wake = null;
+
+            function closeDoor() {
+                door.hidden = true;
+                document.documentElement.style.overflow = '';
+                if (wake) { try { wake.release(); } catch (e) {} wake = null; }
+                if (opener) { opener.focus(); }
+            }
+
+            if (door) {
+                each('[data-door-open]', function (button) {
+                    button.addEventListener('click', function () {
+                        opener = button;
+                        door.hidden = false;
+                        document.documentElement.style.overflow = 'hidden';
+                        door.querySelector('[data-door-close]').focus();
+                        if (navigator.wakeLock && navigator.wakeLock.request) {
+                            navigator.wakeLock.request('screen').then(function (lock) { wake = lock; }).catch(function () {});
+                        }
+                    });
+                });
+                door.querySelector('[data-door-close]').addEventListener('click', closeDoor);
+                door.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') { closeDoor(); return; }
+                    if (e.key !== 'Tab') { return; }
+                    var stops = door.querySelectorAll('button, a[href]');
+                    var first = stops[0], last = stops[stops.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (! e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                });
+            }
+
+            {{-- A button that shows or hides the block it controls. --}}
+            function toggles(selector) {
+                each(selector, function (button) {
+                    var target = document.getElementById(button.getAttribute('aria-controls'));
+                    if (! target) { return; }
+                    button.addEventListener('click', function () {
+                        target.hidden = ! target.hidden;
+                        button.setAttribute('aria-expanded', target.hidden ? 'false' : 'true');
+                        if (! target.hidden) {
+                            var stop = target.querySelector('a[href], button');
+                            if (stop) { stop.focus(); }
+                        }
+                    });
+                });
+            }
+            toggles('[data-calendar-toggle]');
+            toggles('[data-cancel-toggle]');
+            each('[data-cancel-keep]', function (button) {
+                button.addEventListener('click', function () {
+                    document.getElementById('ticket-cancel').hidden = true;
+                    var toggle = document.querySelector('[data-cancel-toggle]');
+                    toggle.setAttribute('aria-expanded', 'false');
+                    toggle.focus();
+                });
+            });
+
+            {{-- Invite friends: the phone's own share sheet, or the event's link on the clipboard. --}}
+            each('[data-invite]', function (button) {
+                button.addEventListener('click', function () {
+                    var url = button.getAttribute('data-url');
+                    if (navigator.share) {
+                        navigator.share({ title: button.getAttribute('data-title'), url: url }).catch(function () {});
+                        return;
+                    }
+                    var label = button.querySelector('[data-invite-label]');
+                    var was = label.textContent;
+                    var done = function () {
+                        label.textContent = button.getAttribute('data-copied');
+                        setTimeout(function () { label.textContent = was; }, 2000);
+                    };
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(url).then(done).catch(function () {});
+                    }
+                });
+            });
+
+            {{-- Arriving after a payment that needed a moment (see below): show it once. --}}
+            var hero = document.querySelector('[data-hero]');
+            try {
+                if (hero && sessionStorage.getItem('es_ticket_arrived')) {
+                    sessionStorage.removeItem('es_ticket_arrived');
+                    hero.hidden = false;
+                    document.getElementById('ticket').classList.add('gk-ticket-fresh');
+                }
+            } catch (e) {}
+
+            {{-- Back from the payment provider before its confirmation reached us: ask again every
+                 four seconds, ten times, and then show whatever is true. --}}
+            if (document.querySelector('[data-confirming]')) {
+                var tries = 0;
+                var settle = function (status) {
+                    try { if (status === 'paid') { sessionStorage.setItem('es_ticket_arrived', '1'); } } catch (e) {}
+                    window.location.reload();
+                };
+                var ask = function () {
+                    tries++;
+                    fetch(window.location.href, { credentials: 'same-origin', cache: 'no-store' })
+                        .then(function (response) { return response.ok ? response.text() : ''; })
+                        .then(function (html) {
+                            var match = html.match(/data-sale-status="([a-z_]+)"/);
+                            if (match && match[1] !== 'unpaid') { settle(match[1]); }
+                            else if (tries >= 10) { settle('unpaid'); }
+                            else { setTimeout(ask, 4000); }
+                        })
+                        .catch(function () { if (tries >= 10) { settle('unpaid'); } else { setTimeout(ask, 4000); } });
+                };
+                setTimeout(ask, 4000);
+            }
+        } catch (e) {}
+    })();
+    </script>
 </x-app-layout>

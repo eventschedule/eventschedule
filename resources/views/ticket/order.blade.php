@@ -1,4 +1,8 @@
-<x-app-layout :title="__('messages.your_tickets') . ($role ? ' | ' . $role->translatedName() : '')">
+@php
+    // The schedule the order was placed on: the page wears its colour, as each ticket does.
+    $themeRole = $sales->first()?->sellingRole() ?? $role;
+@endphp
+<x-app-layout :title="__('messages.your_tickets') . ($themeRole ? ' | ' . $themeRole->translatedName() : '')">
 
     <x-slot name="meta">
         @include('partials.private-page-meta')
@@ -12,83 +16,83 @@
     <x-slot name="head">
         @include('partials.site-head-code')
 
-        {{-- The order belongs to the schedule that sold it; $role is nullable here for the same
-             reason as on the ticket page, and a null role deliberately renders nothing. --}}
-        @include('partials.web-app-manifest', ['manifestRole' => $role])
+        {{-- The order belongs to the schedule that sold it; a null schedule deliberately renders nothing. --}}
+        @include('partials.web-app-manifest', ['manifestRole' => $themeRole])
+
+        <link href="/vendor/manrope/manrope.css" rel="stylesheet">
+        @include('partials.guest-theme', ['role' => $themeRole, 'otherRole' => null, 'selectedGroup' => null])
+        @include('partials.guest-ticket-styles')
     </x-slot>
 
-    <div class="max-w-2xl mx-auto px-4 py-10">
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            {{ __('messages.your_tickets') }}
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 mb-8">
-            {{ __('messages.order_includes_events', ['count' => $sales->count()]) }}
-        </p>
+    <main id="main-content" class="gk-tkpage" tabindex="-1">
+      <div class="gk-tk-wrap">
+        <section class="gk-tk-card">
+          <header class="gk-tk-top {{ ($themeRole && $themeRole->profile_image_url) ? 'gk-tk-top-logo' : '' }}">
+            @if ($themeRole && $themeRole->profile_image_url)
+              <img src="{{ $themeRole->profile_image_url }}" alt="">
+            @endif
+            <div>
+              <h1 class="gk-tk-title">{{ __('messages.your_tickets') }}</h1>
+              <span class="gk-tk-sub">{{ __('messages.order_includes_events', ['count' => $sales->count()]) }}</span>
+            </div>
+          </header>
 
-        <div class="space-y-4">
-            @foreach ($sales as $sale)
+          <div class="gk-tk-body">
+            <ul class="gk-tk-legs">
+              @foreach ($sales as $sale)
                 @php
                     $legEvent = $sale->event;
                     // A leg the organizer cancelled, refunded or let expire is still part of what
                     // the buyer purchased, so it stays listed - but it is no longer a ticket, and
                     // linking it would hand out a QR for a seat that has already been released.
-                    // A leg is deleted outright rather than released is not listed at all: both
+                    // A leg that is deleted outright rather than released is not listed at all: both
                     // queries above filter is_deleted, which is the owner erasing the record.
                     //
                     // A cancelled EVENT counts too: the sale keeps its paid status, so without this
-                    // the buyer saw a live ticket with a working code for an event that is not
-                    // happening.
+                    // the buyer saw a live ticket for an event that is not happening.
                     $isReleased = in_array($sale->status, ['cancelled', 'refunded', 'expired'])
                         || $legEvent->is_cancelled;
+                    // One day is a date, not a range from a day to itself.
+                    $legDate = $legEvent->is_multi_day
+                        ? $legEvent->getDateRangeDisplay($sale->event_date)
+                        : $legEvent->getStartDateTime($sale->event_date, true)->format('F j, Y');
                 @endphp
-                {{-- The card is a div wrapping the link, not the link itself, so the wallet badge
-                     below can be a sibling. Nesting an anchor inside an anchor is invalid HTML and
+                {{-- The row is a list item holding the link, not the link itself, so the wallet
+                     badge below can be a sibling. An anchor inside an anchor is invalid HTML and
                      browsers recover from it by closing the outer one early. --}}
-                <div class="ap-card rounded-xl transition-all duration-200 {{ $isReleased ? 'opacity-60' : 'hover:shadow-md' }}">
-                <a @if (! $isReleased) href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}" @endif
-                   class="p-5 flex flex-col sm:flex-row sm:items-center gap-3">
-                    <div class="flex-1">
-                        <div class="font-medium text-gray-900 dark:text-gray-100">
-                            {{ $legEvent->translatedName() }}
-                        </div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            {{ $legEvent->getDateRangeDisplay($sale->event_date) }}
-                        </div>
+                <li class="gk-tk-leg {{ $isReleased ? 'gk-tk-leg-off' : '' }}">
+                  @if ($isReleased)
+                    <div class="gk-tk-leg-main">
+                      <span><b>{{ $legEvent->translatedName() }}</b><small>{{ $legDate }}</small></span>
+                      <span class="gk-tk-quiet">{{ $legEvent->is_cancelled && $sale->status === 'paid' ? __('messages.event_cancelled_heading') : __('messages.'.$sale->status) }}</span>
                     </div>
-                    <div class="sm:mt-0 mt-2 sm:text-end">
-                        @if ($isReleased)
-                            <span class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                                {{ $legEvent->is_cancelled && $sale->status === 'paid'
-                                    ? __('messages.event_cancelled_heading')
-                                    : __('messages.'.$sale->status) }}
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1 text-sm font-medium text-[var(--brand-blue)]">
-                                {{ __('messages.view_ticket') }}
-                                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                        @endif
+                  @else
+                    <a class="gk-tk-leg-main" href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($legEvent->id), 'secret' => $sale->secret]) }}">
+                      <span><b>{{ $legEvent->translatedName() }}</b><small>{{ $legDate }}</small></span>
+                      <span class="gk-tk-leg-go">
+                        {{ __('messages.view_ticket') }}
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </span>
+                    </a>
+                  @endif
+                  {{-- Saves a multi-event buyer opening every leg just to add its pass. canOffer()
+                       already returns false for a released leg, so this follows $isReleased without
+                       restating it. The condensed badge is Google's own narrow variant, for exactly
+                       this kind of list. --}}
+                  @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $legEvent))
+                    <div class="gk-tk-leg-extra gk-tk-noprint">
+                      @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $legEvent, 'condensed' => true])
                     </div>
-                </a>
-                {{-- Saves a multi-event buyer opening every leg just to add its pass. canOffer()
-                     already returns false for a released leg, so this follows $isReleased without
-                     restating it. The condensed badge is Google's own narrow variant, for exactly
-                     this kind of list. --}}
-                @if (\App\Services\Wallet\GoogleWalletService::canOffer($sale, $legEvent))
-                    <div class="px-5 pb-5 print:hidden">
-                        @include('partials.wallet-buttons', ['sale' => $sale, 'event' => $legEvent, 'condensed' => true])
-                    </div>
-                @endif
-                </div>
-            @endforeach
-        </div>
+                  @endif
+                </li>
+              @endforeach
+            </ul>
 
-        {{-- Each event is scanned with its own code, so there is no single QR for the order. --}}
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-8">
-            {{ __('messages.order_ticket_per_event_help') }}
-        </p>
-    </div>
+            {{-- Each event is scanned with its own code, so there is no single QR for the order. --}}
+            <p class="gk-tk-quiet">{{ __('messages.order_ticket_per_event_help') }}</p>
+          </div>
+        </section>
+      </div>
+    </main>
 
 </x-app-layout>

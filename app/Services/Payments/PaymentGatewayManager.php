@@ -200,6 +200,15 @@ class PaymentGatewayManager
     }
 
     /**
+     * Whether an unpaid sale on a stored method may simply be waiting for the provider's
+     * confirmation to arrive (PaymentGatewayDriver::awaitsConfirmation()). Unknown methods say no.
+     */
+    public function awaitsConfirmation(?string $key, Sale $sale): bool
+    {
+        return (bool) $this->get($key)?->awaitsConfirmation($sale);
+    }
+
+    /**
      * Whether paying sends the buyer to a third-party page, so an embedded widget must break frame.
      * Unknown methods say no: nothing to break out to.
      */

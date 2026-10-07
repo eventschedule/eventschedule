@@ -44,6 +44,16 @@ class StripeGateway extends PaymentGatewayDriver
     }
 
     /**
+     * The return from Checkout records the payment's reference and leaves the sale unpaid on
+     * purpose: the webhook settles it, with locking and an amount check. So the buyer is on their
+     * ticket before it is paid, more often than not.
+     */
+    public function awaitsConfirmation(Sale $sale): bool
+    {
+        return true;
+    }
+
+    /**
      * The only rail that can settle a whole multi-event order in one payment.
      */
     public function supportsCart(): bool

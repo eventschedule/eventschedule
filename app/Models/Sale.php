@@ -708,6 +708,21 @@ class Sale extends Model
         return $event->getGuestUrl($this->subdomain, $this->event_date);
     }
 
+    /**
+     * The schedule this ticket was bought on: whose name, logo and colours its ticket page wears.
+     *
+     * The sale records it (subdomain is the schedule the buyer was on). The pages used to be
+     * handed Event::role(), which is the event's performer and nothing else, so a ticket sold by a
+     * venue or a curator had no schedule at all and showed no logo. The event's own schedule, then
+     * its performer, are the fallbacks for a sale whose schedule has since been renamed or removed.
+     */
+    public function sellingRole(): ?Role
+    {
+        $role = $this->subdomain ? Role::where('subdomain', $this->subdomain)->where('is_deleted', false)->first() : null;
+
+        return $role ?? $this->event?->creatorRole ?? $this->event?->role();
+    }
+
     public function toApiData($includeSecret = false)
     {
         $data = new \stdClass;

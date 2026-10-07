@@ -74,6 +74,15 @@ class PayfastGateway extends PaymentGatewayDriver
     }
 
     /**
+     * Payfast sends the buyer back and tells us about the payment separately (its ITN), and the
+     * buyer is usually first.
+     */
+    public function awaitsConfirmation(Sale $sale): bool
+    {
+        return true;
+    }
+
+    /**
      * All three of merchant id, merchant key and passphrase are required before Payfast is offered as
      * a payment method - from the owner's own account, or from the installation's.
      *

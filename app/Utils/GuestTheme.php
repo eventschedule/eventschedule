@@ -21,6 +21,7 @@ use App\Models\Role;
  *  - edge               a hairline for a fill that has no edge of its own against the panel.
  *  - glow               the accent as a light on a dark ground (the ticket). "r g b", for
  *                       rgb(var(--es-glow) / .35).
+ *  - glowInk            that light as ink on the dark ground: the ticket's title and icons.
  *
  * Each has a light and a dark value, because a panel is white in one and near-black in the other.
  *
@@ -64,6 +65,7 @@ final class GuestTheme
         public readonly string $tint,
         public readonly string $tintDark,
         public readonly string $glow,
+        public readonly string $glowInk,
     ) {}
 
     public static function for(?Role $role): self
@@ -93,6 +95,8 @@ final class GuestTheme
             $fillDark = ColorUtils::shiftUntil($source, self::DARK_PANELS, false, 3.0) ?? self::PAPER;
         }
 
+        $glow = $neutral ? '#94a3b8' : ColorUtils::fromHsl($hue, $saturation, max($lightness, 0.55));
+
         return new self(
             source: $source,
             neutral: $neutral,
@@ -107,9 +111,10 @@ final class GuestTheme
             readableDark: ColorUtils::shiftUntil($source, self::DARK_PANELS, false) ?? self::PAPER,
             tint: ColorUtils::mix($source, self::LIGHT_PANELS[0], 0.12),
             tintDark: ColorUtils::mix($source, self::DARK_PANELS[0], 0.24),
-            glow: implode(' ', ColorUtils::toRgb($neutral
-                ? '#94a3b8'
-                : ColorUtils::fromHsl($hue, $saturation, max($lightness, 0.55)))),
+            glow: implode(' ', ColorUtils::toRgb($glow)),
+            // The light as INK on the dark ticket: a title, an icon. Mixed here rather than with
+            // CSS color-mix(), which an older browser drops along with the whole declaration.
+            glowInk: ColorUtils::mix($glow, '#ffffff', 0.62),
         );
     }
 
@@ -152,6 +157,7 @@ final class GuestTheme
                 '--es-accent-readable' => $this->readable,
                 '--es-accent-tint' => $this->tint,
                 '--es-glow' => $this->glow,
+                '--es-glow-ink' => $this->glowInk,
             ],
             [
                 '--es-accent' => $this->fillDark,

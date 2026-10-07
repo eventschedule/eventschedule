@@ -506,6 +506,15 @@ class PayPalGateway extends PaymentGatewayDriver
         return ! $sale?->paypal_pending_at;
     }
 
+    /**
+     * A capture settles on the return itself, so only one that PayPal is holding for review is
+     * waiting. A declined one is not: that is final, and the buyer needs the way back to paying.
+     */
+    public function awaitsConfirmation(Sale $sale): bool
+    {
+        return (bool) $sale->paypal_pending_at;
+    }
+
     // ---------------------------------------------------------------- checkout
 
     /**
