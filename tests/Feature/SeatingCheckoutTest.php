@@ -349,6 +349,11 @@ class SeatingCheckoutTest extends TestCase
         // Front of house should never have to look a seat up.
         $this->assertStringContainsString('Row A, Seat 1', $html);
         $this->assertStringContainsString('Row A, Seat 2', $html);
+
+        // Two seats are separated by a dot. The separator was written as an HTML entity inside
+        // {{ }}, which escapes it, so the page printed the six characters "&middot;" instead.
+        $this->assertStringContainsString('Stalls, Row A, Seat 1 · Stalls, Row A, Seat 2', $html);
+        $this->assertStringNotContainsString('&amp;middot;', $html);
     }
 
     public function test_the_sweep_clears_lapsed_cart_holds(): void

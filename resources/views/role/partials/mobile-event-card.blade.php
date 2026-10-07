@@ -56,9 +56,9 @@
         <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
         </svg>
-        <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
+        <span v-if="event.ticket_price == 0">{{ $label('free_entry') }}</span>
         <span v-else>
-            <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> &bull; {{ __('messages.coupon_code') }}</span><span v-if="event.coupon_discount_label"> &bull; <bdi v-text="event.coupon_discount_label"></bdi></span>
+            <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> &bull; {{ __('messages.coupon_code') }}: <bdi v-text="event.coupon_code"></bdi></span><span v-if="event.coupon_discount_label"> &bull; <bdi v-text="event.coupon_discount_label"></bdi></span>
         </span>
     </div>
     <div v-if="event.can_edit" class="mt-auto pt-3">

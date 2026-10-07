@@ -197,7 +197,9 @@
                             eventCustomValues: this.eventCustomValues,
                             eventMultiselectValues: this.eventMultiselectValues,
                             createAccount: this.createAccount,
-                            password: this.password,
+                            {{-- No password: this is written to sessionStorage, where any script on
+                                 the page can read it and where it used to outlive a successful
+                                 sign-up. It is the one field a person expects to retype. --}}
                         };
                         sessionStorage.setItem(this.storageKey, JSON.stringify(state));
                     } catch (e) {}
@@ -213,7 +215,6 @@
                         if (state.email) this.email = state.email;
                         if (state.phone) this.phone = state.phone;
                         if (state.createAccount !== undefined) this.createAccount = state.createAccount;
-                        if (state.password) this.password = state.password;
 
                         if (state.eventCustomValues) {
                             this.eventCustomValues = state.eventCustomValues;

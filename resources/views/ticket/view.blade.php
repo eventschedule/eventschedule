@@ -457,7 +457,7 @@
                   @endif
                   @php $seatLabels = $seatLabelsFor($saleTicket); @endphp
                   @if (count($seatLabels))
-                  <span class="block text-[12px] text-white/70 print-text-gray mt-[2px]">{{ implode(' &middot; ', $seatLabels) }}</span>
+                  <span class="block text-[12px] text-white/70 print-text-gray mt-[2px]">{{-- A literal dot: an entity here is escaped by the braces and printed as "&middot;". --}}{{ implode(' · ', $seatLabels) }}</span>
                   @endif
                 </span>
                 <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
