@@ -452,6 +452,9 @@ class FeedMailTest extends TestCase
         $this->assertSame('Open mic is no longer in the feed', $decide->subject);
         $html = (string) $decide->render();
         $this->assertStringContainsString('14 people signed up for it', $html);
+        // Which feed, since the sentence is about the event: a schedule may read several.
+        $this->assertStringContainsString(__('messages.feeds_col_feed').': Town &lt;b&gt;calendar&lt;/b&gt;', $html);
+        $this->assertStringNotContainsString('<b>calendar</b>', $html);
         $this->assertStringContainsString('2 more events need your decision too.', $html);
         $this->assertSame('Open mic has moved at the source', $render(FeedNotification::DECIDE, ['event' => 'Open mic', 'says' => 'moved', 'people' => 1, 'more' => 0])->subject);
         $this->assertSame('Open mic is cancelled at the source', $render(FeedNotification::DECIDE, ['event' => 'Open mic', 'says' => 'cancelled', 'people' => 1, 'more' => 0])->subject);
