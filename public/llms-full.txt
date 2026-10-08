@@ -1981,7 +1981,6 @@ Everything needed to publish events and gather an audience:
 - Up to 10 newsletter emails per month (each recipient counts as one)
 - AI event parsing (50 a day, 10 during the trial)
 - Import events from a link: a calendar feed or a page's own event data is read directly with no AI; any other page counts as one AI parse. A one-time copy of up to 100 events per read, not a subscription (for a standing one, see Feeds below)
-- Feeds (Enterprise on eventschedule.com; every selfhosted install): an address a schedule keeps reading about once an hour, a calendar (.ics, webcal, a public Google or Outlook link), an RSS, Atom or JSON feed, or a page that carries event data. New events are published or held as drafts for review, a change at the source is copied except to a field the owner edited, and the owner chooses what happens to an event that leaves the feed (leave it, cancel it, remove it). An event people signed up for is never changed without the owner. No AI is used. Docs: https://eventschedule.com/docs/managing-schedules#feeds
 
 ### Pro Plan
 
@@ -2012,6 +2011,7 @@ Enterprise adds everything in Pro, plus:
 - AI features: flyer generation, schedule and event detail generation, agenda scanning
 - WhatsApp event creation
 - Availability management
+- Feeds: an address a schedule keeps reading about once an hour, a calendar (.ics, webcal, a public Google or Outlook link), an RSS, Atom or JSON feed, or a page that carries event data. New events are published or held as drafts for review, a change at the source is copied except to a field the owner edited, and the owner chooses what happens to an event that leaves the feed (leave it, cancel it, remove it). An event people signed up for is never changed without the owner. No AI is used. Docs: https://eventschedule.com/docs/managing-schedules#feeds
 - Up to 1,000 newsletter emails per month
 - 100 AI event parses a day
 - Priority support

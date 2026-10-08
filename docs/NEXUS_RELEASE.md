@@ -577,10 +577,12 @@ Leave them unset and nothing about this ships to anyone: the feature stays dark.
 - **Five additions to the events API** (Pro, with the rest of the API): `external_id` with
   lookup and upsert, `ends_at`, `flyer_image_url`, and `POST /api/events/{id}/cancel` and
   `/restore`. All additive: a client that sends none of them sees the two new fields in the event
-  object and nothing else.
+  object and nothing else. Cancel and restore are for the event's own people (its creator, or an
+  owner or admin of the schedule that owns it), not for a schedule that only lists it.
 - A notification preference, **Feeds**, on by default for owners, admins and the shared address:
   drafts waiting, a decision needed, a feed that stopped being read. At most one of each a day per
-  schedule.
+  schedule. They are sent after a run has let go of its lock, and one that could not be sent is
+  tried again at the feed's next read.
 
 **Three migrations:**
 
@@ -594,13 +596,17 @@ Leave them unset and nothing about this ships to anyone: the feature stays dark.
 that are due, oldest first, until about 20 seconds have passed. One cache lock (`feeds.import`)
 covers both rails, so the two cannot read the same feed at once. On the HTTP rail a read can wait
 behind that rail's own 15-minute lock. A feed's address is stored encrypted (`APP_KEY`), is never
-written to a log or an audit row, and its path is dropped from Sentry breadcrumbs for a host that
-is not ours.
+written to a log or an audit row, and its path is dropped from Sentry breadcrumbs and traced
+spans for a host that is not ours. A feed is claimed for ten minutes before it is read, so a
+read that kills the process is not first in line on every run after it.
 
 **What it fetches.** Every read goes through `UrlUtils::safeHttpGetWithUrl()`: public addresses
 only, every redirect checked again. Feeds add outbound requests the app did not make before, at
-most one list an hour per feed plus, for a feed of posts, each new post's own page. No AI call is
-made for a feed, on any plan.
+most one list an hour per feed plus, for a feed of posts, each new post's own page, plus each
+event's picture once. What does not answer is given up on: a post's page after five tries an
+hour apart, a picture after three. A read that left work unfinished comes back within the minute
+only after a run that got somewhere, and at most 30 times running, so a source cannot be asked
+for its whole list every minute for ever. No AI call is made for a feed, on any plan.
 
 **After deploying, check:**
 - `/admin/queue`: the Scheduler card lists `app-import-feeds` and it is not overdue.
@@ -608,12 +614,14 @@ made for a feed, on any plan.
 - Add a feed to a test schedule from a public .ics address: the check shows its events, the feed
   reads within a minute, and a second read an hour later changes nothing.
 
-**Watch for:** the `feeds_failing` row on `/admin`. It shows only when at least five feeds, and
-half of all that are being read, are failing at once, which points at this server (the network,
-or an address of ours that a host blocks) rather than at each source. While it shows, no owner is
-mailed and no feed is paused.
+**Watch for:** the `feeds_failing` row on `/admin`. It shows only when at least five of the sites
+feeds read, and half of all the sites being read, are failing at once (counted by site: six
+feeds on one site that is down are one source's trouble), which points at this server (the
+network, or an address of ours that a host blocks) rather than at each source. While it shows,
+no owner is mailed and no feed is paused.
 
-**Not in this release:** the Jolioo reader is in the code and is not offered in the guide. It
+**Not in this release:** the Jolioo reader is in the code and is offered neither in the guide nor
+on the Add page. It
 was written from the provider's documentation, whose one example is a news post, so the format
 and zone of an event's start are a guess until it has read a real feed.
 

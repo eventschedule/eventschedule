@@ -528,7 +528,7 @@ return [
             'blurb' => 'Monitor users, revenue and analytics, and manage platform settings.',
             'icon' => 'shield',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'selfhost/federation' => [

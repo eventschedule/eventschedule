@@ -18,9 +18,14 @@
         <x-doc-nav-link href="#requests">Requests</x-doc-nav-link>
         <x-doc-nav-group label="Feeds" href="#feeds">
             <x-doc-nav-link href="#feeds-add">Adding a feed</x-doc-nav-link>
+            <x-doc-nav-link href="#feeds-sources">What can be a feed</x-doc-nav-link>
+            <x-doc-nav-link href="#feeds-new-events">New events</x-doc-nav-link>
             <x-doc-nav-link href="#feeds-review">Reviewing drafts</x-doc-nav-link>
             <x-doc-nav-link href="#feeds-updates">Changes and your edits</x-doc-nav-link>
             <x-doc-nav-link href="#feeds-gone">When an event leaves</x-doc-nav-link>
+            <x-doc-nav-link href="#feeds-decisions">Needs your decision</x-doc-nav-link>
+            <x-doc-nav-link href="#feeds-undo">Undoing the first read</x-doc-nav-link>
+            <x-doc-nav-link href="#feeds-settings">Changing or removing a feed</x-doc-nav-link>
             <x-doc-nav-link href="#feeds-trouble">When a feed cannot be read</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#followers">Followers</x-doc-nav-link>
@@ -522,7 +527,7 @@
         <h3 id="feeds-add" class="doc-subheading">Adding a feed</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong>, choose <strong class="text-gray-900 dark:text-white">Integrations</strong>, open the <strong class="text-gray-900 dark:text-white">Feeds from other sites</strong> row and press <strong class="text-gray-900 dark:text-white">Add a feed</strong>. Once the schedule has a feed, the same button is on the Feeds tab. On the import page, a link that was read as a calendar or as a page's own event data offers <strong class="text-gray-900 dark:text-white">Keep this link in sync</strong>, which starts from the same place.</li>
-            <li>Paste the address and press <strong class="text-gray-900 dark:text-white">Check</strong>. The address is read once and nothing is added. You are shown how many upcoming events it holds, how many are already on your schedule, what was left out and why, and the first few with their times.</li>
+            <li>Paste the address and press <strong class="text-gray-900 dark:text-white">Check feed</strong>. The address is read once and nothing is added. You are shown how many upcoming events it holds, how many are already on your schedule, what was left out and why, and the first few with their times.</li>
             <li>Choose what happens to <strong class="text-gray-900 dark:text-white">new events</strong>: <strong class="text-gray-900 dark:text-white">Publish them</strong>, or <strong class="text-gray-900 dark:text-white">Hold them as drafts</strong> for you to look over.</li>
             <li>Choose what happens <strong class="text-gray-900 dark:text-white">when an event is no longer in the feed</strong>: <strong class="text-gray-900 dark:text-white">Leave it</strong>, <strong class="text-gray-900 dark:text-white">Mark it cancelled</strong>, or <strong class="text-gray-900 dark:text-white">Remove it</strong>.</li>
             <li>Under <strong class="text-gray-900 dark:text-white">More options</strong> you can name the feed, file its events under a sub-schedule, give them a category, and say which clock its times are on.</li>
@@ -551,12 +556,12 @@
                     <tr>
                         <td>Page</td>
                         <td>A page that lists its events with event data in its markup, as most venue and ticketing sites do</td>
-                        <td>Yes</td>
+                        <td>Yes, up to the last event the page shows. A page that lists only its next ten cannot say what became of the eleventh</td>
                     </tr>
                     <tr>
                         <td>RSS, Atom or JSON feed</td>
                         <td>Each post's own page is opened for the event's date and place. A post with no event date is left out and counted</td>
-                        <td>Only when a post's own page is gone</td>
+                        <td>No. It lists only its newest posts</td>
                     </tr>
                 </tbody>
             </table>
@@ -570,7 +575,7 @@
             <li>An event that is <strong class="text-gray-900 dark:text-white">already on your schedule</strong>, with the same name at the same time, is linked to the feed and not added again. The feed never changes or removes an event it only matched</li>
             <li><strong class="text-gray-900 dark:text-white">Followers are not emailed about the first read.</strong> Events that arrive later are announced like any new event</li>
             <li>A venue named in the feed is matched to a venue your team already has. Otherwise a new one is made for it, a few at a time</li>
-            <li>A feed adds at most 500 new events in a day and leaves room in your schedule's own daily allowance. What is left arrives the next day, and the feed's page says so</li>
+            <li>A schedule's feeds add at most 500 new events a day between them, and leave room in the schedule's own daily allowance. What is left arrives the next day, and the feed's page says so</li>
         </ul>
 
         <h3 id="feeds-review" class="doc-subheading">Reviewing drafts</h3>
@@ -579,9 +584,9 @@
         </p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">View</strong> opens the event as visitors would see it and <strong class="text-gray-900 dark:text-white">Edit</strong> opens its form</li>
-            <li><strong class="text-gray-900 dark:text-white">Publish</strong> makes it public. <strong class="text-gray-900 dark:text-white">Skip</strong> deletes the draft, and the feed does not add it again however long the source goes on listing it</li>
+            <li><strong class="text-gray-900 dark:text-white">Publish</strong> makes it public. <strong class="text-gray-900 dark:text-white">Skip</strong> deletes the draft, and the feed does not add it again however long the source goes on listing it. It asks first. A draft you have already changed is not skipped: open it and delete it there if you do not want it</li>
             <li>Tick several rows for <strong class="text-gray-900 dark:text-white">Publish selected</strong> or <strong class="text-gray-900 dark:text-white">Skip selected</strong></li>
-            <li><strong class="text-gray-900 dark:text-white">Publish all</strong> publishes everything waiting, over the next few minutes</li>
+            <li><strong class="text-gray-900 dark:text-white">Publish all</strong> publishes everything waiting, over the next few minutes. On a feed that is paused it publishes the next 25 at once, and you press it again for the rest</li>
         </ul>
 
         <h3 id="feeds-updates" class="doc-subheading">Changes at the source, and your own</h3>
@@ -594,22 +599,26 @@
 
         <h3 id="feeds-gone" class="doc-subheading">When an event leaves the feed</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            An event counts as gone when it has not started, was missing from two reads in a row, and is not listed by another of the schedule's feeds. Then your choice applies: it is left as it is, marked cancelled, or removed. An event the source marks as cancelled is cancelled here, and restored if the source puts it back on.
+            An event counts as gone when it has not started, was missing from two reads in a row with at least an hour and a half between its last sighting and the second, and is not listed again by this feed or by another of the schedule's feeds. Then your choice applies: it is left as it is, marked cancelled, or removed. An event the source marks as cancelled is cancelled here, and restored if the source puts it back on.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            What you do by hand stands. An event you restore is not cancelled again for the same absence, and one you cancelled yourself is not restored by the feed. If you change this choice later, it also applies to events that have already left the feed and are still on your schedule, at the next read: the Edit feed page says how many before you save.
         </p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Only what is the feed's alone is cancelled or removed.</strong> An event with sales, RSVPs or people who asked to be told about it is never changed without you. Nor is one removed that carries your own work: photos, videos, a poll, promo codes, an agenda, a seating plan, or a field you edited</li>
             <li><strong class="text-gray-900 dark:text-white">A large number missing at once is held.</strong> When more than three in ten of a feed's coming events, and at least five, are missing from one read, nothing is changed. It lets go by itself if they return</li>
             <li>A feed of posts lists only its newest, so it cannot tell that an event is gone. Its events stay</li>
+            <li>A calendar that comes back empty while events are still to come is not taken as "everything is gone". Nothing changes until it lists something again</li>
         </ul>
 
         <h3 id="feeds-decisions" class="doc-subheading">Needs your decision</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            When people have signed up for an event and the source moves it, calls it off or no longer lists it, the event is left alone and appears under <strong class="text-gray-900 dark:text-white">Needs your decision</strong> with what the feed says and how many signed up. <strong class="text-gray-900 dark:text-white">Keep the event</strong> leaves it, and the same difference is not raised again. <strong class="text-gray-900 dark:text-white">Cancel the event</strong> or <strong class="text-gray-900 dark:text-white">Move the event</strong> shows what will happen first, and lets you email the people who signed up with a note of your own.
+            When people have signed up for an event and the source moves it, calls it off or no longer lists it, the event is left alone and appears under <strong class="text-gray-900 dark:text-white">Needs your decision</strong> with what the feed says and how many signed up. So does an event that carries your own work, where the feed would otherwise remove it. <strong class="text-gray-900 dark:text-white">Keep the event</strong> leaves it, and the same difference is not raised again. <strong class="text-gray-900 dark:text-white">Cancel the event</strong> or <strong class="text-gray-900 dark:text-white">Move the event</strong> shows what will happen first, and where there is somebody the email would reach, lets you email the people who signed up with a note of your own.
         </p>
 
         <h3 id="feeds-undo" class="doc-subheading">Undoing the first read</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            For a day after a feed's first read, <strong class="text-gray-900 dark:text-white">Undo first read</strong> removes the events that read added and pauses the feed. An event somebody signed up for, or one you already changed, stays. Use it when the times came out an hour off or the feed was not the one you meant, then fix the setting and resume.
+            For a day after a feed's first read, <strong class="text-gray-900 dark:text-white">Undo first read</strong> removes the events that read added and pauses the feed. An event somebody signed up for, or one you already changed, stays. Use it when the times came out an hour off or the feed was not the one you meant, then fix the setting and resume. A resumed feed starts over as a first read: its events are published or held as its setting says, followers are not emailed about them, and it can be undone again.
         </p>
 
         <h3 id="feeds-settings" class="doc-subheading">Changing or removing a feed</h3>
@@ -629,7 +638,7 @@
             <li>If the plan no longer includes feeds, they are not read. What they already made is still yours to publish, skip or remove</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Three emails keep a feed from needing to be watched: drafts waiting for review, an event that needs your decision, and a feed that has stopped being read. Each is sent at most once a day per schedule, to every owner and admin who has <strong class="text-gray-900 dark:text-white">Feeds</strong> switched on under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Notifications</a>, and to the shared notification address. A decision about an event within three days is sent at once.
+            Three emails keep a feed from needing to be watched: drafts waiting for review, an event that needs your decision, and a feed that has stopped being read. Each is sent at most once a day per schedule, to every owner and admin who has <strong class="text-gray-900 dark:text-white">Feeds</strong> switched on under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Notifications</a>, and to the shared notification address. A decision about an event within three days is sent at once, and a second decision on the same day is in the next day's email.
         </p>
     </section>
 

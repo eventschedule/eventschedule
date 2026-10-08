@@ -193,6 +193,10 @@ class HelpUtils
         '{subdomain}/seating/*/design' => '/docs/allocated-seating#build',
         '{subdomain}/seating/box-office/*' => '/docs/allocated-seating#box-office',
         '{subdomain}/requests' => '/docs/managing-schedules#requests',
+        // The platform admin's list of every feed. Before the schedule's own feed pages: on a
+        // page with no schedule in its address `{subdomain}/feeds` reads as `*/feeds`, which
+        // is this page too, and the first match wins.
+        'admin/feeds*' => '/docs/selfhost/admin#manage-feeds',
         '{subdomain}/feeds' => '/docs/managing-schedules#feeds',
         '{subdomain}/feeds/add' => '/docs/managing-schedules#feeds-add',
         '{subdomain}/feeds/*/edit' => '/docs/managing-schedules#feeds-settings',

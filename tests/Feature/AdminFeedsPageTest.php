@@ -100,6 +100,17 @@ class AdminFeedsPageTest extends TestCase
         $this->assertStringNotContainsString(route('admin.feeds.read', ['hash' => UrlUtils::encodeId(EventFeed::where('name', 'Paused by its team')->value('id'))]), $html);
     }
 
+    /** The Help button on the page opens the page's own section of the guide, which exists. */
+    public function test_the_help_button_opens_the_pages_own_section_of_the_guide(): void
+    {
+        $html = $this->admin()->get(route('admin.feeds'))->assertOk()->getContent();
+        $this->assertStringContainsString('/docs/selfhost/admin#manage-feeds', $html);
+
+        $guide = file_get_contents(resource_path('views/marketing/docs/selfhost/admin.blade.php'));
+        $this->assertStringContainsString('<section id="manage-feeds"', $guide);
+        $this->assertStringContainsString('href="#manage-feeds"', $guide, 'and the guide\'s own side navigation lists it');
+    }
+
     public function test_the_list_is_searched_and_filtered(): void
     {
         $this->feed('Town hall');

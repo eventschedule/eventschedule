@@ -149,6 +149,11 @@
                         <td>Once a day, at 12:00 in the app's timezone. A schedule that requires approval is told about each event request that no earlier email has named, with its details. The same run reports new poll suggestions, and tells an event's creator about audience comments, photos and videos waiting for review.</td>
                     </tr>
                     <tr>
+                        <td>Feed emails</td>
+                        <td>Owners and admins who have <strong class="text-gray-900 dark:text-white">Feeds</strong> switched on, and the schedule's shared notification address</td>
+                        <td>Checked every minute, as each <a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">feed</a> is read. Three kinds: drafts waiting for review, an event that needs a decision, and a feed that has not been read for three days (and once more when it is paused after two weeks). At most one of each kind a day per schedule, except a decision about an event within three days, which is sent at once. An email that could not be sent is tried again at the feed's next read.</td>
+                    </tr>
+                    <tr>
                         <td>Scheduled event graphic</td>
                         <td>The addresses listed under <strong class="text-gray-900 dark:text-white">Send To</strong> in the schedule's graphic email settings</td>
                         <td>Checked every hour. Sent daily, weekly or monthly, at the hour the owner chose in the schedule's timezone, at most once per period. See <a href="{{ route('marketing.docs.event_graphics') }}#email-scheduling" class="doc-link">Email scheduling</a>.</td>
