@@ -12,11 +12,11 @@ use Tests\TestCase;
  *
  * A crawl of production found 181 of 188 schedule pages with two - the banner header prints the
  * name twice, a mobile and a desktop copy, and only CSS hides one - and 39 event pages with more,
- * because an owner's markdown "# Heading" renders as an <h1> under the page's own. The desktop copy
- * is now a role="heading" aria-level="1" div (display:none keeps the pair to one level-1 heading
- * for a screen reader at any width), and every piece of owner HTML on a guest page goes through
+ * because an owner's markdown "# Heading" renders as an <h1> under the page's own. The banner
+ * header is drawn once now (role/partials/headers/banner), so its name is one <h1> and the two
+ * ids its bodies carried both wrap it. Every piece of owner HTML on a guest page goes through
  * MarkdownUtils::demoteH1(): the announcement, the event and part descriptions, the ticket form's
- * payment instructions, and the schedule, act and venue descriptions inside their Alpine show-more
+ * payment instructions, and the schedule, act and venue descriptions under their show-more
  * toggles.
  */
 class GuestHeadingStructureTest extends TestCase
@@ -61,12 +61,12 @@ class GuestHeadingStructureTest extends TestCase
         $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
         $this->assertSame(1, $this->h1Count($html));
-        // The mobile copy is the <h1>; the desktop copy is still a level-1 heading to a screen
-        // reader, and both keep the ids custom CSS hooks onto.
-        $this->assertMatchesRegularExpression('~id="gp-header-body-mobile".*?<h1 [^>]*>\s*Blue Note\s*</h1>~s', $html);
-        $this->assertMatchesRegularExpression('~id="gp-header-body-desktop".*?<div role="heading" aria-level="1"[^>]*>\s*Blue Note\s*</div>~s', $html);
+        // The header is drawn once, and its name is the <h1>, inside BOTH of the ids custom CSS
+        // was given for the header's contents when there were two copies of them.
+        $this->assertMatchesRegularExpression('~id="gp-header-body-desktop"[^>]*>\s*<div id="gp-header-body-mobile".*?<h1 [^>]*>\s*Blue Note\s*</h1>~s', $html);
+        $this->assertStringNotContainsString('role="heading" aria-level="1"', $html, 'no second copy of the name stands in for a heading');
         $this->assertStringContainsString('<h2 data-es-h1 id="big-news">Big news</h2>', $html, 'the announcement heading was demoted, not dropped');
-        $this->assertSame(2, substr_count($html, '<h2 data-es-h1 id="about-us">About us</h2>'), 'both copies of the description were demoted');
+        $this->assertSame(1, substr_count($html, '<h2 data-es-h1 id="about-us">About us</h2>'), 'the description is in the page once, its heading demoted');
     }
 
     public function test_a_compact_header_schedule_page_has_one_h1(): void

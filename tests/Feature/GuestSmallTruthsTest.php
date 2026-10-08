@@ -80,10 +80,13 @@ class GuestSmallTruthsTest extends TestCase
         $html = $this->get('/'.$role->subdomain)->assertOk()->getContent();
 
         $this->assertStringNotContainsString('Welcome to the Blue Room,...', $html, 'the five-word stand-in');
-        // The STATIC class attribute, not the bound one beside it: the clamp is in the markup so
-        // the full text never flashes before the script runs.
-        $this->assertSame(2, substr_count($html, '<div x-ref="content" :class="{ \'line-clamp-3\': !expanded }" class="custom-content line-clamp-3">'), 'the phone and the laptop header both clamp the real text');
-        $this->assertGreaterThanOrEqual(2, substr_count($html, 'a kitchen that stays open until the band stops'), 'and the whole description is in the page for both');
+        // The fold is the stylesheet's, on a class that is in the markup from the start, so the
+        // full text never flashes before a script runs; and the button under it starts hidden,
+        // shown only where the text is cut.
+        $this->assertSame(1, substr_count($html, '<div class="gk-head-about-text custom-content">'), 'the header is drawn once and clamps the real text');
+        $this->assertMatchesRegularExpression('/\.gk-head-about-text \{[^}]*-webkit-line-clamp: 2;/', $html);
+        $this->assertMatchesRegularExpression('/<button type="button" class="gk-head-more" hidden /', $html);
+        $this->assertStringContainsString('a kitchen that stays open until the band stops', $html, 'and the whole description is in the page');
     }
 
     public function test_a_performers_description_is_cut_by_lines_in_every_script(): void

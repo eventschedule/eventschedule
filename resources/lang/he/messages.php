@@ -1311,6 +1311,7 @@ return [
     'copied' => 'הועתק!',
     'copy_failed' => 'נכשל בהעתקה ללוח',
     'share' => 'שיתוף',
+    'back_to_top' => 'חזרה למעלה',
     'shared' => 'שותף!',
     'share_failed' => 'השיתוף נכשל',
     'generating_graphic' => 'יוצר גרפיקה',
@@ -1336,6 +1337,7 @@ return [
     'create_schedule_first' => 'צור לוח תחילה כדי לשלוח ניוזלטרים.',
 
     'upcoming_events' => 'אירועים קרובים',
+    'upcoming_events_count' => '{1} אירוע קרוב אחד|[0,*] :count אירועים קרובים',
     'tonight' => 'הערב',
     'permission_denied' => 'הרשאה נדחתה',
     'selecting' => 'בוחר',

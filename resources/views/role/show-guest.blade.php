@@ -29,11 +29,10 @@
     $hasHeaderImage = $role->header_image === 'logos'
         ? $logoWallRoles->isNotEmpty()
         : (($role->header_image && $role->header_image !== 'none') || ($role->header_image_url && $role->header_image !== 'none'));
+    // Which buttons the header offers this visitor, worked out once: the header, its second row
+    // and the slim bar that follows it down the page all draw from it.
+    $headActions = \App\Utils\GuestHeader::actions($role, auth()->user());
   @endphp
-
-  @if ($role->profile_image_url && !$hasHeaderImage && $headerStyle === 'banner')
-  <div class="pt-8"></div>
-  @endif
 
   <script {!! nonce_attr() !!}>
   (function() {
@@ -63,12 +62,13 @@
   [data-lead-wrap][data-view="list"] { display: none; }
   html[data-es-view="list"] [data-lead-wrap] { display: none; }
   html[data-es-view="calendar"] [data-lead-wrap] { display: block; }
-  html[data-es-view="list"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
-  html[data-es-view="list"] #toggle-list-btn { background-color: transparent !important; color: #1e1e1e !important; }
-  html[data-es-view="calendar"] #toggle-list-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
-  html[data-es-view="calendar"] #toggle-calendar-btn { background-color: transparent !important; color: #1e1e1e !important; }
-  html.dark[data-es-view="list"] #toggle-list-btn,
-  html.dark[data-es-view="calendar"] #toggle-calendar-btn { color: #ffffff !important; }
+  {{-- The view switch is drawn pressed for the server's layout. Where this visitor last chose
+       the other one, these two put the pressed look on the right button until the list's script
+       starts and sets aria-pressed itself (it removes data-es-view when it does). --}}
+  html[data-es-view="list"] #toggle-list-btn,
+  html[data-es-view="calendar"] #toggle-calendar-btn { background: var(--gk-solid); color: var(--gk-ink); box-shadow: 0 1px 2px rgb(0 0 0 / .18); }
+  html[data-es-view="list"] #toggle-calendar-btn,
+  html[data-es-view="calendar"] #toggle-list-btn { background: none; color: var(--gk-ink-2); box-shadow: none; }
   html[data-es-view="list"] #month-year-title { display: none !important; }
 html[data-es-view="list"] #month-nav-controls { display: none !important; }
 html[data-es-view="list"] #gp-calendar {
@@ -243,24 +243,6 @@ html[data-es-view="list"] #gp-calendar {
           </div>
         </div>
         @endif
-        @endif
-
-        {{-- Mobile Filters Button (beneath video carousel) - visibility controlled by JS in calendar.blade.php --}}
-        @if(!$event)
-        <button id="hero-filters-btn-mobile"
-                data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                class="md:hidden mt-3 mb-1 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
-                       border border-gray-300 dark:border-gray-600 rounded-2xl
-                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                       text-base font-semibold {{ $isRtl ? 'rtl' : '' }}"
-                style="display: none;">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
-            </svg>
-            {{ $role->customLabel('filters') }}
-            <span id="hero-filters-badge-mobile"
-                  class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-button-bg)] text-white rounded-full hidden"></span>
-        </button>
         @endif
 
         @if ($mobileBannerUrl)
@@ -563,6 +545,12 @@ html[data-es-view="list"] #gp-calendar {
       @endif
 
     </div>
+    {{-- The slim bar that follows the banner down the page. A child of main, and not in the
+         header's card (see the partial), and after the header its script looks for. Not in the
+         picture ?graphic=1 renders. --}}
+    @if ($headerStyle === 'banner' && ! request()->graphic)
+        @include('role.partials.headers.bar')
+    @endif
   </main>
 
 <style {!! nonce_attr() !!}>

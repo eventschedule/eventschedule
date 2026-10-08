@@ -1258,6 +1258,7 @@ return [
     'copied' => 'Gekopieerd!',
     'copy_failed' => 'Kopiëren naar klembord mislukt',
     'share' => 'Delen',
+    'back_to_top' => 'Terug naar boven',
     'shared' => 'Gedeeld!',
     'share_failed' => 'Delen mislukt',
     'generating_graphic' => 'Grafiek genereren',
@@ -1283,6 +1284,7 @@ return [
     'create_schedule_first' => 'Maak eerst een agenda aan om nieuwsbrieven te versturen.',
 
     'upcoming_events' => 'Aankomende Evenementen',
+    'upcoming_events_count' => '{1} :count aankomend evenement|[0,*] :count aankomende evenementen',
     'tonight' => 'Vanavond',
     'permission_denied' => 'Toestemming geweigerd',
     'create_account_link' => ':link om je profiel te beheren en je evenementen te kunnen bewerken',

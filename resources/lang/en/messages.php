@@ -1611,6 +1611,7 @@ return [
     'copied' => 'Copied!',
     'copy_failed' => 'Failed to copy to clipboard',
     'share' => 'Share',
+    'back_to_top' => 'Back to top',
     'shared' => 'Shared!',
     'share_failed' => 'Failed to share',
     'generating_graphic' => 'Generating graphic',
@@ -1640,6 +1641,7 @@ return [
     'create_schedule_first' => 'Create a schedule first to send newsletters.',
 
     'upcoming_events' => 'Upcoming Events',
+    'upcoming_events_count' => '{1} :count upcoming event|[0,*] :count upcoming events',
     'tonight' => 'Tonight',
     'permission_denied' => 'Permission denied',
     'create_account_link' => ':link to manage your profile and be able to edit your events',

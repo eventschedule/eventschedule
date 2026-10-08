@@ -1260,6 +1260,7 @@ return [
     'copied' => 'Copié !',
     'copy_failed' => 'Échec de la copie dans le presse-papiers',
     'share' => 'Partager',
+    'back_to_top' => 'Retour en haut',
     'shared' => 'Partagé !',
     'share_failed' => 'Échec du partage',
     'generating_graphic' => 'Génération du graphique',
@@ -1285,6 +1286,7 @@ return [
     'create_schedule_first' => 'Créez d\'abord un planning pour envoyer des newsletters.',
 
     'upcoming_events' => 'Événements à venir',
+    'upcoming_events_count' => '[0,1] :count événement à venir|[2,*] :count événements à venir',
     'tonight' => 'Ce soir',
     'permission_denied' => 'Permission refusée',
     'create_account_link' => ':link pour gérer votre profil et pouvoir modifier vos événements',

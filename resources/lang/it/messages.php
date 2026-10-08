@@ -1258,6 +1258,7 @@ return [
     'copied' => 'Copiato!',
     'copy_failed' => 'Impossibile copiare negli appunti',
     'share' => 'Condividi',
+    'back_to_top' => 'Torna su',
     'shared' => 'Condiviso!',
     'share_failed' => 'Impossibile condividere',
     'generating_graphic' => 'Generazione grafica',
@@ -1283,6 +1284,7 @@ return [
     'create_schedule_first' => 'Crea prima un calendario per inviare newsletter.',
 
     'upcoming_events' => 'Eventi Imminenti',
+    'upcoming_events_count' => '{1} :count evento imminente|[0,*] :count eventi imminenti',
     'tonight' => 'Stasera',
     'permission_denied' => 'Permesso negato',
     'create_account_link' => ':link per gestire il tuo profilo e poter modificare i tuoi eventi',

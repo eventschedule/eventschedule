@@ -1258,6 +1258,7 @@ return [
     'copied' => 'Copiado!',
     'copy_failed' => 'Falha ao copiar para a área de transferência',
     'share' => 'Compartilhar',
+    'back_to_top' => 'Voltar ao topo',
     'shared' => 'Compartilhado!',
     'share_failed' => 'Falha ao compartilhar',
     'generating_graphic' => 'Gerando gráfico',
@@ -1283,6 +1284,7 @@ return [
     'create_schedule_first' => 'Crie primeiro um calendário para enviar newsletters.',
 
     'upcoming_events' => 'Próximos Eventos',
+    'upcoming_events_count' => '{1} :count próximo evento|[0,*] :count próximos eventos',
     'tonight' => 'Esta Noite',
     'permission_denied' => 'Permissão negada',
     'create_account_link' => ':link para gerenciar seu perfil e poder editar seus eventos',

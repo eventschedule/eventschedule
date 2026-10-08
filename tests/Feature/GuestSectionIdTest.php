@@ -46,6 +46,7 @@ class GuestSectionIdTest extends TestCase
         'resources/views/components/stay22-map.blade.php',
         'resources/views/role/partials/guest-banner.blade.php',
         'resources/views/role/partials/headers/banner.blade.php',
+        'resources/views/role/partials/headers/bar.blade.php',
         'resources/views/role/partials/headers/compact.blade.php',
         'resources/views/role/partials/headers/below-bar.blade.php',
         'resources/views/layouts/app-guest.blade.php',

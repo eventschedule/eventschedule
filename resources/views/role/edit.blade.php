@@ -683,7 +683,6 @@
             if (headerUrl) {
                 headerHtml = '<div style="position: relative; width: 100%; height: 90px; border-radius: 12px 12px 0 0; overflow: hidden; flex-shrink: 0;">' +
                     '<div style="width: 100%; height: 100%; background-image: url(\'' + headerUrl + '\'); background-size: cover; background-position: center;"></div>' +
-                    '<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.2); border-radius: 12px 12px 0 0;"></div>' +
                 '</div>';
             } else if (isLogoWall && logoWallPreviewUrls.length) {
                 // Real venue logos; an empty wall renders no header, matching the GP page
@@ -704,22 +703,11 @@
             var profileBorderColor = isDark ? '#1e1e1e' : '#ffffff';
             var cardOverflow = 'hidden';
             var cardMarginTop = '';
-            if (profileSrc && hasHeaderArea) {
-                // Overlapping profile image (matches GP -mt-[100px] scaled down)
-                var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
-                profileHtml = '<div style="position: relative; z-index: 10; margin-top: -26px; margin-bottom: 4px; ' + profileAlign + '">' +
-                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 5px; object-fit: cover;" />' +
-                    '</div>' +
-                '</div>';
-            } else if (profileSrc) {
-                // No header image: profile protrudes above card (matches GP pt-16 + -mt-[100px])
-                cardOverflow = 'visible';
-                cardMarginTop = 'margin-top: 18px;';
-                var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
-                profileHtml = '<div style="position: relative; z-index: 10; margin-top: -20px; margin-bottom: 4px; ' + profileAlign + '">' +
-                    '<div style="width: 38px; height: 38px; border-radius: 6px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">' +
-                        '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 5px; object-fit: cover;" />' +
+            if (profileSrc) {
+                // On the lower edge of a picture or the logo wall; inside the card where there is neither.
+                profileHtml = '<div style="position: relative; z-index: 10; margin-top: ' + (hasHeaderArea ? '-22px' : '0') + ';">' +
+                    '<div style="width: 38px; height: 38px; border-radius: 9px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25);">' +
+                        '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 7px; object-fit: cover;" />' +
                     '</div>' +
                 '</div>';
             }
@@ -727,21 +715,23 @@
             // Card background (semi-transparent to show background through edges)
             var cardBg = isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)';
 
-            // Build content HTML
-            var contentTopPadding = !profileSrc && !hasHeaderArea ? 'padding-top: 10px;' : '';
+            // Build content HTML: the logo with Follow beside it, the name under them, as the
+            // banner header draws them (role/partials/headers/banner).
+            var washHtml = hasHeaderArea ? '' : '<div style="position: absolute; inset: 0 0 auto; height: 70px; border-radius: 16px 16px 0 0; background: linear-gradient(to bottom, ' + accentColor + '66, ' + accentColor + '00); pointer-events: none;"></div>';
             var contentHtml =
-                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: ' + cardOverflow + '; ' + cardMarginTop + '">' +
+                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="position: relative; width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: ' + cardOverflow + '; ' + cardMarginTop + '">' +
+                    washHtml +
                     headerHtml +
-                    '<div style="position: relative; z-index: 5; padding: 8px 16px 14px; display: flex; flex-direction: column; ' + contentTopPadding + '">' +
-                        profileHtml +
-                        '<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">' +
-                            '<div style="font-size: 13px; font-weight: 600; color: ' + fontColor + '; font-family: \'' + fontFamily + '\', sans-serif; line-height: 1.3; min-width: 0;">' + name + '</div>' +
-                            '<div style="flex-shrink: 0;">' +
-                                '<div style="display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">' +
+                    '<div style="position: relative; z-index: 5; padding: ' + (hasHeaderArea ? '0' : '12px') + ' 16px 14px; display: flex; flex-direction: column;">' +
+                        '<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; min-height: 22px;' + (hasHeaderArea && ! profileSrc ? ' padding-top: 8px;' : '') + '">' +
+                            (profileHtml || '<span></span>') +
+                            '<div style="flex-shrink: 0;' + (hasHeaderArea && profileSrc ? ' padding-top: 28px;' : '') + '">' +
+                                '<div style="display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '; box-shadow: 0 1px 2px rgba(0,0,0,0.15);">' +
                                     followText +
                                 '</div>' +
                             '</div>' +
                         '</div>' +
+                        '<div style="margin-top: 7px; font-size: 16px; font-weight: 700; font-synthesis: none; color: ' + fontColor + '; font-family: \'' + fontFamily + '\', sans-serif; line-height: 1.15; min-width: 0;">' + name + '</div>' +
                     '</div>' +
                 '</div>';
 

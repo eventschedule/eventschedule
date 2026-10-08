@@ -449,7 +449,8 @@
                     <tr><td><code class="doc-inline-code">#gp-header-image</code></td><td>The header image behind the name</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-logo-wall</code></td><td>The logo wall header</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-profile-image</code></td><td>The profile picture tile</td></tr>
-                    <tr><td><code class="doc-inline-code">#gp-header-body-mobile</code>, <code class="doc-inline-code">#gp-header-body-desktop</code></td><td>Name, description, social links and buttons inside the header. Two ids because the header is laid out separately for narrow and wide screens, so hide both.</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-header-body-mobile</code>, <code class="doc-inline-code">#gp-header-body-desktop</code></td><td>Name, description, social links and buttons inside the header. Both ids name the same block at every screen width (the header used to be laid out twice), so a rule for either one applies.</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-header-bar</code></td><td>The slim bar that follows visitors down the page once the banner header has scrolled away</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-below-bar</code></td><td>The description and contact strip under the compact header</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-video-carousel</code></td><td>The strip of videos from upcoming events</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-sponsors</code></td><td>The sponsor logo grid (also on event pages)</td></tr>

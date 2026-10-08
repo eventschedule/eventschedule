@@ -299,9 +299,147 @@
         .gk-event-foot { margin-top: 2.5rem; }
     }
 
+    {{-- The schedule's header (role/partials/headers/banner): a card on the owner's page. Its
+         picture across the top, or a wash of the schedule's colour where there is none; the
+         logo; the name at display size in the owner's own typeface; one main button; a line of
+         facts with the socials and the list's tools at its far end; the description folded to
+         its first lines. States are told by a class on the card, read through :where() so
+         every rule here still weighs one class and an owner's CSS wins a tie. --}}
+    .gk-head { --gk-head-pad: 1.25rem; --gk-head-logo: 5.25rem; --gk-head-name: clamp(2rem, 1.15rem + 3.6vw, 3.25rem); position: relative; border-radius: 1.5rem; background: var(--gk-panel); color: var(--gk-ink); font-size: 1rem; line-height: 1.5; text-align: start; -webkit-backdrop-filter: blur(.625rem); backdrop-filter: blur(.625rem); box-shadow: 0 1px 2px rgb(15 23 42 / .08), 0 1.25rem 2.5rem -1.5rem rgb(15 23 42 / .45); }
+    @media (min-width: 48rem) { .gk-head { --gk-head-pad: 2.5rem; --gk-head-logo: 6.5rem; } }
+    {{-- With no picture: one even light in the schedule's colour, deepest at the top edge and
+         gone behind the name. --es-glow is the accent as a light (three numbers), so this needs
+         no color-mix(), which an older browser drops with the whole declaration. --}}
+    .gk-head-stage { position: absolute; inset: 0 0 auto; height: 11rem; overflow: hidden; border-radius: 1.5rem 1.5rem 0 0; background: linear-gradient(to bottom, rgb(var(--es-glow) / .44), rgb(var(--es-glow) / .17) 38%, rgb(var(--es-glow) / 0)); pointer-events: none; }
+    {{-- A picture is shown as it is: nothing is written on it, so nothing is laid over it. --}}
+    :where(.gk-head-pictured) .gk-head-stage { position: relative; inset: auto; height: clamp(9.5rem, 31vw, 17rem); background: #111111; pointer-events: auto; }
+    :where(.gk-head-walled) .gk-head-stage { position: relative; inset: auto; height: auto; overflow: visible; background: none; pointer-events: auto; }
+    .gk-head-stage picture { display: block; height: 100%; }
+    .gk-head-picture { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+    .gk-head-body { position: relative; padding: 1.75rem var(--gk-head-pad) 1.25rem; }
+    :where(.gk-head-pictured) .gk-head-body, :where(.gk-head-walled) .gk-head-body { padding-top: 0; }
+    {{-- The two ids owners were given for the header's contents (the header was once drawn
+         twice, for a phone and for a laptop) are kept on two wrappers that take no box. --}}
+    .gk-head-wrap { display: contents; }
+    .gk-head-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .5rem 1rem; min-height: 2.75rem; }
+    {{-- Over a picture or the logo wall, the logo stands on its lower edge. --}}
+    :where(.gk-head-pictured.gk-head-logoed) .gk-head-top, :where(.gk-head-walled.gk-head-logoed) .gk-head-top { margin-top: calc(var(--gk-head-logo) * -.58); }
+    :where(.gk-head-pictured:not(.gk-head-logoed)) .gk-head-top, :where(.gk-head-walled:not(.gk-head-logoed)) .gk-head-top { padding-top: 1rem; }
+    .gk-head-logo { flex: none; overflow: hidden; width: var(--gk-head-logo); height: var(--gk-head-logo); border-radius: 22%; background: var(--gk-solid); box-shadow: 0 0 0 .25rem var(--gk-solid), 0 .625rem 1.5rem -.5rem rgb(0 0 0 / .45); }
+    :where(.dark) .gk-head-logo { box-shadow: 0 0 0 .25rem var(--gk-solid), 0 0 0 calc(.25rem + 1px) rgb(255 255 255 / .16), 0 .625rem 1.5rem -.5rem rgb(0 0 0 / .6); }
+    .gk-head-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+    {{-- Beside the logo: the one main button, Share, and Manage for a member. Whatever else a
+         visitor may do is a second row under the description. --}}
+    .gk-head-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .5rem; min-width: 0; margin-inline-start: auto; }
+    :where(.gk-head-pictured.gk-head-logoed) .gk-head-actions, :where(.gk-head-walled.gk-head-logoed) .gk-head-actions { padding-top: calc(var(--gk-head-logo) * .58 + .875rem); }
+    .gk-head-more-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; margin-top: 1rem; }
+    .gk-head-ico { flex: none; width: 1.125rem; height: 1.125rem; }
+    .gk-head-follow { padding-inline: 1.25rem 1.375rem; font-weight: 700; white-space: nowrap; }
+    {{-- Manage is drawn twice, beside the main button for a laptop and in the second row for a
+         phone, where three buttons do not fit beside a logo. --}}
+    .gk-head-manage-phone { display: none; }
+    .gk-head-more-actions-phone { display: none; }
+    .gk-head-following { display: inline-flex; align-items: center; gap: .375rem; white-space: nowrap; }
+    .gk-head-share { position: relative; }
+    .gk-head-said { position: absolute; inset-block-end: calc(100% + .5rem); inset-inline-end: 0; padding: .3125rem .625rem; border-radius: .5rem; background: rgb(17 24 39 / .95); color: #ffffff; font-size: .8125rem; font-weight: 600; white-space: nowrap; pointer-events: none; }
+    .gk-head-said:empty { display: none; }
+
+    {{-- font-synthesis: a display face with one weight is drawn as it was cut, where
+         font-semibold used to thicken it artificially. A long name steps down (the class is
+         the server's, from the name's length), so it never runs to four lines. --}}
+    .gk-head-name { margin: .75rem 0 0; font-size: var(--gk-head-name); font-weight: 700; font-synthesis: none; line-height: 1.06; color: var(--gk-ink); text-wrap: balance; overflow-wrap: anywhere; }
+    .gk-head-name-m { font-size: calc(var(--gk-head-name) * .86); }
+    .gk-head-name-s { font-size: calc(var(--gk-head-name) * .74); }
+    .gk-head-tagline { margin: .5rem 0 0; font-size: 1.0625rem; font-weight: 500; color: var(--gk-ink-2); text-wrap: pretty; }
+
+    {{-- Each fact has its own mark, so facts are parted by space alone: a dot between them was
+         left hanging at the start of a wrapped line. --}}
+    .gk-head-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; margin-top: .625rem; }
+    .gk-head-facts { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.125rem; margin: 0; padding: 0; list-style: none; font-size: .9375rem; font-weight: 500; color: var(--gk-ink-2); }
+    .gk-head-fact { display: inline-flex; align-items: center; gap: .375rem; }
+    .gk-head-fact svg { flex: none; width: 1rem; height: 1rem; opacity: .7; }
+    .gk-head-fact a { color: inherit; text-decoration: underline; text-decoration-color: var(--gk-line); text-underline-offset: 3px; }
+    .gk-head-fact a:hover { text-decoration-color: currentColor; }
+    .gk-head-fact b { font-weight: 700; color: var(--gk-ink); }
+    .gk-head-side { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-inline-start: auto; }
+    .gk-head-social { display: flex; flex-wrap: wrap; align-items: center; gap: .125rem; }
+    .gk-head-social-link { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; color: var(--gk-ink-2); transition: background-color var(--gk-swap), color var(--gk-swap); }
+    .gk-head-social-link:hover { background: var(--gk-well); color: var(--gk-ink); }
+    .gk-head-social-link:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
+    .gk-head-social-link svg { width: 1.1875rem; height: 1.1875rem; }
+
+    {{-- The list's own tools: the filter and the view switch. Grey, so Follow is the only
+         thing here in the schedule's colour; the badge alone says a filter is on. The laptop's
+         and the phone's filter are two buttons (they open different panels), shown by turns. --}}
+    .gk-head-tools { display: flex; flex: none; align-items: center; gap: .5rem; }
+    .gk-head-tool { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .4375rem; height: 2.375rem; min-width: 2.375rem; padding: 0 .75rem; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-solid); color: var(--gk-ink); font: inherit; font-size: .875rem; font-weight: 650; white-space: nowrap; cursor: pointer; transition: background-color var(--gk-swap); }
+    .gk-head-tool:hover { background: var(--gk-well); }
+    .gk-head-tool:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-head-tool svg { width: 1rem; height: 1rem; }
+    .gk-head-tool-phone { display: none; }
+    .gk-head-badge { display: inline-grid; place-items: center; min-width: 1.125rem; height: 1.125rem; padding: 0 .25rem; border-radius: 999px; background: var(--es-accent); color: var(--es-accent-text); font-size: .6875rem; font-weight: 800; line-height: 1; }
+    .gk-head-badge[hidden] { display: none; }
+    .gk-head-seg { display: inline-flex; padding: .125rem; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-well); }
+    .gk-head-seg-btn { display: grid; place-items: center; width: 2.25rem; height: 2rem; border: 0; border-radius: .5625rem; background: none; color: var(--gk-ink-2); cursor: pointer; transition: background-color var(--gk-swap), color var(--gk-swap); }
+    .gk-head-seg-btn svg { width: 1.125rem; height: 1.125rem; }
+    .gk-head-seg-btn:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
+    .gk-head-seg-btn[aria-pressed="true"] { background: var(--gk-solid); color: var(--gk-ink); box-shadow: 0 1px 2px rgb(0 0 0 / .18); }
+
+    {{-- The description. Folded, its first lines are a summary in running text: a heading the
+         owner typed is left out of them (it returns with More), where it used to stand larger
+         than everything but the name. The fold is in the stylesheet, not added by script, so
+         the full text never flashes. --}}
+    .gk-head-about { max-width: 46rem; margin-top: .75rem; font-size: .9375rem; line-height: 1.5; color: var(--gk-ink-2); }
+    .gk-head-about-text { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .gk-head-about-text hr { margin-block: .75rem; border: 0; border-top: 1px solid var(--gk-line); }
+    :where(.gk-head-about[data-open]) .gk-head-about-text { display: block; }
+    :where(.gk-head-about:not([data-open])) .gk-head-about-text :is(p, ul, ol, blockquote, li) { display: inline; margin: 0; padding: 0; border: 0; font-size: inherit; font-weight: inherit; line-height: inherit; }
+    :where(.gk-head-about:not([data-open])) .gk-head-about-text :is(p, li, blockquote)::after { content: ' '; }
+    :where(.gk-head-about:not([data-open])) .gk-head-about-text :is(h2, h3, h4, h5, h6, hr, img, table, pre, br) { display: none; }
+    :where(.gk-head-about:not([data-open])) .gk-head-about-text strong { font-weight: 600; color: var(--gk-ink); }
+    .gk-head-more { display: inline-flex; align-items: center; gap: .25rem; margin-top: .25rem; padding: 0; border: 0; background: none; color: var(--gk-ink); font: inherit; font-size: .875rem; font-weight: 700; cursor: pointer; }
+    .gk-head-more[hidden] { display: none; }
+    .gk-head-more svg { width: .875rem; height: .875rem; transition: transform var(--gk-open); }
+    .gk-head-more[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .gk-head-more:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; border-radius: .25rem; }
+
+    @media (max-width: 47.99rem) {
+        .gk-head-side { justify-content: space-between; width: 100%; margin-inline-start: 0; }
+        {{-- The first icon's own edge, not its 2.25rem box, lines up with the text above it. --}}
+        .gk-head-social { margin-inline-start: -.5rem; }
+        .gk-head-about-text { -webkit-line-clamp: 3; }
+        .gk-head-seg { display: none; }
+        .gk-head-tool-desk { display: none; }
+        .gk-head-tool-phone { display: inline-flex; }
+        :where(.gk-head-more-actions) .gk-btn { flex: 1 1 calc(50% - .25rem); }
+        .gk-head-manage-desk { display: none; }
+        .gk-head-manage-phone { display: inline-flex; }
+        .gk-head-more-actions-phone { display: flex; }
+        {{-- A phone's page background is often a picture that ends just under this card: a
+             long shadow fell across that edge. --}}
+        .gk-head { box-shadow: 0 1px 2px rgb(15 23 42 / .1), 0 .375rem .75rem -.5rem rgb(15 23 42 / .4); }
+    }
+
+    {{-- The slim bar that takes over once the header has scrolled away (role/partials/headers/
+         bar). It is a child of main, never of the card: the card's backdrop-filter would make
+         it the bar's containing block and un-fix it. Under the page's dialogs (z-50). --}}
+    .gk-headbar { position: fixed; inset: 0 0 auto; z-index: 30; padding-top: env(safe-area-inset-top, 0px); transform: translateY(-110%); visibility: hidden; transition: transform var(--gk-open) ease, visibility 0s linear var(--gk-open); background: var(--gk-panel); color: var(--gk-ink); -webkit-backdrop-filter: blur(.75rem); backdrop-filter: blur(.75rem); box-shadow: 0 1px 0 var(--gk-line), 0 .75rem 1.5rem -1rem rgb(0 0 0 / .35); }
+    .gk-headbar[data-on] { transform: none; visibility: visible; transition: transform var(--gk-open) ease, visibility 0s; }
+    .gk-headbar-in { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; }
+    .gk-headbar-logo { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 22%; object-fit: cover; }
+    .gk-headbar-name { flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: 1.125rem; font-weight: 700; font-synthesis: none; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; color: var(--gk-ink); }
+    {{-- Its button is a second copy of the header's, so it can be smaller than a first one may be. --}}
+    :where(.gk-headbar) .gk-btn { min-height: 2.25rem; padding: 0 .75rem; }
+    .gk-headbar-top { display: grid; flex: none; place-items: center; width: 2.375rem; height: 2.375rem; border: 1px solid var(--gk-line); border-radius: .625rem; background: var(--gk-solid); color: var(--gk-ink); cursor: pointer; }
+    .gk-headbar-top:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-headbar-top svg { width: 1rem; height: 1rem; }
+
     @media (prefers-reduced-motion: reduce) {
         .gk-btn, .gk-link { transition-duration: 1ms; }
         .gk-btn:active { transform: none; }
+        .gk-headbar { transition: none; }
     }
 
     @media print {
@@ -309,6 +447,7 @@
              and print black text on a dark ground. --}}
         .gk-panel, .dark .gk-panel { background: #ffffff; color: #000000; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #d1d5db; }
         .gk-btn { display: none; }
+        .gk-headbar { display: none; }
         .gk-note { background: #ffffff; color: #000000; border-color: #9ca3af; }
     }
 </style>

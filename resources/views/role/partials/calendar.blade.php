@@ -3921,46 +3921,12 @@ const calendarApp = createApp({
                     }
                 }
             });
-            const listBtn = document.getElementById('toggle-list-btn');
-            const calBtn = document.getElementById('toggle-calendar-btn');
-            const accentColor = (listBtn && listBtn.dataset.accent) || (calBtn && calBtn.dataset.accent) || '{{ $accentColor ?? "#4E81FA" }}';
-            const contrastColor = (listBtn && listBtn.dataset.contrast) || (calBtn && calBtn.dataset.contrast) || '{{ $contrastColor ?? "#FFFFFF" }}';
-            if (listBtn) {
-                listBtn.style.borderColor = accentColor;
-                if (view !== 'list') {
-                    listBtn.style.backgroundColor = accentColor;
-                    listBtn.style.color = contrastColor;
-                    listBtn.className = listBtn.className.replace(/\btext-gray-900\b/g, '').replace(/\bdark:text-white\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
-                    if (!listBtn.className.includes('hover:scale-105')) {
-                        listBtn.className += ' hover:scale-105 hover:shadow-md';
-                    }
-                } else {
-                    listBtn.style.backgroundColor = '';
-                    listBtn.style.color = '';
-                    listBtn.className = listBtn.className.replace(/\bhover:scale-105\b/g, '').replace(/\bhover:shadow-md\b/g, '');
-                    if (!listBtn.className.includes('text-gray-900')) {
-                        listBtn.className += ' text-gray-900 dark:text-white';
-                    }
-                }
-            }
-            if (calBtn) {
-                calBtn.style.borderColor = accentColor;
-                if (view !== 'calendar') {
-                    calBtn.style.backgroundColor = accentColor;
-                    calBtn.style.color = contrastColor;
-                    calBtn.className = calBtn.className.replace(/\btext-gray-900\b/g, '').replace(/\bdark:text-white\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
-                    if (!calBtn.className.includes('hover:scale-105')) {
-                        calBtn.className += ' hover:scale-105 hover:shadow-md';
-                    }
-                } else {
-                    calBtn.style.backgroundColor = '';
-                    calBtn.style.color = '';
-                    calBtn.className = calBtn.className.replace(/\bhover:scale-105\b/g, '').replace(/\bhover:shadow-md\b/g, '');
-                    if (!calBtn.className.includes('text-gray-900')) {
-                        calBtn.className += ' text-gray-900 dark:text-white';
-                    }
-                }
-            }
+            // The view switch in the schedule's header says which view is on; how a pressed
+            // button looks is the stylesheet's (partials/guest-kit-styles, .gk-head-seg-btn).
+            ['list', 'calendar'].forEach((name) => {
+                const btn = document.getElementById('toggle-' + name + '-btn');
+                if (btn) { btn.setAttribute('aria-pressed', view === name ? 'true' : 'false'); }
+            });
         },
         getHeaderImage(event) {
             if (event.venue_header_image) return event.venue_header_image;
@@ -5399,85 +5365,17 @@ calendarApp.directive('list-reveal', listReveal);
 const calendarAppInstance = calendarApp.mount('#calendar-app');
 window.calendarVueApp = calendarAppInstance;
 
-// Update hero filters button visibility and badge (for GP/guest view)
+// The filter buttons in the schedule's header (role/partials/headers/tools): a badge on each
+// says how many filters are on. The buttons are drawn by the server and shown by the stylesheet.
 function updateHeroFiltersButton() {
-    const btn = document.getElementById('hero-filters-btn');
-    const badge = document.getElementById('hero-filters-badge');
-    const btnMobile = document.getElementById('hero-filters-btn-mobile');
-    const badgeMobile = document.getElementById('hero-filters-badge-mobile');
-    if (window.calendarVueApp) {
-        const showBtn = true;
-        const count = window.calendarVueApp.activeFilterCount;
-        const active = count > 0;
-
-        // Desktop hero button
-        if (btn) {
-            if (showBtn) {
-                btn.classList.add('md:flex');
-                btn.style.display = '';
-            } else {
-                btn.classList.remove('md:flex');
-                btn.style.display = 'none';
-            }
-            // Always filled with the schedule accent, matching the Follow button;
-            // the count badge is what signals active filters.
-            const accent = btn.dataset.accent;
-            const contrast = btn.dataset.contrast;
-            btn.style.borderColor = accent;
-            btn.style.backgroundColor = accent;
-            btn.style.color = contrast;
-        }
-        if (badge) {
-            if (active) {
-                badge.textContent = count;
-                // Legible inverse pill against the accent-filled button
-                if (btn) {
-                    badge.style.backgroundColor = btn.dataset.contrast;
-                    badge.style.color = btn.dataset.accent;
-                }
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
-            } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
-            }
-        }
-
-        // Mobile hero button
-        if (btnMobile) {
-            if (showBtn) {
-                btnMobile.style.display = ''; // Let CSS classes control display (md:hidden)
-            } else {
-                btnMobile.style.display = 'none';
-            }
-            // Active = filled accent; inactive = fall back to default white/gray classes
-            const accentM = btnMobile.dataset.accent;
-            const contrastM = btnMobile.dataset.contrast;
-            if (active) {
-                btnMobile.style.backgroundColor = accentM;
-                btnMobile.style.color = contrastM;
-                btnMobile.style.borderColor = accentM;
-            } else {
-                btnMobile.style.backgroundColor = '';
-                btnMobile.style.color = '';
-                btnMobile.style.borderColor = '';
-            }
-        }
-        if (badgeMobile) {
-            if (active) {
-                badgeMobile.textContent = count;
-                if (btnMobile) {
-                    badgeMobile.style.backgroundColor = btnMobile.dataset.contrast;
-                    badgeMobile.style.color = btnMobile.dataset.accent;
-                }
-                badgeMobile.classList.remove('hidden');
-                badgeMobile.classList.add('inline-flex');
-            } else {
-                badgeMobile.classList.add('hidden');
-                badgeMobile.classList.remove('inline-flex');
-            }
-        }
-    }
+    if (! window.calendarVueApp) return;
+    const count = window.calendarVueApp.activeFilterCount;
+    ['hero-filters-badge', 'hero-filters-badge-mobile'].forEach((id) => {
+        const badge = document.getElementById(id);
+        if (! badge) return;
+        badge.textContent = count > 0 ? count : '';
+        badge.hidden = ! (count > 0);
+    });
 }
 
 // Initial update and watch for changes

@@ -1256,6 +1256,7 @@ return [
     'copied' => 'Kopiert!',
     'copy_failed' => 'Fehler beim Kopieren in die Zwischenablage',
     'share' => 'Teilen',
+    'back_to_top' => 'Nach oben',
     'shared' => 'Geteilt!',
     'share_failed' => 'Fehler beim Teilen',
     'generating_graphic' => 'Grafik wird generiert',
@@ -1281,6 +1282,7 @@ return [
     'create_schedule_first' => 'Erstellen Sie zuerst einen Kalender, um Newsletter zu versenden.',
 
     'upcoming_events' => 'Bevorstehende Veranstaltungen',
+    'upcoming_events_count' => '{1} :count bevorstehende Veranstaltung|[0,*] :count bevorstehende Veranstaltungen',
     'tonight' => 'Heute Abend',
     'permission_denied' => 'Berechtigung verweigert',
     'create_account_link' => ':link um Ihr Profil zu verwalten und Ihre Veranstaltungen bearbeiten zu können',

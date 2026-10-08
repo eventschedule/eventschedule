@@ -1317,6 +1317,7 @@ return [
     'copied' => 'تم النسخ!',
     'copy_failed' => 'فشل في النسخ إلى الحافظة',
     'share' => 'مشاركة',
+    'back_to_top' => 'العودة إلى الأعلى',
     'shared' => 'تمت المشاركة!',
     'share_failed' => 'فشل في المشاركة',
     'generating_graphic' => 'جاري إنشاء الرسم البياني',
@@ -1342,6 +1343,7 @@ return [
     'create_schedule_first' => 'أنشئ جدولًا أولًا لإرسال النشرات البريدية.',
 
     'upcoming_events' => 'الأحداث القادمة',
+    'upcoming_events_count' => '{0} :count أحداث قادمة|{1} حدث قادم واحد|{2} حدثان قادمان|[3,10] :count أحداث قادمة|[11,*] :count حدثًا قادمًا',
     'tonight' => 'هذه الليلة',
     'permission_denied' => 'تم رفض الإذن',
     'create_account_link' => ':link لإدارة ملفك الشخصي وتتمكن من تعديل أحداثك',

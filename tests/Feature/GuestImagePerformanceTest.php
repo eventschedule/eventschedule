@@ -187,8 +187,13 @@ class GuestImagePerformanceTest extends TestCase
         $this->assertStringContainsString('width="3000" height="1500"', $header);
         $this->assertStringContainsString('fetchpriority="high"', $header, 'With no image background the header is the LCP candidate');
 
-        // The profile photo: its 480 derivative in a box of a known size.
-        $avatar = $this->imgTag($html, 'profile_abc_w480.webp');
+        // The profile photo: its 480 derivative in a box of a known size. The slim bar that
+        // follows the header down the page carries a small copy, which is not fetched until the
+        // bar is on screen.
+        $this->assertSame(1, preg_match('/<img class="gk-headbar-logo"[^>]*>/', $html, $barLogo));
+        $this->assertStringContainsString('profile_abc_w480.webp', $barLogo[0]);
+        $this->assertStringContainsString('loading="lazy"', $barLogo[0]);
+        $avatar = $this->imgTag(str_replace($barLogo[0], '', $html), 'profile_abc_w480.webp');
         $this->assertStringContainsString('width="120" height="120"', $avatar);
         $this->assertStringNotContainsString('src="'.url('/storage/profile_abc.png').'"', $html);
     }

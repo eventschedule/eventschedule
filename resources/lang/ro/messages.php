@@ -1277,6 +1277,7 @@ return [
     'copied' => 'Copiat!',
     'copy_failed' => 'Copierea în clipboard a eșuat',
     'share' => 'Distribuie',
+    'back_to_top' => 'Înapoi sus',
     'shared' => 'Distribuit!',
     'share_failed' => 'Distribuirea a eșuat',
     'generating_graphic' => 'Se generează graficul',
@@ -1303,6 +1304,7 @@ return [
     'create_schedule_first' => 'Creează mai întâi un program pentru a trimite buletine informative.',
 
     'upcoming_events' => 'Evenimente Viitoare',
+    'upcoming_events_count' => '{0} :count evenimente viitoare|{1} :count eveniment viitor|[2,19] :count evenimente viitoare|[20,*] :count de evenimente viitoare',
     'tonight' => 'În Seara Aceasta',
     'permission_denied' => 'Permisiune refuzată',
     'create_account_link' => ':link pentru a-ți administra profilul și a putea edita evenimentele',

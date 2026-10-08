@@ -1,18 +1,47 @@
-        <div id="gp-header" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl mb-0 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} transition-[max-width] duration-300 ease-in-out mx-auto"
+{{--
+    The banner header: a card on the owner's page, drawn once for every width (it used to be two
+    hand-copied bodies, one for a phone and one for a laptop).
+
+    Top to bottom: the schedule's picture, or a wash of its colour where it has none; the logo
+    with the one main button and Share beside it; the name; a line of facts with the socials and
+    the list's tools at its far end; the description folded to its first lines; and a second
+    row for whatever else a visitor may do. The look is partials/guest-kit-styles (.gk-head*).
+
+    Expects from the parent scope: $role, $isRtl, $accentColor, $contrastColor, $event,
+    $hasHeaderImage, $logoWallRoles, $galleryImages, $upcoming, $headActions.
+--}}
+@php
+    $hasEmail = $role->email && $role->show_email;
+    $hasPhone = $role->showsPhone();
+    // Every owner-typed href goes through UrlUtils::safeHref(): a javascript: value would run on
+    // this page. Without a safe link the icon is left out.
+    $websiteHref = \App\Utils\UrlUtils::safeHref($role->website);
+    $hasWebsite = $websiteHref !== null;
+    $hasSocial = $role->social_links && $role->social_links != '[]';
+    $hasPayment = $role->payment_links && $role->payment_links != '[]';
+
+    $headWall = $role->header_image === 'logos' && ($logoWallRoles ?? collect())->isNotEmpty();
+    $headPicture = $hasHeaderImage && ! $headWall;
+    $headName = $role->translatedName();
+    // A venue's place is its address, as before. An act or a curator says where it is based.
+    $headPlace = trim((string) ($role->isVenue() ? $role->shortAddress() : $role->translatedCity()));
+    $headUpcoming = \App\Utils\GuestHeader::upcomingFact($role, $event ? 0 : count($upcoming ?? []));
+    $headGallery = ($galleryImages ?? collect());
+    // The second row: what else a visitor may do. A member's Manage joins it on a phone, so for
+    // a member the row is always drawn and, where Manage is all it holds, shown on a phone only.
+    $headRest = $headActions['gift'] || $headActions['submit'] || ($headActions['follow'] && $headActions['main'] !== 'follow');
+@endphp
+        <div id="gp-header"
+          class="gk-head {{ $headPicture ? 'gk-head-pictured' : '' }} {{ $headWall ? 'gk-head-walled' : '' }} {{ $role->profile_image_url ? 'gk-head-logoed' : '' }} mb-0 transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
         >
-          <div
-            id="gp-header-image"
-            class="relative rounded-t-xl {{ $role->header_image === 'logos' ? '' : 'overflow-hidden before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl' }}"
-          >
-
-            @if ($role->header_image === 'logos')
-            @if (($logoWallRoles ?? collect())->isNotEmpty())
-            {{-- Extra bottom padding when a profile image exists: it overlaps the
-                 header area by 100px (-mt-[100px] below) and must not cover the last row --}}
+          <div id="gp-header-image" class="gk-head-stage">
+            @if ($headWall)
+            {{-- Extra bottom padding when a profile image exists: it stands on this block's
+                 lower edge and must not cover the last row. --}}
             <div id="gp-logo-wall" data-logo-wall role="group" aria-label="{{ $role->isVenue() ? __('messages.talents') : __('messages.venues') }}"
-                 class="px-4 pt-4 sm:px-6 sm:pt-6 {{ $role->profile_image_url ? 'pb-28' : 'pb-4 sm:pb-6' }} {{ $isRtl ? 'rtl' : '' }}">
+                 class="px-4 pt-4 sm:px-6 sm:pt-6 {{ $role->profile_image_url ? 'pb-20' : 'pb-4 sm:pb-6' }} {{ $isRtl ? 'rtl' : '' }}">
               <div class="mx-auto max-w-5xl flex flex-wrap justify-center gap-2 sm:gap-3">
                 @foreach ($logoWallRoles as $wallRole)
                   @php $tileVisibility = $loop->index >= 16 ? 'hidden sm:flex' : 'flex'; @endphp
@@ -39,8 +68,7 @@
                 @endforeach
               </div>
             </div>
-            @endif
-            @elseif ($role->header_image && $role->header_image !== 'none')
+            @elseif ($headPicture && $role->header_image)
             {{-- width and height give the box its shape before the file arrives, so nothing
                  below it jumps: every built-in header is 1536x768. fetchpriority="high" only
                  when the background is not an image - that one is the layout's high-priority
@@ -48,14 +76,14 @@
             <picture>
               <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
               <img
-                class="block max-h-72 w-full object-cover"
+                class="gk-head-picture"
                 src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
                 width="{{ \App\Models\Role::BUILT_IN_HEADER_SIZE[0] }}" height="{{ \App\Models\Role::BUILT_IN_HEADER_SIZE[1] }}"
                 @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif
-                alt="{{ $role->translatedName() }}"
+                alt="{{ $headName }}"
               />
             </picture>
-            @elseif ($role->header_image_url && $role->header_image !== 'none')
+            @elseif ($headPicture)
             @php
                 // The owner's upload: its 960 derivative as the src, the 960 and 1920 for the
                 // browser to choose between, and the original's recorded size for the box's shape.
@@ -65,130 +93,118 @@
                 $headerSize = $role->imageSourceDimensions('header');
             @endphp
             <img
-              class="block max-h-72 w-full object-cover"
+              class="gk-head-picture"
               src="{{ $role->headerImageUrl(960, pageWidth: true) }}"
               @if ($headerSrcset) srcset="{{ $headerSrcset }}" sizes="(min-width: 1536px) 1496px, calc(100vw - 40px)" @endif
               @if ($headerSize) width="{{ $headerSize[0] }}" height="{{ $headerSize[1] }}" @endif
               @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif
-              alt="{{ $role->translatedName() }}"
+              alt="{{ $headName }}"
             />
             @endif
           </div>
-          <header id="schedule-header" class="px-6 lg:px-16 pb-1 md:pb-4 relative z-10 {{ $isRtl ? 'rtl' : '' }}">
-            @if ($role->profile_image_url)
-            <div id="gp-profile-image" class="rounded-lg w-[130px] h-[130px] -mt-[100px] mx-auto {{ $isRtl ? 'sm:mr-0 sm:ml-auto' : 'sm:mx-0 sm:-ml-2' }} mb-3 sm:mb-6 bg-white dark:bg-gray-900 flex items-center justify-center">
-              <img
-                class="rounded-md w-[120px] h-[120px] object-cover"
-                src="{{ $role->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}"
-                width="120" height="120"
-                alt="{{ $role->translatedName() }}"
-              />
+          {{-- v-pre: nothing here is a Vue template, and the description is the owner's own HTML. --}}
+          <header id="schedule-header" class="gk-head-body {{ $isRtl ? 'rtl' : '' }}" v-pre>
+            {{-- The two ids owners were given for the header's contents, from when it was drawn
+                 twice. Both now name this one body, so a rule written for either still lands. --}}
+            <div id="gp-header-body-desktop" class="gk-head-wrap"><div id="gp-header-body-mobile" class="gk-head-wrap">
+            <div class="gk-head-top">
+              @if ($role->profile_image_url)
+              <div id="gp-profile-image" class="gk-head-logo">
+                <img
+                  src="{{ $role->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}"
+                  width="120" height="120"
+                  alt="{{ $headName }}"
+                />
+              </div>
+              @endif
+              <div class="gk-head-actions">
+                @include('role.partials.headers.action-buttons', ['actionPart' => 'main'])
+                <button type="button" class="gk-btn gk-btn-secondary gk-btn-icon gk-head-share" data-head-share data-said="{{ __('messages.copied') }}" aria-label="{{ __('messages.share') }}" title="{{ __('messages.share') }}">
+                  <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M5 12v6.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V12"/></svg>
+                  <span class="gk-head-said" role="status" aria-live="polite"></span>
+                </button>
+              </div>
             </div>
-            @else
-            <div class="h-6 sm:h-[42px]"></div>
+
+            {{-- The page's one <h1>. --}}
+            <h1 class="gk-head-name {{ \App\Utils\GuestHeader::nameStep($headName) }}" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
+              {!! str_replace(' , ', '<br>', e($headName)) !!}
+            </h1>
+            @if ($role->translatedShortDescription())
+            <p class="gk-head-tagline">{{ $role->translatedShortDescription() }}</p>
             @endif
-            @php
-                $hasEmail = $role->email && $role->show_email;
-                $hasPhone = $role->showsPhone();
-                // Every owner-typed href goes through UrlUtils::safeHref(): a javascript: value
-                // would run on this page. Without a safe link the icon is left out.
-                $websiteHref = \App\Utils\UrlUtils::safeHref($role->website);
-                $hasWebsite = $websiteHref !== null;
-                $hasSocial = $role->social_links && $role->social_links != '[]';
-                $hasPayment = $role->payment_links && $role->payment_links != '[]';
-            @endphp
-            {{-- Mobile layout (< sm): stacked, centered --}}
-            <div id="gp-header-body-mobile" class="flex sm:hidden flex-col items-center gap-3 mb-5">
-              {{-- Name/Location (centered) --}}
-              <div class="text-center mb-1">
-                <h1 class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100 mb-2" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
-                  {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
-                </h1>
-                @if($role->translatedShortDescription())
-                <p class="text-sm text-[#33383C] dark:text-gray-300 mb-2">
-                  {{ $role->translatedShortDescription() }}
-                </p>
+
+            <div class="gk-head-meta">
+              @if ($headPlace !== '' || $headUpcoming || $headGallery->isNotEmpty() || $headActions['following'])
+              <ul class="gk-head-facts">
+                @if ($headPlace !== '')
+                <li class="gk-head-fact">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                  @if ($role->isVenue())
+                  <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}" target="_blank" rel="noopener noreferrer nofollow">{{ $headPlace }}</a>
+                  @else
+                  <span>{{ $headPlace }}</span>
+                  @endif
+                </li>
                 @endif
-                @if($role->isVenue())
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
-                   target="_blank" rel="noopener noreferrer nofollow"
-                   class="inline-flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[var(--brand-blue)] hover:underline transition-colors duration-200">
-                  <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
-                  </svg>
-                  {{ $role->shortAddress() }}
-                  <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                </a>
+                @if ($headUpcoming)
+                <li class="gk-head-fact">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+                  {{-- The figure in bold where the sentence opens with it. Escaped first. --}}
+                  <span>{!! preg_replace('/^(\d+\+?)(?=\s)/u', '<b>$1</b>', e($headUpcoming)) !!}</span>
+                </li>
                 @endif
                 {{-- The gallery sits below the calendar; this puts it one tap from the top. --}}
-                @if (($galleryImages ?? collect())->isNotEmpty())
-                <div class="mt-1">
-                  <a href="#gp-gallery" data-lightbox-set="gallery" @if ($galleryImages->count() > 1) data-lightbox-grid @else data-lightbox-index="0" @endif
-                     class="inline-flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[var(--brand-blue)] hover:underline transition-colors duration-200">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
-                    {{ trans_choice('messages.gallery_photo_count', $galleryImages->count(), ['count' => $galleryImages->count()]) }}
-                  </a>
-                </div>
+                @if ($headGallery->isNotEmpty())
+                <li class="gk-head-fact">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 15.5l-5-5L6 19"/></svg>
+                  <a href="#gp-gallery" data-lightbox-set="gallery" @if ($headGallery->count() > 1) data-lightbox-grid @else data-lightbox-index="0" @endif>{{ trans_choice('messages.gallery_photo_count', $headGallery->count(), ['count' => $headGallery->count()]) }}</a>
+                </li>
                 @endif
-              </div>
+                {{-- A follower is told so here, where the Follow button used to leave a gap. --}}
+                @if ($headActions['following'])
+                <li class="gk-head-fact gk-head-following">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                  <span>{{ __('messages.following') }}</span>
+                </li>
+                @endif
+              </ul>
+              @endif
 
-              {{-- Icons + Buttons together on same row (centered) --}}
-              <div class="flex flex-row flex-wrap items-center justify-center gap-3">
-                {{-- Social icons --}}
-                @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
-                <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
-                    @if($hasEmail)
-                    <a href="mailto:{{ $role->email }}"
-                       class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
-                       style="background-color: {{ $accentColor }}"
-                       data-tooltip="Email: {{ $role->email }}">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <path fill="{{ $contrastColor }}" fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/>
-                        </svg>
+              <div class="gk-head-side">
+                @if ($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
+                <div class="gk-head-social">
+                    @if ($hasEmail)
+                    <a href="mailto:{{ $role->email }}" class="gk-head-social-link social-tooltip" data-tooltip="Email: {{ $role->email }}" aria-label="Email: {{ $role->email }}">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/></svg>
                     </a>
                     @endif
-                    @if($hasPhone)
-                    <a href="tel:{{ $role->phone }}"
-                       class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
-                       style="background-color: {{ $accentColor }}"
-                       data-tooltip="Phone: {{ $role->phone }}">
-                        <svg class="w-5 h-5" fill="{{ $contrastColor }}" viewBox="0 0 24 24">
-                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                        </svg>
+                    @if ($hasPhone)
+                    <a href="tel:{{ $role->phone }}" class="gk-head-social-link social-tooltip" data-tooltip="Phone: {{ $role->phone }}" aria-label="Phone: {{ $role->phone }}">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </a>
                     @endif
-                    @if($hasWebsite)
-                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow"
-                       class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
-                       style="background-color: {{ $accentColor }}"
-                       data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <path fill="{{ $contrastColor }}" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/>
-                        </svg>
+                    @if ($hasWebsite)
+                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}" aria-label="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
+                        <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/></svg>
                     </a>
                     @endif
-                    @if($hasSocial)
+                    @if ($hasSocial)
                         @foreach ($role->decodeLinks('social_links') as $link)
                         @if ($gpLinkHref = $role->socialLinkHref($link, $loop->index))
-                        <a href="{{ $gpLinkHref }}" target="_blank" rel="noopener noreferrer nofollow"
-                           class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
-                           style="background-color: {{ $accentColor }}"
-                           data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
-                            <x-url-icon class="w-5 h-5" :color="$contrastColor">
+                        <a href="{{ $gpLinkHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}" aria-label="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                            <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </a>
                         @endif
                         @endforeach
                     @endif
-                    @if($hasPayment)
+                    @if ($hasPayment)
                         @foreach ($role->decodeLinks('payment_links') as $link)
                         @if ($gpPaymentHref = \App\Utils\UrlUtils::safeHref($link->url))
-                        <a href="{{ $gpPaymentHref }}" target="_blank" rel="noopener noreferrer nofollow"
-                           class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
-                           style="background-color: {{ $accentColor }}"
-                           data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
-                            <x-url-icon class="w-5 h-5" :color="$contrastColor">
+                        <a href="{{ $gpPaymentHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}" aria-label="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                            <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
                         </a>
@@ -197,379 +213,79 @@
                     @endif
                 </div>
                 @endif
-
-                {{-- Action buttons --}}
-                @php
-                $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
-                // Whether to offer the Follow / subscribe trigger.
-                //
-                // This used to be inlined at both call sites as a pair of branches that made the
-                // trigger depend on $hasSubmitButton, and the effect for a SIGNED-OUT visitor was
-                // that a schedule accepting event requests showed Submit INSTEAD of Follow. That
-                // was invisible while every schedule made through the UI had accept_requests
-                // false - the create form's toggle painted off and posted a 0 over the column
-                // default - so flipping that default would have quietly removed the Follow button
-                // from every new schedule's public page. Follow is what mints subscriber accounts.
-                //
-                // Signed out: always offer it. Signed in: unchanged from before.
-                $showFollowTrigger = ! auth()->user()
-                    || ($hasSubmitButton
-                        ? (! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain))
-                        : ! auth()->user()->isConnected($role->subdomain));
-                @endphp
-                @if ($role->hasBookableAppointments() || $hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
-                <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
-                  @if ($role->hasBookableAppointments())
-                  <a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center">
-                    <button type="button" style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}" class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{{ $role->customLabel('book_a_time') }}</button>
-                  </a>
-                  @endif
-                  @if ($hasSubmitButton)
-                  <a
-                    href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center justify-center"
-                  >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
-                    </button>
-                  </a>
-                  @endif
-                  @if ($role->canSellGiftCards())
-                  <a
-                    href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center justify-center"
-                  >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: transparent; color: {{ $accentColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ __('messages.gift_cards') }}
-                    </button>
-                  </a>
-                  @endif
-                  @if (config('app.hosted') || config('app.is_testing'))
-                  @if (! is_demo_mode() && $showFollowTrigger)
-                  <button
-                    type="button"
-                    data-follow-trigger
-                    data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
-                    data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $role->subdomain]) }}"
-                    data-subscribe-label="{{ $role->customLabel('email_me_new_events') }}"
-                    data-account-note="{{ $role->willCreateAccountOnConfirm() ? '1' : '' }}"
-                    data-schedule-name="{{ $role->name }}"
-                    data-schedule-image="{{ $role->profile_image_url }}"
-                    data-accent-color="{{ $accentColor }}"
-                    data-contrast-color="{{ $contrastColor }}"
-                    style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                    class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                  >
-                    {{ $role->customLabel('follow') }}
-                  </button>
-                  @endif
-                  @if (auth()->user() && auth()->user()->isMember($role->subdomain))
-                  <a
-                    href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}"
-                    class="inline-flex items-center justify-center"
-                  >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ __('messages.manage') }}
-                    </button>
-                  </a>
-                  @endif
-                  @endif
-                </div>
-                @endif
-              </div>
-
-              {{-- Description below --}}
-              @if($role->translatedDescription())
-              @php
-                $descDir = content_dir($role, false, $role->translatedDescription());
-              @endphp
-              <div class="w-full mt-2">
-                <div x-data="{ expanded: false, long: false }"
-                     x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
-                     dir="{{ $descDir }}"
-                     class="text-start text-sm text-[#33383C] dark:text-gray-300">
-                  {{-- Cut by LINES, by the browser, and only when it overflows. A description that
-                       did not fit used to be swapped for its first five words and "...", so a
-                       schedule introduced itself as "Welcome to Springfield Events! ...". The
-                       clamp is in the markup, not added by script, so the full text never flashes.
-                       demoteH1(): the schedule's name above is the page's one <h1>. --}}
-                  <div x-ref="content" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3">
-                    {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
-                  </div>
-                  <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
-                    {{ $role->customLabel('show_more') }}
-                  </button>
-                  <button x-show="long && expanded" x-cloak @click="expanded = false" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
-                    {{ $role->customLabel('show_less') }}
-                  </button>
-                </div>
-              </div>
-              @endif
-            </div>
-
-            {{-- Desktop layout (>= sm): horizontal with spacer --}}
-            <div id="gp-header-body-desktop" class="hidden sm:flex flex-col gap-3 mb-3">
-              {{-- Row 1: Name (full width). A heading to assistive tech, but not a second <h1> in the
-                   markup: the mobile copy above is the page's one <h1>, which is what a smartphone
-                   crawler reads, and the two used to give 181 of 188 schedule pages two H1s. The
-                   hidden copy's display:none takes it out of the accessibility tree, so a screen
-                   reader still meets exactly one level-1 heading at any width. --}}
-              <div role="heading" aria-level="1" class="text-[32px] font-semibold leading-10 text-[#151B26] dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
-                {!! str_replace(' , ', '<br>', e($role->translatedName())) !!}
-              </div>
-              {{-- Row 2: Description/Location/Social left, Action buttons right --}}
-              <div class="flex items-start gap-3">
-                {{-- Description/Location/Social --}}
-                <div class="min-w-0 flex-1">
-                  @if($role->translatedShortDescription())
-                  <p class="text-sm text-[#33383C] dark:text-gray-300 mb-2">
-                    {{ $role->translatedShortDescription() }}
-                  </p>
-                  @endif
-                  @if($role->isVenue())
-                  <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($role->bestAddress()) }}"
-                     target="_blank" rel="noopener noreferrer nofollow"
-                     class="flex items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[var(--brand-blue)] hover:underline transition-colors duration-200">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"/>
-                    </svg>
-                    {{ $role->shortAddress() }}
-                    <svg class="ml-1 h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                  </a>
-                  @endif
-                  @if (($galleryImages ?? collect())->isNotEmpty())
-                  <a href="#gp-gallery" data-lightbox-set="gallery" @if ($galleryImages->count() > 1) data-lightbox-grid @else data-lightbox-index="0" @endif
-                     class="mt-1 flex w-fit items-center gap-1.5 text-sm text-[#33383C] dark:text-gray-300 hover:text-[var(--brand-blue)] hover:underline transition-colors duration-200">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
-                    {{ trans_choice('messages.gallery_photo_count', $galleryImages->count(), ['count' => $galleryImages->count()]) }}
-                  </a>
-                  @endif
-                  {{-- Social icons (desktop - simple monochrome style) --}}
-                  @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
-                  <div class="flex flex-row flex-wrap gap-4 items-center mt-3">
-                      @if($hasEmail)
-                      <a href="mailto:{{ $role->email }}"
-                         class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
-                         data-tooltip="Email: {{ $role->email }}">
-                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/>
-                          </svg>
-                      </a>
-                      @endif
-                      @if($hasPhone)
-                      <a href="tel:{{ $role->phone }}"
-                         class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
-                         data-tooltip="Phone: {{ $role->phone }}">
-                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                          </svg>
-                      </a>
-                      @endif
-                      @if($hasWebsite)
-                      <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow"
-                         class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
-                         data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
-                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/>
-                          </svg>
-                      </a>
-                      @endif
-                      @if($hasSocial)
-                          @foreach ($role->decodeLinks('social_links') as $link)
-                          @if ($gpLinkHref2 = $role->socialLinkHref($link, $loop->index))
-                          <a href="{{ $gpLinkHref2 }}" target="_blank" rel="noopener noreferrer nofollow"
-                             class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
-                             data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
-                              <x-url-icon class="w-5 h-5" color="currentColor">
-                                  {{ \App\Utils\UrlUtils::clean($link->url) }}
-                              </x-url-icon>
-                          </a>
-                          @endif
-                          @endforeach
-                      @endif
-                      @if($hasPayment)
-                          @foreach ($role->decodeLinks('payment_links') as $link)
-                          @if ($gpPaymentHref2 = \App\Utils\UrlUtils::safeHref($link->url))
-                          <a href="{{ $gpPaymentHref2 }}" target="_blank" rel="noopener noreferrer nofollow"
-                             class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
-                             data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
-                              <x-url-icon class="w-5 h-5" color="currentColor">
-                                  {{ \App\Utils\UrlUtils::clean($link->url) }}
-                              </x-url-icon>
-                          </a>
-                          @endif
-                          @endforeach
-                      @endif
-                  </div>
-                  @endif
-                </div>
-
-                {{-- Action buttons --}}
-                @if ($role->hasBookableAppointments() || $hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
-                <div class="flex flex-row flex-wrap gap-3 items-center flex-shrink-0">
-                  @if ($role->hasBookableAppointments())
-                  <a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
-                    <button type="button" style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}" class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{{ $role->customLabel('book_a_time') }}</button>
-                  </a>
-                  @endif
-                  @if ($hasSubmitButton)
-                  <a
-                    href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center justify-center flex-shrink-0"
-                  >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
-                    </button>
-                  </a>
-                  @endif
-                  @if ($role->canSellGiftCards())
-                  <a
-                    href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center justify-center flex-shrink-0"
-                  >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: transparent; color: {{ $accentColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ __('messages.gift_cards') }}
-                    </button>
-                  </a>
-                  @endif
-                  @if (config('app.hosted') || config('app.is_testing'))
-                  @if (! is_demo_mode() && $showFollowTrigger)
-                  <button
-                    type="button"
-                    data-follow-trigger
-                    data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
-                    data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $role->subdomain]) }}"
-                    data-subscribe-label="{{ $role->customLabel('email_me_new_events') }}"
-                    data-account-note="{{ $role->willCreateAccountOnConfirm() ? '1' : '' }}"
-                    data-schedule-name="{{ $role->name }}"
-                    data-schedule-image="{{ $role->profile_image_url }}"
-                    data-accent-color="{{ $accentColor }}"
-                    data-contrast-color="{{ $contrastColor }}"
-                    style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                    class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 flex-shrink-0"
-                  >
-                    {{ $role->customLabel('follow') }}
-                  </button>
-                  @endif
-                  @if (auth()->user() && auth()->user()->isMember($role->subdomain))
-                  <a
-                    href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}"
-                    class="inline-flex items-center justify-center flex-shrink-0"
-                  >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ __('messages.manage') }}
-                    </button>
-                  </a>
-                  @endif
-                  @endif
-                </div>
-                @endif
-
-                {{-- Filters Button (desktop only, in hero) - visibility controlled by JS watcher in calendar.blade.php --}}
-                @if(!$event)
-                <button id="hero-filters-btn"
-                        aria-label="{{ $role->customLabel('filters') }}" title="{{ $role->customLabel('filters') }}"
-                        data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                        class="hidden w-11 h-11 items-center justify-center rounded-lg border-2 transition-all duration-200 hover:scale-105 hover:shadow-md flex-shrink-0 relative"
-                        style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}; display: none;">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
-                    </svg>
-                    {{-- Active filter count badge --}}
-                    <span id="hero-filters-badge"
-                          class="absolute -top-1 -end-1 min-w-[18px] h-[18px] items-center justify-center text-xs bg-[var(--brand-button-bg)] text-white rounded-full px-1 hidden"></span>
-                </button>
-                @endif
-
-                {{-- Calendar/List View Toggle (desktop only) --}}
-                @if(!$event)
-                <div class="hidden md:flex items-center rounded-md shadow-sm flex-shrink-0">
-                    <button id="toggle-list-btn"
-                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-11 h-11 flex items-center justify-center rounded-s-md border-2 transition-all duration-200 {{ $role->activeEventLayout() !== 'list' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
-                            style="border-color: {{ $accentColor }}; {{ $role->activeEventLayout() !== 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
-                        </svg>
-                    </button>
-                    <button id="toggle-calendar-btn"
-                            data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-11 h-11 flex items-center justify-center rounded-e-md border-2 border-s-0 transition-all duration-200 {{ $role->activeEventLayout() !== 'calendar' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
-                            style="border-color: {{ $accentColor }}; {{ $role->activeEventLayout() !== 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
-                        </svg>
-                    </button>
-                </div>
-                @endif
-              </div>
-
-              {{-- Description below (full width) --}}
-              @if($role->translatedDescription())
-              @php
-                $descDirDesktop = content_dir($role, false, $role->translatedDescription());
-              @endphp
-              <div x-data="{ expanded: false, long: false }"
-                   x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
-                   dir="{{ $descDirDesktop }}"
-                   class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
-                {{-- Cut by lines, as in the phone body above.
-                     demoteH1(): the schedule's name above is the page's one <h1>. --}}
-                <div x-ref="content" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3">
-                  {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
-                </div>
-                <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
-                  {{ $role->customLabel('show_more') }}
-                </button>
-                <button x-show="long && expanded" x-cloak @click="expanded = false" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
-                  {{ $role->customLabel('show_less') }}
-                </button>
-              </div>
-              @endif
-            </div>
-            <!--
-            <div class="flex gap-3 justify-start flex-col sm:flex-row mb-6">
-              <div class="py-3 px-4 bg-white rounded-[32px] text-center">
-                <p class="text-sm font-semibold text-[var(--brand-blue)]">
-                  Personal coach
-                </p>
-              </div>
-              <div class="py-3 px-4 bg-white rounded-[32px] text-center">
-                <p class="text-sm font-semibold text-[var(--brand-blue)]">
-                  Yoga trainer
-                </p>
-              </div>
-              <div class="py-3 px-4 bg-white rounded-[32px] text-center">
-                <p class="text-sm font-semibold text-[var(--brand-blue)]">
-                  Fitness trainer
-                </p>
+                @include('role.partials.headers.tools')
               </div>
             </div>
-            -->
 
+            @if ($role->translatedDescription())
+            {{-- Cut by LINES, by the browser, and only when it overflows: the clamp is the
+                 stylesheet's, so the full text never flashes, and the button under it is shown
+                 by the script below only where there is more to read. demoteH1(): the
+                 schedule's name above is the page's one <h1>. --}}
+            <div class="gk-head-about" dir="{{ content_dir($role, false, $role->translatedDescription()) }}" data-head-about>
+              <div class="gk-head-about-text custom-content">
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($role->translatedDescription())) !!}
+              </div>
+              <button type="button" class="gk-head-more" hidden aria-expanded="false" data-more="{{ $role->customLabel('show_more') }}" data-less="{{ $role->customLabel('show_less') }}">
+                <span>{{ $role->customLabel('show_more') }}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
+            @endif
+
+            @if ($headRest || $headActions['manage'])
+            <div class="gk-head-more-actions{{ $headRest ? '' : ' gk-head-more-actions-phone' }}">
+              @include('role.partials.headers.action-buttons', ['actionPart' => 'rest'])
+            </div>
+            @endif
+            </div></div>
           </header>
         </div>
+        <script {!! nonce_attr() !!}>
+        (function () {
+            var head = document.getElementById('gp-header');
+            if (! head) return;
+
+            // More, where the folded description is cut or leaves something out.
+            var about = head.querySelector('[data-head-about]');
+            if (about) {
+                var text = about.querySelector('.gk-head-about-text');
+                var more = about.querySelector('.gk-head-more');
+                var measure = function () {
+                    if (about.hasAttribute('data-open')) return;
+                    more.hidden = ! (text.scrollHeight > text.clientHeight + 2 || text.querySelector('h2, h3, h4, h5, h6, hr, img, table, pre'));
+                };
+                measure();
+                // The owner's typeface arrives after the first paint and can change where the cut falls.
+                if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measure); }
+                window.addEventListener('resize', measure);
+                more.addEventListener('click', function () {
+                    var open = about.toggleAttribute('data-open');
+                    more.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    more.querySelector('span').textContent = open ? more.dataset.less : more.dataset.more;
+                });
+            }
+
+            // Share: the phone's own sheet where there is one, a copied link elsewhere.
+            var share = head.querySelector('[data-head-share]');
+            if (share) {
+                var said = share.querySelector('.gk-head-said');
+                var timer = null;
+                share.addEventListener('click', function () {
+                    var url = window.location.href.split('#')[0];
+                    if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
+                        navigator.share({ title: document.title, url: url }).catch(function () {});
+                        return;
+                    }
+                    var done = function () {
+                        said.textContent = share.dataset.said;
+                        clearTimeout(timer);
+                        timer = setTimeout(function () { said.textContent = ''; }, 1800);
+                    };
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(url).then(done).catch(function () {});
+                    }
+                });
+            }
+        })();
+        </script>

@@ -1266,6 +1266,7 @@ return [
     'copied' => 'Kopeeritud!',
     'copy_failed' => 'Lõikelauale kopeerimine ebaõnnestus',
     'share' => 'Jaga',
+    'back_to_top' => 'Tagasi üles',
     'shared' => 'Jagatud!',
     'share_failed' => 'Jagamine ebaõnnestus',
     'generating_graphic' => 'Graafika genereerimine',
@@ -1292,6 +1293,7 @@ return [
     'create_schedule_first' => 'Infolehtede saatmiseks loo esmalt ajakava.',
 
     'upcoming_events' => 'Eelseisvad sündmused',
+    'upcoming_events_count' => '{1} :count eelseisev sündmus|[0,*] :count eelseisvat sündmust',
     'tonight' => 'Täna õhtul',
     'permission_denied' => 'Luba ei antud',
     'create_account_link' => ':link oma profiili haldamiseks ja sündmuste redigeerimiseks',

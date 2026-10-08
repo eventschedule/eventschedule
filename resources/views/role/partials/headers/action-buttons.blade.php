@@ -1,85 +1,64 @@
 {{--
-    Shared Submit / Follow / Manage action cluster for the compact header.
-    Expects: $role, $accentColor, $contrastColor, and optional $onDark (dark bar vs light card).
+    The header's buttons, drawn in one place for both header styles and the slim bar.
+
+    Expects $role and $headActions (App\Utils\GuestHeader::actions(), worked out once by the
+    header that includes this). $actionPart picks what is drawn:
+      'main'  the one main button and, for a member, Manage (the banner, beside the logo)
+      'rest'  whatever else a visitor may do (the banner's second row). On a phone Manage is
+              here and not beside the logo, where three buttons do not fit: it is drawn in both
+              places and the stylesheet shows one.
+      'all'   everything in one row (the compact bar)
+      'bar'   the main button alone, small (the slim bar that follows the banner down the page)
+
+    One button is in the schedule's colour: Book a time where there is one, Follow otherwise.
+    The forward action comes last. Follow stays a <button> (it opens a dialog, and
+    GuestHeaderFollowTriggerTest counts it); the others are links.
 --}}
 @php
-    $onDark = $onDark ?? false;
-    $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
-    // Whether to offer the Follow / subscribe trigger.
-    //
-    // This used to be inlined at both call sites as a pair of branches that made the
-    // trigger depend on $hasSubmitButton, and the effect for a SIGNED-OUT visitor was
-    // that a schedule accepting event requests showed Submit INSTEAD of Follow. That
-    // was invisible while every schedule made through the UI had accept_requests
-    // false - the create form's toggle painted off and posted a 0 over the column
-    // default - so flipping that default would have quietly removed the Follow button
-    // from every new schedule's public page. Follow is what mints subscriber accounts.
-    //
-    // Signed out: always offer it. Signed in: unchanged from before.
-    $showFollowTrigger = ! auth()->user()
-        || ($hasSubmitButton
-            ? (! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain))
-            : ! auth()->user()->isConnected($role->subdomain));
-    $bookable = $role->hasBookableAppointments();
-    $primaryBtnClass = 'inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 '
-        . ($onDark ? 'focus-visible:ring-white/70 focus-visible:ring-offset-[#16171b]' : 'focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900');
+    $actionPart = $actionPart ?? 'all';
+    $actionMain = $headActions['main'];
+    $actionShowsMain = in_array($actionPart, ['main', 'all'], true);
+    $actionShowsRest = in_array($actionPart, ['rest', 'all'], true);
+    $actionShowsLead = $actionShowsMain || $actionPart === 'bar';
+    $actionSize = $actionPart === 'bar' ? 'gk-btn-sm' : '';
+    // Follow is the main button unless Book a time is; then it joins the rest.
+    $actionFollowHere = $headActions['follow']
+        && (($actionMain === 'follow' && $actionShowsLead) || ($actionMain !== 'follow' && $actionShowsRest));
 @endphp
-@if ($bookable)
-<a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
-    <button type="button"
-        style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-        class="{{ $primaryBtnClass }}">
-        {{ $role->customLabel('book_a_time') }}
-    </button>
+@if ($headActions['manage'] && $actionPart !== 'bar')
+<a href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}" class="gk-btn {{ $actionPart === 'rest' ? 'gk-btn-secondary gk-head-manage-phone' : 'gk-btn-quiet gk-head-manage'.($actionPart === 'main' ? ' gk-head-manage-desk' : '') }}">
+    <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+    <span>{{ __('messages.manage') }}</span>
 </a>
 @endif
-@if ($hasSubmitButton)
-<a href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
-    <button type="button"
-        @if ($bookable)
-        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
-        class="{{ $primaryBtnClass }} {{ $onDark ? 'bg-transparent' : 'bg-white dark:bg-transparent' }}"
-        @else
-        style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-        class="{{ $primaryBtnClass }}"
-        @endif>
-        {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
-    </button>
-</a>
+@if ($actionShowsRest && $headActions['gift'])
+<a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-secondary">{{ __('messages.gift_cards') }}</a>
 @endif
-@if ($role->canSellGiftCards())
-<a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
-    <button type="button"
-        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
-        class="{{ $primaryBtnClass }} {{ $onDark ? 'bg-transparent' : 'bg-white dark:bg-transparent' }}">
-        {{ __('messages.gift_cards') }}
-    </button>
-</a>
+@if ($actionShowsRest && $headActions['submit'])
+<a href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-secondary">{{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}</a>
 @endif
-@if (config('app.hosted') || config('app.is_testing'))
-    @if (! is_demo_mode() && $showFollowTrigger)
-    <button type="button"
-        data-follow-trigger
-        data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
-        data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $role->subdomain]) }}"
-        data-subscribe-label="{{ $role->customLabel('email_me_new_events') }}"
-        data-account-note="{{ $role->willCreateAccountOnConfirm() ? '1' : '' }}"
-        data-schedule-name="{{ $role->name }}"
-        data-schedule-image="{{ $role->profile_image_url }}"
-        data-accent-color="{{ $accentColor }}"
-        data-contrast-color="{{ $contrastColor }}"
-        style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-        class="{{ $primaryBtnClass }} flex-shrink-0">
-        {{ $role->customLabel('follow') }}
-    </button>
-    @endif
-    @if (auth()->user() && auth()->user()->isMember($role->subdomain))
-    <a href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}" class="inline-flex items-center justify-center flex-shrink-0">
-        <button type="button"
-            style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-            class="{{ $primaryBtnClass }}">
-            {{ __('messages.manage') }}
-        </button>
-    </a>
-    @endif
+@if ($actionFollowHere)
+<button type="button"
+    data-follow-trigger
+    data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
+    data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $role->subdomain]) }}"
+    data-subscribe-label="{{ $role->customLabel('email_me_new_events') }}"
+    data-account-note="{{ $role->willCreateAccountOnConfirm() ? '1' : '' }}"
+    data-schedule-name="{{ $role->name }}"
+    data-schedule-image="{{ $role->profile_image_url }}"
+    data-accent-color="{{ $accentColor }}"
+    data-contrast-color="{{ $contrastColor }}"
+    class="gk-btn {{ $actionMain === 'follow' ? 'gk-btn-primary' : 'gk-btn-secondary' }} {{ $actionSize }} gk-head-follow">
+    <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1112 0c0 7 3 8 3 8H3s3-1 3-8z"/><path d="M10.3 20a1.95 1.95 0 003.4 0"/></svg>
+    <span>{{ $role->customLabel('follow') }}</span>
+</button>
+@endif
+@if ($actionPart === 'all' && $headActions['following'])
+<span class="gk-head-following">
+    <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    {{ __('messages.following') }}
+</span>
+@endif
+@if ($actionShowsLead && $headActions['book'])
+<a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-primary {{ $actionSize }}">{{ $role->customLabel('book_a_time') }}</a>
 @endif
