@@ -4639,6 +4639,29 @@ class Event extends Model
         return $this->short_description_en ?: $this->short_description;
     }
 
+    /**
+     * When the event ends, in UTC and in the format of starts_at: the start plus its length, to
+     * the minute. Null when the event has no start or no length.
+     *
+     * To the minute because events.duration keeps hours to three decimals: 1h20 is stored as
+     * 1.333, and the plain sum reads 19:59:58 for an event that ends at 20:00. No event in this
+     * app is timed finer than a minute, and 0.001 hours is 3.6 seconds, so a minute-aligned end
+     * always comes back as the minute it was.
+     *
+     * Elapsed time, not wall-clock: an event that runs across a clock change is an hour shorter
+     * or longer in local terms, exactly as its end is displayed everywhere else.
+     */
+    public function endsAtUtc(): ?string
+    {
+        $minutes = (int) round(((float) $this->duration) * 60);
+
+        if (! $this->starts_at || $minutes < 1) {
+            return null;
+        }
+
+        return Carbon::parse($this->starts_at, 'UTC')->addMinutes($minutes)->format('Y-m-d H:i:s');
+    }
+
     public function toApiData()
     {
         $data = new \stdClass;
@@ -4654,6 +4677,8 @@ class Event extends Model
         $data->description = $this->description;
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
+        // Derived, never stored: the same fact as duration, for a client that thinks in end times.
+        $data->ends_at = $this->endsAtUtc();
         $data->category_id = $this->category_id;
         $data->category_name = $this->resolveCategoryName();
         $data->category_color = $this->resolveCategoryColor();

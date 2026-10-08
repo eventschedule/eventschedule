@@ -1048,7 +1048,8 @@ Create a new event under a schedule.
 | starts_at | string | Yes | Start date/time in UTC (Y-m-d H:i:s format) |
 | external_id | string | No | The id your own system knows this event by (text or a number, max 255 chars). Unique for the schedule that owns the event and compared exactly, so `aB3` and `Ab3` are two ids. An id the schedule already has an event for returns `409` with that event's `id` under `data`, and nothing is created, unless `upsert` is true |
 | upsert | boolean | No | With `external_id`: `true` updates the event that already has the id instead of answering `409`. The first call creates (201, `meta.created` true), later calls update (200, `meta.created` false). The update follows the rules of PUT /events/{id}: nothing is required, a field not sent keeps its stored value, a new event's defaults are not applied again (an event made a draft by hand stays a draft), and it is not counted against the daily cap. Send `tickets`, `addons` or `event_parts` only to change them, each existing row with its `id`. Without an `external_id` it is a `422` |
-| duration | number | No | Duration in hours (0 to 24) |
+| duration | number | No | Duration in hours (0 to 8760, decimals allowed) |
+| ends_at | string | No | The end in UTC (Y-m-d H:i:s format). Another way to give the length: send it instead of `duration`, and the length is the time between the two moments. Must be after the start and at most 8760 hours after it. If both are sent and disagree, the one that differs from the stored value wins on an update, and it is a `422` when both were changed or the event is new. `null` changes nothing |
 | description | string | No | Full description, supports markdown (max 10000 chars) |
 | short_description | string | No | Brief description (max 500 chars) |
 | event_url | string | No | External URL for the event (max 255 chars) |
@@ -1642,6 +1643,7 @@ Fan comments, photos and videos submitted on events for schedules you own or adm
 | description | string | Yes | Full description (may contain markdown) |
 | starts_at | datetime | No | Start date/time in UTC (Y-m-d H:i:s) |
 | duration | number | Yes | Duration in hours |
+| ends_at | datetime | Yes | End date/time in UTC (Y-m-d H:i:s): the start plus the duration, to the minute. Null when the event has no length. For a recurring event, the end of the first date |
 | category_id | integer | Yes | Category ID |
 | event_url | string | Yes | External URL |
 | registration_url | string | Yes | External registration URL |

@@ -13,6 +13,7 @@ use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Services\EventLifecycleService;
 use App\Utils\GeminiUtils;
+use App\Utils\ImportedTime;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -256,6 +257,7 @@ class ApiEventController extends Controller
                 'name' => 'required|string|max:255',
                 'starts_at' => 'required|date_format:Y-m-d H:i:s',
                 'duration' => 'nullable|numeric|min:0|max:8760',
+                'ends_at' => 'nullable|date_format:Y-m-d H:i:s',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:500',
                 // 500, matching the column - see Event::CLAMPED_COLUMNS. A 400-character Teams
@@ -313,6 +315,10 @@ class ApiEventController extends Controller
         }
 
         if ($refusal = $this->refuseCancelledInBody($request, false)) {
+            return $refusal;
+        }
+
+        if ($refusal = $this->takeEndsAt($request, null)) {
             return $refusal;
         }
 
@@ -520,6 +526,7 @@ class ApiEventController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
                 'duration' => 'nullable|numeric|min:0|max:8760',
+                'ends_at' => 'nullable|date_format:Y-m-d H:i:s',
                 'description' => 'nullable|string|max:10000',
                 'short_description' => 'nullable|string|max:500',
                 // 500, matching the column - see Event::CLAMPED_COLUMNS. A 400-character Teams
@@ -612,6 +619,10 @@ class ApiEventController extends Controller
         }
 
         if ($refusal = $this->takeExternalId($request, $event)) {
+            return $refusal;
+        }
+
+        if ($refusal = $this->takeEndsAt($request, $event)) {
             return $refusal;
         }
 
@@ -1129,6 +1140,74 @@ class ApiEventController extends Controller
         }
 
         $event->external_id = $externalId;
+
+        return null;
+    }
+
+    /**
+     * `ends_at` is a second way to say how long an event is. An event stores a start and a
+     * length, so the request leaves here with a `duration` and the save never sees `ends_at`.
+     *
+     * Both are UTC here, which is why this runs before the start is turned into the schedule's
+     * wall-clock for saveEvent(): the length is the time that passes, and an event that runs
+     * across a clock change must not gain or lose the hour.
+     *
+     * The event object carries both, so a client that reads an event and writes it back sends
+     * both, and after it changed one of them they disagree. That is not an error: the one that
+     * differs from what is stored is the one the caller changed. When neither differs (the
+     * caller moved the start and sent the rest back) the length is kept, as it is for a start
+     * moved on its own. Only when both were changed and say different things is there nothing
+     * to choose between, and on a new event nothing is stored to compare with.
+     *
+     * A null `ends_at` says nothing: it is what an event with no length reads as. To take the
+     * length off an event, send `duration` as null or 0.
+     */
+    private function takeEndsAt(Request $request, ?Event $event)
+    {
+        if (! $request->filled('ends_at')) {
+            return null;
+        }
+
+        $refuse = fn (string $message) => response()->json([
+            'error' => 'Validation failed',
+            'errors' => ['ends_at' => [$message]],
+        ], 422);
+
+        $startsAt = $request->filled('starts_at') ? $request->input('starts_at') : $event?->starts_at;
+
+        if (! $startsAt) {
+            return $refuse('An end time needs a start. Send starts_at as well.');
+        }
+
+        $end = Carbon::createFromFormat('Y-m-d H:i:s', $request->input('ends_at'), 'UTC');
+        $hours = ImportedTime::hoursBetween(Carbon::parse($startsAt, 'UTC'), $end);
+
+        if ($hours === null) {
+            return $refuse('The ends_at must be after starts_at.');
+        }
+
+        if ($hours > 8760) {
+            return $refuse('An event can be at most 8760 hours long.');
+        }
+
+        if ($request->filled('duration')) {
+            $duration = round((float) $request->input('duration'), 3);
+
+            if (abs($duration - $hours) >= 0.0005) {
+                $durationChanged = ! $event || abs(round((float) $event->duration, 3) - $duration) >= 0.0005;
+                $endChanged = ! $event || $event->endsAtUtc() !== $end->format('Y-m-d H:i:s');
+
+                if ($durationChanged && $endChanged) {
+                    return $refuse('The ends_at and duration disagree: '.$request->input('ends_at').' is '.$hours.' hours after the start. Send one of them.');
+                }
+
+                if (! $endChanged) {
+                    return null;
+                }
+            }
+        }
+
+        $request->merge(['duration' => $hours]);
 
         return null;
     }

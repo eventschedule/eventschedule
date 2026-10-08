@@ -2840,6 +2840,12 @@
             "nullable": true,
             "description": "Event duration in hours"
           },
+          "ends_at": {
+            "type": "string",
+            "nullable": true,
+            "example": "2026-05-09 19:30:00",
+            "description": "End date and time in UTC (Y-m-d H:i:s): the start plus the duration, to the minute. Null when the event has no length. For a recurring event, the end of the first date"
+          },
           "category_id": {
             "type": "integer",
             "nullable": true,
@@ -3082,6 +3088,12 @@
             "minimum": 0,
             "maximum": 24,
             "description": "Event duration in hours"
+          },
+          "ends_at": {
+            "type": "string",
+            "nullable": true,
+            "example": "2026-05-09 19:30:00",
+            "description": "End date and time in UTC (Y-m-d H:i:s). Another way to give the length: send it instead of duration. Must be after the start and at most 8760 hours after it. Sent together with a duration that disagrees, the one that differs from the stored value wins on an update; a 422 when both were changed or the event is new. Null changes nothing"
           },
           "description": {
             "type": "string",
