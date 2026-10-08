@@ -1230,9 +1230,9 @@
           </div>
           <div class="flex flex-col">
             <span class="text-lg font-semibold text-gray-900 dark:text-white" data-ticket-price>
-              @if ($ticketPrice['free'])
+              @if ($ticketPrice['says'] === 'free')
                 {{ $role->customLabel('free_entry') }}
-              @elseif ($ticketPrice['from'])
+              @elseif ($ticketPrice['says'] === 'from')
                 {{ __('messages.price_from', ['price' => \App\Utils\MoneyUtils::format($ticketPrice['min'], $ticketPrice['currency'])]) }}
               @else
                 {{ \App\Utils\MoneyUtils::format($ticketPrice['min'], $ticketPrice['currency']) }}

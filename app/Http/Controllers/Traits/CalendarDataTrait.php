@@ -73,6 +73,11 @@ trait CalendarDataTrait
             ...$imageFields,
             // What a card or a row may say about tickets (Event::cardTicketFields()): empty for a locked event.
             ...$event->cardTicketFields(),
+            // The event's own clock, always. cardTicketFields() names it only where tickets are
+            // on sale, and "Now", "over today" and the zone a card prints are asked of every
+            // event: without it they fell back to the page's clock, which is the viewer's on the
+            // dashboard and the curator's on a curator's page.
+            'zone' => $event->scheduleTimezone(),
             'can_edit' => $canEdit,
             'edit_url' => $canEdit
                 ? ($role ? app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)], false)) : app_url(route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)], false)))

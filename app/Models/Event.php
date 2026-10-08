@@ -3048,11 +3048,14 @@ class Event extends Model
      *
      *  - free: every such row costs nothing.
      *  - min / from: the lowest price, and whether there is a higher one.
+     *  - says: how the line is worded (priceWording()): 'free', 'from' or 'price'. A free
+     *          type beside paid ones is 'free' here while `free` stays false, because there
+     *          is still something to pay for.
      *  - low:  tickets can be bought and few are left: a tenth of the house or fewer, and never
      *          more than ten. Only where the house has a size (not unlimited, not a seat map).
      *          Never a number: the page says "Few left", not how many.
      *
-     * @return array{free: bool, min: float, from: bool, currency: ?string, low: bool}|null
+     * @return array{free: bool, min: float, from: bool, says: string, currency: ?string, low: bool}|null
      */
     public function ticketPriceSummary($date = null): ?array
     {
@@ -3085,11 +3088,27 @@ class Event extends Model
             'free' => $prices->max() <= 0,
             'min' => $prices->min(),
             'from' => $prices->min() < $prices->max(),
+            'says' => self::priceWording($prices->min(), $prices->max()),
             'currency' => $this->ticket_currency_code,
             // "Few left" is about what has gone: a room of two with nothing sold is not running out.
             'low' => $left !== null && $left > 0 && $left < $capacity && $this->ticketSaleState($date) === 'open'
                 && $left <= min(10, max(2, (int) floor($capacity * 0.1))),
         ];
+    }
+
+    /**
+     * How a set of ticket prices is worded in one line: 'free' where the cheapest way in costs
+     * nothing, 'from' where prices differ, 'price' where there is one.
+     *
+     * One rule for the three places that say it: a card or a row of the list and the month
+     * (cardTicketFields()), the event page's price line (event/show-guest) and a newsletter's
+     * event row (NewsletterService::eventRow()). Each used to read "the lowest price, and
+     * whether there is a higher one" for itself, and a free type beside paid ones (free entry,
+     * a paid table) came out as "From $0" in all three.
+     */
+    public static function priceWording(float $min, float $max): string
+    {
+        return $min <= 0 ? 'free' : ($min < $max ? 'from' : 'price');
     }
 
     /**
@@ -3486,9 +3505,15 @@ class Event extends Model
         }
 
         $prices = $priced->map(fn ($ticket) => (float) $ticket->price);
-        $free = $prices->max() <= 0;
+        // priceWording(): the event page's price line and a newsletter's row ask the same rule.
+        $says = self::priceWording($prices->min(), $prices->max());
+        $free = $says === 'free';
         $lowest = \App\Utils\MoneyUtils::format($prices->min(), $this->ticket_currency_code);
-        $from = $free ? null : ($prices->min() < $prices->max() ? __('messages.price_from', ['price' => $lowest]) : $lowest);
+        $from = match ($says) {
+            'free' => null,
+            'from' => __('messages.price_from', ['price' => $lowest]),
+            default => $lowest,
+        };
 
         $soldOut = [];
         $low = [];

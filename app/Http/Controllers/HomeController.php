@@ -1005,12 +1005,16 @@ class HomeController extends Controller
 
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
 
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        // From the grid's first day, not the 1st: the month's first week shows the last days
+        // of the month before, and they were always empty here while a schedule's own month
+        // (RoleController::adminCalendarEvents()) showed the same events on them.
+        $startOfGridUtc = $startOfMonth->copy()->startOfWeek(0)->setTimezone('UTC');
         $endOfGridUtc = $startOfMonth->copy()->endOfMonth()->endOfWeek(6)->addDays(2)->setTimezone('UTC');
 
         $roleIds = $user->editor()->pluck('roles.id');
 
-        $events = Event::with('roles', 'parts', 'tickets')
+        // creatorRole: every row is placed and timed on its own schedule's clock.
+        $events = Event::with('roles', 'parts', 'tickets', 'creatorRole')
             ->where(function ($query) use ($roleIds, $user) {
                 $query->where(function ($query) use ($roleIds) {
                     $query->whereIn('id', function ($query) use ($roleIds) {
@@ -1023,7 +1027,7 @@ class HomeController extends Controller
                     $query->where('user_id', $user->id);
                 });
             })
-            ->inMonth($startOfMonthUtc, $endOfGridUtc)
+            ->inMonth($startOfGridUtc, $endOfGridUtc)
             ->orderBy('starts_at')
             ->get();
 

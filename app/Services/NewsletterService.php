@@ -836,8 +836,9 @@ class NewsletterService
             'price' => match (true) {
                 $state === 'sold_out' => __('messages.sold_out'),
                 ! $summary => null,
-                $summary['free'] => __('messages.free'),
-                $summary['from'] => __('messages.price_from', ['price' => MoneyUtils::format($summary['min'], $summary['currency'])]),
+                // Event::priceWording(): a free type beside paid ones is Free, never "From $0".
+                $summary['says'] === 'free' => __('messages.free'),
+                $summary['says'] === 'from' => __('messages.price_from', ['price' => MoneyUtils::format($summary['min'], $summary['currency'])]),
                 default => MoneyUtils::format($summary['min'], $summary['currency']),
             },
             'soldOut' => $state === 'sold_out',
