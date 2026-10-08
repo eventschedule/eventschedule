@@ -2705,9 +2705,19 @@ class Role extends Model implements MustVerifyEmail
     public const BUILT_IN_HEADER_SIZE = [1536, 768];
 
     /**
+     * The header_image values that name no picture: 'none'; 'gradient', a wash of the accent
+     * colour across the top of the banner header (the owner's choice, drawn by the stylesheet);
+     * and 'logos', the logo wall. Any other value names a built-in header, a file under
+     * public/images/headers, and a blank one means the owner's own upload. Every place that
+     * turns header_image into a file's address asks this list first: a new value that is missing
+     * from it is requested as a picture that does not exist.
+     */
+    public const HEADER_IMAGE_KEYWORDS = ['none', 'gradient', 'logos'];
+
+    /**
      * The URL of the header this schedule shows, or null when it shows none.
      *
-     * Mirrors role/partials/headers/banner.blade.php: 'none' and 'logos' (the logo wall) are no
+     * Mirrors role/partials/headers/banner.blade.php: the values in HEADER_IMAGE_KEYWORDS are no
      * image; any other header_image names a built-in header, served as its bundled WebP; a blank
      * header_image with an upload in header_image_url is the owner's own header, which the edit
      * form's "custom" option saves.
@@ -2724,7 +2734,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $builtIn = $this->header_image;
 
-        if (in_array($builtIn, ['none', 'logos'], true)) {
+        if (in_array($builtIn, self::HEADER_IMAGE_KEYWORDS, true)) {
             return null;
         }
 

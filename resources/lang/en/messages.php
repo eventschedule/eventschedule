@@ -4732,6 +4732,7 @@ return [
     'header_image_banner_only' => 'Applies to the Banner header style only.',
     'talents' => 'Talents',
     'header_image_logos_venue' => 'Venue logo wall',
+    'header_image_gradient' => 'Accent color gradient',
     'header_image_logos_talent' => 'Talent logo wall',
     'header_image_logos_help' => 'Shows the logos of the venues hosting your approved events. Each logo links to the venue\'s schedule page.',
     'header_image_logos_help_venue' => 'Shows the logos of the talents performing at your approved events. Each logo links to the talent\'s schedule page.',

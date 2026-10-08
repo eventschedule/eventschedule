@@ -4279,6 +4279,7 @@ return [
     'header_image_banner_only' => 'Aplica-se apenas ao estilo de cabeçalho Banner.',
     'talents' => 'Talentos',
     'header_image_logos_venue' => 'Mural de logotipos dos locais',
+    'header_image_gradient' => 'Gradiente na cor de destaque',
     'header_image_logos_talent' => 'Mural de logotipos dos talentos',
     'header_image_logos_help' => 'Mostra os logotipos dos locais que recebem os seus eventos aprovados. Cada logotipo leva à página de calendário do local.',
     'header_image_logos_help_venue' => 'Mostra os logotipos dos talentos que se apresentam nos seus eventos aprovados. Cada logotipo leva à página de calendário deles.',

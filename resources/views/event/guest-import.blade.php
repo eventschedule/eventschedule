@@ -2,7 +2,7 @@
 <x-app-guest-layout :role="$role" :showMobileBackground="true" :page-title="__('messages.import_events')" :no-index="true">
 
 @php
-  $hasHeaderImage = ($role->header_image && ! in_array($role->header_image, ['none', 'logos'], true)) || $role->header_image_url;
+  $hasHeaderImage = ($role->header_image && ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true)) || $role->header_image_url;
 @endphp
 
   @if ($role->profile_image_url && !$hasHeaderImage && $role->language_code == 'en')
@@ -17,7 +17,7 @@
             class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0"
           >
             
-            @if ($role->header_image && ! in_array($role->header_image, ['none', 'logos'], true))
+            @if ($role->header_image && ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true))
             <picture>
               <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
               <img

@@ -4283,6 +4283,7 @@ return [
     'header_image_banner_only' => 'S\'applique uniquement au style d\'en-tête Bannière.',
     'talents' => 'Intervenants',
     'header_image_logos_venue' => 'Mur de logos des lieux',
+    'header_image_gradient' => 'Dégradé de la couleur d\'accentuation',
     'header_image_logos_talent' => 'Mur de logos des intervenants',
     'header_image_logos_help' => 'Affiche les logos des lieux qui accueillent vos événements approuvés. Chaque logo renvoie à la page du planning du lieu.',
     'header_image_logos_help_venue' => 'Affiche les logos des intervenants de vos événements approuvés. Chaque logo renvoie à la page de leur planning.',

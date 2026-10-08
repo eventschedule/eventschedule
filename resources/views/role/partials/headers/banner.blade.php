@@ -2,7 +2,8 @@
     The banner header: a card on the owner's page, drawn once for every width (it used to be two
     hand-copied bodies, one for a phone and one for a laptop).
 
-    Top to bottom: the schedule's picture, or a wash of its colour where it has none; the logo
+    Top to bottom: the schedule's picture, or a wash of its colour where the owner chose that
+    over a picture (Header Image: Accent color gradient), or nothing; the logo
     with the one main button and Share beside it; the name; a line of facts with the socials and
     the list's tools at its far end; the description folded to its first lines; and a second
     row for whatever else a visitor may do. The look is partials/guest-kit-styles (.gk-head*).
@@ -22,6 +23,8 @@
 
     $headWall = $role->header_image === 'logos' && ($logoWallRoles ?? collect())->isNotEmpty();
     $headPicture = $hasHeaderImage && ! $headWall;
+    // The wash of the accent is the owner's choice, like a picture: "None" is a plain card.
+    $headWash = $role->header_image === 'gradient';
     $headName = $role->translatedName();
     // A venue's place is its address, as before. An act or a curator says where it is based.
     $headPlace = trim((string) ($role->isVenue() ? $role->shortAddress() : $role->translatedCity()));
@@ -32,7 +35,7 @@
     $headRest = $headActions['gift'] || $headActions['submit'] || ($headActions['follow'] && $headActions['main'] !== 'follow');
 @endphp
         <div id="gp-header"
-          class="gk-head {{ $headPicture ? 'gk-head-pictured' : '' }} {{ $headWall ? 'gk-head-walled' : '' }} {{ $role->profile_image_url ? 'gk-head-logoed' : '' }} mb-0 transition-[max-width] duration-300 ease-in-out mx-auto"
+          class="gk-head {{ $headPicture ? 'gk-head-pictured' : '' }} {{ $headWall ? 'gk-head-walled' : '' }} {{ $headWash ? 'gk-head-washed' : '' }} {{ $role->profile_image_url ? 'gk-head-logoed' : '' }} mb-0 transition-[max-width] duration-300 ease-in-out mx-auto"
           data-view-width
           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
         >

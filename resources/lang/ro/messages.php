@@ -4298,6 +4298,7 @@ return [
     'header_image_banner_only' => 'Se aplică doar stilului de antet Banner.',
     'talents' => 'Talente',
     'header_image_logos_venue' => 'Perete cu logourile locațiilor',
+    'header_image_gradient' => 'Gradient în culoarea de accent',
     'header_image_logos_talent' => 'Perete cu logourile talentelor',
     'header_image_logos_help' => 'Afișează logourile locațiilor care găzduiesc evenimentele tale aprobate. Fiecare logo duce la pagina programului locației.',
     'header_image_logos_help_venue' => 'Afișează logourile talentelor care apar în evenimentele tale aprobate. Fiecare logo duce la pagina programului lor.',

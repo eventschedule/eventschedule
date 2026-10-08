@@ -28,7 +28,7 @@
         : collect();
     $hasHeaderImage = $role->header_image === 'logos'
         ? $logoWallRoles->isNotEmpty()
-        : (($role->header_image && $role->header_image !== 'none') || ($role->header_image_url && $role->header_image !== 'none'));
+        : (! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true) && ($role->header_image || $role->header_image_url));
     // Which buttons the header offers this visitor, worked out once: the header, its second row
     // and the slim bar that follows it down the page all draw from it.
     $headActions = \App\Utils\GuestHeader::actions($role, auth()->user());

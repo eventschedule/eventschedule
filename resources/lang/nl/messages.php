@@ -4280,6 +4280,7 @@ return [
     'header_image_banner_only' => 'Geldt alleen voor de Banner-kopstijl.',
     'talents' => 'Talenten',
     'header_image_logos_venue' => 'Logomuur van locaties',
+    'header_image_gradient' => 'Gradiënt in accentkleur',
     'header_image_logos_talent' => 'Logomuur van talenten',
     'header_image_logos_help' => 'Toont de logo\'s van de locaties van uw goedgekeurde evenementen. Elk logo linkt naar de agendapagina van de locatie.',
     'header_image_logos_help_venue' => 'Toont de logo\'s van de talenten die op uw goedgekeurde evenementen optreden. Elk logo linkt naar hun agendapagina.',

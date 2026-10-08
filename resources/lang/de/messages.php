@@ -4278,6 +4278,7 @@ return [
     'header_image_banner_only' => 'Gilt nur für den Banner-Kopfzeilenstil.',
     'talents' => 'Talente',
     'header_image_logos_venue' => 'Logo-Wand der Veranstaltungsorte',
+    'header_image_gradient' => 'Verlauf in Akzentfarbe',
     'header_image_logos_talent' => 'Logo-Wand der Talente',
     'header_image_logos_help' => 'Zeigt die Logos der Veranstaltungsorte Ihrer genehmigten Veranstaltungen. Jedes Logo verlinkt auf die Zeitplan-Seite des jeweiligen Veranstaltungsorts.',
     'header_image_logos_help_venue' => 'Zeigt die Logos der Talente Ihrer genehmigten Veranstaltungen. Jedes Logo verlinkt auf deren Zeitplan-Seite.',

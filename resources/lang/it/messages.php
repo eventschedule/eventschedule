@@ -4277,6 +4277,7 @@ return [
     'header_image_banner_only' => 'Si applica solo allo stile di intestazione Banner.',
     'talents' => 'Talenti',
     'header_image_logos_venue' => 'Muro di loghi dei luoghi',
+    'header_image_gradient' => 'Gradiente nel colore di accento',
     'header_image_logos_talent' => 'Muro di loghi dei talenti',
     'header_image_logos_help' => 'Mostra i loghi dei luoghi che ospitano i tuoi eventi approvati. Ogni logo rimanda alla pagina del calendario del luogo.',
     'header_image_logos_help_venue' => 'Mostra i loghi dei talenti che si esibiscono nei tuoi eventi approvati. Ogni logo rimanda alla loro pagina del calendario.',

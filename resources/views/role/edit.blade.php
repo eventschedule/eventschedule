@@ -413,7 +413,7 @@
 
             $('#header_image').on('input', function() {
                 var headerImageUrl = $(this).find(':selected').val();
-                if (headerImageUrl && headerImageUrl !== 'none' && headerImageUrl !== 'logos') {
+                if (isBuiltInHeader(headerImageUrl)) {
                     // Preset header selected
                     headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
                     $('#header_image_preview').attr('src', headerImageUrl).show();
@@ -638,6 +638,14 @@
         // drag handler so the preview follows the drag order.
         var logoWallPreviewUrls = @json($logoWallRoles->take(12)->pluck('profile_image_url'));
 
+        // The Header Image choices that name no picture (Role::HEADER_IMAGE_KEYWORDS): anything
+        // else that is not blank is a built-in header, with a thumbnail of its own.
+        // A declaration with the list inside it, so it can be called from anywhere in this
+        // script, whatever has run by then.
+        function isBuiltInHeader(value) {
+            return !! value && @json(\App\Models\Role::HEADER_IMAGE_KEYWORDS).indexOf(value) === -1;
+        }
+
         function updatePreview() {
             var isDark = document.documentElement.classList.contains('dark');
             var background = $('input[name="background"]:checked').val();
@@ -671,7 +679,7 @@
             // Resolve header image URL
             var headerUrl = '';
             var isLogoWall = (headerImage === 'logos');
-            if (headerImage && headerImage !== 'none' && headerImage !== '' && !isLogoWall) {
+            if (isBuiltInHeader(headerImage)) {
                 headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
             } else if (headerImage === '') {
                 var customSrc = $('#header_image_url_preview').attr('src');
@@ -717,7 +725,10 @@
 
             // Build content HTML: the logo with Follow beside it, the name under them, as the
             // banner header draws them (role/partials/headers/banner).
-            var washHtml = hasHeaderArea ? '' : '<div style="position: absolute; inset: 0 0 auto; height: 70px; border-radius: 16px 16px 0 0; background: linear-gradient(to bottom, ' + accentColor + '66, ' + accentColor + '00); pointer-events: none;"></div>';
+            // The wash of the accent, where that is the Header Image choice. The page lifts a dark
+            // accent into a light before it washes with it (GuestTheme's glow), so this does too.
+            var washTint = 'color-mix(in srgb, ' + accentColor + ' 72%, #ffffff)';
+            var washHtml = headerImage !== 'gradient' ? '' : '<div style="position: absolute; inset: 0 0 auto; height: 70px; border-radius: 16px 16px 0 0; background: linear-gradient(to bottom, color-mix(in srgb, ' + washTint + ' 44%, transparent), transparent); pointer-events: none;"></div>';
             var contentHtml =
                 '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="position: relative; width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: ' + cardOverflow + '; ' + cardMarginTop + '">' +
                     washHtml +
@@ -988,7 +999,7 @@
 
             // Show/hide built-in header preview thumbnail
             if (headerPreview) {
-                if (headerValue && headerValue !== 'none' && headerValue !== '' && headerValue !== 'logos') {
+                if (isBuiltInHeader(headerValue)) {
                     headerPreview.src = "{{ asset('images/headers/thumbs') }}" + '/' + headerValue + '.jpg';
                     headerPreview.style.display = '';
                 } else {
@@ -2448,6 +2459,8 @@
                                         data-searchable data-action="header-image-input">
                                         <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
                                             {{ __('messages.none') }}</option>
+                                        <option value="gradient" {{ $effectiveHeaderImage == 'gradient' ? 'SELECTED' : '' }}>
+                                            {{ __('messages.header_image_gradient') }}</option>
                                         <option value="logos" {{ $effectiveHeaderImage == 'logos' ? 'SELECTED' : '' }}>
                                             {{ $role->isVenue() ? __('messages.header_image_logos_talent') : __('messages.header_image_logos_venue') }}</option>
                                         @foreach($headers as $header => $name)
@@ -2540,9 +2553,9 @@
                                 </div>
 
                                 <img id="header_image_preview"
-                                    src="{{ $role->header_image && ! in_array($role->header_image, ['none', 'logos'], true) ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
+                                    src="{{ $role->header_image && ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true) ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
                                     alt="Header Image Preview"
-                                    style="max-height:120px; {{ $effectiveHeaderImage && ! in_array($effectiveHeaderImage, ['none', 'logos'], true) ? '' : 'display:none;' }}"
+                                    style="max-height:120px; {{ $effectiveHeaderImage && ! in_array($effectiveHeaderImage, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true) ? '' : 'display:none;' }}"
                                     class="pt-3 cursor-pointer" data-lightbox-src />
 
                                 @if ($role->header_image_url)

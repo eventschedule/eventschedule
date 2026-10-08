@@ -4340,6 +4340,7 @@ return [
     'header_image_banner_only' => 'ينطبق على نمط ترويسة اللافتة فقط.',
     'talents' => 'المواهب',
     'header_image_logos_venue' => 'جدار شعارات الأماكن',
+    'header_image_gradient' => 'تدرج بلون التمييز',
     'header_image_logos_talent' => 'جدار شعارات المواهب',
     'header_image_logos_help' => 'يعرض شعارات الأماكن التي تستضيف أحداثك المعتمدة. كل شعار يرتبط بصفحة جدول المكان.',
     'header_image_logos_help_venue' => 'يعرض شعارات المواهب المشاركة في أحداثك المعتمدة. كل شعار يرتبط بصفحة الجدول الخاصة بهم.',

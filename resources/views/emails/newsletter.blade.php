@@ -16,7 +16,7 @@
 @php
     $nl = \App\Utils\NewsletterTheme::make($newsletter->template ?? 'modern', $style, ! empty($isRtl));
 
-    $hasBanner = $role?->header_image_url && ! in_array($role?->header_image, ['none', 'logos'], true);
+    $hasBanner = $role?->header_image_url && ! in_array($role?->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true);
     $blocks = array_values(array_filter($blocks, fn ($b) => match ($b['type'] ?? '') {
         'header_banner' => $hasBanner,
         'profile_image' => (bool) $role?->profile_image_url,

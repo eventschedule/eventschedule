@@ -307,11 +307,15 @@
             </svg>
             Header Image
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Header Image</strong> dropdown, under Header Style in the Header and layout row, creates the visual banner at the top of your schedule page. It offers four kinds of option, in this order:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Header Image</strong> dropdown, under Header Style in the Header and layout row, creates the visual banner at the top of your schedule page. It offers five kinds of option, in this order:</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">None</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">The default. A cleaner look with no header image, so your profile image and name take centre stage.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accent color gradient</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">No picture, but a soft wash of your <a href="#color-scheme" class="doc-link">accent color</a> across the top of the header, fading out behind your name.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue logo wall (or Talent logo wall)</h4>

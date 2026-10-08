@@ -300,17 +300,19 @@
     }
 
     {{-- The schedule's header (role/partials/headers/banner): a card on the owner's page. Its
-         picture across the top, or a wash of the schedule's colour where there is none; the
+         picture across the top, or a wash of the schedule's colour where the owner chose one; the
          logo; the name at display size in the owner's own typeface; one main button; a line of
          facts with the socials and the list's tools at its far end; the description folded to
          its first lines. States are told by a class on the card, read through :where() so
          every rule here still weighs one class and an owner's CSS wins a tie. --}}
     .gk-head { --gk-head-pad: 1.25rem; --gk-head-logo: 5.25rem; --gk-head-name: clamp(2rem, 1.15rem + 3.6vw, 3.25rem); position: relative; border-radius: 1.5rem; background: var(--gk-panel); color: var(--gk-ink); font-size: 1rem; line-height: 1.5; text-align: start; -webkit-backdrop-filter: blur(.625rem); backdrop-filter: blur(.625rem); box-shadow: 0 1px 2px rgb(15 23 42 / .08), 0 1.25rem 2.5rem -1.5rem rgb(15 23 42 / .45); }
     @media (min-width: 48rem) { .gk-head { --gk-head-pad: 2.5rem; --gk-head-logo: 6.5rem; } }
-    {{-- With no picture: one even light in the schedule's colour, deepest at the top edge and
-         gone behind the name. --es-glow is the accent as a light (three numbers), so this needs
-         no color-mix(), which an older browser drops with the whole declaration. --}}
-    .gk-head-stage { position: absolute; inset: 0 0 auto; height: 11rem; overflow: hidden; border-radius: 1.5rem 1.5rem 0 0; background: linear-gradient(to bottom, rgb(var(--es-glow) / .44), rgb(var(--es-glow) / .17) 38%, rgb(var(--es-glow) / 0)); pointer-events: none; }
+    .gk-head-stage { position: absolute; inset: 0 0 auto; height: 11rem; overflow: hidden; border-radius: 1.5rem 1.5rem 0 0; pointer-events: none; }
+    {{-- Where the owner chose it over a picture (Header Image: Accent color gradient): one even
+         light in the schedule's colour, deepest at the top edge and gone behind the name.
+         --es-glow is the accent as a light (three numbers), so this needs no color-mix(), which
+         an older browser drops with the whole declaration. --}}
+    :where(.gk-head-washed) .gk-head-stage { background: linear-gradient(to bottom, rgb(var(--es-glow) / .44), rgb(var(--es-glow) / .17) 38%, rgb(var(--es-glow) / 0)); }
     {{-- A picture is shown as it is: nothing is written on it, so nothing is laid over it. --}}
     :where(.gk-head-pictured) .gk-head-stage { position: relative; inset: auto; height: clamp(9.5rem, 31vw, 17rem); background: #111111; pointer-events: auto; }
     :where(.gk-head-walled) .gk-head-stage { position: relative; inset: auto; height: auto; overflow: visible; background: none; pointer-events: auto; }

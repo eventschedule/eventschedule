@@ -201,6 +201,58 @@ class GuestHeaderTest extends TestCase
         $this->assertStringNotContainsString('id="gp-header-bar"', $this->page($role, '?graphic=1'));
     }
 
+    /**
+     * The wash of the accent across the top of the card is a Header Image choice ("Accent color
+     * gradient"), stored as the header_image value 'gradient'. That column otherwise names a
+     * built-in picture, so every place that turns it into a file's address has to know the
+     * value is not one (Role::HEADER_IMAGE_KEYWORDS).
+     */
+    public function test_the_wash_of_the_accent_is_the_owners_choice_and_is_never_read_as_a_picture(): void
+    {
+        $owner = $this->createOwner();
+        $plain = $this->createRole($owner, 'venue');
+        $this->assertSame('none', $plain->header_image, 'fixture: a new schedule has no header image');
+        $this->assertStringNotContainsString('gk-head-washed', $this->header($this->page($plain)), '"None" is a plain card');
+
+        // With an upload still on file: choosing the gradient puts the picture away, as choosing
+        // None does.
+        $washed = $this->createRole($owner, 'venue', ['header_image' => 'gradient', 'header_image_url' => 'header_abc.png', 'accept_requests' => true]);
+        $html = $this->page($washed);
+        $header = $this->header($html);
+
+        $this->assertMatchesRegularExpression('~<div id="gp-header"\s+class="gk-head [^"]*gk-head-washed ~', $header);
+        $this->assertStringNotContainsString('gk-head-pictured', $header);
+        $this->assertStringNotContainsString('class="gk-head-picture"', $header);
+        $this->assertNull($washed->headerImageUrl());
+        // The stylesheet draws it only where the card says so.
+        $this->assertMatchesRegularExpression('~:where\(\.gk-head-washed\) \.gk-head-stage \{ background: linear-gradient~', $html);
+        $this->assertDoesNotMatchRegularExpression('~\n\s*\.gk-head-stage \{[^}]*background~', $html, 'a card that did not choose it has no wash');
+
+        // No page asks for a picture called "gradient": not the schedule's own, and not the two
+        // request forms, which draw the schedule's header picture above the form. Each form is
+        // opened with a built-in header first, to know the picture's address is there to be seen.
+        $this->assertStringNotContainsString('images/headers/gradient', $html);
+        // What each form needs to be drawn at all: the booking form its own switch and no
+        // account wall, the submit form the account wall.
+        $form = ['accept_requests' => true, 'require_approval' => true];
+        foreach ([
+            ['venue', 'event.booking_request', ['require_account' => false, 'event_request_form' => 'booking']],
+            ['curator', 'event.guest_submit', ['require_account' => true]],
+        ] as [$type, $route, $extra]) {
+            $pictured = $this->createRole($owner, $type, $form + $extra + ['header_image' => 'Arena']);
+            $this->assertStringContainsString('images/headers/Arena', $this->get(route($route, ['subdomain' => $pictured->subdomain]))->assertOk()->getContent(), $route.' draws a built-in header');
+
+            $gradient = $this->createRole($owner, $type, $form + $extra + ['header_image' => 'gradient']);
+            $this->assertStringNotContainsString('images/headers/gradient', $this->get(route($route, ['subdomain' => $gradient->subdomain]))->assertOk()->getContent(), $route);
+        }
+
+        // And the schedule form offers it, chosen, with no thumbnail of a picture beside it.
+        $edit = $this->actingAs($owner)->get('/'.$washed->subdomain.'/edit')->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('~<option value="gradient" SELECTED>\s*'.preg_quote(__('messages.header_image_gradient'), '~').'</option>~', $edit);
+        $this->assertStringNotContainsString('images/headers/gradient', $edit);
+        $this->assertStringContainsString('["none","gradient","logos"].indexOf(value) === -1', $edit, 'the form\'s script knows the value names no picture');
+    }
+
     public function test_the_name_is_text_whatever_it_holds_and_steps_down_when_long(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue', ['name' => '<b>Bold</b> & {{ 7*7 }}']);

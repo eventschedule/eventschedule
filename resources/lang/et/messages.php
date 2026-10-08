@@ -4279,6 +4279,7 @@ return [
     'header_image_banner_only' => 'Kehtib ainult Bänneri päisestiili puhul.',
     'talents' => 'Talendid',
     'header_image_logos_venue' => 'Toimumiskohtade logosein',
+    'header_image_gradient' => 'Aktsentvärvi gradient',
     'header_image_logos_talent' => 'Talentide logosein',
     'header_image_logos_help' => 'Kuvab teie heakskiidetud sündmuste toimumiskohtade logod. Iga logo viib toimumiskoha ajakava lehele.',
     'header_image_logos_help_venue' => 'Kuvab teie heakskiidetud sündmustel esinevate talentide logod. Iga logo viib nende ajakava lehele.',
