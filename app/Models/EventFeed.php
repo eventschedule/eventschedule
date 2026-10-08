@@ -123,6 +123,41 @@ class EventFeed extends Model
         return $this->hasMany(EventFeedItem::class);
     }
 
+    /**
+     * Whether a schedule's plan includes feeds: every selfhost install has them, as it has every
+     * Enterprise feature, and on the hosted service they are Enterprise.
+     */
+    public static function allowedFor(Role $role): bool
+    {
+        return ! config('app.hosted') || $role->isEnterprise();
+    }
+
+    /**
+     * Stop reading these feeds until somebody who runs the schedule now says to go on.
+     *
+     * A feed makes events as the schedule's owner, from an address somebody chose. When the
+     * schedule changes hands, or the member who added a feed leaves, nobody who is there now has
+     * chosen it. Paused rather than removed: its events stay, and one press resumes it.
+     *
+     * Whatever was asked to be published is dropped with it: a "Publish all" pressed by someone
+     * who has left must not fire later.
+     */
+    public static function pauseWhere(\Closure $which, string $reason): void
+    {
+        if (! self::tablesReady()) {
+            return;
+        }
+
+        $ids = self::query()->whereNull('paused_at')->where($which)->pluck('id');
+
+        if ($ids->isEmpty()) {
+            return;
+        }
+
+        self::whereIn('id', $ids)->update(['paused_at' => now(), 'pause_reason' => $reason]);
+        EventFeedItem::whereIn('event_feed_id', $ids)->whereNotNull('publish_requested_at')->update(['publish_requested_at' => null]);
+    }
+
     public function isPaused(): bool
     {
         return $this->paused_at !== null;

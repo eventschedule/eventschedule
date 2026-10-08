@@ -1404,6 +1404,8 @@ class ApiEventController extends Controller
         }
 
         // The audit row, its boosts stopped, the webhook with what the event was, then the row.
+        // Deleted on purpose: a feed that made it does not bring it back.
+        \App\Models\EventFeedItem::dismissFor($event);
         app(EventLifecycleService::class)->delete($event, auth()->id());
 
         return response()->json([

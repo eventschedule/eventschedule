@@ -58,6 +58,26 @@ class EventFeedItem extends Model
         return hash('sha256', $externalId);
     }
 
+    /**
+     * The owner is deleting this event on purpose (the admin portal's Delete, the API's DELETE).
+     * If a feed made it, that is a decision about the feed too: the event is not to come back
+     * on the next read. Called BEFORE the delete, which nulls event_id.
+     *
+     * Deliberately not part of deleting an event in general: an event that goes any other way
+     * (the import's Undo, a schedule being deleted, another account) was not decided about by
+     * anybody, and the next read brings it back as a draft for the owner to look at.
+     */
+    public static function dismissFor(Event $event): void
+    {
+        if (! $event->isFromFeed() || ! EventFeed::tablesReady()) {
+            return;
+        }
+
+        static::where('event_id', $event->id)
+            ->whereIn('state', [self::STATE_IMPORTED, self::STATE_DECIDE])
+            ->update(['state' => self::STATE_DISMISSED, 'pending' => null, 'publish_requested_at' => null]);
+    }
+
     public function feed(): BelongsTo
     {
         return $this->belongsTo(EventFeed::class, 'event_feed_id');

@@ -224,6 +224,12 @@ class ScheduleTransferService
             // the schedule mid-handover.
             $role->user_id = $newOwner->id;
 
+            // Its feeds make events as the owner, from addresses the previous owner (or their
+            // team) chose. The new owner has chosen none of them, so each waits for a word from
+            // them. Inside this transaction: a read between the handover and the pause would
+            // make events in the new owner's name.
+            \App\Models\EventFeed::pauseWhere(fn ($query) => $query->where('role_id', $role->id), \App\Models\EventFeed::PAUSED_TRANSFER);
+
             // Cashier writes these two from Stripe; clearing them here means the new owner
             // never sees the previous owner's card. The detach itself happens after the
             // commit, where a Stripe outage costs nothing.

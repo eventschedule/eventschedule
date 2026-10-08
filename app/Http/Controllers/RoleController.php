@@ -4199,6 +4199,13 @@ class RoleController extends Controller
 
         $roleUser->delete();
 
+        // A feed this member added goes on reading an address only they chose. It waits until
+        // somebody still on the team looks at it.
+        \App\Models\EventFeed::pauseWhere(
+            fn ($query) => $query->where('role_id', $role->id)->where('added_by', $userId),
+            \App\Models\EventFeed::PAUSED_MEMBER_LEFT
+        );
+
         AuditService::log(AuditService::SCHEDULE_MEMBER_REMOVE, auth()->id(), 'Role', $role->id, null, null, 'user_id:'.$userId);
 
         // If user removed themselves, redirect to home instead of team page

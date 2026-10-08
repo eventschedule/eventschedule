@@ -405,6 +405,11 @@ class Translate extends Command
 
         $this->applyRetryScope($query);
 
+        // Events somebody typed in go first. The order below takes never-translated rows before
+        // anything else, and a feed's first read is a hundred of those at once: without this, an
+        // event added by hand that afternoon waited behind all of them.
+        $query->orderByRaw('(import_source <=> ?) ASC', [\App\Models\Event::IMPORT_FEED]);
+
         $ids = $this->selectIds($query);
 
         if ($this->dryRun) {

@@ -362,6 +362,12 @@ class SendEventAnnouncements extends Command
             // draft-to-public transition; the COALESCE covers rows that predate that stamp, for
             // which created_at is what this used to compare and so changes nothing.
             ->whereRaw('COALESCE(events.published_at, events.created_at) > ?', [$role->last_announced_at])
+            // A feed's FIRST read is the schedule catching up with a calendar that already
+            // existed: a hundred events that are new to us and to nobody who follows the
+            // schedule. They carry the first read's mark (import_batch), on the event itself so
+            // that it still holds after the feed is removed. What a feed adds afterwards has no
+            // mark and is announced like any other new event.
+            ->whereRaw('NOT (events.import_source <=> ? AND events.import_batch IS NOT NULL)', [Event::IMPORT_FEED])
             // The repo's own scope, so "still worth telling somebody about" means the same thing
             // here as on the calendar - including a multi-day event that has started and is still
             // running. Back-filling last month's gigs is an ordinary thing to do and is not news.

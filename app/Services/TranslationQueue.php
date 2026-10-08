@@ -148,6 +148,11 @@ class TranslationQueue
             // watches - see the note in AppointmentService about this command touching them.
             ->whereNull('appointment_type_id')
             ->where('is_cancelled', false)
+            // A draft a feed made is waiting for its owner to look at it, and a first read can
+            // make a hundred of them in a minute with nobody there. Translating them is spend on
+            // events that may never be published; one that is, joins the queue then.
+            // (NULL-safe: most events have no import_source at all.)
+            ->whereRaw('NOT (events.is_draft = 1 AND events.import_source <=> ?)', [Event::IMPORT_FEED])
             ->where(function ($q) use ($cutoff) {
                 $q->where('starts_at', '>=', $cutoff)
                     ->orWhereNotNull('days_of_week')

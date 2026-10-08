@@ -389,3 +389,16 @@ Schedule::call(function () {
 Schedule::call(function () {
     Artisan::call('app:update-geoip');
 })->monthly()->name('app-update-geoip')->withoutOverlapping(60)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+// Feeds: the addresses schedules keep reading for events (App\Services\Feeds\FeedImporter).
+// Every minute, though a feed is due about once an hour: its own next_check_at says when, so most
+// runs are one query. Ungated, on both rails: whether a schedule's plan includes feeds is asked
+// per feed inside the read. LAST in this file on purpose. A read makes events, and making an
+// event pushes it to connected calendars inline, so of everything here this is the one whose
+// length depends on other people's servers: nothing that sends mail or moves money waits behind
+// it. The command stops starting new work after 20 seconds, and the rails share one lock inside
+// it, because withoutOverlapping() only serialises this rail against itself. Keep in sync with
+// AppController::translateData().
+Schedule::call(function () {
+    Artisan::call('app:import-feeds');
+})->everyMinute()->name('app-import-feeds')->withoutOverlapping(5)->appendOutputTo(storage_path('logs/scheduler.log'));

@@ -216,9 +216,14 @@ class FeedEventWriter
             $decision = null;
         }
 
+        // `pending` also carries what the list said about the item (the importer's), which is
+        // not this method's to drop.
+        $aside = array_diff_key($item->pending ?? [], ['fields' => true, 'decide' => true])
+            + array_filter(['fields' => $pending ?: null, 'decide' => $decision]);
+
         $item->forceFill([
             'imported' => $imported,
-            'pending' => array_filter(['fields' => $pending ?: null, 'decide' => $decision]) ?: null,
+            'pending' => $aside ?: null,
             'state' => $decision ? EventFeedItem::STATE_DECIDE : ($item->state === EventFeedItem::STATE_DECIDE ? EventFeedItem::STATE_IMPORTED : $item->state),
         ])->save();
 

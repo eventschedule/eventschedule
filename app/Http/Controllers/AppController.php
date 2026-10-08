@@ -198,6 +198,18 @@ class AppController extends Controller
                 report($e);
             }
 
+            // Feeds: the addresses schedules keep reading for events. A feed is due about once
+            // an hour, so most calls are one query; a read stops starting new work after 20
+            // seconds. On this rail it runs inside this request's own lock, so a read can wait
+            // behind a slow tier above it. Keep in sync with routes/console.php; the lock the
+            // two rails share is inside the command.
+            try {
+                \Artisan::call('app:import-feeds');
+            } catch (\Throwable $e) {
+                \Log::error('Scheduled command app:import-feeds failed: '.$e->getMessage());
+                report($e);
+            }
+
             // === EVERY 5 MINUTES ===
             if (! Cache::has('td_5min')) {
                 Cache::put('td_5min', true, now()->addMinutes(5));

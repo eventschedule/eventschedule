@@ -186,6 +186,8 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.cannot_delete_event_with_sales'));
         }
 
+        // Deleted on purpose: a feed that made it does not bring it back.
+        \App\Models\EventFeedItem::dismissFor($event);
         $this->deleteEventRecord($event, $user);
 
         /*
