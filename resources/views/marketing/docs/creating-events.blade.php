@@ -460,6 +460,10 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">On by default: visitors submitting an event request are asked this question too. Turn it off to keep the field for your own use.</p>
             </div>
             <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On event page</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Off by default. Tick it and the value you enter here is shown on the public event page, in a row under the venue. A private field is never shown.</p>
+            </div>
+            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Validation Pattern</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Text fields can be held to a ready-made pattern (email, phone, URL, digits, letters and numbers) or your own regular expression, with a <strong class="text-gray-900 dark:text-white">Hint</strong> shown to whoever fills it in. The pattern is checked in the browser and again on the server.</p>
             </div>

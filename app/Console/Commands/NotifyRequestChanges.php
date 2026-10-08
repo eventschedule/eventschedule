@@ -2,11 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Event;
 use App\Models\Role;
-use App\Notifications\NewRequestsNotification;
-use App\Services\NotificationEmailService;
-use App\Services\OneSignalService;
+use App\Services\RequestNotifier;
 use Illuminate\Console\Command;
 
 class NotifyRequestChanges extends Command
@@ -26,66 +23,38 @@ class NotifyRequestChanges extends Command
     protected $description = 'Notify team members when their schedule has new pending requests';
 
     /**
-     * Execute the console command.
+     * The noon summary: whatever is waiting that no mail has told of yet. A request sent through
+     * one of the public forms is usually told at once (EventController::tellOwnersOfPendingRequest());
+     * this is for one that arrived within a quarter of an hour of another, for one that came by
+     * another road (a schedule adding its own event to this one, an appointment waiting to be
+     * confirmed), and for one whose mail could not be sent.
+     *
+     * Until 2026-10 the rule was "more waiting than the last mail counted", which sent a bare
+     * "2 pending" the noon after an owner answered one of three, and nothing at all when one
+     * arrived while another was answered.
      */
-    public function handle()
+    public function handle(RequestNotifier $notifier)
     {
-        // Get all roles that have pending requests
-        // Pending requests are events where is_accepted is null in the event_role pivot table
-        $roles = Role::whereHas('events', function ($query) {
-            $query->whereNull('event_role.is_accepted');
-        })->get();
+        // Pending requests are events where is_accepted is null in the event_role pivot table.
+        // Only schedules that take requests and review them, as before; and not a deleted one,
+        // whose members used to be written to about a schedule that is gone.
+        $roles = Role::where('accept_requests', true)
+            ->where('require_approval', true)
+            ->where('is_deleted', false)
+            ->whereHas('events', function ($query) {
+                $query->whereNull('event_role.is_accepted')->whereNull('event_role.request_notified_at');
+            })->get();
 
         $notifiedCount = 0;
 
         foreach ($roles as $role) {
-            // Count current pending requests for this role
-            $currentRequestCount = Event::whereHas('roles', function ($query) use ($role) {
-                $query->where('event_role.role_id', $role->id)
-                    ->whereNull('event_role.is_accepted');
-            })->count();
-
-            // Get last notified count (default to 0 if null)
-            $lastNotifiedCount = $role->last_notified_request_count ?? 0;
-
-            // Check that role requires approving requests
-            if (! $role->accept_requests || ! $role->require_approval) {
-                continue;
-            }
-
-            // Only notify if current count is greater than last notified count
-            if ($currentRequestCount > $lastNotifiedCount) {
-
-                $editors = $role->getEditorsWantingNotification('new_request');
-
-                if ($editors->isNotEmpty()) {
-                    $pushUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']);
-
-                    foreach ($editors as $editor) {
-                        $editor->notify(new NewRequestsNotification($role, $currentRequestCount));
-
-                        OneSignalService::pushToUser($editor, [
-                            'title_key' => 'messages.push_new_request_title',
-                            'body_key' => 'messages.push_new_request_body',
-                            'url' => $pushUrl,
-                            'options' => ['icon' => $role->profile_image_url],
-                        ], $role);
-                    }
-                }
-
-                $sharedSent = app(NotificationEmailService::class)
-                    ->sendNotification($role, 'new_request', new NewRequestsNotification($role, $currentRequestCount), $editors);
-
-                if ($editors->isNotEmpty() || $sharedSent) {
+            try {
+                if ($notifier->announce($role)) {
                     $notifiedCount++;
                 }
-            }
-
-            // Sync counter to current count so future increases fire correctly,
-            // even after some pending requests are accepted/declined.
-            if ($role->last_notified_request_count !== $currentRequestCount) {
-                $role->last_notified_request_count = $currentRequestCount;
-                $role->save();
+            } catch (\Throwable $e) {
+                // One schedule's trouble must not cost every schedule after it its summary.
+                report($e);
             }
         }
 

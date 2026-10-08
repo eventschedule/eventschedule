@@ -35,7 +35,6 @@ use App\Models\Sale;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\DeletedEventNotification;
-use App\Notifications\NewRequestsNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
@@ -44,8 +43,8 @@ use App\Services\DemoService;
 use App\Services\EventChangeNotifier;
 use App\Services\EventLifecycleService;
 use App\Services\LinkImportService;
-use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
+use App\Services\RequestNotifier;
 use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
@@ -3478,17 +3477,17 @@ class EventController extends Controller
      * been told their event would be reviewed.
      *
      * The same condition as that digest (accepting requests, approval required), the same email
-     * and the same push, and it leaves last_notified_request_count at the count it announced, so
-     * the digest does not announce the same request again. Stored with writeOperationalColumns(),
-     * never save(): a save runs the schedule's whole saving hook and moves updated_at, which the
-     * sitemap publishes.
+     * and the same push, through the same sender: RequestNotifier, which spells each request out
+     * in one mail and marks it as told on its own row (event_role.request_notified_at), so the
+     * digest does not announce the same request again.
      *
      * Three things about when and how:
      *  - After the response. The mail is one round trip to the mail server per recipient, and the
      *    visitor's Submit must not wait on it: a slow server held the button, they pressed again,
      *    and the event was saved twice.
      *  - At most once per REQUEST_NOTICE_MINUTES per schedule. A request inside that window sends
-     *    nothing and leaves the count alone, which is what lets the digest announce it at noon.
+     *    nothing and is left unmarked, which is what lets the next mail (the next request after
+     *    the window, or the digest at noon) spell it out.
      *  - In each person's own language, not the submitter's: this runs inside a guest's request,
      *    whose locale is the guest's.
      *
@@ -3507,37 +3506,9 @@ class EventController extends Controller
                     return;
                 }
 
-                $pendingCount = Event::whereHas('roles', function ($query) use ($role) {
-                    $query->where('event_role.role_id', $role->id)
-                        ->whereNull('event_role.is_accepted');
-                })->count();
-
-                $editors = $role->getEditorsWantingNotification('new_request');
-                $pushUrl = app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests'], false));
-
-                foreach ($editors as $editor) {
-                    $locale = is_valid_language_code($editor->language_code)
-                        ? $editor->language_code
-                        : NotificationEmailService::locale($role);
-
-                    $editor->notify((new NewRequestsNotification($role, $pendingCount))->locale($locale));
-
-                    OneSignalService::pushToUser($editor, [
-                        'title_key' => 'messages.push_new_request_title',
-                        'body_key' => 'messages.push_new_request_body',
-                        'url' => $pushUrl,
-                        'options' => ['icon' => $role->profile_image_url],
-                    ], $role);
-                }
-
-                $sharedSent = app(NotificationEmailService::class)
-                    ->sendNotification($role, 'new_request', new NewRequestsNotification($role, $pendingCount), $editors);
-
-                // Either counts: the daily digest compares against this, so a shared-address-only
-                // schedule would otherwise be told about the same request again at noon.
-                if ($editors->isNotEmpty() || $sharedSent) {
-                    $role->writeOperationalColumns(['last_notified_request_count' => $pendingCount]);
-                }
+                // Who is told, in which language, what the mail spells out and what it leaves
+                // for the noon summary is the notifier's, which that summary sends through too.
+                app(RequestNotifier::class)->announce($role);
             } catch (\Throwable $e) {
                 report($e);
             }

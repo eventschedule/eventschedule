@@ -3074,6 +3074,7 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
                             {{ __('messages.event_custom_fields_request_help') }}
+                            {{ __('messages.event_custom_fields_event_page_help') }}
                         </p>
 
                         <input type="hidden" name="event_custom_fields_submitted" value="1">
@@ -3174,6 +3175,11 @@
                                 </div>
                                 </div>
                                 <div class="mt-3 flex items-center justify-between gap-4">
+                                    {{-- Two lines on purpose: how the field is asked, then where a visitor
+                                         meets it. As one wrapping row the break fell wherever a language's
+                                         labels put it, and in English "Show as filter" ended up alone under
+                                         the box that dims with it. --}}
+                                    <div class="flex flex-col gap-y-2">
                                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                                         <div class="flex items-center">
                                             <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][required]"
@@ -3200,8 +3206,23 @@
                                                 id="event_field_show_on_request_{{ $fieldKey }}"
                                                 value="1"
                                                 {{ ($field['show_on_request'] ?? true) ? 'checked' : '' }}
+                                                data-action="custom-field-on-request-toggle"
                                                 class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                             <label for="event_field_show_on_request_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_on_request') }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                                        {{-- Off unless ticked, so no hidden twin: an absent flag and an unticked box
+                                             mean the same thing (Role::isEventCustomFieldOnEventPage()). Dimmed, not
+                                             disabled, while the field is private, as the filter box beside it is. --}}
+                                        <div class="flex items-center event-field-on-event-container transition-opacity duration-200" title="{{ __('messages.field_show_on_event_help') }}">
+                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][show_on_event]"
+                                                id="event_field_show_on_event_{{ $fieldKey }}"
+                                                data-action="custom-field-on-event-toggle"
+                                                value="1"
+                                                {{ !empty($field['show_on_event']) ? 'checked' : '' }}
+                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded event-field-on-event-input">
+                                            <label for="event_field_show_on_event_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_on_event') }}</label>
                                         </div>
                                         @php
                                             $fieldTypeForFilter = $field['type'] ?? 'string';
@@ -3228,6 +3249,7 @@
                                         <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
                                         @endif
                                     </div>
+                                    </div>
                                     <span class="flex flex-shrink-0 items-center gap-4">
                                     <button type="button" data-action="toggle-field-more" class="event-link" aria-expanded="false">{{ __('messages.more_options') }}</button>
                                     <button type="button" data-action="remove-custom-field" class="event-link is-danger">
@@ -3237,6 +3259,8 @@
                                 </div>
                                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 event-field-filter-help" style="display: none;"
                                     data-help="{{ __('messages.field_show_as_filter_help') }}"
+                                    data-switch-note="{{ __('messages.field_show_on_event_switch_note') }}"
+                                    data-request-note="{{ __('messages.field_request_answer_public_note') }}"
                                     data-private-note="{{ __('messages.field_filter_private_note') }}"></p>
                                 </div>
                             </div>
@@ -8490,6 +8514,7 @@ function addEventCustomField() {
             </div>
             </div>
             <div class="mt-3 flex items-center justify-between gap-4">
+                <div class="flex flex-col gap-y-2">
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <div class="flex items-center">
                         <input type="checkbox" name="event_custom_fields[${fieldKey}][required]"
@@ -8515,8 +8540,19 @@ function addEventCustomField() {
                             id="event_field_show_on_request_${fieldKey}"
                             value="1"
                             checked
+                            data-action="custom-field-on-request-toggle"
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="event_field_show_on_request_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_show_on_request') !!}</label>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div class="flex items-center event-field-on-event-container transition-opacity duration-200" title="{{ __('messages.field_show_on_event_help') }}">
+                        <input type="checkbox" name="event_custom_fields[${fieldKey}][show_on_event]"
+                            id="event_field_show_on_event_${fieldKey}"
+                            data-action="custom-field-on-event-toggle"
+                            value="1"
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded event-field-on-event-input">
+                        <label for="event_field_show_on_event_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_on_event') }}</label>
                     </div>
                     {{-- A new field starts as type=string, which is not a filter by default. No
                          data-touched: until the owner clicks it, updateEventFieldFilterState()
@@ -8533,6 +8569,7 @@ function addEventCustomField() {
                     <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
+                </div>
                 <span class="flex flex-shrink-0 items-center gap-4">
                 <button type="button" data-action="toggle-field-more" class="event-link" aria-expanded="false">{!! __('messages.more_options') !!}</button>
                 <button type="button" data-action="remove-custom-field" class="event-link is-danger">
@@ -8542,6 +8579,8 @@ function addEventCustomField() {
             </div>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 event-field-filter-help" style="display: none;"
                 data-help="{{ __('messages.field_show_as_filter_help') }}"
+                data-switch-note="{{ __('messages.field_show_on_event_switch_note') }}"
+                data-request-note="{{ __('messages.field_request_answer_public_note') }}"
                 data-private-note="{{ __('messages.field_filter_private_note') }}"></p>
             </div>
         </div>
@@ -8634,14 +8673,36 @@ function updateEventFieldFilterState(fieldItem) {
     const isPrivate = !!(privateBox && privateBox.checked);
     container.classList.toggle('opacity-50', isPrivate);
 
+    // "On event page" is every type's, and a private field is never there either.
+    const onEventBox = fieldItem.querySelector('.event-field-on-event-input');
+    const onEventContainer = fieldItem.querySelector('.event-field-on-event-container');
+    if (onEventContainer) onEventContainer.classList.toggle('opacity-50', isPrivate);
+    const onEvent = !!(onEventBox && onEventBox.checked);
+
     if (help) {
-        let text = '';
-        if (filterable && isPrivate) {
-            text = help.dataset.privateNote || '';
-        } else if (filterable && checkbox.checked && type === 'string') {
-            // Only free text needs the advice: the option lists are consistent by construction.
-            text = help.dataset.help || '';
+        const notes = [];
+        if (isPrivate) {
+            // Said for every private field, whatever its type: both boxes beside it are dimmed,
+            // and until 2026-10 a private switch or date was dimmed with nothing to say why.
+            notes.push(help.dataset.privateNote || '');
+        } else {
+            if (filterable && checkbox.checked && type === 'string') {
+                // Only free text needs the advice: the option lists are consistent by construction.
+                notes.push(help.dataset.help || '');
+            }
+            if (onEvent && type === 'switch') {
+                // Or an owner ticks it, opens an event where the switch is off, and sees nothing.
+                notes.push(help.dataset.switchNote || '');
+            }
+            // Free text that a stranger types on the request form and that the event page then
+            // prints: accepting the request is what publishes it, and this is where that is
+            // decided. A choice from the owner's own list, a date or a Yes/No needs no warning.
+            const onRequestBox = fieldItem.querySelector('[data-action="custom-field-on-request-toggle"]');
+            if (onEvent && onRequestBox && onRequestBox.checked && (type === 'string' || type === 'multiline_string')) {
+                notes.push(help.dataset.requestNote || '');
+            }
         }
+        const text = notes.filter(Boolean).join(' ');
         help.textContent = text;
         help.style.display = text ? '' : 'none';
     }
@@ -9662,6 +9723,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateEventFieldFilterState(el.closest('.event-custom-field-item'));
                 break;
             case 'custom-field-private-toggle':
+            case 'custom-field-on-event-toggle':
+            case 'custom-field-on-request-toggle':
                 updateEventFieldFilterState(el.closest('.event-custom-field-item'));
                 break;
             case 'custom-field-regex-preset':

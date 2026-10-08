@@ -442,7 +442,9 @@ class AppointmentService
             Sale::whereKey($lockedSale->id)->update($saleChanges);
 
             if ($backToPending) {
-                $lockedEvent->roles()->updateExistingPivot($role->id, ['is_accepted' => null]);
+                // Waiting again, so not yet told (RequestNotifier): the noon summary counts it
+                // as it did the first time it waited.
+                $lockedEvent->roles()->updateExistingPivot($role->id, ['is_accepted' => null, 'request_notified_at' => null]);
             }
 
             DB::afterCommit(function () use ($lockedEvent) {

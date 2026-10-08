@@ -1101,6 +1101,68 @@
         </div>
         @endif
 
+        {{-- The schedule's own facts about this event: the custom fields its owner ticked "On
+             event page" (the room, the floor, a dress code). One row beside one tile, like When
+             and Where above it. Whose fields they are, and that a private one is never here, is
+             CustomFieldDisplay::forEventPage()'s to say.
+
+             Two forms. A schedule with ONE field ticked gets it read as the rows above are: the
+             answer, then what it is. Any other gets a list of pairs, so six facts are six lines
+             and not six rows. Which form is the SCHEDULE's doing, never this event's: with two
+             fields ticked, an event that answered one of them keeps the list, or the room would
+             change size and place from one of a schedule's events to the next. A long answer
+             takes the list too (a paragraph over its own label reads upside down). A lone Yes/No
+             field leads with its name ("Step-free access", not "Yes"), and so does a lone date:
+             "Oct 12, 2026" in large type directly under the event's own date row reads as a
+             second date for the event. The label comes first in the markup either way; .gk-fact
+             turns the pair over for the eye. v-pre is a precaution: nothing mounts Vue on this
+             card today, and an owner's label or a visitor's answer must stay text on the day
+             something does. --}}
+        @php
+          $eventFacts = \App\Utils\CustomFieldDisplay::forEventPage($event, $role);
+          $loneFact = count($eventFacts) === 1 ? $eventFacts[0] : null;
+          $factList = $eventFacts && (! $loneFact
+              || \App\Utils\CustomFieldDisplay::eventPageFieldCount($event) > 1
+              || $loneFact['type'] === 'multiline_string'
+              || mb_strlen($loneFact['value']) > 60);
+          $factLead = 'text-lg font-semibold text-gray-900 dark:text-white';
+          $factQuiet = 'text-sm text-gray-500 dark:text-gray-400';
+        @endphp
+        @if ($eventFacts)
+        <div id="gp-event-fields" class="flex {{ $factList ? 'items-start' : 'items-center' }} gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+                      bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          @if ($factList)
+          <dl class="gk-facts gk-facts-pairs" v-pre>
+            @foreach ($eventFacts as $fact)
+            <div class="gk-fact-pair" data-event-field="{{ $fact['key'] }}">
+              <dt class="{{ $factQuiet }} gk-fact-text"><bdi>{{ $fact['label'] }}</bdi></dt>
+              <dd class="text-base {{ $fact['type'] === 'multiline_string' ? 'font-normal' : 'font-semibold' }} text-gray-900 dark:text-white gk-fact-text"><bdi>{{ $fact['value'] }}</bdi></dd>
+            </div>
+            @endforeach
+          </dl>
+          @elseif (in_array($loneFact['type'], ['switch', 'date'], true))
+          <dl class="gk-facts" v-pre>
+            <div class="gk-fact-flag" data-event-field="{{ $loneFact['key'] }}">
+              <dt class="{{ $factLead }} gk-fact-text"><bdi>{{ $loneFact['label'] }}</bdi></dt>
+              <dd class="{{ $factQuiet }} gk-fact-text">{{ $loneFact['value'] }}</dd>
+            </div>
+          </dl>
+          @else
+          <dl class="gk-facts" v-pre>
+            <div class="gk-fact" data-event-field="{{ $loneFact['key'] }}">
+              <dt class="{{ $factQuiet }} gk-fact-text"><bdi>{{ $loneFact['label'] }}</bdi></dt>
+              <dd class="{{ $factLead }} gk-fact-text"><bdi>{{ $loneFact['value'] }}</bdi></dd>
+            </div>
+          </dl>
+          @endif
+        </div>
+        @endif
+
         {{-- RSVP Free badge --}}
         @if ($event->rsvp_enabled)
         <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">

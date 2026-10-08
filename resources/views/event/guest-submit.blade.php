@@ -30,6 +30,9 @@
               'required' => ! empty($field['required']),
               'regex' => $field['regex'] ?? '',
               'regex_hint' => $field['regex_hint'] ?? '',
+              // The schedule prints this answer on the event's public page once it accepts the
+              // event. The person typing it is the one who should know.
+              'on_event' => \App\Models\Role::isEventCustomFieldOnEventPage($field),
           ];
           $requestCustomFieldValues[$fieldKey] = ($field['type'] ?? 'string') === 'multiselect'
               ? []
@@ -539,6 +542,10 @@
                   <label v-if="field.type !== 'switch'" :id="'submit_custom_field_label_' + field.key" :for="'submit_custom_field_' + field.key" class="{{ $lb }}">
                     @{{ field.label }}<span v-if="field.required" class="text-red-500" aria-hidden="true"> *</span>
                   </label>
+                  {{-- Under the question and before its control, not after it: under a list of
+                       eight rooms it was nine rows below the question, and under a text box it was
+                       read after typing. Who will read an answer is said before it is given. --}}
+                  <p v-if="field.on_event" :id="'pub_cf_' + field.key" class="gs-hint" data-answer-on-event>{{ __('messages.request_answer_on_event') }}</p>
 
                   <input v-if="field.type === 'string'"
                     :id="'submit_custom_field_' + field.key"
@@ -546,6 +553,7 @@
                     v-model="customFieldValues[field.key]"
                     :pattern="field.regex || null"
                     :class="bad('cf_' + field.key)"
+                    :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null"
                     dir="auto"
                     autocomplete="off"
                     class="{{ $in }}">
@@ -556,6 +564,7 @@
                     dir="auto"
                     v-model="customFieldValues[field.key]"
                     :class="bad('cf_' + field.key)"
+                    :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null"
                     class="{{ $in }}"></textarea>
 
                   {{-- A yes/no question is a box beside its own words, not a box under a heading. --}}
@@ -584,6 +593,7 @@
                     :id="'submit_custom_field_' + field.key"
                     v-model="customFieldValues[field.key]"
                     :class="bad('cf_' + field.key)"
+                    :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null"
                     class="{{ $in }}">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">@{{ option }}</option>

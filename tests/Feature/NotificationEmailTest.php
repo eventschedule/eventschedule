@@ -418,10 +418,10 @@ class NotificationEmailTest extends TestCase
         $this->optOutOfRequests($role, $owner);
         $this->postBookingRequest($role);
 
-        // Confirmed only afterwards, so the booking request itself told nobody.
+        // Confirmed only afterwards, so the booking request itself told nobody, and a request
+        // nobody was told of is still unmarked (RequestNotifier). Nothing is reset by hand here:
+        // this used to pass only because the test zeroed the count the old rule compared.
         $role = $this->withVerifiedAddress($role->fresh());
-        $role->last_notified_request_count = 0;
-        $role->save();
 
         $this->artisan('app:notify-request-changes')->assertSuccessful();
 

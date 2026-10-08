@@ -207,6 +207,7 @@ class RoleUpdateRequest extends FormRequest
             'event_custom_fields.*.required' => ['nullable'],
             'event_custom_fields.*.private' => ['nullable'],
             'event_custom_fields.*.show_on_request' => ['nullable'],
+            'event_custom_fields.*.show_on_event' => ['nullable'],
             'event_custom_fields.*.filter' => ['nullable'],
             'event_custom_fields.*.regex' => ['nullable', 'string', 'max:200'],
             'event_custom_fields.*.regex_hint' => ['nullable', 'string', 'max:200'],

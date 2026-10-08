@@ -5203,6 +5203,18 @@ class Role extends Model implements MustVerifyEmail
         return (bool) ($field['filter'] ?? self::customFieldFilterDefault($type));
     }
 
+    /**
+     * Whether a field's answer is printed on the public event page ("On event page").
+     *
+     * Off unless the owner ticked it, and an absent flag is off: until 2026-10 no page printed an
+     * answer, and a request form's answers are somebody else's words, so nothing a schedule
+     * already holds is published by this flag arriving. A private field never is.
+     */
+    public static function isEventCustomFieldOnEventPage(array $field): bool
+    {
+        return empty($field['private']) && ! empty($field['show_on_event']);
+    }
+
     public function filterPublicCustomFieldValues(?array $values): array
     {
         if (empty($values)) {

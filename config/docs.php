@@ -196,7 +196,7 @@ return [
             'blurb' => 'Customize colors, fonts, and branding for your schedule.',
             'icon' => 'swatch',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'creating-events' => [
@@ -208,7 +208,7 @@ return [
             'blurb' => 'Add events and configure event settings.',
             'icon' => 'plus',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'ai-import' => [
@@ -491,7 +491,7 @@ return [
             'blurb' => 'Set up SMTP, Amazon SES or another mail driver, and see which emails go out automatically.',
             'icon' => 'mail',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'selfhost/ai' => [

@@ -41,6 +41,9 @@
               'regex_hint' => $field['regex_hint'] ?? '',
               // The answer is kept off the schedule's public pages. Worth telling the person answering.
               'private' => ! empty($field['private']),
+              // And the opposite: the schedule prints this answer on the event's public page
+              // once it accepts the request. The person typing it is the one who should know.
+              'on_event' => \App\Models\Role::isEventCustomFieldOnEventPage($field),
           ];
           $requestCustomFieldValues[$fieldKey] = ($field['type'] ?? 'string') === 'multiselect'
               ? []
@@ -390,15 +393,19 @@
                   <label v-if="field.type !== 'switch'" :id="'submit_custom_field_label_' + field.key" :for="'submit_custom_field_' + field.key" class="{{ $lb }}">
                     @{{ field.label }}<span v-if="field.required" class="text-red-500" aria-hidden="true"> *</span><span v-else class="font-normal text-gray-500 dark:text-gray-400" v-text="' (' + words.optional + ')'"></span>
                   </label>
-                  <input v-if="field.type === 'string'" :id="'submit_custom_field_' + field.key" type="text" v-model="customFieldValues[field.key]" :pattern="field.regex || null" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="msg('cf_' + field.key) ? 'err_cf_' + field.key : null" dir="auto" autocomplete="off" class="{{ $in }}">
-                  <textarea v-else-if="field.type === 'multiline_string'" :id="'submit_custom_field_' + field.key" rows="3" dir="auto" v-model="customFieldValues[field.key]" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="msg('cf_' + field.key) ? 'err_cf_' + field.key : null" class="{{ $in }}"></textarea>
+                  {{-- Under the question and before its control, not after it: under a list of
+                       eight rooms it was nine rows below the question, and under a text box it was
+                       read after typing. Who will read an answer is said before it is given. --}}
+                  <p v-if="field.on_event" :id="'pub_cf_' + field.key" class="gs-hint" data-answer-on-event>{{ __('messages.request_answer_on_event') }}</p>
+                  <input v-if="field.type === 'string'" :id="'submit_custom_field_' + field.key" type="text" v-model="customFieldValues[field.key]" :pattern="field.regex || null" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null" dir="auto" autocomplete="off" class="{{ $in }}">
+                  <textarea v-else-if="field.type === 'multiline_string'" :id="'submit_custom_field_' + field.key" rows="3" dir="auto" v-model="customFieldValues[field.key]" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null" class="{{ $in }}"></textarea>
                   <label v-else-if="field.type === 'switch'" class="flex items-start gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <input type="checkbox" :id="'submit_custom_field_' + field.key" v-model="customFieldValues[field.key]" true-value="1" false-value="0"
                       class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <span>@{{ field.label }}<span v-if="field.required" class="text-red-500" aria-hidden="true"> *</span></span>
                   </label>
                   <input v-else-if="field.type === 'date'" :id="'submit_custom_field_' + field.key" type="text" data-gs-date :data-key="field.key" :data-required="field.required ? '1' : '0'" autocomplete="off" :class="bad('cf_' + field.key)" class="{{ $in }}">
-                  <select v-else-if="field.type === 'dropdown'" :id="'submit_custom_field_' + field.key" v-model="customFieldValues[field.key]" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="msg('cf_' + field.key) ? 'err_cf_' + field.key : null" class="{{ $in }}">
+                  <select v-else-if="field.type === 'dropdown'" :id="'submit_custom_field_' + field.key" v-model="customFieldValues[field.key]" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null" class="{{ $in }}">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">@{{ option }}</option>
                   </select>

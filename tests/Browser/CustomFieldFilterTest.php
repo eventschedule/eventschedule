@@ -240,7 +240,10 @@ class CustomFieldFilterTest extends DuskTestCase
             $browser->script("__toggle('{$key}', '[data-action=custom-field-private-toggle]');");
             $private = $state($key);
             $this->assertTrue($private['dimmed']);
-            $this->assertSame('Private fields are never shown as filters.', $private['help']);
+            $this->assertSame('Private fields are never shown as filters or on the event page.', $private['help']);
+            // "On event page" is dimmed with it, and like the filter box it still posts.
+            $this->assertTrue($browser->script("return document.querySelector('.event-custom-field-item[data-field-key={$key}] .event-field-on-event-container').classList.contains('opacity-50');")[0]);
+            $this->assertFalse($browser->script("return document.querySelector('.event-custom-field-item[data-field-key={$key}] .event-field-on-event-input').disabled;")[0]);
             $this->assertFalse($browser->script("return document.querySelector('.event-custom-field-item[data-field-key={$key}] .event-field-filter-input').disabled;")[0]);
         });
     }

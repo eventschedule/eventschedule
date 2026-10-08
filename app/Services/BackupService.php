@@ -2014,6 +2014,11 @@ class BackupService
         // Attach to role via pivot. Prefer the raw tri-state (null = pending approval) when present
         // so pending appointment bookings restore pending; fall back to the legacy bool.
         $pivotData = ['is_accepted' => array_key_exists('_is_accepted_raw', $data) ? $data['_is_accepted_raw'] : ($data['_is_accepted'] ?? true)];
+        // A request restored as waiting is old news: without this the next request mail would
+        // spell out every pending request in the backup as though it had just arrived.
+        if ($pivotData['is_accepted'] === null) {
+            $pivotData['request_notified_at'] = now();
+        }
         $groupRefId = $data['_group_ref_id'] ?? null;
         if ($groupRefId && isset($idMap['groups'][$groupRefId])) {
             $pivotData['group_id'] = $idMap['groups'][$groupRefId];

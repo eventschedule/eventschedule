@@ -151,6 +151,7 @@ class GuestSectionIdTest extends TestCase
             'gp-event-short-description',
             'gp-event-date',
             'gp-event-location',
+            'gp-event-fields',
             'gp-event-price',
             'gp-event-cta',
             'gp-event-share',
@@ -218,6 +219,8 @@ class GuestSectionIdTest extends TestCase
             'banner_message' => 'Doors at seven.',
             'youtube_links' => json_encode([['url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']]),
             'sponsor_logos' => json_encode([['name' => 'A Sponsor', 'logo' => 'demo_sponsor.png', 'url' => 'https://sponsor.test']]),
+            // Ticked "On event page", so #gp-event-fields renders with the rest.
+            'event_custom_fields' => ['new_0' => ['name' => 'Room', 'type' => 'string', 'show_on_event' => true, 'index' => 1]],
         ]);
 
         return [$owner, $role];
@@ -234,6 +237,8 @@ class GuestSectionIdTest extends TestCase
             'agenda_image_url' => 'https://images.test/agenda.jpg',
             'registration_url' => 'https://tickets.test/buy',
             'ticket_price' => 0,
+            'custom_field_values' => ['new_0' => 'The Cellar'],
+            'custom_field_values_role_id' => $role->id,
         ]);
 
         // A venue that is not the creator, so the venue card and its map both render. The map is

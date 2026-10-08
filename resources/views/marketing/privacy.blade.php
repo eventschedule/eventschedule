@@ -782,7 +782,7 @@
 
         // The date of the last change to what this policy says. A fact about the document: move it
         // only in a commit that changes a clause.
-        $lastUpdated = 'October 7, 2026';
+        $lastUpdated = 'October 8, 2026';
 
         // The AI providers this install actually calls (GeminiUtils, OpenAIUtils).
         $aiProviders = array_values(array_filter([
@@ -1013,6 +1013,7 @@
                                                 <ul class="es-fine-list">
                                                     <li><strong>Your account:</strong> your name and email address, your password (stored only as a one-way hash), your language and timezone, and, if you add them, a profile photo and a phone number. If you sign in with Google or Facebook, the name, email address and account ID that service shares, and with Google your profile photo.</li>
                                                     <li><strong>What you publish:</strong> your schedules and events, with their descriptions, images, venues and addresses. For a performer or venue page an organizer creates while listing an event: the name, and any email address or phone number the organizer enters, which is never shown in full.</li>
+                                                    <li><strong>Asking a schedule to list an event or take a booking:</strong> the event you describe, your name and email address, a phone number if the schedule asks for one, your answers to the schedule's own questions, and your message.</li>
                                                     <li><strong>Buying, booking and RSVPs:</strong> the name, email address, and phone number if the organizer asks for one, answers to the organizer's questions, what was bought or booked, and whether it was paid. Card details are entered with the payment provider and never reach us; for a ticket paid in installments we keep the card type and its last four digits.</li>
                                                     <li><strong>Following and email lists:</strong> which schedules you follow. For a schedule's email sign-up: the address and name, the page language, the IP address it was entered from and the time it was confirmed, which are the record of your consent. For updates about a single event, asked for without an account: the email address you enter, the IP address it came from, and the language of the page. Schedule newsletters record whether each one was opened and which links were clicked.</li>
                                                     <li><strong>What you send us:</strong> support chat messages, with the page you wrote from and your country; and comments, photos and videos you post to events.</li>
@@ -1095,6 +1096,9 @@
                                             @case('follower-data')
                                                 <p>
                                                     When you follow a schedule, sign up for its emails, buy a ticket, RSVP, book with it, or submit content (such as a comment, photo or video) to its events, the schedule owner can see your name and email address so they can keep you informed and reach out if needed. If you open one of its newsletters, the owner can see that you did and which links you clicked. Owners can export their sales records to keep their own books. We never sell any of it. You can stop following a schedule at any time from your "Following" page, and leave its email list from any of its emails.
+                                                </p>
+                                                <p>
+                                                    When you ask a schedule to list an event or take a booking, the schedule's team sees what you sent on its requests page, and its owners and admins also receive it in the email that tells them a request has arrived, which goes to the schedule's shared team mailbox too if it has set one up. If the schedule accepts, the event you described is published. Your answers to the schedule's own questions can be published with it: unless the schedule keeps a question private, an answer can be found through the search and filters on the schedule's page, and the schedule can choose to show it on the event's page.
                                                 </p>
                                                 {{-- Round 3 (2026-09-10): RoleSubscriberController::confirm() now calls linkAccount(),
                                                      so confirming a schedule's sign-up panel creates a passwordless account that

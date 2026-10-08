@@ -13,7 +13,11 @@ use App\Models\GiftCard;
 use App\Models\RoleTransfer;
 use App\Notifications\NewFanContentNotification;
 use App\Notifications\NewPollOptionsNotification;
+use App\Notifications\NewRequestsNotification;
+use App\Services\RequestNotifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -96,6 +100,62 @@ class EmailOwnerRenderTest extends TestCase
         foreach ($mails as $label => $render) {
             $this->assertRendersWell($render, $label);
         }
+    }
+
+    /**
+     * The request mail at its longest: one request, and as many as RequestNotifier gives a mail
+     * (the ones it spells out, each with ten answers and a message at their limits, and the ones
+     * it names in a line each), in text that is two bytes a character and full of marks that
+     * grow when escaped. What does not fit is left for the next mail.
+     */
+    public function test_the_request_mail_renders_at_its_longest(): void
+    {
+        Notification::fake();
+        $owner = $this->createOwner();
+        $fields = [];
+        foreach (range(0, 9) as $number) {
+            $fields['new_'.$number] = ['name' => 'שאלה ארוכה מאוד מספר '.$number, 'type' => 'multiline_string', 'show_on_request' => true, 'index' => $number + 1];
+        }
+        $role = $this->createRole($owner, 'venue', ['name' => 'The Blue Note', 'accept_requests' => true, 'require_approval' => true, 'event_custom_fields' => $fields]);
+        $long = fn (int $characters) => mb_substr(str_repeat('תשובה "ארוכה" & מאוד <כאן>. ', 400), 0, $characters);
+        $total = RequestNotifier::LISTED + RequestNotifier::NAMED + 2;
+
+        $requests = collect(range(1, $total))->map(function ($number) use ($role, $fields, $long) {
+            $event = $this->createEvent($role, [
+                'name' => $long(250).$number,
+                'creator_role_id' => $role->id,
+                'custom_field_values_role_id' => $role->id,
+                'is_guest_submission' => true,
+                'contact_name' => $long(250),
+                'contact_email' => 'somebody.with.a.long.address'.$number.'@gmail.com',
+                'contact_phone' => '+972 50 555 0100',
+                'description' => $long(5000),
+                // 700 characters each: past the 600 a mail prints, and what a TEXT column holds
+                // of ten answers once json_encode has written each letter as six bytes.
+                'custom_field_values' => array_fill_keys(array_keys($fields), $long(700)),
+            ]);
+            DB::table('event_role')->where('event_id', $event->id)->update(['is_accepted' => null]);
+
+            return $event->fresh();
+        });
+
+        $this->assertRendersWell(fn () => (new NewRequestsNotification($role, $total, $requests->take(1), $total))->toMail($owner)->render(), 'one request');
+
+        app(RequestNotifier::class)->announce($role);
+        $listed = 0;
+        $named = 0;
+        Notification::assertSentTo($owner, NewRequestsNotification::class, function ($notification) use ($owner, &$listed, &$named) {
+            $this->assertRendersWell(fn () => $notification->toMail($owner)->render(), 'as many as fit');
+            $listed = count($notification->toMail($owner)->viewData['requests']);
+            $named = count($notification->toMail($owner)->viewData['also']);
+
+            return true;
+        });
+        $this->assertGreaterThan(1, $listed, 'the budget left room for one request only');
+        $this->assertLessThanOrEqual(RequestNotifier::LISTED, $listed);
+        $this->assertGreaterThan(10, $named, 'the requests spelled out left the lines after them no room');
+        // Only what the mail named is marked as told.
+        $this->assertSame($listed + $named, DB::table('event_role')->where('role_id', $role->id)->whereNotNull('request_notified_at')->count());
     }
 
     /**

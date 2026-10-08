@@ -218,7 +218,7 @@ class RequestCustomFieldsRenderTest extends TestCase
         $bladeHalf = substr($html, 0, $jsStart);
         $jsHalf = substr($html, $jsStart);
 
-        foreach (['name', 'name_en', 'type', 'options', 'regex', 'regex_hint', 'ai_prompt', 'required', 'private', 'show_on_request', 'index'] as $property) {
+        foreach (['name', 'name_en', 'type', 'options', 'regex', 'regex_hint', 'ai_prompt', 'required', 'private', 'show_on_request', 'show_on_event', 'filter', 'index'] as $property) {
             $this->assertStringContainsString(
                 "[{$property}]",
                 $jsHalf,
@@ -234,6 +234,12 @@ class RequestCustomFieldsRenderTest extends TestCase
             $jsHalf
         );
         $this->assertStringContainsString('show_on_request', $bladeHalf);
+
+        // show_on_event defaults to OFF, so a new row must start unticked and needs no hidden
+        // twin: ticked by default, every new field would be published the moment it had an answer.
+        $this->assertStringContainsString('[show_on_event]', $bladeHalf);
+        $this->assertStringNotContainsString('name="event_custom_fields[${fieldKey}][show_on_event]" value="0"', $jsHalf);
+        $this->assertDoesNotMatchRegularExpression('/\[show_on_event\]"[^>]*\bchecked\b/', $jsHalf);
     }
 
     public function test_a_schedule_with_no_request_fields_seeds_an_empty_list(): void

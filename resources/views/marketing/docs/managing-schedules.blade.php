@@ -461,7 +461,7 @@
                     <tr>
                         <td><strong>A date from another schedule</strong></td>
                         <td>A schedule that adds you to one of its events, when your schedule reviews it first. A Talent schedule always does, unless that schedule is already on its approved list</td>
-                        <td>The event's name, that schedule's picture and its name after <strong>From</strong> as a link to its page, the date and time, the sub-schedule, and the opening of that schedule's description</td>
+                        <td>The event's name, that schedule's picture and its name after <strong>From</strong> as a link to its page, the date and time, the sub-schedule, the venue when it is neither of you, and the opening of that schedule's description</td>
                     </tr>
                     <tr>
                         <td><strong>An appointment booking</strong></td>
@@ -490,7 +490,7 @@
 
         <h3 class="doc-subheading">Being told about them</h3>
         <ul class="doc-list mb-6">
-            <li><strong>From your request form.</strong> Event Schedule emails owners and admins as the request arrives. A busy day does not fill your inbox: that is at most one email every 15 minutes, and anything that arrives in between is in the daily summary</li>
+            <li><strong>From your request form.</strong> Event Schedule emails owners and admins as the request arrives. A busy day does not fill your inbox: that is at most one email every 15 minutes, and anything that arrives in between is in the daily summary. The email spells out each new request (the event, who asked, when, their contact details, their answers to your questions and their message), and a request is named in one email only, so searching your mailbox for an event's name finds it. One email spells out up to five requests, fewer when they are long, and names any others that arrived with them in a line each (the event, who asked and the day), which is what a programme sent through your import page looks like; their answers are on the Requests page. Past 35 at once, it says how many follow in the next email</li>
             <li><strong>From another schedule.</strong> An event another schedule adds you to is announced once a day</li>
             <li><strong>The setting</strong> is <strong>New event requests</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">Settings &rarr; Notifications</a>. It is on unless you turn it off, and it is per person rather than per schedule. Viewers are never notified</li>
             <li><strong>A shared mailbox</strong> can be added as the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#notification-email" class="doc-link">shared notification address</a>, which gets a copy of each request email</li>

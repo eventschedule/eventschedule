@@ -1950,7 +1950,7 @@ Beyond the API endpoints documented above, Event Schedule includes these platfor
 - **Analytics**: Privacy-first (no cookies) page view tracking, device/browser breakdown, traffic sources, social link clicks, and conversion funnels.
 - **Event graphics**: Auto-generated promotional images in multiple layouts, sized for social media sharing, on every plan (AI-written graphic text and scheduled graphic emails are Enterprise).
 - **Sub-schedules**: Color-coded event categories within a schedule, with filtering and separate URLs. Manageable via API.
-- **Custom fields** (Pro): Custom data fields on events, each of which can also be asked on the public event request form.
+- **Custom fields** (Pro): Custom data fields on events, each of which can also be asked on the public event request form, offered as a filter on the schedule, and shown on the public event page (off by default).
 - **Fan content**: YouTube videos, photos and comments on events, with an approval workflow.
 - **Embedding**: Responsive iframe calendar embed for any website, with light/dark mode support; an embeddable ticket widget on Pro.
 - **AI features**: Gemini-powered event parsing from text/images (50 a day, 100 on Enterprise, 10 while a schedule is on its trial), auto-translation across the 12 supported languages, and bulk import.

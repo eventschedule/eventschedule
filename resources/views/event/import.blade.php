@@ -1106,6 +1106,12 @@
                                 @if ($fieldRegexHint && in_array($field['type'] ?? 'string', ['string', 'multiline_string'], true))
                                 <p v-pre class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $fieldRegexHint }}</p>
                                 @endif
+                                {{-- An answer to a field the schedule prints on its event pages is
+                                     public: say so where it is typed. The owner's own import page
+                                     too, where the answer may be one the AI guessed. --}}
+                                @if (\App\Models\Role::isEventCustomFieldOnEventPage($field))
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" data-answer-on-event>{{ __('messages.request_answer_on_event') }}</p>
+                                @endif
                             </div>
                             @endforeach
                         </div>

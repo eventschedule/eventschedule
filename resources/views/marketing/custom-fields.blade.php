@@ -241,7 +241,7 @@
            where an 8.5rem label column would leave the value two words wide. */
         .es-form-spec-tight > div { grid-template-columns: 1fr; gap: 0.15rem; }
 
-        /* --- Flag pills: the five switches a field carries --- */
+        /* --- Flag pills: the six switches a field carries --- */
         .es-form-switch {
             display: inline-flex;
             align-items: center;
@@ -567,7 +567,7 @@
                 'Once per event',
                 'Defined on the schedule: Customize, then Custom Fields',
                 'Ten per schedule, answered once for each event. They appear on your own event form, and each one can also be asked of visitors on your public event request form. This is the set that carries the extra switches.',
-                'All five switches',
+                'All six switches',
                 'You, or a visitor submitting an event to you',
                 'Pro',
             ],
@@ -589,18 +589,21 @@
             ],
         ];
 
-        // The five per-field switches on a schedule field.
+        // The six per-field switches on a schedule field.
         $flags = [
             ['Required', 'on', 'The form will not submit without an answer. Checked in the browser and checked again on the server, so an empty answer cannot slip past either one.'],
             ['On request form', 'on', 'Ask the question of visitors submitting an event to you. On by default. Uncheck it to keep the field for your own use inside the admin portal.'],
             ['Private', 'off', 'Keep the answer off your public schedule. It stays visible to you, and it still fills {custom_N} in graphic templates and URL patterns.'],
             ['Show as filter', 'on', 'Offer the field as a filter on your schedule page, so a visitor can pick Room A and see only what is on there. On by default for dropdowns and multi-selects, one click away for a text field, and the filtered view is a link you can share.'],
+            ['On event page', 'off', 'Print the answer on the public event page, in a row of its own under the venue: the room, the floor, a dress code. Off until you tick it, so nothing you already collect is published by accident, and a private field is never shown.'],
             ['Validation pattern', 'on', 'Text fields can require a format. Pick email address, phone number, web address, numbers only or letters and numbers, or write your own, and test a sample value before you save it.'],
         ];
 
         // Where the answer to one field turns up. Every row is a real surface.
         $landings = [
             ['On the request card', 'A visitor answers on your event request form and the answer sits on the request in the admin portal, then travels with the event once you accept it.'],
+            ['In the request email', 'The email that tells you a request has arrived spells it out: the event, who asked, when, and what they answered. Search your mailbox for the event and there it is.'],
+            ['On the event page', 'Tick On event page and the answer is printed for every visitor, under the venue. Which room, which floor, what to bring.'],
             ['On the order', 'Checkout answers appear beside the sale in your sales table, per order and per ticket.'],
             ['On the ticket', 'The answers a buyer gave are printed on the ticket itself, so the person on the door reads the same thing you do.'],
             ['In the export', 'The sales CSV gains one column per field name, so a spreadsheet of dietary counts is a download rather than an afternoon.'],
@@ -645,7 +648,7 @@
             ['top', 'The form'],
             ['places', 'Three places'],
             ['types', 'Six types'],
-            ['switches', 'Five switches'],
+            ['switches', 'Six switches'],
             ['free', 'Free list, Pro questions'],
             ['column', 'Question and column'],
             ['requests', 'On the request form'],
@@ -901,19 +904,19 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Five switches per field                                   -->
+    <!-- 4. Six switches per field                                    -->
     <!-- ============================================================ -->
     <section id="switches" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 lg:grid-cols-2">
                 <div>
                     <div class="es-form-slot mb-6" data-reveal aria-hidden="true"><span>{custom_3}</span></div>
-                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Five switches</p>
+                    <p class="es-form-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Six switches</p>
                     <h2 class="es-balance es-form-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
                         A question is not just <span class="es-form-fill">its wording.</span>
                     </h2>
                     <p class="es-form-muted mb-8 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
-                        Each field on your schedule carries five switches. They are what turn a box on a form into something you can rely on when the answers come back.
+                        Each field on your schedule carries six switches. They are what turn a box on a form into something you can rely on when the answers come back.
                     </p>
 
                     <div class="space-y-4" data-reveal-group="80">
@@ -1122,7 +1125,7 @@
                 </div>
             </div>
 
-            <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="80">
+            <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
                 @foreach ($landings as [$landName, $landBody])
                     <div class="es-form-card flex h-full flex-col p-6" data-reveal="panel">
                         <h3 class="es-form-ink mb-2 text-base font-bold">{{ $landName }}</h3>

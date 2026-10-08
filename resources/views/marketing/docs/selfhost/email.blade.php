@@ -146,7 +146,7 @@
                     <tr>
                         <td>Daily notice of what is waiting</td>
                         <td>Team members who switched the notification on, and the schedule's shared notification address</td>
-                        <td>Once a day, at 12:00 in the app's timezone. A schedule that requires approval is told when more event requests are waiting than at the last notice. The same run reports new poll suggestions, and tells an event's creator about audience comments, photos and videos waiting for review.</td>
+                        <td>Once a day, at 12:00 in the app's timezone. A schedule that requires approval is told about each event request that no earlier email has named, with its details. The same run reports new poll suggestions, and tells an event's creator about audience comments, photos and videos waiting for review.</td>
                     </tr>
                     <tr>
                         <td>Scheduled event graphic</td>

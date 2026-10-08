@@ -25,7 +25,8 @@
          - The phone field is never filled in from the sender's account, so signed-in visitors
            are asked too.
          - The sender's name and email, and phone when asked, are stored on the event and shown on
-           the Requests tab, owner-facing only. Accept and Decline email the sender only when they
+           the Requests tab and in the email that announces the request (RequestNotifier), both
+           owner-facing only. Accept and Decline email the sender only when they
            sent it signed in: requestDecisionRecipient() returns nobody for a guest submission.
          - Anti-abuse: a honeypot on the form, and on the hosted service a daily cap on new events
            per schedule (Role::canCreateEvent(), null on selfhost). --}}
@@ -361,7 +362,7 @@
         @php
             $inboxSteps = [
                 ['It lands on the Requests tab', 'The tab appears while something is waiting and carries the count. Each request shows the event, the date and the place, and the name and email of whoever sent it, with their phone number and your custom answers when you asked for them.'],
-                ['You hear about it', 'Owners and admins get an email when new requests arrive, unless they switch it off under Settings, Notifications. Viewers can open a request but not decide it.'],
+                ['You hear about it', 'Owners and admins get an email when new requests arrive, with who asked, when and what they answered, unless they switch it off under Settings, Notifications. Viewers can open a request but not decide it.'],
                 ['Accept or decline', 'Accept puts the event on your public schedule; Decline removes it, after you confirm. Anyone who sent the request signed in is emailed your decision. Accept All clears the list in one go; declining is one at a time, on purpose.'],
                 ['Or let it straight through', 'On a venue or curator schedule, switch Require Approval off and requests go straight onto the schedule. Approved schedules skip the queue when they add you to one of their own events, but a booking form request still waits. A performer\'s booking requests always wait.'],
             ];

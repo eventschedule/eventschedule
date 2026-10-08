@@ -51,6 +51,7 @@ use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
+use App\Utils\CustomFieldUtils;
 use App\Utils\DateUtils;
 use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
@@ -5505,6 +5506,10 @@ class RoleController extends Controller
 
         // Read before the fill replaces them with what was posted.
         $storedCuratorIds = $role->default_curator_ids;
+        // The same for the custom fields: further down, "is this field new?" and "have its
+        // options changed?" are questions about what is SAVED. getOriginal() cannot answer
+        // them there either, because a calendar-sync change saves the model on the way.
+        $storedCustomFields = (array) $role->event_custom_fields;
 
         // Not the columns only the server writes (SERVER_OWNED_FIELDS), and not the type: what kind
         // of schedule this is was decided when it was made.
@@ -5637,8 +5642,12 @@ class RoleController extends Controller
 
         // Handle event custom fields (Pro feature)
         if ($request->has('event_custom_fields_submitted') && $role->isPro()) {
-            $submittedFields = $request->input('event_custom_fields', []);
             $existingCustomFields = $role->event_custom_fields ?? [];
+            // A field new to this save never takes a key some event still holds an answer under:
+            // CustomFieldUtils::withUnusedKeys() says how that happens and what it would print.
+            // "New" is against what was SAVED ($storedCustomFields): the fill() above has put the
+            // posted list on the model, so $existingCustomFields is the post itself by now.
+            $submittedFields = CustomFieldUtils::withUnusedKeys($role, (array) $request->input('event_custom_fields', []), $storedCustomFields);
             $eventCustomFields = [];
             $fieldsNeedingTranslation = [];
 
@@ -5694,6 +5703,7 @@ class RoleController extends Controller
                     // Missing means an older row that predates the checkbox, which has always been
                     // shown on the request form - the editor posts a paired hidden 0 for new rows.
                     'show_on_request' => (bool) ($fieldData['show_on_request'] ?? true),
+                    'show_on_event' => ! empty($fieldData['show_on_event']),
                     // "Show as filter". Missing falls back to the type's default (every dropdown and
                     // multiselect was a filter before the flag existed); the editor posts a paired
                     // hidden 0. Stored false for types that cannot filter, whatever was posted.
@@ -5706,8 +5716,10 @@ class RoleController extends Controller
                     'index' => $fieldIndex,
                 ];
 
-                // Preserve options_en if dropdown options haven't changed
-                $existingField = $existingCustomFields[$fieldKey] ?? null;
+                // Preserve options_en if dropdown options haven't changed. Against the stored
+                // field: read from the post, it was never there to preserve, and every save of
+                // the schedule dropped the options' translations until the next translation run.
+                $existingField = $storedCustomFields[$fieldKey] ?? null;
                 if ($existingField && ! empty($existingField['options_en'])
                     && implode(',', array_map('trim', explode(',', $existingField['options'] ?? ''))) === $eventCustomFields[$fieldKey]['options']) {
                     $eventCustomFields[$fieldKey]['options_en'] = $existingField['options_en'];

@@ -43,7 +43,10 @@
         // form in (contact_name). Keyed on contact_name, not is_guest_submission: a SIGNED-IN
         // visitor's booking-form request is not a guest submission but still has nobody else's
         // schedule to show.
-        $submitter = $event->appointment_type_id ? null : $event->contact_name;
+        // Only for a request made through THIS schedule's own form (RequestSummary says why): the
+        // sender's name, address and number ride on the event, and an act that accepted a booking
+        // and then added a venue was showing the venue who had written to the act.
+        $submitter = ! $event->appointment_type_id && \App\Utils\RequestSummary::isFormRequestTo($event, $role) ? $event->contact_name : null;
         // Otherwise it is another schedule: the one that made the event, or failing that the
         // one this card always named (the act, for a venue or a curator; the venue, for an act).
         $asker = null;
@@ -57,8 +60,10 @@
         }
         $groupId = $event->getGroupIdForSubdomain($role->subdomain);
         $group = $groupId ? \App\Models\Group::find($groupId) : null;
-        $requestFields = $event->appointment_type_id ? [] : $role->getRequestFormCustomFields();
-        $requestValues = $event->appointment_type_id ? [] : $event->getCustomFieldValues();
+        // The answers to this schedule's own questions, and nobody else's: field keys collide
+        // across schedules (CustomFieldDisplay says how), so an act's own "Fee" must not be
+        // printed here under a venue's "Room".
+        $requestAnswers = \App\Utils\CustomFieldDisplay::forRequest($event, $role);
     @endphp
     <li class="ap-card rounded-xl request-card">
         <div class="request-body">
@@ -136,14 +141,15 @@
                     {{-- Where. The visitor typed a venue or ticked Online, and the card said neither: the
                          owner had to open the request to learn where they were being asked to be. The
                          schedule's own address is not repeated back to a venue. --}}
-                    @if ($submitter)
-                        @php
-                            $requestVenue = $event->venue && $event->venue->id !== $role->id ? $event->venue : null;
-                            $requestPlace = $requestVenue ? implode(', ', array_filter([$requestVenue->name, $requestVenue->city])) : '';
-                        @endphp
-                        @if ($requestPlace || $event->event_url)
-                        <div data-request-place class="request-line is-quiet" v-pre><bdi>{{ $requestPlace }}</bdi>@if ($requestPlace && $event->event_url) &middot; @endif @if ($event->event_url){{ __('messages.online') }}@endif</div>
-                        @endif
+                    @php
+                        // Not the schedule being asked (its own address is not repeated back to
+                        // it) and not the schedule asking, which the card has just named.
+                        $requestVenue = $event->venue && $event->venue->id !== $role->id && $event->venue->id !== $asker?->id ? $event->venue : null;
+                        $requestPlace = $requestVenue ? implode(', ', array_filter([$requestVenue->name, $requestVenue->city])) : '';
+                        $requestOnline = $submitter && $event->event_url;
+                    @endphp
+                    @if ($requestPlace || $requestOnline)
+                    <div data-request-place class="request-line is-quiet" v-pre><bdi>{{ $requestPlace }}</bdi>@if ($requestPlace && $requestOnline) &middot; @endif @if ($requestOnline){{ __('messages.online') }}@endif</div>
                     @endif
                     @if ($submitter && ($event->contact_email || $event->contact_phone))
                     <p class="request-line" data-request-contact>
@@ -158,28 +164,39 @@
 
                     {{-- Answers to the schedule's request-form questions. Owner-only surface, so
                          private fields are shown here too. --}}
-                    @if ($requestFields && $requestValues)
+                    @if ($requestAnswers)
                     <dl class="mt-2 space-y-2">
-                        @foreach ($requestFields as $fieldKey => $field)
-                            @php $answer = $requestValues[$fieldKey] ?? null; @endphp
-                            @if ($answer !== null && $answer !== '')
-                            <div>
-                                <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400" v-pre><bdi>{{ $role->customFieldLabel($field, $fieldKey) }}</bdi></dt>
-                                <dd class="text-sm text-gray-700 dark:text-gray-300">
-                                    @if (($field['type'] ?? '') === 'multiselect')
-                                        <div class="flex flex-wrap gap-1 mt-1">
-                                            @foreach (array_filter(array_map('trim', explode(',', (string) $answer))) as $answerPart)
-                                            <span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full" dir="auto" v-pre>{{ $answerPart }}</span>
-                                            @endforeach
-                                        </div>
-                                    @elseif (($field['type'] ?? '') === 'switch')
-                                        {{ $answer ? __('messages.yes') : __('messages.no') }}
-                                    @else
-                                        <span class="line-clamp-3" dir="auto" v-pre>{{ $answer }}</span>
-                                    @endif
-                                </dd>
-                            </div>
-                            @endif
+                        @foreach ($requestAnswers as $answer)
+                        <div>
+                            {{-- Accepting the request is what publishes an answer to a field ticked
+                                 "On event page", and this is where that is decided: the same mark the
+                                 event form puts beside such a field. Only where the page would print
+                                 it: a request from before answers recorded their schedule is read
+                                 here (forRequest()) and refused there. --}}
+                            <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                <bdi v-pre>{{ $answer['label'] }}</bdi>
+                                @if ($answer['public'] && $role->isPro() && $event->customFieldValuesBelongTo($role))
+                                <span class="ms-1 inline-flex items-center gap-1 font-normal" data-answer-public title="{{ __('messages.field_request_answer_public_note') }}">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {{ __('messages.field_show_on_event') }}
+                                </span>
+                                @endif
+                            </dt>
+                            <dd class="text-sm text-gray-700 dark:text-gray-300">
+                                @if ($answer['type'] === 'multiselect')
+                                    <div class="flex flex-wrap gap-1 mt-1">
+                                        @foreach ($answer['values'] as $answerPart)
+                                        <span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full" dir="auto" v-pre>{{ $answerPart }}</span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="line-clamp-3" dir="auto" v-pre>{{ $answer['value'] }}</span>
+                                @endif
+                            </dd>
+                        </div>
                         @endforeach
                     </dl>
                     @endif

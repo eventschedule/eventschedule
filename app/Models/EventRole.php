@@ -21,6 +21,10 @@ class EventRole extends Pivot
         'caldav_event_etag',
         'translation_attempts',
         'last_translated_at',
+        // When RequestNotifier told the schedule of this request. Fillable so that
+        // updateExistingPivot() can clear it: a pivot update goes through fill(), which
+        // drops what is not listed here without a word.
+        'request_notified_at',
     ];
 
     protected $casts = [

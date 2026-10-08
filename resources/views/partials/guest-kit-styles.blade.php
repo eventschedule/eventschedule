@@ -110,6 +110,28 @@
          4rem and the row's gap 1rem). --}}
     .gk-more-dates { margin-top: -.75rem; padding-inline-start: 5rem; }
 
+    {{-- The event's own facts (the custom fields its schedule put on the event page), beside one
+         tile like the When and Where rows. One fact reads as those rows do: the answer, then
+         what it is, which the reversed column gives while the label stays first in the markup
+         (.gk-fact-flag is a lone switch or a lone date, which leads with its name).
+         Several are a list: on a phone each label over its answer, a full rem between pairs so a
+         label sits nearer its own answer than the one above; from 40rem the labels are a column
+         of their own, each answer on its label's baseline. That column stops at 9rem and a
+         longer label wraps: sized to the longest label, one long question pushed every answer
+         away from a short one. A list no taller than the tile is centred on it (the 4rem is the
+         tile's own height). An answer keeps its line breaks, and a word with no break in it (an
+         address, a code) wraps rather than widening the card. --}}
+    .gk-facts { display: grid; gap: .5rem; min-width: 0; margin: 0; }
+    .gk-fact { display: flex; flex-direction: column-reverse; min-width: 0; }
+    .gk-fact-flag { display: flex; flex-direction: column; min-width: 0; }
+    .gk-facts-pairs { gap: 1rem; min-height: 4rem; align-content: center; }
+    .gk-fact-pair { display: flex; flex-direction: column; min-width: 0; }
+    .gk-fact-text { margin: 0; min-width: 0; overflow-wrap: anywhere; white-space: pre-line; }
+    @media (min-width: 40rem) {
+        .gk-facts-pairs { grid-template-columns: fit-content(9rem) minmax(0, 1fr); gap: .375rem 1rem; align-items: baseline; }
+        .gk-fact-pair { display: contents; }
+    }
+
     {{-- The foot of a form: its actions, kept at the bottom of the screen while the form is longer
          than it. It bleeds to the edges of the panel it sits in (1.25rem of padding on a phone,
          2rem from a tablet up), so it reads as the panel's own foot. --}}
