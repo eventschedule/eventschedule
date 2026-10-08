@@ -59,6 +59,10 @@ class AdminAlertService
         // Amber, beside it: no page is broken, but owners who switched a venue map on are
         // waiting for one that cannot be finished while the address search does not answer.
         'venue_map_lookups_failing',
+        // Amber, with the other things of ours that stopped: half of all feeds failing at once
+        // is not each source having a bad day. While it shows, no owner is mailed that their
+        // feed is broken and none is paused for it (FeedImporter::failed()).
+        'feeds_failing',
         // Above subscriptions_unrecognized: that customer at least still has the schedule they
         // are paying for. This one is being charged for a schedule that no longer exists, and
         // nothing left in the app lets them stop it.
@@ -239,6 +243,16 @@ class AdminAlertService
                 $since = \Illuminate\Support\Facades\Cache::get(\App\Services\PlaceLookupService::FAILING_SINCE_KEY);
 
                 return is_numeric($since) && $since <= now()->subHour()->timestamp ? 1 : 0;
+            },
+
+            // How many feeds are failing, when that is many at once (EventFeed::manyFailing()):
+            // one feed that cannot be read is its schedule's news, not ours.
+            'feeds_failing' => function () {
+                if (! \App\Models\EventFeed::tablesReady() || ! \App\Models\EventFeed::manyFailing()) {
+                    return 0;
+                }
+
+                return \App\Models\EventFeed::whereNull('paused_at')->where('failure_count', '>', 0)->count();
             },
 
             // A live subscription whose stripe_price is none of the four configured IDs.
@@ -519,6 +533,7 @@ class AdminAlertService
             'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
             'realtime_prune_stalled' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],
             'venue_map_lookups_failing' => ['system', 'queue', 'admin.queue', [], '', 'amber', __('messages.queue')],
+            'feeds_failing' => ['manage', 'feeds', 'admin.feeds', ['state' => 'failing'], '', 'amber', __('messages.feeds_tab')],
             // Its own anchor, not #amount-mismatch: that block is a table of mismatched SALES,
             // and landing there would scroll past the thing the row is about.
             'subscriptions_orphaned' => ['insights', 'revenue', 'admin.revenue', [], '#orphaned-subscriptions', 'red', __('messages.revenue')],

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminFederationController;
+use App\Http\Controllers\AdminFeedController;
 use App\Http\Controllers\AdminLegalController;
 use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AdminRealtimeController;
@@ -905,20 +906,24 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     // Feeds: the addresses a schedule keeps reading for events. Their list is a tab of the
     // schedule (role.view_admin, tab "feeds"); these are what changes one. For the owner and the
     // admins, checked in the controller. The check is throttled: it fetches somebody else's server.
-    Route::get('/{subdomain}/feeds/add', [EventFeedController::class, 'create'])->name('role.feeds.create');
-    Route::post('/{subdomain}/feeds/check', [EventFeedController::class, 'check'])->name('role.feeds.check')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/feeds', [EventFeedController::class, 'store'])->name('role.feeds.store');
-    Route::get('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'show'])->name('role.feeds.show');
-    Route::get('/{subdomain}/feeds/{hash}/edit', [EventFeedController::class, 'edit'])->name('role.feeds.edit');
-    Route::put('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'update'])->name('role.feeds.update');
-    Route::delete('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'destroy'])->name('role.feeds.destroy');
-    Route::post('/{subdomain}/feeds/{hash}/read', [EventFeedController::class, 'read'])->name('role.feeds.read')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/feeds/{hash}/pause', [EventFeedController::class, 'pause'])->name('role.feeds.pause');
-    Route::post('/{subdomain}/feeds/{hash}/resume', [EventFeedController::class, 'resume'])->name('role.feeds.resume');
-    Route::post('/{subdomain}/feeds/{hash}/review', [EventFeedController::class, 'review'])->name('role.feeds.review');
-    Route::post('/{subdomain}/feeds/{hash}/publish-all', [EventFeedController::class, 'publishAll'])->name('role.feeds.publish_all');
-    Route::post('/{subdomain}/feeds/{hash}/decide/{item}', [EventFeedController::class, 'decide'])->name('role.feeds.decide');
-    Route::post('/{subdomain}/feeds/{hash}/undo', [EventFeedController::class, 'undo'])->name('role.feeds.undo');
+    // A schedule's feeds. Never a schedule called admin (no schedule can be): /admin/feeds and
+    // what hangs off it are the platform's own pages, registered further down.
+    Route::where(['subdomain' => '(?!admin(?=/|$))[^/]+'])->group(function () {
+        Route::get('/{subdomain}/feeds/add', [EventFeedController::class, 'create'])->name('role.feeds.create');
+        Route::post('/{subdomain}/feeds/check', [EventFeedController::class, 'check'])->name('role.feeds.check')->middleware('throttle:10,1');
+        Route::post('/{subdomain}/feeds', [EventFeedController::class, 'store'])->name('role.feeds.store');
+        Route::get('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'show'])->name('role.feeds.show');
+        Route::get('/{subdomain}/feeds/{hash}/edit', [EventFeedController::class, 'edit'])->name('role.feeds.edit');
+        Route::put('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'update'])->name('role.feeds.update');
+        Route::delete('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'destroy'])->name('role.feeds.destroy');
+        Route::post('/{subdomain}/feeds/{hash}/read', [EventFeedController::class, 'read'])->name('role.feeds.read')->middleware('throttle:10,1');
+        Route::post('/{subdomain}/feeds/{hash}/pause', [EventFeedController::class, 'pause'])->name('role.feeds.pause');
+        Route::post('/{subdomain}/feeds/{hash}/resume', [EventFeedController::class, 'resume'])->name('role.feeds.resume');
+        Route::post('/{subdomain}/feeds/{hash}/review', [EventFeedController::class, 'review'])->name('role.feeds.review');
+        Route::post('/{subdomain}/feeds/{hash}/publish-all', [EventFeedController::class, 'publishAll'])->name('role.feeds.publish_all');
+        Route::post('/{subdomain}/feeds/{hash}/decide/{item}', [EventFeedController::class, 'decide'])->name('role.feeds.decide');
+        Route::post('/{subdomain}/feeds/{hash}/undo', [EventFeedController::class, 'undo'])->name('role.feeds.undo');
+    });
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
     Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');
@@ -987,9 +992,11 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     // install a schedule legitimately living at /features - the reserved-subdomain list in Role.php
     // is gated on config('app.hosted') and is not consulted by the rename path at all, so a
     // schedule really can hold that subdomain.
+    // "admin" as well: /admin/feeds is the platform's own page, and without this it is the Feeds
+    // tab of a schedule called admin, which no schedule can be (Role::RESERVED_SUBDOMAINS).
     $adminTabSubdomain = config('app.is_nexus')
-        ? '(?!docs(?=/|$)|features(?=/|$))[^/]+'
-        : '(?!docs(?=/|$))[^/]+';
+        ? '(?!docs(?=/|$)|features(?=/|$)|admin(?=/|$))[^/]+'
+        : '(?!docs(?=/|$)|admin(?=/|$))[^/]+';
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|feeds|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
@@ -1124,6 +1131,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         // Same shape as admin.app_update and admin.federation above: registered everywhere, with
         // the controller owning the authorization. AdminController::schedules() counts Stripe
         // subscriptions and granted plans, which simply read zero off-platform.
+        Route::get('/admin/feeds', [AdminFeedController::class, 'index'])->name('admin.feeds');
+        Route::post('/admin/feeds/{hash}/read', [AdminFeedController::class, 'read'])->name('admin.feeds.read');
+        Route::post('/admin/feeds/{hash}/resume', [AdminFeedController::class, 'resume'])->name('admin.feeds.resume');
         Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
         Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
         Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
