@@ -280,7 +280,10 @@
              owner's custom CSS, which must be able to overrule both. --}}
         @include('partials.guest-theme')
         @include('partials.guest-kit-styles')
+        {{-- The month's kit, on a page that draws a calendar (role/partials/calendar says so). --}}
+        @if (request()->attributes->get('month_kit'))
         @include('partials.month-kit-styles')
+        @endif
 
         <style {!! nonce_attr() !!}>
         @if (request()->embed)

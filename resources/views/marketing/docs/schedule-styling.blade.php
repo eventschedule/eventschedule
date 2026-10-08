@@ -348,7 +348,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Calendar</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Events laid out on a month grid, one cell per day, loaded one month at a time. Best when the shape of the month matters, such as a venue with something on most nights.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Events laid out on a month grid, one cell per day, loaded one month at a time. Best when the shape of the month matters, such as a venue with something on most nights. A day shows its first three events, more where its week has room, and the rest behind <strong class="text-gray-900 dark:text-white">+N more</strong>, which opens the whole day; a day with one event shows its picture. Pointing at an event, or a first tap on a touch screen, opens a card beside the day with its date, time, place and price, the way to its tickets or sign-up, and, on your own page, Add to Calendar and share. The arrow keys move between events and days, and Page Up and Page Down change the month.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List</h4>

@@ -37,8 +37,12 @@ trait CalendarDataTrait
         $user = auth()->user();
         $canEdit = false;
         if ($user && $userAdminRoleIds !== null) {
-            $canEdit = $user->id == $event->user_id
-                || $event->roles->contains(fn ($r) => in_array($r->id, $userAdminRoleIds));
+            $onOwnSchedule = $event->roles->contains(fn ($r) => in_array($r->id, $userAdminRoleIds));
+            // With no schedule in hand (the dashboard) the link is event.edit_admin, which looks
+            // for a schedule the event is on that this person edits: "I made it" alone opens
+            // nothing there. An event sent to somebody else's schedule was offered Edit Event,
+            // on the card's main button, and the page answered 403.
+            $canEdit = $role ? ($user->id == $event->user_id || $onOwnSchedule) : $onOwnSchedule;
         } elseif ($user) {
             $canEdit = $user->canEditEvent($event);
         }

@@ -108,7 +108,8 @@ class MonthGridTest extends TestCase
         $from = __('messages.price_from', ['price' => MoneyUtils::format(10, 'USD')]);
         $this->assertSame($from, $this->row($paid)['ticket_from']);
         $this->assertSame('from', $paid->fresh()->ticketPriceSummary($date)['says']);
-        $this->assertStringContainsString($from, $this->get($this->guestEventUrl($this->role, $paid))->assertOk()->getContent());
+        $this->assertSame(1, preg_match('/data-ticket-price>\s*(.*?)\s*<\/span>/s', $this->get($this->guestEventUrl($this->role, $paid))->assertOk()->getContent(), $paidLine));
+        $this->assertSame($from, trim($paidLine[1]), 'the price line itself, not some other mention of the price');
     }
 
     /**
@@ -128,6 +129,95 @@ class MonthGridTest extends TestCase
         $this->assertSame('America/Los_Angeles', $this->row($plain, $la)['zone']);
         // The card's own fields are as they were: nothing to say about tickets, and no clock.
         $this->assertSame(Event::NO_CARD_TICKET_FIELDS, $plain->fresh()->cardTicketFields());
+
+        // The two pages the clock was wrong on. A curator in New York that lists the event: its
+        // page's clock is the curator's, the event's is still Los Angeles.
+        $curator = $this->createRole($this->createOwner(), 'curator', ['timezone' => 'America/New_York']);
+        $plain->roles()->attach($curator->id, ['is_accepted' => true]);
+        $this->assertSame('America/Los_Angeles', $this->row($plain, $curator)['zone']);
+        // And the dashboard of the venue's owner, whose own clock is neither.
+        $owner = $la->users()->first();
+        $owner->timezone = 'Europe/Berlin';
+        $owner->save();
+        $when = now()->addDays(7);
+        $mine = collect($this->actingAs($owner)->getJson('/dashboard/api/calendar-events?year='.$when->year.'&month='.$when->month)->assertOk()->json('events'))->firstWhere('name', 'Just A Date');
+        $this->assertSame('America/Los_Angeles', $mine['zone']);
+        auth()->logout();
+    }
+
+    /**
+     * Edit Event is offered where the page it leads to will open. With no schedule in hand (the
+     * dashboard) the link is event.edit_admin, which wants a schedule the event is on that the
+     * person edits: an event somebody made on a schedule they do not edit was offered it, on the
+     * card's main button, and the page answered 403.
+     */
+    public function test_the_dashboard_offers_edit_only_where_the_edit_page_opens(): void
+    {
+        $owner = $this->role->users()->first();
+        $someoneElses = $this->createRole($this->createOwner(), 'venue', ['timezone' => 'America/New_York']);
+        $this->event(['name' => 'On My Own Schedule', 'tickets_enabled' => false]);
+        $sent = $this->event(['name' => 'Sent To Another Schedule', 'tickets_enabled' => false, 'user_id' => $owner->id], $someoneElses);
+
+        $when = now()->addDays(7);
+        $rows = collect($this->actingAs($owner)->getJson('/dashboard/api/calendar-events?year='.$when->year.'&month='.$when->month)->assertOk()->json('events'))->keyBy('name');
+
+        $this->assertTrue($rows['On My Own Schedule']['can_edit']);
+        $this->assertNotNull($rows['On My Own Schedule']['edit_url']);
+        $this->get($rows['On My Own Schedule']['edit_url'])->assertRedirect();
+
+        $this->assertTrue($rows->has('Sent To Another Schedule'), 'what the person made is still on their dashboard');
+        $this->assertFalse($rows['Sent To Another Schedule']['can_edit'], 'but nothing offers to edit it from there');
+        $this->assertNull($rows['Sent To Another Schedule']['edit_url']);
+        $this->get(route('event.edit_admin', ['hash' => \App\Utils\UrlUtils::encodeId($sent->id)]))->assertForbidden();
+    }
+
+    /**
+     * The plus on a day of the dashboard's month goes where the dashboard's own Add Event goes:
+     * a schedule the person EDITS. It went to the first schedule they belong to by name, which
+     * can be one they only view, and the form turned them away.
+     */
+    public function test_the_dashboards_plus_goes_to_a_schedule_the_person_edits(): void
+    {
+        $owner = $this->role->users()->first();
+        $this->role->forceFill(['name' => 'Zeta Hall'])->saveQuietly();
+        $viewed = $this->createRole($this->createOwner(), 'venue', ['name' => 'Alpha Rooms']);
+        $viewed->users()->attach($owner->id, ['level' => 'viewer']);
+
+        $home = $this->actingAs($owner)->get(route('home'))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/const CAN = \{.*"add":"([^"]*)"\};/', $home, $found));
+        $add = stripslashes($found[1]);
+        $this->assertStringContainsString($this->role->subdomain, $add);
+        $this->assertStringNotContainsString($viewed->subdomain, $add);
+        $this->assertStringEndsWith('date=MONTH-DATE', $add);
+        $this->get(str_replace('MONTH-DATE', now()->addDays(3)->format('Y-m-d'), $add))->assertOk();
+    }
+
+    /**
+     * Draft, Internal and Cancelled are said in the month wherever the feed sends such events:
+     * to the schedule's own people, and to nobody else.
+     */
+    public function test_a_draft_is_sent_to_its_schedules_people_and_to_nobody_else(): void
+    {
+        $owner = $this->role->users()->first();
+        $this->event(['name' => 'Announced', 'tickets_enabled' => false]);
+        $this->event(['name' => 'Not Announced Yet', 'tickets_enabled' => false, 'is_draft' => true]);
+        $when = now()->addDays(7);
+        $query = '?year='.$when->year.'&month='.$when->month;
+
+        $visitor = collect($this->getJson('/'.$this->role->subdomain.'/api/calendar-events'.$query)->assertOk()->json('events'))->keyBy('name');
+        $this->assertTrue($visitor->has('Announced'));
+        $this->assertFalse($visitor->has('Not Announced Yet'), 'a visitor is not sent a draft');
+
+        $mine = collect($this->actingAs($owner)->getJson(route('role.admin_calendar_events', ['subdomain' => $this->role->subdomain]).$query)->assertOk()->json('events'))->keyBy('name');
+        $this->assertTrue((bool) $mine['Not Announced Yet']['is_draft'], 'its owner is, marked as one');
+        $this->assertFalse((bool) $mine['Announced']['is_draft']);
+
+        // And the month says so on every day the event is written, one that is over too: the
+        // mark is not among the things kept for a day still to come.
+        $script = file_get_contents(resource_path('views/role/partials/month-script.blade.php'));
+        $this->assertStringContainsString("if (mark) notes.push({ k: 'mark', cls: 'gk-cal-note-say', text: mark[1], mark: mark[2] });", $script);
+        $this->assertSame(0, preg_match('/if \(opt\.sub !== \'none\'\) \{\s*if \(mark\)/', $script));
+        $this->assertStringContainsString('(told || f.cancelled)', $script);
     }
 
     /**
@@ -194,6 +284,17 @@ class MonthGridTest extends TestCase
         $this->assertStringContainsString('--gk-solid: rgb(var(--ap-surface));', $admin);
         $this->assertStringNotContainsString('--gk-solid: rgb(var(--ap-surface));', $guest);
         auth()->logout();
+        // The kit is printed where a calendar is drawn and nowhere else: it is 34 KB, and the
+        // event page, the checkout and the rest of the portal have no month.
+        $supper = $this->event(['name' => 'Kit Check', 'tickets_enabled' => false]);
+        $eventPage = $this->get($this->guestEventUrl($this->role, $supper))->assertOk()->getContent();
+        $this->assertStringNotContainsString('.gk-cal-week {', $eventPage);
+        $settings = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'followers']))->assertOk()->getContent();
+        $this->assertStringNotContainsString('.gk-cal-week {', $settings);
+        $this->assertStringContainsString('.gk-cal-week {', $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent());
+        auth()->logout();
+        // Its notes are for whoever edits it and are not sent.
+        $this->assertStringNotContainsString('/*', substr($guest, strpos($guest, '.gk-cal {'), 30000));
         // An embed opens an event in a new tab, as it always has; the page itself does not.
         $this->assertStringContainsString(':data-ev="chip.id" :data-date="day.date" :aria-label="chip.label">', $guest);
         $this->assertSame(1, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank" rel="noopener"/', $embed));
@@ -254,6 +355,27 @@ class MonthGridTest extends TestCase
         $outlook = $this->get($ical.'?to=outlook')->assertRedirect()->headers->get('Location');
         $this->assertStringStartsWith('https://outlook.live.com/calendar/0/deeplink/compose?subject='.urlencode($event->getTitle()), $outlook);
 
+        // A series: the night in the address is the night of the entry, at the venue's hour.
+        $first = Carbon::now('America/New_York')->subWeeks(3)->setTime(19, 30, 0);
+        $series = $this->event([
+            'name' => 'Weekly Session', 'tickets_enabled' => false,
+            'starts_at' => $first->copy()->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => str_pad(str_repeat('0', $first->dayOfWeek).'1', 7, '0'), 'recurring_frequency' => 'weekly',
+        ]);
+        $night = $first->copy()->addWeeks(5);
+        $stamp = fn (Carbon $at) => $at->copy()->utc()->format('Ymd\THis\Z');
+        $entry = $this->get($this->guestEventUrl($this->role, $series, $night->format('Y-m-d')).'/ical?to=google')->assertRedirect()->headers->get('Location');
+        $this->assertStringContainsString('&dates='.$stamp($night).'/', $entry, 'the night that was asked for');
+        // A day the series is not on is nobody's night: the entry is the series' own start.
+        $offDay = $night->copy()->addDay();
+        $entry = $this->get($this->guestEventUrl($this->role, $series, $offDay->format('Y-m-d')).'/ical?to=google')->assertRedirect()->headers->get('Location');
+        $this->assertStringContainsString('&dates='.$stamp($first).'/', $entry);
+
+        // A cancelled event is left to the file, which can say it is cancelled.
+        $off = $this->event(['name' => 'Rained Off', 'tickets_enabled' => false, 'is_cancelled' => true]);
+        $file = $this->get($this->guestEventUrl($this->role, $off).'/ical?to=google')->assertOk()->getContent();
+        $this->assertStringContainsString('STATUS:CANCELLED', $file);
+
         // Anything else is not a destination: the .ics, as before.
         foreach (['?to=https://evil.example', '?to=yahoo', ''] as $other) {
             $file = $this->get($ical.$other)->assertOk();
@@ -276,18 +398,25 @@ class MonthGridTest extends TestCase
     public function test_who_is_away_is_told_as_text_and_the_availability_grid_stays(): void
     {
         $owner = $this->role->users()->first();
-        $day = now()->addDays(3)->format('Y-m-d');
-        foreach (['Dana <b>Bold</b>', 'Sam Rivers', 'Sam Rivers'] as $name) {
+        // Today: on the month's page whatever the day of the month the suite runs on.
+        $day = now()->format('Y-m-d');
+        $longAgo = now()->subYears(2)->format('Y-m-d');
+        $swallows = 'Dana <b>Bold</b> <!--<script';
+        foreach ([$swallows, 'Sam Rivers', 'Sam Rivers'] as $name) {
             $member = \App\Models\User::factory()->create(['name' => $name, 'email_verified_at' => now()]);
-            $this->role->users()->attach($member->id, ['level' => 'admin', 'dates_unavailable' => json_encode([$day])]);
+            $this->role->users()->attach($member->id, ['level' => 'admin', 'dates_unavailable' => json_encode([$longAgo, $day])]);
         }
 
         $schedule = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
         $this->assertSame(1, preg_match('/const AWAY = (\[.*?\]);\n/', $schedule, $found));
         $away = json_decode($found[1], true);
-        $this->assertSame(['Dana <b>Bold</b>', 'Sam Rivers', 'Sam Rivers'], array_column($away, 'name'), 'by name as written, one entry a member');
-        $this->assertSame([[$day], [$day], [$day]], array_column($away, 'dates'));
-        $this->assertStringNotContainsString('<b>Bold</b>', $schedule, 'no member\'s name is in the page as markup');
+        $this->assertSame([$swallows, 'Sam Rivers', 'Sam Rivers'], array_column($away, 'name'), 'by name as written, one entry a member');
+        $this->assertSame([[$day], [$day], [$day]], array_column($away, 'dates'), 'the days this page shows, not every day a member ever marked');
+        // The name is in a script block. Written by @json from a bare variable, its "<" is
+        // \u003C there: handed an expression with a comma the directive drops that escaping, and
+        // a name holding "<!--<script" keeps the block's own closing tag from ending it.
+        $this->assertStringNotContainsString('<!--<script', $schedule, 'a name cannot swallow the script it is printed in');
+        $this->assertStringContainsString('Dana \u003Cb\u003EBold\u003C\/b\u003E \u003C!--\u003Cscript', $found[1]);
         // Printed through bindings: an attribute and a text node, never markup.
         $month = file_get_contents(resource_path('views/role/partials/month.blade.php'));
         $this->assertStringContainsString('<span v-if="day.away" class="gk-cal-away" tabindex="0" role="img" :title="day.away" :aria-label="day.away">', $month);
@@ -320,10 +449,9 @@ class MonthGridTest extends TestCase
         // A day the owner marked is drawn marked, and says so.
         $this->role->users()->updateExistingPivot($owner->id, ['dates_unavailable' => json_encode([$day])]);
         $marked = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
-        if (now()->addDays(3)->isSameMonth(now())) {
-            $this->assertSame(1, preg_match('/day-element" data-date="'.$day.'"\s+role="button" tabindex="0" aria-pressed="true"[^>]*>.*?<div class="day-x" data-label="'.preg_quote(e(__('messages.unavailable')), '/').'"><\/div>/s', $marked));
-        }
-        $this->assertSame(substr_count($marked, 'aria-pressed="true"'), substr_count($marked, '<div class="day-x" data-label='));
+        $this->assertSame(1, preg_match('/day-element" data-date="'.$day.'"\s+role="button" tabindex="0" aria-pressed="true"[^>]*>.*?<div class="day-x" data-label="'.preg_quote(e(__('messages.unavailable')), '/').'"><\/div>/s', $marked));
+        $this->assertSame(1, substr_count($marked, 'aria-pressed="true"'));
+        $this->assertSame(1, substr_count($marked, '<div class="day-x" data-label='));
 
         // While the month loads, the page shows the month's own frame.
         $this->assertSame(1, substr_count($schedule, 'class="gk-cal gk-cal-wait hidden md:block animate-pulse"'));
@@ -348,6 +476,10 @@ class MonthGridTest extends TestCase
         foreach ($rules as [, $selector, $body]) {
             $this->assertStringNotContainsString('var(--es-accent)', $body, trim($selector).' reads the wrapper\'s accent');
         }
+        // Nor does anything else in the kit: the card's filled button is also the empty month's
+        // "Go to November", which stands INSIDE the wrapper, and was white on white there.
+        $this->assertSame(0, substr_count($kit, 'var(--es-accent)'), 'no rule of the kit reads the accent as typed');
+        $this->assertStringContainsString('.gk-peek-btn-primary { background: var(--cal-fill); color: var(--es-accent-text);', $kit);
         // The pair that was unreadable: both halves now come from the same place.
         $this->assertSame(1, preg_match('/\.gk-cal-day-today \.gk-cal-num \{ background: var\(--cal-fill\); color: var\(--es-accent-text\);/', $kit));
         $this->assertSame(1, preg_match('/\.gk-cal-span \{[^}]*background: var\(--cal-fill\);[^}]*color: var\(--es-accent-text\);/', $kit));
@@ -410,5 +542,55 @@ class MonthGridTest extends TestCase
         // The admin's month: a third ink and a readable blue that the portal's own are not.
         $this->assertStringContainsString('--gk-ink-3: color-mix(in srgb, rgb(var(--ap-ink-2)) 50%, rgb(var(--ap-ink-3)));', $kit);
         $this->assertStringContainsString('--es-accent-readable: color-mix(in srgb, var(--brand-blue) 70%, rgb(var(--ap-ink)));', $kit);
+    }
+
+    /**
+     * What a reading of the page's scripts found after the month was on its four pages, each
+     * pinned where the server can see it (a browser is what proves the behaviour).
+     */
+    public function test_what_the_ship_review_found_stays_fixed(): void
+    {
+        $owner = $this->role->users()->first();
+        $script = file_get_contents(resource_path('views/role/partials/month-script.blade.php'));
+        $month = file_get_contents(resource_path('views/role/partials/month.blade.php'));
+
+        // A name is on the page before the month is fitted around it: a watcher that waits for
+        // the draw runs ahead of a directive's mounted and updated hooks.
+        $this->assertSame(1, preg_match('/window\.monthClamp = \{.*?beforeMount\(el, binding\).*?beforeUpdate\(el, binding\)/s', $script));
+        $this->assertSame(0, preg_match('/window\.monthClamp = \{[^}]*?\n    (mounted|updated)\(/s', $script));
+
+        // "Nothing scheduled in October" is a statement about the schedule: not said while a
+        // filter is what hid the month's events.
+        $this->assertStringContainsString('v-if="!isLoadingEvents && !loadFailed && monthIsBare && narrowingFilterCount === 0" class="gk-cal-empty"', $month);
+
+        // A night that runs past midnight is not over at midnight.
+        $this->assertStringContainsString('const past = start ? ended : last < now.slice(0, 10);', $script);
+
+        // The dashboard is the person's own page: a Hebrew reader's month runs right to left and
+        // writes its dates in Hebrew. It was forced left to right, in English.
+        $owner->language_code = 'he';
+        $owner->save();
+        $home = $this->actingAs($owner)->get(route('home'))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/\bisRtl: true,/', $home));
+        $this->assertStringContainsString("languageCode: 'he',", $home);
+        $owner->language_code = 'en';
+        $owner->save();
+        app()->setLocale('en');
+
+        // Edit Event stays in the tab, as Add Event does; View Event and a guest's embed open another.
+        $admin = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+        $this->assertStringContainsString(':target="monthPeek.go.edit ? null : \'_blank\'"', $admin);
+        $this->assertStringContainsString('data-month-top class="sticky top-0', $admin, 'the card is kept under the portal\'s own bar');
+        auth()->logout();
+        $guest = $this->get('/'.$this->role->subdomain.'?layout=calendar')->assertOk()->getContent();
+        $this->assertStringNotContainsString('monthPeek.go.edit ? null', $guest, 'a guest\'s page opens an event in its own tab');
+
+        // A viewer cannot mark a day (the script is not given to one), so no day says it is a button.
+        $viewer = \App\Models\User::factory()->create(['email_verified_at' => now()]);
+        $this->role->users()->attach($viewer->id, ['level' => 'viewer']);
+        $asViewer = $this->actingAs($viewer)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
+        $this->assertSame(1, substr_count($asViewer, 'data-availability-grid'));
+        $this->assertSame(0, substr_count($asViewer, 'role="button" tabindex="0" aria-pressed'), 'a viewer\'s days are not buttons that do nothing');
+        $this->assertSame(0, substr_count($asViewer, 'day-element" data-date='));
     }
 }

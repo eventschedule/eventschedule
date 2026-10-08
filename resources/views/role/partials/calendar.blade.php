@@ -1,4 +1,10 @@
-@php $headerTemplates = $headerTemplates ?? collect(); @endphp
+@php
+    $headerTemplates = $headerTemplates ?? collect();
+    // This page draws a calendar: the layout prints the month's stylesheet in its head
+    // (partials/month-kit-styles), where an owner's custom CSS still comes after it. Said on the
+    // request, which the layout reads when its own turn comes: a page's body is rendered first.
+    request()->attributes->set('month_kit', true);
+@endphp
 <style>
     [v-cloak] { display: none !important; }
     .hover-accent:not(:disabled):hover {
@@ -50,8 +56,6 @@
     $startOfMonth = Carbon\Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDay);
     $endOfMonth = Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);
     $currentDate = $startOfMonth->copy();
-    $totalDays = $endOfMonth->diffInDays($startOfMonth) + 1;
-    $totalWeeks = ceil($totalDays / 7);
     $unavailable = [];
     
     // The zone this whole calendar reasons in. Events are placed by their own schedule's
@@ -719,7 +723,9 @@
             $pickDayKeys = array_merge(array_slice($pickDayKeys, $firstDay), array_slice($pickDayKeys, 0, $firstDay));
             $pickToday = $today->format('Y-m-d');
             $pickTodayCol = ($today->year == $year && $today->month == $month) ? ($today->dayOfWeek - $firstDay + 7) % 7 : -1;
-            $pickMarks = $route == 'admin' && $role->email_verified_at;
+            // A day can be pressed where the script that marks it is on the page, and only there
+            // (role/show-admin gives it to everyone but a viewer: keep the two conditions one).
+            $pickMarks = $route == 'admin' && $role->email_verified_at && ! ($isViewer ?? false);
             $pickMarked = is_array($datesUnavailable) ? $datesUnavailable : [];
             $pickCol = 0;
         @endphp
@@ -2532,7 +2538,10 @@ const calendarApp = createApp({
             // the address asked for, and the event's way back returns to that view.
             layoutFromUrl: @json(requested_event_layout()),
             directRegistration: {{ isset($role) && $role->direct_registration ? 'true' : 'false' }},
-            isRtl: {{ $isAdminRoute ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
+            {{-- The dashboard is the person's own page, as the admin's are: its direction and its
+                 language are theirs. Left to the schedule's (there is none there), the month was
+                 forced left to right and wrote its dates in English for every other language. --}}
+            isRtl: {{ ($isAdminRoute || $route === 'home') ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
             durationLabels: {
                 h: @json(__('messages.duration_hour_short')),
                 d: @json(__('messages.duration_day_short')),
@@ -2540,7 +2549,7 @@ const calendarApp = createApp({
             },
             {{-- Also the language forwarded to the guest calendar endpoints, so their payload can no
                  longer disagree with the server-rendered chrome around it. --}}
-            languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
+            languageCode: '{{ ($isAdminRoute || $route === 'home') && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
             {{-- The zone the past-event filters resolve "today" in. Must be the same one $today
                  above uses: these compare against occurrenceDate, which is the SCHEDULE's calendar
                  date, so a viewer-anchored today hides an event that is still running. --}}
@@ -2653,9 +2662,6 @@ const calendarApp = createApp({
                 current.setDate(current.getDate() + 1);
             }
             return days;
-        },
-        totalWeeksComputed() {
-            return Math.ceil(this.calendarDays.length / 7);
         },
         monthYearLabel() {
             const date = new Date(this.pageYear, this.pageMonth - 1, 1);

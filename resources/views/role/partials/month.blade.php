@@ -30,9 +30,11 @@
     </div>
     {{-- A month with nothing in it says so above its weeks, over nobody's day, and where the
          page holds a later event it names it and goes to its month. Behind !loadFailed like
-         every empty state: "nothing scheduled" is a statement about the schedule. --}}
-    <div v-if="!isLoadingEvents && !loadFailed && monthIsBare" class="gk-cal-empty">
-        <div class="gk-cal-empty-card">
+         every empty state: "nothing scheduled" is a statement about the schedule, which is
+         also why it is not said while a filter is what hid the month's events (the notice
+         above the month says that, and offers the way out). --}}
+    <div v-if="!isLoadingEvents && !loadFailed && monthIsBare && narrowingFilterCount === 0" class="gk-cal-empty" role="row">
+        <div class="gk-cal-empty-card" role="gridcell" aria-colspan="7">
             <b v-text="monthEmpty.title"></b>
             <span v-if="monthEmpty.next"><span>{{ __('messages.next_up') }}</span> <bdi v-text="monthEmpty.next.name"></bdi><span v-text="', ' + monthEmpty.next.when"></span></span>
             <span v-if="monthEmpty.next || monthEmpty.add" class="gk-cal-empty-go">
@@ -43,7 +45,7 @@
     </div>
     {{-- Keyed by the month and by whether it is still loading, so the weeks are made anew when a
          month arrives: that is what lets them come in from the side they were asked from. --}}
-    <div class="gk-cal-weeks" :key="monthYearDatetime + (isLoadingEvents ? ':loading' : '')" :class="[{ 'gk-cal-bare': monthIsBare }, monthCame]">
+    <div class="gk-cal-weeks" :key="monthYearDatetime + (isLoadingEvents ? ':loading' : '')" :class="[{ 'gk-cal-bare': monthIsBare }, monthCame]" @animationend.self="monthCame = ''">
         <div v-for="week in monthWeeks" :key="week.key" class="gk-cal-week" :class="{ 'gk-cal-week-past': week.small }" role="row">
             <div v-for="day in week.days" :key="day.date" class="gk-cal-day" :class="day.cls" role="gridcell"
                  :data-date="day.date" :data-col="day.col" :data-full="day.full" :aria-current="day.today ? 'date' : null">

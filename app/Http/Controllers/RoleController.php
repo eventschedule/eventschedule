@@ -3698,7 +3698,6 @@ class RoleController extends Controller
 
                     foreach ($members as $member) {
                         if ($member->pivot->dates_unavailable) {
-                            $datesUnavailable[e($member->name)] = json_decode($member->pivot->dates_unavailable);
                             // For the month, which prints a name as text: the name as it is
                             // written, and one entry a member (two members can share a name).
                             $unavailableMembers[] = ['name' => (string) $member->name, 'dates' => (array) json_decode($member->pivot->dates_unavailable)];

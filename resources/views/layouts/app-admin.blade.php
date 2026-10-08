@@ -75,8 +75,11 @@
              three forms and a schedule's tabs used them. --}}
         @include('partials.form-kit-styles')
         @include('partials.admin-page-styles')
-        {{-- The month (the Schedule tab, the dashboard) on the portal's own tokens. --}}
+        {{-- The month (the Schedule and Availability tabs, the dashboard) on the portal's own
+             tokens, on a page that draws a calendar (role/partials/calendar says so). --}}
+        @if (request()->attributes->get('month_kit'))
         @include('partials.month-kit-styles', ['monthBridge' => true])
+        @endif
         @include('partials.admin-page-script')
 
         {{ isset($head) ? $head : '' }}
@@ -136,7 +139,7 @@
 
         <div class="lg:ps-72 flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
             <div
-                class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 header-gradient px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 ap-frame-bar{{ $frameWide ? ' is-wide' : '' }}">
+                data-month-top class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 header-gradient px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 ap-frame-bar{{ $frameWide ? ' is-wide' : '' }}">
                 <button id="open-sidebar" type="button" class="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 lg:hidden">
                     <span class="sr-only">{{ __('messages.open_sidebar') }}</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"

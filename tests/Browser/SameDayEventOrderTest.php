@@ -160,13 +160,10 @@ class SameDayEventOrderTest extends DuskTestCase
             [$vue, $dom] = $this->gridDay($browser, $this->today);
             $this->assertSame(['Festival', 'Brunch'], $vue);
             // The festival is a bar across its days, above each day's own events. The brunch is
-            // today's one line until it is over (noon in New York), and then stands behind
-            // "1 earlier today": what is over today gives its place to what is not.
+            // today's one line at any hour: what is over today gives its place to what is not,
+            // and with nothing else on today there is nothing to give it to.
             $this->assertContains('Festival', $dom['bars']);
-            $this->assertTrue(
-                $dom['lines'] === ['Brunch'] || ($dom['lines'] === [] && str_contains($dom['more'], '1')),
-                'Brunch is today\'s line, or behind "1 earlier today": '.json_encode($dom)
-            );
+            $this->assertSame(['Brunch'], $dom['lines'], json_encode($dom));
         });
     }
 }

@@ -1008,7 +1008,10 @@ class HomeController extends Controller
         // From the grid's first day, not the 1st: the month's first week shows the last days
         // of the month before, and they were always empty here while a schedule's own month
         // (RoleController::adminCalendarEvents()) showed the same events on them.
-        $startOfGridUtc = $startOfMonth->copy()->startOfWeek(0)->setTimezone('UTC');
+        // A day of slack, as the end has: the bound is the VIEWER's midnight and an event is
+        // placed on its schedule's day, so a morning in Berlin fell before a midnight in Los
+        // Angeles and the grid's first cell was empty. Only grid days are placed (buildEventsMap()).
+        $startOfGridUtc = $startOfMonth->copy()->startOfWeek(0)->subDay()->setTimezone('UTC');
         $endOfGridUtc = $startOfMonth->copy()->endOfMonth()->endOfWeek(6)->addDays(2)->setTimezone('UTC');
 
         $roleIds = $user->editor()->pluck('roles.id');

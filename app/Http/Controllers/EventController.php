@@ -5119,10 +5119,15 @@ class EventController extends Controller
         // built here and nothing in it comes from the request but which of the two is wanted.
         // Its notes are the event's page, as in the mails: the description has no length cap
         // and would otherwise ride in the Location header.
+        // The date in the address is used only where it is one of this event's own nights (a
+        // one-off event has none, a series only the days it is on), the page it names is the
+        // schedule's own domain where it has one, as in the mails, and a cancelled event is
+        // left to the file, which says STATUS:CANCELLED: an entry made here could not.
         $to = request()->query('to');
-        if (in_array($to, ['google', 'outlook'], true)) {
-            $page = $event->getGuestUrl($role->subdomain, $date) ?: '';
-            $entry = $to === 'google' ? $event->getGoogleCalendarUrl($date, $page) : $event->getMicrosoftCalendarUrl($date, $page);
+        if (in_array($to, ['google', 'outlook'], true) && ! $event->is_cancelled) {
+            $night = ($date && $event->days_of_week && $event->matchesDate($date, $event->scheduleTimezone())) ? $date : null;
+            $page = $event->getGuestUrl($role->subdomain, $night, true) ?: '';
+            $entry = $to === 'google' ? $event->getGoogleCalendarUrl($night, $page) : $event->getMicrosoftCalendarUrl($night, $page);
 
             return redirect()->away($entry)->withHeaders([
                 'Cache-Control' => 'no-store, private',

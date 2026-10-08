@@ -3,7 +3,9 @@
 
     <x-slot name="head">
         @if ($tab == 'availability')
-        {{-- The grid's look is the month kit's (partials/month-kit-styles, .gk-cal-pick and .day-x). --}}
+        {{-- The grid's look is the month kit's (partials/month-kit-styles, .gk-cal-pick and .day-x).
+             The grid makes a day pressable on the condition this script is given on ($pickMarks in
+             role/partials/calendar): change one and change the other. --}}
         @if(!$isViewer)
         <script {!! nonce_attr() !!}>
         // Plain script, and listening on the document: the grid sits inside the calendar's Vue

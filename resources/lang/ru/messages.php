@@ -838,7 +838,7 @@ return [
     'happening_now' => 'Идёт сейчас',
     'other_dates' => 'Другие даты',
     'month_n_of' => ':a из :b',
-    'nothing_scheduled_in' => ':month: ничего не запланировано',
+    'nothing_scheduled_in' => 'Ничего не запланировано: :month',
     'next_up' => 'Далее:',
     'go_to_month' => 'Перейти: :month',
     'password_protected' => 'Защищено паролем',

@@ -152,8 +152,9 @@
         <h3 id="schedule-calendar" class="doc-subheading">Reading the calendar</h3>
         <ul class="doc-list mb-6">
             <li>On the month grid, the <strong>arrow buttons</strong> step a month back or forward and <strong>This Month</strong> returns to today. The phone list has no month buttons</li>
-            <li>Each event shows its name and its time, and under them what state it is in: <strong>Now</strong>, <strong>Sold Out</strong>, <strong>Few left</strong>, <strong>Free entry</strong> or <strong>Cancelled</strong>. A day with one event shows its picture, and an event that runs over several days is one bar across them</li>
-            <li>An event that is not public says so under its name: <strong>Draft</strong> or <strong>Internal</strong></li>
+            <li>Each event shows its name and its time, and one that is still to come says under them what state it is in: <strong>Now</strong>, <strong>Sold Out</strong>, <strong>Few left</strong> or <strong>Free entry</strong>. A day with one event shows its picture, and an event that runs over several days is one bar across them</li>
+            <li>An event that is not public says so under its name, <strong>Draft</strong> or <strong>Internal</strong>, and a cancelled one says <strong>Cancelled</strong>, on days that are over as well</li>
+            <li>Days that are over go quiet, and a week that is wholly over is drawn smaller, so the week it is now is not pushed down the page. Once an event of today has ended it gives its place to what is still to come and stands behind <strong>earlier today</strong>; when nothing is left today, the day's events stay in view</li>
             <li>A busy day shows its first three events, and more where the week has room. <strong>+N more</strong>, or the day's number, opens the whole day, and says how many of the events it holds are drafts</li>
             <li>Rest the pointer on an event, or move to it with the keyboard, and a card opens beside its day with its date, time and place, and with <strong>View Event</strong> and <strong>Edit Event</strong>. A click on the event itself opens its public page in a new tab. On a phone, use <strong>Edit Event</strong> on the card</li>
             <li>The arrow keys move between events and days, and Page Up and Page Down change the month</li>
@@ -357,7 +358,7 @@
 
         <h3 class="doc-subheading">Setting Availability</h3>
         <ol class="doc-list doc-list-numbered mb-6">
-            <li>Click a <strong>date</strong> in the month grid to mark it. The day is tinted red and, on a wide screen, labelled <strong>Unavailable</strong>.</li>
+            <li>Click a <strong>date</strong> in the month grid to mark it, or move to it with the keyboard (the arrow keys go from day to day) and press Enter or Space. The day is tinted red and, on a wide screen, labelled <strong>Unavailable</strong>.</li>
             <li>Click the same date again to <strong>clear</strong> the mark.</li>
             <li>Click <strong>Save</strong>. The button stays disabled until you change something, so nothing is saved by accident.</li>
             <li>Save before you move to another month with the arrows. Moving loads a new page, and marks you have not saved are lost.</li>

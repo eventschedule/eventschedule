@@ -838,7 +838,7 @@ return [
     'happening_now' => 'Toimub praegu',
     'other_dates' => 'Teised kuupäevad',
     'month_n_of' => ':a / :b',
-    'nothing_scheduled_in' => ':month: midagi pole kavas',
+    'nothing_scheduled_in' => 'Midagi pole kavas: :month',
     'next_up' => 'Järgmine:',
     'go_to_month' => 'Ava :month',
     'password_protected' => 'Parooliga kaitstud',
