@@ -1276,6 +1276,15 @@
             }
           },
           {
+            "name": "external_id",
+            "in": "query",
+            "description": "The event your own system knows by this id, matched exactly. With subdomain it is one event or none.",
+            "schema": {
+              "type": "string",
+              "maxLength": 255
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "description": "Page number (default 1)",
@@ -1840,6 +1849,30 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The schedule already has an event with this external_id. Nothing is created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The encoded ID of the event that holds the external_id"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -2831,6 +2864,12 @@
             "type": "boolean",
             "description": "Whether the event is private (hidden from calendar, only accessible via direct link)"
           },
+          "external_id": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 255,
+            "description": "The id your own system gave the event. Unique for the schedule that owns the event, compared exactly"
+          },
           "is_cancelled": {
             "type": "boolean",
             "readOnly": true,
@@ -3137,6 +3176,12 @@
                 }
               }
             }
+          },
+          "external_id": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 255,
+            "description": "The id your own system knows this event by. Unique for the schedule that owns the event and compared exactly. On create, an id the schedule already has an event for is a 409. On update, a value sets or changes it and null clears it"
           },
           "schedule": {
             "type": "string",

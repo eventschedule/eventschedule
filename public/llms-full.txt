@@ -901,6 +901,7 @@ List events owned by the authenticated user. Can be filtered by schedule, date r
 | starts_after | date | - | Filter events starting on or after this date (Y-m-d) |
 | starts_before | date | - | Filter events starting on or before this date (Y-m-d) |
 | is_cancelled | boolean | - | `true` for cancelled events only, `false` to leave them out. Without it both are listed |
+| external_id | string | - | The event your own system knows by this id, matched exactly. With `subdomain` it is one event or none |
 | page | integer | 1 | Page number |
 | per_page | integer | 100 | Results per page (max 500) |
 
@@ -1045,6 +1046,7 @@ Create a new event under a schedule.
 |-------|------|----------|-------------|
 | name | string | Yes | Event name (max 255 chars) |
 | starts_at | string | Yes | Start date/time in UTC (Y-m-d H:i:s format) |
+| external_id | string | No | The id your own system knows this event by (text or a number, max 255 chars). Unique for the schedule that owns the event and compared exactly, so `aB3` and `Ab3` are two ids. An id the schedule already has an event for returns `409` with that event's `id` under `data`, and nothing is created |
 | duration | number | No | Duration in hours (0 to 24) |
 | description | string | No | Full description, supports markdown (max 10000 chars) |
 | short_description | string | No | Brief description (max 500 chars) |
@@ -1158,6 +1160,8 @@ Update an existing event. Supports partial updates; only the fields provided wil
 | id | string | The encoded ID of the event |
 
 **Request body**: Same fields as POST /events/{subdomain}. All fields are optional.
+
+`external_id` is kept unless the request names it: a value sets or changes it, `null` clears it. Only an owner or admin of the schedule that owns the event can change it, and an id another event of that schedule holds is a `422`.
 
 **Example**:
 ```bash
@@ -1643,6 +1647,7 @@ Fan comments, photos and videos submitted on events for schedules you own or adm
 | venue_id | string | Yes | Encoded ID of associated venue schedule |
 | flyer_image_url | string | Yes | URL of the flyer image |
 | is_private | boolean | No | Whether the event is private (hidden from calendar, only accessible via direct link) |
+| external_id | string | Yes | The id your own system gave the event. Look an event up with GET /events?external_id= |
 | is_cancelled | boolean | No | Whether the event is cancelled. Read-only: changed with POST /events/{id}/cancel and /restore. Sending back the value you read is accepted; a different one is a 422 |
 | cancelled_at | datetime | Yes | When the event was cancelled (ISO 8601) |
 | is_password_protected | boolean | No | Whether the event page is protected by a password |

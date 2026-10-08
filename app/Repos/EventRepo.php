@@ -452,7 +452,7 @@ class EventRepo
      * caller grants explicitly, and it defaults to false, because there is nothing about the
      * request itself that can tell the two cases apart safely - see the gate below.
      */
-    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false, ?string $importSource = null, ?string $importBatch = null)
+    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false, ?string $importSource = null, ?string $importBatch = null, ?string $externalId = null)
     {
         $this->aiImageRejected = false;
 
@@ -866,6 +866,13 @@ class EventRepo
             if (in_array($importSource, Event::IMPORT_SOURCES, true)) {
                 $event->import_source = $importSource;
                 $event->import_batch = $importBatch;
+            }
+            // The id the caller's own system knows this event by. Here rather than after the
+            // save, so that the event.created webhook built further down already carries it.
+            // Like the two above it is only mentioned when there is one: a new row that names
+            // the column would fail on an install that has not run the migration yet.
+            if ($externalId !== null && $externalId !== '') {
+                $event->external_id = $externalId;
             }
         }
 

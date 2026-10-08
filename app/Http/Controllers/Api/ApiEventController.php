@@ -15,7 +15,10 @@ use App\Services\EventLifecycleService;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -47,6 +50,7 @@ class ApiEventController extends Controller
                 'schedule_type' => 'nullable|string|in:single,recurring',
                 'tickets_enabled' => 'nullable|boolean',
                 'group_id' => 'nullable|string',
+                'external_id' => 'nullable|string|max:255',
                 // Not `boolean`: that rule refuses the words "true" and "false", which is what a
                 // query string carries.
                 'is_cancelled' => 'nullable|in:0,1,true,false',
@@ -136,6 +140,12 @@ class ApiEventController extends Controller
             $events->where('is_cancelled', filter_var($request->is_cancelled, FILTER_VALIDATE_BOOLEAN));
         }
 
+        // The event another system knows by this id. Unique per owning schedule, so with
+        // `subdomain` it is at most one event.
+        if ($request->filled('external_id')) {
+            $events->where('external_id', (string) $request->external_id);
+        }
+
         // Filter by sub-schedule (group)
         if ($request->has('group_id')) {
             $groupId = UrlUtils::decodeId($request->group_id);
@@ -206,6 +216,18 @@ class ApiEventController extends Controller
 
         if (! $role->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
+        // The id the caller's own system knows this record by. Read here, after the caller is
+        // known to be allowed on this schedule (or the answer below would tell a stranger which
+        // ids exist) and before anything is created: an id this schedule already has an event
+        // for is a conflict, with the event that holds it.
+        [$externalId, $refusal] = $this->externalIdFrom($request);
+        if ($refusal) {
+            return $refusal;
+        }
+        if ($externalId !== null && ($holder = $this->eventWithExternalId($role->id, $externalId))) {
+            return $this->externalIdConflict($holder);
         }
 
         $allowedCategoryIds = collect($role->getEventCategories())->pluck('id')->all();
@@ -382,7 +404,32 @@ class ApiEventController extends Controller
             return $errorResponse;
         }
 
-        $event = $this->eventRepo->saveEvent($role, $request, null, true, $scheduleTz);
+        // Two requests carrying the same new id must not both pass the check above and both
+        // create: the second waits for the first, then finds its event. The unique index is the
+        // backstop, and it reads as the same conflict.
+        $save = fn () => $this->eventRepo->saveEvent($role, $request, null, true, $scheduleTz, externalId: $externalId);
+
+        try {
+            if ($externalId === null) {
+                $event = $save();
+            } else {
+                $event = Cache::lock($this->externalIdLockKey($role->id, $externalId), 30)->block(10, function () use ($role, $externalId, $save) {
+                    return $this->eventWithExternalId($role->id, $externalId) ?: $save();
+                });
+
+                if (! $event->wasRecentlyCreated) {
+                    return $this->externalIdConflict($event);
+                }
+            }
+        } catch (LockTimeoutException $e) {
+            return response()->json(['error' => 'Another request is writing an event with this external_id. Try again.'], 409);
+        } catch (QueryException $e) {
+            if (! $this->isDuplicateExternalId($e)) {
+                throw $e;
+            }
+
+            return $this->externalIdConflict($this->eventWithExternalId($role->id, (string) $externalId));
+        }
 
         $event->load(['roles', 'tickets', 'addons', 'parts']);
 
@@ -510,6 +557,10 @@ class ApiEventController extends Controller
         }
 
         if ($refusal = $this->refuseCancelledInBody($request, (bool) $event->is_cancelled)) {
+            return $refusal;
+        }
+
+        if ($refusal = $this->takeExternalId($request, $event)) {
             return $refusal;
         }
 
@@ -750,7 +801,18 @@ class ApiEventController extends Controller
 
         $this->keepAttachments($request, $event, $currentRole, $sentVenue, $sentMembers);
 
-        $event = $this->eventRepo->saveEvent($currentRole, $request, $event, true, $scheduleTz);
+        try {
+            $event = $this->eventRepo->saveEvent($currentRole, $request, $event, true, $scheduleTz);
+        } catch (QueryException $e) {
+            if (! $this->isDuplicateExternalId($e)) {
+                throw $e;
+            }
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => ['external_id' => ['Another event on the same schedule already has this external_id.']],
+            ], 422);
+        }
 
         foreach ($passEventsKept as $ticketId => $ids) {
             $ticket = Ticket::where('event_id', $event->id)->where('is_deleted', false)->find($ticketId);
@@ -869,6 +931,118 @@ class ApiEventController extends Controller
             'data' => $event->toApiData(),
             'meta' => ['message' => $message],
         ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * The external_id a request carries: a number is taken as its digits (ids often are
+     * numbers), and nothing or "" is no id. Spaces around it are already gone, and a blank one is
+     * already null: the framework's TrimStrings and ConvertEmptyStringsToNull run on every
+     * request, JSON bodies and query strings included. ApiEventExternalIdTest holds both, so an
+     * API route taken out of either middleware fails there.
+     *
+     * @return array{0: ?string, 1: ?\Illuminate\Http\JsonResponse}
+     */
+    private function externalIdFrom(Request $request): array
+    {
+        $value = $request->input('external_id');
+
+        if (is_int($value) || is_float($value)) {
+            $value = (string) $value;
+        }
+
+        if ($value === null) {
+            return [null, null];
+        }
+
+        if (! is_string($value) || mb_strlen($value) > 255) {
+            return [null, response()->json([
+                'error' => 'Validation failed',
+                'errors' => ['external_id' => ['The external_id must be text of at most 255 characters.']],
+            ], 422)];
+        }
+
+        return [$value === '' ? null : $value, null];
+    }
+
+    /** The event a schedule owns under this id, if it has one. Compared exactly, letter case included. */
+    private function eventWithExternalId(int $roleId, string $externalId): ?Event
+    {
+        return Event::where('creator_role_id', $roleId)->where('external_id', $externalId)->first();
+    }
+
+    private function externalIdConflict(?Event $holder)
+    {
+        return response()->json(array_filter([
+            'error' => 'An event with this external_id already exists on this schedule.',
+            'data' => $holder ? ['id' => UrlUtils::encodeId($holder->id)] : null,
+        ]), 409);
+    }
+
+    /** Hashed: the id can be 255 characters and a cache lock's key cannot. */
+    private function externalIdLockKey(int $roleId, string $externalId): string
+    {
+        return 'api-event-external-id:'.$roleId.':'.sha1($externalId);
+    }
+
+    private function isDuplicateExternalId(QueryException $e): bool
+    {
+        return (int) ($e->errorInfo[1] ?? 0) === 1062
+            && str_contains($e->getMessage(), 'events_creator_role_id_external_id_unique');
+    }
+
+    /**
+     * An update that names external_id sets, changes or clears it on the event in hand (the
+     * save that follows writes it). The value the event already has passes for anyone who may
+     * update the event, because a client that reads the object and writes it back sends it.
+     *
+     * A different one is the owning schedule's to give. Whoever may edit an event includes an
+     * admin of a schedule that merely lists it, and the id lives in the OWNER's namespace: a
+     * curator that cleared or changed it would make the owner's next sync create a duplicate.
+     */
+    private function takeExternalId(Request $request, Event $event)
+    {
+        if (! $request->has('external_id')) {
+            return null;
+        }
+
+        [$externalId, $refusal] = $this->externalIdFrom($request);
+        if ($refusal) {
+            return $refusal;
+        }
+
+        if ($externalId === $event->external_id) {
+            return null;
+        }
+
+        $refuse = fn (string $message) => response()->json([
+            'error' => 'Validation failed',
+            'errors' => ['external_id' => [$message]],
+        ], 422);
+
+        if (! $event->creator_role_id) {
+            return $refuse('This event has no owning schedule, so it cannot carry an external_id.');
+        }
+
+        $runsTheOwner = auth()->user()->roles()
+            ->where('roles.id', $event->creator_role_id)
+            ->wherePivotIn('level', ['owner', 'admin'])
+            ->exists();
+
+        if (! $runsTheOwner) {
+            return $refuse('Only an owner or admin of the schedule that owns this event can set its external_id.');
+        }
+
+        if ($externalId !== null) {
+            $holder = $this->eventWithExternalId($event->creator_role_id, $externalId);
+
+            if ($holder && $holder->id !== $event->id) {
+                return $refuse('The event '.UrlUtils::encodeId($holder->id).' on the same schedule already has this external_id.');
+            }
+        }
+
+        $event->external_id = $externalId;
+
+        return null;
     }
 
     /**

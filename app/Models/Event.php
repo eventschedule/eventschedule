@@ -272,7 +272,10 @@ class Event extends Model
      *
      * import_source and import_batch are deliberately NOT fillable. EventRepo::saveEvent() fills
      * an Event from the whole request, so a fillable column would be writable from every event
-     * form; the code that creates the event stamps them instead.
+     * form; the code that creates the event stamps them instead. external_id (the id another
+     * system knows the event by) is kept out of $fillable for the same reason: the API controller
+     * writes it, after checking who is asking and that the owning schedule has no other event
+     * with it.
      */
     public const IMPORT_AI = 'ai';                 // text or a flyer read by the model
 
@@ -4661,6 +4664,8 @@ class Event extends Model
         // more than flip the flag (connected calendars, boosts, the people registered).
         $data->is_cancelled = (bool) $this->is_cancelled;
         $data->cancelled_at = $this->cancelled_at?->toIso8601String();
+        // The id another system knows this event by (the API sets it; see ApiEventController).
+        $data->external_id = $this->external_id;
         $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;

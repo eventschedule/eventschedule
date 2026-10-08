@@ -797,7 +797,7 @@
                 ['DELETE', '/api/schedules/{subdomain}/groups/{group_id}', 'Events survive; their sub-schedule reference is cleared.'],
             ]],
             ['Events', 'The big one. Tickets, agenda parts, members and recurrence all ride along.', [
-                ['GET', '/api/events', 'Paginated, newest first. Eleven filters, including tickets_enabled, rsvp_enabled and is_cancelled.'],
+                ['GET', '/api/events', 'Paginated, newest first. Twelve filters, including tickets_enabled, is_cancelled and your own external_id.'],
                 ['GET', '/api/events/{id}', 'One event with its tickets, members and agenda parts.'],
                 ['POST', '/api/events/{subdomain}', 'Create an event on a schedule. Carries its own 30-per-minute throttle.'],
                 ['PUT', '/api/events/{id}', 'Partial update. Recurrence, tickets and agenda parts survive being omitted.'],
@@ -1383,7 +1383,7 @@ HTML,
                                     </div>
                                 </div>
                                 <p class="ax-call-note" data-reveal>
-                                    Eleven filters on the events list, including whether tickets or RSVP are switched on, whether an event is cancelled, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
+                                    Twelve filters on the events list, including whether tickets or RSVP are switched on, whether an event is cancelled, a venue, a sub-schedule, a date window and the id your own system gave the event. You narrow server-side rather than pulling a year and filtering in the agent.
                                 </p>
                             </div>
 

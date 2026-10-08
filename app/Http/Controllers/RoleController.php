@@ -756,6 +756,20 @@ class RoleController extends Controller
             ->where('role_id', $source->id)
             ->update(['role_id' => $target->id]);
 
+        // events.external_id is unique for the schedule that owns the event, so an id both
+        // schedules use would stop the re-point below with a duplicate key, inside this
+        // transaction. The target's event keeps the id and the merged-away schedule's loses it.
+        $takenExternalIds = DB::table('events')
+            ->where('creator_role_id', $target->id)
+            ->whereNotNull('external_id')
+            ->pluck('external_id');
+        if ($takenExternalIds->isNotEmpty()) {
+            DB::table('events')
+                ->where('creator_role_id', $source->id)
+                ->whereIn('external_id', $takenExternalIds)
+                ->update(['external_id' => null]);
+        }
+
         // Re-point events.creator_role_id so CheckData doesn't later "auto-fix"
         // by picking an arbitrary role on the event.
         DB::table('events')

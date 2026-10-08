@@ -627,6 +627,12 @@ class BackupService
         $eventData['is_cancelled'] = (bool) $event->is_cancelled;
         $eventData['cancelled_at'] = optional($event->cancelled_at)->toDateTimeString();
         $eventData['ical_sequence'] = (int) $event->ical_sequence;
+        // Also not fillable. Only for an event this schedule owns: a restore makes the new
+        // schedule the owner of every event in the archive, the ones it merely listed included,
+        // and the id is unique per owner. Another schedule's id is not this archive's to carry.
+        if ($event->external_id !== null && (int) $event->creator_role_id === (int) $role->id) {
+            $eventData['external_id'] = $event->external_id;
+        }
         // Also not fillable: it gates the reschedule cooldown, so losing it on restore would let a
         // just-moved booking be moved again immediately.
         $eventData['rescheduled_at'] = optional($event->rescheduled_at)->toDateTimeString();
@@ -1948,6 +1954,17 @@ class BackupService
         $event->is_cancelled = (bool) ($data['is_cancelled'] ?? false);
         $event->cancelled_at = $data['cancelled_at'] ?? null;
         $event->ical_sequence = (int) ($data['ical_sequence'] ?? 0);
+        // Only when the archive has one: an event without it does not name the column at all.
+        // And only once per schedule: the id is unique for its owner, so an archive that names
+        // the same one twice (edited by hand, or an older export) would otherwise stop the whole
+        // restore on a duplicate key. The first event keeps it.
+        if (isset($data['external_id']) && is_scalar($data['external_id']) && (string) $data['external_id'] !== '') {
+            $externalId = TextUtils::clamp((string) $data['external_id'], 255);
+
+            if (! Event::where('creator_role_id', $role->id)->where('external_id', $externalId)->exists()) {
+                $event->external_id = $externalId;
+            }
+        }
         $event->rescheduled_at = $data['rescheduled_at'] ?? null;
         // ?? false keeps archives written before the column existed importable.
         $event->is_guest_submission = (bool) ($data['is_guest_submission'] ?? false);
