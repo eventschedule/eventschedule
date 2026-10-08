@@ -653,7 +653,7 @@ class IcsImportUtils
      *
      * @return array{venue_name: string, event_address: string, url: string}
      */
-    private static function location(string $location): array
+    public static function location(string $location): array
     {
         $location = trim(preg_replace('/\s+/', ' ', $location));
         $result = ['venue_name' => '', 'event_address' => '', 'url' => ''];
