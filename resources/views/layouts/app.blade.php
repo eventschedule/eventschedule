@@ -335,125 +335,6 @@
         .rtl .sm\\:justify-end { justify-content: flex-start; }
 
 
-        .tooltip {
-            font-family: sans-serif !important;
-            position: absolute;
-            padding: 5px 10px;
-            background: #333;
-            color: #fff;
-            border-radius: 4px;
-            display: none;
-            font-size: 12px;
-            z-index: 9999;
-        }
-
-        /* Event Popup with Glassmorphism */
-        .event-popup {
-            position: fixed;
-            display: none;
-            z-index: 10000;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-        }
-
-        .event-popup.show {
-            display: block;
-            opacity: 1;
-        }
-
-        .event-popup-content {
-            display: flex;
-            flex-direction: row;
-            background: linear-gradient(135deg, rgba(249, 250, 251, 0.95) 0%, rgba(249, 250, 251, 0.9) 100%);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            max-width: 480px;
-            min-width: 380px;
-            pointer-events: auto;
-        }
-
-        .dark .event-popup-content {
-            background: linear-gradient(135deg, rgba(37, 37, 38, 0.95) 0%, rgba(30, 30, 30, 0.9) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .event-popup-image {
-            width: 160px;
-            min-height: 100%;
-            object-fit: cover;
-            flex-shrink: 0;
-            display: block;
-        }
-
-        .event-popup-body {
-            padding: 16px;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .event-popup-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-            margin: 0 0 12px 0;
-            line-height: 1.4;
-        }
-
-        .dark .event-popup-title {
-            color: #fff;
-        }
-
-        .event-popup-details {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .event-popup-detail {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .dark .event-popup-detail {
-            color: rgb(var(--ap-ink-2));
-        }
-
-        .event-popup-icon {
-            width: 16px;
-            height: 16px;
-            flex-shrink: 0;
-            color: #9ca3af;
-        }
-
-        .dark .event-popup-icon {
-            color: rgb(var(--ap-ink-3));
-        }
-
-        .event-popup-description {
-            font-size: 13px;
-            color: #6b7280;
-            line-height: 1.5;
-            margin: 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .dark .event-popup-description {
-            color: rgb(var(--ap-ink-2));
-        }
-
         /* EasyMDE Toolbar Fixes */
         .editor-toolbar {
             background-color: #f8f9fa !important; /* Temporarily change to light gray for debugging */
@@ -679,47 +560,6 @@
 
     <script {!! nonce_attr() !!}>
         if (typeof $ !== 'undefined') $(document).ready(function() {
-            $('.has-tooltip').hover(function(e) {
-                var tooltipText = $(this).attr('data-tooltip');
-                var tooltip = $('#tooltip');
-                tooltip.html(tooltipText).css({
-                    top: e.clientY + 10 + 'px',
-                    left: e.clientX + 10 + 'px'
-                }).fadeIn(0);
-
-                // Calculate if the tooltip will go off the right edge of the screen
-                var tooltipWidth = tooltip.outerWidth();
-                var screenWidth = $(window).width();
-                var tooltipRightEdge = e.clientX + 10 + tooltipWidth;
-
-                if (tooltipRightEdge > screenWidth) {
-                    tooltip.css({
-                        left: e.clientX - tooltipWidth - 10 + 'px'
-                    });
-                }
-            }, function() {
-                $('#tooltip').fadeOut(0);
-            });
-
-            $('.has-tooltip').mousemove(function(e) {
-                var tooltip = $('#tooltip');
-                var tooltipWidth = tooltip.outerWidth();
-                var screenWidth = $(window).width();
-                var tooltipRightEdge = e.clientX + 10 + tooltipWidth;
-
-                if (tooltipRightEdge > screenWidth) {
-                    tooltip.css({
-                        top: e.clientY + 10 + 'px',
-                        left: e.clientX - tooltipWidth - 10 + 'px'
-                    });
-                } else {
-                    tooltip.css({
-                        top: e.clientY + 10 + 'px',
-                        left: e.clientX + 10 + 'px'
-                    });
-                }
-            });
-
 
             {{-- JSON_HEX_TAG: these messages can carry a schedule's name, and a "<!--<script"
                  inside a script block would otherwise swallow the rest of it.
@@ -801,8 +641,6 @@
     </a>
 
     {{ $slot }}
-
-    <div id="tooltip" class="hidden fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg pointer-events-none max-w-xs"></div>
 
     <div id="es-lightbox" style="display:none" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90">
         <button id="es-lightbox-close" class="absolute top-3 ltr:right-3 rtl:left-3 text-white/80 hover:text-white text-4xl leading-none z-10 w-10 h-10 flex items-center justify-center">&times;</button>

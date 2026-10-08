@@ -406,24 +406,32 @@ class ScheduleAdminPagesTest extends TestCase
         $this->assertGreaterThanOrEqual(1, substr_count($html, 'Find { { 7*7 }}'), 'the label is still shown, as text');
     }
 
-    public function test_the_month_marks_a_draft_and_lets_a_lone_title_wrap(): void
+    /**
+     * The Schedule tab's month is the one every page draws now (role/partials/month). It says
+     * which events are not public in words, as a line under the name, where the list under a
+     * phone's dates has said so all along.
+     */
+    public function test_the_month_marks_a_draft_and_an_internal_event_in_words(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent');
 
         $html = $this->page($owner, $role, 'schedule');
 
-        // The title was told to take two lines (line-clamp-2) inside a `truncate`, which forbids
-        // the wrap. The admin month no longer carries both on the same element.
-        $this->assertSame(0, preg_match('/line-clamp-1\'"\s+class="hover:underline truncate"/', $html), 'the title is not held to one line');
-        // The list under a phone's dates has marked drafts all along, with spans of its own: the
-        // month's are told apart by data-month-mark.
-        $this->assertSame(1, preg_match('/<span v-else-if="event\.is_draft" data-month-mark="draft"[^>]*>'.preg_quote(__('messages.draft'), '/').'<\/span>/', $html), 'a draft says so in the month');
-        $this->assertSame(1, preg_match('/<span v-if="event\.is_internal" data-month-mark="internal"[^>]*>'.preg_quote(__('messages.internal'), '/').'<\/span>/', $html), 'and so does an internal event');
+        $this->assertSame(1, substr_count($html, ' data-month '), 'the one month');
+        // A mark is a note of the event's own line, told apart from the phone list's spans by
+        // data-month-mark, and worked out by the script: Internal first, then Draft.
+        $this->assertStringContainsString(':data-month-mark="note.mark"', $html);
+        $this->assertStringContainsString("if (e.is_internal) return ['warn', L.internal, 'internal'];", $html);
+        $this->assertStringContainsString("if (e.is_draft) return ['', L.draft, 'draft'];", $html);
+        $this->assertStringContainsString('"draft":'.json_encode(__('messages.draft')), $html);
+        $this->assertStringContainsString('"internal":'.json_encode(__('messages.internal')), $html);
+        // What a day does not show says how many of it are drafts.
+        $this->assertStringContainsString('<span class="gk-cal-more-say" data-month-mark="draft"', $html);
 
-        // The dashboard's month shares the partial and is left as it was.
+        // The dashboard's month is the same one, so an owner sees the same marks there.
         $home = $this->actingAs($owner)->get(route('home'))->assertOk()->getContent();
-        $this->assertSame(0, substr_count($home, 'data-month-mark'), 'the marks are for a schedule\'s own pages');
-        $this->assertSame(0, substr_count($home, 'whitespace-normal break-words min-w-0'), 'and so is the two-line title');
+        $this->assertSame(1, substr_count($home, ' data-month '));
+        $this->assertStringContainsString(':data-month-mark="note.mark"', $home);
     }
 }

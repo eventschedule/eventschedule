@@ -155,6 +155,13 @@
     .gk-cal-day-past .gk-cal-more { color: var(--gk-ink-3); }
     .gk-cal-day-past .gk-cal-more-n { font-weight: 500; }
 
+    /* A day a team member marked themselves away (the admin's Schedule tab). */
+    .gk-cal-day-away { background: var(--gk-warn-bg); }
+    .gk-cal-away { display: inline-grid; place-items: center; width: 1.375rem; height: 1.375rem; border-radius: 999px; color: var(--gk-warn); cursor: help; }
+    .gk-cal-away:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
+    .gk-cal-away svg { width: 1.125rem; height: 1.125rem; }
+    .gk-dayp-away { flex: none; margin: 0; padding: .4375rem .875rem; border-bottom: 1px solid var(--gk-line); background: var(--gk-warn-bg); color: var(--gk-warn); font-size: .8125rem; }
+
     /* The other dates of the event being looked at. */
     /* In ink, not in the schedule's colour: a red ring reads as an error and a navy one is lost in the dark. */
     .gk-cal-kin { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--gk-ink) 46%, transparent); }
@@ -405,4 +412,34 @@
         .gk-cal-ev-feat:hover .gk-cal-art-img { transform: none; }
         .gk-peek-pill-live::before, .gk-cal-now::before { animation: none; }
     }
+
+    @if ($monthBridge ?? false)
+    /* The admin's pages have no guest kit and no schedule's colours: the month's tokens are
+       given the portal's own (the six palettes are --ap-*; the accent is the brand's). */
+    body {
+        --gk-panel: rgb(var(--ap-surface)); --gk-solid: rgb(var(--ap-surface)); --gk-well: rgb(var(--ap-surface-hover));
+        --gk-ink: rgb(var(--ap-ink)); --gk-ink-2: rgb(var(--ap-ink-2)); --gk-ink-3: rgb(var(--ap-ink-3));
+        --gk-line: rgb(var(--ap-border-strong));
+        --gk-ok: #166534; --gk-ok-bg: #f0fdf4; --gk-ok-line: #86efac;
+        --gk-warn: #92400e; --gk-warn-bg: #fffbeb; --gk-warn-line: #fcd34d;
+        --gk-bad: #b91c1c; --gk-bad-bg: #fef2f2; --gk-bad-line: #fca5a5;
+        --gk-shadow: 0 1px 2px rgb(15 23 42 / .07), 0 1px 1px rgb(15 23 42 / .04);
+        --gk-shadow-lift: 0 4px 12px rgb(15 23 42 / .16);
+        --gk-radius-ctl: .625rem; --gk-swap: 120ms;
+        --es-accent: var(--brand-button-bg); --es-accent-text: #ffffff; --es-accent-edge: transparent;
+        --es-accent-readable: var(--brand-blue); --es-accent-tint: color-mix(in srgb, var(--brand-blue) 10%, rgb(var(--ap-surface)));
+        --es-glow: 78 129 250;
+    }
+    :where(.dark) body {
+        --gk-ok: #86efac; --gk-ok-bg: rgb(22 101 52 / .3); --gk-ok-line: rgb(134 239 172 / .4);
+        --gk-warn: #fcd34d; --gk-warn-bg: rgb(146 64 14 / .3); --gk-warn-line: rgb(252 211 77 / .4);
+        --gk-bad: #fca5a5; --gk-bad-bg: rgb(185 28 28 / .28); --gk-bad-line: rgb(252 165 165 / .4);
+        --gk-shadow: 0 1px 2px rgb(0 0 0 / .4);
+        --gk-shadow-lift: 0 4px 14px rgb(0 0 0 / .5);
+    }
+    /* A raised thing takes the palette's own raised surface, not the guest pages' grey. */
+    :where(.dark) .gk-peek { --peek-bg: rgb(var(--ap-surface-hover)); }
+    :where(.dark) .gk-dayp { --peek-bg: rgb(var(--ap-surface-hover)); }
+    :where(.dark) .gk-cal { --cal-out: rgb(var(--ap-bg) / .6); }
+    @endif
 </style>

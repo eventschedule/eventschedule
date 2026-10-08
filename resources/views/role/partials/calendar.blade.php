@@ -700,9 +700,10 @@
             @endif
         </div>
         @endif
-        @if ($guestRows)
-        {{-- The month: role/partials/month, with its card and its day's panel (month-peek) and
-             the script that writes each day (month-script). --}}
+        @if (($tab ?? '') !== 'availability')
+        {{-- The month, on every page that shows one (a guest's page, the embed, the admin's
+             Schedule tab, the dashboard): role/partials/month, with its card and its day's
+             panel (month-peek) and the script that writes each day (month-script). --}}
         @include('role.partials.month')
         @else
         <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -719,44 +720,20 @@
                 @endforeach
             </div>
         <div class="bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300">
-            @php
-            // Get first role for home route (only calculate once)
-            $firstRole = null;
-            if ($route == 'home' && auth()->check()) {
-                $firstRole = auth()->user()->member()->where('email_verified_at', '!=', null)->first();
-            }
-            @endphp
-            {{-- PHP-rendered calendar grid for admin/home routes (a guest's month is role/partials/month) --}}
+            {{-- The grid of the Availability tab, where a team member marks the days they are away. The
+                 month itself (a guest's page, the embed, the Schedule tab, the dashboard) is
+                 role/partials/month. --}}
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
-                @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
-                @php
-                $unavailable = [];
-                foreach ($datesUnavailable as $user => $dates) {
-                    if (is_array($dates) && in_array($currentDate->format('Y-m-d'), $dates)) {
-                        $unavailable[] = $user;
-                    }
-                }
-                @endphp
-                <div class="cursor-pointer relative calendar-day-navigate {{ count($unavailable) ? ($currentDate->month == $month ? 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-orange-50 dark:bg-orange-900/30 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400') : ($currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600') }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
-                    data-href="{{ route('event.create', ['subdomain' => $role->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}">
-                    @elseif ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
+                    @if ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
                         <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-1 py-1 md:px-3 md:py-2 min-h-[44px] md:min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
                         @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
                             <div class="day-x" data-label="{{ __('messages.unavailable') }}"></div>
                         @endif
-                    @elseif ($route == 'home' && auth()->check())
-                        @if ($firstRole)
-                        <div class="cursor-pointer relative calendar-day-navigate {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} px-3 py-2 min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600"
-                            data-href="{{ route('event.create', ['subdomain' => $firstRole->subdomain, 'date' => $currentDate->format('Y-m-d')]) }}">
-                        @else
-                        <div
-                            class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
-                        @endif
                     @else
                     <div
                         class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
-                        @endif
+                    @endif
                         <div class="flex justify-between">
                         @if ($route == 'admin' || $route == 'home')
                         <time datetime="{{ $currentDate->format('Y-m-d') }}"
@@ -770,51 +747,7 @@
                             style="{{ $isToday ? 'background-color: ' . $todayAccent . '; color: ' . accent_contrast_color($todayAccent) : '' }}"
                             class="{{ $isToday ? 'flex h-6 w-6 items-center justify-center rounded font-semibold' : '' }}">{{ $currentDate->day }}</time>
                         @endif
-                        @if (count($unavailable))
-                            <div class="has-tooltip" data-tooltip="{!! __('messages.unavailable') . ":<br/>" . implode("<br/>", $unavailable) !!}">
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#888">
-                                    <path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z" />
-                                </svg>
-                            </div>
-                        @endif
                         </div>
-                        @if (($tab ?? '') != 'availability')
-                        <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
-                            <li v-for="event in getEventsForDate('{{ $currentDate->format('Y-m-d') }}')" :key="event.id"
-                                class="relative group"
-                                @if ($route != 'admin') :class="event.can_edit ? 'hover:pe-8' : ''" @endif
-                                v-show="isEventVisible(event)">
-                                <a :href="getEventUrl(event, '{{ $currentDate->format('Y-m-d') }}')"
-                                    class="flex event-link-popup"
-                                    :data-event-id="event.id"
-                                    @click.stop="countListTap()" {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
-                                    <p class="flex-auto min-w-0 font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} {{ $route == 'admin' ? '' : 'truncate' }}">
-                                        <span class="flex items-start gap-1.5">
-                                            <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
-                                            <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
-                                              class="hover:underline {{ $route == 'admin' ? 'whitespace-normal break-words min-w-0' : 'truncate' }}" :dir="getEventDisplayDir(event)" v-text="getEventDisplayName(event)">
-                                            </span>
-                                        </span>
-                                        {{-- The list says which events are not public; the month did not. On a
-                                             schedule's own pages only: the dashboard's month and the public
-                                             calendar share this partial and are left as they were. --}}
-                                        @if ($route == 'admin')
-                                        <span v-if="event.is_internal" data-month-mark="internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{{ __('messages.internal') }}</span>
-                                        <span v-else-if="event.is_draft" data-month-mark="draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">{{ __('messages.draft') }}</span>
-                                        @endif
-                                        <span v-if="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1"
-                                              class="block text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
-                                        </span>
-                                    </p>
-                                </a>
-                                <a v-if="event.can_edit" :href="event.edit_url"
-                                    class="absolute end-0 top-0 hidden group-hover:inline-block text-gray-900 dark:text-white hover:underline {{ $route == 'admin' ? 'ps-2 bg-gray-100 dark:bg-gray-700' : '' }}"
-                                    @click.stop>
-                                    {{ __('messages.edit') }}
-                                </a>
-                            </li>
-                        </ol>
-                        @endif
                     </div>
                     @php $currentDate->addDay(); @endphp
                     @endwhile
@@ -2344,43 +2277,8 @@
 </div>
 </Teleport>
 
-@if ($guestRows)
+@if (! request()->graphic && ($tab ?? '') !== 'availability')
 @include('role.partials.month-peek')
-@else
-{{-- The hover popup of the admin's and the dashboard's month. A guest's month has its own card
-     (role/partials/month-peek), which keeps this id. --}}
-<div id="event-popup" class="event-popup">
-    <div class="event-popup-content">
-        <img id="event-popup-image" class="event-popup-image" style="display: none;" />
-        <div class="event-popup-body">
-            <h3 id="event-popup-title" class="event-popup-title">
-                <svg id="event-popup-lock" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display: none; width: 16px; height: 16px; vertical-align: middle; margin-inline-end: 6px; color: #9ca3af; flex-shrink: 0;" class="inline-block"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                <span id="event-popup-title-text"></span>
-            </h3>
-            <div class="event-popup-details">
-                <div id="event-popup-venue" class="event-popup-detail" style="display: none;">
-                    <svg class="event-popup-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C7.58172 2 4 6.00258 4 10.5C4 14.9622 6.55332 19.8124 10.5371 21.6744C11.4657 22.1085 12.5343 22.1085 13.4629 21.6744C17.4467 19.8124 20 14.9622 20 10.5C20 6.00258 16.4183 2 12 2ZM12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" />
-                    </svg>
-                    <span id="event-popup-venue-text"></span>
-                </div>
-                <div id="event-popup-time" class="event-popup-detail" style="display: none;">
-                    <svg class="event-popup-icon" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
-                    </svg>
-                    <span id="event-popup-time-text"></span>
-                </div>
-                <div id="event-popup-price" class="event-popup-detail" style="display: none;">
-                    <svg class="event-popup-icon" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                    </svg>
-                    <span id="event-popup-price-text"></span><span id="event-popup-coupon-text" style="display: none;"></span>
-                </div>
-            </div>
-            <p id="event-popup-description" class="event-popup-description" style="display: none;"></p>
-        </div>
-    </div>
-</div>
 @endif
 
 {{-- A schedule page passes $hasActivePolls: its $events are only the next 50 public ones, while the
@@ -2646,7 +2544,6 @@ const calendarApp = createApp({
             phoneMonth: @json($guestRows && ! $guestEmbed),
             // What the list was left as, when this page is come back to (see the watcher).
             listToRestore: null,
-            popupTimeout: null,
             showFiltersDrawer: false,
             showDesktopFiltersModal: false,
             showOnlineOnly: false,
@@ -4545,25 +4442,6 @@ const calendarApp = createApp({
                 window.location.href = url;
             }
         },
-        getEventPopupData(event) {
-            const time = this.getEventTime(event);
-            return {
-                name: event.name || '',
-                dir: event.dir || 'auto',
-                venue_name: event.venue_name || '',
-                venue_dir: event.venue_dir || 'auto',
-                time: time || '',
-                // A 160px column: the card-size derivative when there is one.
-                image_url: event.image_thumb_url || event.image_url || '',
-                description: '', // Description not currently in event data
-                ticket_price: event.ticket_price,
-                ticket_currency_code: event.ticket_currency_code || '',
-                registration_url: event.registration_url || '',
-                coupon_code: event.coupon_code || '',
-                coupon_discount_label: event.coupon_discount_label || '',
-                is_password_protected: event.is_password_protected || false
-            };
-        },
         // Mirrors getEventDisplayName below: that method shows the VENUE name when you are
         // looking at a talent's own schedule, so the cell must not always use the event
         // name's direction.
@@ -4762,193 +4640,6 @@ const calendarApp = createApp({
                 default: return 'th';
             }
         },
-        initPopups() {
-            // Initialize popup event listeners after Vue updates
-            this.$nextTick(() => {
-                const eventLinks = document.querySelectorAll('.event-link-popup');
-                eventLinks.forEach(el => {
-                    // This runs again whenever filteredEvents changes - on every search keystroke -
-                    // and Vue keeps the surviving elements, so bind each one once. The handlers
-                    // read data-event-id when they fire, so a reused element stays correct.
-                    if (el.dataset.popupBound) return;
-                    el.dataset.popupBound = '1';
-                    el.addEventListener('mouseenter', () => {
-                        const eventId = el.getAttribute('data-event-id');
-                        const event = this.allEvents.find(ev => ev.id === eventId);
-                        if (event) {
-                            this.showEventPopup(event, el);
-                        }
-                    });
-                    el.addEventListener('mouseleave', () => {
-                        this.hideEventPopup();
-                    });
-                });
-            });
-        },
-        showEventPopup(event, element) {
-            // Clear any existing timeout
-            if (this.popupTimeout) {
-                clearTimeout(this.popupTimeout);
-            }
-
-            // Get popup data
-            const popupData = this.getEventPopupData(event);
-
-            // Update popup content
-            const popup = document.getElementById('event-popup');
-            if (!popup) return;
-
-            const titleEl = document.getElementById('event-popup-title');
-            const imageEl = document.getElementById('event-popup-image');
-            const venueEl = document.getElementById('event-popup-venue');
-            const venueTextEl = document.getElementById('event-popup-venue-text');
-            const timeEl = document.getElementById('event-popup-time');
-            const timeTextEl = document.getElementById('event-popup-time-text');
-            const descriptionEl = document.getElementById('event-popup-description');
-
-            const lockEl = document.getElementById('event-popup-lock');
-            const titleTextEl = document.getElementById('event-popup-title-text');
-            if (lockEl) lockEl.style.display = popupData.is_password_protected ? 'inline-block' : 'none';
-            if (titleTextEl) {
-                titleTextEl.textContent = popupData.name || '';
-                titleTextEl.dir = popupData.dir || 'auto';
-            }
-
-            if (imageEl) {
-                if (popupData.image_url) {
-                    imageEl.src = popupData.image_url;
-                    imageEl.style.display = 'block';
-                } else {
-                    imageEl.style.display = 'none';
-                }
-            }
-
-            if (venueEl && venueTextEl) {
-                if (popupData.venue_name) {
-                    venueTextEl.textContent = popupData.venue_name;
-                    venueTextEl.dir = popupData.venue_dir || 'auto';
-                    venueEl.style.display = 'flex';
-                } else {
-                    venueEl.style.display = 'none';
-                }
-            }
-
-            if (timeEl && timeTextEl) {
-                if (popupData.time) {
-                    timeTextEl.textContent = popupData.time;
-                    timeEl.style.display = 'flex';
-                } else {
-                    timeEl.style.display = 'none';
-                }
-            }
-
-            const priceEl = document.getElementById('event-popup-price');
-            const priceTextEl = document.getElementById('event-popup-price-text');
-            const couponTextEl = document.getElementById('event-popup-coupon-text');
-
-            if (priceEl && priceTextEl) {
-                if (popupData.registration_url && popupData.ticket_price != null) {
-                    priceTextEl.textContent = popupData.ticket_price == 0
-                        ? @json($label('free_entry'))
-                        : this.formatPrice(popupData.ticket_price, popupData.ticket_currency_code);
-                    priceEl.style.display = 'flex';
-                } else {
-                    priceEl.style.display = 'none';
-                }
-            }
-
-            if (couponTextEl) {
-                const couponBits = [popupData.coupon_code, popupData.coupon_discount_label].filter(Boolean);
-                if (couponBits.length && popupData.registration_url && popupData.ticket_price != null) {
-                    // Each bit is user text sitting between bullet separators, so isolate it or
-                    // a Latin coupon code drags the bullets to the wrong side of an RTL line.
-                    // FSI (U+2068), not LRI: this list also carries coupon_discount_label, which
-                    // is a translated string and is Hebrew on a Hebrew locale - LRI would force
-                    // it left-to-right. FSI resolves each bit first-strong, matching the <bdi>
-                    // the cards use. Control characters rather than markup because this writes
-                    // through textContent; the popup is pointer-events:none so nothing here can
-                    // reach a clipboard.
-                    couponTextEl.textContent = ' \u2022 ' + couponBits.map(b => '\u2068' + b + '\u2069').join(' \u2022 ');
-                    couponTextEl.style.display = 'inline';
-                } else {
-                    couponTextEl.style.display = 'none';
-                }
-            }
-
-            if (descriptionEl) {
-                if (popupData.description) {
-                    descriptionEl.textContent = popupData.description;
-                    descriptionEl.style.display = 'block';
-                } else {
-                    descriptionEl.style.display = 'none';
-                }
-            }
-
-            // Move popup to body to avoid backdrop-filter containing block issues
-            if (popup.parentElement !== document.body) {
-                document.body.appendChild(popup);
-            }
-
-            // Show popup
-            this.popupElement = element;
-            popup.classList.add('show');
-            this.updatePopupPosition();
-        },
-        hideEventPopup() {
-            if (this.popupTimeout) {
-                clearTimeout(this.popupTimeout);
-            }
-            const popup = document.getElementById('event-popup');
-            if (popup) {
-                popup.classList.remove('show');
-            }
-        },
-        updatePopupPosition() {
-            const popup = document.getElementById('event-popup');
-            if (!popup || !popup.classList.contains('show') || !this.popupElement) return;
-
-            // 1. One-time setup for performance (GPU acceleration)
-            if (popup.style.position !== 'fixed') {
-                Object.assign(popup.style, {
-                    position: 'fixed',
-                    top: '0',
-                    left: '0',
-                    willChange: 'transform',
-                    pointerEvents: 'none' // Prevents flickering when mouse overlaps popup
-                });
-            }
-
-            const content = popup.querySelector('.event-popup-content') || popup;
-            const rect = this.popupElement.getBoundingClientRect();
-
-            // 2. Cache dimensions
-            const pW = content.offsetWidth || 320;
-            const pH = content.offsetHeight || 200;
-            const vW = window.innerWidth;
-            const vH = window.innerHeight;
-            const gap = 8;
-
-            // 3. Position below the element, left-aligned
-            let left = rect.left;
-            let top = rect.bottom + gap;
-
-            // 4. Flip above if not enough space below
-            if (top + pH > vH - 10) {
-                top = rect.top - pH - gap;
-            }
-
-            // 5. Flip left if not enough space on the right
-            if (left + pW > vW - 10) {
-                left = rect.right - pW;
-            }
-
-            // 6. Hard Constraints (Keep inside viewport)
-            left = Math.max(10, Math.min(left, vW - pW - 10));
-            top = Math.max(10, Math.min(top, vH - pH - 10));
-
-            // 7. Apply via Transform (GPU Composite instead of Layout/Reflow)
-            popup.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
-        },
         getTalentHeaderImages(event) {
             if (!event.talent) return [];
             return event.talent.filter(t => t.header_image).map(t => ({ name: t.name, image: t.header_image }));
@@ -4985,7 +4676,6 @@ const calendarApp = createApp({
         },
         onEventsReady() {
             this.$nextTick(() => {
-                this.initPopups();
                 const showPastEventsBtn = document.getElementById('showPastEventsBtn');
                 const pastEventEls = document.querySelectorAll('.past-event');
                 if (pastEventEls.length > 0 && showPastEventsBtn) {
@@ -5268,9 +4958,7 @@ const calendarApp = createApp({
                 this.fetchCalendarEvents();
             }
         } else {
-            // Graphic mode: data already server-rendered, init popups immediately
-            this.initPopups();
-
+            // Graphic mode: data already server-rendered
             this.$nextTick(() => {
                 const showPastEventsBtn = document.getElementById('showPastEventsBtn');
                 const pastEvents = document.querySelectorAll('.past-event');
@@ -5289,11 +4977,6 @@ const calendarApp = createApp({
                 }
             });
         }
-
-        // Reinitialize popups when events change
-        this.$watch('filteredEvents', () => {
-            this.initPopups();
-        });
 
         // Handle browser back/forward for AJAX month navigation
         @if ($route === 'guest' && !request()->graphic)
@@ -5367,15 +5050,6 @@ calendarAppInstance.$watch('activeFilterCount', updateHeroFiltersButton);
 }
 </script>
 
-<script {!! nonce_attr() !!}>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.calendar-day-navigate').forEach(function(el) {
-        el.addEventListener('click', function() {
-            window.location = this.getAttribute('data-href');
-        });
-    });
-});
-</script>
 {{-- v-pre is load-bearing, not decoration. This block sits INSIDE #calendar-app, and a browser
      with scripting on parses <noscript> as raw text and serializes it back verbatim into
      innerHTML - which is exactly what Vue's runtime compiler is handed. Vue does not treat

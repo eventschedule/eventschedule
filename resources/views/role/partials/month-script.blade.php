@@ -28,13 +28,36 @@
         'online' => __('messages.online'), 'coupon' => __('messages.coupon_code'),
         'n_of' => __('messages.month_n_of'), 'nothing_in' => __('messages.nothing_scheduled_in'),
         'next_up' => __('messages.next_up'), 'go_to' => __('messages.go_to_month'),
+        'add_event' => __('messages.add_event'), 'unavailable' => __('messages.unavailable'),
     ];
+    // A plus on a day, for whoever may add an event: on the Schedule tab where the header's own
+    // Add Event button shows (a verified schedule, not a viewer), on the dashboard to the first
+    // schedule the person belongs to, as a press on a day went there before. The date is put
+    // in by the script.
+    $monthAdd = null;
+    if ($route === 'admin' && ($tab ?? '') === 'schedule' && $role->email_verified_at && ! (auth()->check() && auth()->user()->isViewer($role->subdomain))) {
+        $monthAdd = route('event.create', ['subdomain' => $role->subdomain, 'date' => 'MONTH-DATE']);
+    } elseif ($route === 'home' && auth()->check()) {
+        $monthFirst = auth()->user()->member()->where('email_verified_at', '!=', null)->first();
+        $monthAdd = $monthFirst ? route('event.create', ['subdomain' => $monthFirst->subdomain, 'date' => 'MONTH-DATE']) : null;
+    }
+    // The days team members marked themselves away (the Schedule tab only), by name as written.
+    $monthAway = [];
+    if ($route === 'admin' && ($tab ?? '') === 'schedule') {
+        foreach (($unavailableMembers ?? []) as $member) {
+            $dates = array_values(array_filter((array) ($member['dates'] ?? []), 'is_string'));
+            if ($dates) {
+                $monthAway[] = ['name' => (string) ($member['name'] ?? ''), 'dates' => $dates];
+            }
+        }
+    }
     // What each page's card may offer (the plan's "what differs by page"). An embed's card
     // has neither: the embed guide tells owners those live on the event page.
     $monthCan = [
         'calendar' => $route === 'guest' && ! $guestEmbed,
         'share' => ! $guestEmbed,
         'guest' => $route === 'guest',
+        'add' => $monthAdd,
     ];
 @endphp
 <script {!! nonce_attr() !!}>
@@ -48,6 +71,7 @@ const CLOSE_MS = 340;       // and it stays this long after the pointer leaves b
 const NARROW = 150;         // px of day below which the card says less and is three days wide
 const L = @json($monthLabels);
 const CAN = @json($monthCan);
+const AWAY = @json($monthAway);
 
 const two = (n) => String(n).padStart(2, '0');
 const ymd = (d) => d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate());
@@ -112,9 +136,11 @@ return {
             const last = ymd(new Date(this.pageYear, this.pageMonth, 0));
             const today = this.scheduleDay(0);
             const nx = CAN.guest ? this.allMobileOccurrences.find((e) => e.occurrenceDate && e.occurrenceDate > last && e.occurrenceDate >= today) : null;
-            if (!nx) return { title, next: null };
+            // Whoever may add an event is offered that, on today or the month's first day.
+            const add = CAN.add ? CAN.add.replace('MONTH-DATE', today.slice(0, 7) === this.monthYearDatetime ? today : this.monthYearDatetime + '-01') : null;
+            if (!nx) return { title, next: null, add };
             const d = day(nx.occurrenceDate);
-            return { title, next: {
+            return { title, add, next: {
                 name: this.getEventDisplayName(nx), date: nx.occurrenceDate,
                 when: d.toLocaleDateString(lang, { weekday: 'short', month: 'short', day: 'numeric' }),
                 go: say(L.go_to, { month: d.toLocaleDateString(lang, { month: 'long' }) }),
@@ -296,6 +322,9 @@ return {
             if (!cell.inMonth) cls.push('gk-cal-day-out');
             if (cell.past) cls.push('gk-cal-day-past');
             if (cell.today) cls.push('gk-cal-day-today');
+            // Team members away that day (the admin's Schedule tab): a tint and a mark, and who.
+            const away = AWAY.filter((member) => member.dates.includes(cell.date)).map((member) => member.name);
+            if (away.length) cls.push('gk-cal-day-away');
 
             const mine = runs.filter((r) => r.col <= col && r.end >= col);
             const laneCount = mine.length ? Math.max.apply(null, mine.map((r) => r.lane)) + 1 : 0;
@@ -349,6 +378,8 @@ return {
                 date: cell.date, col, inMonth: cell.inMonth, today: cell.today, past: cell.past, cls: cls.join(' '),
                 num: cell.n === 1 ? d.toLocaleDateString(this.languageCode, { month: 'short', day: 'numeric' }) : String(cell.n),
                 count: all.length, label: full + (all.length ? ', ' + L.events + ': ' + all.length : ''), full,
+                away: away.length ? L.unavailable + ': ' + away.join(', ') : '',
+                add: CAN.add ? CAN.add.replace('MONTH-DATE', cell.date) : null, addLabel: L.add_event + ': ' + full,
                 lanes, chips, more,
                 listCls: 'gk-cal-list-' + lines + (lines > 1 ? ' gk-cal-list-wrap' : '') + (art ? ' gk-cal-list-feat' : ''),
             };
@@ -879,6 +910,8 @@ return {
                 title: day(date).toLocaleDateString(lang, brief ? { weekday: 'short', month: 'short', day: 'numeric' } : { weekday: 'long', month: 'long', day: 'numeric' }),
                 count: L.events + ': ' + list.length,
                 prev: !!this.monthDayBeside(date, -1), next: !!this.monthDayBeside(date, 1),
+                away: AWAY.filter((member) => member.dates.includes(date)).map((member) => member.name).join(', '),
+                add: CAN.add ? CAN.add.replace('MONTH-DATE', date) : null,
             };
         },
 

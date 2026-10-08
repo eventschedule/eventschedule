@@ -35,7 +35,10 @@
         <div class="gk-cal-empty-card">
             <b v-text="monthEmpty.title"></b>
             <span v-if="monthEmpty.next"><span>{{ __('messages.next_up') }}</span> <bdi v-text="monthEmpty.next.name"></bdi><span v-text="', ' + monthEmpty.next.when"></span></span>
-            <span v-if="monthEmpty.next" class="gk-cal-empty-go"><button type="button" class="gk-peek-btn gk-peek-btn-primary gk-cal-empty-btn" @click.stop="monthGoTo(monthEmpty.next.date)" v-text="monthEmpty.next.go"></button></span>
+            <span v-if="monthEmpty.next || monthEmpty.add" class="gk-cal-empty-go">
+                <a v-if="monthEmpty.add" class="gk-peek-btn gk-cal-empty-btn" :class="monthEmpty.next ? 'gk-peek-btn-secondary' : 'gk-peek-btn-primary'" :href="monthEmpty.add" @click.stop>{{ __('messages.add_event') }}</a>
+                <button v-if="monthEmpty.next" type="button" class="gk-peek-btn gk-peek-btn-primary gk-cal-empty-btn" @click.stop="monthGoTo(monthEmpty.next.date)" v-text="monthEmpty.next.go"></button>
+            </span>
         </div>
     </div>
     {{-- Keyed by the month and by whether it is still loading, so the weeks are made anew when a
@@ -48,6 +51,10 @@
                     <button v-if="day.count" type="button" class="gk-cal-num" :data-day-open="day.date" aria-expanded="false" :aria-label="day.label"><time :datetime="day.date" v-text="day.num"></time></button>
                     <span v-else class="gk-cal-num"><time :datetime="day.date" v-text="day.num"></time></span>
                     <span v-if="day.today" class="gk-cal-word">{{ __('messages.today') }}</span>
+                    {{-- A team member is away (the admin's Schedule tab): who, as text, in the mark's label. --}}
+                    <span v-if="day.away" class="gk-cal-away" tabindex="0" role="img" :title="day.away" :aria-label="day.away"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg></span>
+                    {{-- A new event on this day, for whoever may add one. --}}
+                    <a v-if="day.add" class="gk-cal-add" :href="day.add" :aria-label="day.addLabel" @click.stop><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></a>
                 </div>
                 <div v-if="day.lanes.length" class="gk-cal-lanes">
                     <template v-for="(lane, at) in day.lanes" :key="at">

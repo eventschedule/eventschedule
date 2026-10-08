@@ -102,6 +102,7 @@
         <button type="button" class="gk-dayp-x" data-day-step="1" aria-label="{{ __('messages.next') }}" :disabled="!monthDayPanel.next" @click="monthDayStep(1)">{!! $monthIcon($monthIcons['next'], 'gk-flip') !!}</button>
         <button type="button" class="gk-dayp-x" data-day-close aria-label="{{ __('messages.close') }}" @click="monthCloseDay()">{!! $monthIcon($monthIcons['x']) !!}</button>
     </div>
+    <p v-if="monthDayPanel.away" class="gk-dayp-away"><b>{{ __('messages.unavailable') }}:</b> <bdi v-text="monthDayPanel.away"></bdi></p>
     <ul class="gk-dayp-rows">
         <li v-for="row in monthDayPanel.rows" :key="row.key">
             <a class="gk-dayp-row" :class="row.cls" :href="row.url"{!! $monthTarget !!} :data-ev="row.id" @click="countListTap()">
@@ -114,6 +115,7 @@
             </a>
         </li>
     </ul>
+    <div v-if="monthDayPanel.add" class="gk-dayp-foot"><a class="gk-peek-btn gk-peek-btn-secondary" :href="monthDayPanel.add">{{ __('messages.add_event') }}</a></div>
     </template>
 </div>
 </Teleport>

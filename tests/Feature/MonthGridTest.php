@@ -152,33 +152,48 @@ class MonthGridTest extends TestCase
     }
 
     /**
-     * One month for the guest page and the embed (role/partials/month), with the card and the
-     * day's panel that stand over it (month-peek) and the script that writes each day
-     * (month-script). The grid that was there, and its hover popup, are gone from these pages.
+     * One month for the four pages that show one (role/partials/month): the guest page, the
+     * embed, the admin's Schedule tab and the dashboard, with the card and the day's panel that
+     * stand over it (month-peek) and the script that writes each day (month-script). The grid
+     * that was written twice, and its hover popup, are gone.
      */
-    public function test_the_guest_page_and_the_embed_draw_the_one_month(): void
+    public function test_the_four_pages_draw_the_one_month(): void
     {
-        foreach (['?layout=calendar', '?embed=true&layout=calendar'] as $query) {
-            $html = $this->get('/'.$this->role->subdomain.$query)->assertOk()->getContent();
+        $owner = $this->role->users()->first();
+        $pages = [
+            'the guest page' => fn () => $this->get('/'.$this->role->subdomain.'?layout=calendar'),
+            'the embed' => fn () => $this->get('/'.$this->role->subdomain.'?embed=true&layout=calendar'),
+            'the Schedule tab' => fn () => $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule'])),
+            'the dashboard' => fn () => $this->actingAs($owner)->get(route('home')),
+        ];
+        foreach ($pages as $query => $page) {
+            $html = $page()->assertOk()->getContent();
 
             $this->assertSame(1, substr_count($html, ' data-month '), $query.': one month');
             $this->assertSame(1, substr_count($html, 'id="event-popup"'), $query.': one card, under the id the popup had');
             $this->assertStringContainsString('<div id="event-popup" ref="monthPeekEl" class="gk-peek"', $html);
             $this->assertStringContainsString('class="gk-dayp"', $html);
-            $this->assertStringNotContainsString('event-link-popup"', $html, $query.': the old grid is not drawn');
-            $this->assertStringNotContainsString('class="event-popup"', $html);
+            foreach (['event-link-popup', 'class="event-popup"', 'initPopups', 'calendar-day-navigate', 'has-tooltip', 'id="tooltip"'] as $gone) {
+                $this->assertStringNotContainsString($gone, $html, $query.': '.$gone.' went with the old grid');
+            }
             // The kit, and the script as a mixin of the calendar's app with its directive.
             $this->assertStringContainsString('.gk-cal-week {', $html);
             $this->assertStringContainsString('mixins: [window.monthMixin],', $html);
             $this->assertStringContainsString("calendarApp.directive('clamp', window.monthClamp);", $html);
         }
 
+        auth()->logout();
         // What an embed's card may not offer: its guide tells owners that adding to a calendar
         // and sharing live on the event page, and share is withheld from embeds everywhere else.
         $guest = $this->get('/'.$this->role->subdomain.'?layout=calendar')->getContent();
         $embed = $this->get('/'.$this->role->subdomain.'?embed=true&layout=calendar')->getContent();
-        $this->assertStringContainsString('const CAN = {"calendar":true,"share":true,"guest":true};', $guest);
-        $this->assertStringContainsString('const CAN = {"calendar":false,"share":false,"guest":true};', $embed);
+        $this->assertStringContainsString('const CAN = {"calendar":true,"share":true,"guest":true,"add":null};', $guest);
+        $this->assertStringContainsString('const CAN = {"calendar":false,"share":false,"guest":true,"add":null};', $embed);
+        // The admin's pages stand on the portal's own tokens, which the guest pages must not get.
+        $admin = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->getContent();
+        $this->assertStringContainsString('--gk-solid: rgb(var(--ap-surface));', $admin);
+        $this->assertStringNotContainsString('--gk-solid: rgb(var(--ap-surface));', $guest);
+        auth()->logout();
         // An embed opens an event in a new tab, as it always has; the page itself does not.
         $this->assertStringContainsString(':data-ev="chip.id" :data-date="day.date" :aria-label="chip.label">', $guest);
         $this->assertSame(1, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank" rel="noopener"/', $embed));
@@ -250,5 +265,44 @@ class MonthGridTest extends TestCase
         $draftIcal = $this->guestEventUrl($this->role, $draft).'/ical';
         $this->get($draftIcal)->assertNotFound();
         $this->get($draftIcal.'?to=google')->assertNotFound();
+    }
+
+    /**
+     * The Availability tab keeps the grid a team member marks their days on; it is not the month.
+     * On the Schedule tab the days people are away are told by name: as text, by the name as it
+     * was written, and one entry a member. They were printed as markup in a tooltip, and keyed
+     * by the escaped name, which folds two members who share a name into one.
+     */
+    public function test_who_is_away_is_told_as_text_and_the_availability_grid_stays(): void
+    {
+        $owner = $this->role->users()->first();
+        $day = now()->addDays(3)->format('Y-m-d');
+        foreach (['Dana <b>Bold</b>', 'Sam Rivers', 'Sam Rivers'] as $name) {
+            $member = \App\Models\User::factory()->create(['name' => $name, 'email_verified_at' => now()]);
+            $this->role->users()->attach($member->id, ['level' => 'admin', 'dates_unavailable' => json_encode([$day])]);
+        }
+
+        $schedule = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/const AWAY = (\[.*?\]);\n/', $schedule, $found));
+        $away = json_decode($found[1], true);
+        $this->assertSame(['Dana <b>Bold</b>', 'Sam Rivers', 'Sam Rivers'], array_column($away, 'name'), 'by name as written, one entry a member');
+        $this->assertSame([[$day], [$day], [$day]], array_column($away, 'dates'));
+        $this->assertStringNotContainsString('<b>Bold</b>', $schedule, 'no member\'s name is in the page as markup');
+        // Printed through bindings: an attribute and a text node, never markup.
+        $month = file_get_contents(resource_path('views/role/partials/month.blade.php'));
+        $this->assertStringContainsString('<span v-if="day.away" class="gk-cal-away" tabindex="0" role="img" :title="day.away" :aria-label="day.away">', $month);
+        $this->assertStringContainsString('<bdi v-text="monthDayPanel.away"></bdi>', file_get_contents(resource_path('views/role/partials/month-peek.blade.php')));
+
+        // A plus on a day for whoever may add an event; a viewer may not.
+        $this->assertSame(1, preg_match('/const CAN = \{.*"add":"[^"]*add-event\?date=MONTH-DATE"\};/', $schedule));
+        $viewer = \App\Models\User::factory()->create(['email_verified_at' => now()]);
+        $this->role->users()->attach($viewer->id, ['level' => 'viewer']);
+        $asViewer = $this->actingAs($viewer)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/const CAN = \{.*"add":null\};/', $asViewer));
+
+        $availability = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
+        $this->assertSame(0, substr_count($availability, ' data-month '), 'the Availability tab is not the month');
+        $this->assertSame(0, substr_count($availability, 'id="event-popup"'));
+        $this->assertStringContainsString('grid-cols-7 grid-rows-', $availability, 'its own grid of days is there');
     }
 }

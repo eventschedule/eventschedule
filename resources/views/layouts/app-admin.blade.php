@@ -75,6 +75,8 @@
              three forms and a schedule's tabs used them. --}}
         @include('partials.form-kit-styles')
         @include('partials.admin-page-styles')
+        {{-- The month (the Schedule tab, the dashboard) on the portal's own tokens. --}}
+        @include('partials.month-kit-styles', ['monthBridge' => true])
         @include('partials.admin-page-script')
 
         {{ isset($head) ? $head : '' }}
