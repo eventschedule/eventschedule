@@ -110,7 +110,13 @@ class JsonLdEventUtils
     /**
      * @param  string  $pageUrl  The address the HTML was finally served from, for relative links.
      * @param  bool  $keepLocalClock  False for a venue schedule: see ImportedTime::place().
-     * @return array{rows: list<array>, skipped: array{past: int, cancelled: int, unreadable: int}}
+     * @return array{rows: list<array>, skipped: array{past: int, cancelled: int, unreadable: int}, seen: array<string, string>, complete: bool}
+     *
+     * Each row carries `source_id`, the event's identity on the page for a reader that comes
+     * back (a feed): its `@id`, else its own `url`, else its name and start. `seen` names every
+     * event the page holds by that id with what became of it (listed, past, later, cancelled,
+     * unreadable), so an event that is merely over, postponed past the window or called off is
+     * not mistaken for one the page no longer lists. See identities().
      */
     public static function read(string $html, string $pageUrl, string $timezone, bool $keepLocalClock, ?\DateTimeInterface $now = null): array
     {
@@ -129,29 +135,40 @@ class JsonLdEventUtils
         }
 
         $rows = [];
-        $seen = [];
+        $once = [];
+        $found = [];
         $skipped = ['past' => 0, 'cancelled' => 0, 'unreadable' => 0];
 
         foreach ($nodes as $node) {
+            // Read before it is judged, so that an event has the same name-and-start whether it
+            // is on, over or called off: that is what tells two events at one address apart.
+            $row = self::row($node, $pageUrl, $timezone, $keepLocalClock);
+            $key = $row === null ? null : mb_strtolower($row['event_name']).'|'.$row['event_date_time'];
+            // An `@id` need not be an address (urn:uuid:...): it is kept as written then.
+            $own = trim(self::text($node['@id'] ?? ''));
+            $address = $own !== ''
+                ? (self::absolute($own, $pageUrl) ?: $own)
+                : self::absolute(self::text($node['url'] ?? ''), $pageUrl);
+
             if (str_contains((string) self::text($node['eventStatus'] ?? ''), 'EventCancelled')) {
                 $skipped['cancelled']++;
+                $found[] = ['address' => $address, 'key' => $key, 'reason' => 'cancelled', 'row' => null];
 
                 continue;
             }
 
-            $row = self::row($node, $pageUrl, $timezone, $keepLocalClock);
             if ($row === null) {
                 $skipped['unreadable']++;
+                $found[] = ['address' => $address, 'key' => null, 'reason' => 'unreadable', 'row' => null];
 
                 continue;
             }
 
             // The same event marked up twice on one page (a list and a detail block) is one event.
-            $key = mb_strtolower($row['event_name']).'|'.$row['event_date_time'];
-            if (isset($seen[$key])) {
+            if (isset($once[$key])) {
                 continue;
             }
-            $seen[$key] = true;
+            $once[$key] = true;
 
             $startsOn = substr($row['sort_at'], 0, 10);
             $endsAt = $row['ends_at'];
@@ -160,16 +177,71 @@ class JsonLdEventUtils
             $upcoming = $startsOn >= $from->format('Y-m-d') || ($endsAt !== null && $endsAt >= $now->getTimestamp());
             if (! $upcoming || $startsOn > $to->format('Y-m-d')) {
                 $skipped['past']++;
+                $found[] = ['address' => $address, 'key' => $key, 'reason' => $upcoming ? 'later' : 'past', 'row' => null];
 
                 continue;
             }
 
+            $found[] = ['address' => $address, 'key' => $key, 'reason' => 'listed', 'row' => count($rows)];
             $rows[] = $row;
+        }
+
+        $seen = [];
+        foreach (self::identities($found) as $index => $id) {
+            if ($id === null) {
+                continue;
+            }
+
+            // A cancelled copy of an event that is also listed does not take its id from it.
+            if (($seen[$id] ?? null) !== 'listed') {
+                $seen[$id] = $found[$index]['reason'];
+            }
+
+            if ($found[$index]['row'] !== null) {
+                $rows[$found[$index]['row']]['source_id'] = $id;
+            }
         }
 
         usort($rows, fn ($a, $b) => [$a['sort_at'], $a['event_name']] <=> [$b['sort_at'], $b['event_name']]);
 
-        return ['rows' => $rows, 'skipped' => $skipped];
+        return ['rows' => $rows, 'skipped' => $skipped, 'seen' => $seen, 'complete' => true];
+    }
+
+    /**
+     * The id each event keeps from one read of the page to the next.
+     *
+     * Its own address (`@id`, else `url`) when it is the only event that has it. Many pages
+     * give every event in a list the address of the list, and some give none, so:
+     *
+     *  - several different events at one address are each that address plus a mark made of the
+     *    name and start, all of them, so that none depends on which comes first on the page;
+     *  - an event with no address is known by its name and start alone.
+     *
+     * An event nothing can be said about (no address, and no name or start to read) has no id.
+     *
+     * @param  list<array{address: string, key: ?string, reason: string, row: ?int}>  $found
+     * @return list<?string>
+     */
+    private static function identities(array $found): array
+    {
+        $shared = [];
+        foreach ($found as $entry) {
+            if ($entry['address'] !== '') {
+                $shared[$entry['address']][$entry['key'] ?? ''] = true;
+            }
+        }
+
+        return array_map(function (array $entry) use ($shared) {
+            $mark = $entry['key'] === null ? null : substr(sha1($entry['key']), 0, 12);
+
+            if ($entry['address'] === '') {
+                return $mark === null ? null : 'ld-'.$mark;
+            }
+
+            return count($shared[$entry['address']]) > 1 && $mark !== null
+                ? $entry['address'].'#'.$mark
+                : $entry['address'];
+        }, $found);
     }
 
     /** Walk a decoded block and gather every event node in it, wherever it is nested. */

@@ -27,6 +27,18 @@ use Sabre\VObject\TimeZoneUtil;
  *    then the whole series: event_date_time is its FIRST occurrence, as a repeating event's is.
  *  - series: a repeating entry it cannot. Its next dates arrive as separate rows that share
  *    series.id, so the preview can show and select them as one.
+ *  - source_id: the entry's identity in the feed, for a reader that comes back (a feed). The
+ *    same entry has the same id on every read however the feed is ordered, which source_uid
+ *    does not promise: see stableIds(). A date of a listed series is `<id>#<its moment in UTC>`,
+ *    the moment it was ORIGINALLY due, so a date somebody moved keeps its id.
+ *
+ * Beside the rows, for the same reader:
+ *
+ *  - seen: every entry the feed holds, by source_id, with what became of it: listed, past,
+ *    later (it starts beyond the window, which `skipped` counts as past), cancelled, private or
+ *    unreadable. An entry that is absent from this map is absent from the feed; one that is
+ *    in it and not listed is still there.
+ *  - complete: false when the reader ran out of time, so absence means nothing this time.
  */
 class IcsImportUtils
 {
@@ -52,11 +64,15 @@ class IcsImportUtils
 
     /**
      * @param  bool  $keepLocalClock  False for a venue schedule: see ImportedTime::place().
-     * @return array{rows: list<array>, skipped: array{past: int, cancelled: int, private: int, unreadable: int}}
+     * @param  bool  $alwaysByDate  List every repeating entry by its dates, never as one repeating
+     *                              event. For a reader that comes back: the window slides, so a
+     *                              listed series never runs out, and each date can be followed
+     *                              (moved, cancelled, gone) on its own.
+     * @return array{rows: list<array>, skipped: array{past: int, cancelled: int, private: int, unreadable: int}, seen: array<string, string>, complete: bool}
      *
      * @throws \InvalidArgumentException when the text is not a calendar at all
      */
-    public static function read(string $body, string $timezone, bool $keepLocalClock, ?\DateTimeInterface $now = null): array
+    public static function read(string $body, string $timezone, bool $keepLocalClock, ?\DateTimeInterface $now = null, bool $alwaysByDate = false): array
     {
         try {
             $calendar = Reader::read($body, Reader::OPTION_FORGIVING | Reader::OPTION_IGNORE_INVALID_LINES);
@@ -78,11 +94,14 @@ class IcsImportUtils
         $starts = [];
         $families = [];
         $zones = [];
+        $nameless = [];
+        $signatures = [];
         foreach ($calendar->select('VEVENT') as $index => $vevent) {
             self::normalise($vevent, $calendar, $zones);
 
             if (! isset($vevent->UID) || trim((string) $vevent->UID) === '') {
                 $vevent->UID = 'no-uid-'.$index;
+                $nameless[(string) $vevent->UID] = true;
             }
             $uid = (string) $vevent->UID;
 
@@ -107,9 +126,12 @@ class IcsImportUtils
                 $vevent->UID = $uid;
             }
             $families[$shared][] = $uid;
+            $signatures[$uid] = $start;
 
             $entries[$uid]['masters'][] = $vevent;
         }
+
+        $stable = self::stableIds($families, $signatures, $nameless);
 
         // A moved or cancelled date names the id it was written with, which several entries
         // may share. It belongs to one that repeats: left with whichever came first, a one-off,
@@ -134,6 +156,8 @@ class IcsImportUtils
         }
 
         $rows = [];
+        $seen = [];
+        $complete = true;
         $skipped = ['past' => 0, 'cancelled' => 0, 'private' => 0, 'unreadable' => 0];
         $deadline = microtime(true) + self::MAX_SECONDS;
         $libraryLimit = Settings::$maxRecurrences;
@@ -145,8 +169,14 @@ class IcsImportUtils
                 $standalone = isset($entry['masters']) ? [$entry['masters'][0]] : ($entry['overrides'] ?? []);
 
                 foreach ($standalone as $vevent) {
+                    // Such a date is known by the series it left and the moment it was due.
+                    $id = isset($entry['masters'])
+                        ? ($stable[(string) $uid] ?? (string) $uid)
+                        : (string) $uid.'#'.self::dueMoment($vevent, $zone);
+
                     if ($reason = self::skipReason($vevent)) {
                         $skipped[$reason]++;
+                        $seen[$id] = $reason;
 
                         continue;
                     }
@@ -154,25 +184,35 @@ class IcsImportUtils
                     // A feed built to keep the reader busy must not hold the request.
                     if (microtime(true) > $deadline) {
                         $skipped['unreadable']++;
+                        $seen[$id] = 'unreadable';
+                        $complete = false;
 
                         continue;
                     }
 
+                    $why = 'past';
+
                     try {
                         $found = isset($entry['masters']) && (isset($vevent->RRULE) || isset($vevent->RDATE))
-                            ? self::series($vevent, $entry['overrides'] ?? [], (string) $uid, $zone, $keepLocalClock, $from, $to)
-                            : self::single($vevent, $zone, $keepLocalClock, $now, $to);
+                            ? self::series($vevent, $entry['overrides'] ?? [], (string) $uid, $zone, $keepLocalClock, $from, $to, $id, $alwaysByDate, $seen, $why)
+                            : self::single($vevent, $zone, $keepLocalClock, $now, $to, $id, $why);
                     } catch (\Throwable $e) {
                         // One malformed entry must not cost the person the rest of their calendar.
                         $skipped['unreadable']++;
+                        $seen[$id] = 'unreadable';
 
                         continue;
                     }
 
                     if (! $found) {
                         $skipped['past']++;
+                        $seen[$id] = $why;
 
                         continue;
+                    }
+
+                    foreach ($found as $row) {
+                        $seen[$row['source_id']] = 'listed';
                     }
 
                     array_push($rows, ...$found);
@@ -184,7 +224,64 @@ class IcsImportUtils
 
         usort($rows, fn ($a, $b) => [$a['sort_at'], $a['event_name']] <=> [$b['sort_at'], $b['event_name']]);
 
-        return ['rows' => $rows, 'skipped' => $skipped];
+        return ['rows' => $rows, 'skipped' => $skipped, 'seen' => $seen, 'complete' => $complete];
+    }
+
+    /**
+     * The id each entry keeps from one read to the next.
+     *
+     * An entry's own UID, when it is the only entry that has it. Two things break that, and both
+     * were being papered over with the entry's POSITION in the feed, which is the one thing a
+     * feed changes on its own: entries are usually listed by date, so the first one passing
+     * moves every other up by one.
+     *
+     *  - No UID at all. It was `no-uid-<index>`.
+     *  - One UID on several entries (some feeds give every entry the same one). The first kept
+     *    the UID bare and the rest were numbered in order, so when the first had passed, each
+     *    entry answered to its neighbour's id.
+     *
+     * Both are named by what the entry says instead: its start and its title, which is all such
+     * an entry has to be told apart by. All of the entries that share a UID, the first included,
+     * or the first's id would still depend on who comes first.
+     *
+     * @param  array<string, list<string>>  $families  The ids used in this read, by the UID they share.
+     * @param  array<string, string>  $signatures  Each one's start and title.
+     * @param  array<string, bool>  $nameless  The made-up UIDs of entries that had none.
+     * @return array<string, string>
+     */
+    private static function stableIds(array $families, array $signatures, array $nameless): array
+    {
+        $stable = [];
+
+        foreach ($families as $shared => $ids) {
+            foreach ($ids as $id) {
+                $mark = substr(sha1($signatures[(string) $id] ?? ''), 0, 12);
+
+                $stable[(string) $id] = match (true) {
+                    isset($nameless[(string) $shared]) => 'no-uid-'.$mark,
+                    count($ids) > 1 => $shared.'#'.$mark,
+                    default => (string) $shared,
+                };
+            }
+        }
+
+        return $stable;
+    }
+
+    /** The moment a moved or edited date was originally due. As written when it cannot be read. */
+    private static function dueMoment(VEvent $vevent, \DateTimeZone $zone): string
+    {
+        try {
+            return self::moment($vevent->{'RECURRENCE-ID'}->getDateTime($zone));
+        } catch (\Throwable $e) {
+            return trim((string) $vevent->{'RECURRENCE-ID'});
+        }
+    }
+
+    /** A moment as part of an id: the same instant reads the same whatever zone it was written in. */
+    private static function moment(\DateTimeInterface $at): string
+    {
+        return gmdate('Ymd\THis\Z', $at->getTimestamp());
     }
 
     /**
@@ -250,8 +347,11 @@ class IcsImportUtils
         return null;
     }
 
-    /** An entry that happens once. Empty when it is over, or further ahead than the window. */
-    private static function single(VEvent $vevent, \DateTimeZone $zone, bool $keepLocalClock, CarbonImmutable $now, CarbonImmutable $to): array
+    /**
+     * An entry that happens once. Empty when it is over, or further ahead than the window, and
+     * $why then says which: an event postponed by thirteen months has not gone anywhere.
+     */
+    private static function single(VEvent $vevent, \DateTimeZone $zone, bool $keepLocalClock, CarbonImmutable $now, CarbonImmutable $to, string $id = '', string &$why = 'past'): array
     {
         $start = $vevent->DTSTART->getDateTime($zone);
         $end = self::endOf($vevent, $start, $zone);
@@ -259,10 +359,12 @@ class IcsImportUtils
         // Still to come, or still going on.
         $upcoming = $start >= $now->startOfDay() || ($end && $end >= $now);
         if (! $upcoming || $start > $to) {
+            $why = $upcoming ? 'later' : 'past';
+
             return [];
         }
 
-        return [self::row($vevent, $start, $end, $zone, $keepLocalClock)];
+        return [self::row($vevent, $start, $end, $zone, $keepLocalClock) + ['source_id' => $id]];
     }
 
     /**
@@ -270,7 +372,7 @@ class IcsImportUtils
      *
      * @param  list<VEvent>  $overrides  Its moved or edited dates.
      */
-    private static function series(VEvent $master, array $overrides, string $uid, \DateTimeZone $zone, bool $keepLocalClock, CarbonImmutable $from, CarbonImmutable $to): array
+    private static function series(VEvent $master, array $overrides, string $uid, \DateTimeZone $zone, bool $keepLocalClock, CarbonImmutable $from, CarbonImmutable $to, string $id = '', bool $alwaysByDate = false, array &$seen = [], string &$why = 'past'): array
     {
         $hasRule = isset($master->RRULE);
         if ($hasRule && in_array(strtoupper((string) ($master->RRULE->getParts()['FREQ'] ?? '')), self::SUB_DAILY, true)) {
@@ -311,11 +413,14 @@ class IcsImportUtils
         $ruleAhead = $iterator->valid() && $iterator->getDtStart() <= $to;
 
         if (! $ruleAhead && ! $addedAhead) {
+            // Nothing in the window. It has dates beyond it, or it is over.
+            $why = $iterator->valid() || array_filter($added, fn ($at) => $at > $to) ? 'later' : 'past';
+
             return [];
         }
 
         // An edited date cannot ride along on a repeating event, so such a series is listed.
-        if ($hasRule && $ruleAhead && ! $overrides) {
+        if ($hasRule && $ruleAhead && ! $overrides && ! $alwaysByDate) {
             $placedStart = $place($masterStart);
 
             $excluded = [];
@@ -348,6 +453,7 @@ class IcsImportUtils
                         $next = $addedAhead[0];
                     }
                     $row['sort_at'] = $place($next)->format('Y-m-d H:i');
+                    $row['source_id'] = $id;
 
                     return [$row];
                 }
@@ -360,8 +466,13 @@ class IcsImportUtils
         $rows = [];
         while ($iterator->valid() && count($rows) < self::SERIES_DATES && $iterator->getDtStart() <= $to) {
             $occurrence = $iterator->getEventObject();
+            // The moment this date was due before anybody moved it, which is what it is known by.
+            $due = isset($occurrence->{'RECURRENCE-ID'}) ? $occurrence->{'RECURRENCE-ID'}->getDateTime($zone) : $iterator->getDtStart();
+            $dateId = $id.'#'.self::moment($due);
             // A date the owner cancelled or hid on its own.
-            if (! self::skipReason($occurrence)) {
+            if ($reason = self::skipReason($occurrence)) {
+                $seen[$dateId] = $reason;
+            } else {
                 $start = $iterator->getDtStart();
                 $end = $iterator->getDtEnd();
                 // A moved date written in UTC, on a series that names its zone.
@@ -369,7 +480,7 @@ class IcsImportUtils
                     $start = $own($start);
                     $end = $end ? $own($end) : null;
                 }
-                $rows[] = self::row($occurrence, $start, $end, $zone, $keepLocalClock, $statesZone);
+                $rows[] = self::row($occurrence, $start, $end, $zone, $keepLocalClock, $statesZone) + ['source_id' => $dateId];
             }
             $iterator->next();
         }
@@ -380,7 +491,7 @@ class IcsImportUtils
         $masterEnd = self::endOf($master, $masterStart, $zone);
         $seconds = $masterEnd ? $masterEnd->getTimestamp() - $masterStart->getTimestamp() : 0;
         foreach ($addedAhead as $at) {
-            $rows[] = self::row($master, $at, $seconds > 0 ? $at->modify('+'.$seconds.' seconds') : null, $zone, $keepLocalClock, $statesZone);
+            $rows[] = self::row($master, $at, $seconds > 0 ? $at->modify('+'.$seconds.' seconds') : null, $zone, $keepLocalClock, $statesZone) + ['source_id' => $id.'#'.self::moment($at)];
         }
 
         // In order, each moment once (a feed can add the date its rule already gives).

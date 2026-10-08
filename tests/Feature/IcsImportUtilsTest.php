@@ -512,4 +512,106 @@ class IcsImportUtilsTest extends TestCase
         $this->assertCount(6000, $read['rows']);
         $this->assertLessThan(6.0, $seconds, 'Reading 6,000 repeating entries took '.round($seconds, 1).'s');
     }
+
+    /**
+     * What a reader that comes back needs beside the rows: every entry the feed holds, by an id
+     * that is the same on every read, and what became of it. An entry that is over, postponed
+     * past the window, cancelled or private is still IN the feed, and must not be taken for one
+     * that has gone from it.
+     */
+    public function test_every_entry_is_named_with_what_became_of_it(): void
+    {
+        $result = $this->read($this->feed(
+            "UID:yesterday\nSUMMARY:Yesterday\nDTSTART:20261009T230000Z",
+            "UID:on\nSUMMARY:On\nDTSTART:20261020T230000Z",
+            "UID:far\nSUMMARY:Postponed thirteen months\nDTSTART;VALUE=DATE:20280101",
+            "UID:far-series\nSUMMARY:Starts in 2028\nDTSTART;TZID=America/New_York:20280105T180000\nRRULE:FREQ=WEEKLY",
+            "UID:ended\nSUMMARY:Ended series\nDTSTART;TZID=America/New_York:20260105T180000\nRRULE:FREQ=WEEKLY;UNTIL=20260301T000000Z",
+            "UID:off\nSUMMARY:Called off\nDTSTART:20261020T230000Z\nSTATUS:CANCELLED",
+            "UID:mine\nSUMMARY:Dentist\nDTSTART:20261020T230000Z\nCLASS:PRIVATE",
+            "UID:broken\nSUMMARY:No start",
+        ));
+
+        $this->assertSame([
+            'yesterday' => 'past',
+            'on' => 'listed',
+            'far' => 'later',
+            'far-series' => 'later',
+            'ended' => 'past',
+            'off' => 'cancelled',
+            'mine' => 'private',
+            'broken' => 'unreadable',
+        ], $result['seen']);
+        $this->assertTrue($result['complete']);
+        $this->assertSame('on', $result['rows'][0]['source_id']);
+        // The counts the preview shows are what they were: "later" is still counted as past there.
+        $this->assertSame(['past' => 4, 'cancelled' => 1, 'private' => 1, 'unreadable' => 1], $result['skipped']);
+    }
+
+    /**
+     * Entries with no id, and entries that all share one, used to be told apart by where they
+     * stood in the feed. A feed lists by date, so when the first one passed every other moved up
+     * and answered to its neighbour's id.
+     */
+    public function test_an_entrys_id_does_not_depend_on_where_it_stands_in_the_feed(): void
+    {
+        $entries = [
+            "SUMMARY:No id, first\nDTSTART:20261020T230000Z",
+            "SUMMARY:No id, second\nDTSTART:20261021T230000Z",
+            "UID:same\nSUMMARY:Shared, first\nDTSTART:20261022T230000Z",
+            "UID:same\nSUMMARY:Shared, second\nDTSTART:20261023T230000Z",
+            "UID:same\nSUMMARY:Shared, third\nDTSTART:20261024T230000Z",
+            "UID:alone\nSUMMARY:Its own id\nDTSTART:20261025T230000Z",
+        ];
+        $ids = fn (array $entries) => array_column($this->rows($this->feed(...$entries)), 'source_id', 'event_name');
+
+        $asWritten = $ids($entries);
+        $this->assertCount(6, array_unique($asWritten));
+        $this->assertSame('alone', $asWritten['Its own id']);
+        $this->assertStringStartsWith('same#', $asWritten['Shared, first']);
+        $this->assertStringStartsWith('no-uid-', $asWritten['No id, first']);
+
+        $this->assertSame($asWritten, array_replace($asWritten, $ids(array_reverse($entries))));
+
+        // The first of each kind has passed and is no longer in the feed.
+        unset($entries[0], $entries[2]);
+        $after = $ids(array_values($entries));
+        $this->assertSame(array_intersect_key($asWritten, $after), $after);
+    }
+
+    /**
+     * For a reader that comes back, a repeating entry is its dates. Each is known by the moment
+     * it was due, so a date somebody moved is still the same date, and one that was called off
+     * on its own is named as called off rather than missing.
+     */
+    public function test_a_series_can_always_be_listed_by_date_and_each_date_keeps_its_id(): void
+    {
+        $weekly = "UID:class\nSUMMARY:Class\nDTSTART;TZID=America/New_York:20261006T190000\nRRULE:FREQ=WEEKLY;COUNT=5";
+        $read = fn (string ...$events) => IcsImportUtils::read($this->feed(...$events), self::ZONE, false, Carbon::parse('2026-10-10 12:00', self::ZONE), true);
+
+        // On the import page this is one repeating event.
+        $this->assertNotNull($this->rows($this->feed($weekly))[0]['recurrence']);
+
+        $plain = $read($weekly);
+        $this->assertSame(['2026-10-13 19:00', '2026-10-20 19:00', '2026-10-27 19:00', '2026-11-03 19:00'], array_column($plain['rows'], 'event_date_time'));
+        $this->assertSame(
+            ['class#20261013T230000Z', 'class#20261020T230000Z', 'class#20261027T230000Z', 'class#20261104T000000Z'],
+            array_column($plain['rows'], 'source_id')
+        );
+        $this->assertNull($plain['rows'][0]['recurrence']);
+
+        $changed = $read(
+            $weekly,
+            // The 20th is moved to the 21st at eight, and the 27th is called off.
+            "UID:class\nSUMMARY:Class\nRECURRENCE-ID;TZID=America/New_York:20261020T190000\nDTSTART;TZID=America/New_York:20261021T200000",
+            "UID:class\nSUMMARY:Class\nRECURRENCE-ID;TZID=America/New_York:20261027T190000\nDTSTART;TZID=America/New_York:20261027T190000\nSTATUS:CANCELLED",
+        );
+        $byId = array_column($changed['rows'], 'event_date_time', 'source_id');
+
+        $this->assertSame('2026-10-21 20:00', $byId['class#20261020T230000Z']);
+        $this->assertArrayNotHasKey('class#20261027T230000Z', $byId);
+        $this->assertSame('cancelled', $changed['seen']['class#20261027T230000Z']);
+        $this->assertSame('listed', $changed['seen']['class#20261020T230000Z']);
+        $this->assertSame(['past' => 0, 'cancelled' => 0, 'private' => 0, 'unreadable' => 0], $changed['skipped']);
+    }
 }

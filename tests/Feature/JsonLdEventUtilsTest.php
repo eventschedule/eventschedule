@@ -319,4 +319,73 @@ class JsonLdEventUtilsTest extends TestCase
             }
         }
     }
+
+    /**
+     * For a reader that comes back: an event's own address when it has one to itself, and a
+     * mark made of its name and start when it shares one or has none. Many pages give every
+     * event in a list the address of the list.
+     */
+    public function test_each_event_has_an_id_that_does_not_depend_on_its_place_on_the_page(): void
+    {
+        $events = [
+            $this->event(['name' => 'Has an id', '@id' => 'https://example.com/events/1#event', 'url' => 'https://example.com/events/1']),
+            $this->event(['name' => 'Has a urn', '@id' => 'urn:uuid:7d1f', 'startDate' => '2026-10-21T20:00:00-04:00']),
+            $this->event(['name' => 'Has a link', 'url' => '/events/3', 'startDate' => '2026-10-22T20:00:00-04:00']),
+            $this->event(['name' => 'At the list, first', 'url' => self::PAGE, 'startDate' => '2026-10-23T20:00:00-04:00']),
+            $this->event(['name' => 'At the list, second', 'url' => self::PAGE, 'startDate' => '2026-10-24T20:00:00-04:00']),
+            $this->event(['name' => 'Has nothing', 'startDate' => '2026-10-25T20:00:00-04:00']),
+        ];
+        $ids = fn (array $events) => array_column($this->rows($this->page(...$events)), 'source_id', 'event_name');
+
+        $asWritten = $ids($events);
+        $this->assertSame('https://example.com/events/1#event', $asWritten['Has an id']);
+        $this->assertSame('urn:uuid:7d1f', $asWritten['Has a urn']);
+        $this->assertSame(parse_url(self::PAGE, PHP_URL_SCHEME).'://'.parse_url(self::PAGE, PHP_URL_HOST).'/events/3', $asWritten['Has a link']);
+        $this->assertStringStartsWith(self::PAGE.'#', $asWritten['At the list, first']);
+        $this->assertStringStartsWith('ld-', $asWritten['Has nothing']);
+        $this->assertCount(6, array_unique($asWritten));
+
+        $this->assertSame($asWritten, array_replace($asWritten, $ids(array_reverse($events))));
+
+        // The first of the two at the list's address has passed and is gone from the page: the
+        // other is alone there now, and is still one of two that were.
+        unset($events[3]);
+        $this->assertSame(self::PAGE, $ids(array_values($events))['At the list, second']);
+    }
+
+    public function test_every_event_is_named_with_what_became_of_it(): void
+    {
+        $result = $this->read($this->page(
+            $this->event(['name' => 'On', '@id' => 'https://example.com/e/on']),
+            $this->event(['name' => 'Yesterday', '@id' => 'https://example.com/e/yesterday', 'startDate' => '2026-10-09T20:00:00-04:00']),
+            $this->event(['name' => 'Postponed thirteen months', '@id' => 'https://example.com/e/far', 'startDate' => '2028-01-01T20:00:00-05:00']),
+            $this->event(['name' => 'Called off', '@id' => 'https://example.com/e/off', 'eventStatus' => 'https://schema.org/EventCancelled']),
+            $this->event(['name' => 'Odd date', '@id' => 'https://example.com/e/odd', 'startDate' => 'next Friday']),
+            // Nothing to know it by: counted, and not named.
+            $this->event(['name' => '', 'startDate' => '']),
+        ));
+
+        $this->assertSame([
+            'https://example.com/e/on' => 'listed',
+            'https://example.com/e/yesterday' => 'past',
+            'https://example.com/e/far' => 'later',
+            'https://example.com/e/off' => 'cancelled',
+            'https://example.com/e/odd' => 'unreadable',
+        ], $result['seen']);
+        $this->assertTrue($result['complete']);
+        $this->assertSame(['past' => 2, 'cancelled' => 1, 'unreadable' => 2], $result['skipped']);
+    }
+
+    /** An event with no address of its own is known by its name and start, called off or not. */
+    public function test_an_event_that_is_called_off_keeps_the_id_it_was_listed_under(): void
+    {
+        $event = ['name' => 'Jazz Night', 'startDate' => '2026-10-20T20:00:00-04:00'];
+
+        $listed = $this->read($this->page($this->event($event)));
+        $cancelled = $this->read($this->page($this->event($event + ['eventStatus' => 'https://schema.org/EventCancelled'])));
+
+        $id = $listed['rows'][0]['source_id'];
+        $this->assertSame([$id => 'listed'], $listed['seen']);
+        $this->assertSame([$id => 'cancelled'], $cancelled['seen']);
+    }
 }
