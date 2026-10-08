@@ -12,7 +12,9 @@
 {{-- The other three name the feed in their first sentence. This one is about an event, so
      which feed is said on its own line: a schedule may read several. --}}
 <x-email.text>{{ __('messages.feeds_col_feed') }}: {{ $facts['feed'] }}</x-email.text>
+@if ($facts['people'] > 0)
 <x-email.text>{{ trans_choice('messages.feeds_mail_decide_text', $facts['people'], ['count' => number_format($facts['people'])]) }}</x-email.text>
+@endif
 @if (($facts['more'] ?? 0) > 0)
 <x-email.text>{{ trans_choice('messages.feeds_mail_decide_more', $facts['more'], ['count' => number_format($facts['more'])]) }}</x-email.text>
 @endif

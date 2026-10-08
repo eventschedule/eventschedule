@@ -205,10 +205,17 @@ class EventFeedController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
+        // How many signed up for each. A decision is not always about people: an event the
+        // owner has worked on is held too, where the feed would otherwise remove it.
+        $signedUp = $decisions->mapWithKeys(fn (EventFeedItem $item) => [
+            $item->id => $item->event->sales()->count() + \App\Models\EventInterest::where('event_id', $item->event->id)->count(),
+        ]);
+
         return view('feed.show', [
             'role' => $role,
             'feed' => $feed,
             'decisions' => $decisions,
+            'signedUp' => $signedUp,
             'waiting' => $waiting,
             'eventsCount' => $feed->items()->whereNotNull('event_id')->count(),
             'canUndo' => $this->actions->canUndoFirstRead($feed),

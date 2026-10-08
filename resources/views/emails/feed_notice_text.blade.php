@@ -9,7 +9,9 @@
 @elseif ($kind === \App\Notifications\FeedNotification::DECIDE)
 {!! __('messages.feeds_col_feed') !!}: {!! $facts['feed'] !!}
 
+@if ($facts['people'] > 0)
 {!! trans_choice('messages.feeds_mail_decide_text', $facts['people'], ['count' => number_format($facts['people'])]) !!}
+@endif
 @if (($facts['more'] ?? 0) > 0)
 {!! trans_choice('messages.feeds_mail_decide_more', $facts['more'], ['count' => number_format($facts['more'])]) !!}
 @endif

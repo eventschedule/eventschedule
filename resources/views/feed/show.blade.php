@@ -85,7 +85,9 @@
 
         <div class="page-stack">
             @if ($decisions->isNotEmpty())
-            <x-page-card flush id="decide" :title="__('messages.feeds_decide_card_title')" :lead="__('messages.feeds_decide_card_lead')">
+            {{-- "People have signed up for these" only where they have for every one: an event
+                 held because of the owner's own work on it has nobody signed up. --}}
+            <x-page-card flush id="decide" :title="__('messages.feeds_decide_card_title')" :lead="$signedUp->min() > 0 ? __('messages.feeds_decide_card_lead') : null">
                 <table class="page-table feed-decide">
                     <colgroup><col style="width:24rem"><col><col style="width:18rem"></colgroup>
                     <thead><tr>
@@ -100,7 +102,7 @@
                             $decision = $item->pending['decide'];
                             $moved = ($decision['kind'] ?? '') === 'moved';
                             $itemHash = \App\Utils\UrlUtils::encodeId($item->id);
-                            $people = $event->sales()->count() + \App\Models\EventInterest::where('event_id', $event->id)->count();
+                            $people = $signedUp[$item->id];
                             $newStart = $moved && isset($decision['starts_at']) ? \Carbon\Carbon::parse($decision['starts_at'], 'UTC')->setTimezone($event->scheduleTimezone()) : null;
                             $says = match (true) {
                                 $newStart !== null => __('messages.feeds_says_moved_time', ['when' => $whenOf($newStart)]),
@@ -230,7 +232,7 @@
                 </x-slot>
             </x-page-card>
             {{-- Its own form, named by the button above: a form cannot stand inside another. --}}
-            <form method="post" id="feed-publish-all" action="{{ route('role.feeds.publish_all', $here) }}" data-confirm="{{ trans_choice('messages.feeds_add_and_publish', $waiting->total(), ['count' => number_format($waiting->total())]) }}?">@csrf</form>
+            <form method="post" id="feed-publish-all" action="{{ route('role.feeds.publish_all', $here) }}" data-confirm="{{ __('messages.feeds_publish_all_confirm', ['count' => number_format($waiting->total())]) }}">@csrf</form>
             @elseif ($decisions->isEmpty())
             <div class="ap-card rounded-xl">
                 <x-page-empty compact :title="__('messages.feeds_status_ok')" :text="__('messages.feeds_nothing_waiting')" />

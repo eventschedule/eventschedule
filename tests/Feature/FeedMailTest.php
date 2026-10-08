@@ -459,6 +459,11 @@ class FeedMailTest extends TestCase
         $this->assertSame('Open mic has moved at the source', $render(FeedNotification::DECIDE, ['event' => 'Open mic', 'says' => 'moved', 'people' => 1, 'more' => 0])->subject);
         $this->assertSame('Open mic is cancelled at the source', $render(FeedNotification::DECIDE, ['event' => 'Open mic', 'says' => 'cancelled', 'people' => 1, 'more' => 0])->subject);
         $this->assertStringNotContainsString('need your decision too', (string) $render(FeedNotification::DECIDE, ['event' => 'Open mic', 'says' => 'moved', 'people' => 1, 'more' => 0])->render());
+        // Held because of the owner's own work on it, with nobody signed up: the mail does not
+        // say that anybody did.
+        $nobody = (string) $render(FeedNotification::DECIDE, ['event' => 'Open mic', 'says' => 'gone', 'people' => 0, 'more' => 0])->render();
+        $this->assertStringNotContainsString('signed up', $nobody);
+        $this->assertStringContainsString('Open mic is no longer in the feed.', $nobody);
 
         // The day is the schedule's: 23:30 UTC on the 4th is already the 5th in Vienna.
         $failing = $render(FeedNotification::FAILING, ['since' => '2026-11-04T23:30:00+00:00']);

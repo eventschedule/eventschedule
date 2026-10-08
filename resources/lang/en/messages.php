@@ -6786,6 +6786,7 @@ return [
     'feeds_waiting_title' => 'Waiting for review',
     'feeds_waiting_lead' => 'Nobody sees a draft until you publish it. A skipped one is deleted and not added again.',
     'feeds_publish_all' => 'Publish all :count',
+    'feeds_publish_all_confirm' => 'Publish everything that is waiting (:count)?',
     'feeds_publish_all_done' => ':count event will be published over the next few minutes.|:count events will be published over the next few minutes.',
     'feeds_publishing_requested' => ':count is being published.|:count are being published.',
     'feeds_col_event_soonest' => 'Event, soonest first',

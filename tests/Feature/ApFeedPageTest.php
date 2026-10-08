@@ -118,12 +118,16 @@ class ApFeedPageTest extends TestCase
             ->assertSee($this->url($feed, 'edit'), false)
             // The decision, in the words of what the feed says.
             ->assertSee(__('messages.feeds_decide_card_title'))
+            ->assertSee(__('messages.feeds_decide_card_lead'))
             ->assertSee('Open mic')
             ->assertSee(trans_choice('messages.feeds_signed_up', 1, ['count' => 1]))
             ->assertSee(__('messages.feeds_confirm_notify'))
             // The drafts, soonest first, with what each is missing.
             ->assertSeeInOrder([__('messages.feeds_waiting_title'), 'Farmers market', 'Town Square', __('messages.feeds_no_place')])
             ->assertSee(__('messages.feeds_publish_all', ['count' => 2]))
+            // It asks first, in words about publishing: this is not the Add feed button.
+            ->assertSee('data-confirm="'.e(__('messages.feeds_publish_all_confirm', ['count' => 2])).'"', false)
+            ->assertDontSee('Add feed and publish')
             ->assertSee(__('messages.feeds_no_picture'))
             ->assertSee(__('messages.feeds_reads_title'))
             ->assertSee(trans_choice('messages.feeds_read_added', 3, ['count' => 3]));
@@ -219,6 +223,29 @@ class ApFeedPageTest extends TestCase
 
         $as->post($this->url($feed, 'decide', ['item' => $this->hashOf($feed, 'b')]), ['answer' => 'maybe'])->assertSessionHasErrors('answer');
         $as->post($this->url($feed, 'decide', ['item' => $this->hashOf($feed, 'b')]), ['answer' => 'apply', 'note' => str_repeat('a', 281)])->assertSessionHasErrors('note');
+    }
+
+    /**
+     * A feed told to remove what leaves it does not remove an event the owner has worked on:
+     * that is a decision too, and nobody signed up for it, so the page does not say they did.
+     */
+    public function test_a_decision_about_the_owners_own_work_does_not_say_people_signed_up(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'left_action' => EventFeed::LEFT_DELETE]);
+        $this->entries = [$this->entry('a', 'Stays'), $this->entry('b', 'Rewritten by hand', 11)];
+        $this->read($feed);
+        $this->named('Rewritten by hand')->forceFill(['description' => 'Our own words about it.'])->save();
+        $this->entries = [$this->entry('a', 'Stays')];
+        $this->read($feed);
+        $this->read($feed);
+        $this->assertSame(1, $feed->fresh()->decide_count);
+        $this->assertNotNull($this->named('Rewritten by hand'));
+
+        $this->actingAs($this->owner)->get($this->url($feed))->assertOk()
+            ->assertSee(__('messages.feeds_decide_card_title'))
+            ->assertSee(__('messages.feeds_says_gone'))
+            ->assertDontSee(__('messages.feeds_decide_card_lead'))
+            ->assertDontSee(__('messages.feeds_confirm_notify'));
     }
 
     public function test_removing_a_feed_keeps_its_events_or_takes_the_coming_ones_with_it(): void
