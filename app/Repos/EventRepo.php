@@ -448,6 +448,44 @@ class EventRepo
     }
 
     /**
+     * A venue schedule for a place no schedule stands for yet: unclaimed, with the look every
+     * new venue gets, in the country and language of the schedule it is made for.
+     *
+     * Only the row. Who follows it, and whether somebody claims it, is the caller's: saveEvent()
+     * decides that from the request, and a feed (FeedVenueResolver) has its own answer.
+     *
+     * @param  array{name?: ?string, name_en?: ?string, email?: ?string, phone?: ?string, address1?: ?string, address2?: ?string, city?: ?string, state?: ?string, postal_code?: ?string, country_code?: ?string, language_code?: ?string, website?: ?string}  $details
+     */
+    public function makeVenue(array $details, ?Role $for, ?string $timezone): Role
+    {
+        $countryCode = ($details['country_code'] ?? null) ?: $for?->country_code;
+
+        $venue = new Role;
+        $venue->name = $details['name'] ?? null;
+        $venue->name_en = $details['name_en'] ?? null;
+        $venue->email = $details['email'] ?? null;
+        $venue->phone = ($details['phone'] ?? null) ?: null;
+        $venue->subdomain = Role::generateSubdomain($details['name'] ?? null, $details['name_en'] ?? null);
+        $venue->type = 'venue';
+        $venue->address1 = $details['address1'] ?? null;
+        $venue->address2 = $details['address2'] ?? null;
+        $venue->city = $details['city'] ?? null;
+        $venue->state = $details['state'] ?? null;
+        $venue->postal_code = $details['postal_code'] ?? null;
+        $venue->country_code = $countryCode ? strtolower($countryCode) : null;
+        $venue->language_code = ($details['language_code'] ?? null) ?: $for?->language_code;
+        $venue->timezone = $timezone;
+        $venue->website = $details['website'] ?? null;
+        $venue->background_colors = ColorUtils::randomGradient();
+        $venue->background_rotation = rand(0, 359);
+        $venue->font_color = '#ffffff';
+        $venue->save();
+        $venue->refresh();
+
+        return $venue;
+    }
+
+    /**
      * Make $file the event's flyer: checked, the flyer it replaces deleted, resized, stored, saved.
      *
      * One implementation for the three ways a flyer arrives as a file: the event form's upload,
@@ -659,29 +697,20 @@ class EventRepo
                 // its details. Save the event without a venue rather than resurrecting the row
                 // the user just got rid of - the venue_* fields here are a stale echo of it.
             } elseif (! $venue) {
-                $venue = new Role;
-                $venue->name = $request->venue_name ?? null;
-                $venue->name_en = $request->venue_name_en ?? null;
-                $venue->email = $request->venue_email ?? null;
-                $venue->phone = $request->venue_phone ?: null;
-                $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en);
-                $venue->type = 'venue';
-                $venue->name = $request->venue_name ?? null;
-                $venue->address1 = $request->venue_address1;
-                $venue->address2 = $request->venue_address2;
-                $venue->city = $request->venue_city;
-                $venue->state = $request->venue_state;
-                $venue->postal_code = $request->venue_postal_code;
-                $countryCode = $request->venue_country_code ? $request->venue_country_code : $currentRole->country_code;
-                $venue->country_code = $countryCode ? strtolower($countryCode) : null;
-                $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $currentRole->language_code;
-                $venue->timezone = $captureTimezone;
-                $venue->website = $request->venue_website;
-                $venue->background_colors = ColorUtils::randomGradient();
-                $venue->background_rotation = rand(0, 359);
-                $venue->font_color = '#ffffff';
-                $venue->save();
-                $venue->refresh();
+                $venue = $this->makeVenue([
+                    'name' => $request->venue_name,
+                    'name_en' => $request->venue_name_en,
+                    'email' => $request->venue_email,
+                    'phone' => $request->venue_phone,
+                    'address1' => $request->venue_address1,
+                    'address2' => $request->venue_address2,
+                    'city' => $request->venue_city,
+                    'state' => $request->venue_state,
+                    'postal_code' => $request->venue_postal_code,
+                    'country_code' => $request->venue_country_code,
+                    'language_code' => $request->venue_language_code,
+                    'website' => $request->venue_website,
+                ], $currentRole, $captureTimezone);
 
                 // Authenticated user explicitly claimed ownership via the AI import checkbox.
                 // Wins over the email/phone auto-match below.
