@@ -239,6 +239,21 @@ class MonthGridTest extends TestCase
 
         $this->assertContains('Last Tuesday Of September', array_column($json['events'], 'name'));
         $this->assertArrayHasKey('2026-09-29', $json['eventsMap']);
+
+        // The grid's first cell, Sunday 27 September. The bound is the VIEWER's midnight and an
+        // event is placed on its schedule's day: eight in the morning in Berlin is 06:00 UTC,
+        // an hour before midnight in Los Angeles is over, and the cell was empty.
+        $berlin = $this->createRole($owner, 'venue', ['timezone' => 'Europe/Berlin']);
+        $this->event([
+            'name' => 'Sunday Morning In Berlin',
+            'tickets_enabled' => false,
+            'starts_at' => Carbon::parse('2026-09-27 08:00', 'Europe/Berlin')->utc()->format('Y-m-d H:i:s'),
+        ], $berlin);
+        $owner->timezone = 'America/Los_Angeles';
+        $owner->save();
+        $json = $this->actingAs($owner)->getJson('/dashboard/api/calendar-events?year=2026&month=10')->assertOk()->json();
+        $this->assertContains('Sunday Morning In Berlin', array_column($json['events'], 'name'));
+        $this->assertArrayHasKey('2026-09-27', $json['eventsMap']);
     }
 
     /**
@@ -294,7 +309,10 @@ class MonthGridTest extends TestCase
         $this->assertStringContainsString('.gk-cal-week {', $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent());
         auth()->logout();
         // Its notes are for whoever edits it and are not sent.
-        $this->assertStringNotContainsString('/*', substr($guest, strpos($guest, '.gk-cal {'), 30000));
+        $from = strpos($guest, '.gk-cal {');
+        $kitAsSent = substr($guest, $from, strpos($guest, '</style>', $from) - $from);
+        $this->assertGreaterThan(20000, strlen($kitAsSent));
+        $this->assertStringNotContainsString('/*', $kitAsSent);
         // An embed opens an event in a new tab, as it always has; the page itself does not.
         $this->assertStringContainsString(':data-ev="chip.id" :data-date="day.date" :aria-label="chip.label">', $guest);
         $this->assertSame(1, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank" rel="noopener"/', $embed));
@@ -370,6 +388,15 @@ class MonthGridTest extends TestCase
         $offDay = $night->copy()->addDay();
         $entry = $this->get($this->guestEventUrl($this->role, $series, $offDay->format('Y-m-d')).'/ical?to=google')->assertRedirect()->headers->get('Location');
         $this->assertStringContainsString('&dates='.$stamp($first).'/', $entry);
+
+        // A date that is no date (the route lets any eight digits through) is nobody's night
+        // either. It was a 500 here for a moment, where the file itself has always ignored it.
+        $entry = $this->get($this->guestEventUrl($this->role, $series, '2026-13-45').'/ical?to=google')->assertRedirect()->headers->get('Location');
+        $this->assertStringContainsString('&dates='.$stamp($first).'/', $entry);
+        $this->get($this->guestEventUrl($this->role, $series, '2026-13-45').'/ical')->assertOk();
+        // And with no night, the page the entry names is the series' own, with no date in it.
+        $this->assertStringContainsString(urlencode($series->getUndatedGuestUrl($this->role->subdomain, true)), $entry);
+        $this->assertStringNotContainsString(urlencode('/'.$first->format('Y-m-d')), $entry);
 
         // A cancelled event is left to the file, which can say it is cancelled.
         $off = $this->event(['name' => 'Rained Off', 'tickets_enabled' => false, 'is_cancelled' => true]);
@@ -573,6 +600,8 @@ class MonthGridTest extends TestCase
         $home = $this->actingAs($owner)->get(route('home'))->assertOk()->getContent();
         $this->assertSame(1, preg_match('/\bisRtl: true,/', $home));
         $this->assertStringContainsString("languageCode: 'he',", $home);
+        // In Blade's eyes as well as Vue's: the wrappers of the calendar are told the same.
+        $this->assertSame(1, preg_match('/<header class="rtl"\s/', $home));
         $owner->language_code = 'en';
         $owner->save();
         app()->setLocale('en');
@@ -592,5 +621,22 @@ class MonthGridTest extends TestCase
         $this->assertSame(1, substr_count($asViewer, 'data-availability-grid'));
         $this->assertSame(0, substr_count($asViewer, 'role="button" tabindex="0" aria-pressed'), 'a viewer\'s days are not buttons that do nothing');
         $this->assertSame(0, substr_count($asViewer, 'day-element" data-date='));
+    }
+
+    /**
+     * A page that is handed its events with the page (?graphic=1) reads the month before the
+     * mixin's created() has run. The month's clock is asked through monthNow(), which must
+     * answer without what created() makes.
+     */
+    public function test_the_months_clock_answers_before_the_month_is_set_up(): void
+    {
+        $script = file_get_contents(resource_path('views/role/partials/month-script.blade.php'));
+
+        $this->assertSame(1, preg_match('/monthNow\(zone\) \{.*?const m = this\.monthHands, stamp = [^;]+;\s+if \(!m\) return this\.scheduleNow\(zone\);/s', $script));
+        // The day an hour belongs to is the day it is said with: a series that ends on the
+        // stroke of midnight ended "Fri 12:00 AM" on the Friday it began.
+        $this->assertStringContainsString('day(f.end ? f.endDay : f.last)', $script);
+        // The calendar menu's hold is the menu's: another event's card does not inherit it.
+        $this->assertStringContainsString('m.pinned = !!opts.pin; m.held = false;', $script);
     }
 }

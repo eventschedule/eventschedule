@@ -208,7 +208,7 @@ return {
             const [first, last] = span ? this.monthRun(e, date) : [date, date];
             const row = Object.assign({}, e, { occurrenceDate: first, _originalOccurrenceDate: first });
             const now = this.monthNow(e.zone);
-            let live = false, ended = false, end = '';
+            let live = false, ended = false, end = '', endDay = last;
             if (start) {
                 const hours = e.duration > 0 ? e.duration : 2;
                 const s = day(first); const [h, mi] = start.split(':').map(Number);
@@ -217,7 +217,7 @@ return {
                 const began = now >= first + ' ' + start;
                 live = began && now < endStr;
                 ended = now >= endStr;
-                if (e.duration > 0) end = two(endAt.getHours()) + ':' + two(endAt.getMinutes());
+                if (e.duration > 0) { end = two(endAt.getHours()) + ':' + two(endAt.getMinutes()); endDay = ymd(endAt); }
             }
             // By its own end where it has a time: a 10pm night is not over at midnight.
             const past = start ? ended : last < now.slice(0, 10);
@@ -230,7 +230,9 @@ return {
             const freeTicket = !!e.ticket_free;
             const free = !!((freeTicket && !over) || (e.rsvp_enabled && !locked && !past));
             const elsewhere = this.rowSoldElsewhere(row);
-            return { start, end, span, first, last, past, over, live, ended, locked, soldOut, low, price, free, freeTicket, elsewhere, cancelled,
+            // endDay: the day the hour in `end` belongs to. `last` is the last day an event is ON,
+            // which for one that ends on the stroke of midnight is the day before.
+            return { start, end, endDay, span, first, last, past, over, live, ended, locked, soldOut, low, price, free, freeTicket, elsewhere, cancelled,
                 draft: !!e.is_draft, internal: !!e.is_internal };
         },
 
@@ -250,7 +252,10 @@ return {
         // The schedule's clock, read once a second at the most: a month of 275 events asked it
         // more than a thousand times a draw.
         monthNow(zone) {
+            // A watcher reads the month before created() has made monthHands, and on a page
+            // that is handed its events with the page (?graphic=1) that first read gets here.
             const m = this.monthHands, stamp = Math.floor(Date.now() / 1000);
+            if (!m) return this.scheduleNow(zone);
             if (!m.now || m.now.stamp !== stamp) m.now = { stamp, at: {} };
             const key = zone || '';
             return m.now.at[key] || (m.now.at[key] = this.scheduleNow(zone));
@@ -276,7 +281,9 @@ return {
                     while (!series && end < 6 && (this.eventsMap[cells[end + 1].date] || []).includes(e.id)) end++;
                     seen[e.id] = end;
                     const [first, last] = this.monthRun(e, cell.date);
-                    runs.push({ e, col, end, in: first < cell.date, out: last > cells[end].date, first });
+                    // An occurrence of a series is drawn on its own day only, so it is not
+                    // given the edge that says a bar goes on: nothing is drawn where it would lead.
+                    runs.push({ e, col, end, in: first < cell.date, out: !series && last > cells[end].date, first });
                 });
             });
             runs.sort((x, y) => x.col - y.col || (y.end - y.col) - (x.end - x.col));
@@ -323,7 +330,7 @@ return {
             const name = this.getEventDisplayName(e);
             const said = [f.start ? this.monthTime(f.start) : '', f.live ? L.now : '', note ? note[1] : '', mark ? mark[1] : ''].filter(Boolean).join(', ');
             return {
-                key: e.id + '|' + date, id: e.id, url: this.getEventUrl(e, date), cls: cls.join(' '),
+                key: e.id + '|' + date, id: e.id, url: e.guest_url ? this.getEventUrl(e, date) : null, cls: cls.join(' '),
                 label: name + (said ? ', ' + said : ''), name: tied(name), dir: this.getEventDisplayDir(e),
                 dot: this.getEventDotColor(e), lock: f.locked, time, notes, art, tall,
                 spare: !!opt.spare, at: f.start, draft: !!e.is_draft,
@@ -366,7 +373,7 @@ return {
                     const f = this.monthFacts(r.e, cell.date);
                     const name = this.getEventDisplayName(r.e);
                     lanes.push({
-                        id: r.e.id, url: this.getEventUrl(r.e, r.first), cols: r.end - r.col + 1, name: tied(name), label: name, dir: this.getEventDisplayDir(r.e),
+                        id: r.e.id, url: r.e.guest_url ? this.getEventUrl(r.e, r.first) : null, cols: r.end - r.col + 1, name: tied(name), label: name, dir: this.getEventDisplayDir(r.e),
                         cls: (r.in ? 'gk-cal-span-in ' : '') + (r.out ? 'gk-cal-span-out ' : '') + (f.past ? 'gk-cal-span-past' : ''),
                     });
                 } else {
@@ -541,8 +548,8 @@ return {
             this.monthPlaceDay();
             if (m.refocus && !this.isLoadingEvents) {
                 m.refocus = false;
-                // A month with nothing on it has no day to hold the focus: its own button, or
-                // the page's month buttons, so the next Page Up still has somewhere to come from.
+                // A month with nothing on it has no day to hold the focus: its own button, from
+                // which Page Up and Page Down still work, or failing that the page's month buttons.
                 const first = root.querySelector('.gk-cal-day:not(.gk-cal-day-out) button.gk-cal-num') || root.querySelector('button.gk-cal-num')
                     || root.querySelector('.gk-cal-empty-btn') || document.querySelector('#month-nav-controls button, #month-nav-controls a');
                 if (first) first.focus({ preventScroll: true });
@@ -585,7 +592,7 @@ return {
             const view = { label: L.view_event, href: url, kind: 'secondary', plain: true };
             // On the admin's pages the month is the owner's: edit what may be edited.
             if (!CAN.guest) return e.can_edit ? { label: L.edit_event, href: e.edit_url || url, kind: 'primary', plain: true, edit: true } : view;
-            if (f.locked || f.past || f.cancelled || f.soldOut) return view;
+            if (!url || f.locked || f.past || f.cancelled || f.soldOut) return view;
             if (e.rsvp_enabled) return { label: L.register, href: withParam('rsvp=true'), kind: 'primary', price: L.free };
             if (f.price || (f.freeTicket && !f.over)) return { label: f.freeTicket ? L.get_tickets : L.buy_tickets, href: withParam('tickets=true'), kind: 'primary', price: f.freeTicket ? L.free : f.price };
             return view;
@@ -612,7 +619,9 @@ return {
         monthPeekModel(e, date) {
             const f = this.monthFacts(e, date);
             const lang = this.languageCode;
-            const url = this.getEventUrl(e, f.first);
+            // An event with no public page (on the dashboard, one on schedules nobody has claimed)
+            // is given no address: built from an empty one, its links went to the page they were on.
+            const url = e.guest_url ? this.getEventUrl(e, f.first) : null;
             const src = (!f.locked && (e.image_url || e.image_thumb_url || e.flyer_url)) || null;
             const d = day(f.first);
             const short = { weekday: 'short', month: 'short', day: 'numeric' };
@@ -633,7 +642,7 @@ return {
                 // Both ends in full: a start time alone on three days says nothing about the other two.
                 when.push({ clock: false, text: d.toLocaleDateString(lang, short) + (f.start ? ', ' : '') });
                 if (f.start) when.push({ clock: true, text: this.monthTime(f.start) });
-                when.push({ clock: false, text: ' – ' + day(f.last).toLocaleDateString(lang, short) + (f.end ? ', ' : '') });
+                when.push({ clock: false, text: ' – ' + day(f.end ? f.endDay : f.last).toLocaleDateString(lang, short) + (f.end ? ', ' : '') });
                 if (f.end) when.push({ clock: true, text: this.monthTime(f.end) + zone });
             } else {
                 clock = f.start ? this.monthTime(f.start) + (f.end ? ' – ' + this.monthTime(f.end) : '') + zone : '';
@@ -711,7 +720,7 @@ return {
             const was = !!m.cur;
             if (m.cur) m.cur.el.classList.remove('gk-cal-ev-on');
             m.cur = { id, date, el };
-            m.pinned = !!opts.pin;
+            m.pinned = !!opts.pin; m.held = false;
             if (el.dataset.ev === id) el.classList.add('gk-cal-ev-on');
             this.monthKin(e, date);
             this.monthPeek = this.monthPeekModel(e, date);
@@ -837,7 +846,6 @@ return {
             });
         },
 
-        // Focus given back to an event when its card closes: without opening the card again.
         // How far down the window the page's own bar reaches: the admin's is sticky, a guest
         // page's is fixed and slides away (out of sight, its foot is above the window).
         monthRoof(edge) {
@@ -851,6 +859,7 @@ return {
             return roof;
         },
 
+        // Focus given back to an event when its card closes: without opening the card again.
         monthBack(el) {
             if (!el || !el.isConnected) return;
             const m = this.monthHands;
@@ -904,7 +913,8 @@ return {
             const cell = this.$refs.monthRoot.querySelector('.gk-cal-day[data-date="' + date + '"]');
             const el = cell && (Array.from(cell.querySelectorAll('[data-ev="' + m.cur.id + '"]')).find((n) => n.offsetParent) || cell.querySelector('.gk-cal-more') || cell.querySelector('.gk-cal-num'));
             const byKey = ev.detail === 0;
-            if (el) this.monthShow(el, { pin: m.pinned || byKey, id: m.cur.id, date, focus: byKey });
+            // Pinned as it was before the calendar menu held it: the menu's hold is not a pin.
+            if (el) this.monthShow(el, { pin: (m.held ? !!m.wasPinned : m.pinned) || byKey, id: m.cur.id, date, focus: byKey });
         },
         monthPeekMenu(ev) {
             const m = this.monthHands;
@@ -914,6 +924,14 @@ return {
             // card stayed for good and no other event's would open.
             if (this.monthPeek.menu) { if (!m.held) { m.held = true; m.wasPinned = m.pinned; } m.pinned = true; } else if (m.held) { m.held = false; m.pinned = !!m.wasPinned; }
             if (this.monthPeek.menu) this.$nextTick(() => { const a = this.$refs.monthPeekEl.querySelector('.gk-peek-menu a'); if (a) a.focus({ preventScroll: true }); });
+        },
+        // One of the menu's links was pressed: the menu closes, and the focus goes to its button
+        // and not to nowhere (the link it was on has just been hidden).
+        monthPeekPick() {
+            if (!this.monthPeek || !this.monthPeek.menu) return;
+            this.monthPeekMenu();
+            const b = this.$refs.monthPeekEl.querySelector('[data-peek-cal]');
+            if (b) b.focus({ preventScroll: true });
         },
         monthPeekShare() {
             const p = this.monthPeek;
@@ -925,6 +943,10 @@ return {
             // copies through a hidden field, as the list's Copy link does. "Copied" is said only
             // when something was.
             const fallback = () => {
+                // Selecting the field takes the focus out of the card, which a card that is not
+                // pinned answers by closing: it is held meanwhile, and the focus is given back.
+                const m = this.monthHands, was = m.pinned, back = document.activeElement;
+                m.pinned = true;
                 const field = document.createElement('textarea');
                 field.value = url;
                 field.setAttribute('readonly', '');
@@ -934,6 +956,8 @@ return {
                 field.select();
                 try { if (document.execCommand('copy')) done(); } catch (err) { /* nothing was copied, nothing is said */ }
                 document.body.removeChild(field);
+                if (back && back.focus) back.focus({ preventScroll: true });
+                m.pinned = was;
             };
             if (navigator.share && !fineHover()) navigator.share({ title: p.name, url }).catch(() => {});
             else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback);
@@ -984,7 +1008,7 @@ return {
                 if (f.internal) sub.push({ k: 'internal', venue: false, cls: 'gk-dayp-note gk-cal-note-warn', text: L.internal });
                 if (f.draft) sub.push({ k: 'draft', venue: false, cls: 'gk-dayp-note', text: L.draft });
                 return {
-                    key: e.id + '|' + date, id: e.id, url: this.getEventUrl(e, f.first), cls: (f.past ? 'gk-dayp-row-past ' : '') + (f.cancelled ? 'gk-dayp-row-off' : ''),
+                    key: e.id + '|' + date, id: e.id, url: e.guest_url ? this.getEventUrl(e, f.first) : null, cls: (f.past ? 'gk-dayp-row-past ' : '') + (f.cancelled ? 'gk-dayp-row-off' : ''),
                     time: f.span && f.first < date ? '…' : this.monthTime(f.start), dot: this.getEventDotColor(e),
                     name: this.getEventDisplayName(e), locked: f.locked, sub,
                     img: (!f.locked && (e.image_thumb_url || e.image_url || e.flyer_url)) || null,
@@ -1134,6 +1158,9 @@ return {
         },
         monthKey(ev) {
             const m = this.monthHands, root = this.$refs.monthRoot, peek = this.$refs.monthPeekEl;
+            // From anywhere in the month, an empty month's own button included: that is where
+            // the focus is left when a month with nothing on it arrives.
+            if (ev.key === 'PageDown' || ev.key === 'PageUp') { ev.preventDefault(); this.monthTurn(ev.key === 'PageDown' ? 1 : -1); return; }
             const el = ev.target.closest('.gk-cal-span, .gk-cal-ev, .gk-cal-more, .gk-cal-num');
             if (!el) return;
             const cell = el.closest('.gk-cal-day');
@@ -1142,7 +1169,6 @@ return {
                 if (first) { ev.preventDefault(); m.pinned = false; first.focus({ preventScroll: true }); }
                 return;
             }
-            if (ev.key === 'PageDown' || ev.key === 'PageUp') { ev.preventDefault(); this.monthTurn(ev.key === 'PageDown' ? 1 : -1); return; }
             const move = { ArrowDown: [0, 1], ArrowUp: [0, -1], ArrowRight: [this.isRtl ? -1 : 1, 0], ArrowLeft: [this.isRtl ? 1 : -1, 0] }[ev.key];
             if (!move) return;
             const cells = Array.from(root.querySelectorAll('.gk-cal-day'));

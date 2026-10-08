@@ -5125,8 +5125,12 @@ class EventController extends Controller
         // left to the file, which says STATUS:CANCELLED: an entry made here could not.
         $to = request()->query('to');
         if (in_array($to, ['google', 'outlook'], true) && ! $event->is_cancelled) {
-            $night = ($date && $event->days_of_week && $event->matchesDate($date, $event->scheduleTimezone())) ? $date : null;
-            $page = $event->getGuestUrl($role->subdomain, $night, true) ?: '';
+            // isOccurrenceDate() first: the route lets any eight digits through, and
+            // matchesDate() parses what it is handed (2026-13-45 was a 500 here, where the
+            // file itself ignores such a date).
+            $night = ($date && $event->days_of_week && Event::isOccurrenceDate($date) && $event->matchesDate($date, $event->scheduleTimezone())) ? $date : null;
+            // No night, no dated page: handed null, getGuestUrl() names the series' first date.
+            $page = $event->getGuestUrl($role->subdomain, $night ?: false, true) ?: '';
             $entry = $to === 'google' ? $event->getGoogleCalendarUrl($night, $page) : $event->getMicrosoftCalendarUrl($night, $page);
 
             return redirect()->away($entry)->withHeaders([

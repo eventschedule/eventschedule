@@ -31,6 +31,9 @@
     // braces is broken once, here, where no new place can forget it.
     $label = fn($key) => $role ? str_replace('{'.'{', '{ {', $role->customLabel($key)) : __('messages.' . $key);
     $isAdminRoute = $route == 'admin';
+    // The pages that are the signed-in person's own, where direction and language are theirs
+    // and not a schedule's: the admin's, and the dashboard (which has no schedule at all).
+    $ownPage = $isAdminRoute || $route === 'home';
     $alwaysShowFilters = in_array($route ?? '', ['guest', 'admin']);
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
     // Whether this is a guest PAGE (or embed): its list is in the page once, the cards from a
@@ -370,7 +373,7 @@
 <div style="--es-accent: {{ $accentColor }}; --es-contrast: {{ $contrastColor }}; --es-date-month: {{ $dateMonthColorLight }}; --es-date-month-dark: {{ $dateMonthColorDark }}">
 
 @if (! request()->graphic)
-<header class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
+<header class="{{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}"
     @if ($route == 'guest')
         :class="currentView === 'list' ? 'pt-0 pb-0' : 'pt-2 pb-4'"
     @else
@@ -465,7 +468,7 @@
                             class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
                                    border border-gray-300 dark:border-gray-600 rounded-md transition-all duration-200
                                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                                   text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                                   text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
                         </svg>
@@ -600,7 +603,7 @@
 {{-- narrowingFilterCount, not activeFilterCount: a sub-schedule page's own sub-schedule is the
      page, not a filter, so a bare /schedule/kids shows no row. Owner-customizable labels sit in
      v-pre spans: this is inside the Vue mount, and a label is owner-authored text. --}}
-<div v-cloak v-if="narrowingFilterCount > 0" id="active-filter-chips" class="mb-4 rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-3 py-2 flex flex-wrap items-center gap-2 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+<div v-cloak v-if="narrowingFilterCount > 0" id="active-filter-chips" class="mb-4 rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-3 py-2 flex flex-wrap items-center gap-2 {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
     <span v-for="chip in activeFilterChips" :key="chip.id"
           class="inline-flex items-center gap-1 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 ps-3 pe-1 text-sm text-gray-800 dark:text-gray-200 max-w-full">
         <span class="truncate" dir="auto" v-text="chip.text"></span>
@@ -626,7 +629,7 @@
          the schedule and was only ever true of the connection. Above both views, and above the
          rows the cache may still have drawn. --}}
     <div v-cloak v-if="loadFailed" data-load-failed role="alert"
-         class="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+         class="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
         <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
@@ -641,7 +644,7 @@
     {{-- The one filter most visitors want, one press away: the schedule's sub-schedules where
          it has them, its categories otherwise. Everything else stays behind Filters. The names
          are the owner's text, drawn by Vue from data (v-text), never compiled. --}}
-    <div v-if="quickChips.length > 1" v-cloak class="gk-pills {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}" role="group" aria-label="{{ $label('filters') }}">
+    <div v-if="quickChips.length > 1" v-cloak class="gk-pills {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}" role="group" aria-label="{{ $label('filters') }}">
         <button type="button" class="gk-pill" :class="{ 'gk-pill-on': !quickChipValue }" :aria-pressed="!quickChipValue ? 'true' : 'false'" @click="pickQuickChip('', $event)">{{ $label('show_all') }}</button>
         <button v-for="chip in quickChips" :key="chip.value" type="button" class="gk-pill" :class="{ 'gk-pill-on': quickChipValue === chip.value }"
                 :aria-pressed="quickChipValue === chip.value ? 'true' : 'false'" @click="pickQuickChip(chip.value, $event)">
@@ -650,7 +653,7 @@
     </div>
     @endif
 
-    <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
@@ -845,7 +848,7 @@
                 <section v-for="group in phoneGroups" :key="'pm-' + group.date" :id="'gk-day-' + group.date" class="gk-panel gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" :class="{ 'gk-day-past': group.past }">
                     <div class="gk-dayhead">
                         <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
-                        <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></h2>
+                        <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}></h2>
                     </div>
                     <ul class="gk-rows">
                         <template v-for="event in group.events" :key="'pm-' + event.uniqueKey">
@@ -882,7 +885,7 @@
                             :class="isPastEvent(group.date) ? 'past-event hidden' : ''">
                             <div class="pb-5 pt-3 px-4 flex items-center gap-4">
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}></div>
                                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                             </div>
                         </div>
@@ -991,7 +994,7 @@
         </div>
 
 {{-- List View (Desktop) --}}
-        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListGroups.length" class="space-y-8">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-d-' + group.date">
@@ -1027,7 +1030,7 @@
                              class="flex items-center gap-4"
                              role="heading" aria-level="2">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                            <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 text-center" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}>
+                            <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 text-center" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}>
                                 @if ($guestRows)
                                 <span v-if="dayWord(group.date)" class="me-2 text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400" v-text="dayWord(group.date)"></span>
                                 @endif
@@ -1847,7 +1850,7 @@
         {{-- List View (Mobile) --}}
         {{-- v-if on a guest page, and only on a phone: a list that is not the one on screen is
              not in the page at all (the cards above are the list from a tablet up). --}}
-        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             @if ($guestRows)
             {{-- The guest list on a phone: a panel for each day, a row for each event
                  (partials/guest-kit-styles: .gk-day, .gk-row).
@@ -1873,7 +1876,7 @@
                                  a day is a day because of where it happens. --}}
                             <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
                             {{-- A heading, as the day is over the cards a wider screen gets. --}}
-                            <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></h2>
+                            <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}></h2>
                         </div>
                         <ul class="gk-rows">
                             <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
@@ -1904,7 +1907,7 @@
                     <div v-if="group.date && group.date !== 'no-date'" class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                         <div class="pb-5 pt-3 px-4 flex items-center gap-4">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                            <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
+                            <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}></div>
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                         </div>
                     </div>
@@ -1979,7 +1982,7 @@
 
     {{-- Bottom sheet panel --}}
     <div ref="mobileFilterPanel" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="filters-drawer-title"
-         class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto focus:outline-none {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+         class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto focus:outline-none {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
         {{-- Header --}}
         <div class="px-6 pt-5 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
             <div>
@@ -2024,7 +2027,7 @@
             <label for="filter-group-m" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
             <select id="filter-group-m" v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
                 <option value="">{{ $label('show_all') }}</option>
                 <option v-for="group in groups" :key="group.slug" :value="group.slug">
                     @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
@@ -2141,7 +2144,7 @@
     {{-- Modal panel --}}
     <div class="fixed inset-0 flex items-center justify-center p-4 z-[101] pointer-events-none">
         <div ref="desktopFilterPanel" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="filters-modal-title"
-             class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto focus:outline-none {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+             class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto focus:outline-none {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             {{-- Header --}}
             <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                 <div>
@@ -2186,7 +2189,7 @@
                 <label for="filter-group-d" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('schedule') }}</label>
                 <select id="filter-group-d" v-model="selectedGroup" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
                     <option value="">{{ $label('show_all') }}</option>
                     <option v-for="group in groups" :key="group.slug" :value="group.slug">
                         @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
@@ -2541,7 +2544,7 @@ const calendarApp = createApp({
             {{-- The dashboard is the person's own page, as the admin's are: its direction and its
                  language are theirs. Left to the schedule's (there is none there), the month was
                  forced left to right and wrote its dates in English for every other language. --}}
-            isRtl: {{ ($isAdminRoute || $route === 'home') ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
+            isRtl: {{ $ownPage ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
             durationLabels: {
                 h: @json(__('messages.duration_hour_short')),
                 d: @json(__('messages.duration_day_short')),
@@ -2549,7 +2552,7 @@ const calendarApp = createApp({
             },
             {{-- Also the language forwarded to the guest calendar endpoints, so their payload can no
                  longer disagree with the server-rendered chrome around it. --}}
-            languageCode: '{{ ($isAdminRoute || $route === 'home') && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
+            languageCode: '{{ $ownPage && auth()->check() ? app()->getLocale() : (isset($role) ? $role->displayLanguageCode() : 'en') }}',
             {{-- The zone the past-event filters resolve "today" in. Must be the same one $today
                  above uses: these compare against occurrenceDate, which is the SCHEDULE's calendar
                  date, so a viewer-anchored today hides an event that is still running. --}}

@@ -81,9 +81,9 @@
         </div>
         {{-- Three links under a button, and said as that: a menu would owe arrow keys. --}}
         <div v-if="monthPeek.links" id="gk-peek-menu" class="gk-peek-menu" :hidden="monthPeek.menu ? null : true">
-            <a rel="nofollow noopener noreferrer" :href="monthPeek.links.google" target="_blank" @click="monthPeekMenu">Google Calendar</a>
-            <a rel="nofollow" :href="monthPeek.links.apple" @click="monthPeekMenu">Apple Calendar</a>
-            <a rel="nofollow noopener noreferrer" :href="monthPeek.links.outlook" target="_blank" @click="monthPeekMenu">Outlook</a>
+            <a rel="nofollow noopener noreferrer" :href="monthPeek.links.google" target="_blank" @click="monthPeekPick">Google Calendar</a>
+            <a rel="nofollow" :href="monthPeek.links.apple" @click="monthPeekPick">Apple Calendar</a>
+            <a rel="nofollow noopener noreferrer" :href="monthPeek.links.outlook" target="_blank" @click="monthPeekPick">Outlook</a>
         </div>
         {{-- A finger's way through a day: shown only while the card is pinned. --}}
         <div v-if="monthPeek.step" class="gk-peek-step">
