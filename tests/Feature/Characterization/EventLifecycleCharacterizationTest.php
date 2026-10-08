@@ -299,6 +299,27 @@ class EventLifecycleCharacterizationTest extends TestCase
         $this->assertSame(0, $this->audited(AuditService::EVENT_PUBLISH, $live));
     }
 
+    /**
+     * The one thing the move changed on purpose. Publishing a cancelled draft used to make it
+     * public and push it to connected calendars as though it were on.
+     */
+    public function test_publish_leaves_a_cancelled_draft_alone(): void
+    {
+        [$owner, $role] = $this->syncingSchedule();
+        $event = $this->createEvent($role, ['is_draft' => true]);
+        $event->forceFill(['is_cancelled' => true, 'cancelled_at' => now()])->save();
+
+        Bus::fake();
+        $this->actingAs($owner)
+            ->post(route('event.publish', ['subdomain' => $role->subdomain, 'hash' => $this->hash($event)]))
+            ->assertRedirect();
+
+        $this->assertTrue((bool) $event->fresh()->is_draft);
+        Bus::assertNotDispatched(SendWebhook::class);
+        Bus::assertNotDispatchedSync(SyncEventToGoogleCalendar::class);
+        $this->assertSame(0, $this->audited(AuditService::EVENT_PUBLISH, $event));
+    }
+
     public function test_delete_removes_an_event_nobody_bought_and_says_deleted_with_what_it_was(): void
     {
         [$owner, $role] = $this->syncingSchedule();

@@ -14,13 +14,11 @@ use App\Http\Requests\EventPollStoreRequest;
 use App\Http\Requests\EventPollVoteRequest;
 use App\Http\Requests\EventUpdateRequest;
 use App\Http\Requests\EventVideoSubmitRequest;
-use App\Jobs\NotifyEventCancelled;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\EventAccepted;
 use App\Mail\EventChanged;
 use App\Mail\EventDeclined;
 use App\Models\AnalyticsEventsDaily;
-use App\Models\BoostCampaign;
 use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
 use App\Models\EventComment;
@@ -42,15 +40,13 @@ use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
-use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\EventChangeNotifier;
+use App\Services\EventLifecycleService;
 use App\Services\LinkImportService;
-use App\Services\MetaAdsService;
 use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
 use App\Services\UsageTrackingService;
-use App\Services\WebhookService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
 use App\Utils\GalleryUtils;
@@ -170,7 +166,7 @@ class EventController extends Controller
         // the booking instead - it frees the slot and (Phase 6) notifies the guest.
         if ($event->appointment_type_id) {
             AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
-            $this->cancelAppointmentBooking($event);
+            app(EventLifecycleService::class)->cancelBooking($event);
 
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'appointments']))
                 ->with('message', __('messages.appointments_cancelled_message'));
@@ -213,32 +209,19 @@ class EventController extends Controller
     }
 
     /**
-     * Delete an event nobody holds a ticket or booking for: the audit row, its boosts stopped, the
-     * webhook, then the row. The caller has already decided this event may go.
+     * Delete an event nobody holds a ticket or booking for (EventLifecycleService::delete(): the
+     * audit row, its boosts stopped, the webhook, then the row). The caller has already decided
+     * this event may go.
      */
     private function deleteEventRecord(Event $event, $user): void
     {
-        AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
-
-        // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
-        $this->cancelActiveBoosts($event);
-
-        // Capture webhook payload before deletion
-        if (! $event->is_draft) {
-            $webhookPayload = [
-                'event' => 'event.deleted',
-                'timestamp' => now()->toIso8601String(),
-                'data' => $event->toApiData(),
-            ];
-            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
-        }
-
-        $event->delete();
+        app(EventLifecycleService::class)->delete($event, $user->id);
     }
 
     /**
      * Soft-cancel an event: retain the row (and its sales / refund trail), mark it cancelled, stop
      * advertising it, remove it from synced calendars, and optionally notify registered attendees.
+     * What that involves, and in which order, is EventLifecycleService::cancel().
      */
     public function cancel(Request $request, $subdomain, $hash)
     {
@@ -249,97 +232,16 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if ($event->is_cancelled) {
-            return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
-        }
-
-        // Appointment bookings: cancel the sale too so the slot frees, analytics decrement, and
-        // (Phase 6) the guest is emailed. The Sale hook sets is_cancelled on the event.
-        if ($event->appointment_type_id) {
-            AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
-            $this->cancelAppointmentBooking($event);
-
-            return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
-        }
-
-        AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
-
-        // Cancel active boost campaigns (don't keep advertising a cancelled event)
-        $this->cancelActiveBoosts($event);
-
-        // Stop charging installment plans. Cancelling an event deliberately leaves its sales
-        // `paid` (see the note in ticket/order.blade.php), so nothing here reaches
-        // Sale::booted()'s cancel branch - which means without this the buyer's card keeps being
-        // debited monthly for an event that is not happening. Same reasoning as the boost
-        // cancellation directly above: unwind the live money before flipping the flag.
-        $this->cancelActiveInstallmentPlans($event);
-
-        $event->forceFill([
-            'is_cancelled' => true,
-            'cancelled_at' => now(),
-            // Bump the iCal sequence so subscribed calendars pick up the cancellation (STATUS:CANCELLED).
-            'ical_sequence' => (int) $event->ical_sequence + 1,
-        ])->save();
-
-        // Remove the event from organizers' / members' synced calendars
-        $event->dispatchCalendarSync('delete');
-
-        if (! $event->is_draft) {
-            WebhookService::dispatch('event.cancelled', $event);
-        }
-
-        // Notify whoever there is to tell - buyers AND the interest list.
-        //
-        // No hasEmailSettings() here any more. notifyCancellation() already applies that gate to
-        // the SALES half internally, where it belongs: a buyer got their receipt from the
-        // schedule's own address and a platform-branded follow-up would be a surprise. Applying it
-        // at the dispatch site instead killed the interest half as well - and those people asked
-        // US, on this schedule's public page, and were told they would hear if anything changed.
-        // Most schedules have no SMTP of their own, so that promise was false for nearly all of
-        // them.
-        if ($request->boolean('notify_attendees')
-            && ! $event->is_draft
-            && EventChangeNotifier::hasAnyoneToTell($event)) {
-            $note = $request->input('notify_message');
-            NotifyEventCancelled::dispatch($event->id, $note ? Str::limit($note, 280, '') : null);
-            $event->forceFill(['attendees_notified_at' => now()])->saveQuietly();
-        }
+        // An appointment booking is cancelled through its sale, so the slot frees and the guest is
+        // emailed. An event that is already cancelled is left as it is. Both answer the same way.
+        app(EventLifecycleService::class)->cancel(
+            $event,
+            $user->id,
+            notifyAttendees: $request->boolean('notify_attendees'),
+            note: $request->input('notify_message'),
+        );
 
         return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
-    }
-
-    /**
-     * Cancel an appointment booking from an owner action (event delete/cancel). Cancels the live
-     * sale - whose Sale::booted hook soft-cancels the event and frees the slot - and decrements
-     * analytics for a paid booking. Falls back to cancelling the event directly if no live sale.
-     */
-    protected function cancelAppointmentBooking(Event $event): void
-    {
-        $sale = Sale::where('event_id', $event->id)
-            ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
-            ->first();
-
-        if ($sale) {
-            $wasPaid = $sale->status === 'paid';
-            $wasPaidMoney = $wasPaid && (float) $sale->payment_amount > 0;
-            $sale->status = 'cancelled';
-            $sale->save();
-            if ($wasPaid) {
-                AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
-            }
-            // Owner cancelled - email the guest, and remind the owner to refund a paid booking.
-            app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
-            if ($wasPaidMoney) {
-                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
-            }
-        } elseif (! $event->is_cancelled) {
-            $event->forceFill([
-                'is_cancelled' => true,
-                'cancelled_at' => now(),
-                'ical_sequence' => (int) $event->ical_sequence + 1,
-            ])->saveQuietly();
-            $event->dispatchCalendarSync('delete');
-        }
     }
 
     /**
@@ -356,116 +258,11 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if (! $event->is_cancelled) {
+        if (app(EventLifecycleService::class)->restore($event, $user->id) === EventLifecycleService::NOT_CANCELLED) {
             return redirect()->back();
         }
 
-        AuditService::log(AuditService::EVENT_RESTORE, $user->id, 'Event', $event->id, null, null, $event->name);
-
-        $event->forceFill([
-            'is_cancelled' => false,
-            'cancelled_at' => null,
-            // Bump the iCal sequence so subscribed calendars pick up the restored event.
-            'ical_sequence' => (int) $event->ical_sequence + 1,
-        ])->save();
-
-        if (! $event->is_draft) {
-            $event->dispatchCalendarSync('create');
-            WebhookService::dispatch('event.updated', $event);
-        }
-
         return redirect()->back()->with('message', __('messages.event_restored'));
-    }
-
-    /**
-     * Cancel and refund any active boost campaigns for an event. Shared by delete() and cancel() so a
-     * cancelled or deleted event never keeps running paid ads.
-     */
-    private function cancelActiveBoosts(Event $event): void
-    {
-        $activeCampaigns = BoostCampaign::where('event_id', $event->id)
-            ->unsettled()
-            ->get();
-
-        foreach ($activeCampaigns as $campaign) {
-            try {
-                $cancelled = \DB::transaction(function () use ($campaign) {
-                    $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
-                    if (! $campaign || ! $campaign->canBeCancelled()) {
-                        return false;
-                    }
-                    $campaign->update([
-                        'status' => 'cancelled',
-                        'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null,
-                    ]);
-
-                    return true;
-                });
-
-                if ($cancelled) {
-                    if ($campaign->meta_campaign_id) {
-                        (new MetaAdsService)->deleteCampaign($campaign);
-                    }
-
-                    // Gate the STRIPE call, not the refund. settlePayment()'s credit branch
-                    // debits boost_credit regardless of mode, so gating the whole block meant
-                    // deleting on selfhost destroyed the advertiser's wallet balance outright.
-                    // refundOnCancellation() reaches Stripe only when there is an intent, which
-                    // a selfhost campaign never has.
-                    $campaign->refresh();
-                    if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
-                        $billingService = new BoostBillingService;
-                        if ($campaign->billing_status === 'pending') {
-                            if (config('app.hosted') && ! config('app.is_testing') && $campaign->stripe_payment_intent_id) {
-                                $billingService->cancelPaymentIntent($campaign);
-                            }
-                        } else {
-                            $billingService->refundOnCancellation($campaign);
-                        }
-                    }
-                }
-            } catch (\Exception $e) {
-                \Log::warning('Failed to cancel boost campaign', [
-                    'campaign_id' => $campaign->id,
-                    'event_id' => $event->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Stop the off-session charges for every installment plan on this event.
-     *
-     * A cancelled event keeps its sales `paid` by design, so none of them pass through
-     * Sale::booted()'s cancel branch. Without this the scheduled installments stay live and
-     * app:charge-installments goes on debiting real cards, month after month, for an event that
-     * has been called off. Failures are logged rather than thrown: the cancellation itself must
-     * still complete.
-     */
-    private function cancelActiveInstallmentPlans(Event $event): void
-    {
-        try {
-            $saleIds = Sale::where('event_id', $event->id)
-                ->where('is_deleted', false)
-                ->pluck('id');
-
-            $cancelled = app(\App\Services\InstallmentService::class)
-                ->cancelPlansForSales($saleIds, 'event_cancelled');
-
-            if ($cancelled) {
-                \Log::info('Cancelled installment plans for cancelled event', [
-                    'event_id' => $event->id,
-                    'plans' => $cancelled,
-                ]);
-            }
-        } catch (\Exception $e) {
-            report($e);
-            \Log::error('Failed to cancel installment plans for cancelled event', [
-                'event_id' => $event->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
     }
 
     /**
@@ -1612,31 +1409,15 @@ class EventController extends Controller
         }
 
         // Internal events are intentionally never public, so the quick-publish route must not flip one
-        // (the UI never offers Publish for them; this also blocks crafted requests). Publishing means
-        // "make fully public", so normalize the whole visibility state via the shared helper.
-        if (! $event->is_draft || $event->is_internal) {
+        // (the UI never offers Publish for them; this also blocks crafted requests), and a cancelled
+        // event is not put back on calendars by being published. Publishing means "make fully
+        // public": EventLifecycleService::publish() normalizes the whole visibility state, pushes
+        // to the calendars this schedule is connected to, and sends the webhook.
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (app(EventLifecycleService::class)->publish($event, $user->id, $role) === EventLifecycleService::NOT_PUBLISHABLE) {
             return redirect()->back();
         }
-
-        $event->setVisibilityState('public');
-        $event->save();
-
-        // Trigger calendar sync now that the event is published
-        $role = Role::subdomain($subdomain)->firstOrFail();
-        if ($role->syncsToGoogle()) {
-            $event->syncToGoogleCalendar('create');
-        }
-        if ($role->syncsToMicrosoft()) {
-            $event->syncToMicrosoftCalendar('create');
-        }
-        if ($role->syncsToCalDAV()) {
-            $event->syncToCalDAV('create');
-        }
-
-        // Dispatch webhook
-        WebhookService::dispatch('event.created', $event);
-
-        AuditService::log(AuditService::EVENT_PUBLISH, $user->id, 'Event', $event->id, null, null, $event->name);
 
         // The publish that takes a setup guide's schedule live lands on its Schedule tab, in the
         // event's month, where the "Your page" panel answers it. This action is reached from the

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventPart;
 use App\Models\PromoCode;
@@ -12,9 +11,7 @@ use App\Models\RoleUser;
 use App\Models\Ticket;
 use App\Repos\EventRepo;
 use App\Services\AuditService;
-use App\Services\BoostBillingService;
-use App\Services\MetaAdsService;
-use App\Services\WebhookService;
+use App\Services\EventLifecycleService;
 use App\Utils\GeminiUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -777,24 +774,7 @@ class ApiEventController extends Controller
         // Appointment bookings: cancel (frees the slot, keeps the Sale + refund trail) rather than
         // hard-delete, which would cascade-delete the Sale.
         if ($event->appointment_type_id) {
-            $sale = \App\Models\Sale::where('event_id', $event->id)
-                ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])->first();
-            if ($sale) {
-                $wasPaid = $sale->status === 'paid';
-                $wasPaidMoney = $wasPaid && (float) $sale->payment_amount > 0;
-                $sale->status = 'cancelled'; // Sale::booted hook soft-cancels the event + frees slot
-                $sale->save();
-                if ($wasPaid) {
-                    \App\Models\AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
-                }
-                app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
-                if ($wasPaidMoney) {
-                    app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
-                }
-            } elseif (! $event->is_cancelled) {
-                $event->forceFill(['is_cancelled' => true, 'cancelled_at' => now(), 'ical_sequence' => (int) $event->ical_sequence + 1])->saveQuietly();
-                $event->dispatchCalendarSync('delete');
-            }
+            app(EventLifecycleService::class)->cancelBooking($event);
 
             AuditService::log(AuditService::EVENT_CANCEL, auth()->id(), 'Event', $event->id, null, null, $event->name);
 
@@ -813,70 +793,8 @@ class ApiEventController extends Controller
             ], 422);
         }
 
-        AuditService::log(AuditService::EVENT_DELETE, auth()->id(), 'Event', $event->id, null, null, $event->name);
-
-        // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
-        $activeCampaigns = BoostCampaign::where('event_id', $event->id)
-            ->unsettled()
-            ->get();
-
-        foreach ($activeCampaigns as $campaign) {
-            try {
-                $cancelled = \DB::transaction(function () use ($campaign) {
-                    $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
-                    if (! $campaign || ! $campaign->canBeCancelled()) {
-                        return false;
-                    }
-                    $campaign->update([
-                        'status' => 'cancelled',
-                        'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null,
-                    ]);
-
-                    return true;
-                });
-
-                if ($cancelled) {
-                    if ($campaign->meta_campaign_id) {
-                        (new MetaAdsService)->deleteCampaign($campaign);
-                    }
-
-                    // Gate the STRIPE call, not the refund. settlePayment()'s credit branch
-                    // debits boost_credit regardless of mode, so gating the whole block meant
-                    // deleting on selfhost destroyed the advertiser's wallet balance outright.
-                    // refundOnCancellation() reaches Stripe only when there is an intent, which
-                    // a selfhost campaign never has.
-                    $campaign->refresh();
-                    if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
-                        $billingService = new BoostBillingService;
-                        if ($campaign->billing_status === 'pending') {
-                            if (config('app.hosted') && ! config('app.is_testing') && $campaign->stripe_payment_intent_id) {
-                                $billingService->cancelPaymentIntent($campaign);
-                            }
-                        } else {
-                            $billingService->refundOnCancellation($campaign);
-                        }
-                    }
-                }
-            } catch (\Exception $e) {
-                \Log::warning('Failed to cancel boost campaign during event deletion', [
-                    'campaign_id' => $campaign->id,
-                    'event_id' => $event->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        // Capture webhook payload before deletion
-        if (! $event->is_draft) {
-            $webhookPayload = [
-                'event' => 'event.deleted',
-                'timestamp' => now()->toIso8601String(),
-                'data' => $event->toApiData(),
-            ];
-            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
-        }
-
-        $event->delete();
+        // The audit row, its boosts stopped, the webhook with what the event was, then the row.
+        app(EventLifecycleService::class)->delete($event, auth()->id());
 
         return response()->json([
             'data' => [

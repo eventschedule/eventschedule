@@ -794,9 +794,18 @@ class Event extends Model
         }
 
         // 'cancel', or a guarded 'delete': hide the event without pushing the change back out.
-        if (! $this->is_cancelled) {
-            $this->forceFill(['is_cancelled' => true, 'cancelled_at' => now()])->save();
-        }
+        // The flag and nothing else: no sequence bump, no webhook, no boost or installment
+        // unwinding, and the calendar services write the audit row once they have the outcome.
+        app(\App\Services\EventLifecycleService::class)->cancel(
+            $this,
+            cancelBoosts: false,
+            stopInstallments: false,
+            pushToCalendars: false,
+            webhook: false,
+            bumpSequence: false,
+            asBooking: false,
+            audit: false,
+        );
 
         return $action === 'delete' ? 'guarded_cancelled' : 'cancelled';
     }
