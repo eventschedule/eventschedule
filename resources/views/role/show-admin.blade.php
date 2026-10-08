@@ -133,6 +133,9 @@
             'appointments' => ['label' => __('messages.appointments'), 'count' => $pendingBookingCount, 'waiting' => true],
             'seating' => $role->isVenue() && $isEditorHere ? ['label' => __('messages.seating_plans')] : null,
             'requests' => count($requests) ? ['label' => __('messages.requests'), 'count' => count($requests), 'waiting' => true] : null,
+            // Shown once the schedule has a feed, and while the page itself is open (which is how
+            // the first one is added). Its count is what waits for somebody: drafts and decisions.
+            'feeds' => $isEditorHere && (($feedsCount ?? 0) > 0 || $tab == 'feeds') ? ['label' => __('messages.feeds_tab'), 'count' => $feedsWaiting ?? 0, 'waiting' => true] : null,
             'followers' => (config('app.hosted') || config('app.is_testing') || $subscribersCount) ? ['label' => __('messages.followers'), 'count' => count($followers) + $subscribersCount] : null,
             'team' => ['label' => __('messages.team'), 'count' => count($members) > 1 ? count($members) : 0],
             'plan' => config('app.hosted') ? ['label' => __('messages.plan')] : null,
@@ -445,6 +448,8 @@
     @include('role.show-admin-seating')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
+    @elseif ($tab == 'feeds')
+    @include('role.show-admin-feeds')
     @elseif ($tab == 'followers')
     @include('role.show-admin-followers')
     @elseif ($tab == 'team')

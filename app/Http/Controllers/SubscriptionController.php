@@ -20,7 +20,7 @@ class SubscriptionController extends Controller
      * Where a checkout was started from, carried through the subscribe form into the
      * subscription.create audit row. Allow-listed, because it lands in the growth export.
      */
-    public const CHECKOUT_SOURCES = ['tickets'];
+    public const CHECKOUT_SOURCES = ['tickets', 'feeds'];
 
     /**
      * Records that the viewer was shown the paid-ticket paywall in the event editor. Fired by

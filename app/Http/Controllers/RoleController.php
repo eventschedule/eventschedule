@@ -3834,10 +3834,46 @@ class RoleController extends Controller
                 ->listingPromptSchedules(auth()->user(), $role);
         }
 
+        // Feeds: the addresses this schedule keeps reading for events. This page admits viewers,
+        // and feeds are for the people who run the schedule, so the tab's own gate is here.
+        if ($tab === 'feeds' && ! auth()->user()->isEditor($subdomain)) {
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
+                ->with('error', __('messages.not_authorized'));
+        }
+
+        // On every tab, for the strip: whether there is a Feeds tab to show, and how much on it
+        // is waiting for somebody. One query of at most ten rows; the counts are kept on the feed
+        // by each read. Caught rather than asked about (EventFeed::tablesReady() is a schema
+        // query per page view): an install that has the code and has not migrated has no feeds.
+        $feeds = collect();
+        $feedsCount = 0;
+        $feedsWaiting = 0;
+        try {
+            if ($tab === 'feeds') {
+                $feeds = \App\Models\EventFeed::where('role_id', $role->id)
+                    ->withCount(['items as events_count' => fn ($query) => $query->whereNotNull('event_id')])
+                    ->orderBy('id')
+                    ->get();
+                $feedsCount = $feeds->count();
+                $feedsWaiting = (int) ($feeds->sum('waiting_count') + $feeds->sum('decide_count'));
+            } else {
+                $summary = DB::table('event_feeds')->where('role_id', $role->id)
+                    ->selectRaw('COUNT(*) as feeds, COALESCE(SUM(waiting_count + decide_count), 0) as waiting')
+                    ->first();
+                $feedsCount = (int) $summary->feeds;
+                $feedsWaiting = (int) $summary->waiting;
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // No table yet.
+        }
+
         return view('role/show-admin', compact(
             'subdomain',
             'role',
             'tab',
+            'feeds',
+            'feedsCount',
+            'feedsWaiting',
             'events',
             'eventTemplates',
             'members',

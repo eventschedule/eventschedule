@@ -21,6 +21,7 @@ use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventFeedController;
 use App\Http\Controllers\EventInterestController;
 use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
@@ -901,6 +902,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/team/transfer', [RoleController::class, 'storeTransfer'])->name('role.transfer.store')->middleware('throttle:5,1');
     Route::post('/{subdomain}/team/transfer/cancel', [RoleController::class, 'cancelTransfer'])->name('role.transfer.cancel');
     Route::post('/{subdomain}/team/transfer/resend', [RoleController::class, 'resendTransfer'])->name('role.transfer.resend')->middleware('throttle:5,1');
+    // Feeds: the addresses a schedule keeps reading for events. Their list is a tab of the
+    // schedule (role.view_admin, tab "feeds"); these are what changes one. For the owner and the
+    // admins, checked in the controller. The check is throttled: it fetches somebody else's server.
+    Route::get('/{subdomain}/feeds/add', [EventFeedController::class, 'create'])->name('role.feeds.create');
+    Route::post('/{subdomain}/feeds/check', [EventFeedController::class, 'check'])->name('role.feeds.check')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/feeds', [EventFeedController::class, 'store'])->name('role.feeds.store');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
     Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');
@@ -972,7 +979,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     $adminTabSubdomain = config('app.is_nexus')
         ? '(?!docs(?=/|$)|features(?=/|$))[^/]+'
         : '(?!docs(?=/|$))[^/]+';
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|feeds|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 

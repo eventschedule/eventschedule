@@ -157,6 +157,11 @@
                     <a href="{{ $learnMoreUrl }}" target="_blank" rel="noopener"
                        class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">{{ __('messages.learn_more') }}</a>
                 @endif
+                {{-- What can be done today without the plan, when there is such a thing (the
+                     Feeds gate: "Import a link once instead"). A quiet link after the buttons. --}}
+                @isset($instead)
+                {{ $instead }}
+                @endisset
             </div>
         @endif
     </div>
