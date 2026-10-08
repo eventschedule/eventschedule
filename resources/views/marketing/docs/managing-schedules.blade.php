@@ -152,15 +152,18 @@
         <h3 id="schedule-calendar" class="doc-subheading">Reading the calendar</h3>
         <ul class="doc-list mb-6">
             <li>On the month grid, the <strong>arrow buttons</strong> step a month back or forward and <strong>This Month</strong> returns to today. The phone list has no month buttons</li>
-            <li>An event that is not public carries a mark beside its name: <strong>Draft</strong> or <strong>Internal</strong></li>
-            <li>Click an event to open its public page in a new tab. To change it, point at it in the grid and use the <strong>Edit</strong> link that appears, or <strong>Edit Event</strong> on a phone card</li>
+            <li>Each event shows its name and its time, and under them what state it is in: <strong>Now</strong>, <strong>Sold Out</strong>, <strong>Few left</strong>, <strong>Free entry</strong> or <strong>Cancelled</strong>. A day with one event shows its picture, and an event that runs over several days is one bar across them</li>
+            <li>An event that is not public says so under its name: <strong>Draft</strong> or <strong>Internal</strong></li>
+            <li>A busy day shows its first three events, and more where the week has room. <strong>+N more</strong>, or the day's number, opens the whole day, and says how many of the events it holds are drafts</li>
+            <li>Rest the pointer on an event, or move to it with the keyboard, and a card opens beside its day with its date, time and place, and with <strong>View Event</strong> and <strong>Edit Event</strong>. A click on the event itself opens its public page in a new tab. On a phone, use <strong>Edit Event</strong> on the card</li>
+            <li>The arrow keys move between events and days, and Page Up and Page Down change the month</li>
             <li>On a Talent schedule, a day a team member marked as unavailable is tinted, and its info icon names who. See <a href="#availability" class="doc-link">Availability</a></li>
         </ul>
 
         <h3 id="schedule-add" class="doc-subheading">Adding events</h3>
         <ul class="doc-list mb-6">
             <li><strong>Add Event</strong> creates a new event by hand. It appears once the schedule's email address is verified, and is hidden from viewers</li>
-            <li>On the month grid, owners and admins can click an empty part of a day to start a new event on that date</li>
+            <li>On the month grid, owners and admins can use the <strong>plus</strong> that appears on a day, when the pointer is on it or it is reached with the keyboard, to start a new event on that date</li>
             <li><strong>Use a Template</strong> sits beside Add Event once you have at least one saved <a href="#templates" class="doc-link">template</a> (Pro)</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
