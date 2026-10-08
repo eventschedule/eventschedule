@@ -229,9 +229,17 @@
     .gk-month-none { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; color: var(--gk-ink-2); }
     .gk-row-where a { color: inherit; text-decoration: underline; text-decoration-color: var(--gk-line); text-underline-offset: 2px; }
     .gk-dayhead-word { font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--es-accent-readable); }
-    .gk-days-past { display: flex; align-items: center; gap: 1rem; padding: .25rem 1rem; font-size: .875rem; font-weight: 600; color: var(--gk-ink-2); }
-    .gk-days-past::before { content: ''; flex: 1; height: 1px; background: var(--gk-line); }
-    .gk-days-past::after { content: ''; flex: 1; height: 1px; background: var(--gk-line); }
+    {{-- Where the list turns from what is coming to what has been (role/partials/calendar). The
+         label stands on the panel's own frosted ground and each rule is a light line over a dark
+         one, so both read on whatever the owner put behind the list: a grey hairline vanished on
+         one photograph and scratched across the next, and plain text was dark on a dark page. --}}
+    .gk-past { display: flex; align-items: center; gap: 1rem; padding-block: .75rem 0; }
+    .gk-past::before { content: ''; flex: 1; height: 2px; background: linear-gradient(rgb(255 255 255 / .62), rgb(255 255 255 / .62)) top / 100% 1px no-repeat, linear-gradient(rgb(0 0 0 / .32), rgb(0 0 0 / .32)) bottom / 100% 1px no-repeat; -webkit-mask-image: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent); }
+    .gk-past::after { content: ''; flex: 1; height: 2px; background: linear-gradient(rgb(255 255 255 / .62), rgb(255 255 255 / .62)) top / 100% 1px no-repeat, linear-gradient(rgb(0 0 0 / .32), rgb(0 0 0 / .32)) bottom / 100% 1px no-repeat; -webkit-mask-image: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent); }
+    .gk-past-label { display: inline-flex; align-items: center; gap: .4375rem; padding: .4375rem .875rem; border-radius: 999px; background: var(--gk-panel); color: var(--gk-ink-2); font-size: .75rem; font-weight: 800; letter-spacing: .08em; line-height: 1.2; text-transform: uppercase; white-space: nowrap; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: var(--gk-shadow); }
+    {{-- Spaced letters pull an Arabic word apart. --}}
+    :where([dir="rtl"]) .gk-past-label, :where(.rtl) .gk-past-label { letter-spacing: 0; }
+    .gk-past-label svg { flex: none; width: .9375rem; height: .9375rem; }
     .gk-row-item { position: relative; }
     {{-- A row of the schedule's list is a card pressed as a whole; its name is the link. --}}
     .gk-row-press { cursor: pointer; }

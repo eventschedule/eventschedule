@@ -1089,7 +1089,16 @@
                     <template v-if="groupIndex === firstPastGroupIndex">
                         @include('role/partials/list-more')
                     </template>
-                    {{-- Past Events Divider (once, before the first all-past group) --}}
+                    {{-- Past Events Divider (once, before the first all-past group). On a guest
+                         page it is the kit's marker (.gk-past), which reads on whatever the owner
+                         put behind the list; the admin's list is on the portal's own surface and
+                         keeps its hairlines. --}}
+                    @if ($guestRows)
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))"
+                         class="gk-past" role="heading" aria-level="2">
+                        <span class="gk-past-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4h4"/><path d="M12 7.5V12l3 2"/></svg><span>{{ $label('past_events') }}</span></span>
+                    </div>
+                    @else
                     <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))"
                          class="py-4 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
@@ -1098,6 +1107,7 @@
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
+                    @endif
                     {{-- One date: header + its cards --}}
                     <div class="space-y-4">
                         {{-- Date Header: translucent card-style backing keeps the date + hairlines
@@ -1943,8 +1953,8 @@
                         @include('role/partials/list-more')
                     </template>
                     {{-- Past Events Divider --}}
-                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))" class="gk-days-past">
-                        <span>{{ $label('past_events') }}</span>
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))" class="gk-past" role="heading" aria-level="2">
+                        <span class="gk-past-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4h4"/><path d="M12 7.5V12l3 2"/></svg><span>{{ $label('past_events') }}</span></span>
                     </div>
                     <section v-if="group.events.some(e => isEventVisible(e))" class="gk-panel gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" :class="{ 'gk-day-past': group.events.every(e => e._isPast) }">
                         {{-- The dateless group has no heading, so it never says "Invalid Date". --}}

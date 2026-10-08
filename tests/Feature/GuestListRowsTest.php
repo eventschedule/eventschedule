@@ -664,4 +664,30 @@ class GuestListRowsTest extends TestCase
         $this->assertCount(8, $rows);
         $this->assertSame($two, $eight, 'eight events ask what two did');
     }
+
+    /**
+     * Where the list turns from what is coming to what has been. It was a small pill between two
+     * grey hairlines drawn straight over the owner's background, which vanished on one photograph
+     * and scratched across the next, and on a phone it was plain dark text, unreadable on a dark
+     * page. On a guest page it is the kit's marker now, at both widths; the admin's list, on the
+     * portal's own surface, keeps its hairlines.
+     */
+    public function test_the_past_events_marker_reads_on_any_background(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $guest = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+        // Once for the cards a wide screen gets, once for a phone's rows.
+        $this->assertSame(2, preg_match_all('~class="gk-past" role="heading" aria-level="2">\s*<span class="gk-past-label"><svg ~', $guest));
+        $this->assertStringNotContainsString('gk-days-past', $guest);
+        $this->assertStringNotContainsString('class="flex-1 h-px bg-gray-300 dark:bg-gray-600"', $guest, 'no grey hairline over the owner\'s background');
+        // The label on the panel's own ground, and the rule a light line over a dark one.
+        $this->assertMatchesRegularExpression('~\.gk-past-label \{[^}]*background: var\(--gk-panel\);~', $guest);
+        $this->assertMatchesRegularExpression('~\.gk-past::before \{[^}]*rgb\(255 255 255 / \.62\)[^}]*rgb\(0 0 0 / \.32\)~', $guest);
+
+        $admin = $this->actingAs($owner)->get('/'.$role->subdomain.'/schedule')->assertOk()->getContent();
+        $this->assertStringNotContainsString('class="gk-past"', $admin, 'the kit is not on the portal\'s pages');
+        $this->assertStringContainsString('class="flex-1 h-px bg-gray-300 dark:bg-gray-600"', $admin);
+    }
 }
