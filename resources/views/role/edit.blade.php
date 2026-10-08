@@ -5958,6 +5958,35 @@
                             @endif
                         </div>
 
+                        {{-- Feeds from other sites: the way in to the Feeds tab, which a schedule
+                             only shows once it has a feed. Nothing here is saved with the form,
+                             so the row holds links and no fields, and its line is written here
+                             (the page reloads on save). The names are somebody's own text. --}}
+                        @if ($role->exists && $role->subdomain)
+                        @php
+                            $feedNames = \App\Models\EventFeed::namesFor($role);
+                            $feedsAllowed = \App\Models\EventFeed::allowedFor($role);
+                            $feedsTabUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'feeds']);
+                            $feedsLine = $feedNames
+                                ? implode(', ', array_slice($feedNames, 0, 3)).(count($feedNames) > 3 ? ', ...' : '')
+                                : __('messages.none');
+                        @endphp
+                        <x-form-row group="integration" tab="feeds" :title="__('messages.integration_row_incoming_feeds')" class="integration-tab"
+                            :summary="$feedsLine" :muted="! $feedNames" :locked="$feedsAllowed ? null : 'enterprise'" />
+                        <div id="integration-tab-feeds" class="event-subrow-body integration-tab-content" hidden>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('messages.feeds_gate_text') }}</p>
+                            <div class="flex flex-wrap items-center gap-3">
+                                @if ($feedNames)
+                                <x-secondary-link :href="$feedsTabUrl">{{ __('messages.feeds_open_tab') }}</x-secondary-link>
+                                @elseif ($feedsAllowed)
+                                <x-secondary-link :href="route('role.feeds.create', ['subdomain' => $role->subdomain])">{{ __('messages.feeds_add') }}</x-secondary-link>
+                                @else
+                                <x-secondary-link :href="$feedsTabUrl">{{ __('messages.feeds_see_plan') }}</x-secondary-link>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Tab Content: Advanced -->
                         <x-form-row group="integration" tab="advanced" :title="__('messages.integration_row_feeds')" class="integration-tab" />
                         <div id="integration-tab-advanced" class="event-subrow-body integration-tab-content" hidden>

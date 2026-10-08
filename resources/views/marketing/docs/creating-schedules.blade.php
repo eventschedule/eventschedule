@@ -51,6 +51,7 @@
             <x-doc-nav-link href="#integrations-google">Google Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-microsoft">Outlook Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-caldav">CalDAV Calendar</x-doc-nav-link>
+            <x-doc-nav-link href="#integrations-feeds">Feeds from other sites</x-doc-nav-link>
             <x-doc-nav-link href="#integrations-advanced">Calendar text and feeds</x-doc-nav-link>
             <x-doc-nav-link href="#available-variables">Available Variables</x-doc-nav-link>
         </x-doc-nav-group>
@@ -1495,6 +1496,12 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Once connected, the row shows which server you are attached to, the sync direction can be changed there (with No Sync as a fourth choice), and <strong class="text-gray-900 dark:text-white">Disconnect</strong> asks you to confirm and then stops syncing. The connection belongs to the schedule's owner: other members see how it is set and cannot change it.
         </p>
+
+        <!-- Feeds from other sites -->
+        <h3 id="integrations-feeds" class="doc-subheading">Feeds from other sites</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A feed is an address this schedule reads about once an hour: a calendar address (.ics or webcal), an RSS, Atom or JSON feed, or a page that lists its events. New events arrive on their own, a change at the source is copied to the event here, and anything you edited yourself is kept as you left it. A connected calendar, above, is your own calendar and syncs both ways. A feed is somebody else's list, and is only ever read.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The row names the feeds the schedule has and leads to them. With none yet, <strong class="text-gray-900 dark:text-white">Add a feed</strong> asks for the address, reads it once, and shows what it found before anything is added. When you add it you choose whether new events are published at once or held as drafts for you to look over, and what happens to an event that is no longer in the feed: leave it, mark it cancelled, or remove it. An event that people have signed up for is never changed without asking you.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Once a schedule has a feed, a <strong class="text-gray-900 dark:text-white">Feeds</strong> tab appears on the schedule's own page, where drafts wait for review and each feed says when it was last read. On eventschedule.com feeds are part of the Enterprise plan. A selfhosted install has them.</p>
 
         <!-- Advanced -->
         <h3 id="integrations-advanced" class="doc-subheading">Calendar text and feeds</h3>

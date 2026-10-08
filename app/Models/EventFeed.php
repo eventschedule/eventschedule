@@ -97,6 +97,22 @@ class EventFeed extends Model
         }
     }
 
+    /**
+     * The names of a schedule's feeds, for a page that only mentions them (the schedule form's
+     * row). Nothing where the tables are not there yet: a page that is not about feeds does not
+     * fail over them.
+     *
+     * @return list<string>
+     */
+    public static function namesFor(Role $role): array
+    {
+        try {
+            return self::where('role_id', $role->id)->orderBy('id')->pluck('name')->all();
+        } catch (\Illuminate\Database\QueryException $e) {
+            return [];
+        }
+    }
+
     /** What two addresses are compared by: an encrypted column cannot be. */
     public static function hashOf(string $url): string
     {

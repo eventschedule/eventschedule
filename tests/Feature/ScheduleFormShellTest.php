@@ -84,7 +84,7 @@ class ScheduleFormShellTest extends TestCase
             ],
             'integration' => [
                 'email' => 'integration-tab-email', 'google' => 'integration-tab-google', 'microsoft' => 'integration-tab-microsoft',
-                'caldav' => 'integration-tab-caldav', 'advanced' => 'integration-tab-advanced',
+                'caldav' => 'integration-tab-caldav', 'feeds' => 'integration-tab-feeds', 'advanced' => 'integration-tab-advanced',
             ],
         ];
 

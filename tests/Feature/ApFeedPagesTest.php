@@ -179,6 +179,98 @@ class ApFeedPagesTest extends TestCase
         $this->actingAs($this->owner)->get(route('role.feeds.create', ['subdomain' => $pro->subdomain]))->assertOk();
     }
 
+    /**
+     * The tab only shows once a schedule has a feed, so the way in is a row of the schedule
+     * form's Integrations tab: it leads to adding one, to the ones there are, or to what the
+     * plan would give.
+     */
+    public function test_the_schedule_form_has_a_row_that_leads_to_feeds(): void
+    {
+        $form = fn (Role $role) => $this->actingAs($this->owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+        $paneOf = function (string $html): string {
+            $from = strpos($html, '<div id="integration-tab-feeds"');
+            $this->assertNotFalse($from);
+
+            return substr($html, $from, strpos($html, '<div id="integration-tab-advanced"') - $from);
+        };
+        $rowOf = function (string $html): string {
+            $from = strpos($html, 'data-row-group="integration" data-tab="feeds"');
+
+            return substr($html, $from, strpos($html, '</button>', $from) - $from);
+        };
+        $tab = fn (Role $role) => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'feeds']);
+        $add = fn (Role $role) => route('role.feeds.create', ['subdomain' => $role->subdomain]);
+
+        // None yet: the row says so and offers to add one.
+        $html = $form($this->role);
+        $this->assertStringContainsString('<span class="event-row-title">'.__('messages.integration_row_incoming_feeds').'</span>', $html);
+        $this->assertStringContainsString('<bdi>'.__('messages.none').'</bdi>', $rowOf($html));
+        $this->assertStringNotContainsString(__('messages.enterprise'), $rowOf($html));
+        $this->assertStringContainsString('href="'.$add($this->role).'"', $paneOf($html));
+        $this->assertStringNotContainsString('href="'.$tab($this->role).'"', $paneOf($html));
+
+        // With feeds: their names on the row, never an address, and the way to them.
+        foreach (['Town hall', '<b>Shopper</b>', 'Third', 'Fourth'] as $i => $name) {
+            $this->feed(['name' => $name, 'url' => 'https://93.184.216.34/'.self::SECRET.'/'.$i.'.ics']);
+        }
+        $html = $form($this->role);
+        $this->assertStringContainsString('<bdi>Town hall, &lt;b&gt;Shopper&lt;/b&gt;, Third, ...</bdi>', $rowOf($html));
+        $this->assertStringContainsString('href="'.$tab($this->role).'"', $paneOf($html));
+        $this->assertStringNotContainsString('href="'.$add($this->role).'"', $paneOf($html));
+        $this->assertStringNotContainsString(self::SECRET, $html);
+
+        // A plan without feeds: the row is marked, and leads to what they are, not to adding one.
+        $pro = $this->createRole($this->owner, 'talent', ['plan_type' => 'pro']);
+        $html = $form($pro);
+        $this->assertStringContainsString(__('messages.enterprise'), $rowOf($html));
+        $this->assertStringContainsString('href="'.$tab($pro).'"', $paneOf($html));
+        $this->assertStringNotContainsString('href="'.$add($pro).'"', $paneOf($html));
+
+        // A selfhost install has them.
+        config(['app.hosted' => false]);
+        $html = $form($pro);
+        $this->assertStringNotContainsString(__('messages.enterprise'), $rowOf($html));
+        $this->assertStringContainsString('href="'.$add($pro).'"', $paneOf($html));
+    }
+
+    /**
+     * "Keep this link in sync" on the import page hands the address to the check by POST. A
+     * guest's form, which shares the view, has none of it.
+     */
+    public function test_the_import_page_offers_to_keep_a_link_in_sync(): void
+    {
+        config(['services.google.gemini_key' => 'test-key']);
+        $page = fn (Role $role) => $this->actingAs($this->owner)->get(route('event.show_import_ai', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+
+        $html = $page($this->role);
+        $this->assertStringContainsString(__('messages.feeds_keep_in_sync'), $html);
+        $this->assertStringContainsString('feedsAllowed: true', $html);
+        $this->assertMatchesRegularExpression('#<form method="post" id="feed-keep-form" action="'.preg_quote(route('role.feeds.check', ['subdomain' => $this->role->subdomain]), '#').'" hidden>\s*<input type="hidden" name="_token"[^>]*>\s*<input type="hidden" name="address" id="feed-keep-address">#', $html);
+        // Its own form, after the page's: a form inside a form is dropped by the browser.
+        $this->assertGreaterThan(strpos($html, 'id="event-import-app"'), strpos($html, 'id="feed-keep-form"'));
+        $this->assertSame(1, substr_count(substr($html, strpos($html, 'id="event-import-app"'), strpos($html, 'id="feed-keep-form"') - strpos($html, 'id="event-import-app"')), '</form>'));
+        // Only for what a feed can read, and never an address in a link.
+        $this->assertStringContainsString("['ics', 'page'].includes(this.preview.meta.source) && this.isLink", $html);
+        $this->assertStringNotContainsString('feeds/check?', $html);
+
+        // Off the plan the button says so in place, and nothing is posted.
+        $pro = $this->createRole($this->owner, 'talent', ['plan_type' => 'pro']);
+        $html = $page($pro);
+        $this->assertStringContainsString('feedsAllowed: false', $html);
+        $this->assertStringContainsString(__('messages.feeds_need_enterprise'), $html);
+        $this->assertStringContainsString('if (! this.feedsAllowed) {', $html);
+
+        // The guest form.
+        $curator = $this->createRole($this->owner, 'curator', ['accept_requests' => true, 'require_account' => false]);
+        auth()->logout();
+        $guest = $this->get(route('event.guest_import', ['subdomain' => $curator->subdomain]))->assertOk()->getContent();
+        $this->assertStringContainsString('isGuestPage: true', $guest);
+        $this->assertStringContainsString('feedsAllowed: false', $guest);
+        $this->assertStringNotContainsString('feed-keep-form', $guest);
+        $this->assertStringNotContainsString(__('messages.feeds_keep_in_sync'), $guest);
+        $this->assertStringNotContainsString('feeds/check', $guest);
+    }
+
     public function test_checking_an_address_shows_what_is_there_and_adds_nothing(): void
     {
         // One of the two is already on the schedule, made by hand.
