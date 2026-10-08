@@ -3,7 +3,8 @@ $isAdmin = $isAdmin ?? false;
 $isTemplateMode = $isTemplateMode ?? false;
 
 $templateDefaults = [
-    'modern' => \App\Models\Newsletter::templateDefaults('modern'),
+    // Modern arrives in the schedule's own accent, as a first newsletter does.
+    'modern' => ($role ?? null) instanceof \App\Models\Role ? \App\Models\Newsletter::defaultStyleSettingsForRole($role) : \App\Models\Newsletter::templateDefaults('modern'),
     'classic' => \App\Models\Newsletter::templateDefaults('classic'),
     'minimal' => \App\Models\Newsletter::templateDefaults('minimal'),
     'bold' => \App\Models\Newsletter::templateDefaults('bold'),
@@ -38,13 +39,8 @@ $segmentsData = ($segments ?? collect())->map(function ($segment) use ($segmentT
     ];
 })->values()->toArray();
 
-$eventsData = ($events ?? collect())->map(function ($event) {
-    return [
-        'id' => $event->id,
-        'name' => $event->name,
-        'date' => $event->starts_at ? $event->getShortDateRangeDisplay() : '',
-    ];
-})->values()->toArray();
+// NewsletterService::eventChoices(): what a mail could list, under the date it would print.
+$eventsData = collect($events ?? [])->values()->all();
 
 $newsletterData = null;
 if (isset($newsletter) && $newsletter->exists) {
@@ -132,9 +128,9 @@ $builderProps = [
         'preview' => __('messages.preview'),
         'preview_text' => __('messages.newsletter_preview_text'),
         'preview_text_help' => __('messages.newsletter_preview_text_help'),
-        'desktop' => __('messages.desktop'),
-        'mobile' => __('messages.mobile'),
-        'system' => __('messages.system'),
+        'desktop' => __('messages.newsletter_preview_desktop'),
+        'mobile' => __('messages.newsletter_preview_mobile'),
+        'system' => __('messages.newsletter_font_system'),
         'preview_session_expired' => __('messages.admin_confirm_password'),
         'edit_blocks' => __('messages.edit_blocks'),
         'test_send' => __('messages.test_send'),

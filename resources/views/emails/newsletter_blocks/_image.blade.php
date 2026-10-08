@@ -26,7 +26,7 @@
     $attr = str_ends_with($width, '%') ? (int) round($inner * min(100, (int) $width) / 100) : min($inner, (int) $width);
     $caption = 'margin: 8px 0 0; '.$nl->smallType();
     $imgStyle = 'height: auto; display: block; border: 0; border-radius: '.$nl->cardRadius.'px;';
-    $margin = $align === 'center' ? 'margin: 0 auto;' : ($align === 'right' ? 'margin: 0 0 0 auto;' : '');
+    $margin = $align === 'center' ? 'margin: 0 auto;' : ($align === 'right' ? 'margin: 0 0 0 auto;' : 'margin: 0 auto 0 0;');
     $perRow = $layout === 'grid' ? 2 : max(1, count($images));
 @endphp
 @if (count($images) === 0)

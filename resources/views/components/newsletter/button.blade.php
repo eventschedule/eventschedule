@@ -18,7 +18,9 @@
 @if ($variant === 'link')
 <a @if ($href) href="{{ $href }}" target="_blank" rel="noopener" @endif style="{{ $nl->type($fs, $lh + 4, $nl->accentInk, 600) }} text-decoration: underline;">{{ $label }}&nbsp;{!! $nl->arrow !!}</a>
 @else
-<table role="presentation" dir="{{ $nl->dir }}" @if ($align !== 'left') align="{{ $align }}" @endif cellpadding="0" cellspacing="0" border="0" @if ($fluid) class="nl-btn-wrap" @endif style="{{ $align === 'center' ? 'margin: 0 auto;' : '' }}">
+{{-- The side is said twice, as an attribute for Outlook and as margins for everyone else, and
+     for every side: with nothing said, "left" was wherever the mail's direction starts. --}}
+<table role="presentation" dir="{{ $nl->dir }}" align="{{ $align }}" cellpadding="0" cellspacing="0" border="0" @if ($fluid) class="nl-btn-wrap" @endif style="margin: 0 {{ $align === 'right' ? '0' : 'auto' }} 0 {{ $align === 'left' ? '0' : 'auto' }};">
 <tr>
 <td align="center" bgcolor="{{ $fill ? $nl->accent : $nl->sheet }}" style="background-color: {{ $fill ? $nl->accent : 'transparent' }}; border: {{ $fill ? '1px solid '.$nl->accentEdge : '2px solid '.$nl->accentInk }}; border-radius: {{ $nl->radius }}px; mso-padding-alt: {{ $py }}px {{ $px }}px; text-align: center;">
 <a @if ($href) href="{{ $href }}" target="_blank" rel="noopener" @endif class="nl-btn-a" style="{{ $labelStyle }}">{{ $label }}</a>

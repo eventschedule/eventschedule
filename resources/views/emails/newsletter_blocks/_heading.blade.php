@@ -14,7 +14,10 @@
     $align = $nl->design === 'compact' ? $nl->start : $align;
     $text = trim((string) ($block['data']['text'] ?? ''));
     $band = $level === 'h1' && in_array($nl->design, ['modern', 'bold'], true);
-    $barMargin = $align === 'center' ? '0 auto' : ($align === 'right' ? '0 0 0 auto' : '0');
+    // Both sides said for every alignment: "0" alone is the start of the mail's direction.
+    $barMargin = $align === 'center' ? '0 auto' : ($align === 'right' ? '0 0 0 auto' : '0 auto 0 0');
+    // A long word in a title must break, not widen the mail.
+    $wrap = ' word-break: break-word;';
     $tight = (int) round($nl->gap * 0.45);
 @endphp
 @if ($text !== '')
@@ -25,7 +28,7 @@
 @endphp
 <tr>
 <td class="nl-g nl-band{{ $corner ? ' nl-round' : '' }}" bgcolor="{{ $nl->accent }}" style="background-color: {{ $nl->accent }}; padding: {{ $bold ? 44 : 38 }}px {{ $nl->gutter }}px {{ $bold ? 40 : 34 }}px; text-align: {{ $align }}; {{ $corner }}">
-<h1 class="nl-h1" dir="auto" style="margin: 0; {{ $nl->type($bold ? 36 : 30, $bold ? 40 : 36, $nl->onAccent, $bold ? 800 : 700) }} letter-spacing: -0.02em; text-wrap: balance;">{{ $text }}</h1>
+<h1 class="nl-h1" dir="auto" style="margin: 0; {{ $nl->type($bold ? 36 : 30, $bold ? 40 : 36, $nl->onAccent, $bold ? 800 : 700) }}{{ $nl->tracking(-0.02) }} text-wrap: balance;{{ $wrap }}">{{ $text }}</h1>
 </td>
 </tr>
 @if (! $beforeBleed)
@@ -39,35 +42,35 @@
 @switch($nl->design.'-'.$level)
 @case('modern-h2')
 @case('bold-h2')
-<h2 dir="auto" style="margin: 0; {{ $nl->type($nl->design === 'bold' ? 27 : 22, $nl->design === 'bold' ? 32 : 30, $nl->ink, $nl->design === 'bold' ? 800 : 700) }} letter-spacing: -0.01em;">{{ $text }}</h2>
+<h2 dir="auto" style="margin: 0; {{ $nl->type($nl->design === 'bold' ? 27 : 22, $nl->design === 'bold' ? 32 : 30, $nl->ink, $nl->design === 'bold' ? 800 : 700) }}{{ $nl->tracking(-0.01) }}{{ $wrap }}">{{ $text }}</h2>
 @if ($nl->design === 'bold')
-<div style="margin: 10px {{ $align === 'center' ? 'auto' : '0' }} 0 {{ $align === 'left' ? '0' : 'auto' }}; width: 44px; height: 4px; line-height: 4px; font-size: 0; background-color: {{ $nl->accent }};">&nbsp;</div>
+<div style="margin: 10px {{ $align === 'right' ? '0' : 'auto' }} 0 {{ $align === 'left' ? '0' : 'auto' }}; width: 44px; height: 4px; line-height: 4px; font-size: 0; background-color: {{ $nl->accentMark }};">&nbsp;</div>
 @endif
 @break
 @case('classic-h1')
-<h1 class="nl-h1" dir="auto" style="margin: 0 0 14px; {{ $nl->type(34, 42, $nl->accentInk, 400) }} letter-spacing: -0.01em; text-wrap: balance;">{{ $text }}</h1>
+<h1 class="nl-h1" dir="auto" style="margin: 0 0 14px; {{ $nl->type(34, 42, $nl->accentInk, 400) }}{{ $nl->tracking(-0.01) }} text-wrap: balance;{{ $wrap }}">{{ $text }}</h1>
 <div style="margin: {{ $barMargin }}; width: 56px; height: 2px; line-height: 2px; font-size: 0; background-color: {{ $nl->accentInk }};">&nbsp;</div>
 @break
 @case('classic-h2')
-<h2 dir="auto" style="margin: 0; padding: 0 0 8px; border-bottom: 1px solid {{ $nl->rule }}; {{ $nl->type(23, 30, $nl->ink, 400) }}">{{ $text }}</h2>
+<h2 dir="auto" style="margin: 0; padding: 0 0 8px; border-bottom: 1px solid {{ $nl->rule }}; {{ $nl->type(23, 30, $nl->ink, 400) }}{{ $wrap }}">{{ $text }}</h2>
 @break
 @case('minimal-h1')
-<h1 class="nl-h1" dir="auto" style="margin: 0; {{ $nl->type(32, 38, $nl->ink, 600) }} letter-spacing: -0.02em; text-wrap: balance;">{{ $text }}</h1>
+<h1 class="nl-h1" dir="auto" style="margin: 0; {{ $nl->type(32, 38, $nl->ink, 600) }}{{ $nl->tracking(-0.02) }} text-wrap: balance;{{ $wrap }}">{{ $text }}</h1>
 @break
 @case('minimal-h2')
-<h2 dir="auto" style="margin: 0; padding: 20px 0 0; border-top: 1px solid {{ $nl->rule }}; {{ $nl->type(21, 27, $nl->ink, 600) }} letter-spacing: -0.01em;">{{ $text }}</h2>
+<h2 dir="auto" style="margin: 0; padding: 20px 0 0; border-top: 1px solid {{ $nl->rule }}; {{ $nl->type(21, 27, $nl->ink, 600) }}{{ $nl->tracking(-0.01) }}{{ $wrap }}">{{ $text }}</h2>
 @break
 @case('minimal-h3')
-<h3 dir="auto" style="margin: 0; {{ $nl->labelType($nl->ink3) }}">{{ $text }}</h3>
+<h3 dir="auto" style="margin: 0; {{ $nl->labelType($nl->ink3) }}{{ $wrap }}">{{ $text }}</h3>
 @break
 @case('compact-h1')
-<h1 dir="auto" style="margin: 0; {{ $nl->type(21, 27, $nl->ink, 700) }}">{{ $text }}</h1>
+<h1 dir="auto" style="margin: 0; {{ $nl->type(21, 27, $nl->ink, 700) }}{{ $wrap }}">{{ $text }}</h1>
 @break
 @case('compact-h2')
-<h2 dir="auto" style="margin: 0; padding: 0 0 6px; border-bottom: 1px solid {{ $nl->rule }}; {{ $nl->type(16, 22, $nl->ink, 700) }}">{{ $text }}</h2>
+<h2 dir="auto" style="margin: 0; padding: 0 0 6px; border-bottom: 1px solid {{ $nl->rule }}; {{ $nl->type(16, 22, $nl->ink, 700) }}{{ $wrap }}">{{ $text }}</h2>
 @break
 @default
-<{{ $level }} dir="auto" style="margin: 0; {{ $nl->labelType(null, 13) }}">{{ $text }}</{{ $level }}>
+<{{ $level }} dir="auto" style="margin: 0; {{ $nl->labelType(null, 13) }}{{ $wrap }}">{{ $text }}</{{ $level }}>
 @endswitch
 </td>
 </tr>

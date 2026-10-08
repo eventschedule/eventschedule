@@ -2560,7 +2560,10 @@ return [
     'select_camera' => 'اختيار الكاميرا',
     'footer_text' => 'نص التذييل',
     'newsletter_preview_text' => 'نص المعاينة',
-    'newsletter_preview_text_help' => 'السطر الذي يظهر في صندوق الوارد بعد الموضوع. إذا تُرك فارغًا، يُستخدم مطلع أول فقرة نصية لديك.',
+    'newsletter_preview_text_help' => 'السطر الذي يظهر في صندوق الوارد بعد الموضوع. إذا تُرك فارغًا، يُستخدم مطلع أول كتلة نصية لديك.',
+    'newsletter_preview_desktop' => 'الحاسوب',
+    'newsletter_preview_mobile' => 'الجوال',
+    'newsletter_font_system' => 'خط النظام',
     'edit_prompt' => 'تعديل الموجه',
     'change_camera' => 'تغيير الكاميرا',
 

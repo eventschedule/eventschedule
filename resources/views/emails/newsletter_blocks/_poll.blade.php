@@ -19,14 +19,13 @@
 <table role="presentation" dir="{{ $nl->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 8px;">
 <tr>
 <td bgcolor="{{ $nl->sheet }}" style="background-color: {{ $nl->sheet }}; border: 1px solid {{ $nl->ruleStrong }}; border-radius: {{ $nl->radius }}px;">
-<a href="{{ $poll['eventUrl'] }}" target="_blank" rel="noopener" style="display: block; padding: {{ $compact ? '8px 12px' : '12px 16px' }}; text-decoration: none;">
+{{-- The link is inside each cell: Outlook does not follow one wrapped round a table. --}}
 <table role="presentation" dir="{{ $nl->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td dir="auto" style="{{ $nl->type($nl->body, $nl->bodyLine - 4, $nl->ink, $nl->serif ? 400 : 600) }} text-align: {{ $nl->start }};">{{ $option }}</td>
-<td width="24" align="{{ $nl->end }}" style="width: 24px; text-align: {{ $nl->end }}; {{ $nl->type($nl->body, $nl->bodyLine - 4, $nl->accentInk, 700) }}">{!! $nl->arrow !!}</td>
+<td style="text-align: {{ $nl->start }};"><a href="{{ $poll['eventUrl'] }}" target="_blank" rel="noopener" dir="auto" style="display: block; padding: {{ $compact ? 8 : 12 }}px 0; padding-{{ $nl->start }}: {{ $compact ? 12 : 16 }}px; {{ $nl->type($nl->body, $nl->bodyLine - 4, $nl->ink, $nl->serif ? 400 : 600) }} text-decoration: none; word-break: break-word;">{{ $option }}</a></td>
+<td width="{{ 24 + ($compact ? 12 : 16) }}" align="{{ $nl->end }}" style="width: {{ 24 + ($compact ? 12 : 16) }}px; text-align: {{ $nl->end }};"><a href="{{ $poll['eventUrl'] }}" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1" style="display: block; padding: {{ $compact ? 8 : 12 }}px 0; padding-{{ $nl->end }}: {{ $compact ? 12 : 16 }}px; {{ $nl->type($nl->body, $nl->bodyLine - 4, $nl->accentInk, 700) }} text-decoration: none;">{!! $nl->arrow !!}</a></td>
 </tr>
 </table>
-</a>
 </td>
 </tr>
 </table>

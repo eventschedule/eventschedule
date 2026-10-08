@@ -60,7 +60,9 @@ class AdminNewsletterController extends Controller
             ->first();
 
         $defaultTemplate = $lastNewsletter ? $lastNewsletter->template : 'modern';
-        $defaultStyleSettings = $lastNewsletter ? Newsletter::designSettings($lastNewsletter->style_settings) : Newsletter::templateDefaults('modern');
+        $defaultStyleSettings = $lastNewsletter
+            ? Newsletter::movedToCurrentPreset($lastNewsletter->template, Newsletter::designSettings($lastNewsletter->style_settings))
+            : Newsletter::templateDefaults('modern');
         $defaultSegmentIds = $lastNewsletter ? ($lastNewsletter->segment_ids ?? []) : [];
 
         // Load saved templates for the template picker

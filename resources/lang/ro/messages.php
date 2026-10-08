@@ -2487,6 +2487,9 @@ return [
     'footer_text' => 'Text Subsol',
     'newsletter_preview_text' => 'Text de previzualizare',
     'newsletter_preview_text_help' => 'Rândul pe care căsuța de e-mail îl arată după subiect. Dacă îl lași gol, se folosește începutul primului tău bloc de text.',
+    'newsletter_preview_desktop' => 'Calculator',
+    'newsletter_preview_mobile' => 'Telefon',
+    'newsletter_font_system' => 'Font de sistem',
     'please_wait' => 'Vă rugăm așteptați înainte de a încerca din nou',
 
     // Scan agenda
@@ -5713,7 +5716,7 @@ return [
     'subscription_unsubscribed_body' => ':schedule nu îți va mai scrie despre evenimente noi.',
     'subscription_unsubscribed_all_body' => 'Niciun program de pe acest site nu îți va mai scrie despre evenimente noi.',
     'subscription_why_receiving' => 'Primești acest mesaj pentru că ai cerut ca :schedule să te țină la curent.',
-    'newsletter_why_receiving' => 'Primești acest mesaj pentru că ești abonat la lista de e-mail :schedule.',
+    'newsletter_why_receiving' => 'Primești acest mesaj pentru că te afli pe lista de e-mail :schedule.',
     'play_video' => 'Redă videoclipul',
     'all_subscribers' => 'Abonați prin e-mail',
     'subscriber_confirmed' => 'Confirmat',

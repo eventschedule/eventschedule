@@ -777,11 +777,16 @@
                 <div class="ap-card sm:rounded-lg overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
-                        <!-- Most mail is opened on a phone: the same preview at 390px. -->
-                        <div class="inline-flex rounded-lg p-0.5 bg-gray-100 dark:bg-gray-700" role="group" :aria-label="t.preview">
+                        <!-- Most mail is opened on a phone: the same preview at 390px. The house
+                             segmented control: a sunken group, the chosen side pressed in. -->
+                        <div class="inline-flex rounded-xl p-0.5" role="group" :aria-label="t.preview"
+                             style="background: rgb(var(--ap-surface-sunken)); border: 1px solid rgb(var(--ap-border));">
                             <button v-for="width in ['desktop', 'mobile']" :key="width" type="button" @click="previewWidth = width" :aria-pressed="previewWidth === width"
-                                class="px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]"
-                                :class="previewWidth === width ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">{{ t[width] }}</button>
+                                class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]"
+                                :class="previewWidth === width ? '' : 'hover:text-gray-700 dark:hover:text-gray-200'"
+                                :style="previewWidth === width
+                                    ? { background: 'rgb(var(--ap-surface))', color: 'rgb(var(--ap-ink))', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.08)' }
+                                    : { color: 'rgb(var(--ap-ink-3))' }">{{ t[width] }}</button>
                         </div>
                     </div>
                     <!--
@@ -797,7 +802,11 @@
                             <span>{{ t.preview_session_expired }}</span>
                         </p>
                     </div>
-                    <div class="relative" :class="previewWidth === 'mobile' ? 'bg-gray-100 dark:bg-gray-900' : ''">
+                    <!-- The mail is laid out at a real width and scaled to this column
+                         (previewFrameStyle): the column is 456px at a 1280 window, under the
+                         mail's 620px breakpoint, so "Desktop" used to show the phone layout. -->
+                    <div ref="previewPane" class="relative overflow-hidden" :class="previewWidth === 'mobile' ? 'bg-gray-100 dark:bg-gray-900' : ''"
+                         style="height: calc(100vh - 14rem); min-height: 400px;">
                         <div v-show="previewLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
                             <div class="flex flex-col items-center gap-2">
                                 <svg class="animate-spin h-6 w-6 text-[var(--brand-blue)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -806,8 +815,8 @@
                                 </svg>
                             </div>
                         </div>
-                        <iframe ref="livePreviewFrame" class="block mx-auto max-w-full border-0 bg-white"
-                                :style="{ height: 'calc(100vh - 14rem)', minHeight: '400px', width: previewWidth === 'mobile' ? '390px' : '100%' }"
+                        <iframe ref="livePreviewFrame" class="block border-0 bg-white"
+                                :style="previewFrameStyle"
                                 srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
                         </iframe>
                     </div>
@@ -939,6 +948,27 @@ const previewLoading = ref(false);
 const previewNeedsReauth = ref(false);
 // 'desktop' or 'mobile': the width the live preview is shown at.
 const previewWidth = ref('desktop');
+// The widths the mail is LAID OUT at, whatever room the column has. Desktop is past the mail's
+// 620px breakpoint with a little ground either side; a wider column is simply used.
+const PREVIEW_LAYOUT = { desktop: 680, mobile: 390 };
+const previewPane = ref(null);
+const previewPaneWidth = ref(0);
+let previewPaneObserver = null;
+const previewFrameStyle = computed(() => {
+    const pane = previewPaneWidth.value || PREVIEW_LAYOUT.desktop;
+    const layout = previewWidth.value === 'desktop' ? Math.max(PREVIEW_LAYOUT.desktop, pane) : PREVIEW_LAYOUT.mobile;
+    const scale = Math.min(1, pane / layout);
+
+    return {
+        width: layout + 'px',
+        // The frame is scaled down, so it is that much taller before the scale.
+        height: `calc((100vh - 14rem) / ${scale})`,
+        minHeight: (400 / scale) + 'px',
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left',
+        marginLeft: Math.max(0, (pane - layout * scale) / 2) + 'px',
+    };
+});
 
 // The accent a preset arrives with, for its thumbnail in the picker.
 function presetAccent(tmpl) {
@@ -1537,11 +1567,22 @@ onMounted(() => {
         initSortable();
         fetchPreview();
     });
+
+    if (previewPane.value) {
+        previewPaneWidth.value = previewPane.value.clientWidth;
+        if (typeof ResizeObserver !== 'undefined') {
+            previewPaneObserver = new ResizeObserver((entries) => {
+                previewPaneWidth.value = entries[0].contentRect.width;
+            });
+            previewPaneObserver.observe(previewPane.value);
+        }
+    }
 });
 
 onBeforeUnmount(() => {
     destroyAllEasyMDE();
     window.removeEventListener('hashchange', onHashChange);
+    if (previewPaneObserver) previewPaneObserver.disconnect();
     clearTimeout(previewDebounceTimer);
     if (previewAbortController) previewAbortController.abort();
 });

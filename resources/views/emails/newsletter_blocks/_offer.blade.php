@@ -22,7 +22,7 @@
 <tr>
 <td align="{{ $align }}" style="padding: {{ $compact ? '16px 18px' : '30px 28px' }}; text-align: {{ $align }};">
 @if ($title)
-<p dir="auto" style="margin: 0; {{ $nl->type($compact ? 17 : 24, $compact ? 23 : 30, $nl->ink, $nl->design === 'bold' ? 800 : ($nl->serif ? 400 : 700)) }} letter-spacing: -0.01em;">{{ $title }}</p>
+<p dir="auto" style="margin: 0; {{ $nl->type($compact ? 17 : 24, $compact ? 23 : 30, $nl->ink, $nl->design === 'bold' ? 800 : ($nl->serif ? 400 : 700)) }}{{ $nl->tracking(-0.01) }} word-break: break-word;">{{ $title }}</p>
 @endif
 @if ($description)
 <p dir="auto" style="margin: 6px 0 0; {{ $nl->bodyType() }}">{{ $description }}</p>
@@ -38,9 +38,9 @@
 </p>
 @endif
 @if ($couponCode)
-<table role="presentation" @if ($align !== 'left') align="{{ $align }}" @endif cellpadding="0" cellspacing="0" border="0" style="margin: {{ $compact ? 10 : 16 }}px {{ $align === 'center' ? 'auto' : '0' }} 0;">
+<table role="presentation" align="{{ $align }}" cellpadding="0" cellspacing="0" border="0" style="margin: {{ $compact ? 10 : 16 }}px {{ $align === 'right' ? '0' : 'auto' }} 0 {{ $align === 'left' ? '0' : 'auto' }};">
 <tr>
-<td bgcolor="{{ $nl->sheet }}" dir="ltr" style="padding: {{ $compact ? '6px 14px' : '10px 22px' }}; background-color: {{ $nl->sheet }}; border: 2px dashed {{ $nl->accentInk }}; border-radius: {{ $nl->radius }}px; font-family: {{ \App\Utils\NewsletterTheme::MONO }}; font-size: {{ $compact ? 15 : 19 }}px; line-height: 24px; font-weight: 700; color: {{ $nl->ink }}; letter-spacing: 0.14em; text-align: center;">{{ $couponCode }}</td>
+<td bgcolor="{{ $nl->sheet }}" dir="ltr" style="padding: {{ $compact ? '6px 14px' : '10px 22px' }}; background-color: {{ $nl->sheet }}; border: 2px dashed {{ $nl->accentInk }}; border-radius: {{ $nl->radius }}px; font-family: {{ \App\Utils\NewsletterTheme::MONO }}; font-size: {{ $compact ? 15 : 19 }}px; line-height: 24px; font-weight: 700; color: {{ $nl->ink }}; {{ $nl->tracking(0.14) }} text-align: center;">{{ $couponCode }}</td>
 </tr>
 </table>
 @endif

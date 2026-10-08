@@ -193,7 +193,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>The preview refreshes as you type and renders the same HTML your recipients receive, so use it to check block order and spacing. <strong class="text-gray-900 dark:text-white">Desktop</strong> and <strong class="text-gray-900 dark:text-white">Mobile</strong> above it switch the preview between a desktop width and a phone's, which is where most mail is opened. On phones the preview is a fourth tab that opens in a new window. A new newsletter starts from your most recent one's template, style settings and selected segments, so a house style only has to be set up once.</p>
+            <p>The preview refreshes as you type and renders the same HTML your recipients receive, so use it to check block order and spacing. <strong class="text-gray-900 dark:text-white">Desktop</strong> and <strong class="text-gray-900 dark:text-white">Mobile</strong> above it switch the preview between a desktop width and a phone's, which is where most mail is opened. On phones the preview is a fourth tab that opens in a new window. A new newsletter starts from your most recent one's template, style settings and selected segments, so a house style only has to be set up once. Its preview text does not come along, because that line was written for one mail.</p>
         </div>
     </section>
 
@@ -223,7 +223,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page, and with its flyer in the designs that show pictures (Modern, Classic and Bold). Left on All Upcoming Events it lists up to ten upcoming or ongoing events in date order, a recurring event under its next date; hand-picked events are shown in date order too. In Modern, Classic and Bold the first event leads the list as a larger card. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, or an event your schedule has not accepted, and a link to your full schedule follows the list.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page. The Cards layout adds each event's flyer in the designs that show pictures (Modern, Classic and Bold), and in those three it opens with the first event as a larger card; the List layout is text only in every design. Left on All Upcoming Events it lists up to ten upcoming or ongoing events in date order, a recurring event under its next date that has not begun; hand-picked events are shown in date order too. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, an event your schedule has not accepted, or one that has ended, and a link to your full schedule follows the list. An event people sign up for, or whose tickets can no longer be bought, is listed without a price.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> All Upcoming Events (on) or a hand-picked list of events, Event Layout (cards or list)</p>
             </div>
             <div class="doc-field">
@@ -280,11 +280,11 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Profile Image</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's profile image, centred like a logo. No fields: change the image on the schedule and every newsletter follows.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's profile image, centred. As the first block it becomes the masthead: the logo with your schedule's name, set the way the chosen design sets it. No fields: change the image on the schedule and every newsletter follows.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Header Banner</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's header image, full width at the top of the email. Also has no fields.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's header image across the email: edge to edge in Modern, Classic and Bold, within the margins in Minimal and Compact. Also has no fields.</p>
             </div>
         </div>
 
@@ -357,7 +357,7 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">
-            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. A preset is also a layout of its own, which stays whatever colours you give it: Modern is a rounded sheet with the title on a band of your accent colour, Classic a framed page with a nameplate and outlined buttons, Minimal a bare page of text links, Bold a dark page with heavy type, and Compact a tight digest. System is the reader's own interface font (San Francisco, Segoe UI or Roboto, whichever their device has).
+            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. A preset is also a layout of its own, which stays whatever colours you give it: Modern is a rounded sheet with the title on a band of your accent colour, Classic a framed page with a nameplate and outlined buttons, Minimal a bare page of text links, Bold heavy type on a page that starts dark, and Compact a tight digest. Choosing a preset changes the colours, typeface and corners; your footer text, your preview text and the layout chosen for your events stay. System is the reader's own interface font (San Francisco, Segoe UI or Roboto, whichever their device has).
         </p>
 
         <h3 id="saved-templates" class="doc-subheading">Saving Your Own Templates</h3>
@@ -431,7 +431,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Email clients have varying CSS support, so the builder renders to table-based, inline-styled HTML with a small set of email-safe fonts. That is why the font list is short and why there is no free-form CSS here. Whatever three colours you pick, the builder works out the rest (panels, hairlines, quieter text, the label on a button) so the text stays readable, and it shows your colours as you chose them in a reader's dark mode too. Free schedules also carry a small "Powered by Event Schedule" line under the unsubscribe link; upgrading to Pro removes it.</p>
+            <p>Email clients have varying CSS support, so the builder renders to table-based, inline-styled HTML with a small set of email-safe fonts. That is why the font list is short and why there is no free-form CSS here. Whatever three colours you pick, the builder works out the rest (panels, hairlines, quieter text, the label on a button) so the text stays readable, and it asks mail apps to keep your colours in a reader's dark mode. Some recolour a mail anyway, so send yourself a test. Free schedules also carry a small "Powered by Event Schedule" line under the unsubscribe link; upgrading to Pro removes it.</p>
         </div>
     </section>
 
@@ -845,7 +845,7 @@
 
         <h3 class="doc-subheading">Cloning</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong class="text-gray-900 dark:text-white">Clone</strong> copies the blocks, style and recipients into a fresh draft and opens it, leaving the original untouched. Statistics and any A/B test are not carried over. This is the quickest way to run a recurring digest.
+            <strong class="text-gray-900 dark:text-white">Clone</strong> copies the blocks, style (preview text included, so rewrite it for the new send) and recipients into a fresh draft and opens it, leaving the original untouched. Statistics and any A/B test are not carried over. This is the quickest way to run a recurring digest.
         </p>
 
         <h3 class="doc-subheading">Deleting</h3>

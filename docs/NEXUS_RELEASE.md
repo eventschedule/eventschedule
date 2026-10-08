@@ -625,6 +625,27 @@ on the Add page. It
 was written from the provider's documentation, whose one example is a news post, so the format
 and zone of an event's start are a guess until it has read a real feed.
 
+### Newsletter emails (2026-10-08)
+
+No migration, no env var, no scheduled entry.
+
+**What ships:**
+- **The five newsletter designs, redrawn**, a preview text field, and a Desktop / Mobile switch on
+  the builder's preview. The designs keep their names and what is stored for them.
+- **What an Events block lists**: only events the schedule accepted, a recurring event under its
+  next date that has not begun, nothing that has ended, and no price on an event people sign up
+  for or whose tickets can no longer be bought.
+
+**Mail already waiting when this deploys goes out in the new design.** Nothing of the old markup
+is stored: a newsletter that is scheduled, and the remainder of an A/B test still waiting for its
+winner, are rendered when they are sent. Their blocks, settings and recipients are unchanged, but
+a hand-picked Events block can go out with fewer rows than its author last saw in the preview
+(an event that was not accepted, or has ended since).
+
+**After deploying:** send a test from the builder to a Gmail and to an Outlook inbox. Outlook for
+Windows was hardened by the same techniques as the transactional mail and has not been looked at
+in the app itself.
+
 ### Guest page counts (2026-10-07)
 
 **What ships:**

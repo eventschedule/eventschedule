@@ -1057,7 +1057,7 @@
                                 <h3 class="es-vote-ink text-xl font-bold">In a newsletter</h3>
                                 <span class="es-vote-plan">Pro</span>
                             </div>
-                            <p class="es-vote-muted">Drop a poll block into a newsletter and it fills itself with the first open poll on your next event that has one: the question, the choices, and a Vote now button back to the event.</p>
+                            <p class="es-vote-muted">Drop a poll block into a newsletter and it fills itself with the first open poll on your next event that has one: the question, and each choice as a link back to the event, where the vote is cast.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

@@ -18,7 +18,7 @@
 </td>
 @endif
 <td valign="top" style="vertical-align: top; padding: 10px 14px; text-align: {{ $nl->start }};">
-<p dir="auto" style="margin: 0;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $nl->type(15, 20, $nl->ink, 700) }} text-decoration: none;">{{ $e['name'] }}</a></p>
+<p dir="auto" style="margin: 0; word-break: break-word;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $nl->type(15, 20, $nl->ink, 700) }} text-decoration: none;">{{ $e['name'] }}</a></p>
 <p style="margin: 2px 0 0; {{ $nl->smallType($nl->ink3) }}">{!! $nl->eventDetail($e) !!}</p>
 </td>
 <td width="30" valign="middle" align="{{ $nl->end }}" style="width: 30px; vertical-align: middle; padding-{{ $nl->end }}: 12px; text-align: {{ $nl->end }};"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" aria-label="{{ $e['cta'] }}" style="{{ $nl->type(18, 24, $nl->accentInk, 700) }} text-decoration: none;">{!! $nl->arrow !!}</a></td>
@@ -32,7 +32,7 @@
 @if ($when !== '')
 <p style="margin: 0 0 4px; {{ $nl->labelType($nl->ink3) }}">{!! $when !!}</p>
 @endif
-<p dir="auto" style="margin: 0;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $nl->type(21, 27, $nl->ink, 600) }} letter-spacing: -0.01em; text-decoration: none;">{{ $e['name'] }}</a></p>
+<p dir="auto" style="margin: 0; word-break: break-word;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $nl->type(21, 27, $nl->ink, 600) }}{{ $nl->tracking(-0.01) }} text-decoration: none;">{{ $e['name'] }}</a></p>
 @if ($meta !== '')
 <p style="margin: 4px 0 0; {{ $nl->smallType($nl->ink3) }}">{!! $meta !!}</p>
 @endif

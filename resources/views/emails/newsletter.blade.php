@@ -36,7 +36,7 @@
     if ($preheader === '') {
         foreach ($blocks as $b) {
             if (($b['type'] ?? '') === 'text' && filled($b['data']['contentHtml'] ?? null)) {
-                $preheader = Str::limit(trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace(['</p>', '<br>'], ' ', $b['data']['contentHtml'])), ENT_QUOTES | ENT_HTML5))), 140, '');
+                $preheader = Str::limit(trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(preg_replace('/<\/p>|<br\s*\/?>/i', ' ', $b['data']['contentHtml']) ?? ''), ENT_QUOTES | ENT_HTML5))), 140, '');
                 break;
             }
         }
@@ -57,7 +57,7 @@
 <title>{{ $newsletter->subject }}</title>
 <!--[if mso]>
 <noscript><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
-<style>table, td, p, a, span, h1, h2, h3, div { mso-line-height-rule: exactly; }</style>
+<style>table, td, p, a, span, h1, h2, h3, div { mso-line-height-rule: exactly;{!! $nl->outlookFont ? ' font-family: '.$nl->outlookFont.' !important;' : '' !!} }</style>
 <![endif]-->
 <style>
 body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -129,7 +129,6 @@ u + .nl-body a { color: inherit; }
 @include('emails.newsletter_blocks._'.$block['type'], [
     'block' => $block,
     'first' => $i === 0 && ! ($masthead && $nl->design !== 'modern'),
-    'afterBleed' => $bleeds($blocks[$i - 1] ?? null),
     'beforeBleed' => $bleeds($blocks[$i + 1] ?? null),
 ])
 @endforeach

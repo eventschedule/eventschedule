@@ -38,8 +38,8 @@
     $when = $nl->when($tile && ! $e['multiDay'] ? $e['weekday'] : $e['date'], $e['time']);
     $titleType = match (true) {
         $classic => $nl->type(27, 34, $nl->ink, 400),
-        $bold => $nl->type(27, 32, $nl->ink, 800).' letter-spacing: -0.02em;',
-        default => $nl->type(24, 30, $nl->ink, 700).' letter-spacing: -0.02em;',
+        $bold => $nl->type(27, 32, $nl->ink, 800).$nl->tracking(-0.02),
+        default => $nl->type(24, 30, $nl->ink, 700).$nl->tracking(-0.02),
     };
     // Classic: lay the row out against the mail's direction, so the picture (first in the markup)
     // lands at the end of the card.

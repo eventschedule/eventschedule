@@ -2565,6 +2565,9 @@ return [
     'footer_text' => 'טקסט תחתית',
     'newsletter_preview_text' => 'טקסט תצוגה מקדימה',
     'newsletter_preview_text_help' => 'השורה שתיבת הדואר מציגה אחרי הנושא. אם תישאר ריקה, תוצג תחילת בלוק הטקסט הראשון שלכם.',
+    'newsletter_preview_desktop' => 'מחשב',
+    'newsletter_preview_mobile' => 'נייד',
+    'newsletter_font_system' => 'גופן המערכת',
     'edit_prompt' => 'ערוך הנחיה',
     'change_camera' => 'החלף מצלמה',
 

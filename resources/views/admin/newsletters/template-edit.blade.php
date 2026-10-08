@@ -37,7 +37,7 @@
                 $events = collect();
                 $newsletter = new \App\Models\Newsletter([
                     'template' => $newsletterTemplate->template ?? 'modern',
-                    'style_settings' => $newsletterTemplate->style_settings ?? \App\Models\Newsletter::defaultStyleSettings(),
+                    'style_settings' => $newsletterTemplate->style_settings ?? \App\Models\Newsletter::templateDefaults('modern'),
                     'subject' => '',
                 ]);
                 $defaultBlocks = $newsletterTemplate->blocks ?? ($defaultBlocks ?? []);

@@ -2507,6 +2507,9 @@ return [
     'footer_text' => 'Testo a Pie di Pagina',
     'newsletter_preview_text' => 'Testo di anteprima',
     'newsletter_preview_text_help' => 'La riga che la casella di posta mostra dopo l\'oggetto. Se la lasci vuota, viene usato l\'inizio del tuo primo blocco di testo.',
+    'newsletter_preview_desktop' => 'Computer',
+    'newsletter_preview_mobile' => 'Telefono',
+    'newsletter_font_system' => 'Carattere di sistema',
     'edit_prompt' => 'Modifica Prompt',
     'change_camera' => 'Cambia Fotocamera',
 

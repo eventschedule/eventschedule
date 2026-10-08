@@ -1,8 +1,9 @@
 {{--
     Sponsor logos. Cells are inline blocks of a fixed width, so four sit across a desktop and two
     across a phone: as four table cells of 120px they needed 544px, and a phone shrank the whole
-    mail to fit them. Outlook, which ignores inline-block, is given a table row instead. On a dark
-    page every logo stands on the same light tile, or the one with a white ground is a lone box.
+    mail to fit them. Outlook, which ignores inline-block, is given table rows of four instead. On
+    a dark page every logo stands on the same light tile (white, whatever the page: logos are
+    drawn for a white ground), or the one with a white ground is a lone box.
 --}}
 @php
     $sponsors = array_values(array_filter($block['data']['resolvedSponsors'] ?? [], fn ($s) => ! empty($s['logo_url']) || ! empty($s['display_name'])));
@@ -41,7 +42,7 @@
 @endif
 @if ($sponsorHref)</a>@endif
 </div>
-<!--[if mso]></td><![endif]-->
+<!--[if mso]></td>@if ($loop->iteration % 4 === 0 && ! $loop->last)</tr><tr>@endif<![endif]-->
 @endforeach
 <!--[if mso]></tr></table><![endif]-->
 </td>

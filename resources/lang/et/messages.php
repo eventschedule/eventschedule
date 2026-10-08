@@ -2469,6 +2469,9 @@ return [
     'footer_text' => 'Jaluse tekst',
     'newsletter_preview_text' => 'Eelvaate tekst',
     'newsletter_preview_text_help' => 'Rida, mida postkast näitab pärast teemat. Kui jätad selle tühjaks, kasutatakse sinu esimese tekstiploki algust.',
+    'newsletter_preview_desktop' => 'Arvuti',
+    'newsletter_preview_mobile' => 'Telefon',
+    'newsletter_font_system' => 'Süsteemi font',
     'please_wait' => 'Oodake enne uuesti proovimist',
 
     // Scan agenda

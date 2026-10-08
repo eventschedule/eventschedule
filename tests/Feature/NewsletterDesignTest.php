@@ -7,14 +7,18 @@ use App\Http\Controllers\Traits\SanitizesNewsletterContent;
 use App\Models\Event;
 use App\Models\EventPoll;
 use App\Models\Newsletter;
+use App\Models\NewsletterRecipient;
 use App\Models\Role;
+use App\Repos\EventRepo;
 use App\Services\NewsletterService;
 use App\Utils\ColorUtils;
 use App\Utils\EmailTheme;
 use App\Utils\NewsletterTheme;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -253,10 +257,16 @@ class NewsletterDesignTest extends TestCase
     {
         $german = $this->venue(['language_code' => 'de', 'subdomain' => 'hafenhalle']);
         $this->event($german, 'Herbstkonzert', 9, 20);
-        $html = $this->render($german, [$this->eventsBlock()]);
+        // Minimal prints the date as a line of type, so the whole of it can be read here.
+        $html = $this->render($german, [$this->eventsBlock()], 'minimal');
+        $english = Carbon::now(self::TZ)->addDays(9)->format('D, M j');
 
         $this->assertStringContainsString('Okt', $html, 'the month in German');
-        $this->assertStringNotContainsString('Oct 17', $html);
+        $this->assertStringNotContainsString($english, $html);
+        // The same event on an English schedule prints exactly that, so the line above can fail.
+        $plain = $this->venue(['subdomain' => 'harbourplain']);
+        $this->event($plain, 'Autumn Concert', 9, 20);
+        $this->assertStringContainsString($english, $this->render($plain, [$this->eventsBlock()], 'minimal'));
         $this->assertStringContainsString(__('messages.view_event', [], 'de'), $html);
 
         $hebrew = $this->venue(['language_code' => 'he', 'subdomain' => 'namal']);
@@ -352,11 +362,17 @@ class NewsletterDesignTest extends TestCase
             }
         };
 
-        $clean = $sanitizer->clean(['fontFamily' => 'System', 'previewText' => "  <b>One</b>\nline ".str_repeat('x', 300)]);
+        $clean = $sanitizer->clean(['fontFamily' => 'System', 'previewText' => "  We <3\nFridays ".str_repeat('x', 300)]);
 
         $this->assertSame('System', $clean['fontFamily']);
-        $this->assertStringStartsWith('One line x', $clean['previewText']);
+        // strip_tags() read "<3" as the start of a tag and saved "We".
+        $this->assertStringStartsWith('We <3 Fridays x', $clean['previewText']);
         $this->assertSame(150, mb_strlen($clean['previewText']));
+        // It is plain text, and the mail prints it escaped.
+        $role = $this->venue();
+        $html = $this->render($role, [['id' => 't', 'type' => 'text', 'data' => ['content' => 'Hello.']]], 'modern', ['previewText' => 'We <3 Fridays & <b>you</b>']);
+        $this->assertStringContainsString('We &lt;3 Fridays &amp; &lt;b&gt;you&lt;/b&gt;', $html);
+        $this->assertStringNotContainsString('<b>you</b>', $html);
         $this->assertSame('Arial', $sanitizer->clean(['fontFamily' => 'Comic Sans MS'])['fontFamily']);
 
         // A new newsletter starts from the last one's settings, and a newsletter can be saved as a
@@ -421,32 +437,383 @@ class NewsletterDesignTest extends TestCase
         $forget = fn () => array_map(fn ($file) => @unlink($file), glob("{$dir}/{$id}_*") ?: []);
         $forget();
 
-        $picture = imagecreatetruecolor(480, 360);
-        imagefilledrectangle($picture, 0, 0, 480, 360, imagecolorallocate($picture, 200, 60, 40));
-        ob_start();
-        imagejpeg($picture, null, 90);
-        $jpeg = ob_get_clean();
+        // A failed assertion must not leave the cached pictures behind for the next run.
+        try {
+            $picture = imagecreatetruecolor(480, 360);
+            imagefilledrectangle($picture, 0, 0, 480, 360, imagecolorallocate($picture, 200, 60, 40));
+            ob_start();
+            imagejpeg($picture, null, 90);
+            $jpeg = ob_get_clean();
 
-        Http::fake(['i.ytimg.com/*' => Http::response($jpeg, 200, ['Content-Type' => 'image/jpeg'])]);
-        $this->venue(['youtube_links' => json_encode([['url' => "https://www.youtube.com/watch?v={$id}"]])]);
+            Http::fake(['i.ytimg.com/*' => Http::response($jpeg, 200, ['Content-Type' => 'image/jpeg'])]);
+            $this->venue(['youtube_links' => json_encode([['url' => "https://www.youtube.com/watch?v={$id}"]])]);
 
-        $plain = $this->get("/yt-thumb/{$id}?q=hq")->assertOk()->getContent();
-        $marked = $this->get("/yt-thumb/{$id}?q=hq&play=1")->assertOk()->assertHeader('Content-Type', 'image/jpeg')->getContent();
+            $plain = $this->get("/yt-thumb/{$id}?q=hq")->assertOk()->getContent();
+            $marked = $this->get("/yt-thumb/{$id}?q=hq&play=1")->assertOk()->assertHeader('Content-Type', 'image/jpeg')->getContent();
 
-        $this->assertSame($jpeg, $plain);
-        $this->assertNotSame($jpeg, $marked);
+            $this->assertSame($jpeg, $plain);
+            $this->assertNotSame($jpeg, $marked);
 
-        // The mark is in the middle: the centre is no longer the picture's red, the corner still is.
-        $read = imagecreatefromstring($marked);
-        $centre = imagecolorsforindex($read, imagecolorat($read, 245, 180));
-        $corner = imagecolorsforindex($read, imagecolorat($read, 10, 10));
-        $this->assertGreaterThan(220, $centre['green'], 'the white triangle');
-        $this->assertLessThan(90, $corner['green'], 'the picture itself');
+            // The mark is in the middle: the centre is no longer the picture's red, the corner still is.
+            $read = imagecreatefromstring($marked);
+            $centre = imagecolorsforindex($read, imagecolorat($read, 245, 180));
+            $corner = imagecolorsforindex($read, imagecolorat($read, 10, 10));
+            $this->assertGreaterThan(220, $centre['green'], 'the white triangle');
+            $this->assertLessThan(90, $corner['green'], 'the picture itself');
 
-        // Drawn from the cached plain thumbnail: YouTube was asked once.
-        Http::assertSentCount(1);
-        $this->assertFileExists("{$dir}/{$id}_hq_play.jpg");
+            // Drawn from the cached plain thumbnail: YouTube was asked once.
+            Http::assertSentCount(1);
+            $this->assertFileExists("{$dir}/{$id}_hq_play.jpg");
+        } finally {
+            $forget();
+        }
+    }
 
-        $forget();
+    // ------------------------------------------------------------------ what the review found
+
+    /** The builder's page props, which it carries as one escaped JSON attribute. */
+    private function builderProps(string $html): array
+    {
+        $this->assertSame(1, preg_match('/id="newsletter-builder" data-props="([^"]*)"/', $html, $m));
+
+        return json_decode(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5), true);
+    }
+
+    private function rows(Role $role, array $ids = []): \Illuminate\Support\Collection
+    {
+        $blocks = app(NewsletterService::class)->processBlocks($this->newsletter($role, [$this->eventsBlock($ids)], 'minimal'));
+
+        return collect($blocks[0]['data']['resolvedEvents'])->keyBy('name');
+    }
+
+    public function test_a_series_whose_date_today_has_begun_is_mailed_under_its_next_one(): void
+    {
+        // It is 11:00 in New York on Thursday 8 October.
+        $role = $this->venue();
+        $class = $this->createRecurringEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'Morning Class', 'duration' => 1,
+            'starts_at' => Carbon::parse('2026-09-01 09:00', self::TZ)->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '1111111', 'recurring_frequency' => 'daily',
+            'tickets_enabled' => true, 'ticket_currency_code' => 'USD',
+        ]);
+        $this->createTicket($class, ['price' => 10, 'quantity' => 20]);
+        $night = $this->createRecurringEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'Late Jazz',
+            'starts_at' => Carbon::parse('2026-09-17 22:00', self::TZ)->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '0000100',
+        ]);
+
+        foreach ([[], [$class->id, $night->id]] as $ids) {
+            $rows = $this->rows($role, $ids);
+            $how = $ids === [] ? 'all upcoming' : 'picked by hand';
+
+            // A series is dated by day: this morning's class is over, and its page refuses the date.
+            $this->assertSame('Fri, Oct 9', $rows['Morning Class']['date'], $how);
+            $this->assertStringEndsWith('/2026-10-09', $rows['Morning Class']['url'], $how);
+            $this->assertTrue($rows['Morning Class']['buy'], "{$how}: tomorrow's can be bought");
+            // Tonight's has not begun.
+            $this->assertSame('Thu, Oct 8', $rows['Late Jazz']['date'], $how);
+            // And the one still to come today is listed before tomorrow's.
+            $this->assertSame(['Late Jazz', 'Morning Class'], $rows->keys()->all(), $how);
+        }
+    }
+
+    public function test_an_event_that_has_ended_is_left_out_even_when_picked_by_hand(): void
+    {
+        $role = $this->venue();
+        $past = $this->createEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'Last Month Show', 'duration' => 2,
+            'starts_at' => Carbon::parse('2026-09-10 20:00', self::TZ)->utc()->format('Y-m-d H:i:s'),
+            'tickets_enabled' => true, 'ticket_currency_code' => 'USD',
+        ]);
+        $this->createTicket($past, ['price' => 25, 'quantity' => 100]);
+        $ended = $this->createRecurringEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'Ended Series',
+            'starts_at' => Carbon::parse('2026-06-04 20:00', self::TZ)->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '0000100', 'recurring_end_type' => 'on_date', 'recurring_end_value' => '2026-08-27',
+        ]);
+        // Began at nine this morning and runs three hours: still on at eleven.
+        $running = $this->event($role, 'Running Now', 0, 9, ['duration' => 3]);
+        $next = $this->event($role, 'Next Week Show', 6, 20);
+
+        // A clone or a saved template carries these ids for months, and the builder lists only
+        // what is coming, so nobody can untick them.
+        $names = $this->rows($role, [$past->id, $ended->id, $running->id, $next->id])->keys()->all();
+
+        $this->assertSame(['Running Now', 'Next Week Show'], $names);
+    }
+
+    public function test_a_price_is_printed_only_where_the_event_page_prints_one(): void
+    {
+        $role = $this->venue();
+        $signup = $this->event($role, 'Sign-up Night', 4, 19, ['tickets_enabled' => true, 'rsvp_enabled' => true, 'ticket_currency_code' => 'USD']);
+        $this->createTicket($signup, ['price' => 15, 'quantity' => 50]);
+        $sold = $this->event($role, 'Ticketed Night', 5, 19, ['tickets_enabled' => true, 'ticket_currency_code' => 'USD']);
+        $this->createTicket($sold, ['price' => 15, 'quantity' => 50]);
+
+        $rows = $this->rows($role);
+
+        // event/show-guest gates its price line on `! rsvp_enabled && canSellTickets($date)`.
+        $this->assertNull($rows['Sign-up Night']['price']);
+        $this->assertFalse($rows['Sign-up Night']['buy']);
+        $this->assertSame(__('messages.view_event'), $rows['Sign-up Night']['cta']);
+        $this->assertSame('$15', $rows['Ticketed Night']['price']);
+        $this->assertTrue($rows['Ticketed Night']['buy']);
+    }
+
+    public function test_a_series_announced_months_ahead_is_listed_and_the_schedule_page_keeps_its_own_horizon(): void
+    {
+        $role = $this->venue();
+        $this->createRecurringEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'January Series',
+            'starts_at' => Carbon::parse('2027-01-12 20:00', self::TZ)->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '0010000',
+        ]);
+
+        $this->assertSame('Tue, Jan 12, 2027', $this->rows($role)['January Series']['date']);
+
+        // The page's list stops at 60 days, and is not answered from the newsletter's year: the
+        // horizon is part of the cache key.
+        $onPage = app(EventRepo::class)->upcomingForGuest($role)->map(fn ($pair) => $pair['event']->name)->all();
+        $this->assertNotContains('January Series', $onPage);
+    }
+
+    public function test_one_unreadable_series_does_not_cost_the_newsletter(): void
+    {
+        $role = $this->venue();
+        // As a restored backup can hold it: matchesDate() divides by the interval.
+        $broken = $this->createRecurringEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'Broken Series',
+            'starts_at' => Carbon::parse('2026-09-01 20:00', self::TZ)->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '0100000', 'recurring_frequency' => 'every_n_weeks', 'recurring_interval' => 0,
+        ]);
+        $next = $this->event($role, 'Next Week Show', 6, 20);
+
+        $this->assertSame(['Next Week Show'], $this->rows($role, [$broken->id, $next->id])->keys()->all());
+    }
+
+    public function test_the_clock_is_the_event_pages_own_in_every_language_and_on_the_senders_time(): void
+    {
+        // Carbon translates the meridiem in Dutch ("8:00 's middags"); the page says "8:00 PM".
+        $dutch = $this->venue(['language_code' => 'nl', 'subdomain' => 'havenzaal']);
+        $this->event($dutch, 'Najaarsconcert', 3, 20);
+        $html = $this->render($dutch, [$this->eventsBlock()], 'minimal');
+        $this->assertStringContainsString('8:00 PM', $html);
+        $this->assertStringNotContainsString('middags', $html);
+        $this->assertStringContainsString('okt', $html, 'the date is still Dutch');
+
+        // An older event with no owning schedule has no clock of its own: the sender's, not the app's.
+        $role = $this->venue(['subdomain' => 'harbourold']);
+        $this->createEvent($role, ['name' => 'No Owner Show', 'duration' => 2, 'starts_at' => Carbon::now(self::TZ)->addDays(7)->setTime(20, 0)->utc()->format('Y-m-d H:i:s')]);
+        $this->assertSame('8:00 PM', $this->rows($role)['No Owner Show']['time']);
+    }
+
+    public function test_link_tracking_carries_the_address_a_browser_would_follow(): void
+    {
+        $service = app(NewsletterService::class);
+        $recipient = new NewsletterRecipient(['token' => 'TOKEN']);
+        $tracked = function (string $html) use ($service, $recipient) {
+            preg_match_all('/href="([^"]+)"/', $service->rewriteLinks($html, $recipient), $m);
+
+            return array_map(fn ($href) => str_contains($href, '/nl/c/') ? 'tracked:'.base64_decode(strtr(basename($href), '-_', '+/')) : $href, $m[1]);
+        };
+
+        // Blade writes "&" as "&amp;". Encoded as written, the second parameter arrived as "amp;b".
+        $this->assertSame(['tracked:https://x.example.com/?a=1&b=2'], $tracked('<a href="https://x.example.com/?a=1&amp;b=2">x</a>'));
+        // A phone's keyboard capitalises the scheme. An address or a number is never tracked.
+        $this->assertSame(['Mailto:hi@x.example.com', 'Tel:+15551234567', 'mailto:hi@x.example.com'], $tracked('<a href="Mailto:hi@x.example.com">m</a><a href="Tel:+15551234567">t</a><a href="mailto:hi@x.example.com">m</a>'));
+
+        // And a link typed "Https://" is followed, not answered with a 404.
+        $role = $this->venue();
+        $newsletter = Newsletter::create(['role_id' => $role->id, 'user_id' => $role->user_id, 'type' => 'schedule', 'subject' => 'S', 'status' => 'sent', 'template' => 'modern']);
+        $saved = NewsletterRecipient::create(['newsletter_id' => $newsletter->id, 'email' => 'reader@example.com', 'name' => 'Reader', 'token' => Str::random(64), 'status' => 'sent', 'sent_at' => now()]);
+        $encoded = rtrim(strtr(base64_encode('Https://x.example.com/menu'), '+/', '-_'), '=');
+
+        $this->get("/nl/c/{$saved->token}/{$encoded}")->assertRedirect();
+        $this->assertNotNull($saved->fresh()->clicked_at);
+    }
+
+    public function test_a_logo_with_no_recorded_size_keeps_its_own_shape(): void
+    {
+        $logo = ['id' => 'logo', 'type' => 'profile_image', 'data' => []];
+        $heading = ['id' => 'h', 'type' => 'heading', 'data' => ['text' => 'Hello', 'level' => 'h3', 'align' => 'center']];
+
+        // Sizes have been recorded since 2026-09 only. Assumed square, a wide logo was squashed.
+        $unknown = $this->venue(['image_variants' => null]);
+        foreach (self::DESIGNS as $design) {
+            $html = $this->render($unknown, [$logo, $heading, $logo], $design);
+            preg_match_all('/<img\b[^>]*demo_profile_jazz[^>]*>/', $html, $m);
+
+            $this->assertCount(2, $m[0], "{$design}: the masthead and the block");
+            foreach ($m[0] as $img) {
+                $this->assertStringNotContainsString(' width="', $img, $design);
+                $this->assertStringNotContainsString(' height="', $img, $design);
+                $this->assertStringContainsString('width: auto; height: auto;', $img, $design);
+                $this->assertMatchesRegularExpression('/max-width: \d+px; max-height: \d+px;/', $img, $design);
+            }
+        }
+
+        // With a size on record the picture is given its real proportions.
+        $known = $this->venue(['subdomain' => 'harbourwide', 'image_variants' => ['src' => ['w' => 900, 'h' => 300]]]);
+        $html = $this->render($known, [$logo, $heading, $logo]);
+        $this->assertStringContainsString('width="173" height="58"', $html, 'the masthead: 72px box, 3 to 1');
+        $this->assertStringContainsString('width="200" height="67"', $html, 'the block');
+    }
+
+    public function test_left_is_left_in_a_right_to_left_mail(): void
+    {
+        $hebrew = $this->venue(['language_code' => 'he', 'subdomain' => 'namal']);
+        $button = fn (string $align) => ['id' => $align, 'type' => 'button', 'data' => ['text' => "Button {$align}", 'url' => 'https://harbourhall.example.com', 'align' => $align]];
+        $table = function (string $html, string $label) {
+            // The last time the label is printed: Outlook's own copy of a button comes first.
+            $before = substr($html, 0, strrpos($html, $label));
+
+            return substr($before, strrpos($before, '<table'));
+        };
+
+        foreach (self::DESIGNS as $design) {
+            $html = $this->render($hebrew, [$button('left'), $button('center'), $button('right')], $design);
+
+            // The cell says the side in every design.
+            foreach (['left', 'center', 'right'] as $side) {
+                $this->assertMatchesRegularExpression('/<td align="'.$side.'" class="nl-g" style="[^"]*text-align: '.$side.';">\s*(?:<table|<a)[^>]*>(?:(?!<\/td>).)*Button '.$side.'/s', $html, $design);
+            }
+
+            // Minimal's is a text link, which the cell alone places.
+            if ($design === 'minimal') {
+                continue;
+            }
+
+            // A button is a table, and a table is placed by its own attribute and margins: with
+            // nothing said, "left" was wherever the mail's direction starts, which here is the right.
+            $this->assertStringContainsString('align="left"', $table($html, 'Button left'), $design);
+            $this->assertStringContainsString('margin: 0 auto 0 0;', $table($html, 'Button left'), $design);
+            $this->assertStringContainsString('margin: 0 auto 0 auto;', $table($html, 'Button center'), $design);
+            $this->assertStringContainsString('align="right"', $table($html, 'Button right'), $design);
+            $this->assertStringContainsString('margin: 0 0 0 auto;', $table($html, 'Button right'), $design);
+        }
+
+        // Nothing is tightened or spaced in a right-to-left mail, the coupon included.
+        $offer = ['id' => 'o', 'type' => 'offer', 'data' => ['title' => 'Two for one', 'couponCode' => 'JAZZ2FOR1', 'align' => 'left']];
+        $this->assertStringNotContainsString('letter-spacing', $this->render($hebrew, [$offer, ['id' => 'h', 'type' => 'heading', 'data' => ['text' => 'Title', 'level' => 'h1', 'align' => 'center']]]));
+        $this->assertStringContainsString('letter-spacing: 0.14em', $this->render($this->venue(['subdomain' => 'harbourltr']), [$offer]));
+    }
+
+    public function test_anything_long_wraps_and_outlook_is_given_rows_and_links_it_can_follow(): void
+    {
+        $role = $this->venue(['sponsor_logos' => json_encode(array_map(fn ($i) => ['logo' => 'demo_profile_beer.jpg', 'name' => "Sponsor {$i}", 'url' => '', 'tier' => 'gold'], range(1, 6)))]);
+        $mic = $this->event($role, 'Open Mic Night', 3, 20);
+        EventPoll::create(['event_id' => $mic->id, 'question' => 'Which night?', 'options' => ['Tuesdays', 'Wednesdays'], 'is_active' => true, 'sort_order' => 0]);
+        $links = array_map(fn ($p) => ['platform' => $p, 'url' => "https://www.{$p}.com/harbourhall"], ['instagram', 'facebook', 'youtube', 'tiktok', 'spotify', 'linkedin', 'whatsapp']);
+        $blocks = [
+            ['id' => 'h', 'type' => 'heading', 'data' => ['text' => 'Donaudampfschifffahrtsgesellschaft', 'level' => 'h1', 'align' => 'center']],
+            // Four spaces of indent make a code block, which does not wrap by itself.
+            ['id' => 't', 'type' => 'text', 'data' => ['content' => "Running order:\n\n    Doors at seven, the support act at eight and the bar open until one\n\nSee you there."]],
+            $this->eventsBlock(),
+            ['id' => 's', 'type' => 'sponsors', 'data' => ['source' => 'schedule']],
+            ['id' => 'p', 'type' => 'poll', 'data' => []],
+            ['id' => 'l', 'type' => 'social_links', 'data' => ['links' => $links]],
+        ];
+
+        foreach (self::DESIGNS as $design) {
+            $html = $this->render($role, $blocks, $design);
+
+            $this->assertMatchesRegularExpression('/<h1\b[^>]*word-break: break-word;[^>]*>Donau/', $html, $design);
+            $this->assertMatchesRegularExpression('/<pre style="[^"]*white-space: pre-wrap; word-break: break-word;/', $html, $design);
+            $this->assertMatchesRegularExpression('/<p dir="auto" style="margin: 0; word-break: break-word;"><a [^>]*>Open Mic Night/', $html, "{$design}: an event's name");
+            // Outlook: six sponsors in rows of four, and no link wrapped round a table.
+            $this->assertSame(1, substr_count($html, '</td></tr><tr><![endif]-->'), $design);
+            $this->assertSame(0, preg_match('/<a\b[^>]*>(?:(?!<\/a>).)*<table/s', $html), "{$design}: Outlook does not follow a link round a table");
+            $this->assertStringContainsString('Tuesdays', $html, $design);
+        }
+
+        // The reader's own interface font is no font Outlook for Windows knows.
+        $this->assertStringContainsString("font-family: 'Segoe UI', Arial, sans-serif !important;", $this->render($role, $blocks, 'modern'));
+        $this->assertStringNotContainsString('!important; }</style>', $this->render($role, $blocks, 'classic'), 'Georgia is left alone');
+    }
+
+    public function test_a_design_nobody_changed_arrives_as_todays_preset(): void
+    {
+        // The last newsletter as an owner who only ever clicked Minimal left it: Minimal's look of
+        // before 2026-10, and the events layout Modern started with, which a preset never changed.
+        $oldMinimal = ['backgroundColor' => '#ffffff', 'accentColor' => '#666666', 'textColor' => '#333333', 'fontFamily' => 'Verdana', 'buttonRadius' => 'rounded', 'eventLayout' => 'cards', 'footerText' => 'See you soon'];
+
+        $moved = Newsletter::movedToCurrentPreset('minimal', $oldMinimal);
+        $this->assertSame(['#111111', 'System', 'cards', 'See you soon'], [$moved['accentColor'], $moved['fontFamily'], $moved['eventLayout'], $moved['footerText']]);
+        // One colour chosen by hand and the design is theirs.
+        $own = ['accentColor' => '#0055AA'] + $oldMinimal;
+        $this->assertSame($own, Newsletter::movedToCurrentPreset('minimal', $own));
+        // Modern arrived in the schedule's own accent, and keeps it.
+        $role = $this->venue(['accent_color' => '#D9482B']);
+        $oldModern = ['backgroundColor' => '#ffffff', 'accentColor' => '#d9482b', 'textColor' => '#333333', 'fontFamily' => 'Arial', 'buttonRadius' => 'rounded', 'eventLayout' => 'list'];
+        $this->assertSame(['#d9482b', 'System'], array_values(array_intersect_key(Newsletter::movedToCurrentPreset('modern', $oldModern, $role), ['accentColor' => 1, 'fontFamily' => 1])));
+        $this->assertSame('Arial', Newsletter::movedToCurrentPreset('modern', $oldModern)['fontFamily'], 'some other colour is a choice');
+        // Classic did not change, and a design with no settings at all is left to the defaults.
+        $this->assertSame(Newsletter::templateDefaults('classic'), Newsletter::movedToCurrentPreset('classic', Newsletter::templateDefaults('classic')));
+        $this->assertNull(Newsletter::movedToCurrentPreset('minimal', null));
+
+        // Through the page that starts a newsletter from the last one.
+        $owner = \App\Models\User::find($role->user_id);
+        Newsletter::create(['role_id' => $role->id, 'user_id' => $owner->id, 'type' => 'schedule', 'subject' => 'September', 'status' => 'sent', 'template' => 'minimal', 'style_settings' => $oldMinimal + ['previewText' => 'Written for September']]);
+
+        $props = $this->builderProps($this->actingAs($owner)->get(route('newsletter.create', ['role_id' => UrlUtils::encodeId($role->id)]))->assertOk()->getContent());
+
+        $this->assertSame('minimal', $props['initialTemplate']);
+        $this->assertSame('#111111', $props['initialStyleSettings']['accentColor']);
+        $this->assertSame('System', $props['initialStyleSettings']['fontFamily']);
+        $this->assertSame('See you soon', $props['initialStyleSettings']['footerText']);
+        $this->assertSame('', $props['initialStyleSettings']['previewText'], 'a line written for one mail does not travel');
+        // The Modern tile is offered in the schedule's own accent, as a first newsletter gets it.
+        $this->assertSame('#D9482B', $props['templateDefaults']['modern']['accentColor']);
+
+        // The platform's own newsletters start the same way.
+        $admin = $this->createOwner(admin: true);
+        Newsletter::create(['role_id' => null, 'user_id' => $admin->id, 'type' => 'admin', 'subject' => 'Product update', 'status' => 'sent', 'template' => 'bold', 'style_settings' => ['backgroundColor' => '#1a1a2e', 'accentColor' => '#e94560', 'textColor' => '#eaeaea', 'fontFamily' => 'Arial', 'buttonRadius' => 'rounded', 'eventLayout' => 'cards', 'footerText' => '', 'previewText' => 'Written for one mail']]);
+
+        $props = $this->builderProps($this->withSession(['admin_password_confirmed_at' => now()->timestamp])->actingAs($admin)->get(route('admin.newsletters.create'))->assertOk()->getContent());
+
+        $this->assertSame('System', $props['initialStyleSettings']['fontFamily']);
+        $this->assertSame('', $props['initialStyleSettings']['previewText']);
+    }
+
+    public function test_the_builders_picker_offers_what_the_mail_would_list(): void
+    {
+        $role = $this->venue();
+        $owner = \App\Models\User::find($role->user_id);
+        $this->event($role, 'Accepted Show', 3, 20);
+        $request = $this->event($role, 'Unanswered Booking Request', 5, 20);
+        $role->events()->updateExistingPivot($request->id, ['is_accepted' => null]);
+        $this->event($role, 'Private Show', 6, 20, ['is_private' => true]);
+        $series = $this->createRecurringEvent($role, [
+            'creator_role_id' => $role->id, 'name' => 'Late Night Jazz',
+            'starts_at' => Carbon::now(self::TZ)->subWeeks(3)->setTime(22, 0)->utc()->format('Y-m-d H:i:s'),
+            'days_of_week' => '0000100',
+        ]);
+
+        $props = $this->builderProps($this->actingAs($owner)->get(route('newsletter.create', ['role_id' => UrlUtils::encodeId($role->id)]))->assertOk()->getContent());
+        $offered = array_column($props['events'], 'date', 'name');
+
+        // A running series under its next date (its starts_at is three weeks back), and nothing
+        // the mail would then leave out.
+        $this->assertSame(['Late Night Jazz' => 'Thu, Oct 8', 'Accepted Show' => 'Sun, Oct 11'], $offered);
+        $this->assertSame($series->id, $props['events'][0]['id']);
+    }
+
+    public function test_the_text_part_is_in_the_schedules_language(): void
+    {
+        config(['app.hosted' => false]);
+        $german = $this->venue(['language_code' => 'de', 'subdomain' => 'hafenhalle']);
+        $newsletter = Newsletter::create(['role_id' => $german->id, 'user_id' => $german->user_id, 'type' => 'schedule', 'subject' => 'Oktober', 'status' => 'draft', 'template' => 'modern', 'blocks' => [['id' => 't', 'type' => 'text', 'data' => ['content' => 'Hallo.']]]]);
+        $recipient = NewsletterRecipient::create(['newsletter_id' => $newsletter->id, 'email' => 'reader@example.com', 'name' => 'Reader', 'token' => Str::random(64), 'status' => 'pending']);
+
+        // The HTML is rendered by the service in the schedule's language; the text part is
+        // rendered by the mailer, in whatever locale the request or the worker has.
+        app()->setLocale('en');
+        $this->assertTrue(app(NewsletterService::class)->sendToRecipient($newsletter, $recipient, true));
+
+        $message = app('mail.manager')->mailer('array')->getSymfonyTransport()->messages()->last()->getOriginalMessage();
+        $this->assertStringContainsString(__('messages.unsubscribe', [], 'de').':', $message->getTextBody());
+        $this->assertStringNotContainsString('Unsubscribe:', $message->getTextBody());
+        $this->assertSame('en', app()->getLocale(), 'and the request keeps its own');
     }
 }

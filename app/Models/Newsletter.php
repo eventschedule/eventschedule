@@ -181,6 +181,9 @@ class Newsletter extends Model
      * places (a new newsletter starts from the last one's, or from a template's, and a newsletter
      * can be saved as a template), and a line carried over would be sent under a subject it was
      * never written for.
+     *
+     * A clone and an A/B variant are the SAME mail again and keep the line: they replicate() the
+     * newsletter and do not come through here.
      */
     public static function designSettings(?array $settings): ?array
     {
@@ -199,6 +202,57 @@ class Newsletter extends Model
         }
 
         return $defaults;
+    }
+
+    /**
+     * The presets as they were before 2026-10, for the three whose values changed. Only the look
+     * a preset sets. Not the events layout: choosing a preset in the builder has always kept the
+     * layout already chosen, so an owner who only ever clicked Minimal holds Modern's "cards",
+     * and comparing it would call that design changed by hand.
+     */
+    private const PRESETS_BEFORE_2026_10 = [
+        'modern' => ['backgroundColor' => '#ffffff', 'accentColor' => '#4E81FA', 'textColor' => '#333333', 'fontFamily' => 'Arial', 'buttonRadius' => 'rounded'],
+        'minimal' => ['backgroundColor' => '#ffffff', 'accentColor' => '#666666', 'textColor' => '#333333', 'fontFamily' => 'Verdana', 'buttonRadius' => 'rounded'],
+        'bold' => ['backgroundColor' => '#1a1a2e', 'accentColor' => '#e94560', 'textColor' => '#eaeaea', 'fontFamily' => 'Arial', 'buttonRadius' => 'rounded'],
+    ];
+
+    /**
+     * $settings for a NEW newsletter that starts from an earlier one's: a design nobody changed
+     * from an old preset arrives as that preset is today.
+     *
+     * A new newsletter starts from the last one's settings, so an owner who sent once before the
+     * presets were redrawn would otherwise stay on Verdana and mid-grey links for good, with the
+     * new values one click away and no reason to click. "Nobody changed" is strict: each of the
+     * three colours, the typeface and the corners is as it arrived. One colour or the typeface chosen by hand and the design
+     * is theirs, and it is left exactly as it is. Modern arrived in the schedule's own accent, so
+     * that or the default blue both count, and whichever it is stays.
+     */
+    public static function movedToCurrentPreset(?string $template, ?array $settings, ?Role $role = null): ?array
+    {
+        $template = $template ?: 'modern';
+        $before = self::PRESETS_BEFORE_2026_10[$template] ?? null;
+
+        if ($settings === null || $before === null) {
+            return $settings;
+        }
+
+        $same = fn ($a, $b) => strcasecmp((string) $a, (string) $b) === 0;
+
+        foreach ($before as $key => $was) {
+            $ownAccent = $key === 'accentColor' && $template === 'modern' && $role?->accent_color
+                && $same($settings[$key] ?? null, $role->accent_color);
+
+            if (! $ownAccent && ! $same($settings[$key] ?? null, $was)) {
+                return $settings;
+            }
+        }
+
+        $now = self::templateDefaults($template);
+        if ($template === 'modern') {
+            $now['accentColor'] = $settings['accentColor'];
+        }
+
+        return array_merge($settings, array_intersect_key($now, $before));
     }
 
     /**

@@ -2508,6 +2508,9 @@ return [
     'footer_text' => 'Voettekst',
     'newsletter_preview_text' => 'Voorbeeldtekst',
     'newsletter_preview_text_help' => 'De regel die een inbox na het onderwerp toont. Laat je hem leeg, dan wordt het begin van je eerste tekstblok gebruikt.',
+    'newsletter_preview_desktop' => 'Computer',
+    'newsletter_preview_mobile' => 'Mobiel',
+    'newsletter_font_system' => 'Systeemlettertype',
     'edit_prompt' => 'Prompt Bewerken',
     'change_camera' => 'Camera Wisselen',
 

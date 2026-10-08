@@ -3,7 +3,7 @@
     $line = in_array($line, ['solid', 'dashed', 'dotted'], true) ? $line : 'solid';
     $border = match ($nl->design) {
         'classic' => '1px solid '.$nl->ruleDouble,
-        'bold' => '2px '.$line.' '.$nl->accent,
+        'bold' => '2px '.$line.' '.$nl->accentMark,
         'compact' => '1px '.($line === 'solid' ? 'dotted' : $line).' '.$nl->ruleStrong,
         default => '1px '.$line.' '.$nl->rule,
     };

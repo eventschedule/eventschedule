@@ -23,7 +23,7 @@
 </td>
 @endif
 <td valign="top" @if (! $e['day']) colspan="2" @endif style="vertical-align: top; padding: {{ $pad }}px 0; padding-{{ $nl->start }}: {{ $e['day'] ? 16 : 0 }}px; {{ $rule }} text-align: {{ $nl->start }};">
-<p dir="auto" style="margin: 0;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $nl->type(['compact' => 15, 'bold' => 19][$nl->design] ?? 17, ['compact' => 20, 'bold' => 25][$nl->design] ?? 24, $nl->ink, $nl->serif ? 400 : ($nl->design === 'bold' ? 800 : 700)) }} text-decoration: none;">{{ $e['name'] }}</a></p>
+<p dir="auto" style="margin: 0; word-break: break-word;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $nl->type(['compact' => 15, 'bold' => 19][$nl->design] ?? 17, ['compact' => 20, 'bold' => 25][$nl->design] ?? 24, $nl->ink, $nl->serif ? 400 : ($nl->design === 'bold' ? 800 : 700)) }} text-decoration: none;">{{ $e['name'] }}</a></p>
 <p style="margin: 3px 0 0; {{ $nl->smallType($nl->ink3) }}">{!! $nl->eventDetail($e) !!}</p>
 </td>
 <td width="28" valign="middle" align="{{ $nl->end }}" style="width: 28px; vertical-align: middle; padding: {{ $pad }}px 0; {{ $rule }} text-align: {{ $nl->end }};"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" aria-label="{{ $e['cta'] }}" style="{{ $nl->type(18, 24, $nl->accentInk, 700) }} text-decoration: none;">{!! $nl->arrow !!}</a></td>

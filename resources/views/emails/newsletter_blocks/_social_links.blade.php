@@ -18,7 +18,7 @@
 @endphp
 @if (count($links))
 <tr>
-<td align="center" class="nl-g" style="padding: 0 {{ $nl->gutter }}px {{ $nl->gap }}px; text-align: center;">
+<td align="center" class="nl-g" style="padding: 0 {{ $nl->gutter }}px {{ $nl->design === 'minimal' ? $nl->gap : $nl->gap - 8 }}px; text-align: center;">
 @if ($nl->design === 'minimal')
 {{-- Each name is its own inline block, so a row too long for a phone breaks between names and
      leaves no separator hanging at the end of a line. --}}
@@ -28,23 +28,26 @@
 @endforeach
 </p>
 @else
-<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
-<tr>
+{{-- Each disc is an inline block, so seven of them wrap on a phone: as cells of one table row
+     they could not, and a schedule's links are not capped. The link is inside the cell, because
+     Outlook does not follow one wrapped round a table; Outlook is given one row. --}}
+<div style="font-size: 0; text-align: center;">
+<!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0"><tr><![endif]-->
 @foreach ($links as $link)
-<td style="padding: 0 6px;">
-<a href="{{ $link['href'] }}" target="_blank" rel="noopener" style="text-decoration: none;">
+<!--[if mso]><td style="padding: 0 6px;"><![endif]-->
+<div style="display: inline-block; vertical-align: top; margin: 0 6px 8px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ $disc }}" style="background-color: {{ $disc }}; border-radius: {{ $discRadius }}px;">
 <tr>
 <td width="{{ $side }}" height="{{ $side }}" align="center" valign="middle" style="width: {{ $side }}px; height: {{ $side }}px; text-align: center; vertical-align: middle;">
-<img src="{{ url('/images/social-icons/'.$link['platform'].'.png') }}" alt="{{ ucfirst($link['platform']) }}" width="{{ $icon }}" height="{{ $icon }}" style="display: block; margin: 0 auto; border: 0;">
+<a href="{{ $link['href'] }}" target="_blank" rel="noopener" style="display: block; text-decoration: none;"><img src="{{ url('/images/social-icons/'.$link['platform'].'.png') }}" alt="{{ ucfirst($link['platform']) }}" width="{{ $icon }}" height="{{ $icon }}" style="display: block; margin: 0 auto; border: 0;"></a>
 </td>
 </tr>
 </table>
-</a>
-</td>
+</div>
+<!--[if mso]></td><![endif]-->
 @endforeach
-</tr>
-</table>
+<!--[if mso]></tr></table><![endif]-->
+</div>
 @endif
 </td>
 </tr>

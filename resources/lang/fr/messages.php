@@ -2500,6 +2500,9 @@ return [
     'footer_text' => 'Texte du pied de page',
     'newsletter_preview_text' => 'Texte d\'aperçu',
     'newsletter_preview_text_help' => 'La ligne qu\'une boîte de réception affiche après l\'objet. Laissée vide, elle reprend le début de votre premier bloc de texte.',
+    'newsletter_preview_desktop' => 'Ordinateur',
+    'newsletter_preview_mobile' => 'Mobile',
+    'newsletter_font_system' => 'Police système',
     'edit_prompt' => 'Modifier l\'invite',
     'change_camera' => 'Changer de caméra',
 

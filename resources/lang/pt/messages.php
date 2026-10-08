@@ -2508,6 +2508,9 @@ return [
     'footer_text' => 'Texto do Rodapé',
     'newsletter_preview_text' => 'Texto de pré-visualização',
     'newsletter_preview_text_help' => 'A linha que a caixa de entrada mostra a seguir ao assunto. Se ficar vazia, é usado o início do seu primeiro bloco de texto.',
+    'newsletter_preview_desktop' => 'Computador',
+    'newsletter_preview_mobile' => 'Telemóvel',
+    'newsletter_font_system' => 'Fonte do sistema',
     'edit_prompt' => 'Editar Prompt',
     'change_camera' => 'Trocar Câmera',
 

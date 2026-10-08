@@ -2499,6 +2499,9 @@ return [
     'footer_text' => 'Texto del Pie de Pagina',
     'newsletter_preview_text' => 'Texto de vista previa',
     'newsletter_preview_text_help' => 'La línea que la bandeja de entrada muestra después del asunto. Si la dejas vacía, se usa el comienzo de tu primer bloque de texto.',
+    'newsletter_preview_desktop' => 'Ordenador',
+    'newsletter_preview_mobile' => 'Móvil',
+    'newsletter_font_system' => 'Fuente del sistema',
     'edit_prompt' => 'Editar Prompt',
     'change_camera' => 'Cambiar Camara',
 

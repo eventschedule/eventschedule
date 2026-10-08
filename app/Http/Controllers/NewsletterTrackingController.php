@@ -44,8 +44,9 @@ class NewsletterTrackingController extends Controller
             abort(404);
         }
 
-        $scheme = parse_url($url, PHP_URL_SCHEME);
-        if (! in_array($scheme, ['http', 'https'])) {
+        // In any case: a phone's keyboard writes "Https://", and a browser follows it.
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        if (! in_array($scheme, ['http', 'https'], true)) {
             \Log::warning('Newsletter click: invalid scheme', ['url' => $url, 'scheme' => $scheme]);
             abort(404);
         }

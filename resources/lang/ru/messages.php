@@ -2531,6 +2531,9 @@ return [
     'footer_text' => 'Текст нижнего колонтитула',
     'newsletter_preview_text' => 'Текст предпросмотра',
     'newsletter_preview_text_help' => 'Строка, которую почтовый ящик показывает после темы. Если оставить её пустой, будет взято начало вашего первого текстового блока.',
+    'newsletter_preview_desktop' => 'Компьютер',
+    'newsletter_preview_mobile' => 'Телефон',
+    'newsletter_font_system' => 'Системный шрифт',
     'please_wait' => 'Пожалуйста, подождите, прежде чем повторить попытку',
 
     // Scan agenda

@@ -52,7 +52,7 @@
 @if ($when !== '')
 <p style="margin: 0 0 5px; {{ $nl->labelType() }}">{!! $when !!}</p>
 @endif
-<p dir="auto" style="margin: 0;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $title }} text-decoration: none;">{{ $e['name'] }}</a></p>
+<p dir="auto" style="margin: 0; word-break: break-word;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $title }} text-decoration: none;">{{ $e['name'] }}</a></p>
 @if ($meta !== '')
 <p style="margin: 5px 0 0; {{ $nl->smallType($nl->ink3) }}">{!! $meta !!}</p>
 @endif

@@ -136,11 +136,7 @@ class NewsletterController extends Controller
         foreach ($segments as $segment) {
             $segment->recipient_count = $segment->recipientCount();
         }
-        $events = $role->events()
-            ->upcomingOrOngoing()
-            ->where('is_draft', false)
-            ->orderBy('starts_at')
-            ->get();
+        $events = app(NewsletterService::class)->eventChoices($role);
 
         $defaultBlocks = Newsletter::defaultBlocks($role);
 
@@ -150,7 +146,9 @@ class NewsletterController extends Controller
             ->first();
 
         $defaultTemplate = $lastNewsletter ? $lastNewsletter->template : 'modern';
-        $defaultStyleSettings = $lastNewsletter ? Newsletter::designSettings($lastNewsletter->style_settings) : Newsletter::defaultStyleSettingsForRole($role);
+        $defaultStyleSettings = $lastNewsletter
+            ? Newsletter::movedToCurrentPreset($lastNewsletter->template, Newsletter::designSettings($lastNewsletter->style_settings), $role)
+            : Newsletter::defaultStyleSettingsForRole($role);
         $defaultSegmentIds = $lastNewsletter ? ($lastNewsletter->segment_ids ?? []) : [];
 
         // Load saved templates for the template picker
@@ -228,11 +226,7 @@ class NewsletterController extends Controller
         foreach ($segments as $segment) {
             $segment->recipient_count = $segment->recipientCount();
         }
-        $events = $role->events()
-            ->upcomingOrOngoing()
-            ->where('is_draft', false)
-            ->orderBy('starts_at')
-            ->get();
+        $events = app(NewsletterService::class)->eventChoices($role);
 
         return view('newsletter.edit', compact('role', 'newsletter', 'segments', 'events'));
     }
@@ -621,22 +615,13 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
-        $events = $role->events()
-            ->upcomingOrOngoing()
-            ->where('is_draft', false)
-            ->orderBy('starts_at')
-            // creator_role_id is load-bearing in this select: getShortDateRangeDisplay() resolves
-            // scheduleTimezone() through the creatorRole relation, and BelongsTo short-circuits on
-            // a null foreign key - so omitting it silently renders every date in the app timezone
-            // rather than the schedule's, with no query and no error to notice.
-            ->with('creatorRole')
-            ->get(['events.id', 'events.name', 'events.starts_at', 'events.duration', 'events.creator_role_id'])
-            ->map(fn ($e) => [
-                'id' => $e->id,
-                'hash' => UrlUtils::encodeId($e->id),
-                'name' => $e->name,
-                'date' => $e->starts_at ? $e->getShortDateRangeDisplay() : '',
-            ]);
+        // The same list the builder is given, with the id as the app shows it.
+        $events = array_map(fn (array $event) => [
+            'id' => $event['id'],
+            'hash' => UrlUtils::encodeId($event['id']),
+            'name' => $event['name'],
+            'date' => $event['date'],
+        ], app(NewsletterService::class)->eventChoices($role));
 
         return response()->json($events);
     }
@@ -1229,11 +1214,7 @@ class NewsletterController extends Controller
         $role = $this->getRole($request);
 
         $defaultBlocks = Newsletter::defaultBlocks($role);
-        $events = $role->events()
-            ->upcomingOrOngoing()
-            ->where('is_draft', false)
-            ->orderBy('starts_at')
-            ->get();
+        $events = app(NewsletterService::class)->eventChoices($role);
 
         $segments = collect();
 
@@ -1286,11 +1267,7 @@ class NewsletterController extends Controller
             abort(403);
         }
 
-        $events = $role->events()
-            ->upcomingOrOngoing()
-            ->where('is_draft', false)
-            ->orderBy('starts_at')
-            ->get();
+        $events = app(NewsletterService::class)->eventChoices($role);
 
         $segments = collect();
 

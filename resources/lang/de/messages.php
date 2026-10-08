@@ -2499,6 +2499,9 @@ return [
     'footer_text' => 'Fußzeilentext',
     'newsletter_preview_text' => 'Vorschautext',
     'newsletter_preview_text_help' => 'Die Zeile, die ein Posteingang nach dem Betreff zeigt. Bleibt sie leer, wird der Anfang deines ersten Textblocks verwendet.',
+    'newsletter_preview_desktop' => 'Desktop',
+    'newsletter_preview_mobile' => 'Mobil',
+    'newsletter_font_system' => 'Systemschrift',
     'edit_prompt' => 'Prompt bearbeiten',
     'change_camera' => 'Kamera wechseln',
 

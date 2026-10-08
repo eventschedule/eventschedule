@@ -2995,9 +2995,13 @@ class EventRepo
      * Dates are in each event's schedule timezone (Event::scheduleTimezone()), like every other
      * occurrence date.
      *
+     * $seriesHorizonDays is how far ahead a series' next occurrence may be. The page keeps to 60: a
+     * newsletter asks for a year, because it announces a weekly night months before its first date
+     * as readily as it does a one-off, which has no horizon here at all.
+     *
      * @return \Illuminate\Support\Collection<int, array{event: Event, date: string}>
      */
-    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50): \Illuminate\Support\Collection
+    public function upcomingForGuest(Role $role, ?\App\Models\Group $group = null, int $limit = 50, int $seriesHorizonDays = 60): \Illuminate\Support\Collection
     {
         $base = fn () => Event::query()
             ->where('events.is_draft', false)
@@ -3050,7 +3054,7 @@ class EventRepo
             $series = collect();
         }
 
-        $seriesDates = $this->upcomingSeriesDates($role, $group, $series);
+        $seriesDates = $this->upcomingSeriesDates($role, $group, $series, $seriesHorizonDays);
 
         $series = $series
             ->map(fn (Event $event) => ['event' => $event, 'date' => $seriesDates[$event->id] ?? null])
@@ -3076,7 +3080,7 @@ class EventRepo
      * @param  \Illuminate\Support\Collection<int, Event>  $series
      * @return array<int, ?string>
      */
-    private function upcomingSeriesDates(Role $role, ?\App\Models\Group $group, \Illuminate\Support\Collection $series): array
+    private function upcomingSeriesDates(Role $role, ?\App\Models\Group $group, \Illuminate\Support\Collection $series, int $horizonDays = 60): array
     {
         if ($series->isEmpty()) {
             return [];
@@ -3086,25 +3090,28 @@ class EventRepo
             ->map(fn (Event $event) => $event->id.'@'.$event->updated_at?->getTimestamp())
             ->implode(',');
         $today = Carbon::now($role->timezone ?: config('app.timezone'))->format('Y-m-d');
-        $key = 'guest_upcoming_series:'.$role->id.':'.($group?->id ?? 0).':'.$today.':'.md5($fingerprint);
+        // The horizon is part of the key: the page's 60 days must never be answered from a
+        // newsletter's year, or the other way round.
+        $key = 'guest_upcoming_series:'.$role->id.':'.($group?->id ?? 0).':'.$today.':'.$horizonDays.':'.md5($fingerprint);
 
         return Cache::remember($key, self::UPCOMING_CACHE_SECONDS, fn () => $series
-            ->mapWithKeys(fn (Event $event) => [$event->id => $this->nextOccurrenceOrNull($event)])
+            ->mapWithKeys(fn (Event $event) => [$event->id => $this->nextOccurrenceOrNull($event, $horizonDays)])
             ->all());
     }
 
     /**
-     * nextOccurrenceFrom() within 60 days, or null when the series' recurrence cannot be read.
+     * nextOccurrenceFrom() within $days (60 for the page), or null when the series' recurrence
+     * cannot be read.
      *
      * matchesDate() trusts what saveEvent() writes, and a restored backup never went through it:
      * an on_date end or an exclude date that is not a date, an every_n_weeks interval of 0 (a
      * modulo by zero) and a days_of_week shorter than seven characters all throw. One such series
      * is reported and left out, rather than taking the schedule page down with it.
      */
-    private function nextOccurrenceOrNull(Event $event): ?string
+    private function nextOccurrenceOrNull(Event $event, int $days = 60): ?string
     {
         try {
-            return $event->nextOccurrenceFrom(null, 60);
+            return $event->nextOccurrenceFrom(null, $days);
         } catch (\Throwable $e) {
             report($e);
 

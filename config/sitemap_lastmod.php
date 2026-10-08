@@ -109,7 +109,7 @@ return [
     '/features/newsletters' => '2026-10-08',
     '/features/online-events' => '2026-09-25',
     '/features/passes' => '2026-09-24',
-    '/features/polls' => '2026-09-24',
+    '/features/polls' => '2026-10-08',
     '/features/private-events' => '2026-09-25',
     '/features/promo-codes' => '2026-09-25',
     '/features/recurring-events' => '2026-09-24',
