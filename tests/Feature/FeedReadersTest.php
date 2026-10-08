@@ -58,7 +58,9 @@ class FeedReadersTest extends TestCase
 
         $this->assertInstanceOf(FeedReading::class, $reading);
         // In the order they happen; two at the same moment, by name.
-        $this->assertSame(['class#20261013T230000Z', 'class#20261020T230000Z', 'one'], array_column($reading->items, 'id'));
+        // A date of a series is known by its day on the entry's own clock, not by its instant:
+        // a class moved by an hour is the same dates.
+        $this->assertSame(['class#20261013', 'class#20261020', 'one'], array_column($reading->items, 'id'));
         $this->assertSame(['off' => 'cancelled', 'far' => 'later'], $reading->seen);
         $this->assertTrue($reading->complete);
         $this->assertTrue($reading->listsEverything);
@@ -84,10 +86,10 @@ class FeedReadersTest extends TestCase
         $before = $read($this->calendar($series), $this->now());
         // A week later the first date has passed, and every other is one place earlier in its series.
         $after = $read($this->calendar($series), $this->now()->addWeek());
-        $this->assertSame($before['class#20261020T230000Z'], $after['class#20261020T230000Z']);
+        $this->assertSame($before['class#20261020'], $after['class#20261020']);
 
         $renamed = $read($this->calendar(str_replace('SUMMARY:Class', 'SUMMARY:Class (moved rooms)', $series)), $this->now());
-        $this->assertNotSame($before['class#20261020T230000Z'], $renamed['class#20261020T230000Z']);
+        $this->assertNotSame($before['class#20261020'], $renamed['class#20261020']);
     }
 
     public function test_a_page_is_the_events_it_marks_up(): void
@@ -160,6 +162,28 @@ class FeedReadersTest extends TestCase
         // And what the page does say stands.
         $own = $reader->detail($item, $post(['name' => 'Jazz Night', 'startDate' => '2026-10-20T20:00:00-04:00', 'description' => 'From the page.', 'image' => 'https://venue.example/own.jpg', 'url' => 'https://tickets.example/jazz']), self::ZONE, false, $this->now());
         $this->assertSame(['From the page.', 'https://venue.example/own.jpg', 'https://tickets.example/jazz'], [$own['event_details'], $own['image_url'], $own['registration_url']]);
+
+        // A page that marks up several events, none of them plainly this post's, gives none.
+        // The first on the page is the soonest thing the SITE has on: taken, it was written
+        // over this post's event on the daily re-read, and one event turned into another.
+        $this->assertSame('no_date', $reader->detail($item, $post(
+            ['name' => 'Also on this week', 'startDate' => '2026-10-15T20:00:00-04:00', 'url' => 'https://venue.example/posts/other'],
+            ['name' => 'And next month', 'startDate' => '2026-11-15T20:00:00-05:00', 'url' => 'https://venue.example/posts/later'],
+        ), self::ZONE, false, $this->now()));
+
+        // The one that lives at the post's own address is the post's, whatever it is called
+        // and wherever it stands on the page.
+        $atItsAddress = $reader->detail($item, $post(
+            ['name' => 'Also on this week', 'startDate' => '2026-10-15T20:00:00-04:00', 'url' => 'https://venue.example/posts/other'],
+            ['name' => 'An evening of jazz', 'startDate' => '2026-10-20T20:00:00-04:00', 'url' => 'http://www.venue.example/posts/jazz/?utm_source=feed'],
+        ), self::ZONE, false, $this->now());
+        $this->assertSame('An evening of jazz', $atItsAddress['event_name']);
+
+        // The only event on the page is the post's, unless it says it lives somewhere else and
+        // is called something else: that is a sidebar, not the post.
+        $this->assertSame('Jazz Night with guests', $reader->detail($item, $post(['name' => 'Jazz Night with guests', 'startDate' => '2026-10-20T20:00:00-04:00', 'url' => 'https://tickets.example/jazz']), self::ZONE, false, $this->now())['event_name']);
+        $this->assertSame('Sole and unaddressed', $reader->detail($item, $post(['name' => 'Sole and unaddressed', 'startDate' => '2026-10-20T20:00:00-04:00']), self::ZONE, false, $this->now())['event_name']);
+        $this->assertSame('no_date', $reader->detail($item, $post(['name' => 'Next in the hall', 'startDate' => '2026-10-20T20:00:00-04:00', 'url' => 'https://venue.example/posts/other']), self::ZONE, false, $this->now()));
 
         // A post that is not an event, or one whose event is over or called off, says so.
         $this->assertSame('no_date', $reader->detail($item, $this->fetched('<html><body>Just news</body></html>', 'text/html'), self::ZONE, false, $this->now()));

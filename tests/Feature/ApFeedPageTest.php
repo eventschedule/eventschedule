@@ -77,6 +77,18 @@ class ApFeedPageTest extends TestCase
         app(FeedImporter::class)->read($feed->fresh(), microtime(true) + 30);
     }
 
+    /**
+     * Read it again a while later. An entry has to have been out of sight for an hour and a
+     * half before its absence means anything (FeedImporter::GONE_AFTER_MINUTES): two reads a
+     * minute apart are one look, not two.
+     */
+    private function readLater(EventFeed $feed): void
+    {
+        \Illuminate\Support\Facades\DB::table('event_feed_items')->update(['last_seen_at' => \Illuminate\Support\Facades\DB::raw('DATE_SUB(last_seen_at, INTERVAL 2 HOUR)')]);
+
+        $this->read($feed);
+    }
+
     private function url(EventFeed $feed, string $route = 'show', array $more = []): string
     {
         return route('role.feeds.'.$route, ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($feed->id)] + $more);
@@ -208,7 +220,7 @@ class ApFeedPageTest extends TestCase
         }
         $this->entries = [$this->entry('a', 'Stays')];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertSame(2, $feed->fresh()->decide_count);
         $as = $this->actingAs($this->owner);
 
@@ -237,7 +249,7 @@ class ApFeedPageTest extends TestCase
         $this->named('Rewritten by hand')->forceFill(['description' => 'Our own words about it.'])->save();
         $this->entries = [$this->entry('a', 'Stays')];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertSame(1, $feed->fresh()->decide_count);
         $this->assertNotNull($this->named('Rewritten by hand'));
 

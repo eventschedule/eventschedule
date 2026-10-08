@@ -17,6 +17,36 @@ use Carbon\CarbonImmutable;
  */
 class ImportedTime
 {
+    /** The clock times are being placed on, where that is not the zone the reader was handed. */
+    private static ?string $clock = null;
+
+    /**
+     * Run a read whose times are placed on $zone, whatever zone the reader is handed for the
+     * times that name none.
+     *
+     * The import page reads one link once, and both are the schedule's zone. A feed has them
+     * apart: "Times are read as" is the clock of the SOURCE's unzoned times, and the schedule's
+     * zone is the clock everything is then placed on. Without this the choice between keeping an
+     * event's own clock and converting it was made against the feed's setting, so an entry that
+     * says "19:30, Vienna" moved when somebody changed what unzoned times are read as.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $read
+     * @return T
+     */
+    public static function onClock(string $zone, callable $read): mixed
+    {
+        $before = self::$clock;
+        self::$clock = $zone;
+
+        try {
+            return $read();
+        } finally {
+            self::$clock = $before;
+        }
+    }
+
     /**
      * @param  \DateTimeInterface  $at  The start as the source gives it. A floating time (no zone
      *                                  at all) must already have been read in the schedule's zone.
@@ -29,6 +59,7 @@ class ImportedTime
      */
     public static function place(\DateTimeInterface $at, bool $statesZone, string $scheduleZone, bool $keepLocalClock): array
     {
+        $scheduleZone = self::$clock ?? $scheduleZone;
         $local = CarbonImmutable::instance($at);
         $inSchedule = $local->setTimezone($scheduleZone);
 

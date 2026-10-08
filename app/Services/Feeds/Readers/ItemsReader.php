@@ -66,7 +66,12 @@ class ItemsReader implements FeedReader
             return 'no_date';
         }
 
-        $row = $this->choose($read['rows'], $item['hint']['title'] ?? '');
+        $row = $this->choose($read['rows'], $item, $fetched->url);
+
+        if (! $row) {
+            return 'no_date';
+        }
+
         $hint = $item['hint'];
 
         // What the list knows and the page did not repeat.
@@ -87,20 +92,54 @@ class ItemsReader implements FeedReader
 
     /**
      * A page can mark up more than the post it is about (a sidebar of what else is on). The
-     * event named like the item is the item's; failing that, the first.
+     * post's event is the one that lives at the post's own address. Failing that, the one named
+     * like the post. Failing that, the only event on the page, when it does not say it lives
+     * somewhere else or its name and the post's overlap.
+     *
+     * Anything less sure is no event at all. The first on the page is the soonest thing the
+     * SITE has on, and the daily re-read wrote its name, time and place over this post's event:
+     * one event turned into another.
      *
      * @param  non-empty-list<array>  $rows
      */
-    private function choose(array $rows, string $title): array
+    private function choose(array $rows, array $item, string $page): ?array
     {
-        $wanted = mb_strtolower(trim($title));
+        $addressOf = fn (array $row) => self::bare(explode('#', (string) ($row['source_id'] ?? ''))[0]);
+        $here = array_filter([self::bare((string) ($item['detail_url'] ?? '')), self::bare($page)]);
 
-        foreach ($rows as $row) {
-            if ($wanted !== '' && mb_strtolower(trim((string) $row['event_name'])) === $wanted) {
-                return $row;
+        $own = array_values(array_filter($rows, fn (array $row) => in_array($addressOf($row), $here, true)));
+        if (count($own) === 1) {
+            return $own[0];
+        }
+
+        $title = mb_strtolower(trim((string) ($item['hint']['title'] ?? '')));
+        $nameOf = fn (array $row) => mb_strtolower(trim((string) ($row['event_name'] ?? '')));
+
+        $named = $title === '' ? [] : array_values(array_filter($own ?: $rows, fn (array $row) => $nameOf($row) === $title));
+        if (count($named) === 1) {
+            return $named[0];
+        }
+
+        if (count($rows) === 1) {
+            $address = $addressOf($rows[0]);
+            $name = $nameOf($rows[0]);
+            $elsewhere = $address !== '' && ! str_starts_with($address, 'ld-') && ! in_array($address, $here, true);
+            $overlap = $title !== '' && $name !== '' && (str_contains($title, $name) || str_contains($name, $title));
+
+            if (! $elsewhere || $overlap) {
+                return $rows[0];
             }
         }
 
-        return $rows[0];
+        return null;
+    }
+
+    /** An address without what does not say where it is: scheme, www, query, fragment, a last slash. */
+    private static function bare(string $url): string
+    {
+        $url = preg_replace('~^[a-z][a-z0-9+.-]*://(www\.)?~i', '', trim($url));
+        $url = preg_replace('~[?#].*$~', '', (string) $url);
+
+        return rtrim(mb_strtolower((string) $url), '/');
     }
 }

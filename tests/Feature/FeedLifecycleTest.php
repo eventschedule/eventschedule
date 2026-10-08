@@ -113,6 +113,8 @@ class FeedLifecycleTest extends TestCase
             'creator_role_id' => $role->id, 'starts_at' => now()->subDays($daysAgo)->format('Y-m-d H:i:s'), 'duration' => $hours,
         ]);
         $seen = ['last_seen_at' => now()->subDays(40)];
+        $paused = $this->feed($role);
+        $paused->forceFill(['paused_at' => now()->subDays(120), 'pause_reason' => EventFeed::PAUSED_BY_OWNER])->save();
 
         $keep = [
             'dismissed, its event still to come' => $this->item($feed, ['state' => EventFeedItem::STATE_DISMISSED, 'starts_at' => now()->addDays(20)] + $seen),
@@ -123,12 +125,21 @@ class FeedLifecycleTest extends TestCase
             // A festival that began six weeks ago and runs for two months.
             'imported, still running' => $this->item($feed, ['state' => EventFeedItem::STATE_IMPORTED, 'event_id' => $event(42, 24 * 60)->id, 'starts_at' => now()->subDays(42)] + $seen),
             'new, seen last week' => $this->item($feed, ['starts_at' => null, 'last_seen_at' => now()->subDays(7)]),
+            // An exhibition that opened five weeks ago is listed for months. The owner deleted
+            // or skipped it: forgotten while it is still shown, it came back.
+            'dismissed, five weeks past, and shown last week' => $this->item($feed, ['state' => EventFeedItem::STATE_DISMISSED, 'starts_at' => now()->subDays(35), 'last_seen_at' => now()->subDays(7)]),
+            'skipped, five weeks past, and shown last week' => $this->item($feed, ['state' => EventFeedItem::STATE_SKIPPED, 'starts_at' => now()->subDays(35), 'last_seen_at' => now()->subDays(7)]),
+            // A paused feed is not looking, so "not shown for a season" says nothing about its
+            // source: resumed after four months it must not find its ledger empty.
+            'on a paused feed, unseen for a season' => $this->item($paused, ['starts_at' => null, 'last_seen_at' => now()->subDays(100)]),
+            'skipped on a paused feed, long past and long unseen' => $this->item($paused, ['state' => EventFeedItem::STATE_SKIPPED, 'starts_at' => now()->subDays(60), 'last_seen_at' => now()->subDays(100)]),
         ];
         $forget = [
             'dismissed, five weeks past' => $this->item($feed, ['state' => EventFeedItem::STATE_DISMISSED, 'starts_at' => now()->subDays(35)] + $seen),
             'imported, five weeks past' => $this->item($feed, ['state' => EventFeedItem::STATE_IMPORTED, 'event_id' => $event(35)->id, 'starts_at' => now()->subDays(35)] + $seen),
             'a post that was never an event, unseen for a season' => $this->item($feed, ['starts_at' => null, 'last_seen_at' => now()->subDays(100)]),
             'dismissed and undated, unseen for a season' => $this->item($feed, ['state' => EventFeedItem::STATE_DISMISSED, 'starts_at' => null, 'last_seen_at' => now()->subDays(100)]),
+            'skipped, five weeks past and not shown since' => $this->item($feed, ['state' => EventFeedItem::STATE_SKIPPED, 'starts_at' => now()->subDays(35)] + $seen),
         ];
 
         $this->assertSame(count($forget), app(FeedImporter::class)->prune());

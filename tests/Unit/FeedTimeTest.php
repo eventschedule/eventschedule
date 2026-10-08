@@ -81,30 +81,47 @@ class FeedTimeTest extends TestCase
     }
 
     /**
-     * Which clock a reader's row is on. "Times are read as" is for times that name no zone: an
-     * event that named its own, and a whole day, do not move when it is changed.
+     * A reader's row is a wall-clock time on the schedule's clock, whichever kind of time it
+     * was at the source: the readers put it there (ImportedTime::onClock()).
      */
-    public function test_a_row_is_placed_on_the_feeds_clock_unless_it_is_the_events_own_or_a_whole_day(): void
+    public function test_a_row_starts_at_its_time_on_the_schedules_clock(): void
     {
         $row = ['event_date_time' => '2026-11-14 19:30'];
 
-        // No zone of its own: the feed's clock, whatever the schedule's is.
-        $this->assertSame('Europe/London', FeedTime::zoneOf($row, 'Europe/London', 'Europe/Vienna'));
-        $this->assertSame('2026-11-14 19:30:00', FeedTime::startOf($row, 'Europe/London', 'Europe/Vienna')->format('Y-m-d H:i:s'));
-        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($row, 'Europe/Vienna', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($row, 'Europe/Vienna')->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-11-14 19:30:00', FeedTime::startOf($row, 'Europe/London')->format('Y-m-d H:i:s'));
+        $this->assertSame('UTC', FeedTime::startOf($row, 'Europe/Vienna')->getTimezone()->getName());
+        // An event's own clock, kept, and a whole day read the same way: they are on that clock too.
+        $this->assertSame('2026-11-13 23:00:00', FeedTime::startOf(['event_date_time' => '2026-11-14 00:00', 'is_all_day' => true, 'local_time_zone' => 'America/New_York'], 'Europe/Vienna')->format('Y-m-d H:i:s'));
+    }
 
-        // Its own clock, kept: read as that clock on the schedule, and the feed's does not reach it.
-        $own = $row + ['local_time_zone' => 'America/New_York'];
-        $this->assertSame('Europe/Vienna', FeedTime::zoneOf($own, 'Europe/London', 'Europe/Vienna'));
-        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($own, 'Europe/London', 'Europe/Vienna')->format('Y-m-d H:i:s'));
-        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($own, 'Pacific/Auckland', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+    /**
+     * What ImportedTime::onClock() is for. "Times are read as" is the clock of a source's unzoned
+     * times; the schedule's zone is the clock everything is placed on. Deciding to keep an
+     * event's own clock against the first of those moved every entry that names its zone when
+     * somebody changed the setting.
+     */
+    public function test_times_are_placed_on_the_schedules_clock_whatever_clock_unzoned_times_are_read_on(): void
+    {
+        $vienna = new \DateTimeImmutable('2026-11-14 19:30', new \DateTimeZone('Europe/Vienna'));
+        $place = fn (string $readOn, bool $statesZone, bool $keep) => \App\Utils\ImportedTime::onClock('Europe/Vienna', fn () => \App\Utils\ImportedTime::place($vienna, $statesZone, $readOn, $keep));
 
-        // A whole day is that date on the schedule's calendar, not the evening before.
-        $day = ['event_date_time' => '2026-11-14 00:00', 'is_all_day' => true];
-        $this->assertSame('2026-11-13 23:00:00', FeedTime::startOf($day, 'Pacific/Auckland', 'Europe/Vienna')->format('Y-m-d H:i:s'));
-        $this->assertSame('UTC', FeedTime::startOf($day, 'Pacific/Auckland', 'Europe/Vienna')->getTimezone()->getName());
+        // The schedule is in Vienna. An entry that says "19:30, Vienna" reads 19:30 here, and
+        // names no other zone, whatever unzoned times are read as.
+        foreach (['Europe/Vienna', 'Europe/London', 'Pacific/Auckland'] as $readOn) {
+            [$placed, $other] = $place($readOn, true, true);
+            $this->assertSame(['2026-11-14 19:30', null], [$placed->format('Y-m-d H:i'), $other], $readOn);
+        }
 
-        // Empty markers are no markers.
-        $this->assertSame('Europe/London', FeedTime::zoneOf($row + ['local_time_zone' => null, 'is_all_day' => false], 'Europe/London', 'Europe/Vienna'));
+        // An unzoned 19:30 read as London's is 20:30 on the schedule.
+        $london = new \DateTimeImmutable('2026-11-14 19:30', new \DateTimeZone('Europe/London'));
+        [$placed] = \App\Utils\ImportedTime::onClock('Europe/Vienna', fn () => \App\Utils\ImportedTime::place($london, false, 'Europe/London', true));
+        $this->assertSame('2026-11-14 20:30', $placed->format('Y-m-d H:i'));
+
+        // Outside a feed's read nothing changes: the zone handed in is the clock.
+        [$placed, $other] = \App\Utils\ImportedTime::place($vienna, true, 'Europe/London', true);
+        $this->assertSame(['2026-11-14 19:30', 'Europe/Vienna'], [$placed->format('Y-m-d H:i'), $other]);
+        [$placed] = \App\Utils\ImportedTime::place($vienna, true, 'Europe/London', false);
+        $this->assertSame('2026-11-14 18:30', $placed->format('Y-m-d H:i'));
     }
 }

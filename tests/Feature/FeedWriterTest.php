@@ -55,8 +55,10 @@ class FeedWriterTest extends TestCase
         ]);
 
         $this->owner = $this->createOwner();
-        // The schedule is in New York and the feed's clock is Vienna's: the two must not be mixed.
-        $this->role = $this->createRole($this->owner, 'talent', ['timezone' => 'America/New_York']);
+        // A row reaches the writer already on the SCHEDULE's clock (the readers put it there,
+        // ImportedTime::onClock()). The schedule is in Vienna and the feed's own clock, the one
+        // its unzoned times are read on, is London's: the writer must not use that one.
+        $this->role = $this->createRole($this->owner, 'talent', ['timezone' => 'Europe/Vienna']);
         $this->feed = $this->feed();
     }
 
@@ -78,7 +80,7 @@ class FeedWriterTest extends TestCase
 
         return EventFeed::create($attrs + [
             'role_id' => $this->role->id, 'name' => 'Town calendar', 'url' => $url, 'url_hash' => EventFeed::hashOf($url),
-            'host' => 'calendar.example.org', 'kind' => EventFeed::KIND_CALENDAR, 'source_timezone' => 'Europe/Vienna',
+            'host' => 'calendar.example.org', 'kind' => EventFeed::KIND_CALENDAR, 'source_timezone' => 'Europe/London',
             'publish_mode' => EventFeed::PUBLISH,
         ]);
     }
@@ -134,8 +136,10 @@ class FeedWriterTest extends TestCase
         $event = $this->writer()->create($this->feed, $this->role, $this->owner, $item, $wanted, 'abcdef012345')->fresh();
 
         $this->assertSame('Frühlingskonzert', $event->name);
-        // 19:30 in Vienna in May is 17:30 UTC, whatever the schedule's own zone is.
+        // 19:30 on the schedule's clock, Vienna's, in May is 17:30 UTC. The feed's clock is
+        // London's and has no say here: it was used, and done with, when the row was read.
         $this->assertSame('2027-05-09 17:30:00', $event->starts_at);
+        // The zone the event's clock is anchored to is its schedule's, as a save by hand records.
         $this->assertSame('Europe/Vienna', $event->timezone);
         $this->assertSame(2.5, $event->duration);
         $this->assertSame("Kommt vorbei!\n\nEintritt frei.", $event->description);
@@ -374,21 +378,22 @@ class FeedWriterTest extends TestCase
     }
 
     /**
-     * The owner corrects the feed's clock (Edit feed). A start the feed moves afterwards is read
-     * on the new clock, and the event says which clock that is.
+     * A start the feed moves is on the schedule's clock, and the event goes on saying that its
+     * clock is the schedule's, whatever the feed's own clock is set to. (What a change of the
+     * feed's clock does to times that name no zone is the readers' business, and is held by
+     * ApFeedPageTest's clock tests, end to end.)
      */
-    public function test_a_start_moved_after_the_feeds_clock_was_corrected_is_on_the_new_clock(): void
+    public function test_a_start_the_feed_moves_is_on_the_schedules_clock_whatever_the_feeds_is(): void
     {
         [$item, $event] = $this->made();
         $this->assertSame('Europe/Vienna', $event->timezone);
 
-        $this->feed->update(['source_timezone' => 'Europe/London']);
+        $this->feed->update(['source_timezone' => 'Pacific/Auckland']);
         $this->update($item, $event, ['event_date_time' => '2027-05-10 19:30']);
 
         $event->refresh();
-        // 19:30 in London in May is 18:30 UTC.
-        $this->assertSame('2027-05-10 18:30:00', $event->starts_at);
-        $this->assertSame('Europe/London', $event->timezone);
+        $this->assertSame('2027-05-10 17:30:00', $event->starts_at);
+        $this->assertSame('Europe/Vienna', $event->timezone);
     }
 
     public function test_the_flyer_is_fetched_when_the_sources_picture_changes_and_never_over_the_owners(): void

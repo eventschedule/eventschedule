@@ -170,6 +170,51 @@ class FeedCommandTest extends TestCase
     }
 
     /**
+     * A read that takes the whole process down never gets to say when to try again. Left as the
+     * most overdue feed, it would lead the next run and every run after, in front of all the
+     * others. So a feed is claimed before it is read.
+     */
+    public function test_a_feed_is_claimed_before_it_is_read(): void
+    {
+        $feed = $this->feed('big.ics');
+        $seen = null;
+
+        $this->mock(FeedImporter::class, function ($mock) use (&$seen) {
+            $mock->shouldReceive('prune')->andReturn(0);
+            $mock->shouldReceive('read')->andReturnUsing(function (EventFeed $feed) use (&$seen) {
+                $seen = EventFeed::find($feed->id)->next_check_at;
+
+                return ['status' => 'ok'];
+            });
+        });
+
+        $this->artisan('app:import-feeds')->assertSuccessful();
+
+        $this->assertNotNull($seen);
+        $this->assertEqualsWithDelta(10, now()->diffInMinutes($seen), 1, 'while it is being read it is already not due');
+    }
+
+    /**
+     * A read that throws is a failed read like any other: it backs off as failures do, the feed
+     * shows as failing, and after a fortnight of it the feed is paused. Counted by the command
+     * alone it failed quietly once an hour for ever, with nobody told.
+     */
+    public function test_a_read_that_throws_is_counted_like_any_failed_read(): void
+    {
+        $feed = $this->feed('throws.ics', ['failure_count' => FeedImporter::PAUSE_AFTER_FAILURES, 'last_success_at' => now()->subDays(20)]);
+        $this->mock(\App\Services\Feeds\FeedFetcher::class, function ($mock) {
+            $mock->shouldReceive('get')->andThrow(new \RuntimeException('Something nobody expected'));
+        });
+
+        $this->artisan('app:import-feeds')->assertSuccessful();
+
+        $feed->refresh();
+        $this->assertSame(['failed', FeedImporter::PAUSE_AFTER_FAILURES + 1], [$feed->last_status, $feed->failure_count]);
+        $this->assertTrue($feed->isPaused(), 'through the same door as every other failure');
+        $this->assertSame(EventFeed::PAUSED_FAILING, $feed->pause_reason);
+    }
+
+    /**
      * The owner deletes an event a feed made. That is a decision about the feed too: the next
      * read, with the event changed at the source so that it is looked at again, does not bring
      * it back.

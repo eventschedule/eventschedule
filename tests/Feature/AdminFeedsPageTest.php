@@ -164,7 +164,7 @@ class AdminFeedsPageTest extends TestCase
     public function test_many_feeds_failing_at_once_is_an_alert_that_opens_the_page(): void
     {
         foreach (range(1, 4) as $n) {
-            $this->feed('Failing '.$n, ['failure_count' => 2, 'last_checked_at' => now()->subHour()]);
+            $this->feed('Failing '.$n, ['failure_count' => 2, 'last_checked_at' => now()->subHour(), 'host' => "site{$n}.example"]);
         }
         $alert = function () {
             AdminAlertService::flush();
@@ -173,7 +173,7 @@ class AdminFeedsPageTest extends TestCase
         };
         $this->assertNull($alert(), 'four failing feeds are four schedules with a problem each');
 
-        $this->feed('Failing 5', ['failure_count' => 2, 'last_checked_at' => now()->subHour()]);
+        $this->feed('Failing 5', ['failure_count' => 2, 'last_checked_at' => now()->subHour(), 'host' => 'site5.example']);
         $row = $alert();
         $this->assertNotNull($row);
         $this->assertSame(5, $row['count']);

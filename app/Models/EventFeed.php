@@ -114,15 +114,21 @@ class EventFeed extends Model
     }
 
     /**
-     * Whether more feeds are failing at once than their own sources would explain: at least
-     * five, and half of all that are being read. Then the fault is likelier ours (the network,
-     * an address of ours that a host blocks), so nobody is mailed that THEIR feed is broken and
-     * no feed is paused for it; the platform's admins are told instead (AdminAlertService).
+     * Whether more SOURCES are failing at once than their own troubles would explain: at least
+     * five sites, and half of all the sites being read. Then the fault is likelier ours (the
+     * network, an address of ours that a host blocks), so nobody is mailed that THEIR feed is
+     * broken and no feed is paused for it; the platform's admins are told instead
+     * (AdminAlertService).
+     *
+     * Counted by site, because six feeds on one site that went down are one source's trouble.
+     * And only among feeds that are being read at all: one whose schedule was deleted or whose
+     * plan lapsed is never asked, and would otherwise make "half" harder to reach for ever.
      */
     public static function manyFailing(): bool
     {
-        $reading = self::whereNull('paused_at')->count();
-        $failing = self::whereNull('paused_at')->where('failure_count', '>', 0)->where('last_checked_at', '>', now()->subDay())->count();
+        $beingRead = fn () => self::whereNull('paused_at')->where('last_checked_at', '>', now()->subDays(2));
+        $reading = $beingRead()->distinct()->count('host');
+        $failing = $beingRead()->where('failure_count', '>', 0)->where('last_checked_at', '>', now()->subDay())->distinct()->count('host');
 
         return $failing >= 5 && $failing * 2 >= $reading;
     }

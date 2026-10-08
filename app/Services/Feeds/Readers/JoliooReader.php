@@ -140,7 +140,9 @@ class JoliooReader implements FeedReader
             return 'later';
         }
 
-        [$placed, $otherZone] = ImportedTime::place($start['at'], $start['states_zone'], $timezone, $keepLocalClock);
+        [$placed, $otherZone] = $start['all_day']
+            ? [\Carbon\CarbonImmutable::instance($start['at']), null]
+            : ImportedTime::place($start['at'], $start['states_zone'], $timezone, $keepLocalClock);
         $location = IcsImportUtils::location((string) ($posting['post_message_location'] ?? ''));
         $media = array_values(array_filter((array) ($posting['post_message_media'] ?? []), 'is_string'));
         $link = (string) ($item['hint']['link'] ?? '');
@@ -153,6 +155,7 @@ class JoliooReader implements FeedReader
             'venue_name' => $location['venue_name'],
             'event_address' => $location['event_address'],
             'registration_url' => ImportAddress::absolute($link, $fetched->url) ?: $location['url'],
+            'link_from_location' => ! ImportAddress::absolute($link, $fetched->url) && ! empty($location['url']),
             'category_name' => '',
             'image_url' => ImportAddress::absolute($media[0] ?? (string) ($item['hint']['image'] ?? ''), $fetched->url) ?: null,
             'is_all_day' => $start['all_day'],

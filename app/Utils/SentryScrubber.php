@@ -169,6 +169,36 @@ class SentryScrubber
             return $crumb;
         }, $event->getBreadcrumbs()));
 
+        // Spans, on a traced request. An outbound request is a span as well as a breadcrumb: the
+        // address is in its description ("GET https://host/path") and again in its data. With
+        // tracing switched on, that is where an address a schedule's owner gave us would leave.
+        foreach ($event->getSpans() as $span) {
+            if ($span->getOp() !== 'http.client') {
+                continue;
+            }
+
+            $description = (string) $span->getDescription();
+            if (preg_match('~^(\S+\s+)?(https?://\S+)$~i', $description, $found)) {
+                $span->setDescription($found[1].self::hostOnly($found[2]));
+            }
+
+            $data = (array) $span->getData();
+            $changed = [];
+            foreach (['url', 'http.url'] as $key) {
+                if (is_string($data[$key] ?? null) && self::hostOnly($data[$key]) !== $data[$key]) {
+                    $changed[$key] = self::hostOnly($data[$key]);
+                }
+            }
+            if ($changed) {
+                foreach (['http.query' => '[query]', 'http.fragment' => '[fragment]'] as $key => $placeholder) {
+                    if (is_string($data[$key] ?? null) && $data[$key] !== '') {
+                        $changed[$key] = $placeholder;
+                    }
+                }
+                $span->setData($changed);
+            }
+        }
+
         // extra and tags are free text the app sets itself, and cost nothing to walk.
         $event->setExtra(self::scrubDeep($event->getExtra()));
         $event->setTags(self::scrubDeep($event->getTags()));
@@ -204,9 +234,7 @@ class SentryScrubber
             return $crumb;
         }
 
-        $path = (string) parse_url($url, PHP_URL_PATH);
-        $port = parse_url($url, PHP_URL_PORT);
-        $crumb = $crumb->withMetadata('url', (parse_url($url, PHP_URL_SCHEME) ?: 'https').'://'.$host.($port ? ':'.$port : '').($path !== '' && $path !== '/' ? '/[path]' : $path));
+        $crumb = $crumb->withMetadata('url', self::hostOnly($url));
 
         foreach (['http.query' => '[query]', 'http.fragment' => '[fragment]'] as $key => $placeholder) {
             if (is_string($metadata[$key] ?? null) && $metadata[$key] !== '') {
@@ -215,6 +243,21 @@ class SentryScrubber
         }
 
         return $crumb;
+    }
+
+    /** A foreign address as its host alone. Our own, and anything that is not an address, as it is. */
+    private static function hostOnly(string $url): string
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (! is_string($host) || $host === '' || self::isOurHost($host)) {
+            return $url;
+        }
+
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $port = parse_url($url, PHP_URL_PORT);
+
+        return (parse_url($url, PHP_URL_SCHEME) ?: 'https').'://'.$host.($port ? ':'.$port : '').($path !== '' && $path !== '/' ? '/[path]' : $path);
     }
 
     private static function isOurHost(string $host): bool

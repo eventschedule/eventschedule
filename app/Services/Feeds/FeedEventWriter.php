@@ -72,9 +72,11 @@ class FeedEventWriter
         return [
             'name' => mb_substr(trim((string) ($row['event_name'] ?? '')), 0, 255) ?: __('messages.untitled_event'),
             'description' => self::text(mb_substr((string) ($row['event_details'] ?? ''), 0, 10000)),
-            'starts_at' => FeedTime::startOf($row, $feed->source_timezone, $role->captureTimezone())->format('Y-m-d H:i:s'),
+            'starts_at' => FeedTime::startOf($row, $role->captureTimezone())->format('Y-m-d H:i:s'),
             'duration' => $duration,
-            'link' => UrlUtils::safeHref($row['registration_url'] ?? null),
+            // Never a link that was a calendar entry's LOCATION: that is where a meeting is held,
+            // and nobody looks at a feed's event before it is public.
+            'link' => empty($row['link_from_location']) ? UrlUtils::safeHref($row['registration_url'] ?? null) : null,
             'category_id' => $this->categoryFor($feed, $role, (string) ($row['category_name'] ?? '')),
             'venue_id' => $venue?->id,
             'flyer' => ($row['image_url'] ?? null) ?: null,
@@ -85,15 +87,16 @@ class FeedEventWriter
      * Make the event. $batch is the first read's mark, which is what "Undo first read" removes
      * and what the digest to subscribers leaves out.
      */
-    public function create(EventFeed $feed, Role $role, User $owner, EventFeedItem $item, array $wanted, ?string $batch): Event
+    public function create(EventFeed $feed, Role $role, User $owner, EventFeedItem $item, array $wanted, ?string $batch, bool $asDraft = false): Event
     {
         $roleId = UrlUtils::encodeId($role->id);
 
         $request = new Request;
         $request->merge(array_filter([
             'name' => $wanted['name'],
-            // saveEvent() reads the start as a wall-clock time in the zone it is handed.
-            'starts_at' => Carbon::parse($wanted['starts_at'], 'UTC')->setTimezone($feed->source_timezone)->format('Y-m-d H:i:s'),
+            // saveEvent() reads the start as a wall-clock time in the zone it is handed, and
+            // records that zone as the one the event's clock is anchored to: the schedule's.
+            'starts_at' => Carbon::parse($wanted['starts_at'], 'UTC')->setTimezone($role->captureTimezone())->format('Y-m-d H:i:s'),
             'duration' => $wanted['duration'],
             'description' => $wanted['description'],
             'registration_url' => $wanted['link'],
@@ -103,7 +106,10 @@ class FeedEventWriter
         ], fn ($value) => $value !== null) + [
             'schedule_type' => 'one_time',
             'tickets_enabled' => false,
-            'is_draft' => ! $feed->publishes(),
+            // $asDraft: an event coming back after it went (deleted by the feed and listed again)
+            // is for the owner to look at, and is made a draft, not published and then hidden:
+            // a publish is a push to calendars, a webhook and a line in the digest to followers.
+            'is_draft' => $asDraft || ! $feed->publishes(),
             'is_private' => false,
             'is_internal' => false,
             // The schedule's own place on its own event, as the API and the form give it.
@@ -119,7 +125,7 @@ class FeedEventWriter
 
         try {
             $event = $this->events->saveEvent(
-                $role, $request, null, true, $feed->source_timezone,
+                $role, $request, null, true, $role->captureTimezone(),
                 importSource: Event::IMPORT_FEED,
                 importBatch: $batch,
             );
@@ -178,6 +184,14 @@ class FeedEventWriter
             $written[] = $field;
         }
 
+        // A source whose text is different on every read (a counter in it, a rotating line)
+        // would have every one of its events rewritten every hour: translations bought again,
+        // calendars pushed, a webhook sent. A few rewrites a day is a source being edited. More
+        // waits for tomorrow, and is not lost: the snapshot stays as it was.
+        if ($written && ! $this->mayWriteAgainToday($item)) {
+            $written = [];
+        }
+
         if ($written) {
             $this->apply($feed, $event, array_intersect_key($wanted, array_flip($written)));
             $material = (bool) array_intersect($written, ['starts_at', 'duration', 'venue_id']);
@@ -209,6 +223,10 @@ class FeedEventWriter
             $imported['row'][$field] = $now[$field];
         }
         $imported['venue_id'] = $imported['row']['venue_id'] ?? null;
+        if ($written) {
+            $day = now()->format('Y-m-d');
+            $imported['writes'] = ['day' => $day, 'n' => (($item->imported['writes']['day'] ?? null) === $day ? (int) $item->imported['writes']['n'] : 0) + 1];
+        }
 
         $decide = array_intersect_key($wanted, array_flip($held));
         $decision = $decide ? ['kind' => 'moved'] + $decide : null;
@@ -228,13 +246,31 @@ class FeedEventWriter
         $aside = array_diff_key($item->pending ?? [], ['fields' => true, 'decide' => true])
             + array_filter(['fields' => $pending ?: null, 'decide' => $decision]);
 
-        $item->forceFill([
-            'imported' => $imported,
-            'pending' => $aside ?: null,
-            'state' => $decision ? EventFeedItem::STATE_DECIDE : ($item->state === EventFeedItem::STATE_DECIDE ? EventFeedItem::STATE_IMPORTED : $item->state),
-        ])->save();
+        // Only what differs is set. MySQL hands a JSON column back with its keys in its own
+        // order, so setting an equal array made every item dirty, and written, on every read.
+        $state = $decision ? EventFeedItem::STATE_DECIDE : ($item->state === EventFeedItem::STATE_DECIDE ? EventFeedItem::STATE_IMPORTED : $item->state);
+        $changes = array_filter([
+            'imported' => $imported != ($item->imported ?? []) ? $imported : null,
+            'state' => $state !== $item->state ? $state : null,
+        ], fn ($value) => $value !== null);
+        if (($aside ?: null) != $item->pending) {
+            $changes['pending'] = $aside ?: null;
+        }
+        if ($changes) {
+            $item->forceFill($changes)->save();
+        }
 
         return ['written' => $written, 'kept' => $kept, 'held' => $held, 'raised' => $raised];
+    }
+
+    /** How many times a day the feed rewrites one event. */
+    public const WRITES_PER_DAY = 6;
+
+    private function mayWriteAgainToday(EventFeedItem $item): bool
+    {
+        $writes = $item->imported['writes'] ?? null;
+
+        return ! $writes || ($writes['day'] ?? null) !== now()->format('Y-m-d') || (int) ($writes['n'] ?? 0) < self::WRITES_PER_DAY;
     }
 
     /**
@@ -433,7 +469,8 @@ class FeedEventWriter
                 'duration' => $event->duration = $value,
                 'link' => $event->registration_url = $value,
                 'category_id' => $event->category_id = $value,
-                'starts_at' => $event->forceFill(['starts_at' => $value, 'timezone' => $feed->source_timezone]),
+                // The zone the event's clock is anchored to is its schedule's, as a save by hand records.
+                'starts_at' => $event->forceFill(['starts_at' => $value, 'timezone' => $event->scheduleTimezone()]),
                 'venue_id' => $this->moveTo($event, $value),
             };
         }

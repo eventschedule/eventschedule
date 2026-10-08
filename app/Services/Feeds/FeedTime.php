@@ -18,28 +18,18 @@ use Carbon\CarbonImmutable;
 final class FeedTime
 {
     /**
-     * The clock a reader's row is on.
+     * The instant a reader's row starts at.
      *
-     * A row's time is a wall-clock time, and whose depends on what the source said. A time with
-     * no zone is on the feed's clock, which is what "Times are read as" sets, and so is a time
-     * that named a zone and was turned to the feed's. But an event that named ANOTHER zone, on a
-     * schedule that keeps such an event's own clock (ImportedTime::place()), is carried as that
-     * clock and is meant to read as it on the schedule: it is placed on the schedule's clock, as
-     * the import page places it, and the feed's setting does not reach it. A whole-day event is
-     * a date, and a date is the schedule's as well.
-     *
-     * While the two clocks are the same one, which is how a feed is added, none of this shows.
-     * It is what keeps "Times are read as" from moving a calendar whose every entry says its zone.
+     * A feed's reads place every time on the schedule's clock (ImportedTime::onClock()). A time
+     * with no zone is read on the feed's own ("Times are read as") and turned to the schedule's.
+     * A time that named a zone is turned to it too, or, on a schedule that keeps an event's own
+     * clock, carried as that clock so that it reads the same here. A whole day is its date. So a
+     * row is always a wall-clock time on the schedule's clock, whichever of those it was, and
+     * this is the one place that says so.
      */
-    public static function zoneOf(array $row, string $feedZone, string $scheduleZone): string
+    public static function startOf(array $row, string $scheduleZone): Carbon
     {
-        return ! empty($row['local_time_zone']) || ! empty($row['is_all_day']) ? $scheduleZone : $feedZone;
-    }
-
-    /** The instant a reader's row starts at. */
-    public static function startOf(array $row, string $feedZone, string $scheduleZone): Carbon
-    {
-        return Carbon::parse($row['event_date_time'], self::zoneOf($row, $feedZone, $scheduleZone))->utc();
+        return Carbon::parse($row['event_date_time'], $scheduleZone)->utc();
     }
 
     /**

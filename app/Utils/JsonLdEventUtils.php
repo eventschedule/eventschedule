@@ -287,7 +287,10 @@ class JsonLdEventUtils
             return null;
         }
 
-        [$placed, $otherZone] = ImportedTime::place($start['at'], $start['states_zone'], $timezone, $keepLocalClock);
+        // A whole day is a date as written: it is on no clock, so it is not moved to one.
+        [$placed, $otherZone] = $start['all_day']
+            ? [\Carbon\CarbonImmutable::instance($start['at']), null]
+            : ImportedTime::place($start['at'], $start['states_zone'], $timezone, $keepLocalClock);
 
         $end = self::moment(self::text($node['endDate'] ?? ''), $timezone);
         $duration = '';

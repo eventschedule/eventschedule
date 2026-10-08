@@ -85,6 +85,18 @@ class FeedMailTest extends TestCase
         return app(FeedImporter::class)->read($feed->fresh(), microtime(true) + $seconds);
     }
 
+    /**
+     * Read it again a while later. An entry has to have been out of sight for an hour and a
+     * half before its absence means anything (FeedImporter::GONE_AFTER_MINUTES): two reads a
+     * minute apart are one look, not two.
+     */
+    private function readLater(EventFeed $feed): array
+    {
+        \Illuminate\Support\Facades\DB::table('event_feed_items')->update(['last_seen_at' => \Illuminate\Support\Facades\DB::raw('DATE_SUB(last_seen_at, INTERVAL 2 HOUR)')]);
+
+        return $this->read($feed);
+    }
+
     private function signUp(string $name): void
     {
         $event = Event::where('name', $name)->firstOrFail();
@@ -237,7 +249,7 @@ class FeedMailTest extends TestCase
         $this->entries = [$this->entry('a', 'Stays'), $this->entry('soon', 'This weekend', 2)];
         $this->read($feed);
         $this->assertSame([], $this->sentTo($this->owner));
-        $this->read($feed);
+        $this->readLater($feed);
 
         $this->assertSame([FeedNotification::DECIDE], $this->sentTo($this->owner));
         $facts = $this->factsSentTo($this->owner, FeedNotification::DECIDE);
@@ -247,7 +259,7 @@ class FeedMailTest extends TestCase
 
         // Still waiting on the next reads: nothing new to say.
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertCount(1, $this->sentTo($this->owner));
 
         // The same day, the one this weekend moves. That does not wait.
@@ -260,7 +272,7 @@ class FeedMailTest extends TestCase
         // Urgent is not "on every read until somebody answers": still moved, still waiting,
         // nothing new to say.
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertCount(2, $this->sentTo($this->owner));
     }
 
@@ -280,7 +292,7 @@ class FeedMailTest extends TestCase
         $this->assertFalse((bool) Event::where('name', 'This weekend')->value('is_cancelled'));
 
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertCount(1, $this->sentTo($this->owner));
     }
 
@@ -294,10 +306,10 @@ class FeedMailTest extends TestCase
 
         $this->entries = [$this->entry('a', 'Stays'), $this->entry('c', 'Second', 25)];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->entries = [$this->entry('a', 'Stays')];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
 
         $this->assertSame([FeedNotification::DECIDE], $this->sentTo($this->owner));
         $this->assertSame('First', $this->factsSentTo($this->owner, FeedNotification::DECIDE)['event']);
@@ -324,7 +336,7 @@ class FeedMailTest extends TestCase
         $this->assertNotEmpty($this->factsSentTo($this->owner, FeedNotification::FAILING)['since']);
 
         // Not every day after that.
-        foreach (range(1, 5) as $day) {
+        foreach (range(1, 6) as $day) {
             $this->travel(1)->days();
             $this->read($feed);
         }
@@ -347,17 +359,17 @@ class FeedMailTest extends TestCase
         $this->assertSame([FeedNotification::FAILING, FeedNotification::PAUSED, FeedNotification::FAILING], $this->sentTo($this->owner));
     }
 
-    /** When half of all feeds fail together the fault is ours: nobody is told theirs is broken, and none is paused. */
-    public function test_many_feeds_failing_at_once_is_not_each_owners_news(): void
+    /** When half of all sources fail together the fault is ours: nobody is told theirs is broken, and none is paused. */
+    public function test_many_sources_failing_at_once_is_not_each_owners_news(): void
     {
-        // Ten feeds, five of them failing since this morning, as they would after an outage of
-        // ours. This one has gone long enough to be mailed about, and that one to be paused.
+        // Ten sites being read, five of them failing since this morning, as they would after an
+        // outage of ours. This one has gone long enough to be mailed about, and that one to be paused.
         foreach (range(1, 8) as $n) {
-            $this->feed(['publish_mode' => EventFeed::PUBLISH, 'file' => 'other'.$n, 'last_success_at' => now()->subHours(2)])
-                ->forceFill($n <= 5 ? ['failure_count' => 2, 'last_checked_at' => now()->subHour()] : [])->save();
+            $this->feed(['publish_mode' => EventFeed::PUBLISH, 'file' => 'other'.$n, 'host' => "site{$n}.example", 'last_success_at' => now()->subHours(2), 'last_checked_at' => now()->subHour()])
+                ->forceFill($n <= 5 ? ['failure_count' => 2] : [])->save();
         }
-        $days = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'file' => 'days', 'last_success_at' => now()->subDays(4)]);
-        $weeks = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'file' => 'weeks', 'last_success_at' => now()->subDays(20)]);
+        $days = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'file' => 'days', 'host' => 'days.example', 'last_success_at' => now()->subDays(4)]);
+        $weeks = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'file' => 'weeks', 'host' => 'weeks.example', 'last_success_at' => now()->subDays(20), 'failure_count' => FeedImporter::PAUSE_AFTER_FAILURES]);
         $this->status = 500;
         $this->assertTrue(EventFeed::manyFailing());
 
@@ -366,7 +378,7 @@ class FeedMailTest extends TestCase
 
         $this->assertSame([], $this->sentTo($this->owner));
         $this->assertFalse($weeks->fresh()->isPaused());
-        $this->assertSame(1, $weeks->fresh()->failure_count);
+        $this->assertSame(FeedImporter::PAUSE_AFTER_FAILURES + 1, $weeks->fresh()->failure_count);
 
         // The others recover. Now these two are their own schedules' news.
         EventFeed::where('url_hash', '!=', $days->url_hash)->where('url_hash', '!=', $weeks->url_hash)->update(['failure_count' => 0]);
@@ -378,26 +390,37 @@ class FeedMailTest extends TestCase
         $this->assertTrue($weeks->fresh()->isPaused());
     }
 
-    /** What counts as many: at least five, half of those being read, failing within the day. */
-    public function test_what_counts_as_many_feeds_failing(): void
+    /** What counts as many: at least five SITES, half of those being read, failing within the day. */
+    public function test_what_counts_as_many_sources_failing(): void
     {
-        $failing = fn (int $n, array $more = []) => collect(range(1, $n))->each(fn ($i) => $this->feed(['file' => uniqid('f', true)])
-            ->forceFill($more + ['failure_count' => 1, 'last_checked_at' => now()->subHour()])->save());
-        $working = fn (int $n) => collect(range(1, $n))->each(fn ($i) => $this->feed(['file' => uniqid('w', true)]));
+        $feeds = fn (int $n, array $more = [], ?string $host = null) => collect(range(1, $n))->each(fn ($i) => $this->feed(['file' => uniqid('f', true), 'host' => $host ?? uniqid('site').'.example'])
+            ->forceFill($more + ['last_checked_at' => now()->subHour()])->save());
+        $failing = fn (int $n, array $more = [], ?string $host = null) => $feeds($n, $more + ['failure_count' => 1], $host);
 
         $failing(4);
         $this->assertFalse(EventFeed::manyFailing(), 'four is a few');
         $failing(1);
         $this->assertTrue(EventFeed::manyFailing());
-        $working(5);
+        $feeds(5);
         $this->assertTrue(EventFeed::manyFailing(), 'five of ten is half');
-        $working(1);
+        $feeds(1);
         $this->assertFalse(EventFeed::manyFailing(), 'five of eleven is not');
 
+        // A feed that is never asked (its schedule deleted, its plan lapsed) is not one of "all".
         EventFeed::query()->delete();
+        $failing(5);
+        $feeds(20, ['last_checked_at' => now()->subDays(5)]);
+        $this->assertTrue(EventFeed::manyFailing(), 'feeds nobody reads do not make half harder to reach');
+
+        // Six feeds on ONE site that went down are one source's trouble, however many feeds.
+        EventFeed::query()->delete();
+        $failing(6, [], 'one-site.example');
+        $this->assertFalse(EventFeed::manyFailing());
+
         // Paused feeds are not being read, and a failure from last week is not this outage.
+        EventFeed::query()->delete();
         $failing(5, ['paused_at' => now()]);
-        $failing(5, ['last_checked_at' => now()->subDays(2)]);
+        $failing(5, ['last_checked_at' => now()->subDays(2)->subHour()]);
         $this->assertFalse(EventFeed::manyFailing());
     }
 

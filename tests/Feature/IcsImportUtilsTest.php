@@ -594,9 +594,16 @@ class IcsImportUtilsTest extends TestCase
 
         $plain = $read($weekly);
         $this->assertSame(['2026-10-13 19:00', '2026-10-20 19:00', '2026-10-27 19:00', '2026-11-03 19:00'], array_column($plain['rows'], 'event_date_time'));
+        // Each date is known by its day on the entry's own clock: the 3rd in New York, though
+        // that evening is already the 4th in UTC.
         $this->assertSame(
-            ['class#20261013T230000Z', 'class#20261020T230000Z', 'class#20261027T230000Z', 'class#20261104T000000Z'],
+            ['class#20261013', 'class#20261020', 'class#20261027', 'class#20261103'],
             array_column($plain['rows'], 'source_id')
+        );
+        // And not by its instant: the class moved to eight o'clock is the same dates.
+        $this->assertSame(
+            array_column($plain['rows'], 'source_id'),
+            array_column($read(str_replace('T190000', 'T200000', $weekly))['rows'], 'source_id')
         );
         $this->assertNull($plain['rows'][0]['recurrence']);
 
@@ -608,10 +615,10 @@ class IcsImportUtilsTest extends TestCase
         );
         $byId = array_column($changed['rows'], 'event_date_time', 'source_id');
 
-        $this->assertSame('2026-10-21 20:00', $byId['class#20261020T230000Z']);
-        $this->assertArrayNotHasKey('class#20261027T230000Z', $byId);
-        $this->assertSame('cancelled', $changed['seen']['class#20261027T230000Z']);
-        $this->assertSame('listed', $changed['seen']['class#20261020T230000Z']);
+        $this->assertSame('2026-10-21 20:00', $byId['class#20261020']);
+        $this->assertArrayNotHasKey('class#20261027', $byId);
+        $this->assertSame('cancelled', $changed['seen']['class#20261027']);
+        $this->assertSame('listed', $changed['seen']['class#20261020']);
         $this->assertSame(['past' => 0, 'cancelled' => 0, 'private' => 0, 'unreadable' => 0], $changed['skipped']);
     }
 }

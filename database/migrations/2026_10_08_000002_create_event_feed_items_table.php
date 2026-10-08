@@ -57,10 +57,20 @@ return new class extends Migration
             $table->json('imported')->nullable();
             $table->json('pending')->nullable();
             $table->char('decided_hash', 64)->nullable();
-            $table->unsignedTinyInteger('missing_reads')->default(0);
+            // Counted on every read that misses the item, for as long as its event is still to
+            // come: the reader stops at a cap, and the column has room past it all the same.
+            $table->unsignedSmallInteger('missing_reads')->default(0);
             $table->boolean('cancelled_by_feed')->default(false);
+            // The cancelled_at the feed's own cancellation stamped. A cancelled event is put
+            // back when the source lists it again only while this is still the event's own:
+            // one the owner restored and cancelled again is theirs.
+            $table->dateTime('feed_cancelled_at')->nullable();
+            // How often the item's own page did not answer. After a few it is left out.
+            $table->unsignedTinyInteger('page_tries')->default(0);
             $table->text('image_source')->nullable();
             $table->boolean('image_pending')->default(false);
+            // How often that picture could not be had. After a few it is not asked for again.
+            $table->unsignedTinyInteger('picture_tries')->default(0);
             $table->dateTime('publish_requested_at')->nullable();
             $table->dateTime('first_seen_at')->nullable();
             $table->dateTime('last_seen_at')->nullable();

@@ -93,6 +93,18 @@ class FeedImporterTest extends TestCase
         return app(FeedImporter::class)->read($feed->fresh(), microtime(true) + 30);
     }
 
+    /**
+     * Read it again a while later. An entry has to have been out of sight for an hour and a
+     * half before its absence means anything (FeedImporter::GONE_AFTER_MINUTES): two reads a
+     * minute apart are one look, not two.
+     */
+    private function readLater(EventFeed $feed): array
+    {
+        \Illuminate\Support\Facades\DB::table('event_feed_items')->update(['last_seen_at' => \Illuminate\Support\Facades\DB::raw('DATE_SUB(last_seen_at, INTERVAL 2 HOUR)')]);
+
+        return $this->read($feed);
+    }
+
     private function eventNamed(string $name): ?Event
     {
         return Event::where('name', $name)->first();
@@ -203,8 +215,8 @@ class FeedImporterTest extends TestCase
         $this->read($feed);
         $this->entries = [];
         $this->read($feed);
-        $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
+        $this->readLater($feed);
 
         $byHand->refresh();
         $this->assertSame('Concert', $byHand->name);
@@ -228,8 +240,8 @@ class FeedImporterTest extends TestCase
         $this->travel(5)->days();
         $this->entries = [$this->entry('b', 'Still to come', 25)];
         $this->read($feed);
-        $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
+        $this->readLater($feed);
 
         $past = $this->eventNamed('Last week\'s concert');
         $this->assertNotNull($past);
@@ -304,8 +316,12 @@ class FeedImporterTest extends TestCase
             $once = $this->eventNamed("Goes {$action}");
             $this->assertTrue($once && ! $once->is_cancelled, "{$action}: missing once is not gone");
 
+            // Twice, but in the same minute: one look, not two.
             $this->read($feed);
-            $this->assertTrue($afterwards($this->eventNamed("Goes {$action}")), "{$action}: missing twice");
+            $this->assertTrue($this->eventNamed("Goes {$action}") && ! $this->eventNamed("Goes {$action}")->is_cancelled, "{$action}: twice in a minute is not gone");
+
+            $this->readLater($feed);
+            $this->assertTrue($afterwards($this->eventNamed("Goes {$action}")), "{$action}: missing twice, an hour and a half apart");
             $this->assertFalse((bool) $this->eventNamed("Stays {$action}")->is_cancelled);
         }
 
@@ -377,7 +393,13 @@ class FeedImporterTest extends TestCase
         $this->read($feed);
         $this->assertNull($feed->fresh()->paused_at);
 
+        // A fortnight without a good read is not enough on its own: a feed resumed after a long
+        // pause has not had one for weeks either, and one timeout must not pause it again.
         $feed->forceFill(['last_success_at' => now()->subDays(15)])->save();
+        $this->read($feed);
+        $this->assertNull($feed->fresh()->paused_at, 'few failures, long silence: not yet');
+
+        $feed->forceFill(['failure_count' => FeedImporter::PAUSE_AFTER_FAILURES - 1])->save();
         $this->read($feed);
         $this->assertNotNull($feed->fresh()->paused_at);
         $this->assertSame(EventFeed::PAUSED_FAILING, $feed->fresh()->pause_reason);
@@ -410,7 +432,7 @@ class FeedImporterTest extends TestCase
 
             $this->entries = [$this->entry('a', "Stays {$action}")];
             $this->read($feed);
-            $this->read($feed);
+            $this->readLater($feed);
 
             $event = $event->fresh();
             $this->assertNotNull($event, "{$what}: deleted");
@@ -440,7 +462,7 @@ class FeedImporterTest extends TestCase
 
         $this->entries = array_slice($all, 0, 4);
         $this->read($feed);
-        $held = $this->read($feed);
+        $held = $this->readLater($feed);
 
         $this->assertSame(6, $held['held']);
         $this->assertSame(0, Event::where('is_cancelled', true)->count());
@@ -458,7 +480,7 @@ class FeedImporterTest extends TestCase
         // A few going is acted on: two of ten is not a bad day.
         $this->entries = array_slice($all, 0, 8);
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertSame(2, Event::where('is_cancelled', true)->count());
         $this->assertNull($feed->fresh()->held_leaving);
     }
@@ -486,7 +508,7 @@ class FeedImporterTest extends TestCase
         $this->assertTrue((bool) $event->fresh()->is_cancelled);
         $event->fresh()->forceFill(['is_cancelled' => false, 'cancelled_at' => null])->save();
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertFalse((bool) $event->fresh()->is_cancelled);
     }
 
@@ -504,8 +526,8 @@ class FeedImporterTest extends TestCase
         // In the first feed: one is put off by thirteen months, one is dropped.
         $this->entries = [$this->entry('a', 'Stays'), $this->entry('b', 'Postponed', 400)];
         $this->read($feed);
-        $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
+        $this->readLater($feed);
 
         $this->assertFalse((bool) $this->eventNamed('Postponed')->is_cancelled);
         $this->assertFalse((bool) $this->eventNamed('Also elsewhere')->is_cancelled, 'the other feed still lists it');

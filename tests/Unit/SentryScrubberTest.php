@@ -249,6 +249,35 @@ class SentryScrubberTest extends TestCase
         $this->assertSame('', $bare['http.query']);
     }
 
+    /**
+     * With tracing on, an outbound request is a span as well as a breadcrumb: its address is in
+     * the span's description and again in its data.
+     */
+    public function test_a_traced_request_to_somebody_elses_server_keeps_its_host_and_nothing_else(): void
+    {
+        $span = fn (string $url, string $op = 'http.client') => tap(new \Sentry\Tracing\Span, function ($span) use ($url, $op) {
+            $span->setOp($op);
+            $span->setDescription('GET '.$url);
+            $span->setData(['url' => $url, 'http.query' => 'key=Zx81', 'http.request.method' => 'GET']);
+        });
+        $ours = 'https://'.parse_url(config('app.url'), PHP_URL_HOST).'/api/internal/growth';
+        $event = SentryEvent::createTransaction();
+        $event->setSpans([
+            $span('https://calendar.google.com/calendar/ical/someone%40gmail.com/private-0123456789abcdef/basic.ics'),
+            $span($ours),
+            $span('https://example.org/a/b', 'db.query'),
+        ]);
+
+        [$foreign, $own, $other] = SentryScrubber::beforeSend($event)->getSpans();
+
+        $this->assertSame('GET https://calendar.google.com/[path]', $foreign->getDescription());
+        $this->assertSame(['https://calendar.google.com/[path]', '[query]', 'GET'], [$foreign->getData('url'), $foreign->getData('http.query'), $foreign->getData('http.request.method')]);
+        $this->assertStringNotContainsString('private-0123456789abcdef', json_encode([$foreign->getDescription(), $foreign->getData()]));
+        // Our own routes are what make a trace readable, and a span that is not a request is not this rule's.
+        $this->assertSame(['GET '.$ours, $ours, 'key=Zx81'], [$own->getDescription(), $own->getData('url'), $own->getData('http.query')]);
+        $this->assertSame('GET https://example.org/a/b', $other->getDescription());
+    }
+
     /** Our own host, and a schedule's subdomain of it. A lookalike that only ends in our letters is not ours. */
     public function test_a_request_to_our_own_host_keeps_its_path(): void
     {

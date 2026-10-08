@@ -78,6 +78,18 @@ class FeedActionsTest extends TestCase
         app(FeedImporter::class)->read($feed->fresh(), microtime(true) + 30);
     }
 
+    /**
+     * Read it again a while later. An entry has to have been out of sight for an hour and a
+     * half before its absence means anything (FeedImporter::GONE_AFTER_MINUTES): two reads a
+     * minute apart are one look, not two.
+     */
+    private function readLater(EventFeed $feed): void
+    {
+        \Illuminate\Support\Facades\DB::table('event_feed_items')->update(['last_seen_at' => \Illuminate\Support\Facades\DB::raw('DATE_SUB(last_seen_at, INTERVAL 2 HOUR)')]);
+
+        $this->read($feed);
+    }
+
     private function actions(): FeedActions
     {
         return app(FeedActions::class);
@@ -141,7 +153,7 @@ class FeedActionsTest extends TestCase
 
         $this->entries = [$this->entry('a', 'Wanted'), $this->entry('b', 'Not wanted (now with a new title)', 11)];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertSame(['Wanted'], Event::pluck('name')->all());
 
         // A published event is not a draft to skip.
@@ -247,7 +259,7 @@ class FeedActionsTest extends TestCase
         $this->signUp($this->named('Gone from the feed'));
         $this->entries = [$this->entry('a', 'Stays')];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $item = $this->itemOf($feed, 'b');
         $this->assertSame(EventFeedItem::STATE_DECIDE, $item->state);
 
@@ -256,7 +268,7 @@ class FeedActionsTest extends TestCase
         $this->assertSame(EventFeedItem::STATE_IMPORTED, $item->fresh()->state);
         $this->assertSame(0, $feed->fresh()->decide_count);
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $this->assertSame(EventFeedItem::STATE_IMPORTED, $item->fresh()->state);
         $this->assertFalse((bool) $this->named('Gone from the feed')->is_cancelled);
     }
@@ -269,7 +281,7 @@ class FeedActionsTest extends TestCase
         $this->signUp($this->named('Gone from the feed'));
         $this->entries = [$this->entry('a', 'Stays')];
         $this->read($feed);
-        $this->read($feed);
+        $this->readLater($feed);
         $item = $this->itemOf($feed, 'b');
 
         Bus::fake();
@@ -279,7 +291,8 @@ class FeedActionsTest extends TestCase
         $this->assertTrue((bool) $event->is_cancelled);
         Bus::assertDispatched(NotifyEventCancelled::class);
         $item->refresh();
-        $this->assertSame([EventFeedItem::STATE_IMPORTED, true], [$item->state, $item->cancelled_by_feed]);
+        // The owner's cancellation, not the feed's: nothing takes it back when the source lists it again.
+        $this->assertSame([EventFeedItem::STATE_IMPORTED, false], [$item->state, $item->cancelled_by_feed]);
         $this->assertSame(0, $feed->fresh()->decide_count);
         // Done once: the next reads neither raise it again nor undo it.
         $this->assertNull($this->actions()->apply($feed->fresh(), $this->role, $item, $this->owner, true, null));

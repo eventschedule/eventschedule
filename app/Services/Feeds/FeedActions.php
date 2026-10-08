@@ -234,9 +234,12 @@ class FeedActions
             $done = $this->writer->applyHeld($feed, $role, $item, $event, $notify, $note) ? 'moved' : null;
         } else {
             $this->lifecycle->cancel($event, $by->id, notifyAttendees: $notify, note: $note);
+            // The owner's cancellation, not the feed's: a source that lists the event again
+            // does not put it back, least of all after people were told it is off.
             $item->forceFill([
                 'state' => EventFeedItem::STATE_IMPORTED,
-                'cancelled_by_feed' => true,
+                'cancelled_by_feed' => false,
+                'feed_cancelled_at' => null,
                 'decided_hash' => FeedEventWriter::hashOf($decision),
                 'pending' => array_diff_key($item->pending, ['decide' => true]) ?: null,
             ])->save();

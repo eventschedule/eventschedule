@@ -79,18 +79,29 @@ class ImportFeeds extends Command
 
                 $read[] = $feed->id;
 
+                // Claimed before it is read. A read that takes the whole process down with it
+                // (memory, a call that is killed) never gets to say when it should be tried
+                // again, and would otherwise be the most overdue feed on the next run and on
+                // every run after, in front of all the others.
+                EventFeed::whereKey($feed->id)->update(['next_check_at' => now()->addMinutes(10)]);
+
                 try {
                     $result = $importer->read($feed, $deadline);
                 } catch (\Throwable $e) {
                     // One feed's trouble is not the others'. Counted as a failed read, so that it
-                    // backs off instead of being tried again every minute.
+                    // backs off, shows as failing, is mailed about and pauses in the end.
                     report($e);
-                    EventFeed::whereKey($feed->id)->update([
-                        'last_checked_at' => now(),
-                        'last_status' => 'failed',
-                        'failure_count' => min($feed->failure_count + 1, 65000),
-                        'next_check_at' => now()->addHour(),
-                    ]);
+
+                    try {
+                        $importer->crashed(EventFeed::find($feed->id) ?? $feed);
+                    } catch (\Throwable $again) {
+                        EventFeed::whereKey($feed->id)->update([
+                            'last_checked_at' => now(),
+                            'last_status' => 'failed',
+                            'failure_count' => min($feed->failure_count + 1, 65000),
+                            'next_check_at' => now()->addHour(),
+                        ]);
+                    }
 
                     continue;
                 }

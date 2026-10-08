@@ -52,15 +52,14 @@ class ScheduleEventMatcher
      * The id of the event this row already is on the schedule, or null.
      *
      * @param  array{event_name?: mixed, event_date_time: string, sort_at?: string, recurrence?: mixed}  $row  A reader's row: its time is a wall-clock time in the zone this was built with.
-     * @param  ?string  $zone  The zone this row's time is on, where a caller's rows are not all on one clock (a feed: FeedTime::zoneOf()).
      */
-    public function match(array $row, ?string $zone = null): ?int
+    public function match(array $row): ?int
     {
         if (! $this->exact) {
             return null;
         }
 
-        $zone ??= $this->timezone;
+        $zone = $this->timezone;
 
         $name = $row['event_name'] ?? '';
         // The row's time is a wall-clock time the save reads in the schedule's zone.

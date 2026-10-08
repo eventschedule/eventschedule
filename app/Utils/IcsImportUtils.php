@@ -278,6 +278,23 @@ class IcsImportUtils
         }
     }
 
+    /**
+     * A date of a repeating entry as part of an id: the day, on the entry's own clock. Not the
+     * instant. A weekly class moved from six to seven is the same twelve dates, and an instant
+     * made them twelve new entries, each of which a feed then added beside the one it had. A day
+     * that holds two dates of one entry gives the later ones their time as well.
+     *
+     * @param  array<string, true>  $days  The days already used for this entry.
+     */
+    private static function dayOf(\DateTimeInterface $at, array &$days): string
+    {
+        $day = $at->format('Ymd');
+        $id = isset($days[$day]) ? $day.'T'.$at->format('His') : $day;
+        $days[$day] = true;
+
+        return $id;
+    }
+
     /** A moment as part of an id: the same instant reads the same whatever zone it was written in. */
     private static function moment(\DateTimeInterface $at): string
     {
@@ -464,11 +481,12 @@ class IcsImportUtils
         }
 
         $rows = [];
+        $days = [];
         while ($iterator->valid() && count($rows) < self::SERIES_DATES && $iterator->getDtStart() <= $to) {
             $occurrence = $iterator->getEventObject();
             // The moment this date was due before anybody moved it, which is what it is known by.
             $due = isset($occurrence->{'RECURRENCE-ID'}) ? $occurrence->{'RECURRENCE-ID'}->getDateTime($zone) : $iterator->getDtStart();
-            $dateId = $id.'#'.self::moment($due);
+            $dateId = $id.'#'.self::dayOf($own($due), $days);
             // A date the owner cancelled or hid on its own.
             if ($reason = self::skipReason($occurrence)) {
                 $seen[$dateId] = $reason;
@@ -491,7 +509,7 @@ class IcsImportUtils
         $masterEnd = self::endOf($master, $masterStart, $zone);
         $seconds = $masterEnd ? $masterEnd->getTimestamp() - $masterStart->getTimestamp() : 0;
         foreach ($addedAhead as $at) {
-            $rows[] = self::row($master, $at, $seconds > 0 ? $at->modify('+'.$seconds.' seconds') : null, $zone, $keepLocalClock, $statesZone) + ['source_id' => $id.'#'.self::moment($at)];
+            $rows[] = self::row($master, $at, $seconds > 0 ? $at->modify('+'.$seconds.' seconds') : null, $zone, $keepLocalClock, $statesZone) + ['source_id' => $id.'#'.self::dayOf($own($at), $days)];
         }
 
         // In order, each moment once (a feed can add the date its rule already gives).
@@ -595,7 +613,10 @@ class IcsImportUtils
     private static function row(VEvent $vevent, \DateTimeInterface $start, ?\DateTimeInterface $end, \DateTimeZone $zone, bool $keepLocalClock, ?bool $statesZone = null): array
     {
         $allDay = ! $vevent->DTSTART->hasTime();
-        [$placed, $otherZone] = ImportedTime::place($start, $statesZone ?? self::statesZone($vevent), $zone->getName(), $keepLocalClock);
+        // A whole day is a date as written: it is on no clock, so it is not moved to one.
+        [$placed, $otherZone] = $allDay
+            ? [\Carbon\CarbonImmutable::instance($start), null]
+            : ImportedTime::place($start, $statesZone ?? self::statesZone($vevent), $zone->getName(), $keepLocalClock);
 
         if ($allDay) {
             $days = $end ? max(1, (int) round(($end->getTimestamp() - $start->getTimestamp()) / 86400)) : 1;
@@ -615,6 +636,10 @@ class IcsImportUtils
             'venue_name' => $location['venue_name'],
             'event_address' => $location['event_address'],
             'registration_url' => self::isWebUrl($url) ? $url : $location['url'],
+            // A link that was the entry's LOCATION is where a meeting is held, not a page about
+            // the event: a caller that publishes the link without a person looking (a feed)
+            // leaves it out.
+            'link_from_location' => ! self::isWebUrl($url) && ! empty($location['url']),
             'category_name' => self::category($vevent),
             'image_url' => self::image($vevent),
             'is_all_day' => $allDay,

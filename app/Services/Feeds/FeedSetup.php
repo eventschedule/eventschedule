@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\ScheduleEventMatcher;
 use App\Utils\ImportAddress;
+use App\Utils\ImportedTime;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -75,7 +76,10 @@ class FeedSetup
         $timezone = $timezone && in_array($timezone, timezone_identifiers_list(), true) ? $timezone : $role->captureTimezone();
         $keepLocalClock = ! $role->isVenue();
         $reader = FeedKind::reader($kind);
-        $reading = $reader->read($fetched, $timezone, $keepLocalClock);
+        // Unzoned times are read on the feed's clock and everything is placed on the schedule's,
+        // exactly as a read will do it, so what is shown here is what will be on the schedule.
+        $clock = $role->captureTimezone();
+        $reading = ImportedTime::onClock($clock, fn () => $reader->read($fetched, $timezone, $keepLocalClock));
 
         if (! $reading) {
             // A page was opened and marks up no event: the commonest way a check ends.
@@ -98,7 +102,7 @@ class FeedSetup
                 }
 
                 $page = $this->fetcher->get($item['detail_url'], null, null, 6);
-                $found = $page->ok() ? $reader->detail($item, $page, $timezone, $keepLocalClock) : null;
+                $found = $page->ok() ? ImportedTime::onClock($clock, fn () => $reader->detail($item, $page, $timezone, $keepLocalClock)) : null;
 
                 if (is_array($found)) {
                     $rows[] = $found;
@@ -110,7 +114,7 @@ class FeedSetup
             }
         }
 
-        $matcher = new ScheduleEventMatcher($role, $timezone);
+        $matcher = new ScheduleEventMatcher($role, $clock);
         $title = $this->titleOf($kind, $fetched) ?: (string) parse_url($url, PHP_URL_HOST);
 
         return [
@@ -123,7 +127,7 @@ class FeedSetup
             'posts' => $posts,
             'more' => $reading->next !== null,
             'skipped' => $reading->skipped,
-            'matched' => $posts === null ? count(array_filter($rows, fn (array $row) => $matcher->match($row, FeedTime::zoneOf($row, $timezone, $role->captureTimezone())) !== null)) : 0,
+            'matched' => $posts === null ? count(array_filter($rows, fn (array $row) => $matcher->match($row) !== null)) : 0,
             'sample' => array_map(fn (array $row) => [
                 'name' => (string) $row['event_name'],
                 'at' => $row['event_date_time'],
