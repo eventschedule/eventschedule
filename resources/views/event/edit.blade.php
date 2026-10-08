@@ -2266,6 +2266,20 @@
                                 v-model="eventName" @keydown.enter="onNameEnter"
                                 required autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                            {{-- An event a feed keeps up to date: said where it is edited, because
+                                 what is changed here stops following the source. The feed's name
+                                 is somebody's own text inside the form's Vue mount: v-pre. --}}
+                            @php
+                                $eventFeed = $event->keptByFeed();
+                            @endphp
+                            @if ($eventFeed)
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" id="event-from-feed">
+                                <span v-pre>{{ __('messages.feeds_event_line', ['feed' => $eventFeed->name]) }}</span>
+                                @if ((int) $eventFeed->role_id === (int) $role->id)
+                                <x-link :href="route('role.feeds.show', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($eventFeed->id)])">{{ __('messages.feeds_open_feed') }}</x-link>
+                                @endif
+                            </p>
+                            @endif
                         </div>
                         </div>
 

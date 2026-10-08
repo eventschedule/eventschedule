@@ -6697,6 +6697,8 @@ return [
     'feeds_see_plan' => 'See what feeds do',
     'feeds_keep_in_sync' => 'Keep this link in sync',
     'feeds_keep_in_sync_help' => 'It is then read about once an hour, and new events arrive on their own.',
+    'feeds_event_line' => 'From the feed ":feed". It is kept up to date from there, and what you change here is kept as you leave it.',
+    'feeds_open_feed' => 'Open the feed',
     'feeds_edit' => 'Edit feed',
     'feeds_edit_lead' => 'Changes apply from the next read. Events already on your schedule keep how they are published.',
     'feeds_reads_from' => 'Reads from',

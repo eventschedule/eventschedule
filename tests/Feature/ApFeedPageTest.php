@@ -349,6 +349,40 @@ class ApFeedPageTest extends TestCase
         $this->assertSame(EventFeedItem::STATE_MATCHED, $feed->items()->first()->state);
     }
 
+    /** Where an event is edited, it says a feed keeps it up to date, and no other event says so. */
+    public function test_the_event_form_says_which_feed_an_event_comes_from(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'name' => 'Town {{ 7 * 7 }} <b>calendar</b>']);
+        $this->entries = [$this->entry('a', 'From the feed')];
+        $this->read($feed);
+        $byHand = $this->createEvent($this->role, ['creator_role_id' => $this->role->id, 'name' => 'Made by hand']);
+        $form = fn (Event $event) => $this->actingAs($this->owner)
+            ->get(route('event.edit', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))->assertOk()->getContent();
+        $line = '<span v-pre>'.e(__('messages.feeds_event_line', ['feed' => 'Town {{ 7 * 7 }} <b>calendar</b>'])).'</span>';
+
+        $html = $form($this->named('From the feed'));
+        $this->assertStringContainsString($line, $html);
+        $this->assertStringContainsString('href="'.$this->url($feed).'"', $html);
+        $this->assertStringNotContainsString(self::SECRET, $html);
+
+        $this->assertStringNotContainsString('id="event-from-feed"', $form($byHand));
+
+        // Opened through a schedule that only lists it: the line, and no link to a page that
+        // is not that schedule's.
+        $curator = $this->createCurator($this->owner);
+        $this->named('From the feed')->roles()->attach($curator->id, ['is_accepted' => true]);
+        $listed = $this->actingAs($this->owner)
+            ->get(route('event.edit', ['subdomain' => $curator->subdomain, 'hash' => UrlUtils::encodeId($this->named('From the feed')->id)]))->assertOk()->getContent();
+        $this->assertStringContainsString($line, $listed);
+        $this->assertStringNotContainsString('/feeds/'.UrlUtils::encodeId($feed->id), $listed);
+
+        // Once the feed is removed its events are events like any other, whatever other feeds
+        // the schedule goes on reading.
+        $this->feed(['file' => 'another', 'name' => 'Another feed']);
+        app(\App\Services\Feeds\FeedActions::class)->remove($feed->fresh(), $this->owner, false);
+        $this->assertStringNotContainsString('id="event-from-feed"', $form($this->named('From the feed')));
+    }
+
     /** A viewer changes nothing, and a feed's id from another schedule opens nothing. */
     public function test_nobody_but_the_people_who_run_the_schedule_reaches_any_of_it(): void
     {

@@ -329,6 +329,20 @@ class Event extends Model
                 ->exists();
     }
 
+    /** The feed that is keeping this event up to date, for a page that says so. Null for any other event. */
+    public function keptByFeed(): ?EventFeed
+    {
+        if (! $this->exists || $this->import_source !== self::IMPORT_FEED || ! EventFeed::tablesReady()) {
+            return null;
+        }
+
+        return EventFeedItem::where('event_id', $this->id)
+            ->whereIn('state', [EventFeedItem::STATE_IMPORTED, EventFeedItem::STATE_DECIDE])
+            ->with('feed')
+            ->first()
+            ?->feed;
+    }
+
     public static function importColumnsReady(): bool
     {
         return self::$importColumnsReady = self::$importColumnsReady
