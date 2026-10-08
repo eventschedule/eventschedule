@@ -150,4 +150,105 @@ class MonthGridTest extends TestCase
         $this->assertContains('Last Tuesday Of September', array_column($json['events'], 'name'));
         $this->assertArrayHasKey('2026-09-29', $json['eventsMap']);
     }
+
+    /**
+     * One month for the guest page and the embed (role/partials/month), with the card and the
+     * day's panel that stand over it (month-peek) and the script that writes each day
+     * (month-script). The grid that was there, and its hover popup, are gone from these pages.
+     */
+    public function test_the_guest_page_and_the_embed_draw_the_one_month(): void
+    {
+        foreach (['?layout=calendar', '?embed=true&layout=calendar'] as $query) {
+            $html = $this->get('/'.$this->role->subdomain.$query)->assertOk()->getContent();
+
+            $this->assertSame(1, substr_count($html, ' data-month '), $query.': one month');
+            $this->assertSame(1, substr_count($html, 'id="event-popup"'), $query.': one card, under the id the popup had');
+            $this->assertStringContainsString('<div id="event-popup" ref="monthPeekEl" class="gk-peek"', $html);
+            $this->assertStringContainsString('class="gk-dayp"', $html);
+            $this->assertStringNotContainsString('event-link-popup"', $html, $query.': the old grid is not drawn');
+            $this->assertStringNotContainsString('class="event-popup"', $html);
+            // The kit, and the script as a mixin of the calendar's app with its directive.
+            $this->assertStringContainsString('.gk-cal-week {', $html);
+            $this->assertStringContainsString('mixins: [window.monthMixin],', $html);
+            $this->assertStringContainsString("calendarApp.directive('clamp', window.monthClamp);", $html);
+        }
+
+        // What an embed's card may not offer: its guide tells owners that adding to a calendar
+        // and sharing live on the event page, and share is withheld from embeds everywhere else.
+        $guest = $this->get('/'.$this->role->subdomain.'?layout=calendar')->getContent();
+        $embed = $this->get('/'.$this->role->subdomain.'?embed=true&layout=calendar')->getContent();
+        $this->assertStringContainsString('const CAN = {"calendar":true,"share":true,"guest":true};', $guest);
+        $this->assertStringContainsString('const CAN = {"calendar":false,"share":false,"guest":true};', $embed);
+        // An embed opens an event in a new tab, as it always has; the page itself does not.
+        $this->assertStringContainsString(':data-ev="chip.id" :data-date="day.date" :aria-label="chip.label">', $guest);
+        $this->assertSame(1, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank" rel="noopener"/', $embed));
+        $this->assertSame(0, preg_match('/<a class="gk-cal-ev" :class="chip\.cls" :href="chip\.url"\s+target="_blank"/', $guest));
+    }
+
+    /**
+     * The month is inside the calendar's Vue mount, where anything printed as a text node is
+     * compiled as a template. Nothing in it prints an event's own text that way: a name is set
+     * by the v-clamp directive (as text, at run time), everything else by v-text, and the
+     * script builds no markup from a name.
+     */
+    public function test_nobodys_text_reaches_the_month_as_markup(): void
+    {
+        $month = file_get_contents(resource_path('views/role/partials/month.blade.php'));
+        $peek = file_get_contents(resource_path('views/role/partials/month-peek.blade.php'));
+        $script = file_get_contents(resource_path('views/role/partials/month-script.blade.php'));
+
+        $this->assertStringContainsString('<span class="gk-cal-nm" :dir="chip.dir" v-clamp="chip.name"></span>', $month);
+        $this->assertStringContainsString('<bdi v-text="monthPeek.name"></bdi>', $peek);
+        $this->assertStringContainsString('<bdi v-text="row.name"></bdi>', $peek);
+        foreach ([$month, $peek] as $view) {
+            $this->assertStringNotContainsString('v-html', $view);
+            // No Vue mustache anywhere: what Blade prints in these two views is our own words.
+            $this->assertStringNotContainsString('@{{', $view);
+        }
+        $this->assertStringNotContainsString('innerHTML', $script);
+        $this->assertStringNotContainsString('insertAdjacentHTML', $script);
+        // The directive sets text, and only when the name itself changes: the script shortens
+        // what is on the page, and a redraw for any other reason must leave that alone.
+        $this->assertStringContainsString("el.textContent = binding.value == null ? '' : String(binding.value);", $script);
+        $this->assertStringContainsString('if (binding.value === binding.oldValue) return;', $script);
+        // The values a card and a row are drawn from carry a DAY: the list's own helpers read
+        // the day off the row, and the shared row of a series holds its first date.
+        $this->assertStringContainsString('const row = Object.assign({}, e, { occurrenceDate: first, _originalOccurrenceDate: first });', $script);
+    }
+
+    /**
+     * The card's "add to calendar" for Google and Outlook: the event's own .ics address with
+     * ?to=, answered with that calendar's "new entry" page. Behind the gate the .ics has, with
+     * nothing in the address taken from the request, and without the description, which has no
+     * length cap and would ride in the Location header.
+     */
+    public function test_the_calendar_links_answer_where_the_ics_does_and_go_only_to_the_two_calendars(): void
+    {
+        $event = $this->event(['name' => 'Harvest Supper', 'tickets_enabled' => false, 'description_html' => '<p>'.str_repeat('A long evening. ', 400).'</p>']);
+        $ical = $this->guestEventUrl($this->role, $event).'/ical';
+
+        $google = $this->get($ical.'?to=google')->assertRedirect();
+        $to = $google->headers->get('Location');
+        $this->assertStringStartsWith('https://calendar.google.com/calendar/r/eventedit?text='.urlencode($event->getTitle()).'&dates=', $to);
+        $this->assertStringNotContainsString('long+evening', $to, 'the description is not in the address');
+        $this->assertStringContainsString(urlencode($event->getGuestUrl($this->role->subdomain)), $to, 'the event page is, as in the mails');
+        $this->assertLessThan(1200, strlen($to));
+        $this->assertStringContainsString('no-store', $google->headers->get('Cache-Control'));
+        $this->assertStringContainsString('noindex', $google->headers->get('X-Robots-Tag'));
+
+        $outlook = $this->get($ical.'?to=outlook')->assertRedirect()->headers->get('Location');
+        $this->assertStringStartsWith('https://outlook.live.com/calendar/0/deeplink/compose?subject='.urlencode($event->getTitle()), $outlook);
+
+        // Anything else is not a destination: the .ics, as before.
+        foreach (['?to=https://evil.example', '?to=yahoo', ''] as $other) {
+            $file = $this->get($ical.$other)->assertOk();
+            $this->assertStringContainsString('BEGIN:VCALENDAR', $file->getContent());
+        }
+
+        // And nothing where the .ics answers nothing: a draft, to a visitor.
+        $draft = $this->event(['name' => 'Not Yet', 'tickets_enabled' => false, 'is_draft' => true]);
+        $draftIcal = $this->guestEventUrl($this->role, $draft).'/ical';
+        $this->get($draftIcal)->assertNotFound();
+        $this->get($draftIcal.'?to=google')->assertNotFound();
+    }
 }

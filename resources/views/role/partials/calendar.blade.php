@@ -662,13 +662,12 @@
                     @endfor
                 </div>
                 <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
-                    @for ($i = 0; $i < 35; $i++)
-                    <div class="bg-white dark:bg-gray-900 p-2 min-h-[100px]">
+                    {{-- As many weeks as the month that is coming has: five, or six. --}}
+                    <div v-for="n in calendarDays.length" :key="n" class="bg-white dark:bg-gray-900 p-2 min-h-[100px]">
                         <div class="h-4 w-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
                         <div class="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
                         <div class="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
                     </div>
-                    @endfor
                 </div>
             </div>
         </div>
@@ -701,6 +700,11 @@
             @endif
         </div>
         @endif
+        @if ($guestRows)
+        {{-- The month: role/partials/month, with its card and its day's panel (month-peek) and
+             the script that writes each day (month-script). --}}
+        @include('role.partials.month')
+        @else
         <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
                 class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
@@ -722,51 +726,7 @@
                 $firstRole = auth()->user()->member()->where('email_verified_at', '!=', null)->first();
             }
             @endphp
-            @if ($route === 'guest' && !request()->graphic)
-            {{-- Vue-driven calendar grid for guest route (supports AJAX month navigation) --}}
-            <div class="w-full grid grid-cols-7 gap-px" :style="{ gridTemplateRows: 'repeat(' + totalWeeksComputed + ', minmax(0, 1fr))' }">
-                <div v-for="day in calendarDays" :key="day.date"
-                    class="relative px-3 py-2 min-h-[100px] border-1 border-transparent"
-                    :class="day.isCurrentMonth ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400'">
-                    <div class="flex justify-between">
-                        <time :datetime="day.date"
-                            :style="day.isToday ? 'background-color: ' + accentColor + '; color: {{ accent_contrast_color($accentColor ?? '#4E81FA') }}' : ''"
-                            :class="day.isToday ? 'flex h-6 w-6 items-center justify-center rounded font-semibold' : ''"
-                            v-text="day.day">
-                        </time>
-                    </div>
-                    <ol class="mt-4 divide-y divide-gray-100 dark:divide-gray-700 text-sm leading-6 md:col-span-7 xl:col-span-8">
-                        <li v-for="event in getEventsForDate(day.date)" :key="event.id"
-                            class="relative group"
-                            :class="event.can_edit ? 'hover:pe-8' : ''"
-                            v-show="isEventVisible(event)">
-                            <a :href="getEventUrl(event, day.date)"
-                                class="flex event-link-popup"
-                                :data-event-id="event.id"
-                                @click.stop="countListTap()" @if (isset($embed) && $embed) target="_blank" @endif>
-                                <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
-                                    <span class="flex items-start gap-1.5">
-                                        <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
-                                        <span :class="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
-                                          class="hover:underline truncate" :dir="getEventDisplayDir(event)" v-text="getEventDisplayName(event)">
-                                        </span>
-                                    </span>
-                                    <span v-if="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1"
-                                          class="text-gray-500 dark:text-gray-400 truncate" v-text="getEventTime(event)">
-                                    </span>
-                                </p>
-                            </a>
-                            <a v-if="event.can_edit" :href="event.edit_url"
-                                class="absolute end-0 top-0 hidden group-hover:inline-block text-gray-900 dark:text-white hover:underline"
-                                @click.stop>
-                                {{ __('messages.edit') }}
-                            </a>
-                        </li>
-                    </ol>
-                </div>
-            </div>
-            @else
-            {{-- PHP-rendered calendar grid for admin/home/graphic routes --}}
+            {{-- PHP-rendered calendar grid for admin/home routes (a guest's month is role/partials/month) --}}
             <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
                 @while ($currentDate->lte($endOfMonth))
                 @if ($route == 'admin' && $tab == 'schedule' && $role->email_verified_at)
@@ -859,9 +819,9 @@
                     @php $currentDate->addDay(); @endphp
                     @endwhile
                 </div>
-            @endif
             </div>
         </div>
+        @endif
         @endif
 
 
@@ -2384,7 +2344,11 @@
 </div>
 </Teleport>
 
-<!-- Event Popup Component -->
+@if ($guestRows)
+@include('role.partials.month-peek')
+@else
+{{-- The hover popup of the admin's and the dashboard's month. A guest's month has its own card
+     (role/partials/month-peek), which keeps this id. --}}
 <div id="event-popup" class="event-popup">
     <div class="event-popup-content">
         <img id="event-popup-image" class="event-popup-image" style="display: none;" />
@@ -2417,6 +2381,7 @@
         </div>
     </div>
 </div>
+@endif
 
 {{-- A schedule page passes $hasActivePolls: its $events are only the next 50 public ones, while the
      list's cards take votes on whatever the calendar fetches. Other callers (?graphic=1, the
@@ -2426,6 +2391,7 @@
 <script src="{{ asset('js/poll-confetti.js') }}" {!! nonce_attr() !!}></script>
 @endif
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+@include('role.partials.month-script')
 <script {!! nonce_attr() !!}>
 if (typeof Vue !== 'undefined') {
 const { createApp } = Vue;
@@ -2620,6 +2586,8 @@ const listReveal = (() => {
 })();
 
 const calendarApp = createApp({
+    // The month, its card and its day's panel: role/partials/month-script.
+    mixins: [window.monthMixin],
     data() {
         return {
             selectedGroup: '{{ isset($selectedGroup) ? $selectedGroup->slug : "" }}',
@@ -5036,9 +5004,11 @@ const calendarApp = createApp({
             let newYear = this.pageYear;
 
             if (direction === 0) {
-                const now = new Date();
-                newMonth = now.getMonth() + 1;
-                newYear = now.getFullYear();
+                // The schedule's month, not the browser's: around the turn of a month a visitor
+                // in another zone was sent to the month the schedule is not in yet, or has left.
+                const [todayYear, todayMonth] = this.scheduleDay(0).split('-').map(Number);
+                newMonth = todayMonth;
+                newYear = todayYear;
             } else {
                 newMonth += direction;
                 if (newMonth > 12) {
@@ -5367,6 +5337,9 @@ const calendarApp = createApp({
 
     }
 });
+
+// How the month prints a name (role/partials/month-script).
+calendarApp.directive('clamp', window.monthClamp);
 
 if (typeof FileReader !== 'undefined') {
     calendarApp.config.globalProperties.FileReader = FileReader;

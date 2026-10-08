@@ -280,6 +280,7 @@
              owner's custom CSS, which must be able to overrule both. --}}
         @include('partials.guest-theme')
         @include('partials.guest-kit-styles')
+        @include('partials.month-kit-styles')
 
         <style {!! nonce_attr() !!}>
         @if (request()->embed)

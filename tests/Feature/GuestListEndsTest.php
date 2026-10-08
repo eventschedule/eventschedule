@@ -108,9 +108,10 @@ class GuestListEndsTest extends TestCase
         // No empty state may be drawn while the load has failed: every one is a statement about
         // the schedule ("No scheduled events", "No events found").
         preg_match_all('/v-(?:else-)?if="(!isLoadingEvents && [^"]*)"/', $html, $matches);
-        // Six on a guest page: two for the cards, two for the phone's rows, the phone month's
-        // and the month grid's.
-        $this->assertSame(6, count($matches[1]), 'the two lists\' empty states, the phone month\'s and the month grid\'s');
+        // Seven on a guest page: two for the cards, two for the phone's rows, the phone month's,
+        // and the month grid's two (nothing for the filters that are set; nothing in the month
+        // at all, role/partials/month).
+        $this->assertSame(7, count($matches[1]), 'the two lists\' empty states, the phone month\'s and the month grid\'s two');
         foreach ($matches[1] as $condition) {
             $this->assertStringContainsString('!loadFailed', $condition, 'empty state shown on a failed load: '.$condition);
         }

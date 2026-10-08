@@ -5113,6 +5113,23 @@ class EventController extends Controller
             abort(404);
         }
 
+        // ?to=google and ?to=outlook: that calendar's own "new entry" address, for the month's
+        // preview card, which holds what an entry needs only here, on the server. Behind the
+        // gate above, so the link answers exactly where this event's .ics does. The address is
+        // built here and nothing in it comes from the request but which of the two is wanted.
+        // Its notes are the event's page, as in the mails: the description has no length cap
+        // and would otherwise ride in the Location header.
+        $to = request()->query('to');
+        if (in_array($to, ['google', 'outlook'], true)) {
+            $page = $event->getGuestUrl($role->subdomain, $date) ?: '';
+            $entry = $to === 'google' ? $event->getGoogleCalendarUrl($date, $page) : $event->getMicrosoftCalendarUrl($date, $page);
+
+            return redirect()->away($entry)->withHeaders([
+                'Cache-Control' => 'no-store, private',
+                'X-Robots-Tag' => 'noindex, nofollow',
+            ]);
+        }
+
         $title = $event->getTitle();
         $description = $event->description_html ? strip_tags($event->description_html) : ($event->role() ? strip_tags($event->role()->description_html) : '');
         $location = $event->venue ? $event->venue->bestAddress() : '';

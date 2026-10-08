@@ -100,7 +100,12 @@ class SameDayEventOrderTest extends DuskTestCase
         ))[0];
     }
 
-    /** Opens the month grid on $day's month and returns that cell's names, from Vue and from the DOM. */
+    /**
+     * Opens the month grid on $day's month and returns that day's names, from Vue and from the
+     * page: the day's own lines in order (a name is read whole from data-full, since a long one
+     * is cut on screen and the line holds a time too), the bars of the month (an event over
+     * several days is one bar, not a line of each day), and what the day says it does not show.
+     */
     private function gridDay(Browser $browser, Carbon $day): array
     {
         $date = $day->format('Y-m-d');
@@ -110,9 +115,13 @@ class SameDayEventOrderTest extends DuskTestCase
 
         $vue = $browser->script("return window.calendarVueApp.getEventsForDate('{$date}').map(e => e.name);")[0];
         $dom = $browser->script("
-            const time = document.querySelector('time[datetime=\"{$date}\"]');
-            const cell = time ? time.closest('div.relative') : null;
-            return cell ? Array.from(cell.querySelectorAll('li')).map(li => li.textContent.trim()) : null;
+            const cell = document.querySelector('[data-month] .gk-cal-day[data-date=\"{$date}\"]');
+            if (!cell) return null;
+            return {
+                lines: Array.from(cell.querySelectorAll('.gk-cal-ev .gk-cal-nm')).map(n => n.dataset.full),
+                bars: Array.from(document.querySelectorAll('[data-month] .gk-cal-span')).map(a => a.getAttribute('aria-label')),
+                more: (cell.querySelector('.gk-cal-more') || {}).textContent || '',
+            };
         ")[0];
 
         return [$vue, $dom];
@@ -146,11 +155,18 @@ class SameDayEventOrderTest extends DuskTestCase
 
             [$vue, $dom] = $this->gridDay($browser, $this->night);
             $this->assertSame(['Opener', 'Live Music', 'DJ Night'], $vue);
-            $this->assertSame(['Opener', 'Live Music', 'DJ Night'], $dom, 'The cell renders in the order getEventsForDate() returns');
+            $this->assertSame(['Opener', 'Live Music', 'DJ Night'], $dom['lines'], 'The cell renders in the order getEventsForDate() returns');
 
             [$vue, $dom] = $this->gridDay($browser, $this->today);
             $this->assertSame(['Festival', 'Brunch'], $vue);
-            $this->assertSame(['Festival', 'Brunch'], $dom);
+            // The festival is a bar across its days, above each day's own events. The brunch is
+            // today's one line until it is over (noon in New York), and then stands behind
+            // "1 earlier today": what is over today gives its place to what is not.
+            $this->assertContains('Festival', $dom['bars']);
+            $this->assertTrue(
+                $dom['lines'] === ['Brunch'] || ($dom['lines'] === [] && str_contains($dom['more'], '1')),
+                'Brunch is today\'s line, or behind "1 earlier today": '.json_encode($dom)
+            );
         });
     }
 }
