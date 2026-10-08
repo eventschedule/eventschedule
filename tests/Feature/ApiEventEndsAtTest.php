@@ -172,6 +172,21 @@ class ApiEventEndsAtTest extends TestCase
             ->assertJsonPath('data.duration', 1)
             ->assertJsonPath('data.starts_at', $this->at($event, '15:00:00'))
             ->assertJsonPath('data.ends_at', $this->at($event, '16:00:00'));
+
+        // Postponed to the next day the same way. The end that comes back with it is now BEFORE
+        // the new start, and it is still only the old end, saying nothing.
+        $read = $this->getJson($this->url($event), $key)->json('data');
+        $nextDay = \Carbon\Carbon::parse($read['starts_at'], 'UTC')->addDay();
+        $this->putJson($this->url($event), ['starts_at' => $nextDay->format('Y-m-d H:i:s')] + $read, $key)
+            ->assertOk()
+            ->assertJsonPath('data.duration', 1)
+            ->assertJsonPath('data.starts_at', $nextDay->format('Y-m-d H:i:s'))
+            ->assertJsonPath('data.ends_at', $nextDay->copy()->addHour()->format('Y-m-d H:i:s'));
+
+        // A NEW end that is before the start is still refused.
+        $this->putJson($this->url($event), ['ends_at' => $nextDay->copy()->subHours(3)->format('Y-m-d H:i:s')], $key)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('ends_at');
     }
 
     public function test_both_changed_and_saying_different_things_is_refused(): void

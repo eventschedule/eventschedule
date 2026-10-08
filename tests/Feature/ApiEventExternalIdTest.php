@@ -229,6 +229,29 @@ class ApiEventExternalIdTest extends TestCase
         $this->getJson('/api/events?external_id=nobody-has-this', $key)->assertOk()->assertJsonCount(0, 'data');
     }
 
+    /**
+     * "One event or none." `subdomain` matches every schedule an event is listed on, and the id
+     * is only unique per OWNING schedule: a schedule that lists somebody else's event carrying
+     * the same id in their numbering got two rows back, and a sync wrote onto the wrong one.
+     */
+    public function test_a_lookup_by_id_answers_with_the_event_the_schedule_owns(): void
+    {
+        [$owner, $role, $key] = $this->schedule();
+        [, $theirs, $theirKey] = $this->schedule();
+        $mine = $this->create($role, $key, ['name' => 'Ours, number 42', 'external_id' => '42'])->assertCreated()->json('data.id');
+        $foreign = $this->create($theirs, $theirKey, ['name' => 'Theirs, also 42', 'external_id' => '42'])->assertCreated()->json('data.id');
+        // We list theirs on our schedule, accepted.
+        Event::find(UrlUtils::decodeId($foreign))->roles()->attach($role->id, ['is_accepted' => true]);
+
+        $this->getJson('/api/events?subdomain='.$role->subdomain, $key)->assertOk()->assertJsonCount(2, 'data');
+        $this->getJson('/api/events?external_id=42&subdomain='.$role->subdomain, $key)
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $mine);
+        // With no schedule named: the events of the schedules the caller runs.
+        $this->getJson('/api/events?external_id=42', $key)->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $mine);
+    }
+
     public function test_an_update_sets_it_changes_it_keeps_it_when_not_named_and_clears_it(): void
     {
         [, $role, $key] = $this->schedule();

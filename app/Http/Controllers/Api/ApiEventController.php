@@ -142,10 +142,16 @@ class ApiEventController extends Controller
             $events->where('is_cancelled', filter_var($request->is_cancelled, FILTER_VALIDATE_BOOLEAN));
         }
 
-        // The event another system knows by this id. Unique per owning schedule, so with
-        // `subdomain` it is at most one event.
+        // The event another system knows by this id. The id is unique per OWNING schedule, and
+        // `subdomain` above matches every schedule an event is listed on, so on its own it could
+        // answer with an event somebody else owns that carries the same id in their numbering
+        // (and a sync would then write onto it). The lookup is of events the named schedule
+        // owns; without a schedule, of events owned by schedules the caller runs.
         if ($request->filled('external_id')) {
-            $events->where('external_id', (string) $request->external_id);
+            $events->where('external_id', (string) $request->external_id)
+                ->whereIn('creator_role_id', $request->has('subdomain')
+                    ? Role::where('subdomain', $request->subdomain)->select('id')
+                    : auth()->user()->roles()->wherePivotIn('level', ['owner', 'admin'])->select('roles.id'));
         }
 
         // Filter by sub-schedule (group)
@@ -487,6 +493,10 @@ class ApiEventController extends Controller
             $request->replace($sent);
 
             return $this->applyUpdate($request, $holder, $role, false);
+        }
+
+        if ($flyer) {
+            $this->rememberFlyerSource($event, $flyerUrl);
         }
 
         $event->load(['roles', 'tickets', 'addons', 'parts']);
@@ -917,6 +927,9 @@ class ApiEventController extends Controller
         if ($removeFlyer) {
             $this->eventRepo->removeFlyer($event);
         }
+        if ($flyer) {
+            $this->rememberFlyerSource($event->fresh() ?? $event, $flyerUrl);
+        }
 
         foreach ($passEventsKept as $ticketId => $ids) {
             $ticket = Ticket::where('event_id', $event->id)->where('is_deleted', false)->find($ticketId);
@@ -1018,11 +1031,35 @@ class ApiEventController extends Controller
             return [null, response()->json(['error' => 'Unauthorized'], 403)];
         }
 
+        // Cancelling stops an event's installments, cancels its boosts and can mail every
+        // buyer the caller's own words, and restoring undoes somebody's cancellation. Editing
+        // rights reach every schedule the event is listed on, and any schedule can list a
+        // public event (EventController::curate()). So these two are for the event's own
+        // people: whoever made it, or an owner or admin of the schedule that owns it.
+        if (! $this->runsTheEvent($event)) {
+            return [null, response()->json(['error' => 'Only the event\'s own schedule can cancel or restore it. A schedule that lists the event can take it off its own list instead.'], 403)];
+        }
+
         if (! $event->isPro()) {
             return [null, response()->json(['error' => 'API usage is limited to Pro accounts'], 403)];
         }
 
         return [$event, null];
+    }
+
+    /** The caller made the event, or is an owner or admin of the schedule that owns it. */
+    private function runsTheEvent(Event $event): bool
+    {
+        $user = auth()->user();
+
+        if ((int) $event->user_id === (int) $user->id) {
+            return true;
+        }
+
+        return $event->creator_role_id !== null && $user->roles()
+            ->where('roles.id', $event->creator_role_id)
+            ->wherePivotIn('level', ['owner', 'admin'])
+            ->exists();
     }
 
     private function lifecycleReply(Event $event, string $message)
@@ -1217,6 +1254,15 @@ class ApiEventController extends Controller
         }
 
         $end = Carbon::createFromFormat('Y-m-d H:i:s', $request->input('ends_at'), 'UTC');
+
+        // The end as it was read, sent back untouched: it says nothing new. A client that reads
+        // an event, moves its start to the next day and writes the object back sends the old end
+        // with it, and the event moves whole. Asked before anything is measured, because that old
+        // end is before the new start and would be refused as "must be after starts_at".
+        if ($event && $event->endsAtUtc() === $end->format('Y-m-d H:i:s')) {
+            return null;
+        }
+
         $hours = ImportedTime::hoursBetween(Carbon::parse($startsAt, 'UTC'), $end);
 
         if ($hours === null) {
@@ -1296,7 +1342,38 @@ class ApiEventController extends Controller
             return [null, false, null];
         }
 
+        // The address the flyer was last taken from, sent again: a sync that sends its own
+        // picture address with every write. Nothing to fetch while the event still has the file
+        // that fetch stored. Without this each call downloaded the picture again and replaced
+        // the stored file, and a source picture that had since gone refused the whole write.
+        $memory = $event ? Cache::get($this->flyerMemoryKey($event->id)) : null;
+        if (is_array($memory)
+            && hash_equals((string) ($memory['source'] ?? ''), sha1($value))
+            && ($memory['file'] ?? null) !== null
+            && $memory['file'] === ($event->getAttributes()['flyer_image_url'] ?? null)) {
+            return [null, false, null];
+        }
+
         return [$value, false, null];
+    }
+
+    private function flyerMemoryKey(int $eventId): string
+    {
+        return 'api-event-flyer-source:'.$eventId;
+    }
+
+    /**
+     * Remember which address the event's flyer came from, and which file that made. Kept in the
+     * cache, not on the event: losing it costs one more download, never a wrong picture, because
+     * it only counts while the event still has that very file.
+     */
+    private function rememberFlyerSource(Event $event, ?string $url): void
+    {
+        $file = $event->getAttributes()['flyer_image_url'] ?? null;
+
+        if ($url !== null && $file !== null) {
+            Cache::put($this->flyerMemoryKey($event->id), ['source' => sha1($url), 'file' => $file], now()->addDays(90));
+        }
     }
 
     /**

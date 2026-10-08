@@ -218,6 +218,44 @@ class ApiEventFlyerUrlTest extends TestCase
         $this->assertSame('flyer_old.jpg', $this->stored($event));
     }
 
+    /**
+     * A sync sends its own picture address with every write. Compared only with OUR address,
+     * that was a download, a deleted file and a new filename on every call, and a source
+     * picture that had since gone refused the whole write, the new time included.
+     */
+    public function test_a_sync_that_sends_its_own_picture_address_every_time_fetches_it_once(): void
+    {
+        [$role, $key] = $this->schedule();
+        $fetches = fn (string $file) => Http::recorded(fn ($request) => str_ends_with($request->url(), '/'.$file))->count();
+        $body = ['name' => 'Synced', 'starts_at' => now()->addWeek()->format('Y-m-d H:i:s'), 'flyer_image_url' => self::SOURCE.'/poster.jpg'];
+
+        $id = $this->postJson('/api/events/'.$role->subdomain, $body, $key)->assertCreated()->json('data.id');
+        $event = Event::find(UrlUtils::decodeId($id));
+        $first = $this->stored($event);
+        $this->assertSame(1, $fetches('poster.jpg'));
+
+        // The same address with the next two writes: nothing fetched, nothing replaced.
+        $this->putJson($this->url($event), ['name' => 'Synced again'] + $body, $key)->assertOk()->assertJsonPath('data.name', 'Synced again');
+        $this->putJson($this->url($event), ['name' => 'And again'] + $body, $key)->assertOk();
+        $this->assertSame(1, $fetches('poster.jpg'));
+        $this->assertSame($first, $this->stored($event));
+        Storage::assertExists('public/'.$first);
+
+        // A new address is a new picture, and the old address after that is new again.
+        $this->putJson($this->url($event), ['flyer_image_url' => self::SOURCE.'/second.png'], $key)->assertOk();
+        $this->assertSame(1, $fetches('second.png'));
+        $this->assertStringEndsWith('.png', $this->stored($event));
+        $this->putJson($this->url($event), ['flyer_image_url' => self::SOURCE.'/second.png'], $key)->assertOk();
+        $this->assertSame(1, $fetches('second.png'));
+        $this->putJson($this->url($event), $body, $key)->assertOk();
+        $this->assertSame(2, $fetches('poster.jpg'));
+
+        // Once the flyer is taken off, the address is a picture to fetch again.
+        $this->putJson($this->url($event), ['flyer_image_url' => null], $key)->assertOk();
+        $this->putJson($this->url($event), $body, $key)->assertOk();
+        $this->assertSame(3, $fetches('poster.jpg'));
+    }
+
     public function test_null_takes_the_flyer_off(): void
     {
         [$role, $key] = $this->schedule();
