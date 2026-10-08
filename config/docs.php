@@ -183,7 +183,7 @@ return [
             'blurb' => 'Configure details, settings, sub-schedules, auto import, and integrations.',
             'icon' => 'cog',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'schedule-styling' => [
@@ -221,7 +221,7 @@ return [
             'blurb' => 'Import events from a link, text, images, a Google calendar or Eventbrite.',
             'icon' => 'sparkles',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'scan-agenda' => [
@@ -366,7 +366,7 @@ return [
             'blurb' => 'Manage events, team, availability, requests, and more.',
             'icon' => 'clipboard',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'analytics' => [

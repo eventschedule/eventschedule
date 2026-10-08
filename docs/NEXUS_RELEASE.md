@@ -178,9 +178,9 @@ checklist:
 
 ### Migrations
 
-Thirty-two, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys;
-eighteen are left: the eleven below, three under GDPR and two under Event import (each in its own
-section), and the two `2026_10_05_*`, which add one guarded nullable column each to `users`
+Thirty-five, none irreversible. Fourteen already ran with the 2026-09-27 to 2026-09-30 deploys;
+twenty-one are left: the eleven below, three under GDPR, two under Event import and three under
+Feeds (each in its own section), and the two `2026_10_05_*`, which add one guarded nullable column each to `users`
 (`setup_guide`, `suggestions_off_at`). Five of the eleven below read a large table: the two listed
 first, the `user_active_days` one, which reads 90 days of `audit_logs`, and the two index builds
 on `role_user` and `sales`:
@@ -221,7 +221,9 @@ All run on both rails:
 - `realtime-prune`, every five minutes;
 - `app-prune-cache`, hourly;
 - `app-place-venues`, every minute (four address lookups a run at most; does nothing while
-  `MAP_GEOCODER_URL` is unset).
+  `MAP_GEOCODER_URL` is unset);
+- `app-import-feeds`, every minute, last in the list (about 20 seconds of reading a run at most;
+  does nothing while no schedule has a feed that is due). See "Feeds" below.
 
 ### GDPR (2026-10-04)
 
@@ -563,6 +565,57 @@ Leave them unset and nothing about this ships to anyone: the feature stays dark.
   the provider table, the tile service in the clause on what marketing consent loads, and the
   hidden-map preference in the list of what the browser keeps. Nothing to edit. Open the page
   and read the three places once after the deploy.
+
+### Feeds, and the API additions (2026-10-08)
+
+**What ships:**
+- **Feeds** (Enterprise on eventschedule.com; every selfhost install has them): an address a
+  schedule keeps reading about once an hour, a calendar, an RSS/Atom/JSON feed or a page with event
+  data. Nothing changes for anyone until an owner adds one, from Edit schedule, Integrations,
+  "Feeds from other sites", or from "Keep this link in sync" on the import page. A schedule shows
+  its Feeds tab once it has a feed. `/admin/feeds` lists every feed on the install.
+- **Five additions to the events API** (Pro, with the rest of the API): `external_id` with
+  lookup and upsert, `ends_at`, `flyer_image_url`, and `POST /api/events/{id}/cancel` and
+  `/restore`. All additive: a client that sends none of them sees the two new fields in the event
+  object and nothing else.
+- A notification preference, **Feeds**, on by default for owners, admins and the shared address:
+  drafts waiting, a decision needed, a feed that stopped being read. At most one of each a day per
+  schedule.
+
+**Three migrations:**
+
+| Migration | What it does |
+|---|---|
+| `2026_10_08_000000_add_external_id_to_events_table` | One nullable `varchar(255)` column (`utf8mb4_bin`, so `A1` and `a1` are two ids) and a unique index on `(creator_role_id, external_id)`. The index build reads all of `events` once. Guarded, with a short lock wait, like `2026_10_04_000003` |
+| `2026_10_08_000001_create_event_feeds_table` | New table |
+| `2026_10_08_000002_create_event_feed_items_table` | New table: one row per entry a feed has seen, which is also the work queue |
+
+**The scheduled entry.** `app-import-feeds` runs every minute on both rails and takes the feeds
+that are due, oldest first, until about 20 seconds have passed. One cache lock (`feeds.import`)
+covers both rails, so the two cannot read the same feed at once. On the HTTP rail a read can wait
+behind that rail's own 15-minute lock. A feed's address is stored encrypted (`APP_KEY`), is never
+written to a log or an audit row, and its path is dropped from Sentry breadcrumbs for a host that
+is not ours.
+
+**What it fetches.** Every read goes through `UrlUtils::safeHttpGetWithUrl()`: public addresses
+only, every redirect checked again. Feeds add outbound requests the app did not make before, at
+most one list an hour per feed plus, for a feed of posts, each new post's own page. No AI call is
+made for a feed, on any plan.
+
+**After deploying, check:**
+- `/admin/queue`: the Scheduler card lists `app-import-feeds` and it is not overdue.
+- `/admin/feeds` opens (it redirects to the dashboard with a notice if the migrations did not run).
+- Add a feed to a test schedule from a public .ics address: the check shows its events, the feed
+  reads within a minute, and a second read an hour later changes nothing.
+
+**Watch for:** the `feeds_failing` row on `/admin`. It shows only when at least five feeds, and
+half of all that are being read, are failing at once, which points at this server (the network,
+or an address of ours that a host blocks) rather than at each source. While it shows, no owner is
+mailed and no feed is paused.
+
+**Not in this release:** the Jolioo reader is in the code and is not offered in the guide. It
+was written from the provider's documentation, whose one example is a news post, so the format
+and zone of an event's start are a guess until it has read a real feed.
 
 ### Guest page counts (2026-10-07)
 
