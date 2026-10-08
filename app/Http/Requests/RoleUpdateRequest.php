@@ -113,6 +113,7 @@ class RoleUpdateRequest extends FormRequest
             'notification_email_new_feedback' => ['nullable', 'boolean'],
             'notification_email_new_poll_option' => ['nullable', 'boolean'],
             'notification_email_installment_due' => ['nullable', 'boolean'],
+            'notification_email_feed' => ['nullable', 'boolean'],
             'new_subdomain' => array_merge(
                 is_demo_mode() ? [] : ['required'],
                 ['string', 'max:50'],

@@ -3858,6 +3858,18 @@
                                 help="{{ __('messages.notification_installment_due_help') }}" />
                         </div>
 
+                        {{-- Defaults ON. What a feed needs somebody for (FeedNotifier): drafts
+                             waiting, a decision, a feed that stopped being read. Shown where the
+                             schedule can have feeds. --}}
+                        @if ($role->exists && \App\Models\EventFeed::allowedFor($role))
+                        <div class="mb-6">
+                            <x-toggle name="notification_feed"
+                                label="{{ __('messages.notify_feed') }}"
+                                checked="{{ old('notification_feed', $notificationSettings['feed'] ?? true) }}"
+                                help="{{ __('messages.notify_feed_help') }}" />
+                        </div>
+                        @endif
+
                         {{-- Defaults ON. One email a week for all of your schedules, sent only in a
                              week with something to report (app:send-owner-digests). The owner is
                              the only one who receives it. Not on the create form: store() reads no
@@ -3984,6 +3996,15 @@
                                             checked="{{ old('notification_email_installment_due', $notificationEmailSettings['installment_due']) }}"
                                             help="{{ __('messages.notification_installment_due_help') }}" />
                                     </div>
+
+                                    @if (\App\Models\EventFeed::allowedFor($role))
+                                    <div>
+                                        <x-toggle name="notification_email_feed"
+                                            label="{{ __('messages.notify_feed') }}"
+                                            checked="{{ old('notification_email_feed', $notificationEmailSettings['feed']) }}"
+                                            help="{{ __('messages.notify_feed_help') }}" />
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

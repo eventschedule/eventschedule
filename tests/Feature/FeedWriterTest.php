@@ -206,7 +206,7 @@ class FeedWriterTest extends TestCase
         // translation again.
         $stamp = $event->updated_at;
         $again = $this->update($item->fresh(), $event, ['event_name' => 'Frühlingskonzert (ausverkauft)', 'event_duration' => 3]);
-        $this->assertSame(['written' => [], 'kept' => [], 'held' => []], $again);
+        $this->assertSame(['written' => [], 'kept' => [], 'held' => [], 'raised' => false], $again);
         $this->assertEquals($stamp, $event->fresh()->updated_at);
     }
 

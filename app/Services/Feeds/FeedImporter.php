@@ -69,6 +69,7 @@ class FeedImporter
         private FeedEventWriter $writer,
         private FeedVenueResolver $venues,
         private EventLifecycleService $lifecycle,
+        private FeedNotifier $notifier,
     ) {}
 
     /**
@@ -80,6 +81,7 @@ class FeedImporter
     {
         $this->deadline = $deadline;
         $this->inThisRead = [];
+        $this->raised = [];
         $this->unfinished = false;
         $role = Role::find($feed->role_id);
         $owner = $role && $role->user_id ? User::find($role->user_id) : null;
@@ -146,6 +148,8 @@ class FeedImporter
                 : $now->copy()->addMinutes(random_int(55, 65)),
             'stats' => $this->remember($feed, $role, $owner, $now, $counts),
         ])->save();
+
+        $this->notifier->afterRead($feed, $role, $counts, $this->unfinished, $this->raised);
 
         return ['status' => FeedFetcher::OK] + $counts;
     }
@@ -269,6 +273,9 @@ class FeedImporter
 
     /** Whether the read stopped with work still to do, which the next run should not wait an hour for. */
     private bool $unfinished = false;
+
+    /** @var list<int> The items that became a decision in this read: what the owner is told about. */
+    private array $raised = [];
 
     /**
      * What is no longer in the source. Returns how many events the breaker is holding.
@@ -410,6 +417,11 @@ class FeedImporter
         if ($item->decided_hash === FeedEventWriter::hashOf($decision)) {
             return;
         }
+
+        // New to the owner, so they are told. Both callers come here only for an item that is
+        // not already waiting (gone() and cancelledAtSource() act on `imported` alone), which is
+        // what keeps a read that finds it still waiting from telling anybody again.
+        $this->raised[] = $item->id;
 
         $item->forceFill([
             'state' => EventFeedItem::STATE_DECIDE,
@@ -554,6 +566,9 @@ class FeedImporter
                 $wanted = $this->writer->wanted($feed, $role, $row, $venue['deferred'] ? $this->venueOf($item) : $venue['venue']);
                 $result = $this->writer->update($feed, $role, $item, $item->event, $wanted);
                 $counts['updated'] += $result['written'] ? 1 : 0;
+                if ($result['raised']) {
+                    $this->raised[] = $item->id;
+                }
                 $this->notePicture($item, $wanted['flyer']);
 
                 continue;
@@ -737,13 +752,22 @@ class FeedImporter
             'stats' => ['last_http' => $httpStatus] + ($feed->stats ?? []),
         ]);
 
+        // Many feeds failing at once is likelier our fault than each source's: nobody is told
+        // their feed is broken and none is paused for it. The platform's admins are told instead.
+        $ours = EventFeed::manyFailing();
         $since = $feed->last_success_at ?? $feed->created_at;
-        if ($since && $since->lt($now->copy()->subDays(self::PAUSE_AFTER_DAYS))) {
+        $pausing = ! $ours && $since && $since->lt($now->copy()->subDays(self::PAUSE_AFTER_DAYS));
+
+        if ($pausing) {
             $feed->forceFill(['paused_at' => $now, 'pause_reason' => EventFeed::PAUSED_FAILING]);
             $feed->items()->whereNotNull('publish_requested_at')->update(['publish_requested_at' => null]);
         }
 
         $feed->save();
+
+        if (! $ours) {
+            $this->notifier->afterFailure($feed, $pausing);
+        }
 
         return ['status' => $reason];
     }
@@ -752,7 +776,8 @@ class FeedImporter
     private function remember(EventFeed $feed, Role $role, User $owner, Carbon $now, array $counts): array
     {
         $stats = $feed->stats ?? [];
-        unset($stats['last_http']);
+        // A good read: the last failure's status, and that somebody was told it was failing.
+        unset($stats['last_http'], $stats['failing_told']);
 
         if (array_sum($counts) > 0) {
             $stats['reads'] = array_slice(array_merge([['at' => $now->toIso8601String()] + array_filter($counts)], $stats['reads'] ?? []), 0, 10);

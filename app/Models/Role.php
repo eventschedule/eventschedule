@@ -1300,9 +1300,9 @@ class Role extends Model implements MustVerifyEmail
             ->filter(function ($user) use ($type) {
                 $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
 
-                // new_request, installment_due and weekly_digest default to opt-in when the user
-                // has not explicitly set a preference (RoleController::edit() renders them on).
-                if (in_array($type, ['new_request', 'installment_due', 'weekly_digest'], true) && ! array_key_exists($type, $settings)) {
+                // new_request, installment_due, weekly_digest and feed default to opt-in when the
+                // user has not explicitly set a preference (RoleController::edit() renders them on).
+                if (in_array($type, ['new_request', 'installment_due', 'weekly_digest', 'feed'], true) && ! array_key_exists($type, $settings)) {
                     return true;
                 }
 
@@ -1315,7 +1315,7 @@ class Role extends Model implements MustVerifyEmail
      * NotifyFanContentChanges only ever mails the event's own creator, so there is no
      * schedule-level notice to copy.
      */
-    public const NOTIFICATION_EMAIL_TYPES = ['new_request', 'new_sale', 'new_feedback', 'new_poll_option', 'installment_due'];
+    public const NOTIFICATION_EMAIL_TYPES = ['new_request', 'new_sale', 'new_feedback', 'new_poll_option', 'installment_due', 'feed'];
 
     private const NOTIFICATION_EMAIL_DEFAULTS = [
         'new_request' => true,
@@ -1323,6 +1323,9 @@ class Role extends Model implements MustVerifyEmail
         'new_feedback' => false,
         'new_poll_option' => false,
         'installment_due' => false,
+        // What a feed needs somebody for (FeedNotifier): on, like requests, because nothing
+        // else tells a team that drafts are waiting or that a feed stopped being read.
+        'feed' => true,
     ];
 
     /**

@@ -113,6 +113,20 @@ class EventFeed extends Model
         }
     }
 
+    /**
+     * Whether more feeds are failing at once than their own sources would explain: at least
+     * five, and half of all that are being read. Then the fault is likelier ours (the network,
+     * an address of ours that a host blocks), so nobody is mailed that THEIR feed is broken and
+     * no feed is paused for it; the platform's admins are told instead (AdminAlertService).
+     */
+    public static function manyFailing(): bool
+    {
+        $reading = self::whereNull('paused_at')->count();
+        $failing = self::whereNull('paused_at')->where('failure_count', '>', 0)->where('last_checked_at', '>', now()->subDay())->count();
+
+        return $failing >= 5 && $failing * 2 >= $reading;
+    }
+
     /** What two addresses are compared by: an encrypted column cannot be. */
     public static function hashOf(string $url): string
     {

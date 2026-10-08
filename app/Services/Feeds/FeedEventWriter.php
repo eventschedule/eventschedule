@@ -218,6 +218,11 @@ class FeedEventWriter
             $decision = null;
         }
 
+        // New to the owner: not already waiting as this same decision. A read that finds it
+        // still waiting has nothing new to tell anybody.
+        $waiting = $item->state === EventFeedItem::STATE_DECIDE ? ($item->pending['decide'] ?? null) : null;
+        $raised = $decision !== null && ($waiting === null || self::hashOf($waiting) !== self::hashOf($decision));
+
         // `pending` also carries what the list said about the item (the importer's), which is
         // not this method's to drop.
         $aside = array_diff_key($item->pending ?? [], ['fields' => true, 'decide' => true])
@@ -229,7 +234,7 @@ class FeedEventWriter
             'state' => $decision ? EventFeedItem::STATE_DECIDE : ($item->state === EventFeedItem::STATE_DECIDE ? EventFeedItem::STATE_IMPORTED : $item->state),
         ])->save();
 
-        return ['written' => $written, 'kept' => $kept, 'held' => $held];
+        return ['written' => $written, 'kept' => $kept, 'held' => $held, 'raised' => $raised];
     }
 
     /**
