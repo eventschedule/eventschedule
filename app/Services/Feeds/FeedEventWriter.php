@@ -2,6 +2,7 @@
 
 namespace App\Services\Feeds;
 
+use App\Jobs\NotifyEventChange;
 use App\Models\Event;
 use App\Models\EventFeed;
 use App\Models\EventFeedItem;
@@ -10,6 +11,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
 use App\Services\AuditService;
+use App\Services\EventChangeNotifier;
 use App\Utils\GeminiUtils;
 use App\Utils\RemoteImage;
 use App\Utils\UrlUtils;
@@ -18,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * What a feed writes: the event it makes from a row, and the changes it makes to that event
@@ -228,6 +231,72 @@ class FeedEventWriter
         ])->save();
 
         return ['written' => $written, 'kept' => $kept, 'held' => $held];
+    }
+
+    /**
+     * The owner said yes to a move the feed was holding (FeedActions::apply()). The held fields
+     * are written as any update is, and this time the people who signed up can be told, in the
+     * words a save by hand uses for a changed date or place.
+     *
+     * @return bool Whether there was anything to apply.
+     */
+    public function applyHeld(EventFeed $feed, Role $role, EventFeedItem $item, Event $event, bool $notify, ?string $note): bool
+    {
+        $values = array_intersect_key($item->pending['decide'] ?? [], array_flip(self::GUARDED));
+
+        if (! $values) {
+            return false;
+        }
+
+        $before = $this->forNotice($event);
+
+        $this->apply($feed, $event, $values);
+        if ($event->isDirty()) {
+            $event->save();
+        }
+        $event->forceFill(['ical_sequence' => (int) $event->ical_sequence + 1])->saveQuietly();
+        $event->unsetRelation('roles');
+
+        if (! $event->is_draft) {
+            $this->events->announceSave($event, $role, false);
+        }
+
+        $now = $this->held($event);
+        $imported = $item->imported ?? [];
+        foreach ($values as $field => $value) {
+            $imported['src'][$field] = $value;
+            $imported['row'][$field] = $now[$field];
+        }
+        $imported['venue_id'] = $imported['row']['venue_id'] ?? null;
+
+        $item->forceFill([
+            'imported' => $imported,
+            'pending' => array_diff_key($item->pending ?? [], ['decide' => true]) ?: null,
+            'state' => EventFeedItem::STATE_IMPORTED,
+            'starts_at' => $event->starts_at,
+        ])->save();
+
+        $changes = EventRepo::detectMaterialChanges($before, $this->forNotice($event->fresh()));
+
+        if ($notify && $changes && ! $event->is_draft && EventChangeNotifier::hasAnyoneToTell($event)) {
+            NotifyEventChange::dispatch($event->id, $changes, $note ? Str::limit($note, 280, '') : null);
+        }
+
+        return true;
+    }
+
+    /** What a change notice compares, as a save takes it before and after. */
+    private function forNotice(Event $event): array
+    {
+        return [
+            'starts_at' => $event->starts_at,
+            'duration' => $event->duration,
+            'timezone' => $event->timezone,
+            'days_of_week' => $event->days_of_week,
+            'event_url' => $event->event_url,
+            'venue_id' => $event->venue?->id,
+            'venue_name' => $event->venue?->getDisplayName(),
+        ];
     }
 
     /**

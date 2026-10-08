@@ -130,7 +130,9 @@ class ApFeedPagesTest extends TestCase
         $response->assertDontSee(self::SECRET, false)->assertSee('93.184.216.34');
         // A feed's name is its source's own words: text, and nothing a template could run.
         $response->assertDontSee('<script>alert(1)</script>', false);
-        $this->assertStringContainsString('<span v-pre><bdi>{{ 7 * 7 }}&lt;script&gt;', $response->getContent());
+        $this->assertStringContainsString('v-pre><bdi>{{ 7 * 7 }}&lt;script&gt;', $response->getContent());
+        // Each opens its own page.
+        $response->assertSee(route('role.feeds.show', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId(EventFeed::where('name', 'Fine and quiet')->value('id'))]), false);
 
         // The strip counts what is waiting for somebody: drafts and decisions.
         $this->assertMatchesRegularExpression('/'.preg_quote(__('messages.feeds_tab'), '/').'\s*<span class="ap-tab-count is-waiting">14<\/span>/', $this->tab(null, 'schedule')->getContent());

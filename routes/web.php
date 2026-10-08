@@ -908,6 +908,15 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/{subdomain}/feeds/add', [EventFeedController::class, 'create'])->name('role.feeds.create');
     Route::post('/{subdomain}/feeds/check', [EventFeedController::class, 'check'])->name('role.feeds.check')->middleware('throttle:10,1');
     Route::post('/{subdomain}/feeds', [EventFeedController::class, 'store'])->name('role.feeds.store');
+    Route::get('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'show'])->name('role.feeds.show');
+    Route::delete('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'destroy'])->name('role.feeds.destroy');
+    Route::post('/{subdomain}/feeds/{hash}/read', [EventFeedController::class, 'read'])->name('role.feeds.read')->middleware('throttle:10,1');
+    Route::post('/{subdomain}/feeds/{hash}/pause', [EventFeedController::class, 'pause'])->name('role.feeds.pause');
+    Route::post('/{subdomain}/feeds/{hash}/resume', [EventFeedController::class, 'resume'])->name('role.feeds.resume');
+    Route::post('/{subdomain}/feeds/{hash}/review', [EventFeedController::class, 'review'])->name('role.feeds.review');
+    Route::post('/{subdomain}/feeds/{hash}/publish-all', [EventFeedController::class, 'publishAll'])->name('role.feeds.publish_all');
+    Route::post('/{subdomain}/feeds/{hash}/decide/{item}', [EventFeedController::class, 'decide'])->name('role.feeds.decide');
+    Route::post('/{subdomain}/feeds/{hash}/undo', [EventFeedController::class, 'undo'])->name('role.feeds.undo');
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
     Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');

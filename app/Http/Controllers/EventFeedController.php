@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\EventFeed;
+use App\Models\EventFeedItem;
 use App\Models\Role;
 use App\Services\AuditService;
+use App\Services\Feeds\FeedActions;
 use App\Services\Feeds\FeedSetup;
+use App\Utils\UrlUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -24,7 +27,10 @@ use Illuminate\Http\Request;
  */
 class EventFeedController extends Controller
 {
-    public function __construct(private FeedSetup $setup) {}
+    /** Drafts shown on a feed's page at a time. */
+    private const PER_PAGE = 25;
+
+    public function __construct(private FeedSetup $setup, private FeedActions $actions) {}
 
     /**
      * The schedule, for someone who runs it, or where to send them instead.
@@ -128,7 +134,7 @@ class EventFeedController extends Controller
         ]);
 
         // Only a sub-schedule and a category that are this schedule's own.
-        $groupId = $role->groups()->whereKey(\App\Utils\UrlUtils::decodeId((string) $request->input('group_id')))->value('id');
+        $groupId = $role->groups()->whereKey(UrlUtils::decodeId((string) $request->input('group_id')))->value('id');
         $categoryId = collect($role->getEventCategories())->pluck('id')->contains((int) $request->input('category_id')) ? (int) $request->input('category_id') : null;
 
         $feed = $this->setup->add($role, $request->user(), $checked, [
@@ -144,5 +150,233 @@ class EventFeedController extends Controller
         AuditService::log(AuditService::FEED_ADD, $request->user()->id, 'Role', $role->id, null, null, 'feed:'.$feed->id.' '.$feed->host.' '.$feed->kind);
 
         return redirect($this->tab($role))->with('message', __($feed->publishes() ? 'messages.feeds_added_publishing' : 'messages.feeds_added_drafts'));
+    }
+
+    /**
+     * One of this schedule's feeds. An id from another schedule opens nothing: the 404 does not
+     * say whether such a feed exists.
+     */
+    private function feed(Role $role, string $hash): EventFeed
+    {
+        return EventFeed::where('role_id', $role->id)->findOrFail(UrlUtils::decodeId($hash));
+    }
+
+    private function page(Role $role, EventFeed $feed): string
+    {
+        return route('role.feeds.show', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($feed->id)]);
+    }
+
+    /** A feed's own page: what waits for somebody first, then what it has been doing. */
+    public function show(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        $decisions = $feed->items()
+            ->where('state', EventFeedItem::STATE_DECIDE)
+            ->whereNotNull('event_id')
+            ->with(['event.roles', 'event.creatorRole'])
+            ->orderBy('starts_at')
+            ->get()
+            ->filter(fn (EventFeedItem $item) => $item->event && isset($item->pending['decide']))
+            ->values();
+
+        // Soonest first: the one that happens on Saturday is the one to look at today.
+        $waiting = $feed->items()
+            ->where('state', EventFeedItem::STATE_IMPORTED)
+            ->whereHas('event', fn ($query) => $query->where('is_draft', true))
+            ->with(['event.roles', 'event.creatorRole'])
+            ->orderBy('starts_at')
+            ->orderBy('id')
+            ->paginate(self::PER_PAGE)
+            ->withQueryString();
+
+        return view('feed.show', [
+            'role' => $role,
+            'feed' => $feed,
+            'decisions' => $decisions,
+            'waiting' => $waiting,
+            'eventsCount' => $feed->items()->whereNotNull('event_id')->count(),
+            'canUndo' => $this->actions->canUndoFirstRead($feed),
+            'allowed' => EventFeed::allowedFor($role),
+        ]);
+    }
+
+    /** Read it on the next run. */
+    public function read(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        if (! EventFeed::allowedFor($role)) {
+            return redirect($this->page($role, $feed))->with('error', __('messages.feeds_need_enterprise'));
+        }
+
+        return redirect($this->page($role, $feed))->with(
+            ...($this->actions->readNow($feed)
+                ? ['message', __('messages.feeds_read_now_done')]
+                : ['error', __('messages.feeds_read_now_wait')])
+        );
+    }
+
+    public function pause(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+        $this->actions->pause($feed);
+        AuditService::log(AuditService::FEED_UPDATE, $request->user()->id, 'Role', $role->id, null, null, 'feed:'.$feed->id.' paused');
+
+        return redirect($this->page($role, $feed))->with('message', __('messages.feeds_paused_done'));
+    }
+
+    public function resume(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        if (! EventFeed::allowedFor($role)) {
+            return redirect($this->page($role, $feed))->with('error', __('messages.feeds_need_enterprise'));
+        }
+
+        $this->actions->resume($feed);
+        AuditService::log(AuditService::FEED_UPDATE, $request->user()->id, 'Role', $role->id, null, null, 'feed:'.$feed->id.' resumed');
+
+        return redirect($this->page($role, $feed))->with('message', __('messages.feeds_resumed_done'));
+    }
+
+    /** Remove the feed. Its events stay unless the form asks for the coming ones to go too. */
+    public function destroy(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+        $trace = 'feed:'.$feed->id.' '.$feed->host.' '.$feed->kind;
+        $deleted = $this->actions->remove($feed, $request->user(), $request->input('its_events') === 'delete');
+        AuditService::log(AuditService::FEED_REMOVE, $request->user()->id, 'Role', $role->id, null, null, $trace);
+
+        return redirect($this->tab($role))->with('message', $deleted
+            ? trans_choice('messages.feeds_removed_with', $deleted, ['count' => number_format($deleted)])
+            : __('messages.feeds_removed'));
+    }
+
+    /**
+     * Publish or skip drafts: the ones ticked, or the one whose own button was pressed.
+     */
+    public function review(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        // A row's own button names the row; the buttons over the list take what is ticked.
+        [$action, $hashes] = match (true) {
+            $request->filled('publish_one') => ['publish', [$request->input('publish_one')]],
+            $request->filled('skip_one') => ['skip', [$request->input('skip_one')]],
+            default => [$request->input('action'), (array) $request->input('items', [])],
+        };
+
+        $ids = array_values(array_filter(array_map(fn ($item) => is_string($item) ? UrlUtils::decodeId($item) : null, $hashes)));
+
+        if (! in_array($action, ['publish', 'skip'], true) || ! $ids) {
+            return redirect($this->page($role, $feed))->with('error', __('messages.feeds_nothing_selected'));
+        }
+
+        if ($action === 'publish') {
+            $done = $this->actions->publish($feed, $role, $request->user(), $ids);
+
+            return redirect()->back()->with('message', trans_choice('messages.feeds_published_count', $done, ['count' => number_format($done)]));
+        }
+
+        $done = $this->actions->skip($feed, $request->user(), $ids);
+
+        return redirect()->back()->with('message', trans_choice('messages.feeds_skipped_count', $done, ['count' => number_format($done)]));
+    }
+
+    public function publishAll(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+        $asked = $this->actions->publishAll($feed);
+
+        return redirect($this->page($role, $feed))->with('message', trans_choice('messages.feeds_publish_all_done', $asked, ['count' => number_format($asked)]));
+    }
+
+    /** The owner's answer to something the feed would not do on its own. */
+    public function decide(Request $request, string $subdomain, string $hash, string $item)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+        $item = $feed->items()->findOrFail(UrlUtils::decodeId($item));
+
+        $request->validate([
+            'answer' => 'required|in:keep,apply',
+            'note' => 'nullable|string|max:280',
+        ]);
+
+        if ($request->input('answer') === 'keep') {
+            $this->actions->keep($feed, $item);
+
+            return redirect($this->page($role, $feed))->with('message', __('messages.feeds_decided_kept'));
+        }
+
+        $done = $this->actions->apply($feed, $role, $item, $request->user(), $request->boolean('notify'), $request->input('note'));
+
+        return redirect($this->page($role, $feed))->with('message', match ($done) {
+            'cancelled' => __('messages.feeds_decided_cancelled'),
+            'moved' => __('messages.feeds_decided_moved'),
+            default => __('messages.feeds_decided_kept'),
+        });
+    }
+
+    public function undo(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        if (! $this->actions->canUndoFirstRead($feed)) {
+            return redirect($this->page($role, $feed))->with('error', __('messages.feeds_undo_too_late'));
+        }
+
+        $result = $this->actions->undoFirstRead($feed, $request->user());
+        AuditService::log(AuditService::FEED_UPDATE, $request->user()->id, 'Role', $role->id, null, null, 'feed:'.$feed->id.' first read undone');
+
+        return redirect($this->page($role, $feed))->with('message', __('messages.feeds_undone', [
+            'removed' => number_format($result['removed']),
+            'kept' => number_format($result['kept']),
+        ]));
     }
 }

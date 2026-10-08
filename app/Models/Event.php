@@ -313,13 +313,20 @@ class Event extends Model
      * after the columns were there. Until the answer is yes it is one small query per ask.
      */
     /**
-     * Whether a feed made this event and may still be keeping it up to date. Such an event is
+     * Whether a feed made this event and is still keeping it up to date. Such an event is
      * written by its feed and by its owner, and by nothing else: an inbound calendar sync that
      * rewrote it would look to the feed exactly like the owner editing every field.
+     *
+     * "Still": import_source says where an event came from and stays for good. Once its feed is
+     * removed, or the owner has dismissed it from the feed, it is an event like any other.
      */
     public function isFromFeed(): bool
     {
-        return $this->import_source === self::IMPORT_FEED;
+        return $this->import_source === self::IMPORT_FEED
+            && EventFeed::tablesReady()
+            && EventFeedItem::where('event_id', $this->id)
+                ->whereIn('state', [EventFeedItem::STATE_IMPORTED, EventFeedItem::STATE_DECIDE])
+                ->exists();
     }
 
     public static function importColumnsReady(): bool
@@ -358,6 +365,7 @@ class Event extends Model
         'curate-event',
         'download-photos',
         'edit-event',
+        'feeds',
         'generate-flyer',
         'generate-style-image',
         'map-image',

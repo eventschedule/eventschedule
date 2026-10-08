@@ -91,22 +91,27 @@
 @else
 <div class="ap-card rounded-xl overflow-hidden">
     <table class="page-table feed-list">
-        <colgroup><col style="width:19.5rem"><col style="width:5rem"><col style="width:10.5rem"><col></colgroup>
+        <colgroup><col style="width:19.5rem"><col style="width:5rem"><col style="width:10.5rem"><col><col style="width:5rem"></colgroup>
         <thead>
             <tr>
                 <th scope="col">{{ __('messages.feeds_col_feed') }}</th>
                 <th scope="col">{{ __('messages.events') }}</th>
                 <th scope="col">{{ __('messages.feeds_col_new') }}</th>
                 <th scope="col">{{ __('messages.feeds_col_status') }}</th>
+                <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
             </tr>
         </thead>
         <tbody>
             @foreach ($ordered as $index)
-            @php $feed = $feeds[$index]; [, $tone, $status, $statusSub] = $states[$index]; @endphp
+            @php
+                $feed = $feeds[$index];
+                [, $tone, $status, $statusSub] = $states[$index];
+                $feedUrl = route('role.feeds.show', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($feed->id)]);
+            @endphp
             <tr>
                 <td class="c-main">
                     {{-- The feed's name is whatever its source calls itself: text, never markup. --}}
-                    <div class="event-list-name feed-name"><span v-pre><bdi>{{ $feed->name }}</bdi></span><span class="event-chip">{{ __('messages.feeds_kind_'.$feed->kind) }}</span></div>
+                    <div class="event-list-name feed-name"><a href="{{ $feedUrl }}" v-pre><bdi>{{ $feed->name }}</bdi></a><span class="event-chip">{{ __('messages.feeds_kind_'.$feed->kind) }}</span></div>
                     {{-- The site, never the address: for a private calendar the address is the key to it. --}}
                     <div class="event-list-sub"><span class="feed-addr" dir="ltr">{{ $feed->host }}</span></div>
                 </td>
@@ -114,7 +119,7 @@
                 <td data-label="{{ __('messages.feeds_col_new') }}">
                     {{ __($feed->publishes() ? 'messages.feeds_mode_publish' : 'messages.feeds_mode_draft') }}
                     @if ($feed->waiting_count > 0)
-                    <div class="event-list-sub">{{ trans_choice('messages.feeds_waiting', $feed->waiting_count, ['count' => number_format($feed->waiting_count)]) }}</div>
+                    <div class="event-list-sub"><a href="{{ $feedUrl }}#waiting" class="event-link">{{ trans_choice('messages.feeds_waiting', $feed->waiting_count, ['count' => number_format($feed->waiting_count)]) }}</a></div>
                     @endif
                 </td>
                 <td>
@@ -123,6 +128,7 @@
                     <div class="event-list-sub">{{ $statusSub }}</div>
                     @endif
                 </td>
+                <td class="c-actions"><a href="{{ $feedUrl }}" class="event-link">{{ __('messages.feeds_open') }}</a></td>
             </tr>
             @endforeach
         </tbody>

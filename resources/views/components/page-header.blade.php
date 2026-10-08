@@ -39,6 +39,11 @@
             @if ($lead)
             <p class="page-lead" v-pre>{{ $lead }}</p>
             @endif
+            {{-- Where a page is about one thing that has a state (a feed: its health, its counts,
+                 when it was last read), that line stands under the title in place of a lead. --}}
+            @isset($status)
+            {{ $status }}
+            @endisset
         </div>
     </div>
     @if (isset($actions) && trim((string) $actions) !== '')
