@@ -3,43 +3,7 @@
 
     <x-slot name="head">
         @if ($tab == 'availability')
-        <style {!! nonce_attr() !!}>
-            .day-x {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(239, 68, 68, 0.1);
-                pointer-events: none;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .day-x::after {
-                content: attr(data-label);
-                font-size: 0.65rem;
-                color: rgba(185, 28, 28, 0.8);
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.025em;
-            }
-
-            .dark .day-x {
-                background-color: rgba(239, 68, 68, 0.15);
-            }
-
-            .dark .day-x::after {
-                color: rgba(252, 165, 165, 0.9);
-            }
-
-            @media (max-width: 767px) {
-                .day-x::after {
-                    content: none;
-                }
-            }
-        </style>
+        {{-- The grid's look is the month kit's (partials/month-kit-styles, .gk-cal-pick and .day-x). --}}
         @if(!$isViewer)
         <script {!! nonce_attr() !!}>
         // Plain script, and listening on the document: the grid sits inside the calendar's Vue
@@ -50,31 +14,60 @@
             const unavailableDays = new Set(@json($datesUnavailable));
             const unavailableLabel = @json(__('messages.unavailable'));
 
+            // Marks a day, or clears it. The state is said on the day itself (aria-pressed), which
+            // is a button to the keyboard and to a screen reader.
+            function toggleDay(dayEl) {
+                const day = dayEl.getAttribute('data-date');
+                const mark = dayEl.querySelector('.day-x');
+
+                if (unavailableDays.has(day)) {
+                    unavailableDays.delete(day);
+                    availableDays.add(day);
+                    if (mark) mark.remove();
+                } else {
+                    unavailableDays.add(day);
+                    availableDays.delete(day);
+                    if (! mark) {
+                        const added = document.createElement('div');
+                        added.className = 'day-x';
+                        added.setAttribute('data-label', unavailableLabel);
+                        dayEl.appendChild(added);
+                    }
+                }
+                dayEl.setAttribute('aria-pressed', unavailableDays.has(day) ? 'true' : 'false');
+
+                const saveButton = document.getElementById('saveButton');
+                if (saveButton) saveButton.disabled = false;
+            }
+
+            // Enter or Space presses the day the focus is on; the arrows move between days.
+            document.addEventListener('keydown', function (e) {
+                const dayEl = e.target.closest ? e.target.closest('.day-element') : null;
+                if (! dayEl || e.target !== dayEl) return;
+
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleDay(dayEl);
+                    return;
+                }
+
+                const rtl = getComputedStyle(dayEl).direction === 'rtl';
+                const step = { ArrowLeft: rtl ? 1 : -1, ArrowRight: rtl ? -1 : 1, ArrowUp: -7, ArrowDown: 7 }[e.key];
+                if (! step) return;
+                const days = Array.prototype.slice.call(document.querySelectorAll('.day-element'));
+                const next = days[days.indexOf(dayEl) + step];
+                if (next) {
+                    e.preventDefault();
+                    next.focus();
+                }
+            });
+
             document.addEventListener('click', function (e) {
                 if (! e.target.closest) return;
 
                 const dayEl = e.target.closest('.day-element');
                 if (dayEl) {
-                    const day = dayEl.getAttribute('data-date');
-                    const mark = dayEl.querySelector('.day-x');
-
-                    if (unavailableDays.has(day)) {
-                        unavailableDays.delete(day);
-                        availableDays.add(day);
-                        if (mark) mark.remove();
-                    } else {
-                        unavailableDays.add(day);
-                        availableDays.delete(day);
-                        if (! mark) {
-                            const added = document.createElement('div');
-                            added.className = 'day-x';
-                            added.setAttribute('data-label', unavailableLabel);
-                            dayEl.appendChild(added);
-                        }
-                    }
-
-                    const saveButton = document.getElementById('saveButton');
-                    if (saveButton) saveButton.disabled = false;
+                    toggleDay(dayEl);
                     return;
                 }
 

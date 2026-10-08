@@ -178,6 +178,31 @@
     .gk-cal-away svg { width: 1.125rem; height: 1.125rem; }
     .gk-dayp-away { flex: none; margin: 0; padding: .4375rem .875rem; border-bottom: 1px solid var(--gk-line); background: var(--gk-warn-bg); color: var(--gk-warn); font-size: .8125rem; }
 
+    /* The Availability tab: the same month with nothing on it but its days, and a day is what
+       is pressed (role/partials/calendar draws it, role/show-admin wires it). The mark lies under
+       the day's number and says its word from data-label, so no language is in this file. */
+    .gk-cal-pick .gk-cal-week { min-height: 5.5rem; }
+    .gk-cal-pick .gk-cal-dayhead { position: relative; z-index: 1; }
+    .gk-cal-pick .day-element { cursor: pointer; transition: background-color var(--gk-swap, 120ms); }
+    .gk-cal-pick .day-element:hover { background: var(--cal-hover); }
+    .gk-cal-pick .day-element:focus-visible { z-index: 2; outline: 2px solid var(--gk-ink); outline-offset: -2px; }
+    .day-x { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: .4375rem .5625rem; background: var(--gk-bad-bg); pointer-events: none; }
+    .day-element:hover .day-x { background: color-mix(in srgb, var(--gk-bad) 14%, var(--gk-solid)); }
+    .day-x::after { content: attr(data-label); min-width: 0; overflow: hidden; font-size: .6875rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gk-bad); text-overflow: ellipsis; white-space: nowrap; }
+    @container gkcal (max-width: 40rem) {
+        .gk-cal-pick .gk-cal-week { min-height: 3.5rem; }
+        .gk-cal-pick .gk-cal-wd { padding-inline: .25rem; text-align: center; }
+        .gk-cal-pick .gk-cal-dayhead { justify-content: center; }
+        .day-x::after { content: none; }
+    }
+
+    /* The month while it loads. */
+    .gk-cal-wait-bar { display: block; border-radius: .25rem; background: var(--gk-line); }
+    .gk-cal-wait-wd { width: 1.75rem; height: .6875rem; }
+    .gk-cal-wait-num { width: 1.25rem; height: 1.125rem; margin: .25rem .1875rem .5rem; }
+    .gk-cal-wait-line { height: .75rem; margin: 0 .3125rem .375rem; }
+    .gk-cal-wait-short { width: 60%; }
+
     /* The other dates of the event being looked at. */
     /* In ink, not in the schedule's colour: a red ring reads as an error and a navy one is lost in the dark. */
     .gk-cal-kin { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--gk-ink) 46%, transparent); }

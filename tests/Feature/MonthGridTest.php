@@ -303,7 +303,31 @@ class MonthGridTest extends TestCase
         $availability = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
         $this->assertSame(0, substr_count($availability, ' data-month '), 'the Availability tab is not the month');
         $this->assertSame(0, substr_count($availability, 'id="event-popup"'));
-        $this->assertStringContainsString('grid-cols-7 grid-rows-', $availability, 'its own grid of days is there');
+        // Its own grid of days is there, in the month's style: every day a thing that can be
+        // pressed and that says whether it is, with the names its script and the browser tests
+        // know it by (.day-element, data-date, .day-x).
+        $this->assertSame(1, substr_count($availability, 'class="gk-cal gk-cal-pick" data-availability-grid'));
+        preg_match_all('/<div class="gk-cal-day[^"]* day-element" data-date="(\d{4}-\d{2}-\d{2})"\s+role="button" tabindex="0" aria-pressed="(true|false)"/', $availability, $days);
+        $this->assertContains(count($days[1]), [28, 35, 42], 'whole weeks of days');
+        $this->assertSame(count($days[1]), substr_count($availability, 'day-element" data-date='), 'every day can be pressed and says its state');
+        $this->assertSame(count($days[1]) / 7, substr_count($availability, '<div class="gk-cal-week">'), 'seven days to a week');
+        foreach (['grid-cols-7 grid-rows-', 'bg-gray-200 dark:bg-gray-700 text-xs leading-6', 'rgba(239, 68, 68, 0.1)'] as $old) {
+            $this->assertStringNotContainsString($old, $availability, 'the old grid\'s look is gone: '.$old);
+        }
+        $this->assertStringContainsString('.day-x { position: absolute; inset: 0;', $availability, 'the mark is the kit\'s');
+        $this->assertStringContainsString('content: attr(data-label);', $availability, 'and its word comes from the page, never from the stylesheet');
+
+        // A day the owner marked is drawn marked, and says so.
+        $this->role->users()->updateExistingPivot($owner->id, ['dates_unavailable' => json_encode([$day])]);
+        $marked = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'availability']))->assertOk()->getContent();
+        if (now()->addDays(3)->isSameMonth(now())) {
+            $this->assertSame(1, preg_match('/day-element" data-date="'.$day.'"\s+role="button" tabindex="0" aria-pressed="true"[^>]*>.*?<div class="day-x" data-label="'.preg_quote(e(__('messages.unavailable')), '/').'"><\/div>/s', $marked));
+        }
+        $this->assertSame(substr_count($marked, 'aria-pressed="true"'), substr_count($marked, '<div class="day-x" data-label='));
+
+        // While the month loads, the page shows the month's own frame.
+        $this->assertSame(1, substr_count($schedule, 'class="gk-cal gk-cal-wait hidden md:block animate-pulse"'));
+        $this->assertSame(1, substr_count($availability, 'class="gk-cal gk-cal-wait gk-cal-pick animate-pulse"'));
     }
 
     /**

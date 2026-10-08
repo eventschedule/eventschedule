@@ -652,21 +652,23 @@
             @include('role.partials.calendar-graphic')
         @else
         <div v-if="isLoadingEvents">
-            {{-- Desktop skeleton --}}
-            <div class="hidden md:block border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
-                <div class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700">
+            {{-- The month while it loads: its own frame, its weekday row and as many weeks as the
+                 month that is coming has, so the page keeps its shape when the month arrives. --}}
+            <div class="gk-cal gk-cal-wait {{ ($tab ?? '') == 'availability' ? 'gk-cal-pick' : 'hidden md:block' }} animate-pulse" aria-hidden="true">
+                <div class="gk-cal-head">
                     @for ($i = 0; $i < 7; $i++)
-                    <div class="flex justify-center bg-white dark:bg-gray-900 py-2">
-                        <div class="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
+                    <div class="gk-cal-wd"><i class="gk-cal-wait-bar gk-cal-wait-wd"></i></div>
                     @endfor
                 </div>
-                <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
-                    {{-- As many weeks as the month that is coming has: five, or six. --}}
-                    <div v-for="n in calendarDays.length" :key="n" class="bg-white dark:bg-gray-900 p-2 min-h-[100px]">
-                        <div class="h-4 w-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                        <div class="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
-                        <div class="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div class="gk-cal-weeks">
+                    <div v-for="w in Math.ceil(calendarDays.length / 7)" :key="w" class="gk-cal-week">
+                        <div v-for="d in 7" :key="d" class="gk-cal-day">
+                            <i class="gk-cal-wait-bar gk-cal-wait-num"></i>
+                            @if (($tab ?? '') != 'availability')
+                            <i class="gk-cal-wait-bar gk-cal-wait-line"></i>
+                            <i class="gk-cal-wait-bar gk-cal-wait-line gk-cal-wait-short"></i>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -706,52 +708,61 @@
              panel (month-peek) and the script that writes each day (month-script). --}}
         @include('role.partials.month')
         @else
-        <div v-show="!isLoadingEvents" class="{{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-            <div
-                class="grid grid-cols-7 gap-px border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-700 text-center text-xs font-semibold leading-6 text-gray-700 dark:text-gray-300">
-                @php
-                    $dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                    $dayKeys = array_merge(array_slice($dayKeys, $firstDay), array_slice($dayKeys, 0, $firstDay));
-                @endphp
-                @foreach ($dayKeys as $day)
-                <div class="flex justify-center bg-white dark:bg-gray-900 py-2">
-                    {{ __('messages.' . $day) }}
-                </div>
+        {{-- The Availability tab: the same month with nothing on it but its days, where a day is
+             the thing that is pressed. The server draws it (the days and what is marked are known
+             when the page is made) on the month kit's own classes (partials/month-kit-styles,
+             .gk-cal-pick). A day keeps the names its script (role/show-admin) and the browser
+             tests know it by: .day-element, data-date, and the .day-x that marks it. It is shown
+             on a phone too, so the root carries no hidden class. --}}
+        @php
+            $pickDayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            $pickDayKeys = array_merge(array_slice($pickDayKeys, $firstDay), array_slice($pickDayKeys, 0, $firstDay));
+            $pickToday = $today->format('Y-m-d');
+            $pickTodayCol = ($today->year == $year && $today->month == $month) ? ($today->dayOfWeek - $firstDay + 7) % 7 : -1;
+            $pickMarks = $route == 'admin' && $role->email_verified_at;
+            $pickMarked = is_array($datesUnavailable) ? $datesUnavailable : [];
+            $pickCol = 0;
+        @endphp
+        <div v-show="!isLoadingEvents" class="gk-cal gk-cal-pick" data-availability-grid role="group"
+             aria-label="{{ \Carbon\Carbon::create($year, $month, 1)->locale(app()->getLocale())->translatedFormat('F Y') }}">
+            <div class="gk-cal-head" aria-hidden="true">
+                @foreach ($pickDayKeys as $i => $pickKey)
+                <div class="gk-cal-wd {{ $i === $pickTodayCol ? 'gk-cal-wd-now' : '' }}">{{ __('messages.' . $pickKey) }}</div>
                 @endforeach
             </div>
-        <div class="bg-gray-200 dark:bg-gray-700 text-xs leading-6 text-gray-700 dark:text-gray-300">
-            {{-- The grid of the Availability tab, where a team member marks the days they are away. The
-                 month itself (a guest's page, the embed, the Schedule tab, the dashboard) is
-                 role/partials/month. --}}
-            <div class="w-full grid grid-cols-7 grid-rows-{{ $totalWeeks }} gap-px">
+            <div class="gk-cal-weeks">
                 @while ($currentDate->lte($endOfMonth))
-                    @if ($route == 'admin' && $tab == 'availability' && $role->email_verified_at)
-                        <div class="cursor-pointer relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-1 py-1 md:px-3 md:py-2 min-h-[44px] md:min-h-[100px] border-1 border-transparent hover:border-gray-300 dark:hover:border-gray-600 day-element" data-date="{{ $currentDate->format('Y-m-d') }}">
-                        @if (is_array($datesUnavailable) && in_array($currentDate->format('Y-m-d'), $datesUnavailable))
-                            <div class="day-x" data-label="{{ __('messages.unavailable') }}"></div>
-                        @endif
-                    @else
-                    <div
-                        class="relative {{ $currentDate->month == $month ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400' }} px-3 py-2 min-h-[100px] border-1 border-transparent">
-                    @endif
-                        <div class="flex justify-between">
-                        @if ($route == 'admin' || $route == 'home')
-                        <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            class="{{ $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year ? 'flex h-6 w-6 items-center justify-center rounded bg-[var(--brand-button-bg)] font-semibold text-white' : '' }}">{{ $currentDate->day }}</time>
-                        @else
-                        @php
-                            $isToday = $currentDate->day == $today->day && $currentDate->month == $today->month && $currentDate->year == $today->year;
-                            $todayAccent = $isAdminRoute ? '#4E81FA' : (isset($otherRole) && $otherRole->accent_color ? $otherRole->accent_color : (isset($role) && $role->accent_color ? $role->accent_color : '#4E81FA'));
-                        @endphp
-                        <time datetime="{{ $currentDate->format('Y-m-d') }}"
-                            style="{{ $isToday ? 'background-color: ' . $todayAccent . '; color: ' . accent_contrast_color($todayAccent) : '' }}"
-                            class="{{ $isToday ? 'flex h-6 w-6 items-center justify-center rounded font-semibold' : '' }}">{{ $currentDate->day }}</time>
-                        @endif
+                @php
+                    $pickDate = $currentDate->format('Y-m-d');
+                    $pickIsMarked = in_array($pickDate, $pickMarked);
+                    $pickClass = 'gk-cal-day'
+                        . ($currentDate->month == $month ? '' : ' gk-cal-day-out')
+                        . ($pickDate < $pickToday ? ' gk-cal-day-past' : '')
+                        . ($pickDate === $pickToday ? ' gk-cal-day-today' : '')
+                        . ($pickMarks ? ' day-element' : '');
+                @endphp
+                @if ($pickCol % 7 === 0)
+                <div class="gk-cal-week">
+                @endif
+                    <div class="{{ $pickClass }}" data-date="{{ $pickDate }}"
+                         @if ($pickMarks) role="button" tabindex="0" aria-pressed="{{ $pickIsMarked ? 'true' : 'false' }}" @endif
+                         aria-label="{{ $currentDate->copy()->locale(app()->getLocale())->translatedFormat('l, F j') }}"
+                         @if ($pickDate === $pickToday) aria-current="date" @endif>
+                        <div class="gk-cal-dayhead">
+                            <span class="gk-cal-num"><time datetime="{{ $pickDate }}">{{ $currentDate->day }}</time></span>
+                            @if ($pickDate === $pickToday)
+                            <span class="gk-cal-word">{{ __('messages.today') }}</span>
+                            @endif
                         </div>
+                        @if ($pickMarks && $pickIsMarked)
+                        <div class="day-x" data-label="{{ __('messages.unavailable') }}"></div>
+                        @endif
                     </div>
-                    @php $currentDate->addDay(); @endphp
-                    @endwhile
+                @if ($pickCol % 7 === 6)
                 </div>
+                @endif
+                @php $currentDate->addDay(); $pickCol++; @endphp
+                @endwhile
             </div>
         </div>
         @endif

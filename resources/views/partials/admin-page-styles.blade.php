@@ -608,16 +608,13 @@
       font-size: 0.8125rem;
       color: rgb(var(--ap-ink-3));
     }
+    /* The key to the Availability grid: the mark's own colours (partials/month-kit-styles, .day-x). */
     .page-legend i {
       width: 1rem;
       height: 1rem;
-      border: 1px solid rgba(220, 38, 38, 0.45);
+      border: 1px solid var(--gk-bad-line, rgba(220, 38, 38, 0.45));
       border-radius: 0.25rem;
-      background: rgba(239, 68, 68, 0.2);
-    }
-    .dark .page-legend i {
-      border-color: rgba(252, 165, 165, 0.6);
-      background: rgba(239, 68, 68, 0.35);
+      background: var(--gk-bad-bg, rgba(239, 68, 68, 0.2));
     }
 
     /* ------------------------------------------------------------------------------------------
