@@ -402,6 +402,12 @@ class EventFeedController extends Controller
             default => [$request->input('action'), (array) $request->input('items', [])],
         };
 
+        // What Enter on a tick box sends, where no script stopped it: the form's first button,
+        // which asks for nothing. The page again, with nothing said.
+        if ($action === 'none') {
+            return redirect()->back();
+        }
+
         $ids = array_values(array_filter(array_map(fn ($item) => is_string($item) ? UrlUtils::decodeId($item) : null, $hashes)));
 
         if (! in_array($action, ['publish', 'skip'], true) || ! $ids) {

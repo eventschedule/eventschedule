@@ -99,6 +99,9 @@
                                 <span class="event-status is-bad">{{ __('messages.feeds_admin_failing') }}</span>
                                 {{-- A reason key and a status code. Never what the other server said. --}}
                                 <span class="c-sub"><span class="c-mono" dir="ltr">{{ $feed->last_status }}{{ $http ? ' '.$http : '' }}</span> &middot; {{ trans_choice('messages.feeds_admin_tries', $feed->failure_count, ['count' => number_format($feed->failure_count)]) }}</span>
+                                @elseif ($feed->last_success_at === null)
+                                {{-- Added and not read yet: "Up to date" beside "Never" was not so. --}}
+                                <span class="event-status">{{ __('messages.feeds_status_never') }}</span>
                                 @else
                                 <span class="event-status is-on">{{ __('messages.feeds_status_ok') }}</span>
                                 @endif

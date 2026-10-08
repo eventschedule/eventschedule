@@ -70,8 +70,12 @@ class AdminFeedsPageTest extends TestCase
         $this->feed('Cannot be read', ['failure_count' => 3, 'last_status' => 'http_error', 'stats' => ['last_http' => 503], 'last_success_at' => now()->subDays(2)]);
         $this->feed('Has drafts <b>waiting</b>', ['waiting_count' => 12, 'decide_count' => 2]);
         $this->feed('On a plan without feeds', [], $this->createRole($this->createOwner(), 'talent', ['plan_type' => 'pro']));
+        $this->feed('Added a moment ago', ['last_success_at' => null, 'baseline_done_at' => null, 'next_check_at' => now()]);
 
         $response = $this->admin()->get(route('admin.feeds'))->assertOk();
+        // One that has not been read yet says so. It used to say "Up to date" beside "Never".
+        $this->assertSame(1, substr_count($response->getContent(), '>'.__('messages.feeds_status_never').'<'));
+        $this->assertSame(2, substr_count($response->getContent(), '>'.__('messages.feeds_status_ok').'<'), 'the two that are read and fine, and not the one never read');
 
         $response->assertSeeInOrder(['Cannot be read', 'Paused by its team', 'Fine and quiet'])
             ->assertSee('Springfield Events')

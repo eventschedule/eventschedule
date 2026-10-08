@@ -225,15 +225,24 @@ class ApFeedPageTest extends TestCase
         $this->assertSame(1, preg_match('/<button[^>]*value="skip"[^>]*>/', $html, $selected));
         $this->assertStringContainsString('data-confirm="'.e(__('messages.feeds_skip_selected_confirm')).'"', $selected[0]);
 
-        // The form's first submit button, in the order of the page, is the one Enter presses:
-        // the first that names the form, or that stands inside it. It is disabled, and a
-        // disabled default button means Enter submits nothing.
+        // Enter on a tick box presses the form's first button that CAN be pressed, in the order
+        // of the page: the first that names the form, or that stands inside it. A disabled one
+        // is passed over (seen in a browser: Enter went on to Skip selected), so the one in
+        // front is a real button that asks for nothing.
         preg_match_all('/<button[^>]*type="submit"[^>]*>/', $html, $buttons, PREG_OFFSET_CAPTURE);
         $form = strpos($html, 'id="feed-review"');
         $first = collect($buttons[0])->first(fn (array $button) => str_contains($button[0], 'form="feed-review"') || $button[1] > $form);
-        $this->assertStringContainsString(' disabled', $first[0]);
-        $this->assertStringNotContainsString('name=', $first[0]);
+        $this->assertStringContainsString('name="action" value="none"', $first[0]);
+        $this->assertStringNotContainsString('disabled', $first[0]);
+        $this->assertStringContainsString('data-feed-nothing', $first[0], 'which the page script stops');
+        $this->assertStringContainsString(' hidden', $first[0]);
         $this->assertStringNotContainsString('data-feed-bulk', $first[0], 'and the script that shows the others never shows it');
+
+        // Without script it is sent, with whatever is ticked. Nothing is done and nothing is said.
+        $ticked = [$this->hashOf($feed, 'a'), $this->hashOf($feed, 'b')];
+        $this->actingAs($this->owner)->from($this->url($feed))->post($this->url($feed, 'review'), ['action' => 'none', 'items' => $ticked])
+            ->assertRedirect($this->url($feed))->assertSessionMissing('error')->assertSessionMissing('message');
+        $this->assertSame(2, Event::where('is_draft', true)->count());
     }
 
     /** A draft the owner has worked on is kept, and the page says so instead of "0 skipped". */

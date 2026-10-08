@@ -179,10 +179,12 @@
                     @if ($requested > 0)
                     <span class="event-list-sub" role="status">{{ trans_choice('messages.feeds_publishing_requested', $requested, ['count' => number_format($requested)]) }}</span>
                     @endif
-                    {{-- The form's first button is the one Enter presses, from a tick box too, and
-                         the first one here deletes. This one stands in front of it and does
-                         nothing: a disabled default button means Enter submits nothing. --}}
-                    <button type="submit" form="feed-review" disabled hidden tabindex="-1" aria-hidden="true"></button>
+                    {{-- Enter on a tick box presses the form's first button that can be pressed
+                         (Chrome and Firefox both; a disabled one is passed over, which is why this
+                         is not one), and the first one here used to delete. This one stands in
+                         front and asks for nothing: the script at the foot stops it, and without
+                         script the page answers it with itself. --}}
+                    <button type="submit" form="feed-review" name="action" value="none" hidden tabindex="-1" aria-hidden="true" data-feed-nothing></button>
                     {{-- For what is ticked. Shown once something is (the script at the foot); with no
                          script they are simply there. Skip deletes for good, so it asks first. --}}
                     <button type="submit" form="feed-review" name="action" value="skip" class="page-tool" data-feed-bulk data-confirm="{{ __('messages.feeds_skip_selected_confirm') }}">{{ __('messages.feeds_skip_selected') }}</button>
@@ -322,6 +324,11 @@
                 }
             }
             document.addEventListener('click', function (event) {
+                // What Enter on a tick box presses: nothing happens.
+                if (event.target.closest && event.target.closest('[data-feed-nothing]')) {
+                    event.preventDefault();
+                    return;
+                }
                 var open = event.target.closest ? event.target.closest('[data-feed-confirm]') : null;
                 var never = event.target.closest ? event.target.closest('[data-feed-never]') : null;
                 if (open) setOpen(open.getAttribute('data-feed-confirm'), open.getAttribute('aria-expanded') !== 'true');
