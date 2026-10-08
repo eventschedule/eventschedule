@@ -10,10 +10,17 @@
      how many lines a name may take; the script marks what no stylesheet can know: a name that
      was cut, a month set a size smaller). The names here are the script's too: change both. --}}
 <style {!! nonce_attr() !!}>
+    /* The month's fill (today's number, a bar over several days, the tints) is the page's accent,
+       read on body, where the theme's tokens are declared (partials/guest-theme; the bridge at
+       the foot of this file for the admin's pages). The calendar's wrapper sets --es-accent
+       inline as the owner typed it, and the label for a fill (--es-accent-text) is made for the
+       fill the theme chose: read under the wrapper, a black accent on a dark page drew today's
+       number black on black. Nothing inside .gk-cal reads --es-accent itself. */
+    body { --cal-fill: var(--es-accent, #4E81FA); }
     .gk-cal {
         --cal-line: var(--gk-line);
-        --cal-hover: color-mix(in srgb, var(--es-accent) 12%, var(--gk-well));
-        --cal-on: color-mix(in srgb, var(--es-accent) 30%, var(--gk-well));
+        --cal-hover: color-mix(in srgb, var(--cal-fill) 12%, var(--gk-well));
+        --cal-on: color-mix(in srgb, var(--cal-fill) 30%, var(--gk-well));
         --cal-out: color-mix(in srgb, var(--gk-well) 55%, transparent);
         position: relative;
         container: gkcal / inline-size;
@@ -45,7 +52,7 @@
     /* In the dark a tint of the accent is mud, and a lighter cell reads as the loudest: other
        months' days go darker than this one's, and today is a rule along its top and its number. */
     :where(.dark) .gk-cal { --cal-out: rgb(0 0 0 / .24); }
-    :where(.dark) .gk-cal-day-today { background: color-mix(in srgb, var(--es-accent) 7%, transparent); box-shadow: inset 0 2px 0 var(--es-accent-readable); }
+    :where(.dark) .gk-cal-day-today { background: color-mix(in srgb, var(--cal-fill) 7%, transparent); box-shadow: inset 0 2px 0 var(--es-accent-readable); }
     .gk-cal-dayhead { display: flex; flex: none; align-items: center; gap: .375rem; min-height: 1.625rem; margin-bottom: .125rem; padding-inline: .0625rem; }
     .gk-cal-num { display: inline-grid; place-items: center; min-width: 1.625rem; height: 1.625rem; padding: 0 .375rem; border: 0; border-radius: 999px; background: none; color: var(--gk-ink-2); font: inherit; font-size: .8125rem; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
     button.gk-cal-num { cursor: pointer; transition: background-color var(--gk-swap, 120ms); }
@@ -53,7 +60,7 @@
     .gk-cal-num:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
     .gk-cal-day-out .gk-cal-num { color: var(--gk-ink-3); font-weight: 500; }
     .gk-cal-day-past .gk-cal-num { color: var(--gk-ink-3); font-weight: 500; }
-    .gk-cal-day-today .gk-cal-num { background: var(--es-accent); color: var(--es-accent-text); box-shadow: 0 0 0 1px var(--es-accent-edge); font-weight: 800; }
+    .gk-cal-day-today .gk-cal-num { background: var(--cal-fill); color: var(--es-accent-text); box-shadow: 0 0 0 1px var(--es-accent-edge); font-weight: 800; }
     .gk-cal-word { font-size: .6875rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--es-accent-readable); }
     .gk-cal-add { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; margin-inline-start: auto; border-radius: .5rem; color: var(--gk-ink-3); opacity: 0; transition: opacity var(--gk-swap, 120ms), background-color var(--gk-swap, 120ms); }
     .gk-cal-day:hover .gk-cal-add { opacity: 1; }
@@ -71,6 +78,15 @@
     .gk-cal-ev:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: -1px; }
     .gk-cal-ev-on { background: var(--cal-on); }
     .gk-cal-ev-on:hover { background: var(--cal-on); }
+    /* The quieter inks of an event (its time, a plain note, a past or a cancelled name) hold
+       4.5:1 on the panel and not on a tint. Pointed at, they step to the second ink; while the
+       event's card is open, everything on it is the full ink, the one colour that reads on that
+       tint for any accent a schedule can have, a state's green or amber included. Measured over
+       fourteen accents and modes: 6.4:1 and 4.9:1 at the worst, where the third ink fell to 3.7
+       and 2.1. (A bar over several days is not one of these: its words stand on the fill.) */
+    .gk-cal-ev, .gk-cal-more { --cal-quiet: var(--gk-ink-3); }
+    .gk-cal-ev:hover, .gk-cal-more:hover { --cal-quiet: var(--gk-ink-2); }
+    .gk-cal-ev.gk-cal-ev-on, .gk-cal-ev.gk-cal-ev-on:hover { --cal-quiet: var(--gk-ink); --cal-say: var(--gk-ink); }
     .gk-cal-top { display: flex; align-items: baseline; gap: .3125rem; min-width: 0; }
     .gk-cal-dot { flex: none; align-self: flex-start; width: .4375rem; height: .4375rem; margin-top: .45em; border-radius: 999px; }
     .gk-cal-name { flex: 1 1 auto; min-width: 0; overflow: hidden; font-weight: 600; }
@@ -90,19 +106,19 @@
     .gk-cal-list-3 .gk-cal-name { max-height: 3.9em; max-height: 3lh; }
     .gk-cal-list-wrap .gk-cal-end { float: inline-end; margin-inline-start: .375rem; }
     .gk-cal-end { display: inline-flex; align-items: baseline; gap: .25rem; font-weight: 550; }
-    .gk-cal-time { flex: none; font-size: .75rem; font-weight: 550; font-variant-numeric: tabular-nums; color: var(--gk-ink-3); white-space: nowrap; }
-    .gk-cal-flag { flex: none; align-self: center; display: inline-grid; place-items: center; width: .9375rem; height: .9375rem; color: var(--gk-ink-3); }
+    .gk-cal-time { flex: none; font-size: .75rem; font-weight: 550; font-variant-numeric: tabular-nums; color: var(--cal-quiet, var(--gk-ink-3)); white-space: nowrap; }
+    .gk-cal-flag { flex: none; align-self: center; display: inline-grid; place-items: center; width: .9375rem; height: .9375rem; color: var(--cal-quiet, var(--gk-ink-3)); }
     .gk-cal-flag svg { width: .9375rem; height: .9375rem; }
     .gk-cal-now { display: inline-flex; flex: none; align-items: center; gap: .3125rem; color: var(--gk-ink); white-space: nowrap; }
     .gk-cal-now::before { content: ''; width: .4375rem; height: .4375rem; border-radius: 999px; background: var(--gk-bad); animation: gk-peek-beat 1.6s ease-in-out infinite; }
     /* The line under a name. A state is never cut; a price gives way first. */
     .gk-cal-sub { display: flex; align-items: center; gap: .375rem; min-width: 0; margin-top: .0625rem; font-size: .75rem; line-height: 1.3; }
-    .gk-cal-note { min-width: 0; overflow: hidden; font-weight: 600; color: var(--gk-ink-3); text-overflow: ellipsis; white-space: nowrap; }
-    .gk-cal-note-say { flex: none; overflow: visible; font-weight: 700; color: var(--gk-ink-2); }
-    .gk-cal-note-out { color: var(--gk-ink-2); }
-    .gk-cal-note-warn { color: var(--gk-warn); }
-    .gk-cal-note-ok { color: var(--gk-ok); font-weight: 650; }
-    .gk-cal-note + .gk-cal-note:not(.gk-cal-now)::before { content: '\00B7'; margin-inline-end: .375rem; color: var(--gk-ink-3); font-weight: 600; }
+    .gk-cal-note { min-width: 0; overflow: hidden; font-weight: 600; color: var(--cal-quiet, var(--gk-ink-3)); text-overflow: ellipsis; white-space: nowrap; }
+    .gk-cal-note-say { flex: none; overflow: visible; font-weight: 700; color: var(--cal-say, var(--gk-ink-2)); }
+    .gk-cal-note-out { color: var(--cal-say, var(--gk-ink-2)); }
+    .gk-cal-note-warn { color: var(--cal-say, var(--gk-warn)); }
+    .gk-cal-note-ok { color: var(--cal-say, var(--gk-ok)); font-weight: 650; }
+    .gk-cal-note + .gk-cal-note:not(.gk-cal-now)::before { content: '\00B7'; margin-inline-end: .375rem; color: var(--cal-quiet, var(--gk-ink-3)); font-weight: 600; }
     /* The time ends the event's last line. Where a line under the name says a state or a price
        (gk-cal-ev-under), that is the last line: the time stands at its end and the name keeps
        its own lines whole. Where a day is narrow it is under every name (see below). */
@@ -137,11 +153,11 @@
 
     /* What is over is quieter by its ink and its weight, never by fading: it still has to be read.
        Its picture is the whole of it still, in grey, at its smallest size. */
-    .gk-cal-ev-past .gk-cal-name { color: var(--gk-ink-3); font-weight: 500; }
+    .gk-cal-ev-past .gk-cal-name { color: var(--cal-quiet, var(--gk-ink-3)); font-weight: 500; }
     .gk-cal-ev-past .gk-cal-art { height: 6rem; filter: grayscale(1); opacity: .78; }
     .gk-cal-ev-past .gk-cal-art-tall { height: 8rem; }
     .gk-cal-list-feat li:has(.gk-cal-ev-past) { flex: none; }
-    .gk-cal-ev-off .gk-cal-name { color: var(--gk-ink-3); text-decoration: line-through; }
+    .gk-cal-ev-off .gk-cal-name { color: var(--cal-quiet, var(--gk-ink-3)); text-decoration: line-through; }
 
     /* "+4 more": the rest of the day, one press away, with the hours it covers. The row is one line
        high and wraps: what does not fit (the hours are last) falls to a second line nobody sees,
@@ -150,9 +166,9 @@
     .gk-cal-more:hover { background: var(--cal-hover); color: var(--gk-ink); }
     .gk-cal-more:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: -1px; }
     .gk-cal-more-n { flex: none; font-weight: 700; }
-    .gk-cal-more-from { flex: none; color: var(--gk-ink-3); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .gk-cal-more-from { flex: none; color: var(--cal-quiet, var(--gk-ink-3)); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .gk-cal-more-say { flex: none; font-weight: 700; color: var(--gk-ink-2); }
-    .gk-cal-day-past .gk-cal-more { color: var(--gk-ink-3); }
+    .gk-cal-day-past .gk-cal-more { color: var(--cal-quiet, var(--gk-ink-3)); }
     .gk-cal-day-past .gk-cal-more-n { font-weight: 500; }
 
     /* A day a team member marked themselves away (the admin's Schedule tab). */
@@ -175,16 +191,18 @@
        the days after it hold a blank of the same height, so everything under it lines up. */
     .gk-cal-lanes { display: grid; flex: none; grid-template-columns: minmax(0, 1fr); gap: .125rem; margin-bottom: .125rem; }
     .gk-cal-lane { height: 1.375rem; }
-    .gk-cal-span { position: relative; z-index: 1; display: flex; align-items: baseline; gap: .4375rem; box-sizing: border-box; width: calc(var(--span) * 100% + (var(--span) - 1) * (.5rem + 1px)); height: 1.375rem; padding: 0 .5rem; border-radius: .4375rem; background: var(--es-accent); box-shadow: 0 0 0 1px var(--es-accent-edge); color: var(--es-accent-text); font-size: .8125rem; line-height: 1.375rem; text-decoration: none; transition: filter 80ms; }
+    .gk-cal-span { position: relative; z-index: 1; display: flex; align-items: baseline; gap: .4375rem; box-sizing: border-box; width: calc(var(--span) * 100% + (var(--span) - 1) * (.5rem + 1px)); height: 1.375rem; padding: 0 .5rem; border-radius: .4375rem; background: var(--cal-fill); box-shadow: 0 0 0 1px var(--es-accent-edge); color: var(--es-accent-text); font-size: .8125rem; line-height: 1.375rem; text-decoration: none; transition: filter 80ms; }
     .gk-cal-span:hover { filter: brightness(.93) saturate(1.1); }
     .gk-cal-span.gk-cal-kin { box-shadow: 0 0 0 1px var(--es-accent-edge); filter: brightness(.93) saturate(1.1); }
-    .gk-cal-span.gk-cal-ev-on { background: var(--es-accent); filter: brightness(.93) saturate(1.1); }
+    .gk-cal-span.gk-cal-ev-on { background: var(--cal-fill); filter: brightness(.93) saturate(1.1); }
+    /* A past bar keeps its own quiet band while its card is open: its words are ink, not the fill's label. */
+    .gk-cal-span-past.gk-cal-ev-on { background: color-mix(in srgb, var(--cal-fill) 22%, var(--gk-solid)); }
     .gk-cal-span:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 1px; }
     .gk-cal-span-in { border-start-start-radius: 0; border-end-start-radius: 0; margin-inline-start: -.25rem; width: calc(var(--span) * 100% + (var(--span) - 1) * (.5rem + 1px) + .25rem); }
     .gk-cal-span-out { border-start-end-radius: 0; border-end-end-radius: 0; width: calc(var(--span) * 100% + (var(--span) - 1) * (.5rem + 1px) + .25rem); }
     .gk-cal-span-in.gk-cal-span-out { width: calc(var(--span) * 100% + (var(--span) - 1) * (.5rem + 1px) + .5rem); }
     .gk-cal-span .gk-cal-name { flex: 0 1 auto; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-    .gk-cal-span-past { background: color-mix(in srgb, var(--es-accent) 42%, var(--gk-solid)); color: var(--gk-ink-2); }
+    .gk-cal-span-past { background: color-mix(in srgb, var(--cal-fill) 22%, var(--gk-solid)); color: var(--gk-ink-2); }
 
     /* Where a day is narrower than about 150px (windows from 768 to 1279, the admin beside its
        sidebar) there is no room for a word and the time on one line. So there:
@@ -415,10 +433,15 @@
 
     @if ($monthBridge ?? false)
     /* The admin's pages have no guest kit and no schedule's colours: the month's tokens are
-       given the portal's own (the six palettes are --ap-*; the accent is the brand's). */
+       given the portal's own (the six palettes are --ap-*; the accent is the brand's).
+       Two are mixed and not taken as they are, because the month sets small text in them and
+       the portal's own do not hold 4.5:1 there: its third ink is 3.7:1 to 4.2:1 on a panel, so
+       the month's is halfway to the second (5.1:1 at the least, on every surface of the month
+       in all six palettes); and the brand blue as text is 3.2:1 on a light palette, so the
+       readable accent is moved 30% toward the palette's ink (5:1 at the least). */
     body {
         --gk-panel: rgb(var(--ap-surface)); --gk-solid: rgb(var(--ap-surface)); --gk-well: rgb(var(--ap-surface-hover));
-        --gk-ink: rgb(var(--ap-ink)); --gk-ink-2: rgb(var(--ap-ink-2)); --gk-ink-3: rgb(var(--ap-ink-3));
+        --gk-ink: rgb(var(--ap-ink)); --gk-ink-2: rgb(var(--ap-ink-2)); --gk-ink-3: color-mix(in srgb, rgb(var(--ap-ink-2)) 50%, rgb(var(--ap-ink-3)));
         --gk-line: rgb(var(--ap-border-strong));
         --gk-ok: #166534; --gk-ok-bg: #f0fdf4; --gk-ok-line: #86efac;
         --gk-warn: #92400e; --gk-warn-bg: #fffbeb; --gk-warn-line: #fcd34d;
@@ -427,7 +450,7 @@
         --gk-shadow-lift: 0 4px 12px rgb(15 23 42 / .16);
         --gk-radius-ctl: .625rem; --gk-swap: 120ms;
         --es-accent: var(--brand-button-bg); --es-accent-text: #ffffff; --es-accent-edge: transparent;
-        --es-accent-readable: var(--brand-blue); --es-accent-tint: color-mix(in srgb, var(--brand-blue) 10%, rgb(var(--ap-surface)));
+        --es-accent-readable: color-mix(in srgb, var(--brand-blue) 70%, rgb(var(--ap-ink))); --es-accent-tint: color-mix(in srgb, var(--brand-blue) 10%, rgb(var(--ap-surface)));
         --es-glow: 78 129 250;
     }
     :where(.dark) body {

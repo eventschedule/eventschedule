@@ -305,4 +305,86 @@ class MonthGridTest extends TestCase
         $this->assertSame(0, substr_count($availability, 'id="event-popup"'));
         $this->assertStringContainsString('grid-cols-7 grid-rows-', $availability, 'its own grid of days is there');
     }
+
+    /**
+     * The calendar's wrapper sets the schedule's accent inline AS THE OWNER TYPED IT, for the
+     * older parts inside it. The label that goes on a fill (--es-accent-text) is worked out by
+     * GuestTheme for the fill GuestTheme chose, which is another colour for a grey, a near-white
+     * or a near-black accent: read from inside the wrapper, a black accent on a dark page drew
+     * today's number and a bar's label black on black. So the month takes its fill from the
+     * page (--cal-fill, declared on body, where the theme's own tokens are), never --es-accent.
+     */
+    public function test_the_month_takes_its_fill_from_the_page_and_not_from_the_calendars_wrapper(): void
+    {
+        $kit = file_get_contents(resource_path('views/partials/month-kit-styles.blade.php'));
+
+        $this->assertSame(1, preg_match('/^\s*body \{ --cal-fill: var\(--es-accent, #4E81FA\); \}$/m', $kit), 'the fill is read where the theme declares it');
+        preg_match_all('/^\s*(?::where\(\.dark\) )?(\.gk-cal[^{]*)\{([^}]*)\}/m', $kit, $rules, PREG_SET_ORDER);
+        $this->assertGreaterThan(100, count($rules));
+        foreach ($rules as [, $selector, $body]) {
+            $this->assertStringNotContainsString('var(--es-accent)', $body, trim($selector).' reads the wrapper\'s accent');
+        }
+        // The pair that was unreadable: both halves now come from the same place.
+        $this->assertSame(1, preg_match('/\.gk-cal-day-today \.gk-cal-num \{ background: var\(--cal-fill\); color: var\(--es-accent-text\);/', $kit));
+        $this->assertSame(1, preg_match('/\.gk-cal-span \{[^}]*background: var\(--cal-fill\);[^}]*color: var\(--es-accent-text\);/', $kit));
+
+        // And the page does carry the theme's tokens on body, with a grey moved to ink.
+        $this->role->forceFill(['accent_color' => '#888888'])->saveQuietly();
+        $html = $this->get('/'.$this->role->subdomain.'?layout=calendar')->assertOk()->getContent();
+        $theme = \App\Utils\GuestTheme::fromAccent('#888888');
+        $this->assertNotSame('#888888', strtolower($theme->fill), 'the theme does not fill with a mid grey');
+        $this->assertStringContainsString('body { --es-accent: '.$theme->fill.';', $html);
+        $this->assertStringContainsString('style="--es-accent: #888888;', $html, 'the wrapper still carries the accent as typed');
+    }
+
+    /**
+     * A clock time is read left to right in every language: in a Hebrew month "7 PM", left to
+     * itself, is drawn "PM 7". The card and the day's panel wrapped theirs from the start; an
+     * event's own time in the month did not. The wrap is INSIDE the element that is placed at
+     * the end of the line, because a direction set on that element itself would turn its own
+     * start and end around.
+     */
+    public function test_a_clock_time_in_the_month_is_read_left_to_right(): void
+    {
+        $month = file_get_contents(resource_path('views/role/partials/month.blade.php'));
+        $peek = file_get_contents(resource_path('views/role/partials/month-peek.blade.php'));
+
+        $this->assertSame(2, substr_count($month, '<bdi dir="ltr" v-text="chip.time"></bdi>'), 'an event\'s time, in both of its places');
+        $this->assertSame(0, preg_match('/class="gk-cal-time[^"]*"[^>]*v-text=/', $month), 'never printed bare');
+        $this->assertSame(0, preg_match('/class="gk-cal-time[^"]*"[^>]*\sdir=/', $month), 'and the direction is not on the placed element');
+        $this->assertStringContainsString('<bdi dir="ltr" class="gk-cal-more-from"', $month);
+        $this->assertStringContainsString('<bdi dir="ltr" v-text="row.time"></bdi>', $peek);
+        $this->assertGreaterThanOrEqual(3, substr_count($peek, 'dir="ltr" class="gk-peek-clock"'));
+    }
+
+    /**
+     * Small text in the month holds 4.5:1 on whatever it stands on, for any accent and in each
+     * of the admin's six palettes. These are the rules that were measured (the numbers are in
+     * the stylesheet's own comments); a browser is what proves them, this keeps them from being
+     * tidied away.
+     */
+    public function test_the_quieter_inks_step_up_where_an_event_is_tinted(): void
+    {
+        $kit = file_get_contents(resource_path('views/partials/month-kit-styles.blade.php'));
+
+        // Pointed at: the second ink. Its card open: the full ink, a state's colour included.
+        $this->assertStringContainsString('.gk-cal-ev, .gk-cal-more { --cal-quiet: var(--gk-ink-3); }', $kit);
+        $this->assertStringContainsString('.gk-cal-ev:hover, .gk-cal-more:hover { --cal-quiet: var(--gk-ink-2); }', $kit);
+        $this->assertStringContainsString('.gk-cal-ev.gk-cal-ev-on, .gk-cal-ev.gk-cal-ev-on:hover { --cal-quiet: var(--gk-ink); --cal-say: var(--gk-ink); }', $kit);
+        // Nothing an event prints is pinned to the third ink any more.
+        preg_match_all('/^\s*(\.gk-cal-(?:time|flag|note|more-from|ev-past \.gk-cal-name|ev-off \.gk-cal-name)[^{]*)\{([^}]*)\}/m', $kit, $rules, PREG_SET_ORDER);
+        $this->assertGreaterThanOrEqual(6, count($rules));
+        foreach ($rules as [, $selector, $body]) {
+            $this->assertSame(0, preg_match('/color: var\(--gk-ink-3\)/', $body), trim($selector).' is fixed to the third ink');
+        }
+        foreach (['warn' => '--gk-warn', 'ok' => '--gk-ok'] as $state => $token) {
+            $this->assertStringContainsString('.gk-cal-note-'.$state.' { color: var(--cal-say, var('.$token.'));', $kit);
+        }
+        // A past bar is a band its words read on, and stays that band while its card is open.
+        $this->assertStringContainsString('.gk-cal-span-past { background: color-mix(in srgb, var(--cal-fill) 22%, var(--gk-solid)); color: var(--gk-ink-2); }', $kit);
+        $this->assertStringContainsString('.gk-cal-span-past.gk-cal-ev-on { background: color-mix(in srgb, var(--cal-fill) 22%, var(--gk-solid)); }', $kit);
+        // The admin's month: a third ink and a readable blue that the portal's own are not.
+        $this->assertStringContainsString('--gk-ink-3: color-mix(in srgb, rgb(var(--ap-ink-2)) 50%, rgb(var(--ap-ink-3)));', $kit);
+        $this->assertStringContainsString('--es-accent-readable: color-mix(in srgb, var(--brand-blue) 70%, rgb(var(--ap-ink)));', $kit);
+    }
 }
