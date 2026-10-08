@@ -2,6 +2,7 @@
 
 namespace App\Services\Feeds;
 
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 
 /**
@@ -16,6 +17,31 @@ use Carbon\CarbonImmutable;
  */
 final class FeedTime
 {
+    /**
+     * The clock a reader's row is on.
+     *
+     * A row's time is a wall-clock time, and whose depends on what the source said. A time with
+     * no zone is on the feed's clock, which is what "Times are read as" sets, and so is a time
+     * that named a zone and was turned to the feed's. But an event that named ANOTHER zone, on a
+     * schedule that keeps such an event's own clock (ImportedTime::place()), is carried as that
+     * clock and is meant to read as it on the schedule: it is placed on the schedule's clock, as
+     * the import page places it, and the feed's setting does not reach it. A whole-day event is
+     * a date, and a date is the schedule's as well.
+     *
+     * While the two clocks are the same one, which is how a feed is added, none of this shows.
+     * It is what keeps "Times are read as" from moving a calendar whose every entry says its zone.
+     */
+    public static function zoneOf(array $row, string $feedZone, string $scheduleZone): string
+    {
+        return ! empty($row['local_time_zone']) || ! empty($row['is_all_day']) ? $scheduleZone : $feedZone;
+    }
+
+    /** The instant a reader's row starts at. */
+    public static function startOf(array $row, string $feedZone, string $scheduleZone): Carbon
+    {
+        return Carbon::parse($row['event_date_time'], self::zoneOf($row, $feedZone, $scheduleZone))->utc();
+    }
+
     /**
      * @param  string  $timezone  The zone a time with no zone of its own is read in.
      * @return ?array{at: CarbonImmutable, all_day: bool, states_zone: bool} Null when it is not

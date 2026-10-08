@@ -115,6 +115,7 @@ class ApFeedPageTest extends TestCase
             ->assertSee(trans_choice('messages.feeds_events_count', 3, ['count' => 3]))
             ->assertSee(__('messages.feeds_read_now'))
             ->assertSee(__('messages.feeds_undo'))
+            ->assertSee($this->url($feed, 'edit'), false)
             // The decision, in the words of what the feed says.
             ->assertSee(__('messages.feeds_decide_card_title'))
             ->assertSee('Open mic')
@@ -241,6 +242,113 @@ class ApFeedPageTest extends TestCase
         $this->assertSame(2, \App\Models\AuditLog::where('action', 'schedule.feed_remove')->count());
     }
 
+    public function test_a_feeds_settings_are_changed_on_its_edit_page(): void
+    {
+        $markets = $this->role->groups()->create(['name' => 'Markets', 'slug' => 'markets']);
+        $elsewhere = $this->createRole($this->createOwner(), 'talent');
+        $theirs = $elsewhere->groups()->create(['name' => 'Not ours', 'slug' => 'not-ours']);
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'left_action' => EventFeed::LEFT_KEEP]);
+        $feed->forceFill(['etag' => '"abc"', 'last_modified' => 'Thu, 08 Oct 2026 08:00:00 GMT', 'next_check_at' => now()->addHour()])->save();
+        $as = $this->actingAs($this->owner);
+        $category = collect($this->role->getEventCategories())->first()['id'];
+
+        $page = $as->get($this->url($feed, 'edit'))->assertOk()
+            ->assertSee(__('messages.feeds_edit'))
+            ->assertSee(__('messages.feeds_reads_from'))
+            ->assertSee('93.184.216.34')
+            ->assertDontSee(self::SECRET, false)
+            ->assertSee('value="Town calendar"', false)
+            ->assertSee(__('messages.feeds_remove'));
+        $this->assertMatchesRegularExpression('/name="publish_mode" value="publish" checked/', $page->getContent());
+        $this->assertMatchesRegularExpression('/name="left_action" value="keep" checked/', $page->getContent());
+        $this->assertMatchesRegularExpression('/value="Europe\/Vienna" selected/', $page->getContent());
+
+        // Everything but the clock: saved, and the feed is not hurried.
+        $as->put($this->url($feed, 'update'), [
+            'name' => '  Town hall  ', 'publish_mode' => 'draft', 'left_action' => 'delete', 'source_timezone' => 'Europe/Vienna',
+            'group_id' => UrlUtils::encodeId($markets->id), 'category_id' => $category,
+        ])->assertRedirect($this->url($feed))->assertSessionHas('message', __('messages.feeds_saved'));
+
+        $feed->refresh();
+        $this->assertSame(['Town hall', 'draft', 'delete', $markets->id, $category], [$feed->name, $feed->publish_mode, $feed->left_action, $feed->group_id, $feed->category_id]);
+        $this->assertSame('"abc"', $feed->etag);
+        $this->assertTrue($feed->next_check_at->isFuture());
+
+        // A sub-schedule or a category that is not this schedule's is not taken.
+        $as->put($this->url($feed, 'update'), [
+            'name' => 'Town hall', 'publish_mode' => 'draft', 'left_action' => 'delete', 'source_timezone' => 'Europe/Vienna',
+            'group_id' => UrlUtils::encodeId($theirs->id), 'category_id' => 987654,
+        ])->assertSessionHas('message');
+        $this->assertSame([null, null], [$feed->fresh()->group_id, $feed->fresh()->category_id]);
+
+        foreach ([['name' => ''], ['publish_mode' => 'now'], ['left_action' => 'burn'], ['source_timezone' => 'Mars/Olympus']] as $bad) {
+            $as->put($this->url($feed, 'update'), $bad + ['name' => 'Town hall', 'publish_mode' => 'draft', 'left_action' => 'delete', 'source_timezone' => 'Europe/Vienna'])
+                ->assertSessionHasErrors(array_key_first($bad));
+        }
+        $this->assertSame('Europe/Vienna', $feed->fresh()->source_timezone);
+        $this->assertSame('Town hall', $feed->fresh()->name);
+        // The two saves that were taken, and none of the four that were refused.
+        $this->assertSame(2, \App\Models\AuditLog::where('action', 'schedule.feed_update')->count());
+    }
+
+    /**
+     * 19:30 with no zone was read as Vienna's. Said to be London's, it is an hour later on the
+     * clock, and the start follows unless the owner had set it.
+     */
+    public function test_a_new_clock_moves_the_starts_the_owner_has_not_changed(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH]);
+        $floating = fn (string $uid, string $name, int $days) => "UID:{$uid}\nSUMMARY:{$name}\nDTSTART:".now('Europe/Vienna')->addDays($days)->format('Ymd').'T193000';
+        $this->entries = [$floating('a', 'Follows the feed', 10), $floating('b', 'Set by hand', 11), $this->entry('c', 'Says its own zone', 12)];
+        $this->read($feed);
+        $before = fn (string $name) => $this->named($name)->starts_at;
+        $follows = $before('Follows the feed');
+        $zoned = $before('Says its own zone');
+        $byHand = \Carbon\Carbon::parse($before('Set by hand'))->addHours(3)->format('Y-m-d H:i:s');
+        $this->named('Set by hand')->forceFill(['starts_at' => $byHand])->save();
+        $feed->forceFill(['etag' => '"abc"', 'next_check_at' => now()->addHour()])->save();
+
+        $this->actingAs($this->owner)->put($this->url($feed, 'update'), [
+            'name' => 'Town calendar', 'publish_mode' => 'publish', 'left_action' => 'cancel', 'source_timezone' => 'Europe/London',
+        ])->assertSessionHas('message', __('messages.feeds_saved_clock'));
+
+        // Asked again at once, and not with "has it changed since".
+        $feed->refresh();
+        $this->assertNull($feed->etag);
+        $this->assertFalse($feed->next_check_at->isFuture());
+
+        $this->read($feed);
+
+        $this->assertSame(\Carbon\Carbon::parse($follows)->addHour()->format('Y-m-d H:i:s'), $before('Follows the feed'));
+        $this->assertSame($byHand, $before('Set by hand'));
+        $this->assertSame($zoned, $before('Says its own zone'));
+        // The ledger's own copy of when each is, which is what orders the review list.
+        foreach (['a' => 'Follows the feed', 'c' => 'Says its own zone'] as $uid => $name) {
+            $this->assertSame($before($name), $feed->items()->where('external_key', EventFeedItem::keyFor($uid))->first()->starts_at->format('Y-m-d H:i:s'));
+        }
+    }
+
+    /**
+     * The feed's clock is London's and the schedule's is Vienna's. An event that says "19:30,
+     * Vienna" and is already on the schedule at 19:30 is that event: linked, not added again.
+     */
+    public function test_an_event_already_on_the_schedule_is_matched_on_its_own_clock(): void
+    {
+        $start = now('Europe/Vienna')->addDays(10)->setTime(19, 30);
+        $this->createEvent($this->role, ['creator_role_id' => $this->role->id, 'name' => 'Open stage', 'starts_at' => $start->copy()->utc()->format('Y-m-d H:i:s')]);
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'source_timezone' => 'Europe/London']);
+        $this->entries = [$this->entry('a', 'Open stage', 10)];
+
+        $found = app(\App\Services\Feeds\FeedSetup::class)->check($this->role, $this->owner, 'https://93.184.216.34/'.self::SECRET.'/check.ics', 'Europe/London');
+        $this->assertTrue($found['ok']);
+        $this->assertSame(1, $found['matched']);
+
+        $this->read($feed);
+
+        $this->assertSame(1, Event::where('name', 'Open stage')->count());
+        $this->assertSame(EventFeedItem::STATE_MATCHED, $feed->items()->first()->state);
+    }
+
     /** A viewer changes nothing, and a feed's id from another schedule opens nothing. */
     public function test_nobody_but_the_people_who_run_the_schedule_reaches_any_of_it(): void
     {
@@ -258,11 +366,14 @@ class ApFeedPageTest extends TestCase
         $this->actingAs($viewer)->get($this->url($feed))->assertRedirect(route('home'));
         $this->actingAs($stranger)->get($this->url($feed))->assertRedirect(route('home'));
         $this->actingAs($stranger)->get($onTheirs('show'))->assertNotFound();
+        $this->actingAs($viewer)->get($this->url($feed, 'edit'))->assertRedirect(route('home'));
+        $this->actingAs($stranger)->get($onTheirs('edit'))->assertNotFound();
 
         foreach ([
             ['post', 'review', [], ['publish_one' => $item]],
             ['post', 'publish_all', [], []],
             ['post', 'pause', [], []],
+            ['put', 'update', [], ['name' => 'Taken over', 'publish_mode' => 'publish', 'source_timezone' => 'UTC']],
             ['post', 'undo', [], []],
             ['post', 'decide', ['item' => $item], ['answer' => 'apply']],
             ['delete', 'destroy', [], ['its_events' => 'delete']],
@@ -273,6 +384,7 @@ class ApFeedPageTest extends TestCase
 
         $this->assertTrue((bool) $this->named('One')->is_draft);
         $this->assertNull($feed->fresh()->paused_at);
+        $this->assertSame('Town calendar', $feed->fresh()->name);
         $this->assertSame(1, EventFeed::count());
     }
 

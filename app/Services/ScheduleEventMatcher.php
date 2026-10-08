@@ -52,30 +52,33 @@ class ScheduleEventMatcher
      * The id of the event this row already is on the schedule, or null.
      *
      * @param  array{event_name?: mixed, event_date_time: string, sort_at?: string, recurrence?: mixed}  $row  A reader's row: its time is a wall-clock time in the zone this was built with.
+     * @param  ?string  $zone  The zone this row's time is on, where a caller's rows are not all on one clock (a feed: FeedTime::zoneOf()).
      */
-    public function match(array $row): ?int
+    public function match(array $row, ?string $zone = null): ?int
     {
         if (! $this->exact) {
             return null;
         }
 
+        $zone ??= $this->timezone;
+
         $name = $row['event_name'] ?? '';
         // The row's time is a wall-clock time the save reads in the schedule's zone.
-        $start = Carbon::parse($row['event_date_time'], $this->timezone);
+        $start = Carbon::parse($row['event_date_time'], $zone);
 
         if ($id = $this->exact[$this->key($name, $start->copy()->utc()->format('Y-m-d H:i'))] ?? null) {
             return $id;
         }
 
         if (! empty($row['recurrence'])) {
-            $next = Carbon::parse($row['sort_at'] ?? $row['event_date_time'], $this->timezone)->utc()->format('Y-m-d H:i');
+            $next = Carbon::parse($row['sort_at'] ?? $row['event_date_time'], $zone)->utc()->format('Y-m-d H:i');
 
             return $this->exact[$this->key($name, $next)] ?? null;
         }
 
         foreach ($this->repeating()[mb_strtolower(trim((string) $name))] ?? [] as $event) {
-            if (Carbon::parse($event->starts_at, 'UTC')->setTimezone($this->timezone)->format('H:i') === $start->format('H:i')
-                && $event->matchesDate($start->format('Y-m-d'), $this->timezone)) {
+            if (Carbon::parse($event->starts_at, 'UTC')->setTimezone($zone)->format('H:i') === $start->format('H:i')
+                && $event->matchesDate($start->format('Y-m-d'), $zone)) {
                 return (int) $event->id;
             }
         }

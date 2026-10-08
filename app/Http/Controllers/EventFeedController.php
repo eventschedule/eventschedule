@@ -133,16 +133,12 @@ class EventFeedController extends Controller
             'source_timezone' => 'nullable|timezone',
         ]);
 
-        // Only a sub-schedule and a category that are this schedule's own.
-        $groupId = $role->groups()->whereKey(UrlUtils::decodeId((string) $request->input('group_id')))->value('id');
-        $categoryId = collect($role->getEventCategories())->pluck('id')->contains((int) $request->input('category_id')) ? (int) $request->input('category_id') : null;
-
         $feed = $this->setup->add($role, $request->user(), $checked, [
             'name' => $request->input('name'),
             'publish_mode' => $request->input('publish_mode'),
             'left_action' => $request->input('left_action'),
-            'group_id' => $groupId,
-            'category_id' => $categoryId,
+            'group_id' => $this->groupOf($role, $request),
+            'category_id' => $this->categoryOf($role, $request),
             'source_timezone' => $request->input('source_timezone'),
         ]);
 
@@ -159,6 +155,20 @@ class EventFeedController extends Controller
     private function feed(Role $role, string $hash): EventFeed
     {
         return EventFeed::where('role_id', $role->id)->findOrFail(UrlUtils::decodeId($hash));
+    }
+
+    /** Only a sub-schedule that is this schedule's own. */
+    private function groupOf(Role $role, Request $request): ?int
+    {
+        return $role->groups()->whereKey(UrlUtils::decodeId((string) $request->input('group_id')))->value('id');
+    }
+
+    /** Only a category this schedule offers. */
+    private function categoryOf(Role $role, Request $request): ?int
+    {
+        $id = (int) $request->input('category_id');
+
+        return collect($role->getEventCategories())->pluck('id')->contains($id) ? $id : null;
     }
 
     private function page(Role $role, EventFeed $feed): string
@@ -204,6 +214,52 @@ class EventFeedController extends Controller
             'canUndo' => $this->actions->canUndoFirstRead($feed),
             'allowed' => EventFeed::allowedFor($role),
         ]);
+    }
+
+    public function edit(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        return view('feed.edit', [
+            'role' => $role,
+            'feed' => $feed,
+            'eventsCount' => $feed->items()->whereNotNull('event_id')->count(),
+        ]);
+    }
+
+    public function update(Request $request, string $subdomain, string $hash)
+    {
+        $role = $this->schedule($subdomain);
+        if ($role instanceof RedirectResponse) {
+            return $role;
+        }
+
+        $feed = $this->feed($role, $hash);
+
+        $request->validate([
+            'name' => 'required|string|max:120',
+            'publish_mode' => 'required|in:'.implode(',', EventFeed::PUBLISH_MODES),
+            'left_action' => 'nullable|in:'.implode(',', EventFeed::LEFT_ACTIONS),
+            'source_timezone' => 'required|timezone',
+        ]);
+
+        $clockChanged = $this->actions->edit($feed, [
+            'name' => $request->input('name'),
+            'publish_mode' => $request->input('publish_mode'),
+            'left_action' => $request->input('left_action'),
+            'group_id' => $this->groupOf($role, $request),
+            'category_id' => $this->categoryOf($role, $request),
+            'source_timezone' => $request->input('source_timezone'),
+        ]);
+
+        AuditService::log(AuditService::FEED_UPDATE, $request->user()->id, 'Role', $role->id, null, null, 'feed:'.$feed->id.' settings');
+
+        return redirect($this->page($role, $feed))->with('message', __($clockChanged ? 'messages.feeds_saved_clock' : 'messages.feeds_saved'));
     }
 
     /** Read it on the next run. */

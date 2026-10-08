@@ -123,6 +123,49 @@ class FeedActions
     }
 
     /**
+     * The feed's own settings. They hold from the next read: what is already on the schedule
+     * keeps its visibility and its sub-schedule. A new clock is different, because it says the
+     * times already read were read wrong: the source is asked again at once, and a start that
+     * still holds what the feed wrote follows it. One the owner set stays, and one people signed
+     * up for becomes a decision, as any move at the source does.
+     *
+     * @return bool Whether the clock changed.
+     */
+    public function edit(EventFeed $feed, array $choices): bool
+    {
+        $zone = $choices['source_timezone'] ?? null;
+        $zone = $zone && in_array($zone, timezone_identifiers_list(), true) ? $zone : $feed->source_timezone;
+        $left = $choices['left_action'] ?? $feed->left_action;
+        $clockChanged = $zone !== $feed->source_timezone;
+
+        $feed->forceFill([
+            'name' => mb_substr(trim((string) ($choices['name'] ?? '')), 0, 120) ?: $feed->name,
+            'publish_mode' => ($choices['publish_mode'] ?? $feed->publish_mode) === EventFeed::PUBLISH ? EventFeed::PUBLISH : EventFeed::DRAFT,
+            // A source that cannot say an event is gone is not asked to act on it.
+            'left_action' => $feed->can_see_leaving && in_array($left, EventFeed::LEFT_ACTIONS, true) ? $left : EventFeed::LEFT_KEEP,
+            // Absent is not "none": only a caller that names the key clears it.
+            'group_id' => array_key_exists('group_id', $choices) ? $choices['group_id'] : $feed->group_id,
+            'category_id' => array_key_exists('category_id', $choices) ? $choices['category_id'] : $feed->category_id,
+            'source_timezone' => $zone,
+        ]);
+
+        if ($clockChanged) {
+            // The same bytes now mean other times, so "nothing changed since last time" is not
+            // an answer to take, and a post's own page is read again though it was read today.
+            $feed->forceFill(['etag' => null, 'last_modified' => null, 'next_check_at' => now()]);
+            $feed->items()
+                ->whereNotNull('detail_url')
+                ->whereIn('state', [EventFeedItem::STATE_IMPORTED, EventFeedItem::STATE_DECIDE])
+                ->where(fn ($when) => $when->whereNull('starts_at')->orWhere('starts_at', '>', now()))
+                ->update(['detail_checked_at' => null]);
+        }
+
+        $feed->save();
+
+        return $clockChanged;
+    }
+
+    /**
      * Stop reading an address for good. Its events stay, as events like any other, unless the
      * owner asks for the coming ones to go too, and then only those that are the feed's alone:
      * nobody signed up, nothing of the owner's on them.

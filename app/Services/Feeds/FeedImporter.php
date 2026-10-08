@@ -108,7 +108,7 @@ class FeedImporter
                 return $this->failed($feed, 'not_readable', $fetched->httpStatus, null);
             }
 
-            $rows = $this->absorb($feed, $reading, $now);
+            $rows = $this->absorb($feed, $role, $reading, $now);
             $counts['held'] = $this->leaving($feed, $role, $reading, $now);
 
             // The validators are only worth sending next time if this read took everything in.
@@ -198,7 +198,7 @@ class FeedImporter
      *
      * @return array<int, array> The rows that came with the list, by item id, for the write.
      */
-    private function absorb(EventFeed $feed, FeedReading $reading, Carbon $now): array
+    private function absorb(EventFeed $feed, Role $role, FeedReading $reading, Carbon $now): array
     {
         $existing = $feed->items()->get()->keyBy('external_key');
         $rows = [];
@@ -223,7 +223,7 @@ class FeedImporter
             ]);
 
             if ($entry['row'] !== null) {
-                $item->starts_at = Carbon::parse($entry['row']['event_date_time'], $feed->source_timezone)->utc();
+                $item->starts_at = FeedTime::startOf($entry['row'], $feed->source_timezone, $role->captureTimezone());
             } elseif ($changed) {
                 // What the list says about it changed: its own page is read again.
                 $item->detail_checked_at = null;
@@ -490,7 +490,7 @@ class FeedImporter
             $item->missing_reads = 0;
 
             if (is_array($found)) {
-                $item->starts_at = Carbon::parse($found['event_date_time'], $feed->source_timezone)->utc();
+                $item->starts_at = FeedTime::startOf($found, $feed->source_timezone, $role->captureTimezone());
                 $item->pending = array_diff_key($item->pending ?? [], ['left_out' => true]) ?: null;
                 $item->save();
                 $rows[$item->id] = $found;
@@ -561,7 +561,7 @@ class FeedImporter
 
             // Already on the schedule, made by hand or by another import: stand beside it.
             $matcher ??= new ScheduleEventMatcher($role, $feed->source_timezone);
-            if ($item->state === EventFeedItem::STATE_NEW && ($matched = $matcher->match($row))) {
+            if ($item->state === EventFeedItem::STATE_NEW && ($matched = $matcher->match($row, FeedTime::zoneOf($row, $feed->source_timezone, $role->captureTimezone())))) {
                 $item->forceFill(['state' => EventFeedItem::STATE_MATCHED, 'event_id' => $matched])->save();
                 $counts['matched']++;
 

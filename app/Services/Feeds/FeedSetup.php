@@ -123,7 +123,7 @@ class FeedSetup
             'posts' => $posts,
             'more' => $reading->next !== null,
             'skipped' => $reading->skipped,
-            'matched' => $posts === null ? count(array_filter($rows, fn (array $row) => $matcher->match($row) !== null)) : 0,
+            'matched' => $posts === null ? count(array_filter($rows, fn (array $row) => $matcher->match($row, FeedTime::zoneOf($row, $timezone, $role->captureTimezone())) !== null)) : 0,
             'sample' => array_map(fn (array $row) => [
                 'name' => (string) $row['event_name'],
                 'at' => $row['event_date_time'],

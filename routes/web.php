@@ -909,6 +909,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/feeds/check', [EventFeedController::class, 'check'])->name('role.feeds.check')->middleware('throttle:10,1');
     Route::post('/{subdomain}/feeds', [EventFeedController::class, 'store'])->name('role.feeds.store');
     Route::get('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'show'])->name('role.feeds.show');
+    Route::get('/{subdomain}/feeds/{hash}/edit', [EventFeedController::class, 'edit'])->name('role.feeds.edit');
+    Route::put('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'update'])->name('role.feeds.update');
     Route::delete('/{subdomain}/feeds/{hash}', [EventFeedController::class, 'destroy'])->name('role.feeds.destroy');
     Route::post('/{subdomain}/feeds/{hash}/read', [EventFeedController::class, 'read'])->name('role.feeds.read')->middleware('throttle:10,1');
     Route::post('/{subdomain}/feeds/{hash}/pause', [EventFeedController::class, 'pause'])->name('role.feeds.pause');

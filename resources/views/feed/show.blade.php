@@ -59,12 +59,14 @@
                 <div class="event-list-sub" style="margin-top:0.25rem"><span class="feed-addr" dir="ltr">{{ $feed->host }}</span> &middot; {{ __('messages.feeds_kind_'.$feed->kind) }}</div>
             </x-slot>
             <x-slot name="actions">
-                @if ($feed->isPaused())
-                @if ($allowed)
-                <form method="post" action="{{ route('role.feeds.resume', $here) }}">@csrf<x-brand-button type="submit">{{ __('messages.resume') }}</x-brand-button></form>
+                {{-- Resume is the way on for a paused feed, so it comes last; Pause is a plain
+                     button in the secondary link's clothes, because it posts. --}}
+                @if (! $feed->isPaused())
+                <form method="post" action="{{ route('role.feeds.pause', $here) }}">@csrf<button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">{{ __('messages.pause') }}</button></form>
                 @endif
-                @else
-                <form method="post" action="{{ route('role.feeds.pause', $here) }}">@csrf<button type="submit" class="{{ 'inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200' }}">{{ __('messages.pause') }}</button></form>
+                <x-secondary-link :href="route('role.feeds.edit', $here)">{{ __('messages.feeds_edit') }}</x-secondary-link>
+                @if ($feed->isPaused() && $allowed)
+                <form method="post" action="{{ route('role.feeds.resume', $here) }}">@csrf<x-brand-button type="submit">{{ __('messages.resume') }}</x-brand-button></form>
                 @endif
             </x-slot>
         </x-page-header>
@@ -265,18 +267,6 @@
             </x-page-card>
             @endif
 
-            {{-- Removing it, with the one thing to choose: what becomes of its events. --}}
-            <x-page-card :title="__('messages.feeds_remove')" :lead="__('messages.feeds_remove_text')">
-                <form method="post" action="{{ route('role.feeds.destroy', $here) }}" data-confirm="{{ __('messages.feeds_remove_title') }}">
-                    @csrf
-                    @method('delete')
-                    <label class="feed-radio"><input type="radio" name="its_events" value="keep" checked><span>{{ __('messages.feeds_remove_keep') }}</span></label>
-                    <label class="feed-radio"><input type="radio" name="its_events" value="delete"><span>{{ __('messages.feeds_remove_delete') }}<small>{{ __('messages.feeds_remove_delete_help') }}</small></span></label>
-                    <div class="page-form-actions">
-                        <x-danger-button type="submit">{{ __('messages.feeds_remove') }}</x-danger-button>
-                    </div>
-                </form>
-            </x-page-card>
         </div>
     </div>
 

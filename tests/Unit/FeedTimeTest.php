@@ -79,4 +79,32 @@ class FeedTimeTest extends TestCase
             $this->assertNull(FeedTime::parse($value, self::ZONE), var_export($value, true));
         }
     }
+
+    /**
+     * Which clock a reader's row is on. "Times are read as" is for times that name no zone: an
+     * event that named its own, and a whole day, do not move when it is changed.
+     */
+    public function test_a_row_is_placed_on_the_feeds_clock_unless_it_is_the_events_own_or_a_whole_day(): void
+    {
+        $row = ['event_date_time' => '2026-11-14 19:30'];
+
+        // No zone of its own: the feed's clock, whatever the schedule's is.
+        $this->assertSame('Europe/London', FeedTime::zoneOf($row, 'Europe/London', 'Europe/Vienna'));
+        $this->assertSame('2026-11-14 19:30:00', FeedTime::startOf($row, 'Europe/London', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($row, 'Europe/Vienna', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+
+        // Its own clock, kept: read as that clock on the schedule, and the feed's does not reach it.
+        $own = $row + ['local_time_zone' => 'America/New_York'];
+        $this->assertSame('Europe/Vienna', FeedTime::zoneOf($own, 'Europe/London', 'Europe/Vienna'));
+        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($own, 'Europe/London', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-11-14 18:30:00', FeedTime::startOf($own, 'Pacific/Auckland', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+
+        // A whole day is that date on the schedule's calendar, not the evening before.
+        $day = ['event_date_time' => '2026-11-14 00:00', 'is_all_day' => true];
+        $this->assertSame('2026-11-13 23:00:00', FeedTime::startOf($day, 'Pacific/Auckland', 'Europe/Vienna')->format('Y-m-d H:i:s'));
+        $this->assertSame('UTC', FeedTime::startOf($day, 'Pacific/Auckland', 'Europe/Vienna')->getTimezone()->getName());
+
+        // Empty markers are no markers.
+        $this->assertSame('Europe/London', FeedTime::zoneOf($row + ['local_time_zone' => null, 'is_all_day' => false], 'Europe/London', 'Europe/Vienna'));
+    }
 }

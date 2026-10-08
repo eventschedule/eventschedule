@@ -362,4 +362,56 @@ class FeedActionsTest extends TestCase
         $this->assertSame($before, Event::count());
         $this->assertNull($feed->fresh()->paused_at);
     }
+
+    /**
+     * A feed of posts says when each event is on the post's own page, which is read once a day.
+     * A new clock is a reason to read those pages again now, for events still to come and no others.
+     */
+    public function test_a_new_clock_reads_again_the_pages_of_events_still_to_come(): void
+    {
+        $feed = $this->feed(['kind' => EventFeed::KIND_ITEMS, 'can_see_leaving' => false, 'left_action' => EventFeed::LEFT_KEEP]);
+        $item = fn (string $id, string $state, ?\Carbon\Carbon $starts, ?string $page = 'https://93.184.216.34/post') => EventFeedItem::create([
+            'event_feed_id' => $feed->id, 'external_key' => EventFeedItem::keyFor($id), 'external_id' => $id, 'state' => $state,
+            'starts_at' => $starts, 'detail_url' => $page ? $page.'/'.$id : null, 'detail_checked_at' => now()->subHour(),
+            'first_seen_at' => now(), 'last_seen_at' => now(),
+        ]);
+        $item('coming', EventFeedItem::STATE_IMPORTED, now()->addWeek());
+        $item('undated', EventFeedItem::STATE_IMPORTED, null);
+        $item('deciding', EventFeedItem::STATE_DECIDE, now()->addWeek());
+        $item('over', EventFeedItem::STATE_IMPORTED, now()->subWeek());
+        $item('skipped', EventFeedItem::STATE_SKIPPED, now()->addWeek());
+        $item('listed', EventFeedItem::STATE_IMPORTED, now()->addWeek(), null);
+        $again = fn () => $feed->items()->whereNull('detail_checked_at')->pluck('external_id')->sort()->values()->all();
+        $same = ['name' => 'Town calendar', 'publish_mode' => 'draft', 'left_action' => 'keep'];
+
+        $this->assertFalse($this->actions()->edit($feed->fresh(), $same + ['source_timezone' => 'Europe/Vienna']));
+        $this->assertSame([], $again());
+
+        $this->assertTrue($this->actions()->edit($feed->fresh(), $same + ['source_timezone' => 'Europe/London']));
+        $this->assertSame(['coming', 'deciding', 'undated'], $again());
+        $this->assertSame('Europe/London', $feed->fresh()->source_timezone);
+    }
+
+    /** What the form cannot send, the action still does not take. */
+    public function test_editing_keeps_what_it_is_not_given_and_refuses_what_the_feed_cannot_do(): void
+    {
+        $markets = $this->role->groups()->create(['name' => 'Markets', 'slug' => 'markets']);
+        $feed = $this->feed(['kind' => EventFeed::KIND_ITEMS, 'can_see_leaving' => false, 'left_action' => EventFeed::LEFT_KEEP, 'publish_mode' => EventFeed::PUBLISH, 'group_id' => $markets->id, 'category_id' => 3]);
+
+        $this->actions()->edit($feed, ['name' => '   ', 'left_action' => 'delete', 'source_timezone' => 'Not/AZone', 'publish_mode' => 'whatever']);
+
+        $feed->refresh();
+        $this->assertSame('Town calendar', $feed->name);
+        // Not named, so not cleared.
+        $this->assertSame([$markets->id, 3], [$feed->group_id, $feed->category_id]);
+        // A feed of posts cannot tell that an event is gone, so it is never asked to act on it.
+        $this->assertSame(EventFeed::LEFT_KEEP, $feed->left_action);
+        $this->assertSame('Europe/Vienna', $feed->source_timezone);
+        $this->assertSame(EventFeed::DRAFT, $feed->publish_mode);
+
+        $this->actions()->edit($feed, ['name' => str_repeat('n', 200), 'group_id' => null, 'category_id' => null]);
+        $this->assertSame(120, mb_strlen($feed->fresh()->name));
+        $this->assertSame(EventFeed::DRAFT, $feed->fresh()->publish_mode);
+        $this->assertSame([null, null], [$feed->fresh()->group_id, $feed->fresh()->category_id]);
+    }
 }

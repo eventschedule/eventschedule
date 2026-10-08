@@ -72,8 +72,7 @@ class FeedEventWriter
         return [
             'name' => mb_substr(trim((string) ($row['event_name'] ?? '')), 0, 255) ?: __('messages.untitled_event'),
             'description' => self::text(mb_substr((string) ($row['event_details'] ?? ''), 0, 10000)),
-            // The row's time is a wall-clock time on the feed's own clock.
-            'starts_at' => Carbon::parse($row['event_date_time'], $feed->source_timezone)->utc()->format('Y-m-d H:i:s'),
+            'starts_at' => FeedTime::startOf($row, $feed->source_timezone, $role->captureTimezone())->format('Y-m-d H:i:s'),
             'duration' => $duration,
             'link' => UrlUtils::safeHref($row['registration_url'] ?? null),
             'category_id' => $this->categoryFor($feed, $role, (string) ($row['category_name'] ?? '')),
