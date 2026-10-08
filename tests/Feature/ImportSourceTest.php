@@ -254,7 +254,7 @@ class ImportSourceTest extends TestCase
     public function test_every_source_written_is_in_the_vocabulary_and_none_is_exported(): void
     {
         $this->assertSame(
-            ['ai', 'ics', 'page', 'page_ai', 'eventbrite', 'google', 'microsoft', 'caldav'],
+            ['ai', 'ics', 'page', 'page_ai', 'eventbrite', 'google', 'microsoft', 'caldav', 'feed'],
             Event::IMPORT_SOURCES
         );
 

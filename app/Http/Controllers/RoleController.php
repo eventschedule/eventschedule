@@ -756,6 +756,17 @@ class RoleController extends Controller
             ->where('role_id', $source->id)
             ->update(['role_id' => $target->id]);
 
+        // The merged-away schedule's feeds go on reading into the one it became: their events
+        // are re-pointed below, and a feed left on a deleted schedule would never be read again
+        // while its events lived on with nothing keeping them up to date. A feed of an address
+        // the target already reads is dropped (one address is one feed per schedule), and its
+        // items go with it: the target's own feed finds the same events by its own ledger.
+        if (\App\Models\EventFeed::tablesReady()) {
+            $read = DB::table('event_feeds')->where('role_id', $target->id)->pluck('url_hash');
+            DB::table('event_feeds')->where('role_id', $source->id)->whereIn('url_hash', $read)->delete();
+            DB::table('event_feeds')->where('role_id', $source->id)->update(['role_id' => $target->id, 'group_id' => null]);
+        }
+
         // events.external_id is unique for the schedule that owns the event, so an id both
         // schedules use would stop the re-point below with a duplicate key, inside this
         // transaction. The target's event keeps the id and the merged-away schedule's loses it.

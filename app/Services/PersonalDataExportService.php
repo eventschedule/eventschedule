@@ -30,7 +30,7 @@ class PersonalDataExportService
         'newsletter_clicks', 'newsletter_unsubscribes', 'event_comments', 'event_photos',
         'event_videos', 'event_poll_votes', 'carpool_offers', 'carpool_requests', 'carpool_reviews',
         'carpool_reports', 'support_conversations', 'referrals', 'boost_campaigns', 'webhooks',
-        'audit_logs', 'sessions', 'realtime_hits', 'user_active_days',
+        'audit_logs', 'sessions', 'realtime_hits', 'user_active_days', 'event_feeds',
     ];
 
     /**
@@ -117,6 +117,10 @@ class PersonalDataExportService
             'boost_campaigns' => $this->rows('boost_campaigns', fn ($q) => $q->where('user_id', $user->id),
                 ['event_id', 'role_id', 'channel', 'name', 'status', 'currency_code', 'user_budget', 'total_charged', 'scheduled_start', 'scheduled_end', 'created_at']),
             'webhooks' => $this->rows('webhooks', fn ($q) => $q->where('user_id', $user->id), ['url', 'event_types', 'is_active', 'description', 'last_triggered_at', 'created_at']),
+            // The feeds this person added to a schedule. The security log is pruned after 90
+            // days, so this row is the lasting record of who did. Its name, the site it reads
+            // and when: not the address, which is a credential and is stored encrypted.
+            'feeds_added' => $this->rows('event_feeds', fn ($q) => $q->where('added_by', $user->id), ['role_id', 'name', 'host', 'kind', 'created_at']),
             'calendar_connections' => [
                 'google' => (bool) $user->google_token,
                 'microsoft' => (bool) $user->microsoft_token,

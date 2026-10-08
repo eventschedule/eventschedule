@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 16;
+    public const SCHEMA_VERSION = 17;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -680,6 +680,11 @@ class GrowthExportService
                 .'frozen in every earlier pull: do not compare them across this version. A calendar pull '
                 .'creates a venue schedule per location, owned by the same account, so count OWNERS '
                 .'(uid), not schedules, when asking how many organizers have a full calendar.',
+            'Since schema_version 17: events_by_source also carries imported_feed, events made by a '
+                .'feed (an address the schedule keeps reading about once an hour), and imported includes '
+                .'them. Unlike every other source they arrive with nobody at the keyboard: a schedule '
+                .'with a feed can gain a hundred events in one read. Do not read imported_feed, or '
+                .'daily.events_imported from this version on, as a count of things an organizer did.',
         ];
         // Every derived section is computed from the row tables, so if those were capped
         // the sections describe the most recent N rows and not the whole population.

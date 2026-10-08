@@ -468,6 +468,7 @@ importing and not to a venue or talent the event is also listed on.
 | `imported_page_ai` | a web page whose text the model read |
 | `imported_eventbrite` | the Eventbrite import |
 | `imported_google`, `imported_microsoft`, `imported_caldav` | a calendar: a standing sync's pull, or a one-time import from it |
+| `imported_feed` | a feed: an address the schedule keeps reading, about once an hour (since schema 17) |
 
 - **They start at the release that added `events.import_source`.** Nothing recorded how an earlier
   event was made, so every older import reads as made by hand. A schedule with `imported` 0 and a
@@ -553,6 +554,15 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **17** (2026-10-08)
+  - **New in `events_by_source`:** `imported_feed`, events made by a feed (an address a schedule
+    keeps reading about once an hour). `imported` includes them, and so does
+    `daily.events_imported`. Zero for every schedule until feeds ship; the bucket is there first
+    so that no later pull changes shape.
+  - **Read it differently from the other sources.** Every other import happens with a person on
+    the import page. A feed's events arrive with nobody at the keyboard, a hundred in one read, so
+    `imported_feed` measures what a schedule is connected to, not what its organizer did that day.
+    Compare `imported` across this version only with `imported_feed` taken out.
 - **16** (2026-10-07)
   - **Seven new `traffic[]` counters** for the guest pages, across every schedule:
     `gp_event_visitors`, `gp_list_taps`, `gp_form_opens`, `gp_checkout_starts`,

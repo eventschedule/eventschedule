@@ -293,9 +293,12 @@ class Event extends Model
 
     public const IMPORT_CALDAV = 'caldav';
 
+    public const IMPORT_FEED = 'feed';             // an address the schedule keeps reading (EventFeed)
+
     public const IMPORT_SOURCES = [
         self::IMPORT_AI, self::IMPORT_ICS, self::IMPORT_PAGE, self::IMPORT_PAGE_AI,
         self::IMPORT_EVENTBRITE, self::IMPORT_GOOGLE, self::IMPORT_MICROSOFT, self::IMPORT_CALDAV,
+        self::IMPORT_FEED,
     ];
 
     /**

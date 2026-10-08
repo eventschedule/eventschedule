@@ -4911,8 +4911,23 @@ class Role extends Model implements MustVerifyEmail
      */
     public function canCreateEvent(?User $actingUser = null): bool
     {
+        return $this->eventCreateAllowance($actingUser) !== 0;
+    }
+
+    /**
+     * How many more events may be created against this schedule today: what is left of the
+     * two caps canCreateEvent() describes, whichever is less. Null when neither applies
+     * (selfhost, where the limit helpers answer null), never below zero.
+     *
+     * canCreateEvent() is "this is not zero" and stays the gate saveEvent() checks. This is for
+     * a caller that creates many at once (a feed's first read) and has to stop while there is
+     * still room for the owner to add an event by hand, instead of finding the gate shut.
+     */
+    public function eventCreateAllowance(?User $actingUser = null): ?int
+    {
         $today = now()->toDateString();
         $operation = \App\Services\UsageTrackingService::EVENT_CREATE;
+        $left = null;
 
         $scheduleLimit = $this->eventCreateDailyLimit();
 
@@ -4922,9 +4937,7 @@ class Role extends Model implements MustVerifyEmail
                 ->where('operation', $operation)
                 ->sum('count');
 
-            if ($scheduleCount >= $scheduleLimit) {
-                return false;
-            }
+            $left = max(0, $scheduleLimit - $scheduleCount);
         }
 
         if ($actingUser) {
@@ -4939,14 +4952,13 @@ class Role extends Model implements MustVerifyEmail
                         ->where('operation', $operation)
                         ->sum('count');
 
-                    if ($userCount >= $userLimit) {
-                        return false;
-                    }
+                    $userLeft = max(0, $userLimit - $userCount);
+                    $left = is_null($left) ? $userLeft : min($left, $userLeft);
                 }
             }
         }
 
-        return true;
+        return $left;
     }
 
     /**
@@ -5123,6 +5135,12 @@ class Role extends Model implements MustVerifyEmail
     public function groups()
     {
         return $this->hasMany(\App\Models\Group::class);
+    }
+
+    /** The addresses this schedule keeps reading for events. */
+    public function feeds()
+    {
+        return $this->hasMany(\App\Models\EventFeed::class);
     }
 
     public function eventTemplates()

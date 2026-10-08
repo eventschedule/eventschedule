@@ -78,7 +78,7 @@ class PersonalDataExportTest extends TestCase
     public function test_every_table_holding_a_persons_rows_is_accounted_for(): void
     {
         $personColumns = ['user_id', 'email', 'guest_email', 'purchaser_email', 'recipient_email', 'reviewer_user_id',
-            'reviewed_user_id', 'referrer_user_id', 'referred_user_id', 'from_user_id', 'to_user_id', 'reporter_user_id'];
+            'reviewed_user_id', 'referrer_user_id', 'referred_user_id', 'from_user_id', 'to_user_id', 'reporter_user_id', 'added_by'];
         $known = array_merge(PersonalDataExportService::EXPORTED, array_keys(PersonalDataExportService::NOT_EXPORTED));
         $missing = [];
 
