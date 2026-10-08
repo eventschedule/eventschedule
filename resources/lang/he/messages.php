@@ -2563,6 +2563,8 @@ return [
     'start_camera' => 'הפעל מצלמה',
     'select_camera' => 'בחר מצלמה',
     'footer_text' => 'טקסט תחתית',
+    'newsletter_preview_text' => 'טקסט תצוגה מקדימה',
+    'newsletter_preview_text_help' => 'השורה שתיבת הדואר מציגה אחרי הנושא. אם תישאר ריקה, תוצג תחילת בלוק הטקסט הראשון שלכם.',
     'edit_prompt' => 'ערוך הנחיה',
     'change_camera' => 'החלף מצלמה',
 
@@ -5690,6 +5692,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule לא ישלח לכם יותר מיילים על אירועים חדשים.',
     'subscription_unsubscribed_all_body' => 'אף לוח זמנים באתר הזה לא ישלח לכם יותר מיילים על אירועים חדשים.',
     'subscription_why_receiving' => 'קיבלתם את זה כי ביקשתם מ:schedule לעדכן אתכם.',
+    'newsletter_why_receiving' => 'קיבלתם את זה כי אתם ברשימת התפוצה של :schedule.',
+    'play_video' => 'הפעלת הסרטון',
     'all_subscribers' => 'מנויי אימייל',
     'subscriber_confirmed' => 'מאושר',
     'subscriber_pending' => 'ממתין לאישור',

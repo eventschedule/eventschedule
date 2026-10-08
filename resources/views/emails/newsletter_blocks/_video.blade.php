@@ -1,22 +1,18 @@
+{{--
+    A video, as its thumbnail with a play mark on it. The mark is part of the picture
+    (AppController::youtubeThumbnail() draws it for play=1), because nothing layered over an image
+    survives Outlook, and a bare thumbnail read as one more photo.
+--}}
 @php
     $videoId = $block['data']['videoId'] ?? '';
     $thumbnailUrl = $block['data']['thumbnailUrl'] ?? '';
     $videoUrl = $block['data']['url'] ?? '';
-    $template = $template ?? 'modern';
-    $borderRadius = $template === 'bold' || $template === 'modern' ? 'border-radius: 8px;' : '';
+    $w = $nl->inner;
 @endphp
 @if ($videoId)
 <tr>
-    <td align="center" style="padding: 20px 30px;">
-        <a href="{{ $videoUrl }}" style="display: block; text-decoration: none; max-width: 560px; margin: 0 auto;">
-            <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 560px;">
-                <tr>
-                    <td align="center" style="{{ $borderRadius }}">
-                        <img src="{{ $thumbnailUrl }}" alt="Video" width="560" style="width: 100%; max-width: 560px; height: auto; display: block; {{ $borderRadius }}" />
-                    </td>
-                </tr>
-            </table>
-        </a>
-    </td>
+<td align="center" class="nl-g" style="padding: 0 {{ $nl->gutter }}px {{ $nl->gap }}px; text-align: center;">
+<a href="{{ $videoUrl }}" target="_blank" rel="noopener" style="display: block; text-decoration: none;"><img src="{{ $thumbnailUrl }}{{ str_contains($thumbnailUrl, '?') ? '&' : '?' }}play=1" width="{{ $w }}" alt="{{ __('messages.play_video') }}" style="display: block; width: 100%; max-width: {{ $w }}px; height: auto; border: 0; border-radius: {{ $nl->cardRadius }}px;"></a>
+</td>
 </tr>
 @endif

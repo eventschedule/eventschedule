@@ -1,37 +1,13 @@
+{{-- The schedule's picture in the flow of the mail. One that OPENS the mail is the masthead instead
+     (the newsletter masthead component), which the shell renders. --}}
 @php
-    $template = $template ?? 'modern';
+    $size = $role->imageSourceDimensions();
+    $ratio = $size ? $size[0] / max(1, $size[1]) : 1;
+    $w = $ratio > 1.6 ? 200 : ($nl->design === 'compact' ? 72 : 120);
+    $h = (int) round($w / $ratio);
 @endphp
-@if ($role?->profile_image_url)
-@if ($template === 'classic')
 <tr>
-    <td align="center" style="padding-bottom: 20px;">
-        <img src="{{ $role?->profile_image_url }}" alt="{{ $role?->name }}" width="200" style="max-width: 200px; height: auto; border-radius: 0;" />
-    </td>
+<td align="center" class="nl-g" style="padding: 0 {{ $nl->gutter }}px {{ $nl->gap }}px; text-align: center;">
+<img src="{{ $role->getProfileImageUrl(480) }}" width="{{ $w }}" height="{{ $h }}" alt="{{ $role->name }}" style="display: block; margin: 0 auto; width: {{ $w }}px; height: {{ $h }}px; border: 0; border-radius: {{ $nl->cardRadius }}px;">
+</td>
 </tr>
-@elseif ($template === 'minimal')
-<tr>
-    <td align="center" style="padding-bottom: 14px;">
-        <img src="{{ $role?->profile_image_url }}" alt="{{ $role?->name }}" width="150" style="max-width: 150px; height: auto; border-radius: 4px;" />
-    </td>
-</tr>
-@elseif ($template === 'bold')
-<tr>
-    <td align="center" style="padding-bottom: 20px;">
-        <img src="{{ $role?->profile_image_url }}" alt="{{ $role?->name }}" width="200" style="max-width: 200px; height: auto; border-radius: 8px; border: 3px solid {{ $style['accentColor'] }};" />
-    </td>
-</tr>
-@elseif ($template === 'compact')
-<tr>
-    <td align="center" style="padding-bottom: 10px;">
-        <img src="{{ $role?->profile_image_url }}" alt="{{ $role?->name }}" width="80" style="max-width: 80px; height: auto; border-radius: 4px;" />
-    </td>
-</tr>
-@else
-{{-- Modern (default) --}}
-<tr>
-    <td align="center" style="padding-bottom: 20px;">
-        <img src="{{ $role?->profile_image_url }}" alt="{{ $role?->name }}" width="200" style="max-width: 200px; height: auto; border-radius: 8px;" />
-    </td>
-</tr>
-@endif
-@endif

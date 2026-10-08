@@ -2822,6 +2822,8 @@ return [
     'test_email_failed' => 'Failed to send test email. Please check the logs for details.',
     'test_email_note' => 'This is a test email. Links are disabled.',
     'footer_text' => 'Footer Text',
+    'newsletter_preview_text' => 'Preview text',
+    'newsletter_preview_text_help' => 'The line an inbox shows after the subject. Left empty, it is the opening of your first text block.',
     'please_wait' => 'Please wait before trying again',
 
     // Scan agenda
@@ -5759,6 +5761,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule will not email you about new events again.',
     'subscription_unsubscribed_all_body' => 'You will not be emailed about new events by any schedule on this site.',
     'subscription_why_receiving' => 'You are getting this because you asked :schedule to email you updates.',
+    'newsletter_why_receiving' => 'You are getting this because you are on :schedule\'s mailing list.',
+    'play_video' => 'Play video',
     'audience_opt_in_label' => 'Email me updates from :schedule',
     'audience_opt_in_label_cart' => 'Email me updates from these schedules',
     'audience_share_link' => 'Your follow link',

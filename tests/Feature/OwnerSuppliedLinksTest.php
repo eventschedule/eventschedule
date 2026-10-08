@@ -166,7 +166,8 @@ class OwnerSuppliedLinksTest extends TestCase
                 ['name' => 'Scripted Sponsor', 'display_name' => 'Scripted Sponsor', 'url' => 'javascript:alert(6)', 'logo_url' => 'https://cdn.example.com/a.png'],
                 ['name' => 'Good Sponsor', 'display_name' => 'Good Sponsor', 'url' => 'https://sponsor.example.com', 'logo_url' => ''],
             ], 'sponsorTitle' => 'Sponsors']],
-            'style' => ['fontFamily' => 'Arial', 'textColor' => '#111111', 'buttonRadius' => 'rounded'],
+            // A block reads its colours and type from the theme the newsletter's shell builds.
+            'nl' => \App\Utils\NewsletterTheme::make('modern', ['fontFamily' => 'Arial', 'textColor' => '#111111', 'buttonRadius' => 'rounded'], false),
         ])->render();
 
         $this->assertDoesNotMatchRegularExpression(self::SCRIPT_HREF, $html);

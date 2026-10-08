@@ -1068,8 +1068,8 @@
 
                     <div class="space-y-3" data-reveal-group="90">
                         @foreach ([
-                            ['Five templates to start from', 'Modern, Classic, Minimal, Bold or Compact. Each one arrives with its own colours, typeface, button shape and event layout.'],
-                            ['Then make it yours', 'Background, accent and text colours, five email-safe fonts, rounded or square buttons, events as cards or as a list, and your own footer line.'],
+                            ['Five templates to start from', 'Modern, Classic, Minimal, Bold or Compact. Each is a layout of its own, and arrives with colours, a typeface and a button shape to start from.'],
+                            ['Then make it yours', 'Background, accent and text colours, six email-safe fonts, rounded or square buttons, events as cards or as a list, and your own footer line.'],
                             ['Save it as your template', 'Keep a finished newsletter as a starting point and the next one begins already dressed.'],
                         ] as [$t, $d])
                             <div class="es-send-card es-send-hover p-4" data-reveal>

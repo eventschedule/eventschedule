@@ -2497,6 +2497,8 @@ return [
     'start_camera' => 'Kamera starten',
     'select_camera' => 'Kamera auswählen',
     'footer_text' => 'Fußzeilentext',
+    'newsletter_preview_text' => 'Vorschautext',
+    'newsletter_preview_text_help' => 'Die Zeile, die ein Posteingang nach dem Betreff zeigt. Bleibt sie leer, wird der Anfang deines ersten Textblocks verwendet.',
     'edit_prompt' => 'Prompt bearbeiten',
     'change_camera' => 'Kamera wechseln',
 
@@ -5691,6 +5693,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule wird dir keine E-Mails mehr über neue Termine schicken.',
     'subscription_unsubscribed_all_body' => 'Kein Terminplan auf dieser Website wird dir noch E-Mails über neue Termine schicken.',
     'subscription_why_receiving' => 'Du erhältst das, weil du :schedule gebeten hast, dir Neuigkeiten zu schicken.',
+    'newsletter_why_receiving' => 'Du erhältst das, weil du auf der Mailingliste von :schedule stehst.',
+    'play_video' => 'Video abspielen',
     'all_subscribers' => 'E-Mail-Abonnenten',
     'subscriber_confirmed' => 'Bestätigt',
     'subscriber_pending' => 'Warten auf Bestätigung',

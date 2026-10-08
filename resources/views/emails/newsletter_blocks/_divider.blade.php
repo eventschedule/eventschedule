@@ -1,36 +1,19 @@
 @php
-    $dividerStyle = $block['data']['style'] ?? 'solid';
-    $template = $template ?? 'modern';
+    $line = $block['data']['style'] ?? 'solid';
+    $line = in_array($line, ['solid', 'dashed', 'dotted'], true) ? $line : 'solid';
+    $border = match ($nl->design) {
+        'classic' => '1px solid '.$nl->ruleDouble,
+        'bold' => '2px '.$line.' '.$nl->accent,
+        'compact' => '1px '.($line === 'solid' ? 'dotted' : $line).' '.$nl->ruleStrong,
+        default => '1px '.$line.' '.$nl->rule,
+    };
 @endphp
-@if ($template === 'classic')
 <tr>
-    <td style="padding: 10px 30px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top: 3px double #ccc; font-size: 0; line-height: 0;" height="1">&nbsp;</td></tr></table>
-    </td>
-</tr>
-@elseif ($template === 'minimal')
+<td class="nl-g" style="padding: 0 {{ $nl->gutter }}px {{ $nl->gap }}px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-    <td style="padding: 10px 30px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top: 1px solid #eee; font-size: 0; line-height: 0;" height="1">&nbsp;</td></tr></table>
-    </td>
+<td style="border-top: {{ $border }};{{ $nl->design === 'classic' ? ' border-bottom: '.$border.'; height: 3px; line-height: 3px;' : ' height: 1px; line-height: 1px;' }} font-size: 0;">&nbsp;</td>
 </tr>
-@elseif ($template === 'bold')
-<tr>
-    <td style="padding: 10px 30px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top: 2px solid {{ $style['accentColor'] }}; font-size: 0; line-height: 0;" height="1">&nbsp;</td></tr></table>
-    </td>
+</table>
+</td>
 </tr>
-@elseif ($template === 'compact')
-<tr>
-    <td style="padding: 6px 30px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top: 1px dotted #ccc; font-size: 0; line-height: 0;" height="1">&nbsp;</td></tr></table>
-    </td>
-</tr>
-@else
-{{-- Modern (default) --}}
-<tr>
-    <td style="padding: 10px 30px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top: 1px {{ $dividerStyle }} #ddd; font-size: 0; line-height: 0;" height="1">&nbsp;</td></tr></table>
-    </td>
-</tr>
-@endif

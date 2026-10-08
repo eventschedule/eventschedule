@@ -2505,6 +2505,8 @@ return [
     'start_camera' => 'Avvia Fotocamera',
     'select_camera' => 'Seleziona Fotocamera',
     'footer_text' => 'Testo a Pie di Pagina',
+    'newsletter_preview_text' => 'Testo di anteprima',
+    'newsletter_preview_text_help' => 'La riga che la casella di posta mostra dopo l\'oggetto. Se la lasci vuota, viene usato l\'inizio del tuo primo blocco di testo.',
     'edit_prompt' => 'Modifica Prompt',
     'change_camera' => 'Cambia Fotocamera',
 
@@ -5690,6 +5692,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule non ti scriverà più per i nuovi eventi.',
     'subscription_unsubscribed_all_body' => 'Nessun calendario di questo sito ti scriverà più per i nuovi eventi.',
     'subscription_why_receiving' => 'Ricevi questo messaggio perché hai chiesto a :schedule di tenerti aggiornato.',
+    'newsletter_why_receiving' => 'Ricevi questo messaggio perché sei nella mailing list di :schedule.',
+    'play_video' => 'Riproduci video',
     'all_subscribers' => 'Iscritti via email',
     'subscriber_confirmed' => 'Confermato',
     'subscriber_pending' => 'In attesa di conferma',

@@ -1,42 +1,39 @@
+{{-- A poll from an upcoming event. Each answer is a link to where it is cast, and says so with an
+     arrow: they used to look like buttons and do nothing. No radio marks and no Vote button, which
+     would promise a choose-then-send that mail cannot do. --}}
 @php
     $poll = $block['data']['resolvedPoll'] ?? null;
-    $template = $template ?? 'modern';
+    $compact = $nl->design === 'compact';
 @endphp
 @if ($poll)
 <tr>
-    <td style="padding: 20px 30px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid {{ $style['accentColor'] }}33; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 8px;' : '' }}">
-            <tr>
-                <td style="padding: 20px 24px 8px; font-family: '{{ $style['fontFamily'] }}', sans-serif; font-size: 18px; font-weight: bold; color: {{ $style['textColor'] }};">
-                    {{ $poll['question'] }}
-                </td>
-            </tr>
-            @if (!empty($poll['eventName']))
-            <tr>
-                <td style="padding: 0 24px 12px; font-family: '{{ $style['fontFamily'] }}', sans-serif; font-size: 12px; color: {{ $style['textColor'] }}99;">
-                    {{ $poll['eventName'] }}
-                </td>
-            </tr>
-            @endif
-            @foreach ($poll['options'] as $option)
-            <tr>
-                <td style="padding: 4px 24px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: {{ $style['accentColor'] }}0d; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 6px;' : '' }}">
-                        <tr>
-                            <td style="padding: 10px 14px; font-family: '{{ $style['fontFamily'] }}', sans-serif; font-size: 14px; color: {{ $style['textColor'] }};">
-                                {{ $option }}
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            @endforeach
-            <tr>
-                <td align="center" style="padding: 16px 24px 20px;">
-                    <a href="{{ $poll['eventUrl'] }}" style="display: inline-block; padding: 12px 24px; background-color: {{ $style['accentColor'] }}; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: bold; {{ $style['buttonRadius'] === 'rounded' ? 'border-radius: 6px;' : '' }} font-family: '{{ $style['fontFamily'] }}', sans-serif;">{{ __('messages.vote_now') }}</a>
-                </td>
-            </tr>
-        </table>
-    </td>
+<td class="nl-g" style="padding: 0 {{ $nl->gutter }}px {{ $nl->gap }}px;">
+<table role="presentation" dir="{{ $nl->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ $nl->panel }}" style="background-color: {{ $nl->panel }}; border: 1px solid {{ $nl->rule }}; border-radius: {{ $nl->cardRadius }}px;">
+<tr>
+<td style="padding: {{ $compact ? '14px 16px 8px' : '24px 24px 16px' }}; text-align: {{ $nl->start }};">
+@if (! empty($poll['eventName']))
+<p dir="auto" style="margin: 0 0 6px; {{ $nl->labelType() }}">{{ $poll['eventName'] }}</p>
+@endif
+<p dir="auto" style="margin: 0 0 {{ $compact ? 10 : 16 }}px; {{ $nl->type($compact ? 16 : 21, $compact ? 22 : 28, $nl->ink, $nl->serif ? 400 : 700) }}">{{ $poll['question'] }}</p>
+@foreach ($poll['options'] as $option)
+<table role="presentation" dir="{{ $nl->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 8px;">
+<tr>
+<td bgcolor="{{ $nl->sheet }}" style="background-color: {{ $nl->sheet }}; border: 1px solid {{ $nl->ruleStrong }}; border-radius: {{ $nl->radius }}px;">
+<a href="{{ $poll['eventUrl'] }}" target="_blank" rel="noopener" style="display: block; padding: {{ $compact ? '8px 12px' : '12px 16px' }}; text-decoration: none;">
+<table role="presentation" dir="{{ $nl->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td dir="auto" style="{{ $nl->type($nl->body, $nl->bodyLine - 4, $nl->ink, $nl->serif ? 400 : 600) }} text-align: {{ $nl->start }};">{{ $option }}</td>
+<td width="24" align="{{ $nl->end }}" style="width: 24px; text-align: {{ $nl->end }}; {{ $nl->type($nl->body, $nl->bodyLine - 4, $nl->accentInk, 700) }}">{!! $nl->arrow !!}</td>
+</tr>
+</table>
+</a>
+</td>
+</tr>
+</table>
+@endforeach
+</td>
+</tr>
+</table>
+</td>
 </tr>
 @endif

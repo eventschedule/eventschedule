@@ -11,8 +11,9 @@ use Tests\TestCase;
  * background with a 1px border for a warning or success state.
  *
  * Catches the literal property and the RTL-flipped form, `border-{{ $isRtl ? 'right' : 'left' }}`,
- * which a grep for "border-left" misses. The newsletter templates are the exception: their quote
- * bar and the bold/compact designs are owner-selectable looks, not our chrome.
+ * which a grep for "border-left" misses. The newsletter's five designs were the exception until
+ * 2026-10 (the quote's bar, Bold's cards, Compact's heading); they were rebuilt without one, so
+ * its views and the x-newsletter components are held to the rule like every other email.
  */
 class EmailSideStripeTest extends TestCase
 {
@@ -24,14 +25,11 @@ class EmailSideStripeTest extends TestCase
     {
         $offenders = [];
 
-        // components/email is the shared design system every email is built on, and vendor/mail the
-        // theme Laravel inlines into its Markdown mail, so a stripe in either reaches every message.
-        foreach (['emails', 'mail', 'components/email', 'vendor/mail', 'vendor/notifications'] as $dir) {
+        // components/email is the shared design system every email is built on, components/newsletter
+        // the newsletter's own, and vendor/mail the theme Laravel inlines into its Markdown mail, so a
+        // stripe in any of them reaches every message.
+        foreach (['emails', 'mail', 'components/email', 'components/newsletter', 'vendor/mail', 'vendor/notifications'] as $dir) {
             foreach (File::allFiles(resource_path('views/'.$dir)) as $file) {
-                if (str_contains($file->getRelativePathname(), 'newsletter')) {
-                    continue;
-                }
-
                 foreach (preg_split('/\R/', $file->getContents()) as $i => $line) {
                     if (preg_match(self::PATTERN, $line)) {
                         $offenders[] = $dir.'/'.$file->getRelativePathname().':'.($i + 1);

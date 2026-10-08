@@ -2559,6 +2559,8 @@ return [
     'start_camera' => 'تشغيل الكاميرا',
     'select_camera' => 'اختيار الكاميرا',
     'footer_text' => 'نص التذييل',
+    'newsletter_preview_text' => 'نص المعاينة',
+    'newsletter_preview_text_help' => 'السطر الذي يظهر في صندوق الوارد بعد الموضوع. إذا تُرك فارغًا، يُستخدم مطلع أول فقرة نصية لديك.',
     'edit_prompt' => 'تعديل الموجه',
     'change_camera' => 'تغيير الكاميرا',
 
@@ -5691,6 +5693,8 @@ return [
     'subscription_unsubscribed_body' => 'لن يراسلك :schedule مرة أخرى بشأن الفعاليات الجديدة.',
     'subscription_unsubscribed_all_body' => 'لن يراسلك أي جدول على هذا الموقع بشأن الفعاليات الجديدة.',
     'subscription_why_receiving' => 'وصلتك هذه الرسالة لأنك طلبت من :schedule أن يبقيك على اطلاع.',
+    'newsletter_why_receiving' => 'وصلتك هذه الرسالة لأنك ضمن القائمة البريدية لدى :schedule.',
+    'play_video' => 'تشغيل الفيديو',
     'all_subscribers' => 'المشتركون بالبريد الإلكتروني',
     'subscriber_confirmed' => 'مؤكَّد',
     'subscriber_pending' => 'بانتظار التأكيد',

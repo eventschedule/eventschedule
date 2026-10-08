@@ -142,7 +142,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Content</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The subject line (required) and the block list. <strong class="text-gray-900 dark:text-white">Add Block</strong> opens the block palette; click a block to add it or drag it onto the canvas. Blocks are reordered by their drag handle, and each one can be selected to edit its fields inline, cloned, or removed.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The subject line (required), the preview text and the block list. <strong class="text-gray-900 dark:text-white">Preview text</strong> is the line an inbox shows after the subject; leave it empty and it is the opening of your first text block. <strong class="text-gray-900 dark:text-white">Add Block</strong> opens the block palette; click a block to add it or drag it onto the canvas. Blocks are reordered by their drag handle, and each one can be selected to edit its fields inline, cloned, or removed.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Style</h4>
@@ -193,7 +193,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Tip</div>
-            <p>The preview refreshes as you type and renders the same HTML your recipients receive, so use it to check block order and spacing. On phones the preview is a fourth tab that opens in a new window. A new newsletter starts from your most recent one's template, style settings and selected segments, so a house style only has to be set up once.</p>
+            <p>The preview refreshes as you type and renders the same HTML your recipients receive, so use it to check block order and spacing. <strong class="text-gray-900 dark:text-white">Desktop</strong> and <strong class="text-gray-900 dark:text-white">Mobile</strong> above it switch the preview between a desktop width and a phone's, which is where most mail is opened. On phones the preview is a fourth tab that opens in a new window. A new newsletter starts from your most recent one's template, style settings and selected segments, so a house style only has to be set up once.</p>
         </div>
     </section>
 
@@ -223,7 +223,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events with their flyer image, date and a link to the event page. Left on All Upcoming Events it lists up to ten upcoming or ongoing events in date order; hand-picked events are shown in the order you tick them. Either way it never includes drafts, cancelled events, unlisted events or password-protected ones.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Pulls in your events, each with its day, time, price (or Free, or Sold Out) and a link to its page, and with its flyer in the designs that show pictures (Modern, Classic and Bold). Left on All Upcoming Events it lists up to ten upcoming or ongoing events in date order, a recurring event under its next date; hand-picked events are shown in date order too. In Modern, Classic and Bold the first event leads the list as a larger card. Either way it never includes drafts, cancelled events, unlisted events, password-protected ones, or an event your schedule has not accepted, and a link to your full schedule follows the list.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> All Upcoming Events (on) or a hand-picked list of events, Event Layout (cards or list)</p>
             </div>
             <div class="doc-field">
@@ -253,7 +253,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Poll</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Shows the first active poll found across your upcoming events, with a button through to that event's page to vote. It has no fields to fill in, and renders nothing if no upcoming event has an active poll.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Shows the first active poll found across your upcoming events. Each answer links through to that event's page, where the vote is cast. It has no fields to fill in, and renders nothing if no upcoming event has an active poll.</p>
             </div>
         </div>
 
@@ -322,7 +322,7 @@
                         <td><span class="font-semibold text-gray-900 dark:text-white">Modern</span></td>
                         <td>White</td>
                         <td>Your schedule's accent colour</td>
-                        <td>Arial</td>
+                        <td>System</td>
                         <td>Rounded</td>
                     </tr>
                     <tr>
@@ -335,15 +335,15 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Minimal</span></td>
                         <td>White</td>
-                        <td>Grey</td>
-                        <td>Verdana</td>
+                        <td>Near black</td>
+                        <td>System</td>
                         <td>Rounded</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Bold</span></td>
                         <td>Near-black navy</td>
                         <td>Red</td>
-                        <td>Arial</td>
+                        <td>System</td>
                         <td>Rounded</td>
                     </tr>
                     <tr>
@@ -357,7 +357,7 @@
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mt-4 mb-6">
-            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. Bold is the one preset with a dark background, and Compact tightens the padding and footer type as well as the palette.
+            Every value stays editable afterwards, so a preset is a starting point rather than a lock-in. A preset is also a layout of its own, which stays whatever colours you give it: Modern is a rounded sheet with the title on a band of your accent colour, Classic a framed page with a nameplate and outlined buttons, Minimal a bare page of text links, Bold a dark page with heavy type, and Compact a tight digest. System is the reader's own interface font (San Francisco, Segoe UI or Roboto, whichever their device has).
         </p>
 
         <h3 id="saved-templates" class="doc-subheading">Saving Your Own Templates</h3>
@@ -411,7 +411,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Font Family</span></td>
-                        <td>Arial, Georgia, Verdana, Trebuchet MS or Courier New</td>
+                        <td>System (the reader's own interface font), Arial, Georgia, Verdana, Trebuchet MS or Courier New</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Button Style</span></td>
@@ -431,7 +431,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Email clients have varying CSS support, so the builder renders to table-based, inline-styled HTML with a small set of email-safe fonts. That is why the font list is short and why there is no free-form CSS here. Free schedules also carry a small "Powered by Event Schedule" line under the unsubscribe link; upgrading to Pro removes it.</p>
+            <p>Email clients have varying CSS support, so the builder renders to table-based, inline-styled HTML with a small set of email-safe fonts. That is why the font list is short and why there is no free-form CSS here. Whatever three colours you pick, the builder works out the rest (panels, hairlines, quieter text, the label on a button) so the text stays readable, and it shows your colours as you chose them in a reader's dark mode too. Free schedules also carry a small "Powered by Event Schedule" line under the unsubscribe link; upgrading to Pro removes it.</p>
         </div>
     </section>
 

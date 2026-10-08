@@ -1,90 +1,99 @@
-{{ $newsletter->subject }}
-{{ str_repeat('=', strlen($newsletter->subject)) }}
+{{-- The plain-text part. Every block that says something in the HTML part says it here: the
+     quote, the poll, the sponsors and the video were silently dropped, and an event had no venue
+     or price. mb_strwidth, not strlen: a Hebrew subject was underlined twice its length. Unescaped on
+     purpose: this part is never read as HTML, and escaped it said "What&#039;s on". --}}
+@php
+    $line = fn (string $text, string $char) => str_repeat($char, max(3, mb_strwidth($text)));
+    $href = fn ($url) => \App\Utils\UrlUtils::safeActionHref($url);
+@endphp
+{!! $newsletter->subject !!}
+{!! $line($newsletter->subject, '=') !!}
 
 @foreach ($blocks as $block)
-@php $blockType = $block['type'] ?? ''; @endphp
-@if ($blockType === 'heading' && !empty($block['data']['text']))
-
-{{ $block['data']['text'] }}
-{{ str_repeat('-', strlen($block['data']['text'])) }}
-
-@elseif ($blockType === 'text' && !empty($block['data']['content']))
-{{ strip_tags($block['data']['content']) }}
-
-@elseif ($blockType === 'image')
 @php
-    $textImages = isset($block['data']['url']) ? [['url' => $block['data']['url'], 'alt' => $block['data']['alt'] ?? '', 'caption' => '', 'link' => '']] : ($block['data']['images'] ?? []);
+    $type = $block['type'] ?? '';
+    $data = $block['data'] ?? [];
 @endphp
-@foreach ($textImages as $tImg)
-@if (!empty($tImg['url']))
-[{{ !empty($tImg['alt']) ? $tImg['alt'] : __('messages.image') }}]{{ !empty($tImg['caption']) ? ' - ' . $tImg['caption'] : '' }}{{ !empty($tImg['link']) ? ' ' . $tImg['link'] : '' }}
+@if ($type === 'heading' && filled($data['text'] ?? null))
+
+{!! $data['text'] !!}
+{!! $line($data['text'], '-') !!}
+
+@elseif ($type === 'text' && filled($data['content'] ?? null))
+{!! strip_tags($data['content']) !!}
+
+@elseif ($type === 'image')
+@foreach (isset($data['url']) ? [['url' => $data['url'], 'alt' => $data['alt'] ?? '']] : ($data['images'] ?? []) as $image)
+@if (filled($image['url'] ?? null))
+[{!! filled($image['alt'] ?? null) ? $image['alt'] : __('messages.image') !!}]{!! filled($image['caption'] ?? null) ? ' '.$image['caption'] : '' !!}{!! $href($image['link'] ?? null) ? ' '.$href($image['link']) : '' !!}
 @endif
 @endforeach
 
-@elseif ($blockType === 'events' && !empty($block['data']['resolvedEvents']))
-@foreach ($block['data']['resolvedEvents'] as $event)
-* {{ $event->name }}
-  @php
-      $tz = $role->timezone ?? 'UTC';
-      $s = $event->starts_at ? \Carbon\Carbon::parse($event->starts_at)->setTimezone($tz) : null;
-      $timeFormat = ($role?->use_24_hour_time ?? false) ? 'H:i' : 'g:i A';
-      if ($s && $event->is_multi_day) {
-          $e = $s->copy()->addMinutes($event->durationInMinutes());
-          if ($s->year !== $e->year) {
-              $dateStr = $s->format('M j, Y') . ' - ' . $e->format('M j, Y');
-          } elseif ($s->month !== $e->month) {
-              $dateStr = $s->format('M j') . ' - ' . $e->format('M j, Y');
-          } else {
-              $dateStr = $s->format('M j') . ' - ' . $e->format('j, Y');
-          }
-          $dateStr .= ' - ' . $s->format($timeFormat);
-      } elseif ($s) {
-          $dateStr = $s->format('M j, Y - ' . $timeFormat);
-      } else {
-          $dateStr = '';
-      }
-  @endphp
-{{ $dateStr }}
-  {{ $event->getGuestUrl($role?->subdomain, null, true) }}
+@elseif ($type === 'events' && collect($data['resolvedEvents'] ?? [])->isNotEmpty())
+@foreach ($data['resolvedEvents'] as $e)
+* {!! $e['name'] !!}
+  {!! implode(' | ', array_filter([$e['date'], $e['time'], $e['venue'], $e['repeat'], $e['price']])) !!}
+  {!! $e['url'] !!}
 
 @endforeach
-@elseif ($blockType === 'button' && !empty($block['data']['text']))
-{{ $block['data']['text'] }}: {{ $block['data']['url'] ?? '' }}
+@if (filled($data['scheduleUrl'] ?? null))
+{!! __('messages.announcement_view_schedule') !!}: {!! $data['scheduleUrl'] !!}
 
-@elseif ($blockType === 'offer')
-@if (!empty($block['data']['title']))
-{{ $block['data']['title'] }}
 @endif
-@if (!empty($block['data']['description']))
-{{ $block['data']['description'] }}
-@endif
-@if (!empty($block['data']['originalPrice']) && !empty($block['data']['salePrice']))
-{{ $block['data']['originalPrice'] }} -> {{ $block['data']['salePrice'] }}
-@elseif (!empty($block['data']['salePrice']))
-{{ $block['data']['salePrice'] }}
-@endif
-@if (!empty($block['data']['couponCode']))
-{{ __('messages.coupon_code_label') }}: {{ $block['data']['couponCode'] }}
-@endif
-@if (!empty($block['data']['buttonText']))
-{{ $block['data']['buttonText'] }}: {{ $block['data']['buttonUrl'] ?? '' }}
+@elseif ($type === 'button' && filled($data['text'] ?? null))
+{!! $data['text'] !!}{!! $href($data['url'] ?? null) ? ': '.$href($data['url']) : '' !!}
+
+@elseif ($type === 'quote' && filled($data['text'] ?? null))
+"{!! $data['text'] !!}"
+@if (filled($data['author'] ?? null))
+  {!! implode(', ', array_filter([$data['author'], $data['title'] ?? null])) !!}
 @endif
 
-@elseif ($blockType === 'divider')
+@elseif ($type === 'offer' && (filled($data['title'] ?? null) || filled($data['salePrice'] ?? null)))
+{!! implode("\n", array_filter([$data['title'] ?? null, $data['description'] ?? null])) !!}
+@if (filled($data['originalPrice'] ?? null) && filled($data['salePrice'] ?? null))
+{!! $data['originalPrice'] !!} -> {!! $data['salePrice'] !!}
+@elseif (filled($data['salePrice'] ?? null))
+{!! $data['salePrice'] !!}
+@endif
+@if (filled($data['couponCode'] ?? null))
+{!! __('messages.coupon_code_label') !!}: {!! $data['couponCode'] !!}
+@endif
+@if (filled($data['buttonText'] ?? null))
+{!! $data['buttonText'] !!}{!! $href($data['buttonUrl'] ?? null) ? ': '.$href($data['buttonUrl']) : '' !!}
+@endif
+
+@elseif ($type === 'video' && filled($data['videoId'] ?? null))
+{!! __('messages.play_video') !!}: {!! $data['url'] !!}
+
+@elseif ($type === 'poll' && ! empty($data['resolvedPoll']))
+{!! $data['resolvedPoll']['question'] !!}
+@foreach ($data['resolvedPoll']['options'] as $option)
+  ( ) {!! $option !!}
+@endforeach
+{!! __('messages.vote_now') !!}: {!! $data['resolvedPoll']['eventUrl'] !!}
+
+@elseif ($type === 'sponsors' && ! empty($data['resolvedSponsors']))
+{!! filled($data['sponsorTitle'] ?? null) ? $data['sponsorTitle'].': ' : '' !!}{!! collect($data['resolvedSponsors'])->pluck('display_name')->filter()->implode(', ') !!}
+
+@elseif ($type === 'divider')
 ---
 
-@elseif ($blockType === 'social_links' && !empty($block['data']['links']))
-@foreach ($block['data']['links'] as $link)
-@if (!empty($link['url']) && !empty($link['platform']))
-{{ ucfirst($link['platform']) }}: {{ $link['url'] }}
+@elseif ($type === 'social_links')
+@foreach ($data['links'] ?? [] as $link)
+@if (\App\Utils\UrlUtils::safeHref($link['url'] ?? null) && filled($link['platform'] ?? null))
+{!! ucfirst($link['platform']) !!}: {!! \App\Utils\UrlUtils::safeHref($link['url']) !!}
 @endif
 @endforeach
 
 @endif
 @endforeach
 --
-{{ !empty($style['footerText']) ? $style['footerText'] : ($role?->name ?? config('app.name')) }}
-@if (! empty($manageUrl))
-{{ __('messages.subscription_manage_account') }}: {{ $manageUrl }}
+{!! filled($style['footerText'] ?? null) ? $style['footerText'] : ($role?->name ?? config('app.name')) !!}
+@if ($role)
+{!! __('messages.newsletter_why_receiving', ['schedule' => $role->name]) !!}
 @endif
-{{ __('messages.unsubscribe') }}: {{ $unsubscribeUrl }}
+@if (! empty($manageUrl))
+{!! __('messages.subscription_manage_account') !!}: {!! $manageUrl !!}
+@endif
+{!! __('messages.unsubscribe') !!}: {!! $unsubscribeUrl !!}

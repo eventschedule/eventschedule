@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Traits;
 
 use App\Models\Newsletter;
+use App\Utils\NewsletterTheme;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,8 @@ trait SanitizesNewsletterContent
             return $defaults;
         }
 
-        $allowedFonts = ['Arial', 'Georgia', 'Verdana', 'Trebuchet MS', 'Times New Roman', 'Courier New', 'Helvetica', 'Tahoma'];
+        // The faces the designs have a stack for. System is the reader's own interface font.
+        $allowedFonts = array_keys(NewsletterTheme::FONTS);
         $allowedRadii = ['rounded', 'square'];
         $allowedLayouts = ['cards', 'list'];
 
@@ -27,6 +29,8 @@ trait SanitizesNewsletterContent
         $sanitized['buttonRadius'] = in_array($settings['buttonRadius'] ?? '', $allowedRadii) ? $settings['buttonRadius'] : $defaults['buttonRadius'];
         $sanitized['eventLayout'] = in_array($settings['eventLayout'] ?? '', $allowedLayouts) ? $settings['eventLayout'] : $defaults['eventLayout'];
         $sanitized['footerText'] = mb_substr(strip_tags(trim($settings['footerText'] ?? '')), 0, 500);
+        // One line, as an inbox shows it after the subject.
+        $sanitized['previewText'] = mb_substr(trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($settings['previewText'] ?? '')))), 0, 150);
 
         return $sanitized;
     }

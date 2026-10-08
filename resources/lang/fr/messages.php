@@ -2498,6 +2498,8 @@ return [
     'start_camera' => 'Démarrer la caméra',
     'select_camera' => 'Choisir la caméra',
     'footer_text' => 'Texte du pied de page',
+    'newsletter_preview_text' => 'Texte d\'aperçu',
+    'newsletter_preview_text_help' => 'La ligne qu\'une boîte de réception affiche après l\'objet. Laissée vide, elle reprend le début de votre premier bloc de texte.',
     'edit_prompt' => 'Modifier l\'invite',
     'change_camera' => 'Changer de caméra',
 
@@ -5696,6 +5698,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule ne vous écrira plus au sujet de nouveaux événements.',
     'subscription_unsubscribed_all_body' => 'Aucun agenda de ce site ne vous écrira plus au sujet de nouveaux événements.',
     'subscription_why_receiving' => 'Vous recevez ceci parce que vous avez demandé à :schedule de vous tenir au courant.',
+    'newsletter_why_receiving' => 'Vous recevez ceci parce que vous figurez sur la liste de diffusion de :schedule.',
+    'play_video' => 'Lire la vidéo',
     'all_subscribers' => 'Abonnés par e-mail',
     'subscriber_confirmed' => 'Confirmé',
     'subscriber_pending' => 'En attente de confirmation',

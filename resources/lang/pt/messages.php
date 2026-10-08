@@ -2506,6 +2506,8 @@ return [
     'start_camera' => 'Iniciar Câmera',
     'select_camera' => 'Selecionar Câmera',
     'footer_text' => 'Texto do Rodapé',
+    'newsletter_preview_text' => 'Texto de pré-visualização',
+    'newsletter_preview_text_help' => 'A linha que a caixa de entrada mostra a seguir ao assunto. Se ficar vazia, é usado o início do seu primeiro bloco de texto.',
     'edit_prompt' => 'Editar Prompt',
     'change_camera' => 'Trocar Câmera',
 
@@ -5692,6 +5694,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule não vai mais escrever sobre novos eventos.',
     'subscription_unsubscribed_all_body' => 'Nenhuma agenda deste site vai mais escrever sobre novos eventos.',
     'subscription_why_receiving' => 'Está a receber isto porque pediu a :schedule que o mantivesse a par.',
+    'newsletter_why_receiving' => 'Está a receber isto porque faz parte da lista de correio de :schedule.',
+    'play_video' => 'Reproduzir vídeo',
     'all_subscribers' => 'Inscritos por e-mail',
     'subscriber_confirmed' => 'Confirmado',
     'subscriber_pending' => 'Aguardando confirmação',

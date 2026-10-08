@@ -2467,6 +2467,8 @@ return [
     'test_email_failed' => 'Testmeili saatmine ebaõnnestus. Vaadake üksikasju logidest.',
     'test_email_note' => 'See on testmeil. Lingid on keelatud.',
     'footer_text' => 'Jaluse tekst',
+    'newsletter_preview_text' => 'Eelvaate tekst',
+    'newsletter_preview_text_help' => 'Rida, mida postkast näitab pärast teemat. Kui jätad selle tühjaks, kasutatakse sinu esimese tekstiploki algust.',
     'please_wait' => 'Oodake enne uuesti proovimist',
 
     // Scan agenda
@@ -5692,6 +5694,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule ei kirjuta sulle enam uutest sündmustest.',
     'subscription_unsubscribed_all_body' => 'Ükski selle saidi kava ei kirjuta sulle enam uutest sündmustest.',
     'subscription_why_receiving' => 'Said selle kirja, sest palusid kalendril :schedule end kursis hoida.',
+    'newsletter_why_receiving' => 'Said selle kirja, sest oled kalendri :schedule meililistis.',
+    'play_video' => 'Esita video',
     'all_subscribers' => 'E-posti tellijad',
     'subscriber_confirmed' => 'Kinnitatud',
     'subscriber_pending' => 'Ootab kinnitust',

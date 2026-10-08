@@ -2506,6 +2506,8 @@ return [
     'start_camera' => 'Camera Starten',
     'select_camera' => 'Camera Selecteren',
     'footer_text' => 'Voettekst',
+    'newsletter_preview_text' => 'Voorbeeldtekst',
+    'newsletter_preview_text_help' => 'De regel die een inbox na het onderwerp toont. Laat je hem leeg, dan wordt het begin van je eerste tekstblok gebruikt.',
     'edit_prompt' => 'Prompt Bewerken',
     'change_camera' => 'Camera Wisselen',
 
@@ -5693,6 +5695,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule mailt je niet meer over nieuwe evenementen.',
     'subscription_unsubscribed_all_body' => 'Geen enkel schema op deze site mailt je nog over nieuwe evenementen.',
     'subscription_why_receiving' => 'Je krijgt dit omdat je :schedule hebt gevraagd je op de hoogte te houden.',
+    'newsletter_why_receiving' => 'Je krijgt dit omdat je op de mailinglijst van :schedule staat.',
+    'play_video' => 'Video afspelen',
     'all_subscribers' => 'E-mailabonnees',
     'subscriber_confirmed' => 'Bevestigd',
     'subscriber_pending' => 'Wacht op bevestiging',

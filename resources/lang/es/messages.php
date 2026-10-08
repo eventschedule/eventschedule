@@ -2497,6 +2497,8 @@ return [
     'start_camera' => 'Iniciar Camara',
     'select_camera' => 'Seleccionar Camara',
     'footer_text' => 'Texto del Pie de Pagina',
+    'newsletter_preview_text' => 'Texto de vista previa',
+    'newsletter_preview_text_help' => 'La línea que la bandeja de entrada muestra después del asunto. Si la dejas vacía, se usa el comienzo de tu primer bloque de texto.',
     'edit_prompt' => 'Editar Prompt',
     'change_camera' => 'Cambiar Camara',
 
@@ -5691,6 +5693,8 @@ return [
     'subscription_unsubscribed_body' => ':schedule ya no te escribirá sobre nuevos eventos.',
     'subscription_unsubscribed_all_body' => 'Ninguna agenda de este sitio volverá a escribirte sobre nuevos eventos.',
     'subscription_why_receiving' => 'Recibes esto porque pediste a :schedule que te mantuviera al día.',
+    'newsletter_why_receiving' => 'Recibes esto porque estás en la lista de correo de :schedule.',
+    'play_video' => 'Reproducir vídeo',
     'all_subscribers' => 'Suscriptores por correo',
     'subscriber_confirmed' => 'Confirmado',
     'subscriber_pending' => 'Pendiente de confirmar',

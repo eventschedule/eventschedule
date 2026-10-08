@@ -154,6 +154,11 @@ class Newsletter extends Model
         return UrlUtils::detectPlatform($url);
     }
 
+    /**
+     * What a newsletter saved before a setting existed is read with, so these stay as they were:
+     * NewsletterService::renderHtml() lays the saved settings over them. The starting values of a
+     * NEW newsletter are the preset's (templateDefaults()).
+     */
     public static function defaultStyleSettings(): array
     {
         return [
@@ -164,12 +169,31 @@ class Newsletter extends Model
             'buttonRadius' => 'rounded',
             'eventLayout' => 'cards',
             'footerText' => '',
+            // The line an inbox shows after the subject. Empty means the opening of the first
+            // text block, as the mail reads.
+            'previewText' => '',
         ];
+    }
+
+    /**
+     * $settings as ANOTHER newsletter, or a saved template, should start with them: the design,
+     * without the preview text, which was written for one mail. The settings travel in three
+     * places (a new newsletter starts from the last one's, or from a template's, and a newsletter
+     * can be saved as a template), and a line carried over would be sent under a subject it was
+     * never written for.
+     */
+    public static function designSettings(?array $settings): ?array
+    {
+        if ($settings !== null) {
+            $settings['previewText'] = '';
+        }
+
+        return $settings;
     }
 
     public static function defaultStyleSettingsForRole(Role $role): array
     {
-        $defaults = self::defaultStyleSettings();
+        $defaults = self::templateDefaults('modern');
         if ($role->accent_color) {
             $defaults['accentColor'] = $role->accent_color;
         }
@@ -177,6 +201,11 @@ class Newsletter extends Model
         return $defaults;
     }
 
+    /**
+     * The settings a preset arrives with. The designs themselves live in App\Utils\NewsletterTheme
+     * and the newsletter views; a preset only chooses the colours, typeface and corners they start
+     * from. System is the reader's own interface font (NewsletterTheme::FONTS).
+     */
     public static function templateDefaults(string $template): array
     {
         return match ($template) {
@@ -188,24 +217,28 @@ class Newsletter extends Model
                 'buttonRadius' => 'square',
                 'eventLayout' => 'cards',
                 'footerText' => '',
+                'previewText' => '',
             ],
             'minimal' => [
                 'backgroundColor' => '#ffffff',
-                'accentColor' => '#666666',
+                // Near-black, so Minimal's links are black. At mid-grey every link looked disabled.
+                'accentColor' => '#111111',
                 'textColor' => '#333333',
-                'fontFamily' => 'Verdana',
+                'fontFamily' => 'System',
                 'buttonRadius' => 'rounded',
                 'eventLayout' => 'list',
                 'footerText' => '',
+                'previewText' => '',
             ],
             'bold' => [
                 'backgroundColor' => '#1a1a2e',
                 'accentColor' => '#e94560',
                 'textColor' => '#eaeaea',
-                'fontFamily' => 'Arial',
+                'fontFamily' => 'System',
                 'buttonRadius' => 'rounded',
                 'eventLayout' => 'cards',
                 'footerText' => '',
+                'previewText' => '',
             ],
             'compact' => [
                 'backgroundColor' => '#f5f5f5',
@@ -215,8 +248,9 @@ class Newsletter extends Model
                 'buttonRadius' => 'square',
                 'eventLayout' => 'list',
                 'footerText' => '',
+                'previewText' => '',
             ],
-            default => self::defaultStyleSettings(), // 'modern'
+            default => ['fontFamily' => 'System'] + self::defaultStyleSettings(), // 'modern'
         };
     }
 }

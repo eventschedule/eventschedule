@@ -39,6 +39,18 @@
                             </div>
                         </div>
 
+                        <!-- Preview text: the line an inbox shows after the subject. Posted by the
+                             hidden style_settings[previewText] field below. -->
+                        <div v-if="!isTemplateMode">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 px-5 py-4"><label for="newsletter_preview_text">{{ t.preview_text }}</label></h3>
+                            <div class="px-5 pb-5">
+                                <input id="newsletter_preview_text" type="text" maxlength="150"
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
+                                    v-model="styleSettings.previewText" />
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ t.preview_text_help }}</p>
+                            </div>
+                        </div>
+
                         <!-- Blocks section -->
                         <div>
                             <div class="flex items-center justify-between px-5 py-4">
@@ -556,43 +568,48 @@
                                         <input type="radio" name="template_selector" :value="tmpl" v-model="template" @change="onTemplateChange(tmpl)" class="sr-only" />
                                         <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center hover:border-[var(--brand-blue)] transition-colors"
                                             :class="template === tmpl ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : ''">
-                                            <div class="h-16 mb-2 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                                                <!-- Modern: filled rounded card with accent band -->
-                                                <div v-if="tmpl === 'modern'" class="w-full h-full flex flex-col items-center justify-center gap-1">
-                                                    <div class="w-10 h-2.5 rounded bg-[var(--brand-button-bg)]"></div>
-                                                    <div class="w-8 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
-                                                    <div class="w-6 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
-                                                    <div class="w-5 h-2 rounded bg-[var(--brand-button-bg)]"></div>
-                                                </div>
-                                                <!-- Classic: underlined heading, outlined button -->
-                                                <div v-else-if="tmpl === 'classic'" class="w-full h-full flex flex-col items-center justify-center gap-1 bg-[#faf9f6] dark:bg-gray-700">
-                                                    <div class="w-6 h-1 bg-[#8B4513]"></div>
-                                                    <div class="w-4 h-px bg-[#8B4513]"></div>
-                                                    <div class="w-8 h-1 rounded bg-gray-300 dark:bg-gray-500"></div>
-                                                    <div class="w-5 h-2 rounded border border-[#8B4513]"></div>
-                                                </div>
-                                                <!-- Minimal: stark, uppercase, text link -->
-                                                <div v-else-if="tmpl === 'minimal'" class="w-full h-full flex flex-col items-center justify-center gap-0.5">
-                                                    <div class="w-7 h-0.5 bg-gray-400 dark:bg-gray-500"></div>
-                                                    <div class="w-8 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                                    <div class="w-6 h-0.5 bg-gray-300 dark:bg-gray-500"></div>
-                                                    <div class="w-4 h-px bg-gray-200 dark:bg-gray-600"></div>
-                                                    <div class="text-[6px] text-gray-400 dark:text-gray-500 underline mt-0.5">link</div>
-                                                </div>
-                                                <!-- Bold: dark bg, large accent elements -->
-                                                <div v-else-if="tmpl === 'bold'" class="w-full h-full flex flex-col items-center justify-center gap-1 bg-[#16213e]">
-                                                    <div class="w-full h-3 bg-[#e94560]"></div>
-                                                    <div class="w-6 h-0.5 bg-gray-400"></div>
-                                                    <div class="w-8 h-0.5 bg-gray-500"></div>
-                                                    <div class="w-6 h-2.5 rounded bg-[#e94560]"></div>
-                                                </div>
-                                                <!-- Compact: dense, left-aligned, small -->
-                                                <div v-else-if="tmpl === 'compact'" class="w-full h-full flex flex-col items-start justify-center gap-0.5 pl-2">
-                                                    <div class="flex items-center gap-0.5"><div class="w-0.5 h-2 bg-[#2d6a4f]"></div><div class="w-6 h-1 bg-gray-400 dark:bg-gray-500"></div></div>
-                                                    <div class="w-9 h-0.5 bg-gray-300 dark:bg-gray-500 ml-1.5"></div>
-                                                    <div class="w-7 h-0.5 bg-gray-300 dark:bg-gray-500 ml-1.5"></div>
-                                                    <div class="w-4 h-1.5 bg-[#2d6a4f] ml-1.5"></div>
-                                                </div>
+                                            <!-- Each preset drawn as the design it is (the sheet, the title, an event entry), in the
+                                                 colours it arrives with. The email's own colours, so they do not follow the app's theme. -->
+                                            <div class="mb-2 rounded overflow-hidden border border-gray-200 dark:border-gray-600" style="aspect-ratio: 3 / 2;">
+                                                <svg v-if="tmpl === 'modern'" viewBox="0 0 96 64" class="block w-full h-full" aria-hidden="true">
+                                                    <rect width="96" height="64" fill="#f1f2f4" /><rect x="20" y="6" width="56" height="58" rx="5" fill="#fff" stroke="#e3e5e8" />
+                                                    <path d="M20 11a5 5 0 0 1 5-5h46a5 5 0 0 1 5 5v11H20z" :fill="presetAccent(tmpl)" /><rect x="34" y="12.5" width="28" height="3.5" rx="1.75" fill="#fff" />
+                                                    <rect x="26" y="27" width="44" height="2" rx="1" fill="#c9ccd1" /><rect x="26" y="31.5" width="34" height="2" rx="1" fill="#c9ccd1" />
+                                                    <rect x="26" y="38" width="44" height="12" rx="3" fill="#f7f7f8" stroke="#e3e5e8" /><rect x="28.5" y="40.5" width="9" height="7" rx="1.5" fill="#b9bdc4" />
+                                                    <rect x="40" y="41.5" width="12" height="1.6" rx=".8" :fill="presetAccent(tmpl)" /><rect x="40" y="45" width="22" height="2" rx="1" fill="#55595f" />
+                                                    <rect x="26" y="53" width="44" height="11" rx="3" fill="#f7f7f8" stroke="#e3e5e8" />
+                                                </svg>
+                                                <svg v-else-if="tmpl === 'classic'" viewBox="0 0 96 64" class="block w-full h-full" aria-hidden="true">
+                                                    <rect width="96" height="64" fill="#efede8" /><rect x="20" y="6" width="56" height="58" fill="#faf9f6" stroke="#dedbd3" />
+                                                    <rect x="40" y="11" width="16" height="1.6" fill="#6b6257" /><path d="M26 16.5h44M26 18h44" stroke="#bdb8ae" stroke-width=".7" />
+                                                    <rect x="31" y="23" width="34" height="3.4" :fill="presetAccent(tmpl)" /><rect x="44" y="29" width="8" height="1" :fill="presetAccent(tmpl)" />
+                                                    <rect x="26" y="34" width="44" height="1.8" fill="#c8c3b9" /><rect x="26" y="38" width="36" height="1.8" fill="#c8c3b9" />
+                                                    <rect x="26" y="44" width="44" height="13" fill="#f3f1ec" stroke="#dedbd3" /><rect x="29" y="46.5" width="12" height="1.4" :fill="presetAccent(tmpl)" />
+                                                    <rect x="29" y="50" width="22" height="2.2" fill="#4a443c" /><rect x="58" y="46.5" width="9.5" height="8" fill="#b7b0a4" />
+                                                </svg>
+                                                <svg v-else-if="tmpl === 'minimal'" viewBox="0 0 96 64" class="block w-full h-full" aria-hidden="true">
+                                                    <rect width="96" height="64" fill="#fff" /><rect x="45.5" y="6" width="5" height="5" rx="1.2" fill="#9aa0a6" /><rect x="41" y="13" width="14" height="1.6" rx=".8" fill="#3c4043" />
+                                                    <path d="M18 19h60" stroke="#e3e5e8" stroke-width=".8" /><rect x="28" y="24" width="40" height="4.4" rx="1" fill="#202124" />
+                                                    <rect x="18" y="33" width="60" height="1.8" rx=".9" fill="#c9ccd1" /><rect x="18" y="37" width="48" height="1.8" rx=".9" fill="#c9ccd1" />
+                                                    <rect x="18" y="44.5" width="14" height="1.3" rx=".65" fill="#9aa0a6" /><rect x="18" y="48" width="30" height="2.6" rx="1" fill="#202124" />
+                                                    <path d="M18 55.5h60" stroke="#e3e5e8" stroke-width=".8" /><rect x="18" y="59" width="14" height="1.3" rx=".65" fill="#9aa0a6" />
+                                                </svg>
+                                                <svg v-else-if="tmpl === 'bold'" viewBox="0 0 96 64" class="block w-full h-full" aria-hidden="true">
+                                                    <rect width="96" height="64" fill="#1a1a2e" /><rect x="20" y="8" width="56" height="17" :fill="presetAccent(tmpl)" /><rect x="29" y="14.4" width="38" height="4.6" rx="1" fill="#fff" />
+                                                    <rect x="26" y="30" width="44" height="1.8" rx=".9" fill="#8c8fa3" /><rect x="26" y="34" width="34" height="1.8" rx=".9" fill="#8c8fa3" />
+                                                    <rect x="26" y="40" width="44" height="20" rx="4" fill="#2a2a3f" stroke="#3a3a52" /><rect x="29" y="43" width="14" height="14" rx="2.5" fill="#6d7087" />
+                                                    <rect x="46" y="44" width="12" height="1.5" rx=".75" :fill="presetAccent(tmpl)" /><rect x="46" y="47.5" width="20" height="2.6" rx="1" fill="#fff" />
+                                                    <rect x="46" y="52.5" width="12" height="4.5" rx="1.6" :fill="presetAccent(tmpl)" />
+                                                </svg>
+                                                <svg v-else viewBox="0 0 96 64" class="block w-full h-full" aria-hidden="true">
+                                                    <rect width="96" height="64" fill="#f5f5f5" /><rect x="24" y="6" width="48" height="1.8" :fill="presetAccent(tmpl)" />
+                                                    <rect x="24" y="11" width="4" height="4" rx="1" fill="#9aa0a6" /><rect x="30" y="12.1" width="13" height="1.7" rx=".85" fill="#3c4043" />
+                                                    <rect x="24" y="19" width="26" height="2.8" rx="1" fill="#202124" /><rect x="24" y="24.5" width="48" height="1.5" rx=".75" fill="#bfc3c8" />
+                                                    <g v-for="y in [30, 39, 48, 57]" :key="y">
+                                                        <rect x="24" :y="y" width="48" height="7.4" rx="1.6" fill="#fff" stroke="#e1e3e6" stroke-width=".7" /><rect x="26.5" :y="y + 2.2" width="4" height="3" rx=".6" :fill="presetAccent(tmpl)" />
+                                                        <rect x="33.5" :y="y + 1.9" width="20" height="1.6" rx=".8" fill="#202124" /><rect x="33.5" :y="y + 4.4" width="13" height="1.2" rx=".6" fill="#9aa0a6" />
+                                                    </g>
+                                                </svg>
                                             </div>
                                             <span class="text-xs font-medium text-gray-700 dark:text-gray-300 capitalize">{{ tmpl }}</span>
                                         </div>
@@ -633,6 +650,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.font_family }}</label>
                                             <select v-model="styleSettings.fontFamily" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm">
+                                                <option value="System">{{ t.system }}</option>
                                                 <option value="Arial">Arial</option>
                                                 <option value="Georgia">Georgia</option>
                                                 <option value="Verdana">Verdana</option>
@@ -724,6 +742,7 @@
             <input type="hidden" name="style_settings[buttonRadius]" :value="styleSettings.buttonRadius" />
             <input type="hidden" name="style_settings[eventLayout]" :value="styleSettings.eventLayout" />
             <input type="hidden" name="style_settings[footerText]" :value="styleSettings.footerText" />
+            <input type="hidden" name="style_settings[previewText]" :value="styleSettings.previewText" />
             <input type="hidden" v-for="segmentId in selectedSegmentIds" :key="'seg_' + segmentId" name="segment_ids[]" :value="segmentId" />
 
             <!-- Action Buttons -->
@@ -758,6 +777,12 @@
                 <div class="ap-card sm:rounded-lg overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ t.preview }}</h3>
+                        <!-- Most mail is opened on a phone: the same preview at 390px. -->
+                        <div class="inline-flex rounded-lg p-0.5 bg-gray-100 dark:bg-gray-700" role="group" :aria-label="t.preview">
+                            <button v-for="width in ['desktop', 'mobile']" :key="width" type="button" @click="previewWidth = width" :aria-pressed="previewWidth === width"
+                                class="px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]"
+                                :class="previewWidth === width ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">{{ t[width] }}</button>
+                        </div>
                     </div>
                     <!--
                         Deliberately a banner and not a reload: the builder holds an unsaved draft,
@@ -772,7 +797,7 @@
                             <span>{{ t.preview_session_expired }}</span>
                         </p>
                     </div>
-                    <div class="relative">
+                    <div class="relative" :class="previewWidth === 'mobile' ? 'bg-gray-100 dark:bg-gray-900' : ''">
                         <div v-show="previewLoading" class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
                             <div class="flex flex-col items-center gap-2">
                                 <svg class="animate-spin h-6 w-6 text-[var(--brand-blue)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -781,8 +806,8 @@
                                 </svg>
                             </div>
                         </div>
-                        <iframe ref="livePreviewFrame" class="w-full border-0 bg-white"
-                                style="height: calc(100vh - 14rem); min-height: 400px;"
+                        <iframe ref="livePreviewFrame" class="block mx-auto max-w-full border-0 bg-white"
+                                :style="{ height: 'calc(100vh - 14rem)', minHeight: '400px', width: previewWidth === 'mobile' ? '390px' : '100%' }"
                                 srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
                         </iframe>
                     </div>
@@ -912,6 +937,13 @@ const showSchedule = ref(false);
 const showSaveAsTemplate = ref(false);
 const previewLoading = ref(false);
 const previewNeedsReauth = ref(false);
+// 'desktop' or 'mobile': the width the live preview is shown at.
+const previewWidth = ref('desktop');
+
+// The accent a preset arrives with, for its thumbnail in the picker.
+function presetAccent(tmpl) {
+    return (props.templateDefaults[tmpl] || {}).accentColor || '#4E81FA';
+}
 
 const activeSection = ref('content');
 const imageUploading = ref({});
@@ -1258,11 +1290,15 @@ function toggleSegment(segmentId) {
 
 function onTemplateChange(tmpl) {
     if (props.templateDefaults[tmpl]) {
+        // A preset changes the look. What the owner wrote, and the layout chosen on the Events
+        // block, stay.
         const preservedLayout = styleSettings.eventLayout;
         const preservedFooterText = styleSettings.footerText;
+        const preservedPreviewText = styleSettings.previewText;
         Object.assign(styleSettings, props.templateDefaults[tmpl]);
         styleSettings.eventLayout = preservedLayout;
         styleSettings.footerText = preservedFooterText;
+        styleSettings.previewText = preservedPreviewText;
     }
 }
 

@@ -60,7 +60,7 @@ class AdminNewsletterController extends Controller
             ->first();
 
         $defaultTemplate = $lastNewsletter ? $lastNewsletter->template : 'modern';
-        $defaultStyleSettings = $lastNewsletter ? $lastNewsletter->style_settings : Newsletter::defaultStyleSettings();
+        $defaultStyleSettings = $lastNewsletter ? Newsletter::designSettings($lastNewsletter->style_settings) : Newsletter::templateDefaults('modern');
         $defaultSegmentIds = $lastNewsletter ? ($lastNewsletter->segment_ids ?? []) : [];
 
         // Load saved templates for the template picker
@@ -79,7 +79,7 @@ class AdminNewsletterController extends Controller
                 if ($fromTemplate) {
                     $defaultBlocks = ! empty($fromTemplate->blocks) ? $fromTemplate->blocks : $defaultBlocks;
                     $defaultTemplate = $fromTemplate->template ?? 'modern';
-                    $defaultStyleSettings = $fromTemplate->style_settings ?? $defaultStyleSettings;
+                    $defaultStyleSettings = Newsletter::designSettings($fromTemplate->style_settings) ?? $defaultStyleSettings;
                 }
             }
         }
@@ -695,7 +695,7 @@ class AdminNewsletterController extends Controller
             'name' => $validated['template_name'],
             'blocks' => $newsletter->blocks,
             'template' => $newsletter->template,
-            'style_settings' => $newsletter->style_settings,
+            'style_settings' => Newsletter::designSettings($newsletter->style_settings),
         ]);
 
         return back()->with('status', __('messages.template_saved'));
