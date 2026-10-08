@@ -974,6 +974,15 @@ class MicrosoftCalendarService
             return false;
         }
 
+        // An event a feed made is owned by its feed. This method would rewrite its name,
+        // description, whole-hour duration and venue from the calendar's copy of what we pushed,
+        // and the feed tells a field the owner edited from one it still writes by comparing with
+        // what it last wrote: after one echo every field would read as edited, and the event
+        // would stop following its source for good. Event::isFromFeed().
+        if ($event->isFromFeed()) {
+            return false;
+        }
+
         $event->name = ($item['subject'] ?? '') ?: __('messages.untitled_event');
 
         if (! empty($item['body']['content'])) {

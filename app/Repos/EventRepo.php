@@ -448,6 +448,67 @@ class EventRepo
     }
 
     /**
+     * Tell the outside that a PUBLISHED event was saved: the calendars its schedule is connected
+     * to, and whoever listens for event webhooks.
+     *
+     * The end of every save, and of a feed's update of an event it made (FeedEventWriter), which
+     * writes the model directly because a save reads everything a request does not carry as
+     * emptied.
+     *
+     * @param  bool  $isNewOrJustPublished  The outside has not seen this event before.
+     */
+    public function announceSave(Event $event, ?Role $currentRole, bool $isNewOrJustPublished): void
+    {
+        // A cancelled event has been taken off connected calendars (EventLifecycleService::
+        // cancel()), and the calendar jobs create the entry when they find no mapping for it:
+        // saving a cancelled event used to put it straight back. It returns when it is restored.
+        if (! $event->is_cancelled) {
+            // Sync to Google Calendar for the current role
+            if ($currentRole && $currentRole->syncsToGoogle()) {
+                if ($isNewOrJustPublished) {
+                    $event->syncToGoogleCalendar('create');
+                } else {
+                    $event->syncToGoogleCalendar('update');
+                }
+            } elseif ($currentRole) {
+                // Sync for members even when owner sync is not enabled
+                $memberAction = $isNewOrJustPublished ? 'create' : 'update';
+                foreach ($currentRole->getMembersWithCalendarSync() as $member) {
+                    if ($member->google_token) {
+                        SyncEventToGoogleCalendar::dispatchSync(
+                            $event, $currentRole, $memberAction, $member, $member->pivot->google_calendar_id
+                        );
+                    }
+                }
+            }
+
+            // Sync to Outlook / Microsoft calendar for the current role
+            if ($currentRole && $currentRole->syncsToMicrosoft()) {
+                if ($isNewOrJustPublished) {
+                    $event->syncToMicrosoftCalendar('create');
+                } else {
+                    $event->syncToMicrosoftCalendar('update');
+                }
+            }
+
+            // Sync to CalDAV for the current role
+            if ($currentRole && $currentRole->syncsToCalDAV()) {
+                if ($isNewOrJustPublished) {
+                    $event->syncToCalDAV('create');
+                } else {
+                    $event->syncToCalDAV('update');
+                }
+            }
+        }
+
+        // Dispatch webhook
+        WebhookService::dispatch(
+            $isNewOrJustPublished ? 'event.created' : 'event.updated',
+            $event
+        );
+    }
+
+    /**
      * A venue schedule for a place no schedule stands for yet: unclaimed, with the look every
      * new venue gets, in the country and language of the schedule it is made for.
      *
@@ -2487,53 +2548,7 @@ class EventRepo
         if (! $event->is_draft) {
             $isNewOrJustPublished = $event->wasRecentlyCreated || $wasDraftBeforeSave;
 
-            // A cancelled event has been taken off connected calendars (EventLifecycleService::
-            // cancel()), and the calendar jobs create the entry when they find no mapping for it:
-            // saving a cancelled event used to put it straight back. It returns when it is restored.
-            if (! $event->is_cancelled) {
-                // Sync to Google Calendar for the current role
-                if ($currentRole && $currentRole->syncsToGoogle()) {
-                    if ($isNewOrJustPublished) {
-                        $event->syncToGoogleCalendar('create');
-                    } else {
-                        $event->syncToGoogleCalendar('update');
-                    }
-                } elseif ($currentRole) {
-                    // Sync for members even when owner sync is not enabled
-                    $memberAction = $isNewOrJustPublished ? 'create' : 'update';
-                    foreach ($currentRole->getMembersWithCalendarSync() as $member) {
-                        if ($member->google_token) {
-                            SyncEventToGoogleCalendar::dispatchSync(
-                                $event, $currentRole, $memberAction, $member, $member->pivot->google_calendar_id
-                            );
-                        }
-                    }
-                }
-
-                // Sync to Outlook / Microsoft calendar for the current role
-                if ($currentRole && $currentRole->syncsToMicrosoft()) {
-                    if ($isNewOrJustPublished) {
-                        $event->syncToMicrosoftCalendar('create');
-                    } else {
-                        $event->syncToMicrosoftCalendar('update');
-                    }
-                }
-
-                // Sync to CalDAV for the current role
-                if ($currentRole && $currentRole->syncsToCalDAV()) {
-                    if ($isNewOrJustPublished) {
-                        $event->syncToCalDAV('create');
-                    } else {
-                        $event->syncToCalDAV('update');
-                    }
-                }
-            }
-
-            // Dispatch webhook
-            WebhookService::dispatch(
-                $isNewOrJustPublished ? 'event.created' : 'event.updated',
-                $event
-            );
+            $this->announceSave($event, $currentRole, $isNewOrJustPublished);
         } elseif ($wasJustUnpublished) {
             // Remove from external calendars when un-publishing
             if ($currentRole && $currentRole->syncsToGoogle()) {

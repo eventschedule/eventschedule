@@ -312,6 +312,16 @@ class Event extends Model
      * hour later, and a "no" kept for its lifetime left every event it synced unlabelled long
      * after the columns were there. Until the answer is yes it is one small query per ask.
      */
+    /**
+     * Whether a feed made this event and may still be keeping it up to date. Such an event is
+     * written by its feed and by its owner, and by nothing else: an inbound calendar sync that
+     * rewrote it would look to the feed exactly like the owner editing every field.
+     */
+    public function isFromFeed(): bool
+    {
+        return $this->import_source === self::IMPORT_FEED;
+    }
+
     public static function importColumnsReady(): bool
     {
         return self::$importColumnsReady = self::$importColumnsReady
