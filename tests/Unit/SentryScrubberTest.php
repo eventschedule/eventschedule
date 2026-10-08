@@ -185,10 +185,14 @@ class SentryScrubberTest extends TestCase
         $this->assertStringContainsString('x=1', $message, 'the rest of the line stays readable');
     }
 
-    /** An http_client_requests breadcrumb carries the URL in metadata, not in the message. */
+    /**
+     * An http_client_requests breadcrumb carries the URL in metadata, not in the message. On our
+     * own host the path stays, with the secret out of it: our route paths are what make a report
+     * readable.
+     */
     public function test_it_scrubs_a_booking_secret_from_breadcrumb_metadata(): void
     {
-        $url = 'https://example.com/appointment/view/abc123/'.str_repeat('a', 32);
+        $url = rtrim(config('app.url'), '/').'/appointment/view/abc123/'.str_repeat('a', 32);
 
         $event = SentryEvent::createEvent();
         $event->setBreadcrumb([
@@ -200,6 +204,78 @@ class SentryScrubberTest extends TestCase
 
         $this->assertStringNotContainsString(str_repeat('a', 32), $scrubbed);
         $this->assertStringContainsString('/appointment/view/abc123/[secret]', $scrubbed);
+    }
+
+    private function outbound(string $url, string $query = '', string $fragment = ''): Breadcrumb
+    {
+        // The three keys Sentry's HTTP client integration records for a request.
+        return (new Breadcrumb(Breadcrumb::LEVEL_INFO, Breadcrumb::TYPE_HTTP, 'http'))
+            ->withMetadata('url', $url)
+            ->withMetadata('http.query', $query)
+            ->withMetadata('http.fragment', $fragment)
+            ->withMetadata('http.request.method', 'GET');
+    }
+
+    private function scrubbedCrumb(Breadcrumb $crumb): array
+    {
+        $event = SentryEvent::createEvent();
+        $event->setBreadcrumb([$crumb]);
+
+        return SentryScrubber::beforeSend($event)->getBreadcrumbs()[0]->getMetadata();
+    }
+
+    /**
+     * An address a schedule's owner gave us to read is a credential in the path, in a shape no
+     * pattern can know. A request to somebody else's server keeps the host and loses the rest.
+     */
+    public function test_a_request_to_somebody_elses_server_keeps_its_host_and_nothing_else(): void
+    {
+        foreach ([
+            'https://calendar.google.com/calendar/ical/someone%40gmail.com/private-0123456789abcdef/basic.ics' => 'https://calendar.google.com/[path]',
+            'https://app.jolioo.com/rss/Zx81TokenThatOpensTheFeed' => 'https://app.jolioo.com/[path]',
+            'http://feeds.example.org:8443/a/b' => 'http://feeds.example.org:8443/[path]',
+        ] as $url => $expected) {
+            $metadata = $this->scrubbedCrumb($this->outbound($url, 'key=Zx81&page=2', 'frag'));
+
+            $this->assertSame($expected, $metadata['url']);
+            $this->assertSame('[query]', $metadata['http.query']);
+            $this->assertSame('[fragment]', $metadata['http.fragment']);
+            $this->assertSame('GET', $metadata['http.request.method'], 'what is not an address stays');
+        }
+
+        // Nothing to hide in an address that is only a host, and nothing invented for it.
+        $bare = $this->scrubbedCrumb($this->outbound('https://example.org/'));
+        $this->assertSame('https://example.org/', $bare['url']);
+        $this->assertSame('', $bare['http.query']);
+    }
+
+    /** Our own host, and a schedule's subdomain of it. A lookalike that only ends in our letters is not ours. */
+    public function test_a_request_to_our_own_host_keeps_its_path(): void
+    {
+        $host = parse_url(config('app.url'), PHP_URL_HOST);
+
+        foreach (['https://'.$host.'/api/internal/growth', 'https://venue.'.$host.'/events/jazz-night'] as $url) {
+            $metadata = $this->scrubbedCrumb($this->outbound($url, 'page=2'));
+
+            $this->assertSame($url, $metadata['url']);
+            $this->assertSame('page=2', $metadata['http.query']);
+        }
+
+        $this->assertSame('https://not'.$host.'/[path]', $this->scrubbedCrumb($this->outbound('https://not'.$host.'/rss/token'))['url']);
+    }
+
+    /** Only a request's own breadcrumb is cut down: a log line is text, and is scrubbed as text. */
+    public function test_a_breadcrumb_that_is_not_a_request_is_left_to_the_patterns(): void
+    {
+        $crumb = (new Breadcrumb(Breadcrumb::LEVEL_INFO, Breadcrumb::TYPE_DEFAULT, 'log', 'Read https://example.org/a/b?secret=s3cr3t-live'))
+            ->withMetadata('url', 'https://example.org/a/b');
+
+        $event = SentryEvent::createEvent();
+        $event->setBreadcrumb([$crumb]);
+        $scrubbed = SentryScrubber::beforeSend($event)->getBreadcrumbs()[0];
+
+        $this->assertSame('https://example.org/a/b', $scrubbed->getMetadata()['url']);
+        $this->assertSame('Read https://example.org/a/b?secret=[secret]', $scrubbed->getMessage());
     }
 
     /** A breadcrumb with no message at all must not blow up: withMessage() is typed string. */

@@ -154,6 +154,8 @@ class SentryScrubber
                 $crumb = $crumb->withMessage(self::scrub($message));
             }
 
+            $crumb = self::withoutForeignPath($crumb);
+
             // Metadata, not just the message: an http_client_requests breadcrumb carries the URL
             // there, which is where an appointment secret actually travels.
             foreach ($crumb->getMetadata() as $key => $value) {
@@ -172,6 +174,61 @@ class SentryScrubber
         $event->setTags(self::scrubDeep($event->getTags()));
 
         return $event;
+    }
+
+    /**
+     * An outbound request to somebody else's server keeps its host and loses the rest.
+     *
+     * Every request the app makes is a breadcrumb (`http_client_requests`), and an address a
+     * schedule's owner gave us to read is a credential in the PATH, where no pattern can know it:
+     * a calendar's private link (`/calendar/ical/<address>/private-<token>/basic.ics`), a
+     * provider's feed (`/rss/<token>`), and whatever it redirects to. Any error in the same
+     * process would ship them. The host says which service was asked, which is what a report
+     * needs; the stack trace says which call.
+     *
+     * Our own host and its subdomains are left to the patterns above: our route paths are what
+     * make a report readable, and the secrets in them are ones this class knows the shape of.
+     */
+    private static function withoutForeignPath(Breadcrumb $crumb): Breadcrumb
+    {
+        $metadata = $crumb->getMetadata();
+        $url = $metadata['url'] ?? null;
+
+        if ($crumb->getType() !== Breadcrumb::TYPE_HTTP || ! is_string($url)) {
+            return $crumb;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (! is_string($host) || $host === '' || self::isOurHost($host)) {
+            return $crumb;
+        }
+
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $port = parse_url($url, PHP_URL_PORT);
+        $crumb = $crumb->withMetadata('url', (parse_url($url, PHP_URL_SCHEME) ?: 'https').'://'.$host.($port ? ':'.$port : '').($path !== '' && $path !== '/' ? '/[path]' : $path));
+
+        foreach (['http.query' => '[query]', 'http.fragment' => '[fragment]'] as $key => $placeholder) {
+            if (is_string($metadata[$key] ?? null) && $metadata[$key] !== '') {
+                $crumb = $crumb->withMetadata($key, $placeholder);
+            }
+        }
+
+        return $crumb;
+    }
+
+    private static function isOurHost(string $host): bool
+    {
+        $ours = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        if (! is_string($ours) || $ours === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+        $ours = strtolower($ours);
+
+        return $host === $ours || str_ends_with($host, '.'.$ours);
     }
 
     /**
