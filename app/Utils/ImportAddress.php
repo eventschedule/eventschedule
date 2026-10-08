@@ -106,6 +106,42 @@ class ImportAddress
         return [$url, null];
     }
 
+    /**
+     * A link as a document wrote it, made whole against the address the document was served
+     * from. Web links only: anything with another scheme (mailto:, javascript:, data:) is not a
+     * link this app follows or shows, and comes back empty.
+     */
+    public static function absolute(string $link, string $base): string
+    {
+        $link = trim($link);
+        if ($link === '') {
+            return '';
+        }
+
+        if (preg_match('#^https?://#i', $link)) {
+            return $link;
+        }
+
+        $base = parse_url($base);
+        if (empty($base['scheme']) || empty($base['host']) || preg_match('#^[a-z][a-z0-9+.-]*:#i', $link)) {
+            return '';
+        }
+
+        $origin = $base['scheme'].'://'.$base['host'].(isset($base['port']) ? ':'.$base['port'] : '');
+
+        if (str_starts_with($link, '//')) {
+            return $base['scheme'].':'.$link;
+        }
+
+        if (str_starts_with($link, '/')) {
+            return $origin.$link;
+        }
+
+        $directory = preg_replace('#/[^/]*$#', '/', $base['path'] ?? '/');
+
+        return $origin.$directory.$link;
+    }
+
     /** A calendar by what it is, not by what the address ends in. */
     public static function isCalendar(string $contentType, string $body): bool
     {
