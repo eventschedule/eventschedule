@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">CalDAV Calendar Sync for iCloud, Nextcloud & Fastmail</x-slot>
     <x-slot name="description">Two-way CalDAV sync with iCloud, Nextcloud, Fastmail or any conformant server. Free on every plan, HTTPS only, and selfhost friendly at both ends.</x-slot>
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>

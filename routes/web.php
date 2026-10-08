@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminBlockController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminFeedController;
@@ -1134,6 +1135,14 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::get('/admin/feeds', [AdminFeedController::class, 'index'])->name('admin.feeds');
         Route::post('/admin/feeds/{hash}/read', [AdminFeedController::class, 'read'])->name('admin.feeds.read');
         Route::post('/admin/feeds/{hash}/resume', [AdminFeedController::class, 'resume'])->name('admin.feeds.resume');
+        // Shutting an account out, and the list of what new accounts are refused for. On every
+        // install: a selfhost that opens registration has the same spam.
+        Route::get('/admin/blocked', [AdminBlockController::class, 'index'])->name('admin.blocked');
+        Route::post('/admin/blocked/list', [AdminBlockController::class, 'storeEntry'])->name('admin.blocked.entry.store');
+        Route::post('/admin/blocked/list/{hash}/remove', [AdminBlockController::class, 'removeEntry'])->name('admin.blocked.entry.remove');
+        Route::get('/admin/blocked/account/{hash}', [AdminBlockController::class, 'account'])->name('admin.blocked.account');
+        Route::post('/admin/blocked/account/{hash}/block', [AdminBlockController::class, 'block'])->name('admin.blocked.block');
+        Route::post('/admin/blocked/account/{hash}/unblock', [AdminBlockController::class, 'unblock'])->name('admin.blocked.unblock');
         Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
         Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
         Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');

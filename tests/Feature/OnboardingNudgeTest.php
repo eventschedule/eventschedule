@@ -455,7 +455,7 @@ class OnboardingNudgeTest extends TestCase
     {
         $user = $this->stalled(2, ['pending_schedule_name' => 'blue-room']);
 
-        $this->assertSame('Finish setting up Blue Room', $this->mail($user, 1)->envelope()->subject);
+        $this->assertSame('Finish setting up your "Blue Room" schedule', $this->mail($user, 1)->envelope()->subject);
         // Only the first: the later stages are about the account, not a page they are building.
         $this->assertSame(__('messages.onboarding_nudge_subject_2'), $this->mail($user, 2)->envelope()->subject);
     }

@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'home_title' => 'Event Schedule - Calendario eventi, biglietteria e prenotazioni',
+    'home_description' => 'Pubblica i tuoi eventi su una pagina di calendario, accetta iscrizioni gratuite senza limiti e prenotazioni. Biglietteria su Pro, zero commissioni. Inizia gratis.',
+
     'pricing_title' => 'Prezzi di Event Schedule: piano gratuito, zero commissioni',
     'pricing_description' => 'Inizia gratis: eventi e iscrizioni illimitati. Pro aggiunge la vendita di biglietti a pagamento, Enterprise i posti numerati. Zero commissioni.',
 

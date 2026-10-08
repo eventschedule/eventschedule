@@ -450,7 +450,11 @@
                                 @endphp
                                 <tr>
                                     <td class="c-main c-wrap">
-                                        <span class="c-strong"><bdi>{{ $signup->name }}</bdi></span>
+                                        {{-- To the account's own page, where it can be looked at and blocked. --}}
+                                        <a href="{{ route('admin.blocked.account', ['hash' => \App\Utils\UrlUtils::encodeId($signup->id)]) }}" class="c-strong"><bdi>{{ $signup->name ?: $signup->email }}</bdi></a>
+                                        @if($signup->blocked_at)
+                                        <span class="event-chip">@lang('messages.blocked')</span>
+                                        @endif
                                         @if($signup->signup_intent)
                                         <span class="c-sub"><span class="event-chip" title="{{ __('messages.signup_intent') }}">{{ __('messages.signup_intent_' . $signup->signup_intent) }}</span></span>
                                         @endif

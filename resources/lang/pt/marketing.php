@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'home_title' => 'Event Schedule - Calendário de eventos, ingressos e agendamentos, grátis',
+    'home_description' => 'Publique seus eventos em uma página de calendário, receba inscrições gratuitas sem limite e agendamentos. Venda ingressos no Pro, sem taxa de plataforma.',
+
     'pricing_title' => 'Preços do Event Schedule: plano grátis, sem taxas de plataforma',
     'pricing_description' => 'Comece grátis: eventos e inscrições ilimitados. O Pro adiciona a venda de ingressos pagos e o Enterprise lugares marcados. Sem taxa de plataforma.',
 

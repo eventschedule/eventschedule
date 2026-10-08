@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     {{-- Both bounded in the model: the brand suffix only when it still fits in 60 characters,
          and the description cut at a word boundary to 160. See BlogPost::pageTitle(). --}}
     <x-slot name="title">{{ $post->pageTitle() }}</x-slot>
@@ -100,8 +100,8 @@
     <header class="relative overflow-hidden bg-[#0a0a0f]">
         <!-- Animated gradient orbs - larger and more prominent -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-violet-600/30 via-indigo-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] bg-gradient-to-r from-fuchsia-600/25 to-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-600/30 via-sky-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] bg-gradient-to-r from-sky-600/25 to-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
             <div class="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-gradient-to-l from-blue-600/20 to-cyan-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
         </div>
 
@@ -135,7 +135,7 @@
                     <div class="flex flex-wrap gap-2 justify-center mb-6">
                         @foreach($post->tags as $tag)
                             <a href="{{ route('blog.index', ['tag' => $tag]) }}"
-                               class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-violet-500/20 text-violet-300 hover:bg-violet-500/30 transition-colors border border-violet-500/30">
+                               class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition-colors border border-blue-500/30">
                                 #{{ $tag }}
                             </a>
                         @endforeach
@@ -151,7 +151,7 @@
                 <div class="flex items-center justify-center gap-4 text-sm text-gray-400 mb-8">
                     @if($post->published_at)
                         <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <time datetime="{{ $post->published_at->toISOString() }}">
@@ -161,7 +161,7 @@
                     @endif
                     <span class="text-gray-600">•</span>
                     <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-fuchsia-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>{{ $post->reading_time }}</span>
@@ -255,7 +255,7 @@
                     </a>
                 @else
                     <a href="{{ marketing_url('/') }}" class="block group">
-                        <div class="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-6 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-violet-500/25 group-hover:scale-[1.02]">
+                        <div class="bg-gradient-to-r from-blue-500 via-blue-500 to-sky-500 rounded-2xl p-6 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25 group-hover:scale-[1.02]">
                             <div class="text-center">
                                 <p class="text-white text-lg font-medium">
                                     {!! str_replace(':link', '<span class="font-bold underline">eventschedule.com</span>',  __('messages.try_event_schedule')) !!}
@@ -321,7 +321,7 @@
                                             </picture>
                                         </div>
                                     @endif
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mb-2">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
                                         <a href="{{ route('blog.show', $relatedPost->slug) }}">
                                             {{ $relatedPost->title }}
                                         </a>
@@ -343,7 +343,7 @@
                 <!-- Back to Blog -->
                 <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
                     <a href="{{ route('blog.index') }}"
-                       class="inline-flex items-center text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors">
+                       class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                         </svg>

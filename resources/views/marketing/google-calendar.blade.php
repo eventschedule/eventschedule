@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Free Two-Way Google Calendar Sync - Event Schedule</x-slot>
     <x-slot name="description">Two-way Google Calendar sync, free on every plan. Each schedule picks its own calendar, and edits made in Google come back within seconds.</x-slot>
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Custom CSS | Advanced Schedule Styling - Event Schedule</x-slot>
     <x-slot name="description">Add your own CSS to your schedule page, event pages and embeds. It loads right after the built-in styles, so a tie goes to you. 10,000 characters on Pro.</x-slot>
     <x-slot name="breadcrumbTitle">Custom CSS</x-slot>

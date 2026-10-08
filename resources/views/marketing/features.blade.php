@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('marketing.features_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.features_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Features</x-slot>
@@ -44,6 +44,28 @@
         }
         [dir="rtl"] .es-ch-rule { transform-origin: right; }
         html.es-anim [data-reveal]:not(.is-revealed) .es-ch-rule { transform: scaleX(0); }
+
+        /* The plan filter over the small print. */
+        .es-also-filter { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+        .es-also-filter[hidden] { display: none; }
+        .es-also-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-height: 2.25rem;
+            padding: 0.35rem 0.9rem;
+            border: 1px solid var(--hp-line-2);
+            border-radius: 9999px;
+            background-color: var(--hp-bg-2);
+            color: var(--hp-ink-2);
+            font-size: 0.875rem;
+            font-weight: 700;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .es-also-pill span { font-weight: 400; color: var(--hp-ink-3); font-variant-numeric: tabular-nums; }
+        .es-also-pill:hover { border-color: var(--hp-blue); }
+        .es-also-pill[aria-pressed="true"] { background-color: var(--hp-ink); border-color: var(--hp-ink); color: var(--hp-bg); }
+        .es-also-pill[aria-pressed="true"] span { color: var(--hp-bg); opacity: 0.75; }
     </style>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -57,46 +79,41 @@
     <!-- ============================================================ -->
     <!-- Hero                                                        -->
     <!-- ============================================================ -->
-    <section id="top" class="es-hero relative flex min-h-[calc(78svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="absolute inset-0 grid-pattern"></div>
-        </div>
+    <section id="top" class="es-hero hp-hero">
+        <div class="hp-hero-sky" aria-hidden="true"></div>
 
-        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
-                    <span class="relative flex h-2 w-2">
-                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                    </span>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event management software</span>
+        <div class="hp-hero-copy">
+            <h1 class="hp-h1">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 hp-eyebrow">
+                    <span class="hp-live" aria-hidden="true"><i></i></span>
+                    Event management software
                 </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Every feature, in</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-features">five chapters</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="hp-ink-grad">five chapters</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+            <p class="es-fade-up es-d-2 hp-sub">
                 Everything you need to fill seats, from calendars and ticketing to newsletters and analytics.
             </p>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
-                    Start for free
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="#sell" class="group inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+            <div class="es-fade-up es-d-3 hp-hero-actions">
+                <a href="#sell" class="hp-btn hp-btn-ghost is-down">
                     Explore features
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </a>
+                <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary">
+                    Start for free
+                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
             </div>
+
+            {{-- The five chapters by number: the way around a long page, in place of the dots that
+                 used to ride down its right edge. --}}
+            <nav class="es-fade-up es-d-4 hp-toc" aria-label="Chapters">
+                @foreach ([['sell', 'Sell'], ['schedule', 'Schedule'], ['promote', 'Promote'], ['engage', 'Engage'], ['own-it', 'Make it yours']] as $tocIndex => [$tocId, $tocLabel])
+                    <a href="#{{ $tocId }}"><b>{{ sprintf('%02d', $tocIndex + 1) }}</b>{{ $tocLabel }}</a>
+                @endforeach
+            </nav>
         </div>
     </section>
 
@@ -128,18 +145,15 @@
             ],
         ];
     @endphp
-    <section class="relative overflow-hidden border-y border-gray-200 bg-white py-10 dark:border-white/10 dark:bg-[#0a0a0f]" aria-label="Feature highlights">
+    <section class="hp-lineup" aria-label="Feature highlights">
         <h2 class="sr-only">Feature highlights</h2>
-        <div class="es-marquee-mask space-y-4">
+        <div class="es-marquee-mask">
             @foreach ($marqueeRows as $rowIndex => $row)
                 <div class="es-marquee" data-marquee="{{ $rowIndex === 0 ? '1' : '-1' }}">
                     <div class="es-marquee-track">
                         @for ($i = 0; $i < 2; $i++)
                             @foreach ($row as [$label, $dot, $href])
-                                <a href="{{ $href }}" @if ($i === 1) aria-hidden="true" tabindex="-1" @endif class="flex items-center gap-2.5 rounded-full border border-gray-200/70 bg-gray-100/80 px-6 py-3 text-lg font-semibold text-gray-800 transition-colors hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-200 dark:hover:text-blue-400">
-                                    <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
-                                    {{ $label }}
-                                </a>
+                                <a href="{{ $href }}" @if ($i === 1) aria-hidden="true" tabindex="-1" data-loop-copy @endif class="hp-act">{{ $label }}<i class="{{ $dot }}" aria-hidden="true"></i></a>
                             @endforeach
                         @endfor
                     </div>
@@ -167,42 +181,15 @@
         lede="A ticket with a price on it is a Pro feature, and the platform fee is zero whatever plan you are on. Buyers pay through Stripe, PayPal or four other methods, and Stripe and PayPal sales refund in full or in part. Free registration is unlimited on every tier, and so is QR check-in at the door."
         :chips="['Zero platform fees', 'QR check-ins', 'Stripe and PayPal', 'Check-in dashboard', 'Waitlist', 'Promo codes', 'Sales export', 'Free event RSVP', 'Reserved seating']"
         :lead="true"
-        frame="browser"
-        frame-url="yourvenue.eventschedule.com/tickets"
+        shot="tickets--sales"
+        shot-alt="The Sales page: each order with its event, amount and status, beside the Import, Check-in and Scan Ticket buttons"
+        frame-url="app.eventschedule.com/sales"
         ground="white">
         <x-slot name="badgeIcon">
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
             </svg>
         </x-slot>
-
-        <div class="space-y-3">
-            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
-                <div>
-                    <div class="font-medium text-gray-900 dark:text-white">Early Bird</div>
-                    <div class="text-xs text-emerald-700 dark:text-emerald-400">50 remaining</div>
-                </div>
-                <div class="text-xl font-bold text-gray-900 dark:text-white">$18</div>
-            </div>
-            <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
-                <div>
-                    <div class="font-medium text-gray-900 dark:text-white">General</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">142 sold</div>
-                </div>
-                <div class="text-xl font-bold text-gray-900 dark:text-white">$25</div>
-            </div>
-            <div class="flex items-center justify-between rounded-xl border border-sky-200 bg-sky-50 p-3 dark:border-sky-400/30 dark:bg-sky-500/15">
-                <div>
-                    <div class="font-medium text-gray-900 dark:text-white">VIP</div>
-                    <div class="text-xs text-sky-700 dark:text-sky-300">38 sold</div>
-                </div>
-                <div class="text-xl font-bold text-gray-900 dark:text-white">$75</div>
-            </div>
-            <div class="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-white/10">
-                <span class="text-xs text-gray-500 dark:text-gray-400">Platform fee</span>
-                <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{{ plan_price(0) }}</span>
-            </div>
-        </div>
     </x-marketing.feature-banner>
 
     <x-marketing.feature-banner
@@ -322,22 +309,20 @@
     </x-marketing.feature-banner>
 
     <!-- Punctuation band A: the fee claim, right after the selling chapter -->
-    <section class="relative overflow-hidden bg-white py-12 dark:bg-[#0a0a0f] lg:py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-3xl bg-gradient-to-r from-blue-600 to-sky-600 p-8 shadow-xl shadow-blue-500/20 md:p-12" data-reveal="panel">
-                <div class="grid grid-cols-1 gap-8 text-center md:grid-cols-3">
-                    <div>
-                        <div class="mb-2 text-3xl font-bold text-white md:text-4xl">100%</div>
-                        <div class="text-sm text-blue-100">Free and open source</div>
-                    </div>
-                    <div>
-                        <div class="mb-2 text-3xl font-bold text-white md:text-4xl">0%</div>
-                        <div class="text-sm text-blue-100">Platform fees on tickets</div>
-                    </div>
-                    <div>
-                        <div class="mb-2 text-3xl font-bold text-white md:text-4xl">12</div>
-                        <div class="text-sm text-blue-100">Languages supported</div>
-                    </div>
+    <section class="hp-sec is-tight">
+        <div class="hp-wrap is-narrow">
+            <div class="hp-figs" data-reveal-group="140">
+                <div class="hp-fig" data-reveal>
+                    <div class="hp-num">100%</div>
+                    <strong>Free and open source</strong>
+                </div>
+                <div class="hp-fig" data-reveal>
+                    <div class="hp-num">0%</div>
+                    <strong>Platform fees on tickets</strong>
+                </div>
+                <div class="hp-fig" data-reveal>
+                    <div class="hp-num">12</div>
+                    <strong>Languages supported</strong>
                 </div>
             </div>
         </div>
@@ -537,36 +522,40 @@
     </x-marketing.feature-banner>
 
     <!-- Punctuation band B: the integrations the page used to orphan entirely -->
-    <section class="relative overflow-hidden border-y border-gray-200 bg-white py-14 dark:border-white/10 dark:bg-[#0a0a0f] lg:py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="es-balance mb-2 text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>
-                Works with what you already use
-            </h2>
-            <p class="mx-auto mb-8 max-w-2xl text-gray-500 dark:text-gray-400" data-reveal>
-                Connect the calendar and payment tools your team already runs on.
-            </p>
-            <div class="flex flex-wrap items-center justify-center gap-3" data-reveal-group="60">
-                @php
-                    $integrations = [
-                        ['google', 'Google Calendar', marketing_url('/google-calendar')],
-                        ['outlook', 'Outlook', marketing_url('/outlook-calendar')],
-                        ['caldav', 'CalDAV', marketing_url('/caldav')],
-                        ['stripe', 'Stripe', marketing_url('/stripe')],
-                        ['invoiceninja', 'Invoice Ninja', marketing_url('/invoiceninja')],
-                    ];
-                @endphp
-                @foreach ($integrations as [$logo, $label, $href])
-                    <a href="{{ $href }}" data-reveal
-                       class="group inline-flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40">
-                        @include('marketing.partials.integration-logo', ['name' => $logo, 'class' => 'h-7 w-7'])
-                        <span class="text-sm font-semibold text-gray-800 group-hover:text-blue-600 dark:text-gray-200 dark:group-hover:text-blue-400">{{ $label }}</span>
-                    </a>
-                @endforeach
+    @php
+        $integrations = [
+            ['google', 'Google Calendar', marketing_url('/google-calendar')],
+            ['outlook', 'Outlook', marketing_url('/outlook-calendar')],
+            ['caldav', 'CalDAV', marketing_url('/caldav')],
+            ['stripe', 'Stripe', marketing_url('/stripe')],
+            ['invoiceninja', 'Invoice Ninja', marketing_url('/invoiceninja')],
+        ];
+    @endphp
+    <section class="hp-sec is-tight hp-alt">
+        <div class="hp-wrap">
+            <div class="hp-head is-center">
+                <span class="hp-kicker" data-reveal>Integrates with</span>
+                <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    Works with what you already use
+                </h2>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.14s;">
+                    Connect the calendar and payment tools your team already runs on.
+                </p>
             </div>
-            <p class="mt-8" data-reveal>
-                <a href="{{ route('marketing.integrations') }}" class="group inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition-all hover:gap-2 dark:text-blue-400">
+            <ul class="hp-plugs is-five" data-reveal-group="60" style="margin-top: clamp(2rem, 4vw, 3rem);">
+                @foreach ($integrations as [$logo, $label, $href])
+                    <li data-reveal>
+                        <a href="{{ $href }}" class="hp-plug">
+                            @include('marketing.partials.integration-logo', ['name' => $logo, 'class' => 'hp-plug-logo'])
+                            <span>{{ $label }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+            <p style="margin-top: 2rem; text-align: center;" data-reveal>
+                <a href="{{ route('marketing.integrations') }}" class="hp-more">
                     See all integrations
-                    <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
             </p>
         </div>
@@ -575,13 +564,17 @@
     <!-- ============================================================ -->
     <!-- Chapter 03: Promote                                         -->
     <!-- ============================================================ -->
+    {{-- The page's night. "Fill the room" is the chapter the homepage's Saturday belongs to, so
+         it is the one stretch that is dark in both modes: the chapter and its three banners
+         stand in one run, with the dusk above it and the dawn below it drawn once (hp-kit). --}}
+    <div class="hp-dark is-run">
     <x-marketing.feature-chapter
         number="03"
         id="promote"
         accent="cyan"
         title="Fill the room"
         lede="Publishing an event already tells the people who subscribed. Newsletters, shareable graphics and Meta ads cover everyone else, without opening a single ad manager."
-        ground="gray" />
+        ground="dark" />
 
     <x-marketing.feature-banner
         :href="route('marketing.newsletters')"
@@ -592,47 +585,15 @@
         :chips="['Automatic new-event digest', 'Drag-and-drop builder', 'A/B testing', 'Open and click tracking']"
         :lead="true"
         :flip="true"
-        frame="browser"
-        frame-url="eventschedule.com/admin/newsletters"
-        ground="gray">
+        shot="newsletters--create"
+        shot-alt="The newsletter builder: a list of content blocks on one side and a live preview of the email on the other"
+        frame-url="app.eventschedule.com/newsletters"
+        ground="dark">
         <x-slot name="badgeIcon">
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
         </x-slot>
-
-        <div class="mb-3">
-            <div class="mb-1 flex justify-between text-xs">
-                <span class="text-gray-600 dark:text-gray-400">Open rate</span>
-                <span class="font-medium text-sky-700 dark:text-sky-300">42%</span>
-            </div>
-            <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-                <div class="es-bar h-full rounded-full bg-sky-500" style="width: 42%; --bd: 0.1s;"></div>
-            </div>
-        </div>
-        <div class="mb-4">
-            <div class="mb-1 flex justify-between text-xs">
-                <span class="text-gray-600 dark:text-gray-400">Click rate</span>
-                <span class="font-medium text-cyan-700 dark:text-cyan-300">18%</span>
-            </div>
-            <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-                <div class="es-bar h-full rounded-full bg-cyan-500" style="width: 18%; --bd: 0.25s;"></div>
-            </div>
-        </div>
-        <div class="flex justify-between border-t border-gray-200 pt-3 text-center dark:border-white/10">
-            <div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white">800</div>
-                <div class="text-[10px] text-gray-500 dark:text-gray-400">Sent</div>
-            </div>
-            <div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white">336</div>
-                <div class="text-[10px] text-gray-500 dark:text-gray-400">Opens</div>
-            </div>
-            <div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white">144</div>
-                <div class="text-[10px] text-gray-500 dark:text-gray-400">Clicks</div>
-            </div>
-        </div>
     </x-marketing.feature-banner>
 
     <x-marketing.feature-banner
@@ -643,7 +604,7 @@
         lede="Auto-generate shareable images and formatted text for upcoming events. Ready for Instagram, WhatsApp, email, and more."
         :chips="['Auto-generated', 'Social-ready', 'Multiple formats', 'AI flyer generation', 'AI style generation']"
         frame="phone"
-        ground="white">
+        ground="dark">
         <x-slot name="badgeIcon">
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -684,7 +645,7 @@
         :chips="['Facebook & Instagram', 'Smart targeting', 'Reach, clicks and spend']"
         :flip="true"
         frame="phone"
-        ground="gray">
+        ground="dark">
         <x-slot name="badgeIcon">
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
@@ -711,6 +672,8 @@
             <div class="text-sm font-bold text-amber-700 dark:text-amber-300">2,400 - 6,800</div>
         </div>
     </x-marketing.feature-banner>
+    </div>
+
 
     <!-- ============================================================ -->
     <!-- Chapter 04: Engage                                          -->
@@ -851,28 +814,15 @@
         lede="Three tabs: web traffic, revenue and check-ins. Page views, referrers, UTM campaigns, devices and your best-earning events, with no third-party tracker involved."
         :chips="['Web, revenue, check-ins', 'UTM campaigns', 'No external services']"
         :flip="true"
-        frame="browser"
-        frame-url="eventschedule.com/admin/analytics"
+        shot="analytics--dashboard"
+        shot-alt="The analytics page: total views, views in the period, a chart of views over time and a breakdown by device"
+        frame-url="app.eventschedule.com/analytics"
         ground="gray">
         <x-slot name="badgeIcon">
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
         </x-slot>
-
-        <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">Views this week</div>
-        <div class="flex h-28 items-end justify-between gap-2">
-            <div class="es-bar w-full rounded-t bg-emerald-500/40" style="height: 40%; --bd: 0.05s;"></div>
-            <div class="es-bar w-full rounded-t bg-emerald-500/50" style="height: 55%; --bd: 0.12s;"></div>
-            <div class="es-bar w-full rounded-t bg-emerald-500/60" style="height: 45%; --bd: 0.19s;"></div>
-            <div class="es-bar w-full rounded-t bg-emerald-500/70" style="height: 70%; --bd: 0.26s;"></div>
-            <div class="es-bar w-full rounded-t bg-emerald-500/80" style="height: 60%; --bd: 0.33s;"></div>
-            <div class="es-bar w-full rounded-t bg-emerald-500/90" style="height: 85%; --bd: 0.4s;"></div>
-            <div class="es-bar w-full rounded-t bg-emerald-500" style="height: 100%; --bd: 0.47s;"></div>
-        </div>
-        <div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
-        </div>
     </x-marketing.feature-banner>
 
     <!-- ============================================================ -->
@@ -1160,33 +1110,12 @@
             ],
         ];
     @endphp
-    <section id="more" class="relative scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    And everything else you'd expect
-                </h2>
-            </div>
-            {{-- Two columns even at 390px: twelve stacked paragraph cards added
-                 ~1,500px of scroll for a secondary grid. On mobile these collapse
-                 to icon + title, which is all this section needs to do. --}}
-            <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4" data-reveal-group="55">
-                @foreach ($moreFeatures as $feature)
-                    <a href="{{ $feature['href'] }}" class="group flex flex-col rounded-2xl border border-gray-200 bg-white p-3.5 transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40 sm:p-5" data-reveal aria-label="{{ $feature['aria'] }}">
-                        <div class="mb-2.5 flex items-center gap-2.5 sm:gap-3">
-                            <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {{ $feature['chip'] }} sm:h-9 sm:w-9">
-                                <svg class="h-4 w-4 {{ $feature['text'] }} sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $feature['icon'] !!}</svg>
-                            </span>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white sm:text-base">{{ $feature['title'] }}</h3>
-                        </div>
-                        <p class="hidden flex-grow text-sm text-gray-600 dark:text-gray-400 sm:block">{{ $feature['desc'] }}</p>
-                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium text-blue-700 dark:text-blue-400 transition-all group-hover:gap-2 sm:inline-flex">
-                            Learn more
-                            <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
+    <section id="more" class="hp-sec">
+        <div class="hp-wrap">
+            {{-- The twelve that have a page and no banner above, set as the homepage sets its own
+                 "everything else": names like the foot of a festival bill, the sentence of the one
+                 being pointed at standing under them. On a phone, a plain list. --}}
+            <x-marketing.hp-bill :items="$moreFeatures" right="Twelve more">And everything else you'd expect</x-marketing.hp-bill>
         </div>
     </section>
 
@@ -1242,11 +1171,21 @@
                 <p class="mt-3 text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
                     Twenty-eight more things the app does, and the plan each one sits on.
                 </p>
+                {{-- "What do I get for free?" is the question this list is read for, so it can be
+                     asked of it. The buttons show the rows that carry that plan's badge; every row
+                     is in the page from the start, so a reader without JavaScript (and a crawler)
+                     gets all of them and no buttons, which the script below un-hides. --}}
+                <div id="also-filter" class="es-also-filter mt-6" role="group" aria-label="Show by plan" hidden>
+                    <button type="button" class="es-also-pill" data-also-tier="" aria-pressed="true">All <span>{{ count($alsoIncluded) }}</span></button>
+                    @foreach (['Free', 'Pro', 'Enterprise'] as $alsoTierName)
+                        <button type="button" class="es-also-pill" data-also-tier="{{ $alsoTierName }}" aria-pressed="false">{{ $alsoTierName }} <span>{{ count(array_filter($alsoIncluded, fn ($alsoCounted) => $alsoCounted[2] === $alsoTierName)) }}</span></button>
+                    @endforeach
+                </div>
             </div>
-            <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">
+            <dl id="also-list" class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">
                 @foreach ($alsoIncluded as $alsoRow)
                     @php [$alsoName, $alsoDesc, $alsoTier] = $alsoRow; $alsoPath = $alsoRow[3] ?? null; @endphp
-                    <div class="border-gray-200 ltr:border-l ltr:pl-4 rtl:border-r rtl:pr-4 dark:border-white/10" data-reveal>
+                    <div class="border-gray-200 ltr:border-l ltr:pl-4 rtl:border-r rtl:pr-4 dark:border-white/10" data-also-row="{{ $alsoTier }}" data-reveal>
                         <dt class="flex flex-wrap items-center gap-2">
                             @if ($alsoPath)
                                 <a href="{{ marketing_url($alsoPath) }}" class="inline-flex min-h-[24px] items-center text-sm font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoName }}</a>
@@ -1261,7 +1200,7 @@
             </dl>
             <p class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
                 Selfhosted installs resolve to the top tier, so every row above is included.
-                <a href="{{ marketing_url('/pricing') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">See the full plan comparison</a>.
+                <a href="{{ marketing_url('/pricing#compare') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">See the full plan comparison</a>.
             </p>
         </div>
     </section>
@@ -1310,98 +1249,42 @@
         ];
     @endphp
     <x-seo.faq-schema :items="$faqs" />
-    <section class="relative bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-balance mb-10 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                Common questions
-            </h2>
-            <div class="space-y-3" data-reveal-group="60">
-                @foreach ($faqs as $faq)
-                    <details name="faq" class="group rounded-2xl border border-gray-200 bg-white px-5 py-4 transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40" data-reveal>
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold text-gray-900 dark:text-white">
-                            {{ $faq['q'] }}
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="mt-3 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
+    <x-marketing.hp-faq :items="$faqs" class="hp-alt">Common <span class="hp-ink-grad">questions</span></x-marketing.hp-faq>
 
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
     <!-- Finale                                                      -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
+    <x-marketing.hp-finale lead="Create your free event schedule in seconds. No credit card required." placeholder="your-schedule" :foot="false">
+        Ready to <span class="hp-ink-grad">get started?</span>
+    </x-marketing.hp-finale>
 
-                <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Ready to <span class="text-gradient-features">get started?</span>
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Create your free event schedule in seconds. No credit card required.
-                    </p>
 
-                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
-                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
-                        </div>
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Start for free
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Plan filter over the small print (vanilla JS, no inline handlers) -->
+    <script {!! nonce_attr() !!}>
+        (function () {
+            var bar = document.getElementById('also-filter');
+            var list = document.getElementById('also-list');
+            if (!bar || !list) return;
+            var pills = bar.querySelectorAll('[data-also-tier]');
+            var rows = list.querySelectorAll('[data-also-row]');
+            bar.hidden = false;
+            bar.addEventListener('click', function (e) {
+                var pill = e.target.closest ? e.target.closest('[data-also-tier]') : null;
+                if (!pill) return;
+                var tier = pill.getAttribute('data-also-tier');
+                pills.forEach(function (p) { p.setAttribute('aria-pressed', p === pill ? 'true' : 'false'); });
+                rows.forEach(function (row) {
+                    row.hidden = tier !== '' && row.getAttribute('data-also-row') !== tier;
+                    // A row the scroll has not reached yet would otherwise appear empty and fade
+                    // in later, in the middle of a list the reader just asked for.
+                    row.classList.add('is-revealed');
+                });
+            });
+        })();
+    </script>
 
-    <!-- Section dot navigation (desktop) -->
-    @php
-        $dotSections = [
-            ['top', 'Top'],
-            ['sell', 'Sell'],
-            ['schedule', 'Schedule'],
-            ['promote', 'Promote'],
-            ['engage', 'Engage'],
-            ['own-it', 'Make it yours'],
-            ['more', 'Everything else'],
-            ['also', 'Small print'],
-            ['claim', 'Get started'],
-        ];
-    @endphp
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#15151c] dark:text-gray-300">{{ $sectionLabel }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
-
-    <!-- Local confetti (no CDN) + motion engines -->
-    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>
+    <!-- Motion engines (the finale brings its own confetti) -->
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

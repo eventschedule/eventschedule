@@ -28,7 +28,7 @@
     $hasRightRail = $hasToc && ! $tocInLeftRail;
 @endphp
 
-<x-marketing-layout :docs="true" :title="$pageTitle()" :description="$metaDescription()">
+<x-marketing-layout :docs="true" :hp="true" :title="$pageTitle()" :description="$metaDescription()">
     <x-slot name="breadcrumbTitle">{{ $page['title'] }}</x-slot>
 
     {{-- Only a page that declares one; every other doc page keeps the layout's self-canonical. --}}

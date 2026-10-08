@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Open Source Event Calendar - Licence and Selfhosting</x-slot>
     <x-slot name="description">Event Schedule is open source under the Attribution Assurance License. Selfhost the whole thing on your own server, or drive it through the REST API.</x-slot>
     <x-slot name="breadcrumbTitle">Open Source</x-slot>
@@ -358,6 +358,39 @@
             white-space: nowrap;
         }
         .dark .es-commit-path { color: #e7ecf5; }
+        /* On a phone the table kept its 34rem and ran off the side: a path was cut mid-word
+           and what the endpoint does was out of sight. Each endpoint becomes the method and
+           the path on one line, the path free to break, with what it does under the path.
+           The head stays for a screen reader (the table roles are said outright in the
+           markup, because a table laid out as blocks loses them). */
+        @media (max-width: 639.98px) {
+            .es-commit-scroll { overflow-x: visible; }
+            .es-commit-table { display: block; min-width: 0; }
+            .es-commit-table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+            }
+            .es-commit-table tbody { display: block; }
+            .es-commit-table tbody tr {
+                display: grid;
+                grid-template-columns: 3.9rem minmax(0, 1fr);
+                align-items: start;
+                gap: 0.2rem 0.6rem;
+                padding: 0.65rem 0;
+                border-top: 1px solid rgba(16, 22, 35, 0.09);
+            }
+            .dark .es-commit-table tbody tr { border-top-color: rgba(231, 236, 245, 0.1); }
+            .es-commit-table tbody tr:first-child { border-top: 0; padding-top: 0; }
+            .es-commit-table tbody th,
+            .es-commit-table tbody td { display: block; padding: 0; border-top: 0; }
+            .es-commit-table tbody td.hidden { display: none; }
+            .es-commit-table tbody td:last-child { grid-column: 2; }
+            .es-commit-table .es-commit-path { white-space: normal; overflow-wrap: anywhere; padding-top: 0.1rem; }
+        }
         .es-commit-verb {
             display: inline-block;
             min-width: 3.9rem;
@@ -514,6 +547,18 @@
         @media (prefers-reduced-motion: reduce) {
             .es-commit-caret { animation: none !important; opacity: 1; }
             .es-commit-log::before { transition: none !important; transform: none !important; }
+        }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
         }
     </style>
 
@@ -852,25 +897,26 @@
 
             <div class="es-commit-card p-5 sm:p-7" data-reveal="panel">
                 <div class="es-commit-scroll">
-                    <table class="es-commit-table">
+                    <table class="es-commit-table" role="table">
                         <caption class="sr-only">The authenticated REST API surface: method, path, resource and what each endpoint does</caption>
-                        <thead>
-                            <tr class="es-commit-tag">
-                                <th scope="col">Method</th>
-                                <th scope="col">Path</th>
-                                <th scope="col" class="hidden sm:table-cell">Resource</th>
-                                <th scope="col">What it does</th>
+                        <thead role="rowgroup">
+                            <tr class="es-commit-tag" role="row">
+                                <th scope="col" role="columnheader">Method</th>
+                                <th scope="col" role="columnheader">Path</th>
+                                <th scope="col" role="columnheader" class="hidden sm:table-cell">Resource</th>
+                                <th scope="col" role="columnheader">What it does</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody role="rowgroup">
                             @foreach ($endpoints as [$eVerb, $ePath, $eRes, $eWhat])
-                                <tr>
-                                    <td>
+                                <tr role="row">
+                                    <td role="cell">
                                         <span class="es-commit-verb @if ($eVerb === 'GET') es-commit-verb-read @endif">{{ $eVerb }}</span>
                                     </td>
-                                    <th scope="row" class="es-commit-path">{{ $ePath }}</th>
-                                    <td class="es-commit-muted hidden text-sm sm:table-cell">{{ $eRes }}</td>
-                                    <td class="es-commit-muted text-sm">{{ $eWhat }}</td>
+                                    {{-- A break is offered after each slash, so a long path folds between segments on a phone. --}}
+                                    <th scope="row" role="rowheader" class="es-commit-path">{!! str_replace('/', '/<wbr>', e($ePath)) !!}</th>
+                                    <td role="cell" class="es-commit-muted hidden text-sm sm:table-cell">{{ $eRes }}</td>
+                                    <td role="cell" class="es-commit-muted text-sm">{{ $eWhat }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -1228,77 +1274,10 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 9. Key features                                              -->
-    <!-- ============================================================ -->
-    <section class="border-t border-gray-200 py-20 dark:border-white/10">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-commit-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Integrations" description="Calendar sync, Stripe, Invoice Ninja, Eventbrite import and webhooks" :url="marketing_url('/features/integrations')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-2 2a4 4 0 01-5.656-5.656l1-1m6.656-6.656l1-1a4 4 0 015.656 5.656l-2 2a4 4 0 01-5.656 0" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="White label" description="Remove the Event Schedule credit from your guest pages" :url="marketing_url('/features/white-label')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Custom domain" description="Serve a schedule from a domain you own, with SSL" :url="marketing_url('/features/custom-domain')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed calendar" description="Put your schedule on the site you already have" :url="marketing_url('/features/embed-calendar')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-commit-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 10. Related pages                                            -->
-    <!-- ============================================================ -->
-    <section class="border-t border-gray-200 py-16 dark:border-white/10">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-commit-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
-                @foreach ([['/selfhost', 'Selfhosting'], ['/for-ai-agents', 'AI Agents'], ['/docs/developer/api', 'API Reference'], ['/pricing', 'Pricing']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" class="es-commit-card es-commit-hover group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-commit-hover-title es-commit-ink mb-3 text-sm font-semibold transition-colors">{{ $relName }}</span>
-                        <span class="es-commit-hover-arrow es-commit-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-            <div class="mt-8 text-center">
-                <a href="{{ marketing_url('/docs') }}" class="es-commit-link inline-flex items-center font-medium hover:underline">
-                    Browse the documentation
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 11. FAQ                                                      -->
+    <!-- 9. FAQ                                                       -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
@@ -1329,8 +1308,10 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 12. Finale: HEAD                                             -->
+    <!-- 10. Finale: HEAD                                             -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1350,14 +1331,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="es-commit-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get started free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1400,8 +1381,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

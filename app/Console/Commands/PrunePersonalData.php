@@ -19,7 +19,7 @@ class PrunePersonalData extends Command
 {
     protected $signature = 'app:prune-personal-data';
 
-    protected $description = 'Delete personal data past its retention period: failed jobs, expired reset tokens, unconfirmed sign-ups, old guest support chats, waitlists and interest lists of past events, the buyer details on deleted sales, the days an account was used, and stale cached video thumbnails';
+    protected $description = 'Delete personal data past its retention period: failed jobs, expired reset tokens, unconfirmed sign-ups, old guest support chats, waitlists and interest lists of past events, the buyer details on deleted sales, the days an account was used, stale cached video thumbnails, and the address an account signed up from';
 
     /** A failed job's payload is a serialized mail or task, addresses and all. */
     public const FAILED_JOB_DAYS = 30;
@@ -50,6 +50,14 @@ class PrunePersonalData extends Command
      * name, so they live exactly as long as it does (audit:prune).
      */
     public const SEEDED_ACTIVE_DAY_DAYS = 90;
+
+    /**
+     * The address an account was made from (users.signup_ip), which is what "also refuse sign-ups
+     * from the address this account used" reads at /admin/blocked. As long as the security log
+     * keeps an address. An account that is blocked keeps it while it is blocked: it is the record
+     * of why a list entry exists.
+     */
+    public const SIGNUP_IP_DAYS = 90;
 
     private const BATCH = 1000;
 
@@ -102,6 +110,7 @@ class PrunePersonalData extends Command
             'deleted sales' => $this->forgetDeletedBuyers(),
             'days an account was used' => ActiveDays::prune(self::ACTIVE_DAY_DAYS, self::SEEDED_ACTIVE_DAY_DAYS),
             'cached video thumbnails' => $this->pruneThumbnailCache(),
+            'sign-up addresses' => $this->forgetSignupAddresses(),
         ];
 
         foreach ($counts as $what => $count) {
@@ -109,6 +118,36 @@ class PrunePersonalData extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * In batches by id, as everything here is. Guarded: the scheduler can run this code while the
+     * web container is still adding the column.
+     */
+    private function forgetSignupAddresses(): int
+    {
+        $total = 0;
+
+        try {
+            do {
+                $ids = DB::table('users')
+                    ->whereNotNull('signup_ip')
+                    ->whereNull('blocked_at')
+                    ->where('created_at', '<', now()->subDays(self::SIGNUP_IP_DAYS))
+                    ->limit(self::BATCH)
+                    ->pluck('id');
+
+                if ($ids->isEmpty()) {
+                    break;
+                }
+
+                $total += DB::table('users')->whereIn('id', $ids->all())->update(['signup_ip' => null]);
+            } while ($ids->count() === self::BATCH);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+        }
+
+        return $total;
     }
 
     /**

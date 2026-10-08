@@ -98,6 +98,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $guarded = [
         'is_admin', // Prevent privilege escalation via mass assignment
+        'blocked_at', // Set only by AccountBlockService
+        'signup_ip', // Set only where an account is made (Blocklist::address())
         'two_factor_secret', // Set explicitly in TwoFactorController only
         'two_factor_recovery_codes', // Set explicitly in TwoFactorController only
     ];
@@ -110,6 +112,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'signup_ip',
         'stripe_account_id',
         'invoiceninja_api_key',
         'invoiceninja_api_url',
@@ -231,6 +234,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'google_token_expires_at' => 'datetime',
@@ -953,6 +957,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    /**
+     * An operator has shut this account out (/admin/blocked). Asked on every request by
+     * EnsureAccountNotBlocked and ApiAuthentication; written only by AccountBlockService.
+     */
+    public function isBlocked(): bool
+    {
+        return ! is_null($this->blocked_at);
+    }
+
+    public function accountBlock()
+    {
+        return $this->hasOne(AccountBlock::class);
     }
 
     public function hasVerifiedPhone(): bool

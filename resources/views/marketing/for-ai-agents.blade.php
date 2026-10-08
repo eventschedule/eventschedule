@@ -1113,13 +1113,13 @@ HTML,
                             <span class="ax-type ax-type-2">show is <span class="ax-em">on sale.</span><span class="ax-caret" aria-hidden="true"></span></span>
                         </h1>
                         <div class="ax-cta es-fade-up es-d-3">
-                            <a href="{{ route('marketing.docs.developer.api') }}" class="ax-btn">
-                                Read the API reference
-                                {!! $axArrow !!}
-                            </a>
                             <a href="#ledger" class="ax-btn ax-btn-alt">
                                 See all {{ $endpointCount }} endpoints
                                 <i aria-hidden="true">&darr;</i>
+                            </a>
+                            <a href="{{ route('marketing.docs.developer.api') }}" class="ax-btn">
+                                Read the API reference
+                                {!! $axArrow !!}
                             </a>
                         </div>
                     </div>
@@ -1730,6 +1730,7 @@ HTML,
                             $axFeatures = [
                                 ['Ticketing', 'Ticket types, QR check-in and zero platform fees', marketing_url('/features/ticketing')],
                                 ['Calendar Sync', 'Two-way Google, Outlook and CalDAV sync on every plan', marketing_url('/features/calendar-sync')],
+                                ['Integrations', 'Every port in and out, with the plan each one needs', marketing_url('/features/integrations')],
                                 ['Embed Calendar', 'Put the schedule on the site you already run', marketing_url('/features/embed-calendar')],
                                 ['Analytics', 'Page views, devices and traffic sources, free on every plan', marketing_url('/features/analytics')],
                             ];
@@ -1839,7 +1840,7 @@ HTML,
                                     <span class="ax-host">.eventschedule.com</span>
                                 </div>
                                 <a href="{{ app_url('/sign_up') }}" class="ax-btn">
-                                    Get started free
+                                    Start for free
                                     <kbd aria-hidden="true">&crarr;</kbd>
                                 </a>
                             </div>
@@ -1878,7 +1879,6 @@ HTML,
         </section>
 
         <div class="ax-keep">
-            <x-marketing.related-pages />
         </div>
     </div>
 

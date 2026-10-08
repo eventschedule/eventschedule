@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Newsletter;
 use App\Models\Role;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
@@ -102,6 +103,15 @@ class ScheduleDeletionService
             // The name is changing hands, so nobody's auto-accept list may keep pointing at it.
             // See Role::rewriteApprovedSubdomainReferences.
             Role::rewriteApprovedSubdomainReferences($original, null);
+
+            // A newsletter waiting for its hour goes back to a draft, as Cancel on its own page
+            // does it. NewsletterService::send() does not ask whether the schedule is still up,
+            // so a schedule taken down for spam (this, or a block at /admin/blocked) would still
+            // have mailed its list at the time its owner chose. restore() does not put it back:
+            // sending is the owner's to decide again.
+            Newsletter::where('role_id', $locked->id)
+                ->where('status', 'scheduled')
+                ->update(['status' => 'draft', 'scheduled_at' => null]);
 
             AuditService::log(
                 $auditAction,

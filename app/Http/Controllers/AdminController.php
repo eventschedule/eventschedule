@@ -330,7 +330,8 @@ class AdminController extends Controller
         $recentSignups = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->orderByDesc('created_at')
-            ->paginate(20, ['name', 'email', 'created_at', 'signup_intent', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer_url', 'landing_page'])
+            // id and blocked_at: each name leads to the account's page at /admin/blocked.
+            ->paginate(20, ['id', 'blocked_at', 'name', 'email', 'created_at', 'signup_intent', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer_url', 'landing_page'])
             ->withQueryString();
 
         // Onboarding conversion funnel (marketing visit -> first event)

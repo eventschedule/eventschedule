@@ -414,8 +414,10 @@ class HomeDashboardTest extends TestCase
         $this->assertSame(7, $page->viewData('dashboard')['period']);
         // The Customize dialog prints all three period labels and every card's name on every
         // organizer page, so "the page says 7 days" proves nothing. Once is the dialog; more
-        // than once is the tiles and cards saying it too.
-        $said = fn ($response, int $days) => substr_count($response->getContent(), e(__('messages.last_'.$days.'_days')));
+        // than once is the tiles and cards saying it too. Counted in the body alone: the head
+        // carries the portal's stylesheets, and a note in one of them that quotes a label (the
+        // page kit's, about a select's arrow) is not the page saying it.
+        $said = fn ($response, int $days) => substr_count((string) strstr($response->getContent(), '</head>'), e(__('messages.last_'.$days.'_days')));
         $this->assertGreaterThan(1, $said($page, 7), 'the tiles cover the saved period');
         $this->assertSame(1, $said($page, 14));
         $this->assertSame(1, $said($page, 30));

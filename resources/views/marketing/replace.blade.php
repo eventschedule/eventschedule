@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">All-in-One Event Platform to Replace Google Forms & Canva</x-slot>
     <x-slot name="description">Replace twelve tools with one event record: Google Forms, Mailchimp, Canva, Linktree, Sheets, Calendly and more. Free to publish, zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
@@ -682,7 +682,7 @@
                         <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                     </a>
                     <a href="{{ app_url('/sign_up') }}" class="es-belt-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                        Get Started Free
+                        Start for free
                         <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -1140,8 +1140,6 @@
         </div>
     </section>
 
-    @include('marketing.partials.pricing-nudge')
-
     <!-- ============================================================ -->
     <!-- 8. FAQ                                                      -->
     <!-- ============================================================ -->
@@ -1174,6 +1172,8 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
     <!-- 9. Finale: the buckle                                       -->
     <!-- ============================================================ -->
@@ -1196,14 +1196,14 @@
                     <div class="es-belt-buckle mx-auto max-w-2xl">
                         <div class="flex flex-col items-stretch justify-center gap-3 sm:flex-row">
                             <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                            <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                                 <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                    class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
+                                    class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0">
                                 <span class="es-belt-on-muted shrink-0 select-none font-mono text-sm sm:text-base">.eventschedule.com</span>
                             </div>
                             <a href="{{ app_url('/sign_up') }}" class="es-belt-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                                 <span class="relative z-10 flex items-center gap-2">
-                                    Get Started Free
+                                    Start for free
                                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
@@ -1234,8 +1234,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <!-- Local confetti (no CDN) + motion engines -->
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>

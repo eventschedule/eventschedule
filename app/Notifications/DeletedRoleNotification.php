@@ -41,16 +41,18 @@ class DeletedRoleNotification extends Notification
         $role = $this->role;
         $user = $this->user;
 
+        // Named as a schedule, never by its type: "The talent Jane Doe has been deleted" read as
+        // though a person had been.
         return (new MailMessage)
             ->replyTo(config('app.support_email'))
             ->subject(str_replace(
-                ':type',
-                __('messages.'.$role->type),
+                ':name',
+                $role->name,
                 __('messages.role_has_been_deleted'))
             )
             ->line(str_replace(
-                [':name', ':type', ':user'],
-                [$role->name, $role->type, $user->name],
+                [':name', ':user'],
+                [$role->name, $user->name],
                 __('messages.role_has_been_deleted_details'))
             )
             ->withSymfonyMessage(function ($message) {

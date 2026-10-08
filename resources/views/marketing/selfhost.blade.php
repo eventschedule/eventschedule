@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('marketing.selfhost_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.selfhost_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
@@ -81,12 +81,62 @@
         }
         /* Panels that are dark in both modes need the bright stops in light mode too */
         .es-finale-panel .text-gradient-selfhost,
+        .hp-finale .text-gradient-selfhost,
         .es-band-dark .text-gradient-selfhost {
             background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #14b8a6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        /* The house style (partials/hp-kit) gives this page its typeface, paper and navy. The page
+           keeps its own accent on top of it: the sky behind the headline, the main button and
+           the last panel are emerald here, where the other pages' are blue. */
+        #hp .hp-hero-sky {
+            background:
+                radial-gradient(62rem 34rem at 50% -9rem, rgba(16, 185, 129, 0.2), transparent 70%),
+                radial-gradient(36rem 26rem at 8% 18rem, rgba(20, 184, 166, 0.14), transparent 70%),
+                radial-gradient(36rem 26rem at 92% 22rem, rgba(5, 150, 105, 0.12), transparent 70%);
+        }
+        .dark #hp .hp-hero-sky {
+            background:
+                radial-gradient(62rem 34rem at 50% -9rem, rgba(16, 185, 129, 0.3), transparent 70%),
+                radial-gradient(36rem 26rem at 8% 18rem, rgba(20, 184, 166, 0.14), transparent 70%),
+                radial-gradient(36rem 26rem at 92% 22rem, rgba(5, 150, 105, 0.16), transparent 70%);
+        }
+        #hp .hp-btn-own {
+            color: #fff;
+            background: linear-gradient(100deg, #047857, #0f766e);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 14px 34px -12px rgba(5, 150, 105, 0.7), 0 0 0 1px rgba(4, 120, 87, 0.5);
+        }
+        #hp .hp-btn-own:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 22px 44px -14px rgba(5, 150, 105, 0.85), 0 0 0 1px rgba(4, 120, 87, 0.6), 0 0 44px -6px rgba(45, 212, 191, 0.5);
+        }
+        #hp .hp-finale.is-own {
+            background:
+                radial-gradient(52rem 30rem at 50% -6rem, rgba(5, 150, 105, 0.55), transparent 70%),
+                radial-gradient(30rem 20rem at 8% 100%, rgba(45, 212, 191, 0.18), transparent 70%),
+                radial-gradient(30rem 20rem at 92% 100%, rgba(16, 185, 129, 0.18), transparent 70%),
+                #050814;
+            box-shadow: 0 40px 100px -40px rgba(5, 150, 105, 0.6);
+        }
+        /* The page's other emerald buttons and its "You are here" tab: the same deeper pair, so
+           white type clears 4.5:1 on them (emerald-600 gave 3.8). */
+        #hp .from-emerald-600.to-teal-600,
+        #hp .bg-emerald-600 { background-image: linear-gradient(100deg, #047857, #0f766e); }
+        #hp .from-emerald-600.to-teal-500 { background-image: linear-gradient(100deg, #047857, #0f766e); }
+        #hp #data a.text-emerald-300 { display: inline-flex; align-items: center; min-height: 24px; }
+        @media (max-width: 479px) {
+            /* Two small drawings whose labels ran past their boxes on a phone. */
+            #hp .es-fed .font-mono { font-size: 8px; letter-spacing: -0.03em; }
+            #hp .es-fed .rounded-xl { width: 41%; padding-inline: 0.2rem; }
+            #hp .es-fed .flex-1 { min-width: 1.75rem !important; }
+            #hp .es-tier-tile { padding-inline: 0.35rem; }
+            #hp .es-tier-tile > div:first-child { font-size: 0.7rem; letter-spacing: -0.02em; }
+        }
+        #hp .hp-finale .hp-btn-onnight { color: #eef2ff; border: 1px solid rgba(255, 255, 255, 0.32); background: transparent; }
+        #hp .hp-finale .hp-btn-onnight:hover { background: rgba(255, 255, 255, 0.1); }
 
         /* Ownership rule: every "this part is yours to run" marker is amber */
         .es-own { color: #b45309; }
@@ -122,7 +172,8 @@
         }
         .dark .es-prompt { color: #34d399; }
         .es-band-dark .es-prompt,
-        .es-finale-panel .es-prompt { color: #34d399; }
+        .es-finale-panel .es-prompt,
+        .hp-finale .es-prompt { color: #34d399; }
         .es-prompt .es-prompt-path { opacity: 0.72; }
 
         /* Exit-code chip: the "this worked" affirmation */
@@ -325,44 +376,33 @@
     <!-- ============================================================ -->
     <!-- Hero                                                        -->
     <!-- ============================================================ -->
-    <section id="top" class="es-hero relative flex min-h-[calc(78svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(20, 184, 166, 0.26), rgba(20, 184, 166, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.14), rgba(5, 150, 105, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="absolute inset-0 grid-pattern"></div>
-        </div>
+    <section id="top" class="es-hero hp-hero">
+        <div class="hp-hero-sky" aria-hidden="true"></div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-8">
-                    <span class="relative flex h-2 w-2">
-                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                    </span>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Selfhosted event calendar</span>
+        <div class="hp-hero-copy">
+            <h1 class="hp-h1">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 hp-eyebrow">
+                    <span class="hp-live" aria-hidden="true"><i></i></span>
+                    Selfhosted event calendar
                 </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Selfhost the whole thing.</span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-selfhost">Nothing is held back</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+            <p class="es-fade-up es-d-2 hp-sub">
                 Run Event Schedule on your own infrastructure and every Pro and Enterprise feature is included, free. No platform fees, no seat counts, no data leaving your server.
             </p>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#install" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/40">
-                    Install it
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </a>
-                <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <div class="es-fade-up es-d-3 hp-hero-actions">
+                <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="hp-btn hp-btn-ghost is-still">
+                    <svg aria-hidden="true"  fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
                     View on GitHub
+                </a>
+                <a href="#install" class="hp-btn hp-btn-own is-down">
+                    Install it
+                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                 </a>
             </div>
         </div>
@@ -397,18 +437,15 @@
             ],
         ];
     @endphp
-    <section class="relative overflow-hidden border-y border-gray-200 bg-white py-10 dark:border-white/10 dark:bg-[#0a0a0f]" aria-label="Included features">
+    <section class="hp-lineup" aria-label="Included features">
         <h2 class="sr-only">Included features</h2>
-        <div class="es-marquee-mask space-y-4">
+        <div class="es-marquee-mask">
             @foreach ($marqueeRows as $rowIndex => $row)
                 <div class="es-marquee" data-marquee="{{ $rowIndex === 0 ? '1' : '-1' }}">
                     <div class="es-marquee-track">
                         @for ($i = 0; $i < 2; $i++)
                             @foreach ($row as [$label, $dot, $href])
-                                <a href="{{ $href }}" @if ($i === 1) aria-hidden="true" tabindex="-1" @endif class="flex items-center gap-2.5 rounded-full border border-gray-200/70 bg-gray-100/80 px-6 py-3 text-lg font-semibold text-gray-800 transition-colors hover:text-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-200 dark:hover:text-emerald-400">
-                                    <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
-                                    {{ $label }}
-                                </a>
+                                <a href="{{ $href }}" @if ($i === 1) aria-hidden="true" tabindex="-1" data-loop-copy @endif class="hp-act">{{ $label }}<i class="{{ $dot }}" aria-hidden="true"></i></a>
                             @endforeach
                         @endfor
                     </div>
@@ -1018,11 +1055,11 @@
                             <div class="relative z-10 w-[33%] rounded-xl border border-white/15 bg-white/5 px-2 py-3 text-center">
                                 <svg aria-hidden="true" class="mx-auto mb-1.5 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                                 <div class="text-xs font-semibold text-white">Listings</div>
-                                <div class="font-mono text-[10px] text-gray-500 dark:text-gray-400">eventschedule.com</div>
+                                <div class="font-mono text-[10px] text-gray-400">eventschedule.com</div>
                             </div>
                         </div>
 
-                        <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
+                        <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-gray-400">
                             <svg aria-hidden="true" class="h-3.5 w-3.5 rotate-180 text-emerald-400 rtl:rotate-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             every listing links back to your site
                         </div>
@@ -1050,7 +1087,7 @@
                     @foreach ($responsibilities as [$rTitle, $rBody])
                         <div data-reveal>
                             <div class="es-own mb-1.5 font-semibold">{{ $rTitle }}</div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $rBody }}</p>
+                            <p class="text-sm text-gray-400">{{ $rBody }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -1297,7 +1334,7 @@
                                 </div>
                                 <div class="grid grid-cols-3 gap-2">
                                     @foreach ([['Free', '142 users'], ['Pro', '89 users'], ['Enterprise', '16 users']] as [$tierName, $tierCount])
-                                        <div class="rounded-lg bg-emerald-500/15 p-3 text-center">
+                                        <div class="es-tier-tile rounded-lg bg-emerald-500/15 p-3 text-center">
                                             <div class="font-semibold text-gray-900 dark:text-white">{{ $tierName }}</div>
                                             <div class="text-xs text-emerald-700 dark:text-emerald-300">{{ $tierCount }}</div>
                                         </div>
@@ -1434,99 +1471,34 @@
         ];
     @endphp
     <x-seo.faq-schema :items="$selfhostFaqs" />
-    <section id="faq" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-selfhost">questions</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything people ask before they install.
-                </p>
-            </div>
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ($selfhostFaqs as $faq)
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-emerald-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-emerald-400/40">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-5 sm:p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="faq-answer px-5 pb-5 text-gray-600 dark:text-gray-400 sm:px-6 sm:pb-6">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
+    <x-marketing.hp-faq id="faq" :items="$selfhostFaqs" class="hp-alt" lead="Everything people ask before they install.">Frequently asked <span class="text-gradient-selfhost">questions</span></x-marketing.hp-faq>
+
+    <x-marketing.related-pages />
 
     <!-- ============================================================ -->
     <!-- Finale                                                      -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-emerald-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-
-                </div>
-
-                <div class="relative z-10">
-                    <div class="es-prompt mb-5" aria-hidden="true"><span class="es-prompt-path">~/eventschedule</span> $ ./start</div>
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your server is <span class="text-gradient-selfhost">waiting</span>
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Pick an install method and you can be running your own event platform this afternoon.
-                    </p>
-                    <div class="flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row">
-                        <a href="{{ route('marketing.docs.selfhost.installation') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/40">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Read the installation guide
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                        </a>
-                        <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center rounded-2xl border-2 border-white/30 px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white/10">
-                            Or try the hosted version
-                        </a>
-                    </div>
+    <section id="claim" class="hp-sec">
+        <div class="hp-wrap">
+            <div class="hp-finale is-own" data-reveal="panel">
+                <div class="es-prompt mb-5" aria-hidden="true"><span class="es-prompt-path">~/eventschedule</span> $ ./start</div>
+                <h2 class="hp-h2">
+                    Your server is <span class="text-gradient-selfhost">waiting</span>
+                </h2>
+                <p class="hp-lead">
+                    Pick an install method and you can be running your own event platform this afternoon.
+                </p>
+                <div class="hp-actions" style="justify-content: center;">
+                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-onnight">Or try the hosted version</a>
+                    <a href="{{ route('marketing.docs.selfhost.installation') }}" class="hp-btn hp-btn-own">
+                        Read the installation guide
+                        <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <x-marketing.related-pages />
-
-    <!-- Section dot navigation (desktop) -->
-    @php
-        $dotSections = [
-            ['top', 'Top'],
-            ['demo', 'See it running'],
-            ['install', 'Install it'],
-            ['included', 'What you get'],
-            ['data', 'What you own'],
-            ['compare', 'Hosted or selfhost'],
-            ['docs', 'Docs'],
-            ['faq', 'FAQ'],
-            ['claim', 'Get started'],
-        ];
-    @endphp
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#15151c] dark:text-gray-300">{{ $sectionLabel }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
 
     <!-- Install switcher + copy buttons (vanilla JS, no inline handlers) -->
     <script {!! nonce_attr() !!}>
@@ -1595,6 +1567,5 @@
     </script>
 
     <!-- Local confetti (no CDN) + motion engines -->
-    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

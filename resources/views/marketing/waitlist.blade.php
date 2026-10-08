@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Ticket Waitlist for Sold-Out Events | One Offer at a Time</x-slot>
     <x-slot name="description">When a date sells out, guests join a waitlist. A returned seat goes to one person at a time, with 24 hours to buy, so it is never promised to two people.</x-slot>
     <x-slot name="breadcrumbTitle">Waitlist</x-slot>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('accessibility.page_title') }}</x-slot>
     <x-slot name="description">{{ __('accessibility.meta_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('accessibility.breadcrumb') }}</x-slot>

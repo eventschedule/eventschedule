@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Schedule FAQ: Free Plan, Ticketing, Payments and Sync</x-slot>
     <x-slot name="description">Straight answers before you sign up: what the free plan includes, paid ticketing on Pro with zero platform fees, PayPal, refunds and calendar sync.</x-slot>
     <x-slot name="breadcrumbTitle">FAQ</x-slot>
@@ -348,6 +348,49 @@
         .es-desk-yes { font-weight: 700; color: #1e3a8a; }
         .dark .es-desk-yes { color: #a8c3ff; }
         .es-desk-scroll { overflow-x: auto; }
+        /* On a phone the card showed the Free column and cut Pro and Enterprise off the side,
+           with nothing to say they were there. Each question becomes its own block: the
+           question, then the three plans side by side, each under its own name. The names
+           come from data-label, never from the stylesheet, and the head stays for a screen
+           reader (the table roles are said outright in the markup, because a table laid out
+           as blocks loses them). */
+        @media (max-width: 639.98px) {
+            .es-desk-scroll { overflow-x: visible; }
+            .es-desk-rate { display: block; }
+            .es-desk-rate thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+            }
+            .es-desk-rate tbody { display: block; }
+            .es-desk-rate tbody tr {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.45rem 0.75rem;
+                padding: 0.85rem 0.25rem;
+                border-top: 1px solid rgba(20, 27, 38, 0.1);
+            }
+            .dark .es-desk-rate tbody tr { border-top-color: rgba(233, 238, 247, 0.12); }
+            .es-desk-rate tbody tr:first-child { border-top: 0; padding-top: 0.25rem; }
+            .es-desk-rate tbody th,
+            .es-desk-rate tbody td { display: block; padding: 0; border-top: 0; }
+            .es-desk-rate tbody th { grid-column: 1 / -1; font-size: 0.92rem; }
+            .es-desk-rate tbody td { overflow-wrap: anywhere; }
+            .es-desk-rate tbody td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 0.15rem;
+                font-size: 0.62rem;
+                font-weight: 800;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: #4d5866;
+            }
+            .dark .es-desk-rate tbody td::before { color: #9aabc4; }
+        }
 
         /* --- Chips, plan pills, links, buttons ---------------------- */
         .es-desk-chip {
@@ -499,6 +542,18 @@
         @media (prefers-reduced-motion: reduce) {
             .es-desk-sheen { animation: none; }
             .es-desk-arrow { transition: none; }
+        }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
         }
     </style>
 
@@ -851,39 +906,10 @@
         }
         $faqCount = count($faqs);
 
-        // The rate card. Verified row by row against docs/FEATURES.md.
-        // A cell takes affirmative navy ink only when it is an INCLUSION. Denials
-        // and ceilings take neutral ink, so no limit can read as a feature you are
-        // being sold: that covers "No", a bare quantity (a 10-email allowance, a
-        // one-member cap) and an "Up to 5". "Unlimited", "Zero" and a price are
-        // inclusions and stay affirmative.
-        $rateAffirmative = fn (string $cell) => ! (
-            $cell === 'No'
-            // A bare quantity (10 emails, 1 member) or one carrying its unit ("1 type").
-            || preg_match('/^\d[\d,]*(\s|$)/', $cell)
-            || str_starts_with($cell, 'Up to ')
-        );
-        $rateRows = [
-            ['What it costs', plan_price(0) . ', permanently', plan_price($proMonthly) . ' / month or ' . plan_price($proYearly) . ' / year', plan_price($entMonthly) . ' / month or ' . plan_price($entYearly) . ' / year'],
-            ['Events on your schedule', 'Unlimited', 'Unlimited', 'Unlimited'],
-            ['Public page, embed and QR code', 'Yes', 'Yes', 'Yes'],
-            ['Two-way Google, Outlook and CalDAV sync', 'Yes', 'Yes', 'Yes'],
-            ['Built-in analytics', 'Yes', 'Yes', 'Yes'],
-            ['Free registration with a capacity limit', 'Yes', 'Yes', 'Yes'],
-            ['Newsletter emails a month (each recipient counts as one)', '10', '100', '1,000'],
-            ['Sell tickets that carry a price', 'No', 'Yes', 'Yes'],
-            ['Platform fee on ticket sales', 'Zero', 'Zero', 'Zero'],
-            ['Stripe and PayPal checkout, with refunds', 'No', 'Yes', 'Yes'],
-            ['Scan tickets at the door', 'Yes', 'Yes', 'Yes'],
-            ['Live check-in dashboard, waitlist, promo codes and passes', 'No', 'Yes', 'Yes'],
-            ['Appointment booking', '1 type', 'Unlimited types', 'Unlimited types'],
-            ['Charge for an appointment booking', 'No', 'Yes', 'Yes'],
-            ['Advanced scheduling (overrides, buffers, approvals)', 'No', 'Yes', 'Yes'],
-            ['Remove Event Schedule branding', 'No', 'Yes', 'Yes'],
-            ['Team members', '1', '1', 'Up to 5'],
-            ['Reserved seating for venue schedules', 'No', 'No', 'Yes'],
-            ['Custom domain, Internal and Unlisted events', 'No', 'No', 'Yes'],
-        ];
+        // The rate card. The rows and the rule for which cells take affirmative ink live in
+        // App\Utils\PlanRateCard, because /pricing prints the same table and the two must agree.
+        $rateAffirmative = fn (string $cell) => \App\Utils\PlanRateCard::includes($cell);
+        $rateRows = \App\Utils\PlanRateCard::rows();
 
         $quickAnswers = [
             [
@@ -963,7 +989,7 @@
                             <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                         </a>
                         <a href="{{ app_url('/sign_up') }}" class="es-desk-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5">
-                            Get started free
+                            Start for free
                             <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -1058,23 +1084,23 @@
 
             <div class="es-desk-card p-4 sm:p-6" data-reveal="panel">
                 <div class="es-desk-scroll">
-                    <table class="es-desk-rate">
+                    <table class="es-desk-rate" role="table">
                         <caption class="sr-only">What each Event Schedule plan includes, with monthly and yearly prices</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">What you asked about</th>
-                                <th scope="col">Free</th>
-                                <th scope="col">Pro</th>
-                                <th scope="col">Enterprise</th>
+                        <thead role="rowgroup">
+                            <tr role="row">
+                                <th scope="col" role="columnheader">What you asked about</th>
+                                <th scope="col" role="columnheader">Free</th>
+                                <th scope="col" role="columnheader">Pro</th>
+                                <th scope="col" role="columnheader">Enterprise</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody role="rowgroup">
                             @foreach ($rateRows as [$rateLabel, $rateFree, $ratePro, $rateEnt])
-                                <tr>
-                                    <th scope="row">{{ $rateLabel }}</th>
-                                    <td class="{{ $rateAffirmative($rateFree) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $rateFree }}</td>
-                                    <td class="{{ $rateAffirmative($ratePro) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $ratePro }}</td>
-                                    <td class="{{ $rateAffirmative($rateEnt) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $rateEnt }}</td>
+                                <tr role="row">
+                                    <th scope="row" role="rowheader">{{ $rateLabel }}</th>
+                                    <td role="cell" data-label="Free" class="{{ $rateAffirmative($rateFree) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $rateFree }}</td>
+                                    <td role="cell" data-label="Pro" class="{{ $rateAffirmative($ratePro) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $ratePro }}</td>
+                                    <td role="cell" data-label="Enterprise" class="{{ $rateAffirmative($rateEnt) ? 'es-desk-yes' : 'es-desk-cell' }}">{{ $rateEnt }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -1204,29 +1230,10 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 6. Where to next (related pages strip)                       -->
-    <!-- ============================================================ -->
-    <section class="border-t es-desk-divide py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-desk-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Where to next</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
-                @foreach ([['/pricing', 'Pricing', 'Every row of the rate card, in full'], ['/features', 'Features', 'What is actually in the product'], ['/use-cases', 'Use cases', 'The same tool, by who is using it'], ['/selfhost', 'Selfhosting', 'Run the whole thing yourself']] as [$nextHref, $nextName, $nextBlurb])
-                    <a href="{{ marketing_url($nextHref) }}" class="es-desk-card es-desk-hover flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-desk-hover-title es-desk-ink mb-2 text-sm font-semibold">{{ $nextName }}</span>
-                        <span class="es-desk-muted mb-4 text-xs leading-relaxed">{{ $nextBlurb }}</span>
-                        <span class="es-desk-link mt-auto inline-flex items-center gap-1 text-xs">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
+    <x-marketing.related-pages />
 
     <!-- ============================================================ -->
-    <!-- 7. Finale                                                    -->
+    <!-- 6. Finale                                                    -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1245,9 +1252,9 @@
 
                     <div class="mx-auto mb-8 flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                     </div>
@@ -1261,7 +1268,7 @@
                         </a>
                         <a href="{{ app_url('/sign_up') }}" class="es-desk-btn group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get started free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1291,8 +1298,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

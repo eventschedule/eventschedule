@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Installment Payments | Spread a Ticket Over Months</x-slot>
     <x-slot name="description">Let buyers pay for an expensive ticket monthly, with no interest. They see every date and amount first, and the ticket is theirs from the first payment.</x-slot>
     <x-slot name="breadcrumbTitle">Installments</x-slot>

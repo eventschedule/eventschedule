@@ -28,10 +28,10 @@ class TicketFeesTest extends TestCase
     use RefreshDatabase;
 
     /** The pages that draw a calculator. */
-    private const PAGES = ['/compare', '/pricing', '/for-talent', '/ticket-fee-calculator'];
+    private const PAGES = ['/', '/compare', '/pricing', '/for-talent', '/ticket-fee-calculator'];
 
     /** The pages whose calculator recomputes in the browser. */
-    private const INTERACTIVE = ['/compare', '/pricing', '/ticket-fee-calculator'];
+    private const INTERACTIVE = ['/', '/compare', '/pricing', '/ticket-fee-calculator'];
 
     /** Every file a calculator is drawn or computed in. */
     private const SOURCES = [

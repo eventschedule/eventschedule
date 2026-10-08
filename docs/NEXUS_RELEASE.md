@@ -106,8 +106,10 @@ steps below are now overdue rather than ahead.
 
 Still to ship: realtime, the growth data pull, the get-started and email-design rework of
 2026-10-02, the cache pruning of 2026-10-03, and round three of the homepage headline test of
-2026-10-04 with the Reset stats button it needs and the homepage search title and description
-that now read from it. Four parts need steps of their own, below the
+2026-10-04 with the Reset stats button it needs, the homepage's search title and description
+going back to their own strings on 2026-10-08 (they read from the headline test from 2026-10-04,
+and search clicks fell; step 10), and the homepage redesign of 2026-10-08 (step 10 has what to do
+after it is live). Four parts need steps of their own, below the
 checklist:
 - [Conversion, churn and owner emails](#conversion-churn-and-owner-emails) (live; the Stripe
   setting in step 3 is the one step left)
@@ -159,12 +161,24 @@ checklist:
     against round three, and not resetting starts `plan_sell` on its round-two counts while the
     two new arms start from nothing.
 
-    The same view-source should open on
-    `<title>Plan, promote, and sell from your event calendar | Event Schedule</title>`, with the
-    subtitle as the meta description: the homepage's search title and description are now built
-    from the headline the server renders (`HeroExperiment::meta()`), so they follow the default
-    and then the winner. Nothing to run. Google picks it up on its next crawl of `/`; "Request
-    indexing" for the homepage in Search Console shortens the wait and is optional.
+    **The search result no longer follows the headline (2026-10-08).** For four days the
+    homepage's `<title>` was the headline with the brand after it ("Plan, promote, and sell from
+    your event calendar | Event Schedule") and its meta description was the subtitle; search
+    clicks fell, so both are strings of their own again (`home_title` and `home_description` in
+    `lang/*/marketing.php`). The title is word for word what was live before 2026-10-04. The
+    description opens as it did and has a new ending: it names bookings, says tickets are sold on
+    Pro inside the sentence, and closes on "Free to start." where it used to close on "Paid
+    ticketing is on the Pro plan." After the deploy that carries this, and once the cache for `/`
+    has turned over, view-source on the signed-out homepage should open on
+    `<title>Event Schedule - Free Event Calendar, Ticketing &amp; Booking</title>`, with
+    "Publish your events on one calendar page, take bookings and unlimited free registrations,
+    and sell tickets on Pro with zero platform fees. Free to start." as the description,
+    whichever headline the test is showing. Nothing to run. Then press "Request indexing" for `https://eventschedule.com/`
+    in Search Console: Google only shows the old title again after it has crawled the page, and
+    this is the one page where waiting for that costs clicks. Compare the homepage's clicks and
+    click-through rate in Search Console for the week after with the weeks before 2026-10-04,
+    per query, since a brand search and a search for "event calendar" may have moved differently.
+    Leave both strings alone for a few weeks after that, so the numbers say something.
 
     **Reset once more after the release that puts the variant on the sign-up link.** Between
     the consent release and that one, only visitors who allowed marketing cookies could be
@@ -173,6 +187,15 @@ checklist:
     sign-ups are counted on the same basis. Then check it: in a private window, leave the cookie
     banner unanswered, click a sign-up button on the homepage (the address bar shows
     `/sign_up?hero=...`) and create an account. The card's sign-up count rises within 10 minutes.
+
+    **And once more after the homepage redesign of 2026-10-08.** The three headlines are the same,
+    but everything around them changed (the name box and its button are beside the headline now),
+    so counts from before and after are not one experiment. When view-source on the signed-out
+    homepage shows `<div id="hp">`, press **Reset stats**. The same release re-cut the homepage's
+    link preview (`public/images/social/home.jpg`), and the image address carries no version, so
+    re-scrape `https://eventschedule.com/` in the Facebook Sharing Debugger and the LinkedIn Post
+    Inspector. Then run PageSpeed on `/`: if the largest paint in a tall window turns out to be
+    the showreel's poster and it is slow, give the two posters `fetchpriority="high"`.
 11. **The next day:** check that the `cache` table stopped growing (see
     [Cache pruning](#cache-pruning-appprune-cache)).
 
@@ -620,10 +643,10 @@ feeds on one site that is down are one source's trouble), which points at this s
 network, or an address of ours that a host blocks) rather than at each source. While it shows,
 no owner is mailed and no feed is paused.
 
-**Not in this release:** the Jolioo reader is in the code and is offered neither in the guide nor
-on the Add page. It
-was written from the provider's documentation, whose one example is a news post, so the format
-and zone of an event's start are a guess until it has read a real feed.
+**Not in this release:** a reader for one provider's own feed format is in the code and is named
+neither in the guide nor on the Add page. It was written from the provider's documentation, whose
+one example is a news post, so the format and zone of an event's start are a guess until it has
+read a real feed.
 
 ### Newsletter emails (2026-10-08)
 

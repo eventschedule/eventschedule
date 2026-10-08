@@ -25,7 +25,7 @@ use Tests\TestCase;
  * the fold says tickets are sold with zero platform fees without saying that selling them is free
  * (a ticket with a price is Pro), so a plan name appearing up here is either
  * wrong or is a paid feature being advertised beside a badge reading "Free event calendar. No credit card."
- * and a button reading "Start for free". An earlier version of this fold carried a chip row that
+ * and a button reading "Claim it free". An earlier version of this fold carried a chip row that
  * named Pro and Enterprise; it was removed deliberately, and this is what stops it drifting back in
  * unqualified.
  *
@@ -38,6 +38,8 @@ class MarketingHeroClaimTest extends TestCase
 
     /**
      * The hero's rendered text: everything from <section id="top"> to the poster wall that closes it.
+     * Since the 2026-10 redesign that is the headline, the name box, the phone's "your name" poster
+     * and the film's frame with its caption; the phone's poster strip is pictures only.
      *
      * Stops at the wall rather than the section end so the event names on the poster cards, which
      * are live database rows and could contain anything, cannot satisfy or trip an assertion.
@@ -83,10 +85,8 @@ class MarketingHeroClaimTest extends TestCase
     {
         $hero = $this->heroText();
 
-        // The <title> is the headline itself (HeroExperiment::meta()), so the two agree by
-        // construction. What is left to hold here is that the fold names the category at all: an
-        // H1 that never says what the product is is the usual trigger for Google rewriting the
-        // title in the SERP.
+        // The <title> says "Free Event Calendar". An H1 and subhead that never confirm the title's
+        // subject is the usual trigger for Google rewriting the title in the SERP.
         $this->assertStringContainsStringIgnoringCase('event calendar', $hero,
             'the fold no longer says what the product is, so the title has nothing on the page to confirm it');
     }
@@ -106,7 +106,7 @@ class MarketingHeroClaimTest extends TestCase
         foreach (['Pro', 'Enterprise'] as $tier) {
             $this->assertDoesNotMatchRegularExpression('/\b'.$tier.'\b/', $hero,
                 "the fold names the {$tier} plan. Everything above the fold is free, and a plan name ".
-                'beside "Free forever" and "Start for free" reads as a catch. Put tier-gated '.
+                'beside "Free event calendar" and "Claim it free" reads as a catch. Put tier-gated '.
                 "features in the sections below.\n\nHero text was:\n".$hero);
         }
     }

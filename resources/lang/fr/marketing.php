@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'home_title' => 'Event Schedule - Calendrier d\'événements, billetterie et réservations',
+    'home_description' => 'Publiez vos événements sur une page de calendrier, acceptez des inscriptions gratuites sans limite et des rendez-vous. Billetterie sur Pro, sans frais de plateforme.',
+
     'pricing_title' => 'Tarifs Event Schedule : plan gratuit, zéro frais de plateforme',
     'pricing_description' => 'Gratuit : événements et inscriptions illimités. Pro ajoute la vente de billets payants, Enterprise le placement numéroté. Zéro frais de plateforme.',
 

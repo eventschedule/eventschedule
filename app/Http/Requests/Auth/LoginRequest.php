@@ -65,6 +65,19 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // The password was right, so saying why tells nobody anything they could not sign in to
+        // see. Before the two-factor step and the sign-in's audit entry: neither happens for an
+        // account that is shut out. EnsureAccountNotBlocked is the net under every other door.
+        if (Auth::user()->isBlocked()) {
+            Auth::guard('web')->logout();
+
+            AuditService::log(AuditService::AUTH_LOGIN_FAILED, null, null, null, null, null, $this->string('email').' (blocked)');
+
+            throw ValidationException::withMessages([
+                'email' => __('messages.account_blocked'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

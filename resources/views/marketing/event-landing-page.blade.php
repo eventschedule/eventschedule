@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Landing Page, Free | RSVP, a Map, Paid Tickets on Pro</x-slot>
     <x-slot name="description">Every event gets a free landing page: the flyer, the date and time, the venue with a map, free RSVP, add to calendar and sharing, and paid tickets on Pro.</x-slot>
     <x-slot name="breadcrumbTitle">Event Landing Page</x-slot>

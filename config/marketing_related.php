@@ -6,8 +6,12 @@
  * Keyed by request path (e.g. 'features/ticketing', 'for-musicians', 'pricing').
  * Each value is an array of 3-6 related entries with: title, path, blurb.
  *
- * Used by <x-marketing.related-pages /> to render a "Related" strip above the
- * footer. Adding a new key here automatically enables the strip on that page.
+ * Used by <x-marketing.related-pages /> to render the "Keep exploring" strip, which
+ * sits between a page's FAQ and its closing sign-up panel, so that the panel is the
+ * last thing on the page. It is the page's ONE list of where to go next: a page does
+ * not also carry a "Related pages" or "Key features" block of its own (About and the
+ * AI agents manual keep their own closing list, which is part of each page's idea,
+ * and so have no key here). Adding a key enables the strip on that page.
  *
  * A key with no matching view renders nothing and is dead weight; a view that
  * invokes the component with no matching key renders an empty strip. Both are
@@ -20,20 +24,24 @@
 
 return [
     // The parent page for everything ticketing, and it linked to none of the five pages that break
-    // out one part of it. FOUR entries, like 111 of the 112 keys here: MarketingRelatedPagesTest
-    // caps a strip at 6, and four is the only size that also fills every row at both
-    // sm:grid-cols-2 and the lg:grid-cols-{min(count, 4)} the component derives.
-    // Four cannot hold all five, so the three chosen are the ones that make the other two
-    // REACHABLE: promo-codes carries installments and waitlist in its own strip, so every new page
-    // is within two hops of here. Allocated seating moved one hop out (check-in links it) and the
-    // Eventbrite comparison is still reached from /compare and from its twenty-five siblings.
-    // The fourth slot, once Pricing, is /features/registration: the free, no-payment half of the
-    // same Tickets panel, which this page describes only in passing.
+    // out one part of it. A strip is FOUR entries or SIX and never five: MarketingRelatedPagesTest
+    // caps it at 6, four fills every row at sm:grid-cols-2 and lg:grid-cols-4, and six fills them
+    // at sm:grid-cols-2 and the lg:grid-cols-3 the component gives a strip of six.
+    // The first three are the ones that make the pages they leave out REACHABLE: promo-codes
+    // carries installments and waitlist in its own strip, so every one is within two hops of
+    // here. Allocated seating is one hop out (check-in links it) and the Eventbrite comparison is
+    // still reached from /compare and from its twenty-five siblings. The fourth, once Pricing, is
+    // /features/registration: the free, no-payment half of the same Tickets panel, which this
+    // page describes only in passing. The last two came from the page's own "Related features"
+    // list when every page was given one ending (2026-10): the two it named that nothing else on
+    // the page links, and that belong to a checkout.
     'features/ticketing' => [
         ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
         ['title' => 'Check-in Dashboard', 'path' => '/features/check-in', 'blurb' => 'Watch the room fill up while you are standing at the door.'],
         ['title' => 'Promo Codes & Add-ons', 'path' => '/features/promo-codes', 'blurb' => 'Discounts that expire and cap themselves, and extras with their own stock.'],
         ['title' => 'Free Registration & RSVP', 'path' => '/features/registration', 'blurb' => 'Free sign-ups with a cap per date, a waitlist and a QR code, on every plan.'],
+        ['title' => 'Embed Tickets', 'path' => '/features/embed-tickets', 'blurb' => 'Put the ticket checkout on your own website with one iframe tag.'],
+        ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Ask your own questions on the ticket and registration forms.'],
     ],
 
     'paypal' => [
@@ -210,11 +218,15 @@ return [
 
     // The for-curators page already links the neighbouring audience pages inline,
     // so this strip carries the features a curator reaches for instead.
+    // Six since 2026-10: the page's "Also in this issue" list went when every page was given one
+    // ending. The two other kinds of schedule are the ones a curator's sources come from.
     'for-curators' => [
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Sort what arrives into the sections of your guide.'],
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Drop the guide into the site you already have.'],
         ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's highlights to your subscribers."],
         ['title' => 'AI Features', 'path' => '/features/ai', 'blurb' => 'Turn pasted text or a photo of a flyer into a listed event.'],
+        ['title' => 'For Talent', 'path' => '/for-talent', 'blurb' => 'A gig calendar for every performer: every show you play, on one link.'],
+        ['title' => 'For Venues', 'path' => '/for-venues', 'blurb' => 'One calendar your audience can follow, and everything your staff needs behind it.'],
     ],
 
     'for-venues' => [
@@ -325,12 +337,6 @@ return [
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to ticketed events with zero platform fees.'],
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run your live music calendar in one place.'],
     ],
-    'about' => [
-        ['title' => 'Open Source', 'path' => '/open-source', 'blurb' => 'The licence, the repositories and how to contribute.'],
-        ['title' => 'Contact Us', 'path' => '/contact', 'blurb' => 'Email support, GitHub issues, and where else to find us.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
-    ],
 
     'accessibility' => [
         ['title' => 'Accessibility Guide', 'path' => '/docs/selfhost/accessibility', 'blurb' => 'The accessibility options built into every schedule.'],
@@ -367,11 +373,15 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    // Six since 2026-10: the page's own "Key features" list went when every page was given one
+    // ending, and these two are the ones from it that a reader of the licence is here for.
     'open-source' => [
         ['title' => 'Selfhost', 'path' => '/selfhost', 'blurb' => 'Run every Enterprise feature on your own server at no cost.'],
         ['title' => 'White-Label SaaS', 'path' => '/saas', 'blurb' => 'Turn your install into a ticketing business you own.'],
         ['title' => 'Pretix Alternative', 'path' => '/pretix-alternative', 'blurb' => 'Flat pricing instead of per-ticket fees, plus AI features.'],
         ['title' => 'Hi.Events Alternative', 'path' => '/hi-events-alternative', 'blurb' => 'Two open source ticketing platforms, compared line by line.'],
+        ['title' => 'Integrations', 'path' => '/features/integrations', 'blurb' => 'Every port in and out of Event Schedule, with the plan each one needs.'],
+        ['title' => 'White Label', 'path' => '/features/white-label', 'blurb' => 'Remove branding and make the platform look like your product.'],
     ],
 
     'privacy' => [
@@ -395,11 +405,15 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    // Six since 2026-10: "What the free plan carries" went when every page was given one ending,
+    // and these two are the free-plan pages from it that the account page talks about most.
     'why-create-account' => [
         ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
         ['title' => 'FAQ', 'path' => '/faq', 'blurb' => 'Answers on pricing, ticketing, calendar sync and selfhosting.'],
         ['title' => 'Examples', 'path' => '/examples', 'blurb' => 'Real schedules built by venues, artists, and organizers.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Send branded newsletters to your followers and ticket buyers.'],
+        ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar, Outlook and any CalDAV server.'],
     ],
 
     'features/analytics' => [
@@ -479,11 +493,14 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    // The page's own feature list and second card row went when every page was given one ending
+    // (2026-10), so this strip is the only way out of the page. Features and Pricing are in the
+    // header on every page; the two slots they held go to pages the header does not reach.
     'features/integrations' => [
         ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar, Outlook and any CalDAV server.'],
         ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'The charge is created on your own account, with no platform fee.'],
-        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
+        ['title' => 'Online Events', 'path' => '/features/online-events', 'blurb' => 'Paste a Zoom, Meet or stream link once and the ticket and listing follow.'],
     ],
 
     'features/newsletters' => [
@@ -602,13 +619,6 @@ return [
         ['title' => 'Stripe', 'path' => '/stripe', 'blurb' => 'The charge is created on your own account, with no platform fee.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
         ['title' => 'Integrations', 'path' => '/features/integrations', 'blurb' => 'Google Calendar, Outlook, CalDAV, Stripe, webhooks and the REST API.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
-    ],
-
-    'for-ai-agents' => [
-        ['title' => 'Integrations', 'path' => '/features/integrations', 'blurb' => 'Google Calendar, Outlook, CalDAV, Stripe, webhooks and the REST API.'],
-        ['title' => 'Open Source', 'path' => '/open-source', 'blurb' => 'The licence, the repositories and how to contribute.'],
-        ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 

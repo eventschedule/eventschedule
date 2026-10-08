@@ -11,8 +11,10 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * The homepage finale asks for "your-name.eventschedule.com" and offers "Claim it free", and until
- * now the name was thrown away at the click: the link was a plain /sign_up.
+ * The homepage asks for "your-name.eventschedule.com" and offers "Claim it free" (beside its
+ * headline and again in its finale since the 2026-10 redesign; a name typed in either box is the
+ * name in both, and rides every other sign-up link on the page), and until 2026-09 the name was
+ * thrown away at the click: the link was a plain /sign_up.
  *
  * initClaim() in resources/js/marketing-home.js now adds ?schedule=<slug> to that link,
  * RegisteredUserController::create() keeps it in the session (so it survives the Google round

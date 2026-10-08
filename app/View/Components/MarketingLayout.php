@@ -23,6 +23,12 @@ class MarketingLayout extends Component
          * BreadcrumbList's last crumb - would all claim the missing URL as a real page.
          */
         public bool $errorPage = false,
+        /**
+         * The house style: the homepage's design language (2026-10) for another marketing page.
+         * The layout then loads the typeface, wraps the page in <div id="hp"> and prints
+         * marketing/partials/hp-kit, whose notes say what that does to the page's markup.
+         */
+        public bool $hp = false,
     ) {}
 
     /**

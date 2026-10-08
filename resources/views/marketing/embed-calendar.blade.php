@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Embed an Event Calendar on Your Website - Event Schedule</x-slot>
     <x-slot name="description">One iframe tag puts your live calendar on the site you already have. It follows the visitor's dark mode, speaks 12 languages, and never needs pasting twice.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>

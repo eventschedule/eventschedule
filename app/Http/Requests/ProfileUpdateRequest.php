@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 use App\Rules\NoFakeEmail;
+use App\Rules\NotBlocklisted;
 use App\Rules\UsableTimezone;
 use App\Utils\TimezoneUtils;
 use Illuminate\Foundation\Http\FormRequest;
@@ -34,6 +35,9 @@ class ProfileUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
+                // Only when the address is changing: an account made before its domain went on
+                // the operator's list must still be able to save its settings.
+                strtolower((string) $this->input('email')) !== strtolower((string) $this->user()->email) ? [new NotBlocklisted(address: false)] : [],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/', Rule::unique(User::class)->ignore($this->user()->id)],

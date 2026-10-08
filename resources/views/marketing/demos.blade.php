@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     {{-- SEO Slots --}}
     <x-slot name="title">Event Schedule Examples | Live Demo Schedules to Explore</x-slot>
     <x-slot name="description">Open {{ $scheduleCount }} live Event Schedule demos, from a yoga retreat and a pub lineup to woodworking classes and a model town, and see what visitors can do on each.</x-slot>
@@ -1081,6 +1081,8 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
     <!-- 8. Finale: the empty space on the floor                      -->
     <!-- ============================================================ -->
@@ -1103,14 +1105,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="es-show-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1148,8 +1150,6 @@
          the strip up the moment that key is added. Until then the internal
          linking on this page is carried by "Other floors" above, which is
          why that section is a real content block and not four bare labels. --}}
-    <x-marketing.related-pages />
-
     <!-- Local confetti (no CDN) + motion engines -->
     <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
     @vite('resources/js/marketing-home.js')

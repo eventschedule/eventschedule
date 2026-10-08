@@ -202,6 +202,9 @@ class SendOnboardingNudges extends Command
         return User::query()
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            // An account an operator has shut out (/admin/blocked): its schedules were taken
+            // down with it, so without this it reads as someone who never made one.
+            ->whereNull('blocked_at')
             // Only ever moves forward, so a re-run or a double-fired scheduler cannot resend.
             ->where('onboarding_nudge_stage', '<', $stage)
             ->where('created_at', '<=', now()->subHours($hours))

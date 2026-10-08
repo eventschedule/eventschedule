@@ -85,4 +85,32 @@ class EncodedIdRoutingCharacterizationTest extends TestCase
 
         $this->assertSame(0, \App\Models\Event::count());
     }
+
+    /**
+     * ?id[]=1 reaches decodeId() as an array, and Sqids::decode() is typed string: an uncaught
+     * TypeError, so a 500 (Sentry EVENTSCHEDULE-PHP-4G, on a schedule's guest page). The helper
+     * has some 340 call sites, many fed straight from the request, so it answers null itself
+     * instead of each caller checking - the same root fix as is_valid_language_code() got in
+     * ArrayLanguageParamTest.
+     */
+    public function test_the_helper_rejects_a_non_scalar_instead_of_throwing(): void
+    {
+        $this->assertNull(UrlUtils::decodeId(['1']));
+        $this->assertNull(UrlUtils::decodeId([]));
+        $this->assertNull(UrlUtils::decodeId(new \stdClass));
+        $this->assertNull(UrlUtils::decodeId(null));
+        $this->assertNull(UrlUtils::decodeId(''));
+        $this->assertNull(UrlUtils::decodeId('not-a-real-hash'));
+
+        // The other half: the guard must not cost a real id, in either of the two forms.
+        $this->assertSame(4242, UrlUtils::decodeId(UrlUtils::encodeId(4242)));
+        $this->assertEquals(4242, UrlUtils::decodeId(base64_encode((string) (4242 + 389278))));
+    }
+
+    public function test_decode_id_or_fail_404s_on_a_non_scalar(): void
+    {
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+
+        UrlUtils::decodeIdOrFail(['1']);
+    }
 }

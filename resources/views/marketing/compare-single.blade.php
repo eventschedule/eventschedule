@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     @php
         /* ==================================================================
            EVERY fact about the competitor on this page comes from

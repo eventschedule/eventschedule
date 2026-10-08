@@ -40,6 +40,8 @@
         'manage' => ['label' => __('messages.manage'), 'pages' => array_filter([
             'boost' => ['label' => __('messages.boost'), 'href' => route('admin.boost')],
             'schedules' => ['label' => __('messages.schedules'), 'href' => route('admin.schedules')],
+            // Beside Schedules: a spam schedule is where an operator meets the account to block.
+            'blocked' => ['label' => __('messages.blocked'), 'href' => route('admin.blocked')],
             'feeds' => ['label' => __('messages.feeds_tab'), 'href' => route('admin.feeds')],
             'domains' => config('app.hosted') ? ['label' => __('messages.domains'), 'href' => route('admin.domains')] : null,
             'referrals' => config('app.hosted') ? ['label' => __('messages.referrals'), 'href' => route('admin.referrals')] : null,

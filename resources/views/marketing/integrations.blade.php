@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Schedule Integrations: Calendars, Stripe, PayPal, API</x-slot>
     <x-slot name="description">Fifteen real integrations, each labelled with its direction, trigger and plan: Google Calendar, Outlook, CalDAV, Stripe, PayPal, webhooks and more.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
@@ -371,6 +371,38 @@
         .dark .es-wire-reg th,
         .dark .es-wire-reg td { border-top-color: rgba(231, 234, 238, 0.09); }
         .es-wire-reg thead th { border-top: 0; padding-top: 0; padding-bottom: 0.45rem; }
+        /* On a phone the register is a list, not a table scrolled sideways: the sentence that
+           says what moves each port is the widest column and was the one cut off. Each row
+           becomes the port, its direction and its plan on one line with the sentence under
+           them. The head is kept for a screen reader (the roles are said outright in the
+           markup, because a table laid out as blocks loses them) and taken off the screen. */
+        @media (max-width: 639.98px) {
+            .es-wire-scroll { overflow-x: visible; }
+            .es-wire-reg { display: block; min-width: 0; }
+            .es-wire-reg thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+            }
+            .es-wire-reg tbody { display: block; }
+            .es-wire-reg tbody tr {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto auto;
+                align-items: center;
+                gap: 0.4rem 0.75rem;
+                padding: 0.9rem 0;
+                border-top: 1px solid rgba(16, 20, 24, 0.09);
+            }
+            .dark .es-wire-reg tbody tr { border-top-color: rgba(231, 234, 238, 0.09); }
+            .es-wire-reg tbody tr:first-child { border-top: 0; padding-top: 0; }
+            .es-wire-reg tbody th,
+            .es-wire-reg tbody td { display: block; padding: 0; border-top: 0; }
+            .es-wire-reg tbody td:nth-child(3) { grid-column: 1 / -1; grid-row: 2; max-width: none; }
+            .es-wire-reg tbody td:nth-child(4) { grid-column: 3; grid-row: 1; }
+        }
 
         /* --- Heat-shrink label, for event types and endpoint paths --- */
         .es-wire-slug {
@@ -549,6 +581,18 @@
                 transform: none;
                 opacity: 0.55;
             }
+        }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
         }
     </style>
 
@@ -736,13 +780,13 @@
                         Every Event Schedule integration talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe or PayPal account, your own endpoint. Fifteen ports, each labelled with which way it runs, what makes data move, and which plan it is on.
                     </p>
 
-                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
-                        <a href="#register" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap">
+                        <a href="#register" class="glass group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                             Read the wiring register
                             <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                         </a>
-                        <a href="{{ app_url('/sign_up') }}" class="es-wire-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                            Get started free
+                        <a href="{{ app_url('/sign_up') }}" class="es-wire-btn group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                            Start for free
                             <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -877,23 +921,23 @@
 
             <div class="es-wire-card p-5 sm:p-7" data-reveal="panel">
                 <div class="es-wire-scroll">
-                    <table class="es-wire-reg">
+                    <table class="es-wire-reg" role="table">
                         <caption class="sr-only">The fifteen Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
-                        <thead>
-                            <tr class="es-wire-tag">
-                                <th scope="col" class="font-bold">Port</th>
-                                <th scope="col" class="font-bold">Wire</th>
-                                <th scope="col" class="font-bold">What moves it</th>
-                                <th scope="col" class="font-bold">Plan</th>
+                        <thead role="rowgroup">
+                            <tr class="es-wire-tag" role="row">
+                                <th scope="col" role="columnheader" class="font-bold">Port</th>
+                                <th scope="col" role="columnheader" class="font-bold">Wire</th>
+                                <th scope="col" role="columnheader" class="font-bold">What moves it</th>
+                                <th scope="col" role="columnheader" class="font-bold">Plan</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody role="rowgroup">
                             @foreach ($register as [$regName, $regDir, $regPlan, $regWhat])
-                                <tr>
-                                    <th scope="row" class="es-wire-ink text-sm font-bold">{{ $regName }}</th>
-                                    <td class="es-wire-dir">{{ $regDir }}</td>
-                                    <td class="es-wire-muted max-w-md text-sm">{{ $regWhat }}</td>
-                                    <td><span class="es-wire-plan @if ($regPlan !== 'Free') es-wire-plan-pro @endif">{{ $regPlan }}</span></td>
+                                <tr role="row">
+                                    <th scope="row" role="rowheader" class="es-wire-ink text-sm font-bold">{{ $regName }}</th>
+                                    <td role="cell" class="es-wire-dir">{{ $regDir }}</td>
+                                    <td role="cell" class="es-wire-muted max-w-md text-sm">{{ $regWhat }}</td>
+                                    <td role="cell"><span class="es-wire-plan @if ($regPlan !== 'Free') es-wire-plan-pro @endif">{{ $regPlan }}</span></td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -1414,69 +1458,10 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 9. Key features                                              -->
-    <!-- ============================================================ -->
-    <section class="es-wire-rule border-t py-20">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-wire-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google, Outlook and any CalDAV server" :url="marketing_url('/features/calendar-sync')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell through your own Stripe account with zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="teal">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Online Events" description="One link field, pointed at wherever you are streaming" :url="marketing_url('/features/online-events')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed Calendar" description="Put the schedule on the website you already have" :url="marketing_url('/features/embed-calendar')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-wire-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 10. Related pages                                            -->
-    <!-- ============================================================ -->
-    <section class="es-wire-rule border-t py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-wire-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-3" data-reveal-group="70">
-                @foreach ([['/google-calendar', 'Google Calendar'], ['/outlook-calendar', 'Outlook Calendar'], ['/caldav', 'CalDAV'], ['/stripe', 'Stripe'], ['/paypal', 'PayPal'], ['/invoiceninja', 'Invoice Ninja']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" class="es-wire-hover es-wire-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-wire-hover-title es-wire-ink mb-3 text-sm font-semibold transition-colors">{{ $relName }}</span>
-                        <span class="es-wire-hover-arrow es-wire-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 11. FAQ                                                      -->
+    <!-- 9. FAQ                                                       -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
@@ -1507,8 +1492,10 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 12. Finale                                                   -->
+    <!-- 10. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1549,14 +1536,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm es-wire-onband-muted sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="es-wire-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get started free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1586,8 +1573,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

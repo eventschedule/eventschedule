@@ -6,10 +6,12 @@
     // fifth card, so the grid below stays a complete row of four.
     // Only when there is a strip to put it in: the lookup is for this heading alone.
     $guide = ! empty($related) ? \App\Utils\DocsUtils::guideForPath($path) : null;
-    $gridCols = match (min(count($related), 4)) {
-        1 => 'lg:grid-cols-1',
-        2 => 'lg:grid-cols-2',
-        3 => 'lg:grid-cols-3',
+    // Six is three across, so that it ends on a full row as four does. Five would not at any
+    // width, which is why config/marketing_related.php holds four or six.
+    $gridCols = match (true) {
+        count($related) === 1 => 'lg:grid-cols-1',
+        count($related) === 2 => 'lg:grid-cols-2',
+        count($related) === 3, count($related) === 6 => 'lg:grid-cols-3',
         default => 'lg:grid-cols-4',
     };
 @endphp
@@ -18,8 +20,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <p class="text-sm font-semibold uppercase tracking-wider text-[var(--wp-link)] mb-2">Related</p>
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Keep exploring</h2>
+                    <p class="es-related-eyebrow text-sm font-semibold uppercase tracking-wider text-[var(--wp-link)] mb-2">Related</p>
+                    <h2 class="es-related-title text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Keep exploring</h2>
                 </div>
                 @if ($guide)
                     <a href="{{ $guide['url'] }}"
@@ -42,7 +44,7 @@
                          on hover, which is what makes a flat card grid feel like part of
                          this site rather than a footer. --}}
                     <a href="{{ url($item['path']) }}"
-                       class="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-blue-500/40">
+                       class="es-related-card group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-blue-500/40">
                         <span aria-hidden="true"
                               class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#4E81FA] to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100"></span>
                         <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[var(--wp-link)] transition-colors">

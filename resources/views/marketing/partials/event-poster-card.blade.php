@@ -1,8 +1,8 @@
 {{-- Cinematic poster card for the homepage events rail. Mirrors the logic of
      event-card.blade.php (guest URL guard, hidden state, admin discovery toggle)
      with a tall poster layout: the event image fills the card and a bottom scrim
-     carries the details. Rendered inside the always-light band, so styling is
-     fixed (no dark: variants). --}}
+     carries the details. The picture and its dark scrim are the whole card, so the
+     styling is fixed (no dark: variants) although the band around it follows the theme. --}}
 @php
     $eventUrl = $event->getGuestUrl();
     $cardRole = $event->getViewableRole();

@@ -273,6 +273,7 @@ class HelpUtils
         // Not the organizer's Boost guide: 'boost*' above does not match this path.
         'admin/boost*' => '/docs/selfhost/admin#manage-boost',
         'admin/schedules*' => '/docs/selfhost/admin#manage-plans',
+        'admin/blocked*' => '/docs/selfhost/admin#manage-blocked',
         // Hosted only, and the operator's own walkthrough is on the SaaS side of the guide.
         'admin/domains*' => '/docs/saas/custom-domains#admin-management',
         'admin/referrals*' => '/docs/selfhost/admin#manage-referrals',

@@ -78,6 +78,14 @@ class ApiAuthentication
             return response()->json(['error' => 'Invalid API key'], 401);
         }
 
+        // An account an operator has shut out (/admin/blocked). After the key is proven, so the
+        // answer tells nobody anything about a key they do not hold.
+        if ($user->isBlocked()) {
+            $this->logFailedAttempt($clientIp, 'account_blocked');
+
+            return response()->json(['error' => 'Account blocked'], 403);
+        }
+
         // Check if API key has expired
         if ($user->api_key_expires_at && now()->greaterThan($user->api_key_expires_at)) {
             $this->logFailedAttempt($clientIp, 'api_key_expired');

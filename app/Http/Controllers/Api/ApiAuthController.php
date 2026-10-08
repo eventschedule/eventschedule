@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
+use App\Rules\NotBlocklisted;
 use App\Services\AuditService;
+use App\Services\Blocklist;
 use App\Utils\HoneypotUtils;
 use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
@@ -32,7 +34,7 @@ class ApiAuthController extends Controller
 
         try {
             $request->validate([
-                'email' => ['required', 'string', 'email', 'max:255', new NoFakeEmail],
+                'email' => ['required', 'string', 'email', 'max:255', new NoFakeEmail, new NotBlocklisted],
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -101,7 +103,7 @@ class ApiAuthController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
-                ['required', 'string', 'email', 'max:255'],
+                ['required', 'string', 'email', 'max:255', new NotBlocklisted],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
@@ -173,6 +175,7 @@ class ApiAuthController extends Controller
 
         // Mark email verified
         $user->email_verified_at = now();
+        $user->signup_ip = Blocklist::address($request);
 
         // Generate API key
         $plaintextKey = bin2hex(random_bytes(16));
@@ -227,6 +230,11 @@ class ApiAuthController extends Controller
             usleep(250000); // 250ms delay
 
             return response()->json(['error' => 'Invalid email or password'], 401);
+        }
+
+        // An account an operator has shut out gets no key. After the password, as on the web.
+        if ($user->isBlocked()) {
+            return response()->json(['error' => 'Account blocked'], 403);
         }
 
         // Check for 2FA

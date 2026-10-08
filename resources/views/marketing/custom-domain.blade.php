@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Custom Domain | Use Your Own Domain - Event Schedule</x-slot>
     <x-slot name="description">Serve your schedule from events.yourdomain.com. HTTPS is issued once the CNAME resolves, and event links in emails and feeds carry your domain.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Domain</x-slot>

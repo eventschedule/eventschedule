@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Recurring Events | Weekly, Monthly & Yearly - Event Schedule</x-slot>
     <x-slot name="description">Repeat events daily, weekly, biweekly, monthly or yearly. Skip or add dates, count tickets per date, and give guests a calendar feed that updates itself.</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     @php
         // Page 1 keeps the clean URL. Page 2+ self-canonicalizes, and the URL has to be byte-identical
         // to the hrefs the paginator emits for rel=prev/next and its own links, so it is built by the
@@ -112,8 +112,8 @@
     <section class="relative overflow-hidden bg-[#0a0a0f]">
         <!-- Animated gradient orbs - larger and more prominent -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-violet-600/30 via-indigo-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-r from-fuchsia-600/25 to-pink-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-blue-600/30 via-sky-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-r from-sky-600/25 to-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
             <div class="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-gradient-to-l from-blue-600/20 to-cyan-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
         </div>
 
@@ -124,7 +124,7 @@
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
                 <!-- Badge -->
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
-                    <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                     </svg>
                     <span class="text-sm text-gray-300">{{ __('messages.news_tips_insights') }}</span>
@@ -144,13 +144,13 @@
                 <!-- Stats or social proof -->
                 <div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
                     <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-violet-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                         </svg>
                         <span class="text-gray-400">{{ $posts->total() }} {{ Str::plural('article', $posts->total()) }}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-fuchsia-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 text-sky-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                         </svg>
                         <span class="text-gray-400">{{ $allTags->count() }} {{ __('messages.topics') }}</span>
@@ -171,7 +171,7 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.filtered_by') }}</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
                                 #{{ request('tag') }}
                             </span>
                         </div>
@@ -192,7 +192,7 @@
                     @if($posts->count() > 0)
                         @foreach($posts as $post)
                             <a href="{{ route('blog.show', $post->slug) }}" class="block group">
-                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/20 hover:-translate-y-1 hover:border-violet-200 dark:hover:border-violet-700 cursor-pointer">
+                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 dark:hover:shadow-blue-900/20 hover:-translate-y-1 hover:border-blue-200 dark:hover:border-blue-700 cursor-pointer">
                                     @if($post->featured_image_url)
                                         <div class="mb-4 overflow-hidden rounded-xl">
                                             <picture>
@@ -213,7 +213,7 @@
                                         @if($post->tags)
                                             <div class="flex gap-2 mt-1 sm:mt-0">
                                                 @foreach(array_slice($post->tags, 0, 3) as $tag)
-                                                    <span class="text-violet-600 dark:text-violet-400 group-hover:text-violet-800 dark:group-hover:text-violet-300 transition-colors duration-200">
+                                                    <span class="text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors duration-200">
                                                         #{{ $tag }}
                                                     </span>
                                                 @endforeach
@@ -221,7 +221,7 @@
                                         @endif
                                     </div>
                                     <div class="relative">
-                                        <h3 class="text-lg font-semibold leading-6 text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200 mb-3">
+                                        <h3 class="text-lg font-semibold leading-6 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 mb-3">
                                             {{ $post->title }}
                                         </h3>
                                         <p class="line-clamp-3 text-sm leading-6 text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
@@ -250,7 +250,7 @@
                             <div class="flex flex-wrap gap-2" id="tags-container">
                                 @foreach($allTags->take(20) as $tag)
                                     <a href="{{ route('blog.index', ['tag' => $tag]) }}"
-                                       class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:text-violet-800 dark:hover:text-violet-300 transition-colors {{ request('tag') == $tag ? 'bg-violet-200 dark:bg-violet-900 text-violet-900 dark:text-violet-200' : '' }}">
+                                       class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-300 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200' : '' }}">
                                         #{{ $tag }}
                                     </a>
                                 @endforeach
@@ -258,7 +258,7 @@
                                     <div id="hidden-tags" class="hidden flex flex-wrap gap-2">
                                         @foreach($allTags->slice(20) as $tag)
                                             <a href="{{ route('blog.index', ['tag' => $tag]) }}"
-                                               class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:text-violet-800 dark:hover:text-violet-300 transition-colors {{ request('tag') == $tag ? 'bg-violet-200 dark:bg-violet-900 text-violet-900 dark:text-violet-200' : '' }}">
+                                               class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-300 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200' : '' }}">
                                                 #{{ $tag }}
                                             </a>
                                         @endforeach
@@ -276,9 +276,9 @@
                         </div>
                     @endif
                     <!-- About -->
-                    <div class="bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50 border border-violet-200 dark:border-violet-800 rounded-2xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-violet-900 dark:text-violet-100 mb-2">{{ __('messages.about_our_blog') }}</h3>
-                        <p class="text-sm text-violet-800 dark:text-violet-200">
+                    <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 border border-blue-200 dark:border-blue-800 rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">{{ __('messages.about_our_blog') }}</h3>
+                        <p class="text-sm text-blue-800 dark:text-blue-200">
                             {{ __('messages.about_our_blog_description') }}
                         </p>
                     </div>

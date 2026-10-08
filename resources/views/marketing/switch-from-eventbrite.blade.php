@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Migrate from Eventbrite to Event Schedule | Switching Guide</x-slot>
     <x-slot name="description">What the Eventbrite import brings across, what stays behind, and how payments and refunds work once you sell from your own page with no platform fee.</x-slot>
     <x-slot name="breadcrumbTitle">Switch from Eventbrite</x-slot>

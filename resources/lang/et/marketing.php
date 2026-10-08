@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'home_title' => 'Event Schedule - tasuta sündmuste kalender, piletimüük ja broneeringud',
+    'home_description' => 'Avalda sündmused ühel kalendrilehel, võta vastu broneeringuid ja piiramatult tasuta registreerumisi ning müü Pro-paketis pileteid platvormitasudeta. Alusta tasuta.',
+
     'pricing_title' => 'Event Schedule\'i hinnad: tasuta plaan, ilma platvormitasudeta',
     'pricing_description' => 'Alusta tasuta: piiramatud sündmused ja tasuta registreerumine. Pro lisab tasuliste piletite müügi, Enterprise nummerdatud kohad. Platvormitasu pole üheski plaanis.',
 

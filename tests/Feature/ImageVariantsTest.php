@@ -1487,17 +1487,19 @@ class ImageVariantsTest extends TestCase
     // ---------------------------------------------------------- the homepage
 
     /**
-     * The eager budget for the whole document: 6 on the mobile strip plus 5 on the desktop wall
-     * (row 0 of each of the five columns), both from marquee copy 0 only. It was 50 before this
-     * phase - copy 0 of all 25 strip cards plus copy 0 of all 25 wall cards.
+     * The eager budget for the whole document: 6 on the mobile strip plus 4 on the desktop wall
+     * (row 0 of each of its four columns, two to a wing since the 2026-10 redesign; five columns
+     * and a budget of 11 before it), both from marquee copy 0 only. It was 50 before this phase -
+     * copy 0 of all 25 strip cards plus copy 0 of all 25 wall cards.
      *
      * Both breakpoints ship in the DOM at once (the strip is lg:hidden, the wall is
      * hidden lg:block), so the two eager sets are drawn from the SAME first cards: cards 0-5 on
-     * the strip, cards 0-4 on the wall. The wall's set is a subset of the strip's, so whichever
+     * the strip, cards 0-3 on the wall. The wall's set is a subset of the strip's, so whichever
      * breakpoint is displayed the browser fetches at most SIX distinct posters before first
-     * paint - never eleven, and never a poster that is display:none.
+     * paint - never ten, and never a poster that is display:none. The eight posters behind the
+     * finale's own poster are lazy and are not part of this.
      */
-    private const MAX_EAGER_IMAGES = 11;
+    private const MAX_EAGER_IMAGES = 10;
 
     public function test_the_homepage_stays_within_its_eager_image_budget(): void
     {

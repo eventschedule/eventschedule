@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('marketing.calendar_sync_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.calendar_sync_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Calendar Sync</x-slot>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Custom Labels | Rename Events to Classes or Sessions</x-slot>
     <x-slot name="description">Rename the words on your public schedule, so Events reads Classes and Register reads Book a mat. 37 labels, each with a translated form, on the Pro plan.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>

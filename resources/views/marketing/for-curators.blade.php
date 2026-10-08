@@ -372,28 +372,6 @@
         #es-cur-classifieds .es-cur-ad h3 { color: var(--esc-ink); font-family: var(--esc-serif); }
         #es-cur-classifieds .es-cur-ad p { color: var(--esc-muted); }
 
-        /* The index rows. The card becomes a ruled listing line. */
-        #es-cur-index .es-cur-idx > a > div {
-            background-color: transparent;
-            border-color: transparent;
-            border-bottom: 1px solid var(--esc-rule);
-            border-radius: 0;
-            padding-inline: 0;
-        }
-        #es-cur-index .es-cur-idx > a:hover > div {
-            background-color: transparent;
-            border-bottom-color: var(--esc-spot);
-        }
-        #es-cur-index .es-cur-idx > a > div > div:first-child {
-            background-color: rgba(154, 52, 18, 0.08);
-            border: 1px solid var(--esc-rule);
-            border-radius: 2px;
-        }
-        .dark #es-cur-index .es-cur-idx > a > div > div:first-child { background-color: rgba(251, 191, 36, 0.1); }
-        #es-cur-index .es-cur-idx .font-semibold { color: var(--esc-ink); font-family: var(--esc-serif); }
-        #es-cur-index .es-cur-idx .text-sm { color: var(--esc-muted); }
-        #es-cur-index .es-cur-idx svg { color: var(--esc-spot); }
-
         /* The rates block (shared pricing nudge). */
         #es-cur-rates > section { background-color: var(--esc-paper-2); }
         #es-cur-rates h2 { color: var(--esc-ink); font-family: var(--esc-serif); }
@@ -404,6 +382,14 @@
         #es-cur-rates .text-sm { color: var(--esc-muted); }
         #es-cur-rates .w-px { background-color: var(--esc-rule); }
         #es-cur-rates a { color: var(--esc-spot); }
+        /* The band's sign-up button is a link too, and took the colour above: rust lettering
+           on the shared blue button, 1.4 to 1. It is this page's own solid button instead. */
+        #es-cur-rates a.rounded-2xl {
+            background-image: none;
+            background-color: var(--esc-spot);
+            color: var(--esc-paper);
+            box-shadow: none;
+        }
 
         /* The shared "Keep exploring" strip. */
         #es-cur-exploring > section {
@@ -1008,93 +994,12 @@
             </div>
         </section>
 
-        <!-- ============================================================ -->
-        <!-- 6. The index                                                 -->
-        <!-- ============================================================ -->
-        <section class="es-cur-ground-2 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-            <div class="mx-auto max-w-3xl">
-
-                <div data-reveal>
-                    <div class="es-cur-rule"></div>
-                    <div class="flex items-baseline justify-between gap-4 py-2">
-                        <span class="es-cur-kicker" style="color: var(--esc-spot);">The index</span>
-                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 6</span>
-                    </div>
-                    <div class="es-cur-rule"></div>
-                    <h2 class="es-cur-head-2 mt-7">Key <span class="text-gradient-guide">features</span></h2>
-                </div>
-
-                <div id="es-cur-index" class="mt-6" data-reveal-group="70">
-                    <div class="es-cur-idx" data-reveal>
-                        <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="amber">
-                            <x-slot:icon><svg aria-hidden="true" class="es-cur-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
-                        </x-feature-link-card>
-                    </div>
-                    <div class="es-cur-idx" data-reveal>
-                        <x-feature-link-card name="Sub-Schedules" description="Sort what arrives into the sections of your guide" :url="marketing_url('/features/sub-schedules')" icon-color="amber">
-                            <x-slot:icon><svg aria-hidden="true" class="es-cur-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
-                        </x-feature-link-card>
-                    </div>
-                    <div class="es-cur-idx" data-reveal>
-                        <x-feature-link-card name="Newsletters" description="Send the week's highlights to your subscribers" :url="marketing_url('/features/newsletters')" icon-color="amber">
-                            <x-slot:icon><svg aria-hidden="true" class="es-cur-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                        </x-feature-link-card>
-                    </div>
-                </div>
-
-                <p class="mt-7 text-center">
-                    <a href="{{ marketing_url('/features') }}" class="es-cur-link inline-flex items-center gap-1.5">
-                        See all features
-                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
-                </p>
-            </div>
-        </section>
-
         <div id="es-cur-rates">
             @include('marketing.partials.pricing-nudge')
         </div>
 
         <!-- ============================================================ -->
-        <!-- Also in this issue                                           -->
-        <!-- ============================================================ -->
-        <section class="es-cur-ground-2 px-4 py-16 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-3xl">
-                <div data-reveal>
-                    <div class="es-cur-rule"></div>
-                    <div class="flex items-baseline justify-between gap-4 py-2">
-                        <span class="es-cur-kicker" style="color: var(--esc-spot);">Also in this issue</span>
-                    </div>
-                    <div class="es-cur-rule"></div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" data-reveal-group="70">
-                    @foreach ([['/for-talent', 'Talent'], ['/for-venues', 'Venues'], ['/for-community-centers', 'Community Centers'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                        <a href="{{ marketing_url($relHref) }}" data-reveal class="es-cur-box group flex items-center justify-between gap-4 p-4">
-                            <span>
-                                <span class="es-cur-agate es-cur-faint block">Event Schedule for</span>
-                                <span class="es-cur-serif es-cur-relname block text-lg font-bold transition-colors">{{ $relName }}</span>
-                            </span>
-                            <svg aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" style="color: var(--esc-spot);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </a>
-                    @endforeach
-                </div>
-
-                <p class="mt-6 text-center">
-                    <a href="{{ marketing_url('/use-cases') }}" class="es-cur-link inline-flex items-center gap-1.5">
-                        See all use cases
-                        <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
-                </p>
-            </div>
-        </section>
-
-        <div id="es-cur-exploring">
-            <x-marketing.related-pages />
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- 7. Ask the editor                                            -->
+        <!-- 6. Ask the editor                                            -->
         <!-- ============================================================ -->
         <x-seo.faq-schema :items="$curFaqs" />
         <section id="questions" class="es-cur-ground scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
@@ -1104,7 +1009,7 @@
                     <div class="es-cur-rule"></div>
                     <div class="flex items-baseline justify-between gap-4 py-2">
                         <span class="es-cur-kicker" style="color: var(--esc-spot);">Ask the editor</span>
-                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 7</span>
+                        <span class="es-cur-folio es-cur-nums" aria-hidden="true">Page 6</span>
                     </div>
                     <div class="es-cur-rule"></div>
                     <h2 class="es-cur-head-2 es-balance mt-7">
@@ -1130,8 +1035,12 @@
             </div>
         </section>
 
+        <div id="es-cur-exploring">
+            <x-marketing.related-pages />
+        </div>
+
         <!-- ============================================================ -->
-        <!-- 8. The coupon                                                -->
+        <!-- 7. The coupon                                                -->
         <!-- ============================================================ -->
         <section id="claim" class="es-cur-ground scroll-mt-24 px-4 pb-20 pt-6 sm:px-6 lg:px-8 lg:pb-28">
             <div class="mx-auto max-w-3xl">
@@ -1148,12 +1057,12 @@
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
                         <div dir="ltr" class="es-claim es-cur-box flex min-w-0 flex-1 items-center px-4 py-3.5 transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-city" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold focus:outline-none focus:ring-0 sm:text-base"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold focus:outline-none focus:ring-0"
                                 style="color: var(--esc-ink);">
                             <span class="es-cur-faint shrink-0 select-none font-mono text-sm sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=curator') }}" class="es-cur-btn es-cur-btn-solid shrink-0 px-7 py-3.5 text-base">
-                            Get started free
+                            Start for free
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
                     </div>

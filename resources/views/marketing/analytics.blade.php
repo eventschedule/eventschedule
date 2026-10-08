@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Privacy-First Event Analytics, Built In | Event Schedule</x-slot>
     {{-- "No visitor log" holds where a schedule's owner sees only daily counts. Where owners
          also have Realtime (RealtimeTracker::ownerViewEnabled(), the predicate the FAQ below

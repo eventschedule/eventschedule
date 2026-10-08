@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Self-Hosting Terms - Event Schedule</x-slot>
     <x-slot name="description">Terms for self-hosting Event Schedule - the rules and guidelines for running your own instance, including data ownership, your obligations, and liability.</x-slot>
     <x-slot name="breadcrumbTitle">Selfhosting Terms</x-slot>

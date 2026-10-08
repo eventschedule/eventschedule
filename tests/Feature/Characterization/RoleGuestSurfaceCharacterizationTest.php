@@ -361,6 +361,29 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
     }
 
     /**
+     * ?id[]=1 hands UrlUtils::decodeId() an array, which Sqids::decode() refused with a TypeError
+     * (Sentry EVENTSCHEDULE-PHP-4G). An id that cannot be one is no id: the page renders as it
+     * does without the parameter.
+     */
+    public function test_view_guest_survives_an_array_id_query_param(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Array Id Venue']);
+        $event = $this->createEvent($role, [
+            'name' => 'Array Id Event',
+            'creator_role_id' => $role->id,
+        ]);
+
+        $this->get('/'.$role->subdomain.'?id[]=1')
+            ->assertOk()
+            ->assertSee('Array Id Venue');
+
+        $this->get('/'.$role->subdomain.'/'.$event->slug.'?id[]=1')
+            ->assertOk()
+            ->assertSee('Array Id Event');
+    }
+
+    /**
      * The other half of the fix: a VALID ?date= must still select that occurrence. Rejecting or
      * dropping the date would make every test above pass while quietly breaking recurring events.
      */

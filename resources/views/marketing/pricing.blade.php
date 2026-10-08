@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('marketing.pricing_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.pricing_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
@@ -12,6 +12,9 @@
         $proPerMonth = $proYearly / 12;
         $entPerMonth = $entYearly / 12;
         $saveMax = max(($proMonthly * 12) - $proYearly, ($entMonthly * 12) - $entYearly);
+
+        // The compare table under the cards: the rate card's rows, shared with /faq.
+        $planRows = \App\Utils\PlanRateCard::rows();
 
         // Curated feature lists (CLAUDE.md:43). Wording and order are fixed - style
         // them, never edit them.
@@ -134,14 +137,18 @@
 
         /* Billing toggle: a single .is-annual class on #pricing-plans drives every
            state (no framework). Segmented control - the active half is a raised pill. */
-        .bt-seg { color: #4b5563; transition: background-color .2s, color .2s, box-shadow .2s; }
-        .dark .bt-seg { color: #9ca3af; }
-        .bt-seg-month { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
-        .dark .bt-seg-month { background: #2d2d30; color: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
-        #pricing-plans.is-annual .bt-seg-month { background: transparent; color: #4b5563; box-shadow: none; }
-        .dark #pricing-plans.is-annual .bt-seg-month { background: transparent; color: #9ca3af; box-shadow: none; }
-        #pricing-plans.is-annual .bt-seg-year { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
-        .dark #pricing-plans.is-annual .bt-seg-year { background: #2d2d30; color: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+        .bt-seg { min-height: 2.75rem; color: var(--hp-ink-2); transition: background-color .2s, color .2s, box-shadow .2s; }
+        .bt-seg-month { background: var(--hp-ink); color: var(--hp-bg); box-shadow: 0 10px 24px -12px rgba(10, 16, 32, 0.6); }
+        #pricing-plans.is-annual .bt-seg-month { background: transparent; color: var(--hp-ink-2); box-shadow: none; }
+        #pricing-plans.is-annual .bt-seg-year { background: var(--hp-ink); color: var(--hp-bg); box-shadow: 0 10px 24px -12px rgba(10, 16, 32, 0.6); }
+
+        /* The plan cards keep their own shape and their curated lists; here they take the
+           page's surfaces. Pro's band and badge are the flat blue of the buttons, and the
+           recommended card stands in the page's light. */
+        #pricing-plans .from-blue-600.to-sky-500 { background-image: linear-gradient(100deg, #2b5fe3, #2f6fe9); }
+        #pricing-plans .es-bento { border-color: var(--hp-line); background: var(--hp-bg-2); box-shadow: var(--hp-card-shadow); }
+        #pricing-plans .es-bento.ring-2 { box-shadow: 0 0 0 2px rgba(47, 102, 234, 0.75), 0 30px 70px -28px rgba(47, 102, 234, 0.55), 0 0 80px -20px rgba(34, 211, 238, 0.45); }
+        #pricing-plans .es-ring-glow { display: none; }
 
         /* Price swapping */
         .bt-price-month, .bt-price-year { transition: opacity .2s ease; }
@@ -166,6 +173,75 @@
         .plan-disc > summary::-webkit-details-marker { display: none; }
         .plan-disc > summary::marker { content: ''; }
         .plan-disc[open] > summary .plan-disc-chev { transform: rotate(180deg); }
+
+        /* Compare plans: the same rows as the rate card on /faq (App\Utils\PlanRateCard), in
+           this page's own dress. Plain CSS, so it needs no class the stylesheet lacks. */
+        .pc-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        .pc-table th,
+        .pc-table td { padding: 0.8rem 1rem; vertical-align: top; border-top: 1px solid var(--hp-line); }
+        .pc-table thead th {
+            border-top: 0;
+            font-family: var(--hp-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            font-variation-settings: normal;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--hp-ink-3);
+            white-space: nowrap;
+        }
+        .pc-table tbody th { font-weight: 700; font-variation-settings: 'wght' 640; color: var(--hp-ink); }
+        .pc-table thead th:first-child,
+        .pc-table tbody th { width: 40%; }
+        /* A denial or a ceiling stays in neutral ink, so no limit reads as a feature. */
+        .pc-yes { font-weight: 700; font-variation-settings: 'wght' 640; color: #047857; }
+        .dark .pc-yes { color: #6ee7b7; }
+        .pc-no { color: var(--hp-ink-3); }
+        /* The Pro column carries the same quiet lift its card does. */
+        .pc-table th:nth-child(3),
+        .pc-table td:nth-child(3) { background-color: rgba(47, 102, 234, 0.05); }
+        .dark .pc-table th:nth-child(3),
+        .dark .pc-table td:nth-child(3) { background-color: rgba(125, 165, 255, 0.08); }
+        /* On a phone each question is its own block, the three plans side by side under their
+           names. The names come from data-label, and the head stays for a screen reader (the
+           table roles are said outright in the markup, because a table laid out as blocks
+           loses them). */
+        @media (max-width: 639.98px) {
+            .pc-table { display: block; }
+            .pc-table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+            }
+            .pc-table tbody { display: block; }
+            .pc-table tbody tr {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.45rem 0.75rem;
+                padding: 0.85rem 0;
+                border-top: 1px solid var(--hp-line);
+            }
+            .pc-table tbody tr:first-child { border-top: 0; padding-top: 0; }
+            .pc-table tbody th,
+            .pc-table tbody td { display: block; width: auto; padding: 0; border-top: 0; background-color: transparent; }
+            .pc-table tbody td:nth-child(3),
+            .dark .pc-table tbody td:nth-child(3) { background-color: transparent; }
+            .pc-table tbody th { grid-column: 1 / -1; }
+            .pc-table tbody td { overflow-wrap: anywhere; font-size: 0.9rem; }
+            .pc-table tbody td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 0.15rem;
+                font-size: 0.65rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--hp-ink-3);
+            }
+        }
     </style>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -179,33 +255,23 @@
     <!-- ============================================================ -->
     <!-- Hero (text only - on a pricing page the cards are the CTA)  -->
     <!-- ============================================================ -->
-    <section id="top" class="es-hero relative flex min-h-[calc(46svh-4rem)] items-center overflow-hidden bg-white py-14 dark:bg-[#0a0a0f] noise">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(16, 185, 129, 0.28), rgba(16, 185, 129, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="absolute inset-0 grid-pattern"></div>
-        </div>
+    <section id="top" class="es-hero hp-hero is-short">
+        <div class="hp-hero-sky" aria-hidden="true"></div>
 
-        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <h1 class="es-balance mb-5 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-6">
-                    <svg aria-hidden="true" class="h-5 w-5 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+        <div class="hp-hero-copy">
+            <h1 class="hp-h1">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 hp-eyebrow">
+                    <svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event Schedule pricing, no hidden fees</span>
+                    Event Schedule pricing, no hidden fees
                 </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Pricing that never</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-pricing">takes a cut</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="hp-ink-grad">takes a cut</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+            <p class="es-fade-up es-d-2 hp-sub">
                 Start free and upgrade when you need more. No surprises, and never a cut of your ticket sales.
-            </p>
-
-            <p class="es-fade-up es-d-3 mx-auto mt-5 max-w-3xl text-base text-gray-500 dark:text-gray-400">
-                Not signed up yet? See <x-link href="{{ marketing_url('/why-create-account') }}">what a free account unlocks</x-link>.
             </p>
         </div>
     </section>
@@ -213,11 +279,11 @@
     <!-- ============================================================ -->
     <!-- Plans                                                       -->
     <!-- ============================================================ -->
-    <section id="pricing-plans" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+    <section id="pricing-plans" class="scroll-mt-24 bg-gray-50 pb-16 pt-8 dark:bg-[#0f0f14] lg:pb-24">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 
             <!-- Billing toggle (vanilla JS: toggles .is-annual on #pricing-plans) -->
-            <div class="mb-14 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div class="mb-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <div class="inline-flex items-center rounded-2xl border border-gray-200 bg-gray-100 p-1 dark:border-white/10 dark:bg-white/[0.06]">
                     <button id="bt-monthly" type="button" aria-pressed="true" class="bt-seg bt-seg-month rounded-xl px-5 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]">Monthly</button>
                     <button id="bt-annual" type="button" aria-pressed="false" class="bt-seg bt-seg-year rounded-xl px-5 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]">Annual</button>
@@ -268,7 +334,7 @@
 
                     <div class="mt-auto">
                         <a href="{{ app_url('/sign_up') }}" class="block w-full rounded-2xl border-2 border-emerald-300 bg-white px-6 py-4 text-center font-semibold text-emerald-700 transition-all hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-white/10 dark:text-emerald-300 dark:hover:bg-white/20">
-                            Get Started Free
+                            Start for free
                         </a>
                         <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">No card. No expiry. Nothing to cancel.</p>
                     </div>
@@ -311,7 +377,7 @@
 
                     <div class="mt-auto">
                         <a href="{{ app_url('/sign_up') }}" class="block w-full rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-sky-500 hover:shadow-xl">
-                            Start Free Trial
+                            Start free trial
                         </a>
                         <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">7 days free, then {{ plan_price($proMonthly) }} a month. Cancel any time and the schedule stays live.</p>
                     </div>
@@ -359,7 +425,7 @@
 
                     <div class="mt-auto">
                         <a href="{{ app_url('/sign_up') }}" class="block w-full rounded-2xl bg-gradient-to-r from-amber-700 to-amber-800 px-6 py-4 text-center font-semibold text-white shadow-lg shadow-amber-700/25 transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-xl">
-                            Start Free Trial
+                            Start free trial
                         </a>
                         <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">7 days free. Or selfhost, where every line above is included at no cost.</p>
                     </div>
@@ -367,6 +433,46 @@
                 </div>
 
             </div>
+
+            {{-- Compare plans. The three cards say what each plan adds; this says, row by row,
+                 what each plan has, including the rows that say no. The rows are the rate card's
+                 (App\Utils\PlanRateCard), so this page and /faq cannot disagree. It ships open,
+                 so a reader without JavaScript and a crawler get every row; the script below
+                 closes it on a phone, where the summary is the way in. --}}
+            <details id="compare" class="plan-disc mt-10 scroll-mt-24" open>
+                <summary class="flex cursor-pointer items-center justify-between rounded-2xl border border-gray-200 bg-white px-6 py-4 font-semibold text-gray-900 dark:border-white/10 dark:bg-white/[0.03] dark:text-white md:hidden">
+                    Compare plans, row by row
+                    <svg aria-hidden="true" class="plan-disc-chev h-4 w-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                <div class="mt-4 rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.03] sm:p-8 md:mt-0" data-reveal>
+                    <div class="mb-6 hidden md:block">
+                        <h2 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">Compare plans, row by row</h2>
+                        <p class="mt-2 text-gray-500 dark:text-gray-400">{{ ucfirst(\Illuminate\Support\Number::spell(count($planRows))) }} rows, including the ones that say no.</p>
+                    </div>
+                    <table class="pc-table" role="table">
+                        <caption class="sr-only">What each Event Schedule plan includes, with monthly and yearly prices</caption>
+                        <thead role="rowgroup">
+                            <tr role="row">
+                                <th scope="col" role="columnheader">What you get</th>
+                                <th scope="col" role="columnheader">Free</th>
+                                <th scope="col" role="columnheader">Pro</th>
+                                <th scope="col" role="columnheader">Enterprise</th>
+                            </tr>
+                        </thead>
+                        <tbody role="rowgroup">
+                            @foreach ($planRows as [$rowLabel, $rowFree, $rowPro, $rowEnt])
+                                <tr role="row">
+                                    <th scope="row" role="rowheader">{{ $rowLabel }}</th>
+                                    <td role="cell" data-label="Free" class="{{ \App\Utils\PlanRateCard::includes($rowFree) ? 'pc-yes' : 'pc-no' }}">{{ $rowFree }}</td>
+                                    <td role="cell" data-label="Pro" class="{{ \App\Utils\PlanRateCard::includes($rowPro) ? 'pc-yes' : 'pc-no' }}">{{ $rowPro }}</td>
+                                    <td role="cell" data-label="Enterprise" class="{{ \App\Utils\PlanRateCard::includes($rowEnt) ? 'pc-yes' : 'pc-no' }}">{{ $rowEnt }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <p class="mt-5 text-sm text-gray-500 dark:text-gray-400">A selfhosted install resolves to the Enterprise feature set at no cost.</p>
+                </div>
+            </details>
         </div>
     </section>
 
@@ -375,11 +481,12 @@
     <!-- ============================================================ -->
     <section id="fees" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Zero platform fees. Here's the math.
+            <div class="hp-head is-center" style="margin-bottom: clamp(2rem, 4vw, 3rem);">
+                <span class="hp-kicker" data-reveal>What it costs</span>
+                <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
+                    Zero platform fees. <span class="hp-ink-grad">Here's the math.</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal>
+                <p class="hp-lead" data-reveal style="--reveal-delay: 0.14s;">
                     Most ticketing platforms take a cut of every ticket. We take none. Move the numbers and see what that means for your event.
                 </p>
             </div>
@@ -449,27 +556,23 @@
     <!-- ============================================================ -->
     <!-- Selfhost                                                    -->
     <!-- ============================================================ -->
-    <section id="selfhost" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-20">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-white/10 dark:bg-white/[0.04] lg:p-10" data-reveal="panel">
-                <svg aria-hidden="true" class="mx-auto mb-5 h-10 w-10 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                <h2 class="es-balance mb-3 text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl">
-                    Or run it yourself. Free, forever.
-                </h2>
-                <p class="mx-auto mb-7 max-w-2xl text-gray-500 dark:text-gray-400">
-                    Event Schedule is open source. Install it on your own server and every Enterprise feature is included at no cost, with your data staying entirely on your infrastructure.
-                </p>
-                <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <a href="{{ marketing_url('/selfhost') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
-                        Selfhosting guide
-                    </a>
-                    <a href="{{ marketing_url('/open-source') }}" class="group inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-semibold text-blue-600 transition-all hover:gap-3 dark:text-blue-400">
-                        View the source
-                        <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
-                </div>
+    <section id="selfhost" class="hp-dark on-alt">
+        <div class="hp-wrap is-narrow" style="text-align: center;" data-reveal>
+            <svg aria-hidden="true" style="width: 3rem; height: 3rem; margin: 0 auto 1.5rem;" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            <h2 class="hp-h2">
+                Or run it yourself. <span class="hp-ink-grad">Free, forever.</span>
+            </h2>
+            <p class="hp-lead" style="max-width: 40rem; margin: 1.1rem auto 0;">
+                Event Schedule is open source. Install it on your own server and every Enterprise feature is included at no cost, with your data staying entirely on your infrastructure.
+            </p>
+            <div class="hp-actions" style="justify-content: center;">
+                <a href="{{ marketing_url('/selfhost') }}" class="hp-btn hp-btn-ghost">Selfhosting guide</a>
+                <a href="{{ marketing_url('/open-source') }}" class="hp-more">
+                    View the source
+                    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
             </div>
         </div>
     </section>
@@ -478,110 +581,21 @@
     <!-- FAQ                                                         -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
-    <section id="faq" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Frequently asked questions
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal>
-                    Everything you need to know about pricing.
-                </p>
-            </div>
+    <x-marketing.hp-faq id="faq" :items="$faqs" class="hp-alt" lead="Everything you need to know about pricing.">Frequently asked <span class="hp-ink-grad">questions</span></x-marketing.hp-faq>
 
-            <div class="space-y-3" data-reveal-group="80">
-                @foreach ($faqs as $faq)
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
+    <x-marketing.related-pages />
 
     <!-- ============================================================ -->
     <!-- Finale                                                      -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-gray-50 px-2 py-16 dark:bg-[#0f0f14] sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
+    <x-marketing.hp-finale lead="Create your free schedule in seconds. Start your free trial today." placeholder="your-schedule" :foot="false">
+        Start sharing your events <span class="hp-ink-grad">today</span>
+        <x-slot name="after">
+            <p class="hp-finale-foot">Know other organizers? <a href="{{ route('marketing.docs.referral_program') }}">Earn free months with our referral program</a>.</p>
+        </x-slot>
+    </x-marketing.hp-finale>
 
-                <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Start sharing your events <span class="text-gradient-pricing">today</span>
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Create your free schedule in seconds. Start your free trial today.
-                    </p>
 
-                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
-                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
-                        </div>
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- Referral CTA --}}
-    <section class="bg-gray-50 pb-16 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]">
-                <p class="text-gray-700 dark:text-gray-300">
-                    Know other organizers? <a href="{{ route('marketing.docs.referral_program') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Earn free months with our referral program</a>.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <x-marketing.related-pages />
-
-    <!-- Section dot navigation (desktop) -->
-    @php
-        $dotSections = [
-            ['top', 'Top'],
-            ['pricing-plans', 'Plans'],
-            ['fees', 'Zero fees'],
-            ['selfhost', 'Selfhost'],
-            ['faq', 'FAQ'],
-            ['claim', 'Get started'],
-        ];
-    @endphp
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#15151c] dark:text-gray-300">{{ $sectionLabel }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
 
     <!-- Billing toggle + fee calculator + mobile plan disclosure (vanilla JS) -->
     @include('marketing.partials.ticket-fee-math')
@@ -652,7 +666,6 @@
         })();
     </script>
 
-    <!-- Local confetti (no CDN) + motion engines -->
-    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>
+    <!-- Motion engines (the finale brings its own confetti) -->
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

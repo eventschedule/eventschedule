@@ -72,6 +72,20 @@
             </x-page-card>
             @endif
 
+            {{-- Whose it is, and the way to that account's own page: taking this schedule down
+                 leaves the account free to make another, and blocking is decided there. --}}
+            @if ($owner = $role->user)
+            <x-page-card beside :title="__('messages.owner')">
+                <div class="event-setting">
+                    <div class="min-w-0">
+                        <div class="event-setting-label"><bdi>{{ $owner->name ?: $owner->email }}</bdi>@if ($owner->isBlocked()) <span class="event-chip">@lang('messages.blocked')</span>@endif</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 break-all" dir="ltr">{{ $owner->email }}</div>
+                    </div>
+                    <a href="{{ route('admin.blocked.account', ['hash' => \App\Utils\UrlUtils::encodeId($owner->id)]) }}" class="page-tool">@lang('messages.block_review_account')</a>
+                </div>
+            </x-page-card>
+            @endif
+
             {{-- Schedule details --}}
             <x-page-card beside :title="__('messages.schedule_details')">
                 <form method="POST" action="{{ route('admin.schedules.update_details', ['role' => $role->encodeId()]) }}">

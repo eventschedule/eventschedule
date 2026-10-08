@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     @php
         // Every Google Wallet claim on this page reads the same predicate the button itself does
         // (GoogleWalletService::isConfigured()), so an install without an issuer account never
@@ -536,6 +536,18 @@
         @media (prefers-reduced-motion: reduce) {
             .es-turn-tick { animation: none !important; top: 42% !important; }
         }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
+        }
     </style>
 
     @php
@@ -722,15 +734,15 @@
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="{{ route('marketing.docs.tickets') }}" class="glass group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            Read the Ticketing guide
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
                         <a href="{{ app_url('/sign_up') }}" class="es-turn-btn group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             Start selling tickets
                             <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
-                        </a>
-                        <a href="{{ route('marketing.docs.tickets') }}" class="glass group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                            Read the Ticketing guide
-                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
                     </div>
                 </div>
@@ -1234,90 +1246,10 @@
 
     @include('marketing.partials.pricing-nudge')
 
-    <!-- ============================================================ -->
-    <!-- 9. Related features                                          -->
-    <!-- ============================================================ -->
-    <section class="py-20">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-turn-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related features</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Stripe Payments" description="Accept credit cards, Apple Pay, and Google Pay with zero platform fees" :url="marketing_url('/stripe')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="PayPal Checkout" description="Let buyers pay from a PayPal balance or card, with zero platform fees" :url="route('marketing.paypal')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Custom Fields" description="Collect additional info from ticket buyers with custom form fields" :url="marketing_url('/features/custom-fields')" icon-color="amber">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send branded newsletters to followers and ticket buyers" :url="marketing_url('/features/newsletters')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed Calendar" description="Embed your full event calendar on any website" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed Tickets" description="Embed a ticket purchase or RSVP form on any website with one line of code" :url="marketing_url('/features/embed-tickets')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-turn-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
     <hr class="es-turn-perf mx-auto max-w-7xl" aria-hidden="true">
 
     <!-- ============================================================ -->
-    <!-- 10. Keep reading                                             -->
-    <!-- ============================================================ -->
-    <section class="py-16 lg:py-20">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-turn-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Keep reading</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-3" data-reveal-group="70">
-                @php
-                    $keepReading = [
-                        [route('marketing.docs.tickets'), 'Ticketing guide', 'Every tab, field and setting, written out.'],
-                        [route('marketing.passes'), 'Passes and subscriptions', 'Class packs, memberships and season tickets on one QR code.'],
-                        [route('marketing.check_in'), 'Check-in', 'The door scanner and the live dashboard, in detail.'],
-                        [marketing_url('/for-musicians'), 'For musicians', 'Selling to a room you booked yourself.'],
-                        [marketing_url('/for-venues'), 'For venues', 'A door count for somebody else\'s show.'],
-                        [marketing_url('/for-comedy-clubs'), 'For comedy clubs', 'Several shows a night, each with its own count.'],
-                    ];
-                @endphp
-                @foreach ($keepReading as [$krHref, $krName, $krBlurb])
-                    <a href="{{ $krHref }}" class="es-turn-card es-turn-hover group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-turn-hover-title es-turn-ink mb-2 text-sm font-bold transition-colors">{{ $krName }}</span>
-                        <span class="es-turn-muted mb-3 text-xs leading-relaxed">{{ $krBlurb }}</span>
-                        <span class="es-turn-hover-arrow es-turn-muted mt-auto inline-flex items-center gap-1 text-xs font-semibold transition-colors">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 11. FAQ                                                      -->
+    <!-- 9. FAQ                                                       -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
@@ -1348,8 +1280,10 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 12. Finale                                                   -->
+    <!-- 10. Finale                                                   -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1379,14 +1313,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="es-turn-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1416,8 +1350,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

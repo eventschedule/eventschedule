@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('messages.why_create_account_title') }} | Event Schedule</x-slot>
     <x-slot name="description">{{ __('messages.why_create_account_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">{{ __('messages.why_create_account_title') }}</x-slot>
@@ -109,11 +109,6 @@
             border-color: rgba(231, 236, 243, 0.13);
             background-color: rgba(231, 236, 243, 0.05);
         }
-        .es-key-inset {
-            border-radius: 0.75rem;
-            background-color: #e9edf5;
-        }
-        .dark .es-key-inset { background-color: rgba(231, 236, 243, 0.07); }
 
         /* Hairline rules. These are page-local on purpose: an arbitrary
            `border-[rgba(...)]` utility that is not already in the built
@@ -370,10 +365,8 @@
         /* --- Hover treatment shared by FAQ and related cards -------- */
         .es-key-hover:hover { border-color: rgba(23, 73, 196, 0.45); }
         .dark .es-key-hover:hover { border-color: rgba(125, 184, 245, 0.45); }
-        .es-key-hover:hover .es-key-hover-title,
-        .es-key-hover:hover .es-key-hover-arrow { color: #1749c4; }
-        .dark .es-key-hover:hover .es-key-hover-title,
-        .dark .es-key-hover:hover .es-key-hover-arrow { color: #7db8f5; }
+        .es-key-hover:hover .es-key-hover-title{ color: #1749c4; }
+        .dark .es-key-hover:hover .es-key-hover-title{ color: #7db8f5; }
 
         /* --- Shared-system recolors (brand blue chrome by default) --- */
         .es-hero .es-spot {
@@ -412,6 +405,18 @@
         @media (prefers-reduced-motion: reduce) {
             .es-key-hang { animation: none !important; transform: none !important; }
         }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
+        }
     </style>
 
     @php
@@ -423,41 +428,6 @@
             ['Submit', 'Events you sent in'],
             ['Publish', 'A schedule of your own'],
             ['Team', 'A seat on somebody else\'s'],
-        ];
-
-        // Doors that are already open: no account, no key.
-        $openDoors = [
-            [
-                // FeedController::icalFeed is public and unauthenticated; the Add to Calendar menu
-                // offers it as "Subscribe to all events from {schedule}".
-                'Read anything public',
-                'Every public schedule page, event page and calendar is open to anyone. Add any event to your own calendar as an .ics download, or subscribe to a whole schedule as a live calendar feed that updates itself when dates change. Neither asks you to sign in or to give an address.',
-            ],
-            [
-                'Buy a ticket, or register',
-                'Checkout asks for a name and an email, whether the ticket is paid or a free registration with a capacity limit. The confirmation and the QR code arrive by email, and the order is stored with no owner on it. Creating an account at checkout is an optional tick box, not a step.',
-            ],
-            [
-                // EventInterestController::store: one field, single opt-in, and no user is created.
-                // Unsubscribing deletes the row rather than suppressing it.
-                'Hear when tickets go on sale',
-                'Where the organizer offers it on an event page, "Tell me when tickets go on sale" (or "Tell me if anything changes", once they are on sale) takes an email address and nothing else, not even a name. You get one email when tickets go on sale, one if it is cancelled and a reminder shortly before it starts, plus any notice the organizer chooses to send if the date or venue changes. It covers that one date, creates no account, and unsubscribing deletes the address.',
-            ],
-            [
-                // RoleSubscriberController::store is on the guest routes, not behind auth:
-                // the sign-up panel renders on both the schedule page and every event page.
-                // confirm() then runs linkAccount(): a passwordless account following the schedule.
-                'Hear about new events',
-                'Leave your name and email address in the panel on any schedule page (signed out, the Follow button opens the same form) and confirm it from the message that follows. From then on you get a digest when that schedule publishes new events, at most one every three days. Confirming also sets up an account that follows the schedule, with no password until you add one, so this door cuts you a key on the way through.',
-            ],
-            [
-                'Add photos and comments',
-                'Photos, video and comments on an event take a name and an email, and they go through the schedule\'s approval queue before anyone else sees them. A schedule can choose to require an account here instead, and some do.',
-            ],
-            [
-                'Submit an event',
-                'Most schedules will take a submission from anybody. The form is public, and it is the interesting case on this page: the door opens either way, and what changes is whose record the event becomes afterwards.',
-            ],
         ];
 
         // The duplex ledger. Same action, two records.
@@ -522,12 +492,6 @@
             'Backup and restore',
         ];
 
-        $steps = [
-            ['01', 'Create the account', 'An email address and a password, or continue with Google. A verification code confirms the address, and no card is asked for at any point.'],
-            ['02', 'Decide later what you are', 'You are not forced into a schedule. If you do want one, pick Talent, Venue or Curator and it gets its own address. You can run more than one on the same login.'],
-            ['03', 'Start using the ring', 'Follow the schedules you care about, submit to the ones you play, and publish your own when you are ready.'],
-        ];
-
         $faqs = [
             [
                 'q' => 'Do I need an account to buy a ticket?',
@@ -569,11 +533,8 @@
 
         $dotSections = [
             ['top', 'The ring'],
-            ['open', 'Already open'],
             ['ledger', 'Two records'],
             ['keys', 'The keys'],
-            ['not', 'What it is not'],
-            ['cut', 'Cut the key'],
             ['faq', 'Questions'],
             ['claim', 'Claim a name'],
         ];
@@ -669,59 +630,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Doors that are already open (fixed-dark band)             -->
-    <!-- ============================================================ -->
-    <section id="open" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
-        <div class="es-key-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="grid-overlay absolute inset-0 opacity-20"></div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <span class="es-key-tag es-key-blank es-key-mark mb-6" data-reveal aria-hidden="true">02</span>
-                    <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">No key needed</p>
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                        An account is <span class="es-key-lit">not a turnstile.</span>
-                    </h2>
-                    <p class="es-key-dim mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                        These plates are blank on purpose. {{ ucfirst(\Illuminate\Support\Number::spell(count($openDoors))) }} things people routinely assume sit behind a sign-up are not gated at all, and pretending otherwise would be a poor argument for making one.
-                    </p>
-                </div>
-
-                <div class="grid gap-6 md:grid-cols-2" data-reveal-group="100">
-                    @foreach ($openDoors as [$doorTitle, $doorBody])
-                        <div class="es-key-card p-7" data-reveal="panel">
-                            <div class="mb-4 flex flex-wrap items-center gap-3">
-                                <span class="es-key-tag es-key-blank" aria-hidden="true">
-                                    <span class="es-key-tag-code">Open</span>
-                                    <span class="es-key-tag-name">No account</span>
-                                </span>
-                                <h3 class="es-key-lit text-lg font-bold">{{ $doorTitle }}</h3>
-                            </div>
-                            <p class="es-key-dim text-sm leading-relaxed">{{ $doorBody }}</p>
-                        </div>
-                    @endforeach
-                </div>
-
-                <p class="es-key-dim mx-auto mt-10 max-w-2xl text-center" data-reveal>
-                    None of that needs a key. The ledger below is where the difference actually shows up: same action, two records, and only one of them is yours to change afterwards.
-                    <a href="#ledger" class="es-key-link inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
-                        See both records
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                    </a>
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. The duplex ledger: one action, two records               -->
+    <!-- 2. The duplex ledger: one action, two records               -->
     <!-- ============================================================ -->
     <section id="ledger" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
-                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">03</span>
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">02</span>
                 <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">The same action, twice</p>
                 <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     One action. <span class="es-key-accent">Two records.</span>
@@ -760,12 +674,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. The keys on the ring: bento                               -->
+    <!-- 3. The keys on the ring: bento                               -->
     <!-- ============================================================ -->
     <section id="keys" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">04</span>
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">03</span>
                 <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">On the ring</p>
                 <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Six keys, <span class="es-key-accent">one login.</span>
@@ -904,147 +818,17 @@
         </div>
     </section>
 
-    <!-- ============================================================ -->
-    <!-- 5. Two things a key is not                                   -->
-    <!-- ============================================================ -->
-    <section id="not" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <span class="es-key-tag es-key-blank es-key-mark mb-6" data-reveal aria-hidden="true">05</span>
-                <p class="es-key-tagline mb-4" data-reveal style="--reveal-delay: 0.05s;">Being straight about it</p>
-                <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Two things a key <span class="es-key-accent">is not.</span>
-                </h2>
-            </div>
-
-            <div class="grid gap-6 md:grid-cols-2" data-reveal-group="110">
-                {{-- flex flex-col + mt-auto on the inset so the two footnote panels sit on the
-                     same baseline even though the paragraphs above them differ in length. --}}
-                <div class="es-key-card flex flex-col p-7" data-reveal="panel">
-                    <h3 class="es-key-ink mb-3 text-lg font-bold">It is not a paywall</h3>
-                    <p class="es-key-muted mb-4 text-sm leading-relaxed">Every key on this page is on the free plan, and the account asks for no card at sign-up or afterwards. What the paid plans buy is capability for a schedule you run: the free plan already takes unlimited free registrations and scans tickets at the door, Pro at {{ plan_price($proMonthly) }} a month is what lets a ticket carry a price and adds the live check-in dashboard, custom fields and a ticket waitlist, and Enterprise at {{ plan_price($entMonthly) }} a month adds multiple team members, custom domains and AI agenda scanning.</p>
-                    <div class="es-key-inset mt-auto p-4">
-                        <p class="es-key-muted text-xs leading-relaxed">Newsletters, two-way calendar sync, analytics, the embeddable calendar and free registration with a capacity limit are all on the free plan. That is unusual enough to be worth stating outright rather than implying.</p>
-                    </div>
-                </div>
-
-                <div class="es-key-card flex flex-col p-7" data-reveal="panel">
-                    <h3 class="es-key-ink mb-3 text-lg font-bold">It is not a notification subscription</h3>
-                    <p class="es-key-muted mb-4 text-sm leading-relaxed">An account does not sign you up for alerts. Pressing Follow while signed in puts the schedule where you can find it again and lets somebody there include you the next time they write to their audience, and that is all it does.</p>
-                    <div class="es-key-inset mt-auto p-4">
-                        <p class="es-key-muted text-xs leading-relaxed">The emails that do arrive on their own are ones you asked for separately: the new-event digest after you confirm an address in the sign-up panel, at most one every three days, and a few notices about a single event when you ask to hear about its tickets. The other automatic traffic runs the other way: a schedule is emailed when a submission lands in its queue.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. Cutting the key                                           -->
-    <!-- ============================================================ -->
-    <section id="cut" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">06</span>
-                <h2 class="es-balance es-key-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
-                    {{ __('messages.why_create_account_how_title') }}
-                </h2>
-                <p class="es-key-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Three steps, and only the first one is required.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ($steps as [$stepNum, $stepTitle, $stepBody])
-                    <div class="es-key-card p-7" data-reveal="panel">
-                        <div class="es-key-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
-                        <h3 class="es-key-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
-                        <p class="es-key-muted text-sm leading-relaxed">{{ $stepBody }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
-    <!-- ============================================================ -->
-    <section class="es-key-rule border-t py-20">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-key-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>What the free plan carries</h2>
-            <div class="space-y-3" data-reveal-group="70">
-                <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Email the people who follow you, with open and click rates" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google, Outlook and CalDAV" :url="marketing_url('/features/calendar-sync')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Page views, devices and traffic sources for your schedule" :url="marketing_url('/features/analytics')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Embed Calendar" description="Put your schedule on the website you already have" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-key-link inline-flex items-center font-medium hover:underline">
-                    See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
-    <!-- ============================================================ -->
-    <section class="es-key-rule border-t py-16">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 class="es-key-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
-                @foreach ([['/pricing', 'Pricing', 'What the plans cost'], ['/features', 'Features', 'Everything, in one list'], ['/examples', 'Examples', 'Real schedules to look at'], ['/faq', 'FAQ', 'The rest of the questions']] as [$relHref, $relName, $relBlurb])
-                    <a href="{{ marketing_url($relHref) }}" class="es-key-hover es-key-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
-                        <span class="es-key-hover-title es-key-ink mb-2 text-sm font-semibold transition-colors">{{ $relName }}</span>
-                        <span class="es-key-muted mb-3 text-xs leading-relaxed">{{ $relBlurb }}</span>
-                        <span class="es-key-hover-arrow es-key-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
-                            Read more
-                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-            <div class="mt-8 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-key-link inline-flex items-center font-medium hover:underline">
-                    See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 4. FAQ                                                       -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="es-key-rule scroll-mt-24 border-t py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">07</span>
+                <span class="es-key-tag es-key-mark mb-6" data-reveal aria-hidden="true">04</span>
                 <h2 class="es-balance es-key-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked questions
                 </h2>
@@ -1068,8 +852,10 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 10. Finale: cut the key                                      -->
+    <!-- 5. Finale: cut the key                                       -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1107,9 +893,9 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="es-key-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
@@ -1144,8 +930,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <!-- Local confetti (no CDN) + motion engines -->
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>

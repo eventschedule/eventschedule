@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Newsletter Builder, Free to Start - Event Schedule</x-slot>
     <x-slot name="description">Write newsletters to subscribers, followers and ticket buyers, and let new events reach subscribers as a digest. Free for 10 emails a month, counted per recipient.</x-slot>
     <x-slot name="breadcrumbTitle">Newsletters</x-slot>

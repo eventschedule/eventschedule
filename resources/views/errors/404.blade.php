@@ -1,4 +1,4 @@
-<x-marketing-layout :error-page="true">
+<x-marketing-layout :error-page="true" :hp="true">
     <x-slot name="title">Page Not Found - Event Schedule</x-slot>
     <x-slot name="description">The page you are looking for could not be found.</x-slot>
     <x-slot name="robots">noindex, follow</x-slot>

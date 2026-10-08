@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Free Appointment Booking | One Link, No Double Booking</x-slot>
     <x-slot name="description">Share one booking link and guests book an open time in their own timezone. Free with one appointment type on any plan, and never a double booking.</x-slot>
     <x-slot name="breadcrumbTitle">Appointments</x-slot>
@@ -420,7 +420,8 @@
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             font-size: 0.72rem;
             letter-spacing: 0;
-            opacity: 0.75;
+            /* 0.85, not 0.75: at 0.75 the numeral measured 4.15:1 on the tab in light mode. */
+            opacity: 0.85;
         }
         .es-book-eyebrow {
             font-size: 0.72rem;

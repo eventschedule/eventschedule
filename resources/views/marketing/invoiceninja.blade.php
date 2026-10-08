@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Invoice Ninja Ticketing | Post Every Sale to Your Books</x-slot>
     <x-slot name="description">Sell tickets in Event Schedule and the entry lands in Invoice Ninja: a client, a line item per ticket type, and the QR code printed on the invoice.</x-slot>
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>

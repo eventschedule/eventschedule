@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('marketing.about_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.about_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">About</x-slot>
@@ -498,6 +498,18 @@
             html.es-anim .es-colo-mark { animation: none; }
             .es-colo-draw { transition: none; transform: none !important; }
         }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
+        }
     </style>
 
     @php
@@ -642,13 +654,11 @@
             ['three', 'Three questions', 'B'],
             ['imprint', 'The imprint', 'C'],
             ['mission', 'Why it was set', 'D'],
-            ['who', 'Who it is set for', 'E'],
-            ['impressions', 'Two impressions', 'F'],
-            ['rules', 'Standing rules', 'G'],
-            ['errata', 'Errata', 'H'],
-            ['makers', 'The makers', 'I'],
-            ['source', 'The source', 'J'],
-            ['faq', 'Questions', 'K'],
+            ['impressions', 'Two impressions', 'E'],
+            ['rules', 'Standing rules', 'F'],
+            ['errata', 'Errata', 'G'],
+            ['makers', 'The makers', 'H'],
+            ['faq', 'Questions', 'I'],
             ['claim', 'The last leaf', null],
         ];
     @endphp
@@ -855,60 +865,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- E. Who it is set for: the three schedule types                -->
-    <!-- ============================================================ -->
-    <section id="who" class="scroll-mt-24 py-20 lg:py-28">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">E</span> Who it is set for</p>
-                <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
-                    Three kinds of schedule, <span class="es-colo-second">one book.</span>
-                </h2>
-                <div class="es-colo-rule es-colo-draw" aria-hidden="true"></div>
-                <p class="es-colo-muted mt-5 text-lg">
-                    However you share your events, Event Schedule is built to work for you. There are only three schedule types, and everything else is a variation on them.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="90">
-                @php
-                    $editions = [
-                        ['/for-talent', 'Talent', 'Share your upcoming shows, appearances and locations with the people who follow you. Musicians, DJs, comedians, dancers, magicians, food trucks: anyone whose audience needs to know where to find them next.'],
-                        ['/for-venues', 'Venues', 'Keep one calendar current and public, so visitors can see what is coming up and buy tickets straight from the schedule instead of hunting for a listing.'],
-                        ['/for-curators', 'Curators', 'Aggregate events from several schedules and publish a guide to what is happening in your area or your niche, with the originals still credited.'],
-                    ];
-                @endphp
-                @foreach ($editions as $eIndex => [$eHref, $eName, $eBody])
-                    <a href="{{ marketing_url($eHref) }}" class="es-colo-hover es-colo-leaf group flex flex-col p-7 transition-all duration-200 hover:-translate-y-0.5" data-reveal="panel">
-                        <div class="mb-4 flex items-baseline justify-between gap-3">
-                            <h3 class="es-colo-hover-title es-colo-title es-colo-ink text-xl transition-colors">For {{ $eName }}</h3>
-                            <span class="es-colo-mono es-colo-muted text-xs">{{ str_pad($eIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                        </div>
-                        <div class="es-colo-hair mb-4" aria-hidden="true"></div>
-                        <p class="es-colo-muted text-sm leading-relaxed">{{ $eBody }}</p>
-                        <span class="es-colo-hover-arrow es-colo-muted mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold transition-colors">
-                            Read the chapter
-                            <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-
-            <p class="es-colo-muted mt-8 text-sm" data-reveal>
-                Not sure which one fits?
-                <a href="{{ marketing_url('/use-cases') }}" class="es-colo-link font-semibold">Browse every use case</a>
-                and pick the closest.
-            </p>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- F. Two impressions: hosted or selfhosted                      -->
+    <!-- E. Two impressions: hosted or selfhosted                      -->
     <!-- ============================================================ -->
     <section id="impressions" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">F</span> Two impressions</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">E</span> Two impressions</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     The same book, printed on <span class="es-colo-second">two presses.</span>
                 </h2>
@@ -979,12 +941,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- G. Standing rules: what we hold to                            -->
+    <!-- F. Standing rules: what we hold to                            -->
     <!-- ============================================================ -->
     <section id="rules" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">G</span> Standing rules</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">F</span> Standing rules</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     What we believe in, <span class="es-colo-second">pinned to the press.</span>
                 </h2>
@@ -1031,12 +993,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- H. The errata slip                                            -->
+    <!-- G. The errata slip                                            -->
     <!-- ============================================================ -->
     <section id="errata" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">H</span> Errata</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">G</span> Errata</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     The slip that says <span class="es-colo-second">what is not here.</span>
                 </h2>
@@ -1070,12 +1032,12 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- I. The makers                                                 -->
+    <!-- H. The makers                                                 -->
     <!-- ============================================================ -->
     <section id="makers" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">I</span> The makers</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">H</span> The makers</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     Built by the team behind <span class="es-colo-second">Invoice Ninja.</span>
                 </h2>
@@ -1117,59 +1079,14 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- J. The source                                                -->
-    <!-- ============================================================ -->
-    <section id="source" class="relative scroll-mt-24 overflow-hidden py-20 lg:py-28">
-        <div class="es-colo-laid pointer-events-none absolute inset-0" aria-hidden="true"></div>
-
-        <div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto max-w-3xl text-center">
-                <div data-reveal>
-                    <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">J</span> The source</p>
-                    <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
-                        Free and <span class="es-colo-second">open source.</span>
-                    </h2>
-                    <div class="es-colo-rule es-colo-draw mx-auto max-w-xs" aria-hidden="true"></div>
-                </div>
-
-                <p class="es-colo-muted mx-auto mt-6 mb-8 max-w-2xl text-lg" data-reveal style="--reveal-delay: 0.1s;">
-                    Event Schedule is open source under the Attribution Assurance License. Selfhost it on your own server, contribute to the codebase, or just use it free forever. The repository is public and the history goes back to the first commit.
-                </p>
-
-                <div class="flex justify-center" data-reveal>
-                    @include('marketing.partials.github-star-badge')
-                </div>
-
-                <div class="flex flex-wrap justify-center gap-4" data-reveal>
-                    <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="es-colo-ghost inline-flex items-center gap-2 px-6 py-3 font-semibold transition-all duration-200">
-                        <svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        View on GitHub
-                    </a>
-                    <a href="{{ marketing_url('/open-source') }}" class="es-colo-ghost inline-flex items-center gap-2 px-6 py-3 font-semibold transition-all duration-200">
-                        Why open source
-                    </a>
-                    <a href="{{ marketing_url('/features') }}" class="es-colo-btn inline-flex items-center gap-2 px-6 py-3 font-semibold transition-all duration-200 hover:-translate-y-0.5">
-                        Explore features
-                        <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- K. Questions                                                 -->
+    <!-- I. Questions                                                 -->
     <!-- ============================================================ -->
     <x-seo.faq-schema :items="$faqs" />
 
     <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-10" data-reveal>
-                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">K</span> Questions</p>
+                <p class="es-colo-sig mb-5"><span class="es-colo-sig-mark">I</span> Questions</p>
                 <h2 class="es-balance es-colo-title es-colo-h2 mb-4">
                     What people ask <span class="es-colo-second">before they trust it.</span>
                 </h2>
@@ -1198,7 +1115,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- L. Related pages                                              -->
+    <!-- J. Related pages                                              -->
     <!-- ============================================================ -->
     <section class="py-16">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -1223,7 +1140,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- M. The last leaf                                              -->
+    <!-- K. The last leaf                                              -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
@@ -1243,14 +1160,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-400 focus:outline-none focus:ring-0">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" class="es-colo-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden px-8 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1280,8 +1197,6 @@
     </nav>
 
     </div>
-
-    <x-marketing.related-pages />
 
     <!-- Local confetti (no CDN) + motion engines -->
     <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Booking Request Form: Let Acts and Promoters Ask for a Date</x-slot>
     <x-slot name="description">A free booking request form for your schedule page: promoters ask a performer for a date, acts ask a venue, and each request arrives with the sender's details.</x-slot>
     <x-slot name="breadcrumbTitle">Booking Requests</x-slot>

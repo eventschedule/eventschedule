@@ -134,12 +134,49 @@ function initGalleryScene() {
     const rail = section.querySelector('.es-rail');
     const clip = section.querySelector('.es-rail-clip');
     const bar = section.querySelector('.es-rail-progress');
+    const pin = section.querySelector('.es-gallery-pin');
     if (!rail || !clip) {
         return;
     }
 
+    // While the band is pinned the rail only moves with the page, so a card reached with the
+    // Tab key could be focused while still off to the side. Scroll the page to where that card
+    // stands in the middle.
+    //
+    // Keyboard focus only (:focus-visible). A mouse press focuses a card too, and moving the
+    // page between its press and its release would slide another card under the pointer and
+    // lose the click. And only for a card that is not already whole on screen.
+    clip.addEventListener('focusin', (e) => {
+        const card = e.target.closest ? e.target.closest('.es-shot') : null;
+        let keyed = false;
+        try {
+            keyed = e.target.matches(':focus-visible');
+        } catch (err) {}
+        if (!card || !keyed || !desktop.matches || !pin || getComputedStyle(pin).position !== 'sticky') {
+            return;
+        }
+        // The band must not have been scrolled sideways to show the card: the rail moves, not it.
+        pin.scrollLeft = 0;
+        const box = card.getBoundingClientRect();
+        if (box.left >= 0 && box.right <= window.innerWidth) {
+            return;
+        }
+        const max = Math.max(0, rail.scrollWidth - clip.clientWidth);
+        const total = section.getBoundingClientRect().height - window.innerHeight;
+        if (max <= 0 || total <= 0) {
+            return;
+        }
+        const want = clamp(card.offsetLeft - (clip.clientWidth - card.offsetWidth) / 2, 0, max);
+        const top = section.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: top + (want / max) * total, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    });
+
     scenes.push(() => {
-        if (!desktop.matches) {
+        // The stylesheet decides whether the band is pinned (it is not on a phone, nor in a
+        // window too short to hold it), so ask it rather than repeat its conditions here. Where
+        // it is not pinned the rail scrolls sideways by itself, and moving it from here as well
+        // would push its first cards off the start of a scroller that cannot go negative.
+        if (!desktop.matches || !pin || getComputedStyle(pin).position !== 'sticky') {
             rail.style.transform = '';
             return;
         }
@@ -523,6 +560,26 @@ function initVideoFacade() {
     if (!facade) {
         return;
     }
+    // A link elsewhere that promises the film (the hero's "Watch the 3-minute overview") still
+    // scrolls to the screen as an anchor, and then starts it, so the film is one press away
+    // rather than two. A modified click keeps its usual meaning, and nothing happens if the
+    // player is already in. data-opening tells the showreel not to start fetching a reel that
+    // is about to be replaced: the anchor's own scroll would otherwise count as the visitor
+    // arriving at it.
+    document.querySelectorAll('[data-video-open]').forEach((opener) => {
+        opener.addEventListener('click', (e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) {
+                return;
+            }
+            facade.setAttribute('data-opening', '');
+            setTimeout(() => {
+                if (facade.isConnected) {
+                    facade.click();
+                }
+            }, 650);
+        });
+    });
+
     facade.addEventListener('click', (e) => {
         // Let modified clicks (new tab / new window) fall through to the
         // plain link instead of swapping the player in place.
@@ -594,6 +651,12 @@ function initShowreel() {
 
     let active = wanted();
     let visible = false;
+    // The frame now stands at the foot of the first screen, so on a tall window more than a
+    // third of it is in view the moment the page opens. Being in view is not yet a reason to
+    // fetch 16MB: the reel waits for the first scroll, which is the visitor coming to it.
+    let moved = window.scrollY > 0;
+    // Set once the pause button is wired: it shows "play" while the reel is waiting, too.
+    let relabel = () => {};
     // The visitor's own pause outranks scrolling back into view. Under
     // reduced motion or Save-Data the reel starts out paused this way.
     let paused = reduceMotion.matches || Boolean(saveData);
@@ -603,7 +666,8 @@ function initShowreel() {
     let handover = null;
 
     const sync = () => {
-        const play = visible && !document.hidden && !paused;
+        const opening = document.querySelector('[data-video-facade][data-opening]');
+        const play = visible && moved && !opening && !document.hidden && !paused;
         reels.forEach((v) => {
             // The outgoing cut keeps playing under its successor's seek, but
             // stops with everything else on a pause, a hidden tab or a scroll away.
@@ -699,13 +763,18 @@ function initShowreel() {
     io.observe(frame);
     document.addEventListener('visibilitychange', sync);
 
-    // Start buffering once the visitor scrolls the frame to within a quarter
+    // Start buffering on the first scroll that leaves the frame within a quarter
     // screen of the fold, so the reel is moving by the time it plays instead
-    // of sitting on its poster. Not an IntersectionObserver root margin: the
-    // frame starts about a screen and a half down, so any margin wide enough
-    // to help would already be satisfied on page load, and every visitor would
-    // pay for a reel most never scroll to.
+    // of sitting on its poster. A scroll listener, not an IntersectionObserver
+    // root margin: the frame stands in or just under the first screen, so any
+    // margin would already be satisfied on page load, and every visitor would
+    // pay for a reel many never scroll to.
     const warm = () => {
+        if (!moved) {
+            moved = true;
+            relabel();
+            sync();
+        }
         if (frame.getBoundingClientRect().top < window.innerHeight * 1.25) {
             window.removeEventListener('scroll', warm);
             if (!paused && active.isConnected) {
@@ -717,12 +786,20 @@ function initShowreel() {
 
     if (toggle) {
         const label = () => {
-            toggle.setAttribute('aria-label', paused ? toggle.dataset.labelPlay : toggle.dataset.labelPause);
-            toggle.querySelector('[data-icon="pause"]').classList.toggle('hidden', paused);
-            toggle.querySelector('[data-icon="play"]').classList.toggle('hidden', !paused);
+            const idle = paused || !moved;
+            toggle.setAttribute('aria-label', idle ? toggle.dataset.labelPlay : toggle.dataset.labelPause);
+            toggle.querySelector('[data-icon="pause"]').classList.toggle('hidden', idle);
+            toggle.querySelector('[data-icon="play"]').classList.toggle('hidden', !idle);
         };
+        relabel = label;
         toggle.addEventListener('click', () => {
-            paused = !paused;
+            // Pressing play before any scroll is the visitor asking for the reel outright.
+            if (!moved) {
+                moved = true;
+                paused = false;
+            } else {
+                paused = !paused;
+            }
             label();
             sync();
         });
@@ -736,51 +813,71 @@ function initShowreel() {
 /* ------------------------------------------------------------------ */
 
 function initClaim() {
-    const input = document.getElementById('es-claim-input');
-    if (!input) {
+    // Every claim box on the page. Most pages have one, in the finale; the homepage has a
+    // second beside its headline, and a name typed in either is the name in both.
+    const boxes = Array.from(document.querySelectorAll('.es-claim input[type="text"]')).map((input) => {
+        const cta = input.closest('.es-claim')?.parentElement?.querySelector('a[href]');
+        return { input: input, cta: cta, baseHref: cta?.getAttribute('href') };
+    });
+    if (!boxes.length) {
         return;
     }
-    const cta = input.closest('.es-claim')?.parentElement?.querySelector('a[href]');
-    const baseHref = cta?.getAttribute('href');
+    // Sign-up links away from a box that should carry the name too (data-claim-link): somebody
+    // who typed a name beside the headline and pressed "Start for free" further down meant it.
+    const followers = Array.from(document.querySelectorAll('a[data-claim-link]')).map((cta) => {
+        return { cta: cta, baseHref: cta.getAttribute('href') };
+    });
 
-    input.addEventListener('input', () => {
-        const slug = input.value.toLowerCase()
-            .replace(/['’]/g, '')
-            .replace(/[^a-z0-9-]+/g, '-')
-            .replace(/-{2,}/g, '-')
-            .replace(/^-+/, '')
-            .slice(0, 30);
-        if (input.value !== slug) {
-            input.value = slug;
-        }
-
+    const point = (box, slug) => {
         // The box promises "your-name.eventschedule.com", so the name has to reach sign-up:
         // it used to be thrown away at the click. RegisteredUserController::create() keeps it
         // in the session (through Google too) and the new-schedule form starts with it.
-        // Trailing hyphens are dropped here, not above, or typing "blue-" could never
-        // continue to "blue-room".
-        if (cta && baseHref) {
-            const name = slug.replace(/-+$/, '');
-            if (name) {
-                const url = new URL(baseHref, window.location.href);
-                url.searchParams.set('schedule', name);
-                cta.setAttribute('href', url.toString());
-            } else {
-                cta.setAttribute('href', baseHref);
-            }
-        }
-    });
-
-    // The input is not inside a form, so Enter did nothing at all: somebody typed the
-    // name they wanted and the field just sat there. Follow the CTA beside it instead.
-    input.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter') {
+        // Trailing hyphens are dropped here, not when the value is cleaned, or typing "blue-"
+        // could never continue to "blue-room".
+        if (!box.cta || !box.baseHref) {
             return;
         }
-        if (cta) {
-            event.preventDefault();
-            cta.click();
+        const name = slug.replace(/-+$/, '');
+        if (name) {
+            const url = new URL(box.baseHref, window.location.href);
+            url.searchParams.set('schedule', name);
+            box.cta.setAttribute('href', url.toString());
+        } else {
+            box.cta.setAttribute('href', box.baseHref);
         }
+    };
+
+    boxes.forEach((box) => {
+        box.input.addEventListener('input', () => {
+            const slug = box.input.value.toLowerCase()
+                .replace(/['’]/g, '')
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-{2,}/g, '-')
+                .replace(/^-+/, '')
+                .slice(0, 30);
+            if (box.input.value !== slug) {
+                box.input.value = slug;
+            }
+            boxes.forEach((other) => {
+                if (other !== box && other.input.value !== slug) {
+                    other.input.value = slug;
+                }
+                point(other, slug);
+            });
+            followers.forEach((follower) => point(follower, slug));
+        });
+
+        // The input is not inside a form, so Enter did nothing at all: somebody typed the
+        // name they wanted and the field just sat there. Follow the CTA beside it instead.
+        box.input.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') {
+                return;
+            }
+            if (box.cta) {
+                event.preventDefault();
+                box.cta.click();
+            }
+        });
     });
 }
 

@@ -277,16 +277,16 @@
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
-                    Create your calendar
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
                 <a href="#front-of-house" class="group inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
                     See how it works
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </a>
+                <a href="{{ app_url('/sign_up?type=venue') }}" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                    Create your calendar
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
             </div>
@@ -844,11 +844,11 @@
                             </span>
                             <h3 class="text-sm font-semibold text-white sm:text-base">{{ $item['title'] }}</h3>
                         </div>
-                        <p class="hidden flex-grow text-sm text-gray-500 dark:text-gray-400 sm:block">{{ $item['desc'] }}</p>
+                        <p class="hidden flex-grow text-sm text-gray-400 sm:block">{{ $item['desc'] }}</p>
                         {{-- One link colour rather than one per card: the icon chip already
                              carries each card's identity, and four of the twelve accents sat
                              under 4.5:1 on white at this size. --}}
-                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium text-blue-700 transition-all group-hover:gap-2 dark:text-blue-400 sm:inline-flex">
+                        <span class="mt-auto hidden items-center gap-1 pt-3 text-sm font-medium text-blue-400 transition-all group-hover:gap-2 sm:inline-flex">
                             Learn more
                             <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </span>
@@ -878,7 +878,7 @@
                     <li data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
                         <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-base font-black text-white">{{ $i + 1 }}</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">{{ $step['name'] }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $step['text'] }}</p>
+                        <p class="text-sm text-gray-400">{{ $step['text'] }}</p>
                     </li>
                 @endforeach
             </ol>
@@ -1057,14 +1057,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-venue" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -1073,7 +1073,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
                 </div>
             </div>
         </div>

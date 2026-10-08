@@ -37,7 +37,9 @@ class WhatsAppWebhookController extends Controller
             ->whereNotNull('phone_verified_at')
             ->first();
 
-        if (! $user) {
+        // An account an operator has shut out (/admin/blocked) is nobody here either: it may
+        // still be an editor of somebody else's schedule.
+        if (! $user || $user->isBlocked()) {
             WhatsAppService::sendMessage($phone, __('messages.whatsapp_user_not_found'));
 
             return response($twiml, 200)->header('Content-Type', 'text/xml');

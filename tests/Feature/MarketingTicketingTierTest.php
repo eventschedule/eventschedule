@@ -249,9 +249,10 @@ class MarketingTicketingTierTest extends TestCase
                 // (SeoUtils::softwareApplication()). It replaced 92 per-page nodes that these
                 // globs did see, so without this line their claims would move out of view.
                 app_path('Utils/SeoUtils.php'),
-                // The homepage's headline and subtitle, which are also its <title> and meta
-                // description (HeroExperiment::meta()). That pair sat in lang/en/marketing.php,
-                // which the glob above reads, until the page started building it from here.
+                // The homepage's headline and subtitle, every variant of them: the first claim a
+                // visitor reads, kept in a class rather than in a view the globs above would see.
+                // (The page's <title> and meta description are home_title and home_description
+                // in lang/*/marketing.php, which the glob above reads.)
                 app_path('Utils/HeroExperiment.php'),
             ]
         );

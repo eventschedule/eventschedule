@@ -222,6 +222,16 @@ class AuditService
 
     const ADMIN_SCHEDULE_UPDATE = 'admin.schedule_update';
 
+    // An operator shutting an account out, and letting it back in (AccountBlockService), and
+    // the list of what new accounts are refused for (Blocklist, /admin/blocked).
+    const ADMIN_ACCOUNT_BLOCK = 'admin.account_block';
+
+    const ADMIN_ACCOUNT_UNBLOCK = 'admin.account_unblock';
+
+    const ADMIN_BLOCKLIST_ADD = 'admin.blocklist_add';
+
+    const ADMIN_BLOCKLIST_REMOVE = 'admin.blocklist_remove';
+
     const ADMIN_GRANT = 'admin.grant';
 
     const ADMIN_REVOKE = 'admin.revoke';

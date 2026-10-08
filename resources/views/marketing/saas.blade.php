@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">White-Label Ticketing Platform - Launch Your Own for Free</x-slot>
     <x-slot name="description">Launch a white-label ticketing platform for free. Open source, multi-tenant, Stripe billing built in. Set your prices; only Stripe's fee comes off. See the demo.</x-slot>
     <x-slot name="breadcrumbTitle">White-Label SaaS</x-slot>
@@ -482,6 +482,18 @@
                the first one should show. */
             .es-scene-1,
             .es-scene-2 { display: none; }
+        }
+
+        /* On a phone the page's own object (the thing in the hero's second column) sat below
+           the first screen, so every page opened on the same pill, headline, paragraph and two
+           buttons. A little less air, a headline one step down and a 16px lede bring its top
+           into view. Phones only; nothing changes from 640px up. */
+        @media (max-width: 639.98px) {
+            #top { padding-top: 2.5rem; }
+            #top h1 { font-size: 2.125rem; margin-bottom: 1.25rem; }
+            #top h1 > :first-child { margin-bottom: 1.25rem; }
+            #top h1 + p { font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem; }
+            #top div:has(> div > h1) { gap: 2rem; }
         }
     </style>
 
@@ -1076,7 +1088,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-white">The AAL license</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Event Schedule is open source under the Attribution Assurance License. Use it commercially at no cost; just keep the attribution intact.</p>
+                                    <p class="text-sm text-gray-400">Event Schedule is open source under the Attribution Assurance License. Use it commercially at no cost; just keep the attribution intact.</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4">
@@ -1085,7 +1097,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-white">A small backlink</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com, on every tier you sell, the paid ones included. Your free tier carries your own footer strip in its place, so no page shows two credits. That link is how the project grows, which keeps the software maintained for everyone.</p>
+                                    <p class="text-sm text-gray-400">Public schedule pages carry a small, discreet link back to eventschedule.com, on every tier you sell, the paid ones included. Your free tier carries your own footer strip in its place, so no page shows two credits. That link is how the project grows, which keeps the software maintained for everyone.</p>
                                 </div>
                             </div>
                         </div>
@@ -1108,7 +1120,7 @@
                                 Join the Discussions
                             </a>
                         </div>
-                        <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">Read more about <a href="{{ route('marketing.open_source') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">the open source project</a> or the full <a href="{{ route('marketing.self_hosting_terms') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">self-hosting terms</a>.</p>
+                        <p class="mt-6 text-sm text-gray-400">Read more about <a href="{{ route('marketing.open_source') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">the open source project</a> or the full <a href="{{ route('marketing.self_hosting_terms') }}" class="text-sky-300 underline decoration-sky-300/40 underline-offset-2 hover:text-sky-200">self-hosting terms</a>.</p>
                     </div>
 
                     <!-- The loupe: the catch shown at actual size -->
@@ -1148,7 +1160,7 @@
                         <div class="es-loupe hidden bottom-[-28px] items-center justify-center ltr:right-[-18px] rtl:left-[-18px] lg:flex">
                             <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-2xl font-black text-white shadow-lg">ES</span>
                         </div>
-                        <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">Shown at actual size. That is the whole catch.</p>
+                        <p class="mt-4 text-center text-sm text-gray-400">Shown at actual size. That is the whole catch.</p>
                     </div>
                 </div>
             </div>
@@ -1598,6 +1610,8 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
     <!-- 11. Finale                                                   -->
     <!-- ============================================================ -->
@@ -1647,8 +1661,6 @@
             </div>
         </div>
     </section>
-
-    <x-marketing.related-pages />
 
     <!-- Section dot navigation (desktop) -->
     @php

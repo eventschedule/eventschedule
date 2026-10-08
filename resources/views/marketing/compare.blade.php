@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Compare Event Platforms: Eventbrite, Luma &amp; {{ count($headToHead) - 2 }} More</x-slot>
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup and {{ count($headToHead) - 3 }} more platforms: feature by feature, a fee calculator at published rates, and 0% platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
@@ -319,7 +319,7 @@
                     </svg>
                 </a>
                 <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    Start free
+                    Start for free
                 </a>
             </div>
         </div>
@@ -725,7 +725,7 @@
                     <div data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6">
                         <div class="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/20 text-sm font-bold text-blue-300">{{ $sIndex + 1 }}</div>
                         <h3 class="mb-2 font-semibold text-white">{{ $sTitle }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $sBody }}</p>
+                        <p class="text-sm text-gray-400">{{ $sBody }}</p>
                     </div>
                 @endforeach
             </div>
@@ -773,6 +773,8 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
     <!-- Finale                                                      -->
     <!-- ============================================================ -->
@@ -794,7 +796,7 @@
                     <div class="flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row">
                         <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get started free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
@@ -809,8 +811,6 @@
             </div>
         </div>
     </section>
-
-    <x-marketing.related-pages />
 
     <!-- Section dot navigation (desktop) -->
     @php

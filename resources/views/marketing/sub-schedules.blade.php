@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Sub-Schedules | Sort One Event Calendar Into Sections</x-slot>
     <x-slot name="description">Sort one event calendar into sections like Live Music or Workshops, each with a colour, its own link and a place in the filter. Free, with no limit.</x-slot>
     <x-slot name="breadcrumbTitle">Sub-Schedules</x-slot>

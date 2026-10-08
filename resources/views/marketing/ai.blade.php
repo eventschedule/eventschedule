@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">{{ __('marketing.ai_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.ai_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">AI Features</x-slot>

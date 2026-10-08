@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\RoleUser;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -43,10 +44,14 @@ class AddedMemberNotification extends Notification
     {
         $newUser = $this->user->wasRecentlyCreated;
 
+        // A member is added as an admin or as a viewer, and the mail told both they were an admin.
+        $level = RoleUser::where('user_id', $this->user->id)->where('role_id', $this->role->id)->value('level');
+        $detail = $level === 'viewer' ? 'messages.added_to_team_detail_viewer' : 'messages.added_to_team_detail';
+
         return (new MailMessage)
             ->replyTo($this->admin->email, $this->admin->name)
             ->subject(str_replace(':name', $this->role->name, __('messages.added_to_team')))
-            ->line(str_replace([':name', ':user'], [$this->role->name, $this->admin->name], __('messages.added_to_team_detail')))
+            ->line(str_replace([':name', ':user'], [$this->role->name, $this->admin->name], __($detail)))
             ->action(
                 $newUser ? __('messages.set_new_password') : __('messages.get_started'),
                 $newUser ? route('password.request', ['email' => $this->user->email]) : route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))

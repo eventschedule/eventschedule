@@ -5,6 +5,7 @@ use App\Http\Middleware\CacheableMarketingResponse;
 use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\DemoAutoLogin;
 use App\Http\Middleware\DetectTrailingSlash;
+use App\Http\Middleware\EnsureAccountNotBlocked;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureSelfhostSetup;
 use App\Http\Middleware\EnsureUserIsAdmin;
@@ -119,6 +120,9 @@ return Application::configure(basePath: dirname(__DIR__))
             CaptureUtmParameters::class,
             TrackMarketingVisit::class,
             SetUserLanguage::class,
+            // After the language is known (the sentence it sends to the sign-in page is the
+            // person's own), before anything asks more of an account that is shut out.
+            EnsureAccountNotBlocked::class,
             EnsureEmailIsVerified::class,
             HandleBotTraffic::class,
             DemoAutoLogin::class,

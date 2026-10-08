@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Promote Events with Facebook and Instagram Ads | Boost</x-slot>
     <x-slot name="description">Promote a published event with Facebook and Instagram ads built from its details. Prepaid from $10, no Ads Manager needed, and unspent budget is refunded.</x-slot>
     <x-slot name="breadcrumbTitle">Boost</x-slot>

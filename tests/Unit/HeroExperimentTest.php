@@ -41,16 +41,6 @@ class HeroExperimentTest extends TestCase
             $this->assertMatchesRegularExpression('/\bbook(ing|ings|ed)?\b/i', $fold, "{$key} never says the product takes bookings");
             $this->assertDoesNotMatchRegularExpression('/\b(Pro|Enterprise)\b/', $fold, "{$key} names a paid plan in the fold");
             $this->assertStringNotContainsString("\u{2014}", $fold, "{$key} contains an em-dash");
-
-            // The copy is also the homepage's search result. MarketingMetaLengthTest and
-            // MarketingKeywordMapTest hold these same bounds, but they render the page, so they
-            // only ever see the default: a winner would otherwise reach the <title> unchecked.
-            $meta = HeroExperiment::meta($copy);
-
-            $this->assertLessThanOrEqual(65, mb_strlen($meta['title']), "{$key} makes a <title> over 65 characters: keep line 1 and line 2 to 48 together");
-            $this->assertStringContainsStringIgnoringCase('event calendar', $meta['title'], "{$key} has no \"event calendar\" in the headline, which is the <title>");
-            $this->assertGreaterThanOrEqual(80, mb_strlen($meta['description']), "{$key} subtitle is too short to be the meta description");
-            $this->assertLessThanOrEqual(165, mb_strlen($meta['description']), "{$key} subtitle is too long to be the meta description");
         }
     }
 

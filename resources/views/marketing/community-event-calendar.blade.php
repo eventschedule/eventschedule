@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Community Event Calendar | One Calendar for the Whole Town</x-slot>
     <x-slot name="description">Run a community event calendar for a town, neighbourhood or local paper: organizers submit, you approve, and it embeds on your site. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">Community Event Calendar</x-slot>

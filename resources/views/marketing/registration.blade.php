@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Free Event Registration Software & RSVP | Event Schedule</x-slot>
     <x-slot name="description">Free event registration and RSVP on every plan: a cap per date, a waitlist when it fills, a QR code in every confirmation and a form you can embed.</x-slot>
     <x-slot name="breadcrumbTitle">Registration</x-slot>

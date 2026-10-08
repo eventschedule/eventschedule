@@ -64,7 +64,7 @@
    @if ($external) target="_blank" rel="noopener" @endif
    data-reveal
    data-tilt="2.5"
-   class="es-bento es-tilt-inner group relative flex h-full flex-col overflow-hidden rounded-3xl p-6 shadow-sm transition-shadow duration-200 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] {{ $surface }}">
+   class="es-aud-card es-bento es-tilt-inner group relative flex h-full flex-col overflow-hidden rounded-3xl p-6 shadow-sm transition-shadow duration-200 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] {{ $surface }}">
 
 
     <div class="mb-3 flex items-center gap-3">

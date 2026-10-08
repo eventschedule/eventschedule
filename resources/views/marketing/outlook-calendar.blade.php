@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Free Two-Way Outlook & Microsoft 365 Calendar Sync</x-slot>
     <x-slot name="description">Two-way Outlook and Microsoft 365 calendar sync, free on every plan, with Graph change notifications, a delete policy and optional Teams meetings.</x-slot>
     <x-slot name="breadcrumbTitle">Outlook Calendar</x-slot>

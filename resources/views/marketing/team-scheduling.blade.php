@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Team Scheduling | Invite Members and Set Permissions</x-slot>
     <x-slot name="description">Invite your team onto one schedule. Admins run events and see ticket sales, viewers scan tickets at the door, and only the owner changes who does what.</x-slot>
     <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>

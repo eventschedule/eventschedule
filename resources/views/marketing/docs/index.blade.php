@@ -79,7 +79,7 @@
     ];
 @endphp
 
-<x-marketing-layout :docs="true">
+<x-marketing-layout :docs="true" :hp="true">
     <x-slot name="title">Event Schedule Documentation: User Guide, Selfhost, API</x-slot>
     <x-slot name="breadcrumbTitle">Documentation</x-slot>
     <x-slot name="description">Guides for running your schedule on Event Schedule: events, tickets, subscribers and sharing, plus selfhost installation, SaaS operations and the REST API.</x-slot>
@@ -123,49 +123,35 @@
 
         {{-- Hero. The one docs page that gets the full es-* treatment: it is a
              landing page, not reference material. --}}
-        <section class="es-hero noise relative overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] lg:py-20">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(37,99,235,.26), transparent 65%);"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 78% 62%, rgba(14,165,233,.24), transparent 65%);"></div>
-                <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(34,211,238,.16), transparent 62%);"></div>
-                <div class="es-rays absolute inset-0"></div>
-                <div class="absolute inset-0 grid-pattern"></div>
-            </div>
+        <section class="es-hero hp-hero is-short">
+            <div class="hp-hero-sky" aria-hidden="true"></div>
 
-            <div class="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-                <div class="es-fade-up es-d-1 mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
+            <div class="hp-hero-copy">
+                <div class="es-fade-up es-d-1 hp-eyebrow">
                     <x-docs.icon name="book" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span class="text-sm text-gray-600 dark:text-gray-300">Documentation</span>
+                    Documentation
                 </div>
 
-                <h1 class="es-balance mb-4 text-[2.25rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
+                <h1 class="hp-h1">
                     <span class="es-mask"><span class="es-mask-line">Everything you need,</span></span>
-                    {{-- Same docs accent gradient, one shade deeper. The shared
-                         .text-gradient-docs ends on cyan-500, which measures 2.43
-                         against this white hero and misses AA; the 600-shade stops
-                         below clear 3:1 in BOTH themes, so one gradient serves
-                         light and dark. background-IMAGE, never the `background`
-                         shorthand, or the clip-to-text is reset and the letters
-                         turn into a filled box. --}}
-                    <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-docs" style="background-image: linear-gradient(135deg, #2563eb 0%, #0284c7 50%, #0891b2 100%);">in one place</span></span></span>
+                    <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="hp-ink-grad">in one place</span></span></span>
                 </h1>
 
-                <p class="es-fade-up es-d-2 mx-auto mb-9 max-w-2xl text-lg text-gray-500 dark:text-gray-400">
+                <p class="es-fade-up es-d-2 hp-sub">
                     Guides for organizers, selfhost installation, SaaS operations, and the REST API.
                 </p>
 
                 {{-- Hero scale here, rail scale on every leaf page. Never
                      [data-reveal] - the primary control must be usable on paint. --}}
-                <div class="es-fade-up es-d-3 mx-auto max-w-2xl">
+                <div class="es-fade-up es-d-3" style="max-width: 42rem; margin: clamp(1.6rem, 3.4vh, 2.3rem) auto 0; text-align: start;">
                     <x-docs.search variant="hero" />
-
-                    <nav class="mt-4 flex flex-wrap items-center justify-center gap-2" aria-label="Page sections">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Jump to</span>
-                        @foreach ([['Get started', '#start'], ['User Guide', '#guide'], ['Platforms', '#platforms'], ['Glossary', '#glossary']] as [$label, $href])
-                            <a href="{{ $href }}" class="rounded-full border border-gray-200 bg-white/70 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-[var(--brand-blue)] hover:text-blue-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:text-blue-300">{{ $label }}</a>
-                        @endforeach
-                    </nav>
                 </div>
+
+                <nav class="es-fade-up es-d-4 hp-toc" aria-label="Page sections">
+                    @foreach ([['Get started', '#start'], ['User Guide', '#guide'], ['Platforms', '#platforms'], ['Glossary', '#glossary']] as $tocIndex => [$label, $href])
+                        <a href="{{ $href }}"><b>{{ sprintf('%02d', $tocIndex + 1) }}</b>{{ $label }}</a>
+                    @endforeach
+                </nav>
             </div>
         </section>
 

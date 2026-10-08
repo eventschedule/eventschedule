@@ -5,8 +5,10 @@ namespace App\Utils;
 /**
  * What ticketing platforms take out of one event's ticket sales, at their published US rates.
  *
- * Every fee calculator on the marketing site reads this: <x-marketing.fee-calculator> on /compare
- * and /ticket-fee-calculator, the savings panel on /pricing and the door-money band on /for-talent. Each renders its first paint
+ * Every fee calculator on the marketing site reads this: <x-marketing.fee-calculator> on the
+ * homepage, /compare and /ticket-fee-calculator, the savings panel on /pricing and the door-money
+ * band on /for-talent. The homepage passes its own four platforms, leaving out the one whose rate
+ * could not be re-checked (see 'ticket-tailor' below). Each renders its first paint
  * from cost(), and the scripts that recompute as a visitor types are handed rates() as a data-rates
  * attribute and run the same formula (marketing/partials/ticket-fee-math.blade.php), so a keystroke
  * cannot change the answer the page was rendered with. Before this class the rates were retyped in

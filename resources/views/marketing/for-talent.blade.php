@@ -126,6 +126,10 @@
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="#gigs" class="group inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:text-white">
+                    See how it works
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                </a>
                 <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                     <span class="relative z-10 flex items-center gap-2">
                         Create your schedule
@@ -134,10 +138,6 @@
                         </svg>
                     </span>
                     <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                </a>
-                <a href="#gigs" class="group inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:text-white">
-                    See how it works
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
             </div>
 
@@ -421,33 +421,33 @@
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
                         A sold-out night, <span class="text-gradient-talent">two invoices</span>
                     </h2>
-                    <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
+                    <p class="text-lg text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
                         {{ $feeTickets }} tickets at ${{ $feePrice }}, so ${{ number_format($feeRevenue) }} through the door. Here is what each platform takes.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="110" data-fee-tickets="{{ $feeTickets }}" data-fee-price="{{ $feePrice }}">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Eventbrite</div>
+                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Eventbrite</div>
                         <div data-fee-total="eventbrite" class="mb-2 text-4xl font-black text-white">${{ number_format($feeEb, 2) }}</div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $feeRates['eventbrite']['label'] }}.</p>
+                        <p class="text-sm text-gray-400">{{ $feeRates['eventbrite']['label'] }}.</p>
                     </div>
 
                     <div class="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-6 text-center backdrop-blur-sm" data-reveal="panel">
                         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Event Schedule</div>
                         <div data-fee-total="eventschedule" class="mb-2 text-4xl font-black text-white">${{ number_format($feeEs, 2) }}</div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's {{ $feeRates['stripe']['label'] }}. Our platform fee is {{ plan_price(0) }}.</p>
+                        <p class="text-sm text-gray-400">{{ plan_price($proMonthly) }} for Pro plus Stripe's {{ $feeRates['stripe']['label'] }}. Our platform fee is {{ plan_price(0) }}.</p>
                     </div>
 
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">You keep</div>
+                        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">You keep</div>
                         <div class="mb-2 text-4xl font-black text-gradient-talent">${{ number_format($feeKeep, 2) }}</div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">More, on one night. Roughly {{ floor($feeKeep / $feePrice) }} extra tickets you didn't have to sell.</p>
+                        <p class="text-sm text-gray-400">More, on one night. Roughly {{ floor($feeKeep / $feePrice) }} extra tickets you didn't have to sell.</p>
                     </div>
                 </div>
 
                 {{-- gray-400, not gray-500: small text on the dark band needs 4.5:1. --}}
-                <p class="mx-auto mt-8 max-w-3xl text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
+                <p class="mx-auto mt-8 max-w-3xl text-center text-sm text-gray-400" data-reveal>
                     Card processing is real either way. Eventbrite adds its own 2.9% to every order on top of the service fee, and we show Stripe's on our side and charge nothing on top, so the comparison is like for like.
                     <a href="{{ marketing_url('/ticket-fee-calculator') }}" class="ms-1 font-medium text-cyan-300 hover:underline">Run your own numbers</a>
                 </p>
@@ -492,7 +492,7 @@
                         @endforeach
                     </ul>
                     <a href="{{ app_url('/sign_up?type=talent') }}" class="group mt-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 px-4 py-3 text-base font-semibold text-gray-800 transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-white/15 dark:text-white">
-                        Start free
+                        Start for free
                         <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
                 </div>
@@ -650,14 +650,14 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-4 sm:px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-500 dark:text-gray-400 sm:text-base">.eventschedule.com</span>
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-base font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get started for free
+                                Start for free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -666,7 +666,7 @@
                         </a>
                     </div>
 
-                    <p class="mt-6 text-sm text-gray-500 dark:text-gray-400">No credit card required</p>
+                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
                 </div>
             </div>
         </div>

@@ -297,7 +297,7 @@ class RequestMailTest extends TestCase
 
         $mail = $this->sentTo($owner)[0];
         $this->assertSame([], $mail['data']['requests']);
-        $this->assertSame('1 pending request(s) for Student House', $mail['subject']);
+        $this->assertSame('1 pending request(s) for the "Student House" schedule', $mail['subject']);
         $this->assertStringNotContainsString('Dana Guest', $mail['html'], 'a booking is named after its guest');
         $this->assertSame(1, $this->stamped($venue), 'counted once, and not again tomorrow');
     }
@@ -601,8 +601,8 @@ class RequestMailTest extends TestCase
 
         $mail = (new NewRequestsNotification($venue, 3))->toMail($owner);
 
-        $this->assertSame('3 pending request(s) for Student House', $mail->subject);
-        $this->assertStringContainsString('pending requests for Student House', (string) $mail->render());
+        $this->assertSame('3 pending request(s) for the "Student House" schedule', $mail->subject);
+        $this->assertStringContainsString(e('pending requests for the "Student House" schedule'), (string) $mail->render());
     }
 
     /** A date in the reader's own order, on the schedule's clock, in the reader's language. */

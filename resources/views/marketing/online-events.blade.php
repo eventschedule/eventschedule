@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Online & Hybrid Event Hosting, Any Platform - Event Schedule</x-slot>
     <x-slot name="description">Host virtual and hybrid events on Zoom, Google Meet or any link: paste it once and the ticket, the listing and the search markup follow. Free plan.</x-slot>
     <x-slot name="breadcrumbTitle">Online Events</x-slot>

@@ -108,6 +108,12 @@ class UrlUtils
             return null;
         }
 
+        // ?id[]=1 arrives as an array (and a posted file as an object), and Sqids::decode() is
+        // typed string: a TypeError, so a 500 on any page that decodes an id from the request.
+        if (! is_scalar($value)) {
+            return null;
+        }
+
         // Try Sqids decode first (verify round-trip to avoid false positives)
         $decoded = self::getSqids()->decode($value);
         if (! empty($decoded) && self::getSqids()->encode($decoded) === $value) {

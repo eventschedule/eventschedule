@@ -124,6 +124,39 @@ class GdprNoticesTest extends TestCase
         $this->assertStringNotContainsString('data-cookie-consent-reopen', $html);
     }
 
+    /**
+     * The marketing footer's four columns are curated by hand and hold five links each. The
+     * control that reopens the banner used to be a sixth entry under Company; it now stands
+     * beside the copyright line, still at the foot of every marketing page, which is what the
+     * privacy policy ("at the bottom of the page") and the selfhost guide ("in the footer") say.
+     */
+    public function test_the_marketing_footer_reopens_the_banner_from_its_last_line_not_from_a_column(): void
+    {
+        config(['services.google.analytics' => 'G-TEST123']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $footer = substr($html, strrpos($html, '<footer'));
+        $bar = strpos($footer, 'Bottom Bar');
+        $this->assertNotFalse($bar, 'the footer no longer marks where its link columns end');
+
+        $columns = substr($footer, 0, $bar);
+        $this->assertStringNotContainsString('data-cookie-consent-reopen', $columns,
+            'the cookie control is back among the footer links, which makes one column longer than the rest');
+        $this->assertSame(1, substr_count(substr($footer, $bar), 'data-cookie-consent-reopen'),
+            'a marketing page that shows the banner must be able to reopen it (GDPR Art. 7(3))');
+
+        foreach (['Product', 'Deploy', 'Company'] as $heading) {
+            $this->assertSame(1, preg_match('#<h3[^>]*>'.$heading.'</h3>\s*<ul[^>]*>(.*?)</ul>#s', $columns, $match), "the {$heading} column is gone");
+            $this->assertSame(5, substr_count($match[1], '<li>'), "the {$heading} column no longer holds five links");
+        }
+
+        // Where no banner is shown there is nothing to reopen, and no dead control.
+        config(['services.google.analytics' => null]);
+        if (! cookie_banner_required()) {
+            $this->assertStringNotContainsString('data-cookie-consent-reopen', $this->get('/')->assertOk()->getContent());
+        }
+    }
+
     /** ?graphic=1 is turned into an image by a headless browser that can never answer a banner. */
     public function test_a_rendered_graphic_carries_no_banner_and_no_legal_pill(): void
     {

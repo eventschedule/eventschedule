@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Fan Photos, Videos & Comments for Events - Event Schedule</x-slot>
     <x-slot name="description">Let fans add YouTube videos, photos, and comments to your event pages for free, with organizer approval before anything goes live.</x-slot>
     <x-slot name="breadcrumbTitle">Fan Videos, Photos & Comments</x-slot>

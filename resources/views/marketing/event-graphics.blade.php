@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     @php
         // The wall in the hero: six upcoming events, each with its own flyer.
         // Two OPTIONAL settings are switched on in this drawing, and the caption

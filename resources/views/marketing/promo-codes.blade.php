@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Ticket Promo Codes and Add-ons | Discounts With a Deadline</x-slot>
     <x-slot name="description">Discount codes that expire, cap their own use and cover chosen ticket types, plus add-ons with their own stock. A code never comes off an add-on.</x-slot>
     <x-slot name="breadcrumbTitle">Promo Codes</x-slot>

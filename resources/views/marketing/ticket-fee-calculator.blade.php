@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Ticket Fee Calculator: What Each Platform Takes Per Ticket</x-slot>
     <x-slot name="description">Work out what Eventbrite, Luma, Ticket Tailor, TicketLeap, Universe, AllEvents and Hi.Events take from your ticket sales, next to 0% on Event Schedule.</x-slot>
     <x-slot name="breadcrumbTitle">Ticket Fee Calculator</x-slot>

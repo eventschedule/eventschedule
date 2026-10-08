@@ -299,9 +299,7 @@ class ApFeedPagesTest extends TestCase
 
         $this->actingAs($this->owner)->get(route('role.feeds.create', ['subdomain' => $this->role->subdomain]))->assertOk()
             ->assertSee(__('messages.feeds_add_lead'))
-            ->assertSee(__('messages.feeds_works_page_title'))
-            // Not offered until its reader has been run against a real feed of that kind.
-            ->assertDontSee(__('messages.feeds_works_jolioo_title'));
+            ->assertSee(__('messages.feeds_works_page_title'));
 
         $response = $this->check(self::CALENDAR)->assertOk();
 

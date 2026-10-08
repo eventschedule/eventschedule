@@ -86,7 +86,7 @@
         . ', ' . str_replace('ALPHA', '0', $a['glow']) . ' 65%)';
 @endphp
 
-<section id="{{ $id }}" class="relative scroll-mt-24 overflow-hidden {{ $groundClass }} pb-4 pt-14 lg:pb-8 lg:pt-20">
+<section id="{{ $id }}" class="es-chapter relative scroll-mt-24 overflow-hidden {{ $groundClass }} pb-4 pt-14 lg:pb-8 lg:pt-20">
     <div class="pointer-events-none absolute inset-0" aria-hidden="true">
         <div class="es-aurora es-ch-aurora es-aurora-1" style="background: {{ $glow }};"></div>
     </div>
@@ -97,16 +97,16 @@
                  empty - the numeral lives there. Bleeding it off the leading edge
                  instead put it directly behind the eyebrow, where it read as a smudge. --}}
             <span aria-hidden="true"
-                  class="pointer-events-none absolute top-1/2 -translate-y-1/2 select-none text-[7rem] font-black leading-none {{ $accentText }} {{ $numeralOpacity }} lg:text-[13rem] ltr:right-0 rtl:left-0">{{ $number }}</span>
+                  class="es-chapter-num pointer-events-none absolute top-1/2 -translate-y-1/2 select-none text-[7rem] font-black leading-none {{ $accentText }} {{ $numeralOpacity }} lg:text-[13rem] ltr:right-0 rtl:left-0">{{ $number }}</span>
 
             <div class="relative max-w-3xl">
                 <div class="mb-4 inline-flex items-center gap-2">
                     <span class="h-1.5 w-1.5 rounded-full {{ $a['dot'] }}"></span>
-                    <span class="text-xs font-semibold uppercase tracking-[0.18em] {{ $accentText }}">{{ $label }} {{ $number }}</span>
+                    <span class="es-chapter-label text-xs font-semibold uppercase tracking-[0.18em] {{ $accentText }}">{{ $label }} {{ $number }}</span>
                 </div>
 
-                <h2 class="es-balance mb-3 text-3xl font-black tracking-tight {{ $titleClass }} md:text-4xl">{{ $title }}</h2>
-                <p class="text-lg {{ $ledeClass }}">{{ $lede }}</p>
+                <h2 class="es-chapter-title es-balance mb-3 text-3xl font-black tracking-tight {{ $titleClass }} md:text-4xl">{{ $title }}</h2>
+                <p class="es-chapter-lede text-lg {{ $ledeClass }}">{{ $lede }}</p>
 
                 <div class="es-ch-rule mt-8 h-px bg-gradient-to-r {{ $a['rule'] }} to-transparent rtl:bg-gradient-to-l"></div>
             </div>

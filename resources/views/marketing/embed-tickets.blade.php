@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Embed Tickets on Your Website | Full Checkout in One iframe</x-slot>
     <x-slot name="description">Put the whole ticket checkout on your own website with one iframe tag: ticket types, custom questions, promo codes and payment by Stripe, PayPal or cash.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>

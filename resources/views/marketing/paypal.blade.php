@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Sell Event Tickets with PayPal | Zero Platform Fees</x-slot>
     <x-slot name="description">Take ticket money into your own PayPal account, with no platform fee on any plan. Every payment is read back from PayPal, and refunds can be full or partial.</x-slot>
     <x-slot name="breadcrumbTitle">PayPal</x-slot>

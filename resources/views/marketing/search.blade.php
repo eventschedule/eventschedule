@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     {{-- SEO Slots --}}
     <x-slot name="title">Search Schedules & Upcoming Events | Event Schedule</x-slot>
     <x-slot name="description">Look up a schedule by name, web address, city or blurb, and an upcoming event by name or blurb. Free, no account needed, and past dates never come back.</x-slot>

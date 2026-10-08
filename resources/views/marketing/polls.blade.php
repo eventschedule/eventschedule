@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Polls: Let Your Audience Vote on the Event Page</x-slot>
     <x-slot name="description">Add a poll to any event: a question, two to ten choices, one vote per signed-in guest. Guests read no count until they have voted. A Pro feature.</x-slot>
     <x-slot name="breadcrumbTitle">Event Polls</x-slot>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">White Label | Remove Event Schedule Branding on Pro</x-slot>
     <x-slot name="description">On Pro, Event Schedule branding comes off seven surfaces at once, from the foot of your page to both embeds and your newsletters. Here is what stays, too.</x-slot>
     <x-slot name="breadcrumbTitle">White Label</x-slot>

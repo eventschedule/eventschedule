@@ -37,8 +37,10 @@ use App\Models\User;
 use App\Notifications\DeletedEventNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
+use App\Rules\NotBlocklisted;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
+use App\Services\Blocklist;
 use App\Services\DemoService;
 use App\Services\EventChangeNotifier;
 use App\Services\EventLifecycleService;
@@ -3139,6 +3141,15 @@ class EventController extends Controller
                     ]);
                 }
 
+                // An account an operator has shut out submits nothing: said here, before the
+                // event is made. EnsureAccountNotBlocked would only sign it out afterwards.
+                if (auth()->user()->isBlocked()) {
+                    Auth::guard('web')->logout();
+                    throw ValidationException::withMessages([
+                        'account_password' => [__('messages.account_blocked')],
+                    ]);
+                }
+
                 RateLimiter::clear($throttleKey);
 
                 $user = auth()->user();
@@ -3306,7 +3317,7 @@ class EventController extends Controller
         $request->validate([
             'account_name' => ['required', 'string', 'max:255'],
             'account_email' => array_merge(
-                ['required', 'string', 'email', 'max:255'],
+                ['required', 'string', 'email', 'max:255', new NotBlocklisted],
                 $isStub ? [] : ['unique:users,email'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
@@ -3376,6 +3387,7 @@ class EventController extends Controller
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
         $user->email_verified_at = now();
+        $user->signup_ip = Blocklist::address($request);
         // The form's terms checkbox, recorded as RegisteredUserController does (hosted only, where
         // the box is shown with the privacy policy).
         if (config('app.hosted') && $request->boolean('terms')) {
@@ -3576,7 +3588,7 @@ class EventController extends Controller
         $request->validate([
             'account_name' => ['required', 'string', 'max:255'],
             'account_email' => array_merge(
-                ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+                ['required', 'string', 'email', 'max:255', 'unique:users,email', new NotBlocklisted],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'account_password' => ['required', 'string', 'min:8'],
@@ -3614,6 +3626,8 @@ class EventController extends Controller
         ]);
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
+
+        $user->forceFill(['signup_ip' => Blocklist::address($request)])->save();
 
         // The form's terms checkbox, recorded as RegisteredUserController does (hosted only, where
         // the box is shown with the privacy policy).

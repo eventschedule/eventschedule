@@ -131,17 +131,6 @@
                             Self-Hosting Terms
                         </a>
                     </li>
-                    {{-- GDPR Art. 7(3): withdrawing consent must be as easy as giving it, so the
-                         banner can be reopened from every page that asked, not only from the
-                         privacy policy. Added with the owner's sign-off (the footer links are
-                         otherwise curated by hand). --}}
-                    @if (cookie_banner_visible())
-                    <li>
-                        <button type="button" data-cookie-consent-reopen class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            {{ __('messages.cookie_consent_manage') }}
-                        </button>
-                    </li>
-                    @endif
                 </ul>
             </div>
         </div>
@@ -159,8 +148,17 @@
                         <img class="h-8 w-auto" src="{{ url('images/light_logo.png') }}" alt="Event Schedule" width="163" height="32" loading="lazy" />
                     </picture>
                 </a>
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    &copy; {{ date('Y') }} Event Schedule. All rights reserved.
+                {{-- GDPR Art. 7(3): withdrawing consent must be as easy as giving it, so the banner can
+                     be reopened from every page that asked, not only from the privacy policy. The
+                     control stands here beside the copyright line, not in a link column: it was the
+                     sixth entry under Company while the other columns hold five, and the owner asked
+                     for it to be moved (2026-10-08). The privacy policy says "at the bottom of the
+                     page" and the selfhost guide says "in the footer", and both are still so. --}}
+                <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+                    <span class="whitespace-nowrap">&copy; {{ date('Y') }} Event Schedule. All rights reserved.</span>
+                    @if (cookie_banner_visible())
+                        <span class="whitespace-nowrap"><span aria-hidden="true" class="hidden lg:inline">&middot;&nbsp;</span><button type="button" data-cookie-consent-reopen class="py-1 underline underline-offset-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ __('messages.cookie_consent_manage') }}</button></span>
+                    @endif
                 </p>
                 <div class="flex items-center gap-4">
                     <a href="https://www.facebook.com/appeventschedule" target="_blank" rel="noopener noreferrer" class="text-gray-500 dark:text-gray-400 p-2 rounded-lg hover:text-white hover:bg-blue-600 transition-colors" aria-label="Facebook">

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Stripe Payments for Tickets | The Money Goes Straight to You</x-slot>
     <x-slot name="description">Sell tickets through your own connected Stripe account. The charge is created on your account, there is no platform fee in it, and Stripe pays you out.</x-slot>
     <x-slot name="breadcrumbTitle">Stripe</x-slot>

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Availability Calendar: Cross Out the Dates You Cannot Work</x-slot>
     <x-slot name="description">On a talent schedule, mark whole dates as unavailable and your team sees who is out on the shared calendar. Private to signed-in members, never published.</x-slot>
     <x-slot name="breadcrumbTitle">Availability</x-slot>

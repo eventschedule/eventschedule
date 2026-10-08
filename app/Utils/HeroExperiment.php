@@ -41,8 +41,9 @@ use Throwable;
  * editing a variant's text in place keeps crediting the old copy's history to the new text.
  * Adding, removing or editing any variant changes setHash(), which discards a stored candidate
  * or winner, so the test resumes on its own. The homepage's <title> and meta description are
- * built from the copy the server renders (meta()), so what a search result prints follows the
- * default, then the winner, with no lang file to keep in step.
+ * NOT part of the test: they are their own strings (home_title and home_description in
+ * lang/<locale>/marketing.php). From 2026-10-04 to 2026-10-08 they were built from this copy, and
+ * search clicks fell, so a search result no longer follows the default or the winner.
  *
  * STARTING OVER: reset() (the button on /admin/growth) restarts the counts for every key without
  * deleting history: stats() only reads what came after RESET_SETTING. A visitor assigned before a
@@ -67,13 +68,6 @@ final class HeroExperiment
      * marketing/index.blade.php), and every variant must pass MarketingHeroClaimTest's rules:
      * say "event calendar", say it takes bookings, name no paid plan. HeroExperimentTest
      * checks each one.
-     *
-     * The copy is also the homepage's search result (meta()), which adds three rules:
-     * - line1 and line2 together fit 48 characters, so the title and its brand suffix stay inside
-     *   the 65 that MarketingMetaLengthTest allows. Two full 24-character lines would be 66.
-     * - "event calendar" is in the HEADLINE, not only somewhere in the fold: the keyword map
-     *   (config/marketing_keywords.php) looks for it in the <title>.
-     * - the subtitle is 80 to 165 characters, the bounds of a meta description.
      *
      * Round three (from 2026-10-04): 'plan_sell' is the control, and each challenger changes ONE
      * thing about it, so a win says which change earned it. Round two ran 'plan' against two
@@ -216,22 +210,6 @@ final class HeroExperiment
             'default' => self::VARIANTS[self::DEFAULT],
             'variants' => self::VARIANTS,
             'weights' => $state['weights'],
-        ];
-    }
-
-    /**
-     * The homepage's <title> and meta description for one variant's copy: the headline with the
-     * brand after it, and the subtitle as written. The page passes forPage()['default'], so a
-     * search result says what the page opens on.
-     *
-     * @param  array{line1: string, line2: string, subtitle: string}  $copy
-     * @return array{title: string, description: string}
-     */
-    public static function meta(array $copy): array
-    {
-        return [
-            'title' => $copy['line1'].' '.$copy['line2'].' | Event Schedule',
-            'description' => $copy['subtitle'],
         ];
     }
 

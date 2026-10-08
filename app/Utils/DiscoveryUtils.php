@@ -24,20 +24,27 @@ use Illuminate\Support\Collection;
  * the other ten places on the homepage wall went back to the two that had more: nine of its 25
  * posters were that one photo. A quota cannot share out a list that one schedule already owns.
  *
- * This DEMOTES rather than drops: an event past its schedule's quota moves down the same list
- * instead of leaving it, and a pool that the per-schedule limit leaves short is topped up with
- * the rows it passed over. The count a caller gets back is therefore what it would be with no
- * spreading at all, which matters because three consumers shrink badly - the poster wall pads
- * itself with demo flyers below 25 real events, the rail drops its pinned scroll animation below
- * 4, and /for-talent hides its whole section below 4. That is the one real difference from
+ * spread() DEMOTES rather than drops: an event past its schedule's quota moves down the same
+ * list instead of leaving it, and a pool that the per-schedule limit leaves short is topped up
+ * with the rows it passed over. The count a caller gets back is therefore what it would be with
+ * no spreading at all, which matters to /for-talent, which hides its whole section below 4, and
+ * to /search, where one schedule may be the only answer. That is the one real difference from
  * GraphicController::applyPerScheduleCap(), which drops, and is why the two are separate: that
  * one also keys on every linked talent and venue minus the schedule the graphic is for, which has
  * no analogue here. Neither should be bent into the other.
  *
- * The order out is by turns: every schedule's first events in date order, then every schedule's
- * next ones, and so on, with anything that repeats a card already shown after all of those. It is
- * deliberately NOT re-sorted back into pure date order at the end: the homepage rail renders the
- * first 12 of the collection, so restoring the date order would float the demoted duplicates
+ * The homepage and /browse do NOT spread. They show one event for each schedule and stop there
+ * (onePerSchedule() and App\Utils\BrowseWall::pick(), on the same scheduleKey()), so a list
+ * shorter than its places is their honest state: the homepage wall fills the places left with
+ * its demo flyers. Until 2026-10 the homepage took one from each schedule and then went round
+ * again, and with sixteen schedules to fill 25 places it showed one of them five times. Both
+ * still draw their events through candidates(), which is what stops one schedule owning the
+ * pool.
+ *
+ * The order out of spread() is by turns: every schedule's first events in date order, then every
+ * schedule's next ones, and so on, with anything that repeats a card already shown after all of
+ * those. It is deliberately NOT re-sorted back into pure date order at the end: a caller renders
+ * the front of the collection, so restoring the date order would float the demoted duplicates
  * straight back to the top and undo the whole thing on exactly the corpus that needed it. When
  * there are enough distinct schedules to fill the list in the first turn, nothing is demoted into
  * the visible range and the output is in date order anyway.
@@ -48,9 +55,8 @@ class DiscoveryUtils
      * How many events one schedule may contribute to a turn before the rest wait for the next.
      *
      * Two rather than one so an active schedule can still show it runs more than one thing. The
-     * homepage asks for one (MarketingController::discoverWallEvents()), because its wall is
-     * pictures with no names under them and two posters from one schedule are very often the
-     * same profile photo twice.
+     * homepage and /browse do not take turns at all: one event for each schedule, and no more
+     * (onePerSchedule(), BrowseWall::pick()).
      */
     public const MAX_PER_SCHEDULE = 2;
 
@@ -69,8 +75,9 @@ class DiscoveryUtils
      * More than the quota itself, because a schedule's soonest rows can be each other's
      * duplicates (a translated copy of every day) and it then needs something different to put
      * forward. Few enough that the pool always holds the schedules a full list needs: a pool of
-     * 100 at three per schedule is at least 34 schedules for the homepage's 25 places, and at six
-     * it is at least 17 for the 12 that /browse needs to fill 24 two at a time.
+     * 100 at three per schedule is at least 34 schedules for the homepage's 25 places and for the
+     * 24 on /browse's wall, which each take one event from a schedule, and at six it is at least
+     * 17 for the 12 places /search fills.
      */
     public const POOL_DEPTH = 3;
 
@@ -254,15 +261,57 @@ class DiscoveryUtils
     }
 
     /**
-     * The schedule an event spends its quota against.
+     * One event for each schedule: the first it has in the order given, cut to $limit.
+     *
+     * What the homepage shows, on its wall and in its rail. Unlike spread() this DROPS: a
+     * schedule's second event is left off the list, not moved down it, so the list is as long
+     * as the number of schedules in the pool and never longer. The caller has to be able to
+     * stand a short list, which the homepage can (see MarketingController::discoverWallEvents()).
+     *
+     * No fingerprints here. They exist to tell a schedule's repeats from its other events, and
+     * with one event a schedule there is nothing to tell apart.
+     */
+    public static function onePerSchedule(Collection $events, int $limit): Collection
+    {
+        // As in spread(): a no-op for the discovery queries, which eager-load roles in the
+        // order scheduleKey() reads them.
+        if ($events instanceof EloquentCollection) {
+            $events->loadMissing('roles');
+        }
+
+        $shown = [];
+        $placed = [];
+
+        foreach ($events as $event) {
+            if (count($placed) >= $limit) {
+                break;
+            }
+
+            $key = self::scheduleKey($event);
+
+            if (isset($shown[$key])) {
+                continue;
+            }
+
+            $shown[$key] = true;
+            $placed[] = $event;
+        }
+
+        // take(0) and concat(), as in spread(): an Eloquent collection stays one, in this order.
+        return $events->take(0)->concat($placed)->values();
+    }
+
+    /**
+     * The schedule an event is counted against, on every discovery surface.
      *
      * getViewableRole() rather than creator_role_id, because it is the schedule whose name the
      * card actually prints, and a visitor counts repeats by the name they read. The fallbacks
      * are unreachable through the discovery queries, which all require an accepted pivot on a
      * listed schedule, but the last one matters anyway: without it a null key would put every
-     * schedule-less event in ONE bucket and demote all but two of them.
+     * schedule-less event in ONE bucket, and all but one or two of them would be demoted or
+     * dropped.
      */
-    private static function scheduleKey(Event $event): string
+    public static function scheduleKey(Event $event): string
     {
         $role = $event->getViewableRole();
 

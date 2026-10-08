@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Private Events: Members-Only, Unlisted or Password-Protected</x-slot>
     <x-slot name="description">Keep an event members-only, or unlisted with an optional password. Hidden events stay out of your schedule page, calendar feeds, search and email digests.</x-slot>
     <x-slot name="breadcrumbTitle">Private Events</x-slot>

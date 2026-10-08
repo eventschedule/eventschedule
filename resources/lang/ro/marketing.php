@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'home_title' => 'Event Schedule - calendar de evenimente, bilete și programări, gratuit',
+    'home_description' => 'Publică-ți evenimentele pe o pagină de calendar, primește înscrieri gratuite nelimitate și programări, și vinde bilete în planul Pro, fără comision de platformă.',
+
     'pricing_title' => 'Prețuri Event Schedule: gratuit, fără comision de platformă',
     'pricing_description' => 'Începe gratuit: evenimente și înscrieri nelimitate. Pro adaugă vânzarea biletelor cu plată, Enterprise locuri numerotate. Fără comision de platformă.',
 

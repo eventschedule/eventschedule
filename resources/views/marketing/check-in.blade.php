@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">QR Ticket Check-in | Free at the Door, Live Count on Pro</x-slot>
     <x-slot name="description">Scan ticket QR codes at the door free on every plan. On Pro, watch the room fill live: overall progress, each ticket type and the last ten arrivals.</x-slot>
     <x-slot name="breadcrumbTitle">Check-in</x-slot>

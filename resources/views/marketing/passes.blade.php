@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     @php
         // Every Google Wallet claim on this page reads the same predicate the button itself does
         // (GoogleWalletService::isConfigured()), so an install without an issuer account never

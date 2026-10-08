@@ -70,25 +70,38 @@ class HeroExperimentTest extends TestCase
     }
 
     /**
-     * What a search result prints for the homepage is the headline and subtitle the page opens on,
-     * built by HeroExperiment::meta() rather than typed a second time in a lang file. The same two
-     * slots feed the Open Graph pair, so a shared link reads the same.
+     * What a search result prints for the homepage is a pair of strings of its own (home_title and
+     * home_description in lang/<locale>/marketing.php), not the headline and subtitle the page
+     * opens on. From 2026-10-04 to 2026-10-08 the two tags were built from the headline test's
+     * copy, with the brand after the headline; search clicks fell and they were put back. The same
+     * two slots feed the Open Graph pair, so a shared link reads the same.
      */
-    public function test_the_search_result_carries_the_default_headline_and_subtitle(): void
+    public function test_the_search_result_is_its_own_text_and_not_the_headline(): void
     {
-        $meta = HeroExperiment::meta(HeroExperiment::VARIANTS[HeroExperiment::DEFAULT]);
+        $result = $this->searchResult($this->get('/')->assertOk()->getContent());
+        $copy = HeroExperiment::VARIANTS[HeroExperiment::DEFAULT];
 
-        $this->assertSame($meta, $this->searchResult($this->get('/')->assertOk()->getContent()));
+        $this->assertSame(__('marketing.home_title'), $result['title']);
+        $this->assertSame(__('marketing.home_description'), $result['description']);
+
+        $this->assertStringStartsWith('Event Schedule', $result['title'], 'the brand opens the title, where a search for it is matched first');
+        $this->assertStringNotContainsStringIgnoringCase($copy['line1'], $result['title'], 'the <title> is the headline again');
+        $this->assertNotSame($copy['subtitle'], $result['description'], 'the meta description is the subtitle again');
     }
 
-    public function test_the_search_result_follows_a_locked_winner(): void
+    public function test_the_search_result_does_not_follow_a_locked_winner(): void
     {
+        $before = $this->searchResult($this->get('/')->assertOk()->getContent());
+
         Setting::set(HeroExperiment::WINNER_SETTING, HeroExperiment::setHash().'|promote_sell|2026-09-01');
+        Cache::flush();
 
-        $meta = HeroExperiment::meta(HeroExperiment::VARIANTS['promote_sell']);
+        $response = $this->get('/')->assertOk();
 
-        $this->assertNotSame($meta, HeroExperiment::meta(HeroExperiment::VARIANTS[HeroExperiment::DEFAULT]));
-        $this->assertSame($meta, $this->searchResult($this->get('/')->assertOk()->getContent()));
+        // The winner did reach the page, so the unchanged search result below is not an accident
+        // of the lock being ignored.
+        $response->assertSee('data-hero="l1">'.e(HeroExperiment::VARIANTS['promote_sell']['line1']).'<', false);
+        $this->assertSame($before, $this->searchResult($response->getContent()));
     }
 
     /**

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\CaptureUtmParameters;
 use App\Models\Referral;
 use App\Models\User;
+use App\Rules\NotBlocklisted;
 use App\Services\AuditService;
+use App\Services\Blocklist;
 use App\Utils\HeroExperiment;
 use App\Utils\SocialLoginUtils;
 use App\Utils\TimezoneUtils;
@@ -213,6 +215,13 @@ class SocialAuthController extends Controller
                 ->withErrors(['email' => __('messages.account_creation_disabled')]);
         }
 
+        // The operator's list (/admin/blocked), as the sign-up form asks it: this is the other
+        // half of all new accounts.
+        if ($entry = Blocklist::refusal($email, request())) {
+            return redirect()->route('login')
+                ->withErrors(['email' => NotBlocklisted::sentence($entry->type)]);
+        }
+
         $utmParams = session('utm_params', []);
 
         // Fall back to cookie if session has no UTM data
@@ -283,6 +292,7 @@ class SocialAuthController extends Controller
         if (config('app.hosted') && session()->pull('pending_no_product_updates')) {
             $user->is_subscribed = false;
         }
+        $user->signup_ip = Blocklist::address(request());
         $user->save();
 
         // Link referral if referral code exists in session
@@ -334,6 +344,13 @@ class SocialAuthController extends Controller
      */
     private function completeLogin(User $user, string $provider): RedirectResponse
     {
+        // An account an operator has shut out, before anything is claimed for it or recorded as
+        // a sign-in. EnsureAccountNotBlocked would turn it away one step later.
+        if ($user->isBlocked()) {
+            return redirect()->route('login')
+                ->withErrors(['email' => __('messages.account_blocked')]);
+        }
+
         if (session()->pull('pending_follow_consent_dismissed') && ! $user->follow_consent_dismissed) {
             $user->update(['follow_consent_dismissed' => true]);
         }

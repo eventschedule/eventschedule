@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     @php
         // ------------------------------------------------------------------
         // This ONE template renders all twelve /*-replacement pages, so every

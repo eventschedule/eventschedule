@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Carpool Matching | The Driver Approves Every Rider</x-slot>
     <x-slot name="description">Attendees offer and request lifts on the event page. The driver approves each rider before any email or phone number is shared. Ratings follow the ride.</x-slot>
     <x-slot name="breadcrumbTitle">Carpool</x-slot>

@@ -38,6 +38,7 @@ class PersonalDataExportService
      * PersonalDataExportTest fails when a table appears that is in neither list.
      */
     public const NOT_EXPORTED = [
+        'account_blocks' => 'An operator\'s record of a blocked account. A blocked account cannot sign in to ask for this file, and the row is deleted when the block is lifted; the fact and its date are in account.blocked_at.',
         'backup_jobs' => 'Job bookkeeping; the archives are the user\'s own downloads.',
         'calendar_syncs' => 'Which event maps to which calendar entry; covered by the calendar_connections summary.',
         'microsoft_calendar_syncs' => 'Same, for Outlook.',
@@ -151,7 +152,7 @@ class PersonalDataExportService
             'profile_image_url', 'created_at', 'updated_at',
         ]);
 
-        foreach (['hero_variant', 'signup_intent', 'push_settings'] as $optional) {
+        foreach (['hero_variant', 'signup_intent', 'push_settings', 'signup_ip', 'blocked_at'] as $optional) {
             if (\Illuminate\Support\Facades\Schema::hasColumn('users', $optional)) {
                 $row[$optional] = DB::table('users')->where('id', $user->id)->value($optional);
             }

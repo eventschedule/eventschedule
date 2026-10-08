@@ -425,7 +425,7 @@ class AdminPortalKitTest extends TestCase
             }
         }
         $this->assertSame(
-            ['admin/app-update', 'admin/legal', 'admin/newsletters/segment-edit', 'admin/newsletters/segments', 'admin/schedules-edit', 'admin/settings', 'newsletter/segment-edit', 'newsletter/segments'],
+            ['admin/app-update', 'admin/blocked-account', 'admin/legal', 'admin/newsletters/segment-edit', 'admin/newsletters/segments', 'admin/schedules-edit', 'admin/settings', 'newsletter/segment-edit', 'newsletter/segments'],
             collect($pages)->keys()->sort()->values()->all()
         );
         foreach ($pages as $view => [$titled, $beside]) {

@@ -16,6 +16,14 @@
 
     `ground="dark"` is a fixed-dark band, dark in light mode too, for pages that
     dive somewhere else mid-scroll. Opt-in; /features passes only white/gray.
+
+    `shot` puts a REAL screen in the frame instead of a drawn panel: the name of a picture
+    under public/images/docs (the user guide's screenshots, light and dark, png and webp, made
+    by App\Console\Commands\GenerateDocScreenshots). The banner then gives the picture the
+    wider column, because a screenshot the size of a drawn panel cannot be read. The picture is
+    cropped by CSS to the working area of the app: the sidebar and the top bar are the same on
+    every screen and say nothing about the feature. Only pass a screen that shows the feature
+    doing something; one that shows an empty list or "Not connected" sells its absence.
 --}}
 @props([
     'href',
@@ -29,6 +37,8 @@
     'frame' => 'panel',
     'frameUrl' => null,
     'ground' => 'white',
+    'shot' => null,
+    'shotAlt' => '',
 ])
 
 @php
@@ -140,33 +150,39 @@
         ? 'max-w-[17rem] sm:max-w-sm lg:max-w-lg'
         : 'max-w-[15rem] sm:max-w-[19rem] lg:max-w-md';
 
+    // A real screen needs the room to be read, so it takes the wider column (plain CSS below:
+    // the widths it wants are not in the built stylesheet).
+    if ($shot) {
+        $mockWidth = 'es-shot-col';
+    }
+
     // Text on the left enters from the left; the mockup mirrors it.
     $textReveal = $flip ? 'right' : 'left';
     $mockReveal = $flip ? 'left' : 'right';
 @endphp
 
-<section class="relative overflow-hidden {{ $groundClass }} {{ $pad }}">
+<section class="es-banner relative overflow-hidden {{ $groundClass }} {{ $pad }}">
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="group flex flex-col items-center {{ $gap }} {{ $flip ? 'lg:flex-row-reverse' : 'lg:flex-row' }}">
+        <div class="es-banner-row group flex flex-col items-center {{ $gap }} {{ $flip ? 'lg:flex-row-reverse' : 'lg:flex-row' }}">
 
             {{-- Text column: `relative` scopes the stretched link to this side only. --}}
-            <div class="relative flex-1 text-center lg:text-start" data-reveal="{{ $textReveal }}">
+            <div class="es-banner-copy relative flex-1 text-center lg:text-start" data-reveal="{{ $textReveal }}">
                 <div class="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium {{ $badgeClass }}">
                     {{ $badgeIcon ?? '' }}
                     {{ $badge }}
                 </div>
 
-                <h2 class="es-balance mb-4 {{ $headSize }} font-black tracking-tight {{ $headingColor }} transition-colors {{ $headClass }}">
+                <h2 class="es-banner-heading es-balance mb-4 {{ $headSize }} font-black tracking-tight {{ $headingColor }} transition-colors {{ $headClass }}">
                     <a href="{{ $href }}"
                        class="rounded-sm after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 {{ $isDark ? 'focus-visible:ring-sky-300' : 'focus-visible:ring-[#4E81FA]' }}">{{ $heading }}</a>
                 </h2>
 
-                <p class="mb-6 text-lg {{ $ledeColor }}">{{ $lede }}</p>
+                <p class="es-banner-lede mb-6 text-lg {{ $ledeColor }}">{{ $lede }}</p>
 
                 @if (! empty($chips))
                     <div class="mb-6 flex flex-wrap justify-center gap-2.5 lg:justify-start">
                         @foreach ($chips as $i => $chip)
-                            <span class="inline-flex items-center rounded-full border px-3 py-1 text-sm {{ $chipClass }} {{ $i >= 4 ? 'hidden sm:inline-flex' : '' }}">{{ $chip }}</span>
+                            <span class="es-banner-chip inline-flex items-center rounded-full border px-3 py-1 text-sm {{ $chipClass }} {{ $i >= 4 ? 'hidden sm:inline-flex' : '' }}">{{ $chip }}</span>
                         @endforeach
                     </div>
                 @endif
@@ -182,12 +198,32 @@
             {{-- Mockup: its own link so `data-tilt` receives pointer events.
                  aria-hidden + tabindex="-1" keeps it out of the a11y tree, so the
                  banner still announces once. --}}
-            <div class="w-full shrink-0 {{ $mockWidth }}" data-reveal="{{ $mockReveal }}">
+            <div class="es-banner-mock {{ $lead ? 'is-lead' : '' }} w-full shrink-0 {{ $mockWidth }}" data-reveal="{{ $mockReveal }}">
                 {{-- The phone's width lives here rather than on .es-tilt-inner: .es-glare and
                      .es-ring-glow are inset-0 children of this anchor, so a narrower inner frame
                      would leave them tracing the full column instead of the device. --}}
                 <a href="{{ $href }}" aria-hidden="true" tabindex="-1"
                    class="es-bento relative block {{ $frame === 'phone' ? 'mx-auto w-full max-w-[16rem]' : '' }}" data-tilt="{{ $lead ? '4' : '3' }}">
+                    @if ($shot)
+                        <div class="es-tilt-inner overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl shadow-gray-900/5 dark:border-white/10 dark:bg-[#101016] dark:shadow-black/40">
+                            <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.04]">
+                                <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FF5F57;"></span>
+                                <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FEBC2E;"></span>
+                                <span class="h-2.5 w-2.5 rounded-full" style="background-color: #28C840;"></span>
+                                @if ($frameUrl)
+                                    <span dir="ltr" class="ms-2 flex-1 truncate rounded-md bg-white px-2 py-1 text-[10px] text-gray-500 dark:bg-white/5 dark:text-gray-400">{{ $frameUrl }}</span>
+                                @endif
+                            </div>
+                            <div class="es-shot">
+                                @foreach (['' => 'es-shot-light', '-dark' => 'es-shot-dark'] as $shotSuffix => $shotTheme)
+                                    <picture class="{{ $shotTheme }}">
+                                        <source srcset="{{ url('images/docs/'.$shot.$shotSuffix.'.webp') }}" type="image/webp">
+                                        <img src="{{ url('images/docs/'.$shot.$shotSuffix.'.png') }}" alt="{{ $shotAlt }}" width="1280" height="757" loading="lazy" decoding="async">
+                                    </picture>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
                     @switch($frame)
                         @case('browser')
                             <div class="es-tilt-inner overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl shadow-gray-900/5 dark:border-white/10 dark:bg-[#101016] dark:shadow-black/40">
@@ -215,6 +251,7 @@
                         @default
                             <div class="es-tilt-inner rounded-2xl border border-gray-200 bg-white p-5 shadow-xl shadow-gray-900/5 dark:border-white/10 dark:bg-[#15151c] dark:shadow-black/40">{{ $slot }}</div>
                     @endswitch
+                    @endif
 
                     <div class="es-glare" aria-hidden="true"></div>
                     @if ($lead)
@@ -227,3 +264,30 @@
         </div>
     </div>
 </section>
+
+@if ($shot)
+    @once
+        {{-- The crop. A guide screenshot is 1280 by 757 with a 288px sidebar and a 56px top bar.
+             From a tablet up the frame shows the 992px beside the sidebar; on a phone it shows
+             the first 533px of that at a size that can still be read. The theme switch is plain
+             CSS as well: a display utility on the picture would fight the rule that makes the
+             picture a block. --}}
+        <style {!! nonce_attr() !!}>
+            .es-shot-col { max-width: 36rem; }
+            .es-shot { overflow: hidden; aspect-ratio: 4 / 3; background-color: #f3f4f6; }
+            .dark .es-shot { background-color: #101016; }
+            .es-shot picture { display: block; }
+            .es-shot .es-shot-dark,
+            .dark .es-shot .es-shot-light { display: none; }
+            .dark .es-shot .es-shot-dark { display: block; }
+            .es-shot img { display: block; max-width: none; width: 240%; height: auto; margin-left: -54%; margin-top: -10.5%; }
+            @media (min-width: 640px) {
+                .es-shot { aspect-ratio: 62 / 35; }
+                .es-shot img { width: 129.03%; margin-left: -29.03%; margin-top: -5.65%; }
+            }
+            @media (min-width: 1024px) {
+                .es-shot-col { width: 56%; max-width: 44rem; }
+            }
+        </style>
+    @endonce
+@endif

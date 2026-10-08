@@ -371,10 +371,30 @@ class GenerateSocialImages extends Command
                 // [data-cookie-consent] is the consent banner, which the capture server shows because
                 // IS_NEXUS turns realtime on; since 2026-10-03 it sits centred along the bottom edge.
                 $heroHeight = self::HEIGHT;
+                // Pages in the house style (the layout's :hp flag, which is nearly every page but the
+                // for-* ones) keep everything inside a wrapper with the id "hp", so the hero is that
+                // wrapper's first section, not main's: the rules below name both parents for that
+                // reason. The homepage and the five pages rebuilt around it (Features, Pricing, Use
+                // Cases, Selfhost, the docs home) have a hero of their own shape (.hp-hero), which
+                // these extra rules centre on the page's sky, without what means nothing on a card:
+                // the name box, the film, the blank "your name" poster, the buttons, the chapter
+                // index and the docs search.
                 $browser->script("
+                    var homeCard = ' #hp .hp-hero { height: {$heroHeight}px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; --hp-col: 54rem !important; } #hp .hp-hero::after { display: none !important; } #hp .hp-hero-copy { position: absolute !important; top: 50% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; margin: 0 auto !important; } #hp .hp-claimrow, #hp .hp-demo, #hp .hp-strip, #hp .hp-stage, #hp .hp-mine-plane, #hp .hp-mine-phone, #hp .hp-hero-actions, #hp .hp-toc, #hp .hp-hero-copy > div.es-d-3 { display: none !important; } #hp .hp-hero-sky { -webkit-mask-image: none !important; mask-image: none !important; } #hp .hp-h1 { font-size: 4.4rem !important; } #hp .hp-sub { font-size: 1.5rem !important; max-width: 46rem !important; } #hp .hp-hero-foot { font-size: 1.05rem !important; }';
                     var style = document.createElement('style');
-                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } .es-mask .es-mask-line { transform: none !important; } .es-fade-up { opacity: 1 !important; transform: none !important; } header { display: none !important; } footer { display: none !important; } .es-dotnav { display: none !important; } main > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } main > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } main > section:first-of-type .relative.z-10 > .mb-6:first-child:not(h1) { display: none !important; } main > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } main > section:first-of-type > .relative.z-10 { position: absolute !important; top: 50% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } main > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } main > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; } [data-cookie-consent] { display: none !important; } main > .doc-accent-guide > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; overflow: hidden !important; }';
+                    style.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; } .animate-reveal { opacity: 1 !important; } .es-mask .es-mask-line { transform: none !important; } .es-fade-up { opacity: 1 !important; transform: none !important; } header { display: none !important; } footer { display: none !important; } .es-dotnav { display: none !important; } :is(main, #hp) > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; padding: 0 !important; overflow: hidden !important; } :is(main, #hp) > section:first-of-type .flex.justify-center.gap-4 { display: none !important; } :is(main, #hp) > section:first-of-type .relative.z-10 > .mb-6:first-child:not(h1) { display: none !important; } :is(main, #hp) > section:first-of-type nav[aria-label=\"Breadcrumb\"] { display: none !important; } :is(main, #hp) > section:first-of-type > .relative.z-10 { position: absolute !important; top: 50% !important; left: 0 !important; right: 0 !important; transform: translateY(-50%) !important; padding: 0 !important; margin: 0 auto !important; } :is(main, #hp) > section:first-of-type .relative.z-10.text-center { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2rem !important; } :is(main, #hp) > section:first-of-type .relative.z-10.text-center > * { margin-top: 0 !important; margin-bottom: 0 !important; } .fixed.bottom-4.right-4.z-50 { display: none !important; } [data-cookie-consent] { display: none !important; } main > .doc-accent-guide > section:first-of-type { height: {$heroHeight}px !important; min-height: unset !important; overflow: hidden !important; }' + homeCard;
                     document.head.appendChild(style);
+                ");
+
+                // /browse (since its 2026-10 redesign) keeps everything inside #bw, so like the
+                // homepage its hero is not main's first section. Its card is its words, centred:
+                // without the search box and the chips, which mean nothing on a card, and without
+                // the wall, which on the capture database is whatever events it happens to hold
+                // (the card before this one read "0 showing"). #bw exists on that page alone.
+                $browser->script("
+                    var browseCard = document.createElement('style');
+                    browseCard.textContent = '#bw .bw-hero { display: flex !important; align-items: center !important; height: {$heroHeight}px !important; padding: 0 !important; } #bw .bw-hero-in { display: block !important; max-width: 66rem !important; text-align: center !important; } #bw .bw-hero-say { width: 100% !important; } #bw .bw-hero-do, #bw .bw-stage, #bw .bw-faq, #bw .bw-keep, #bw .bw-end, #bw .bw-eyebrow span { display: none !important; } #bw .bw-eyebrow { display: block !important; margin-bottom: 1.5rem !important; font-size: 1.3rem !important; } #bw .bw-h1 { font-size: 4.7rem !important; } #bw .bw-lede { font-size: 1.5rem !important; max-width: 44rem !important; margin: 1.75rem auto 0 !important; }';
+                    document.head.appendChild(browseCard);
                 ");
 
                 $browser->pause(1500);
@@ -383,7 +403,7 @@ class GenerateSocialImages extends Command
                 // is where the eyebrow and the headline live. Anchor an oversized one to the top
                 // so only its tail is lost. Pages that fit are untouched.
                 $browser->script("
-                    var hero = document.querySelector('main > section:first-of-type > .relative.z-10');
+                    var hero = document.querySelector(':is(main, #hp) > section:first-of-type > .relative.z-10') || document.querySelector('#hp .hp-hero-copy');
                     if (hero && hero.getBoundingClientRect().height > {$heroHeight}) {
                         hero.style.setProperty('top', '0', 'important');
                         hero.style.setProperty('transform', 'none', 'important');

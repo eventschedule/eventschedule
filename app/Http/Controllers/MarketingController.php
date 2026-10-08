@@ -8,6 +8,7 @@ use App\Models\PageView;
 use App\Models\Role;
 use App\Services\AuditService;
 use App\Utils\AdminReauthUtils;
+use App\Utils\BrowseWall;
 use App\Utils\DiscoveryUtils;
 use App\Utils\DocsUtils;
 use App\Utils\HeroExperiment;
@@ -56,14 +57,15 @@ class MarketingController extends Controller
      * Same visibility rules as /browse: only events whose card shows a real image (own flyer, or
      * a talent/venue schedule's profile photo), so the wall is guaranteed visually rich posters.
      *
-     * Spread across schedules by DiscoveryUtils, so one schedule's cluster of same-day events
-     * cannot own the front of the rail, which renders the first 12 of this collection.
-     *
-     * One event per schedule before anybody's second, where /browse and /search allow two. The
-     * wall above the fold is 25 pictures with no names under them, and a schedule's second
-     * poster is very often its profile photo again: at two each, with one schedule's synced work
-     * calendar filling the pool, nine of the 25 were the same photo. A schedule's other events
-     * still follow once every schedule has had its turn, so the list is never shorter for it.
+     * ONE event for each schedule, its soonest, and no more (DiscoveryUtils::onePerSchedule()),
+     * as on /browse (BrowseWall). The wall, the phone strip, the rail and the structured list all
+     * read this one collection, so the rule holds for all four. The wall above the fold is 25
+     * pictures with no names under them, and a schedule's second poster is very often its
+     * profile photo again. Until 2026-10 a schedule's other events followed once every schedule
+     * had had its turn, so the list was never short: with sixteen schedules for the 25 places,
+     * one of them was on the wall five times. A short list is this page's honest state now. The
+     * wall fills the places left with its demo flyers, and the rail drops its pinned scroll
+     * below four.
      *
      * Cached for `marketing.wall_cache_seconds`: this is five correlated subqueries plus an
      * excludeLikelyTest() regex pass, run on the single most-hit page on the site, and its answer
@@ -79,9 +81,9 @@ class MarketingController extends Controller
         $limit = 25;
         $perSchedule = 1;
 
-        // Spread INSIDE the closure so the cached collection is already diverse, and so the
-        // cache still holds $limit models rather than the whole candidate pool.
-        $build = fn () => DiscoveryUtils::spread(
+        // Chosen INSIDE the closure so the cached collection is already one per schedule, and
+        // so the cache holds at most $limit models rather than the whole candidate pool.
+        $build = fn () => DiscoveryUtils::onePerSchedule(
             DiscoveryUtils::candidates(
                 $this->publicUpcomingEventsQuery()
                     ->where('is_hidden_from_discovery', false)
@@ -100,8 +102,7 @@ class MarketingController extends Controller
                 $limit,
                 $perSchedule
             ),
-            $limit,
-            $perSchedule
+            $limit
         );
 
         $ttl = (int) config('marketing.wall_cache_seconds');
@@ -124,16 +125,23 @@ class MarketingController extends Controller
         return 'marketing.wall.'.md5((string) config('app.url'));
     }
 
+    /** The cache key browseWall() reads and writes: which events /browse's wall is chosen from. */
+    public static function browseCacheKey(): string
+    {
+        return self::wallCacheKey().'.browse';
+    }
+
     /**
-     * Drop the cached homepage wall.
+     * Drop the cached homepage wall, and what /browse's wall is chosen from.
      *
      * Called from Event's saved/deleted hooks (see Event::WALL_CACHE_FIELDS) and from the admin
-     * discovery toggle. One Cache::forget, so it is cheap enough to run on every qualifying save;
-     * the next homepage hit pays for the rebuild.
+     * discovery toggle. Two Cache::forgets, so it is cheap enough to run on every qualifying
+     * save; the next hit on each page pays for its rebuild.
      */
     public static function forgetWallCache(): void
     {
         Cache::forget(self::wallCacheKey());
+        Cache::forget(self::browseCacheKey());
     }
 
     /**
@@ -7062,7 +7070,7 @@ class MarketingController extends Controller
                                 ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
                         })
                         ->where('is_hidden_from_discovery', false)
-                        // Same order as browse(): dated events from today first, soonest first, then the
+                        // Same order as the homepage wall: dated events from today first, soonest first, then the
                         // recurring series whose starts_at is the date the series BEGAN (already past), then
                         // undated rows. A plain starts_at sort put a weekly night that started last year ahead
                         // of next week's one-offs, contradicting the /search page's own "soonest first".
@@ -7089,32 +7097,11 @@ class MarketingController extends Controller
     {
         $isAdmin = auth()->check() && auth()->user()->isAdmin();
 
-        // Only surface events whose card shows an image (own flyer, or a talent/venue
-        // schedule's profile photo) rather than the letter-gradient placeholder.
-        //
-        // This page renders the whole collection, so unlike the homepage rail it needs the
-        // WIDER pool to see any benefit: reordering 24 rows still leaves the same 24 events on
-        // the page. The FAQ answer below describes the cap, so keep the two in step.
-        $events = DiscoveryUtils::spread(
-            DiscoveryUtils::candidates(
-                $this->publicUpcomingEventsQuery()
-                    ->where('is_hidden_from_discovery', false)
-                    ->where(function ($sub) {
-                        $sub->where(function ($f) {
-                            $f->whereNotNull('flyer_image_url')
-                                ->where('flyer_image_url', '!=', '');
-                        })
-                            ->orWhereHas('roles', function ($r) {
-                                $r->whereIn('roles.type', ['talent', 'venue'])
-                                    ->whereNotNull('roles.profile_image_url')
-                                    ->where('roles.profile_image_url', '!=', '');
-                            });
-                    })
-                    ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC, events.id ASC', [Carbon::today()]),
-                24
-            ),
-            24
-        );
+        $now = Carbon::now('UTC');
+
+        // One poster for each schedule: the event it has on next (BrowseWall). $more names the
+        // schedules that have something else coming up as well.
+        [$events, $more] = $this->browseWall($now);
 
         // Admins also see hidden events so they can restore them. Deliberately NOT spread and
         // NOT widened: this is a moderation list, where demoting an event past the 50th row
@@ -7167,6 +7154,10 @@ class MarketingController extends Controller
 
         return view('marketing.browse', [
             'events' => $events,
+            'wall' => BrowseWall::build($events, $more, $now),
+            'network' => BrowseWall::remote($federatedEvents, $now),
+            'hidden' => BrowseWall::build($hiddenEvents, [], $now, plain: true),
+            'browseAdmin' => $isAdmin,
             'hiddenEvents' => $hiddenEvents,
             'federatedEvents' => $federatedEvents,
             'federatedTotal' => $federatedTotal,
@@ -7177,6 +7168,91 @@ class MarketingController extends Controller
             'federatedLanguage' => $federatedLanguage,
             'federatedInstance' => $federatedInstance,
         ]);
+    }
+
+    /**
+     * The events on /browse's wall, soonest first, and the schedules among them that have more.
+     *
+     * Two reads make the pool. Dated events that have not ended, a few per owning schedule
+     * (DiscoveryUtils::candidates()), in the order they are on: what is running now first, then
+     * by start. And every series, because when a series is next on cannot be asked of SQL - the
+     * rhythm, the skipped dates and the end of the run are Event::nextOccurrenceFrom()'s.
+     * BrowseWall::pick() then keeps one event for each credited schedule.
+     *
+     * "Not ended" is in the SQL, before the pool is cut, on purpose. Chosen afterwards, a studio
+     * with three classes already over today had no row left in its three places, and was off the
+     * wall with one on tonight. It is start plus length, and SIX HOURS for an event with no
+     * length recorded, which is BrowseWall::NO_LENGTH_HOURS: the two must agree, or the pool
+     * holds rows the pick then throws away.
+     *
+     * Only events whose poster shows a picture (own flyer, or a talent/venue schedule's profile
+     * photo). The FAQ on the page describes these rules, so keep the two in step.
+     *
+     * The ids are cached with the homepage wall's (marketing.wall_cache_seconds, 0 in tests) and
+     * dropped with it. Each request reloads those rows through the same visibility rules and
+     * picks again, so an event that has ended or been unpublished since is gone at once and
+     * only a NEW event waits out the cache.
+     *
+     * @return array{0: \Illuminate\Support\Collection, 1: array<string, bool>}
+     */
+    private function browseWall(Carbon $now): array
+    {
+        $listed = fn () => $this->publicEventsQuery()
+            ->where('is_hidden_from_discovery', false)
+            ->where(function ($sub) {
+                $sub->where(function ($f) {
+                    $f->whereNotNull('flyer_image_url')
+                        ->where('flyer_image_url', '!=', '');
+                })
+                    ->orWhereHas('roles', function ($r) {
+                        $r->whereIn('roles.type', ['talent', 'venue'])
+                            ->whereNotNull('roles.profile_image_url')
+                            ->where('roles.profile_image_url', '!=', '');
+                    });
+            });
+
+        $build = function () use ($listed, $now) {
+            $at = $now->format('Y-m-d H:i:s');
+
+            $dated = DiscoveryUtils::candidates(
+                $listed()
+                    ->whereNull('days_of_week')
+                    ->whereNotNull('starts_at')
+                    ->whereRaw(
+                        'DATE_ADD(starts_at, INTERVAL ROUND(IF(duration IS NULL OR duration <= 0, ?, duration) * 60) MINUTE) >= ?',
+                        [BrowseWall::NO_LENGTH_HOURS, $at]
+                    )
+                    ->orderByRaw('GREATEST(starts_at, ?) ASC, events.id ASC', [$at]),
+                BrowseWall::LIMIT,
+                1
+            );
+
+            $series = $listed()
+                ->whereNotNull('days_of_week')
+                ->orderByDesc('events.id')
+                ->limit(BrowseWall::SERIES)
+                ->get();
+
+            $pool = $dated->concat($series);
+            $picked = BrowseWall::pick($pool, BrowseWall::LIMIT, $now);
+
+            return [
+                'ids' => $picked->pluck('id')->all(),
+                'more' => BrowseWall::schedulesWithMore($pool, $picked, $now),
+            ];
+        };
+
+        $ttl = (int) config('marketing.wall_cache_seconds');
+        $chosen = $ttl > 0 ? Cache::remember(self::browseCacheKey(), $ttl, $build) : $build();
+
+        if (! $chosen['ids']) {
+            return [(new Event)->newCollection(), []];
+        }
+
+        return [
+            BrowseWall::pick($listed()->whereIn('events.id', $chosen['ids'])->get(), BrowseWall::LIMIT, $now),
+            $chosen['more'],
+        ];
     }
 
     /**
@@ -7385,11 +7461,32 @@ class MarketingController extends Controller
     }
 
     /**
-     * Base query for upcoming, public, non-demo events shown on the platform discovery
-     * surfaces (homepage Discover, /browse, /search). Callers add hidden-state filtering,
-     * any text search, ordering and limits.
+     * Base query for upcoming, public, non-demo events shown on the homepage Discover, /search
+     * and /for-talent. Callers add hidden-state filtering, any text search, ordering and limits.
+     *
+     * "Upcoming" here is from the start of today (UTC), every series, and anything of a day or
+     * longer that is still running. /browse asks a finer question (not ended, to the minute) and
+     * builds on publicEventsQuery() itself.
      */
     private function publicUpcomingEventsQuery(): Builder
+    {
+        return $this->publicEventsQuery()
+            ->where(function ($q) {
+                $q->where('starts_at', '>=', Carbon::today())
+                    ->orWhereNotNull('days_of_week')
+                    ->orWhere(function ($q2) {
+                        $q2->where('duration', '>=', 24)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [Carbon::today()]);
+                    });
+            });
+    }
+
+    /**
+     * Which events the platform's discovery surfaces may show at all, whenever they are on:
+     * public, accepted by a listed schedule, not demo content and not a likely test. Every
+     * caller adds its own rule about time.
+     */
+    private function publicEventsQuery(): Builder
     {
         $excludeCountry = strtolower(trim((string) config('app.search_exclude_country', '')));
         $publicScheduleFilter = $this->publicScheduleFilter();
@@ -7399,7 +7496,7 @@ class MarketingController extends Controller
         // roles is ordered explicitly because the relation has no ordering of its own, and three
         // things read its FIRST element: getViewableRole() (the name and city on the card),
         // getGuestUrlData() via role()/venue (the card's href and the url in the ItemList JSON-LD)
-        // and DiscoveryUtils::spread() (the schedule an event spends its quota against).
+        // and DiscoveryUtils::scheduleKey() (the schedule an event is counted against, on every surface).
         //
         // event_role.id, NOT roles.id. It is attachment order, which is what the unordered query
         // was already returning in practice - the join drives off the event_id index, whose leaves
@@ -7412,14 +7509,6 @@ class MarketingController extends Controller
         // Scoped to discovery rather than added to Event::roles(), which guest pages, graphics and
         // emails all read. The sitemap deliberately keeps the natural order for the same reason.
         return Event::with(['roles' => fn ($q) => $q->orderBy('event_role.id'), 'creatorRole'])
-            ->where(function ($q) {
-                $q->where('starts_at', '>=', Carbon::today())
-                    ->orWhereNotNull('days_of_week')
-                    ->orWhere(function ($q2) {
-                        $q2->where('duration', '>=', 24)
-                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [Carbon::today()]);
-                    });
-            })
             ->where('is_private', false)
             ->where('is_draft', false)
             ->where('is_cancelled', false)
@@ -7561,7 +7650,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Google Calendar', 'description' => 'Set up Google Calendar sync for your schedule.', 'url' => $r['creating_schedules'].'#integrations-google', 'category' => 'User Guide', 'keywords' => 'google calendar sync'],
             ['page' => 'Creating Schedules', 'section' => 'Outlook Calendar', 'description' => 'Set up Outlook / Microsoft 365 calendar sync for your schedule.', 'url' => $r['creating_schedules'].'#integrations-microsoft', 'category' => 'User Guide', 'keywords' => 'outlook microsoft 365 office calendar sync teams'],
             ['page' => 'Creating Schedules', 'section' => 'CalDAV Calendar', 'description' => 'Set up CalDAV protocol integration.', 'url' => $r['creating_schedules'].'#integrations-caldav', 'category' => 'User Guide', 'keywords' => 'caldav ical protocol'],
-            ['page' => 'Creating Schedules', 'section' => 'Feeds from Other Sites', 'description' => 'Keep a schedule up to date from a calendar address, an RSS feed or a page that lists events.', 'url' => $r['creating_schedules'].'#integrations-feeds', 'category' => 'User Guide', 'keywords' => 'feed rss atom ics ical webcal sync import jolioo subscribe'],
+            ['page' => 'Creating Schedules', 'section' => 'Feeds from Other Sites', 'description' => 'Keep a schedule up to date from a calendar address, an RSS feed or a page that lists events.', 'url' => $r['creating_schedules'].'#integrations-feeds', 'category' => 'User Guide', 'keywords' => 'feed rss atom ics ical webcal sync import subscribe'],
             ['page' => 'Creating Schedules', 'section' => 'Calendar Text and Feeds', 'description' => 'Calendar description template and iCal/RSS feed URLs.', 'url' => $r['creating_schedules'].'#integrations-advanced', 'category' => 'User Guide', 'keywords' => 'advanced feeds ical rss subscribe calendar description template variables price discount before after coupon calendar text'],
             ['page' => 'Creating Schedules', 'section' => 'AI Details Generator', 'description' => 'Use AI to generate schedule descriptions (Enterprise).', 'url' => $r['creating_schedules'].'#ai-details-generator', 'category' => 'User Guide', 'keywords' => 'ai generate details description automatic'],
             ['page' => 'Creating Schedules', 'section' => 'The Schedule Form', 'description' => 'Where the schedule form is, its sections and rows, and how the one Save works.', 'url' => $r['creating_schedules'].'#schedule-form', 'category' => 'User Guide', 'keywords' => 'edit schedule form sections rows save'],
@@ -7991,6 +8080,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Usage', 'description' => 'Calls to email, AI, calendar and payment providers against daily limits, and the translation backlog.', 'url' => $r['selfhost_admin'].'#insights-usage', 'category' => 'Selfhost', 'keywords' => 'usage features tracking'],
             ['page' => 'Admin Panel', 'section' => 'Boost Management', 'description' => 'Manage Boost ad campaigns.', 'url' => $r['selfhost_admin'].'#manage-boost', 'category' => 'Selfhost', 'keywords' => 'boost campaigns manage ads'],
             ['page' => 'Admin Panel', 'section' => 'Schedules', 'description' => 'Manage any schedule on any install: edit its details, verify it, release a squatted subdomain, mark it deleted and restore it. Plans are assigned on hosted installs only.', 'url' => $r['selfhost_admin'].'#manage-plans', 'category' => 'Selfhost', 'keywords' => 'plans tiers subscription manage schedules delete deleted restore rename subdomain release free up squatted taken unclaimed ownerless junk takedown undo this is not me claimed owner filter curator approved list'],
+            ['page' => 'Admin Panel', 'section' => 'Blocked', 'description' => 'Block an account that abuses the service: it is signed out, its schedules go offline, and its email address, domain or network address can be refused at sign-up.', 'url' => $r['selfhost_admin'].'#manage-blocked', 'category' => 'Selfhost', 'keywords' => 'block blocked ban banned spam spammer spammers abuse suspend account unblock blocklist blacklist refuse sign-up signup email domain ip address network range'],
             ['page' => 'Admin Panel', 'section' => 'Feeds', 'description' => 'Every feed on the install: which schedule reads what, whether it is being read, and Read now or Resume for one that is not.', 'url' => $r['selfhost_admin'].'#manage-feeds', 'category' => 'Selfhost', 'keywords' => 'feeds admin failing paused read now resume ics rss import'],
             ['page' => 'Admin Panel', 'section' => 'Domains Management', 'description' => 'Manage custom domains (SaaS only).', 'url' => $r['selfhost_admin'].'#manage-domains', 'category' => 'Selfhost', 'keywords' => 'domains custom manage'],
             ['page' => 'Admin Panel', 'section' => 'Newsletters Management', 'description' => 'Manage newsletters from the admin panel.', 'url' => $r['selfhost_admin'].'#manage-newsletters', 'category' => 'Selfhost', 'keywords' => 'newsletters manage admin'],

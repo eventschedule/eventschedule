@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-marketing-layout :hp="true">
     <x-slot name="title">Event Scheduling Software for Any Industry | Event Schedule</x-slot>
     <x-slot name="description">Event scheduling software for musicians, venues, curators, theaters and online events. Sell tickets with zero platform fees. Free forever, open source.</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
@@ -108,6 +108,8 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        /* Each group's heading in the page's display size. */
+        #hp section[id] h2.es-balance { font-size: clamp(2rem, 2.2vw + 1.1rem, 3.1rem); line-height: 1.04; }
         .es-finale-panel .text-gradient-usecases {
             background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
             -webkit-background-clip: text;
@@ -127,41 +129,51 @@
     <!-- ============================================================ -->
     <!-- Hero (compact - on a directory page the cards are the CTA)  -->
     <!-- ============================================================ -->
-    <section id="top" class="es-hero relative flex min-h-[calc(46svh-4rem)] items-center overflow-hidden bg-white py-14 dark:bg-[#0a0a0f] noise">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.28), rgba(37, 99, 235, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="absolute inset-0 grid-pattern"></div>
-        </div>
+    <section id="top" class="es-hero hp-hero is-short">
+        <div class="hp-hero-sky" aria-hidden="true"></div>
 
-        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <h1 class="es-balance mb-5 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5 mb-6">
-                    <span class="relative flex h-2 w-2">
-                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-                        <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
-                    </span>
-                    <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Event scheduling software, by use case</span>
+        <div class="hp-hero-copy">
+            <h1 class="hp-h1">
+                <x-marketing.hero-eyebrow class="es-fade-up es-d-1 hp-eyebrow">
+                    <span class="hp-live" aria-hidden="true"><i></i></span>
+                    Event scheduling software, by use case
                 </x-marketing.hero-eyebrow>
                 <span class="es-mask"><span class="es-mask-line">Whatever you put on,</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-usecases">somebody here runs it</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="hp-ink-grad">somebody here runs it</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-7 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Share your events, <a href="{{ marketing_url('/features/ticketing') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">sell tickets</a> with zero platform fees, and <a href="{{ marketing_url('/features/newsletters') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">email your followers</a> when you have new dates. Free forever, open source, and <a href="{{ marketing_url('/selfhost') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">selfhostable</a> if you want it on your own server.
+            <p class="es-fade-up es-d-2 hp-sub">
+                Share your events, <a href="{{ marketing_url('/features/ticketing') }}" class="hp-inline">sell tickets</a> with zero platform fees, and <a href="{{ marketing_url('/features/newsletters') }}" class="hp-inline">email your followers</a> when you have new dates. Free forever, open source, and <a href="{{ marketing_url('/selfhost') }}" class="hp-inline">selfhostable</a> if you want it on your own server.
             </p>
 
-            {{-- Jump row: the mobile wayfinding answer, since the dot nav is lg-only. --}}
-            <nav class="es-fade-up es-d-3 flex flex-wrap items-center justify-center gap-2 lg:hidden" aria-label="Jump to a category">
-                <a href="#performers" class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-400/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20">Performers</a>
-                <a href="#venues" class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20">Venues</a>
-                <a href="#curators" class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20">Curators</a>
-                <a href="#online" class="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-3.5 py-1.5 text-sm font-medium text-cyan-700 transition-colors hover:bg-cyan-100 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:bg-cyan-500/20">Online</a>
-                <a href="#communities" class="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1.5 text-sm font-medium text-teal-800 transition-colors hover:bg-teal-100 dark:border-teal-400/30 dark:bg-teal-500/10 dark:text-teal-300 dark:hover:bg-teal-500/20">Communities</a>
-                <a href="#developers" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-400/30 dark:bg-slate-500/10 dark:text-slate-300 dark:hover:bg-slate-500/20">Developers</a>
+            {{-- The six groups by number: the way around the directory, at every width. --}}
+            <nav class="es-fade-up es-d-3 hp-toc" aria-label="Jump to a category">
+                @foreach ([['performers', 'Performers'], ['venues', 'Venues'], ['curators', 'Curators'], ['online', 'Online'], ['communities', 'Communities'], ['developers', 'Developers']] as $tocIndex => [$tocId, $tocLabel])
+                    <a href="#{{ $tocId }}"><b>{{ sprintf('%02d', $tocIndex + 1) }}</b>{{ $tocLabel }}</a>
+                @endforeach
             </nav>
+        </div>
+    </section>
+
+    {{-- The line-up, as on the homepage: here it is the directory's own names, each the link to
+         its page (the same links as the cards below, so nothing new is claimed). --}}
+    @php
+        $lineupDots = ['bg-blue-500', 'bg-sky-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-amber-500', 'bg-teal-500'];
+    @endphp
+    <section class="hp-lineup" aria-label="Who uses Event Schedule">
+        <h2 class="sr-only">Who uses Event Schedule</h2>
+        <div class="es-marquee-mask">
+            @foreach ([$performers, $venues] as $rowIndex => $lineupRow)
+                <div class="es-marquee" data-marquee="{{ $rowIndex === 0 ? '1' : '-1' }}">
+                    <div class="es-marquee-track">
+                        @for ($i = 0; $i < 2; $i++)
+                            @foreach ($lineupRow as $lineupIndex => $lineupAct)
+                                <a href="{{ marketing_url($lineupAct['url']) }}" @if ($i === 1) aria-hidden="true" tabindex="-1" data-loop-copy @endif class="hp-act">{{ $lineupAct['name'] }}<i class="{{ $lineupDots[$lineupIndex % count($lineupDots)] }}" aria-hidden="true"></i></a>
+                            @endforeach
+                        @endfor
+                    </div>
+                </div>
+            @endforeach
         </div>
     </section>
 
@@ -481,103 +493,18 @@
     <!-- ============================================================ -->
     <!-- FAQ                                                         -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-12 text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Frequently asked <span class="text-gradient-usecases">questions</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal>
-                    Common questions about Event Schedule.
-                </p>
-            </div>
-
-            <div class="space-y-3" data-reveal-group="80">
-                @foreach ($faqs as $faq)
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
-                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
-                    </details>
-                @endforeach
-            </div>
-        </div>
-    </section>
+    <x-marketing.hp-faq :items="$faqs" class="hp-alt" lead="Common questions about Event Schedule.">Frequently asked <span class="hp-ink-grad">questions</span></x-marketing.hp-faq>
 
     <x-marketing.related-pages />
 
     <!-- ============================================================ -->
     <!-- Finale                                                      -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
-        <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
-                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
+    <x-marketing.hp-finale lead="Create your schedule in seconds. No credit card, no platform fees, ever." placeholder="your-schedule" :foot="false">
+        Whatever you run, <span class="hp-ink-grad">start free</span>
+    </x-marketing.hp-finale>
 
-                <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Whatever you run, <span class="text-gradient-usecases">start free</span>
-                    </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Create your schedule in seconds. No credit card, no platform fees, ever.
-                    </p>
 
-                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
-                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
-                        </div>
-                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
-                            <span class="relative z-10 flex items-center gap-2">
-                                Get started for free
-                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </span>
-                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section dot navigation (desktop) -->
-    @php
-        $dotSections = [
-            ['top', 'Top'],
-            ['performers', 'Performers'],
-            ['venues', 'Venues'],
-            ['curators', 'Curators'],
-            ['online', 'Online'],
-            ['communities', 'Communities'],
-            ['developers', 'Developers'],
-            ['claim', 'Get started'],
-        ];
-    @endphp
-    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
-        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
-            @foreach ($dotSections as [$sectionId, $sectionLabel])
-                <li class="relative">
-                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]" aria-label="{{ $sectionLabel }}">
-                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
-                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#15151c] dark:text-gray-300">{{ $sectionLabel }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
-
-    <!-- Local confetti (no CDN) + motion engines -->
-    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>
+    <!-- Motion engines (the finale brings its own confetti) -->
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

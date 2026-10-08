@@ -10,8 +10,10 @@ use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\SignupVerificationCode;
 use App\Rules\NoFakeEmail;
+use App\Rules\NotBlocklisted;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
+use App\Services\Blocklist;
 use App\Utils\HeroExperiment;
 use App\Utils\HoneypotUtils;
 use App\Utils\TimezoneUtils;
@@ -136,7 +138,9 @@ class RegisteredUserController extends Controller
             }
         }
 
-        $emailValidationRules = ['required', 'string', 'email', 'max:255'];
+        // The operator's list, before a code is mailed to an address it refuses. This method
+        // also serves the guest forms' code step, which makes an account too.
+        $emailValidationRules = ['required', 'string', 'email', 'max:255', new NotBlocklisted];
 
         // Add fake email validation for hosted mode
         if (config('app.hosted')) {
@@ -472,7 +476,7 @@ class RegisteredUserController extends Controller
         $validationRules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
-                ['required', 'string', 'email', 'max:255'],
+                ['required', 'string', 'email', 'max:255', new NotBlocklisted],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
@@ -678,6 +682,9 @@ class RegisteredUserController extends Controller
         // below now also persists terms_accepted_at, and consent must not depend on a tautology
         // surviving the next person who reads it.
         $user->email_verified_at = now();
+        // Where the account was made from, for /admin/blocked. A stub that becomes an account
+        // here is made here too.
+        $user->signup_ip = Blocklist::address($request);
         $user->save();
 
         if (session()->pull('pending_follow_consent_dismissed')) {

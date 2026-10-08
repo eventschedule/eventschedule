@@ -21,6 +21,7 @@
         <x-doc-nav-group label="Manage" expanded>
             <x-doc-nav-link href="#manage-boost">Boost</x-doc-nav-link>
             <x-doc-nav-link href="#manage-plans">Schedules</x-doc-nav-link>
+            <x-doc-nav-link href="#manage-blocked">Blocked</x-doc-nav-link>
             <x-doc-nav-link href="#manage-feeds">Feeds</x-doc-nav-link>
             <x-doc-nav-link href="#manage-domains">Domains</x-doc-nav-link>
             <x-doc-nav-link href="#manage-referrals">Referrals</x-doc-nav-link>
@@ -813,6 +814,45 @@
 
         <h3 id="schedules-plans" class="doc-subheading">Plans are the only hosted part</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-6">This page is on every install, because a schedule can be deleted and its name released on a selfhosted install too, and this is where you undo it. Only plans behave differently: a plain selfhost resolves every schedule to the Enterprise feature set, so the plan counts, the plan filters and columns, and the card that assigns a plan only appear on hosted installs. The features in each tier come from the application itself and what a plan charges from your Stripe prices; neither can be edited here. The figures the site advertises are set in the <a href="#settings-plan-pricing" class="doc-link">Plan pricing</a> card on Settings.</p>
+    </section>
+
+    <!-- Manage: Blocked (every install) -->
+    <section id="manage-blocked" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            Blocked (Manage)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The Blocked page, at <code class="doc-inline-code">/admin/blocked</code>, is where you shut out an account that abuses the service, and where you keep the list of what new accounts are refused for. It is there on every install. Deleting a spam schedule on the <a href="#manage-plans" class="doc-link">Schedules</a> page leaves its owner free to make another one; blocking the account does not.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Three totals</strong> - blocked accounts, entries on the list, and how many sign-ups the list has refused</li>
+            <li><strong class="text-gray-900 dark:text-white">Find an account</strong> - by name, email address or a schedule it owns. The owner card on a schedule's admin page and the names under Recent sign-ups on the <a href="#insights-users" class="doc-link">Users</a> page lead to the same place</li>
+            <li><strong class="text-gray-900 dark:text-white">Blocked accounts</strong> - who is blocked, how many schedules the block took down, when and by whom, and your note</li>
+            <li><strong class="text-gray-900 dark:text-white">Refused at sign-up</strong> - the list itself, with how often each entry has refused someone</li>
+        </ul>
+
+        <h3 id="blocked-account" class="doc-subheading">Blocking an account</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A block is decided on the account's own page, which shows what you need first: the schedules it owns, how it signs in, the network address it signed up from, and the other accounts that were made from that same address, each one press away. Press <strong class="text-gray-900 dark:text-white">Block account</strong> and:</p>
+        <ul class="doc-list mb-6">
+            <li>The account can no longer sign in, by password, Google or Facebook, or use its API key. Anyone signed in to it is signed out on their next page</li>
+            <li>Every schedule it owns goes offline and its subdomain is released, exactly as <strong class="text-gray-900 dark:text-white">Delete</strong> on the Schedules page does. A paid plan on one of them is cancelled, and a newsletter waiting to be sent goes back to a draft</li>
+            <li>Its email address goes on the list, so it cannot sign up again</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Two switches add more to the list, and both are off until you turn them on. <strong class="text-gray-900 dark:text-white">Also refuse new accounts from the address</strong> adds the network address the account signed up from (for an IPv6 address, the /64 it sits in). <strong class="text-gray-900 dark:text-white">Also refuse new accounts at the domain</strong> adds its email domain. Beside each is the number of other accounts that share it: a large number means an office, a mobile network or a mail provider that ordinary people use, and it should stay off.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">An administrator cannot be blocked, and you cannot block yourself. Schedules the account is only a member of are not touched.</p>
+
+        <h3 id="blocked-unblock" class="doc-subheading">Unblocking</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Unblock account</strong>, on the same page, undoes what the block did and nothing else. The account can sign in again, the schedules this block took down come back, and the entries it added leave the list. A schedule that was already deleted before the block stays deleted, a cancelled plan stays cancelled, and a subdomain somebody has taken in the meantime stays theirs: the schedule then comes back under its released name.</p>
+
+        <h3 id="blocked-list" class="doc-subheading">The list</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A new account is refused when it matches an entry, whichever way it is being made: the sign-up form, Google or Facebook, the API, or the account a guest form offers. Accounts that already exist are never affected by the list, so adding a domain does not lock anyone out. An entry is one of:</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Email address</strong> - one mailbox. A <code class="doc-inline-code">+tag</code>, and for Gmail the dots in the name, do not make a new address</li>
+            <li><strong class="text-gray-900 dark:text-white">Email domain</strong> - everything at <code class="doc-inline-code">example.com</code> and its subdomains</li>
+            <li><strong class="text-gray-900 dark:text-white">Network address</strong> - one IP address, or a range such as <code class="doc-inline-code">203.0.113.0/24</code>. The widest range allowed is /16 for IPv4 and /32 for IPv6</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">When you add an entry by hand, the page tells you how many existing accounts already match it. The address an account signed up from is kept for 90 days, or for as long as the account is blocked, so the address switch is not offered for an older account. Every block, unblock and change to the list is in the <a href="#system-audit-log" class="doc-link">Audit Log</a>.</p>
     </section>
 
     <!-- Manage: Feeds (every install) -->
