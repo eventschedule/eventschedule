@@ -1799,6 +1799,34 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "With upsert: the event that already had this external_id, updated. meta.created is false",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Event updated successfully"
+                        },
+                        "created": {
+                          "type": "boolean",
+                          "example": false
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "201": {
             "description": "Event created successfully",
             "content": {
@@ -1854,7 +1882,7 @@
             }
           },
           "409": {
-            "description": "The schedule already has an event with this external_id. Nothing is created",
+            "description": "The schedule already has an event with this external_id and the request did not ask to upsert. Nothing is created",
             "content": {
               "application/json": {
                 "schema": {
@@ -3182,6 +3210,11 @@
             "nullable": true,
             "maxLength": 255,
             "description": "The id your own system knows this event by. Unique for the schedule that owns the event and compared exactly. On create, an id the schedule already has an event for is a 409. On update, a value sets or changes it and null clears it"
+          },
+          "upsert": {
+            "type": "boolean",
+            "writeOnly": true,
+            "description": "POST only, with external_id: true updates the event that already has the id instead of answering 409. The update follows the rules of PUT /events/{id} and is not counted against the daily cap"
           },
           "schedule": {
             "type": "string",

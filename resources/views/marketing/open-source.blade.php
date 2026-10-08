@@ -565,7 +565,7 @@
             ['DELETE', '/api/schedules/{subdomain}/groups/{group_id}', 'Sub-schedules', 'Delete it'],
             ['GET', '/api/events', 'Events', 'List events, paginated'],
             ['GET', '/api/events/{id}', 'Events', 'One event'],
-            ['POST', '/api/events/{subdomain}', 'Events', 'Create an event on a schedule'],
+            ['POST', '/api/events/{subdomain}', 'Events', 'Create an event on a schedule, or update it by your own id'],
             ['PUT', '/api/events/{id}', 'Events', 'Update it'],
             ['DELETE', '/api/events/{id}', 'Events', 'Delete it'],
             ['POST', '/api/events/{id}/cancel', 'Events', 'Call it off and keep its sales'],

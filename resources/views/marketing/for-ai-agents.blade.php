@@ -799,7 +799,7 @@
             ['Events', 'The big one. Tickets, agenda parts, members and recurrence all ride along.', [
                 ['GET', '/api/events', 'Paginated, newest first. Twelve filters, including tickets_enabled, is_cancelled and your own external_id.'],
                 ['GET', '/api/events/{id}', 'One event with its tickets, members and agenda parts.'],
-                ['POST', '/api/events/{subdomain}', 'Create an event on a schedule. Carries its own 30-per-minute throttle.'],
+                ['POST', '/api/events/{subdomain}', 'Create an event on a schedule, or with an external_id and upsert, update the one you made last time. Carries its own 30-per-minute throttle.'],
                 ['PUT', '/api/events/{id}', 'Partial update. Recurrence, tickets and agenda parts survive being omitted.'],
                 ['DELETE', '/api/events/{id}', 'Delete it, and withdraw it from any synced calendar.'],
                 ['POST', '/api/events/{id}/cancel', 'Call it off and keep its sales. Optionally email the people registered, with a note.'],

@@ -226,9 +226,24 @@ class ApiEventController extends Controller
         if ($refusal) {
             return $refusal;
         }
-        if ($externalId !== null && ($holder = $this->eventWithExternalId($role->id, $externalId))) {
-            return $this->externalIdConflict($holder);
+
+        // "upsert": true turns that conflict into an update of the event that holds the id. It is
+        // decided HERE, before any step below: those steps are a new event's (required fields,
+        // the schedule's default visibility, the default payment method, the daily cap), and run
+        // on an event that exists they would republish a draft the owner is holding or reset
+        // what the request never mentioned. The update runs under the rules of PUT, through the
+        // schedule in the address, which owns the event.
+        [$upsert, $refusal] = $this->upsertAsked($request, $externalId);
+        if ($refusal) {
+            return $refusal;
         }
+        if ($externalId !== null && ($holder = $this->eventWithExternalId($role->id, $externalId))) {
+            return $upsert ? $this->applyUpdate($request, $holder, $role, false) : $this->externalIdConflict($holder);
+        }
+
+        // What was sent, before the steps below rewrite it for a new event: a request that
+        // loses the race for its id further down is answered from this.
+        $sent = $request->all();
 
         $allowedCategoryIds = collect($role->getEventCategories())->pluck('id')->all();
 
@@ -409,6 +424,8 @@ class ApiEventController extends Controller
         // backstop, and it reads as the same conflict.
         $save = fn () => $this->eventRepo->saveEvent($role, $request, null, true, $scheduleTz, externalId: $externalId);
 
+        $holder = null;
+
         try {
             if ($externalId === null) {
                 $event = $save();
@@ -418,7 +435,7 @@ class ApiEventController extends Controller
                 });
 
                 if (! $event->wasRecentlyCreated) {
-                    return $this->externalIdConflict($event);
+                    $holder = $event;
                 }
             }
         } catch (LockTimeoutException $e) {
@@ -428,16 +445,31 @@ class ApiEventController extends Controller
                 throw $e;
             }
 
-            return $this->externalIdConflict($this->eventWithExternalId($role->id, (string) $externalId));
+            $holder = $this->eventWithExternalId($role->id, (string) $externalId);
+
+            if (! $holder) {
+                return $this->externalIdConflict(null);
+            }
+        }
+
+        // Another request made the event while this one waited. Without upsert that is the
+        // conflict; with it, this request is the update it would have been a moment later, from
+        // what was sent rather than from what the steps above turned it into.
+        if ($holder) {
+            if (! $upsert) {
+                return $this->externalIdConflict($holder);
+            }
+
+            $request->replace($sent);
+
+            return $this->applyUpdate($request, $holder, $role, false);
         }
 
         $event->load(['roles', 'tickets', 'addons', 'parts']);
 
         return response()->json([
             'data' => $event->toApiData(),
-            'meta' => [
-                'message' => 'Event created successfully',
-            ],
+            'meta' => ['message' => 'Event created successfully'] + ($upsert ? ['created' => true] : []),
         ], 201, [], JSON_PRETTY_PRINT);
     }
 
@@ -452,6 +484,25 @@ class ApiEventController extends Controller
         if (! auth()->user()->canEditEvent($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+
+        return $this->applyUpdate($request, $event);
+    }
+
+    /**
+     * Everything an update is, once the caller is known to be allowed: PUT /api/events/{id}, and
+     * a POST that names an external_id the schedule already has an event for and asks to upsert.
+     *
+     * $through is the schedule the save runs through when the caller named one (the upsert's
+     * address, which is the event's owner). Without it, it is the first of the event's schedules
+     * the caller runs, as it has always been for a PUT. It decides the timezone a start is read
+     * in, the sub-schedules a `schedule` slug is looked up in, and whether `members` is the
+     * caller's list or the schedule's own (a talent schedule is its own performer).
+     *
+     * $created is what an upsert reports under meta.created; null leaves the key out.
+     */
+    private function applyUpdate(Request $request, Event $event, ?Role $through = null, ?bool $created = null)
+    {
+        $event->loadMissing(['roles', 'tickets', 'addons', 'parts']);
 
         if (! $event->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
@@ -594,16 +645,21 @@ class ApiEventController extends Controller
         // "venue_id": null for an event that has no venue, and that names nothing.
         $sentVenue = $request->filled('venue_id') || $request->filled('venue_name') || $request->filled('venue_address1');
 
-        // Determine the current role from the event's roles (first where user is owner/admin)
-        $currentRole = null;
-        foreach ($event->roles as $role) {
-            $pivot = auth()->user()->roles()
-                ->where('roles.id', $role->id)
-                ->wherePivotIn('level', ['owner', 'admin'])
-                ->first();
-            if ($pivot) {
-                $currentRole = $role;
-                break;
+        // The schedule the save runs through: the one the caller named, when the event is on it
+        // (store() has already checked the caller runs it), else the first of the event's
+        // schedules where the caller is owner or admin.
+        $currentRole = $through ? $event->roles->firstWhere('id', $through->id) : null;
+
+        if (! $currentRole) {
+            foreach ($event->roles as $role) {
+                $pivot = auth()->user()->roles()
+                    ->where('roles.id', $role->id)
+                    ->wherePivotIn('level', ['owner', 'admin'])
+                    ->first();
+                if ($pivot) {
+                    $currentRole = $role;
+                    break;
+                }
             }
         }
 
@@ -827,9 +883,7 @@ class ApiEventController extends Controller
 
         return response()->json([
             'data' => $event->toApiData(),
-            'meta' => [
-                'message' => 'Event updated successfully',
-            ],
+            'meta' => ['message' => 'Event updated successfully'] + ($created === null ? [] : ['created' => $created]),
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
@@ -962,6 +1016,40 @@ class ApiEventController extends Controller
         }
 
         return [$value === '' ? null : $value, null];
+    }
+
+    /**
+     * Whether a create asked to update the event that already holds its external_id.
+     *
+     * Asked without an id it is refused, not ignored: there is nothing to match on, so a sync
+     * that believes it is upserting would add every record again on every run.
+     *
+     * @return array{0: bool, 1: ?\Illuminate\Http\JsonResponse}
+     */
+    private function upsertAsked(Request $request, ?string $externalId): array
+    {
+        $value = $request->input('upsert');
+
+        if ($value === null) {
+            return [false, null];
+        }
+
+        $asked = is_scalar($value) ? filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+
+        $refuse = fn (string $field, string $message) => [false, response()->json([
+            'error' => 'Validation failed',
+            'errors' => [$field => [$message]],
+        ], 422)];
+
+        if ($asked === null) {
+            return $refuse('upsert', 'The upsert field must be true or false.');
+        }
+
+        if ($asked && $externalId === null) {
+            return $refuse('external_id', 'An upsert needs an external_id: it is what the event is matched on.');
+        }
+
+        return [$asked, null];
     }
 
     /** The event a schedule owns under this id, if it has one. Compared exactly, letter case included. */
