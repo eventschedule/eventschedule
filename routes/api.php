@@ -82,6 +82,8 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     // Events
     Route::get('/events', [ApiEventController::class, 'index']);
     Route::post('/events/flyer/{event_id}', [ApiEventController::class, 'flyer']);
+    Route::post('/events/{id}/cancel', [ApiEventController::class, 'cancel']);
+    Route::post('/events/{id}/restore', [ApiEventController::class, 'restore']);
     Route::post('/events/{subdomain}', [ApiEventController::class, 'store'])->middleware('throttle:30,1');
     Route::get('/events/{id}', [ApiEventController::class, 'show']);
     Route::put('/events/{id}', [ApiEventController::class, 'update']);

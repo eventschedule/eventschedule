@@ -527,7 +527,7 @@
             ],
             [
                 'ref' => 'routes/api.php',
-                'subject' => 'Twenty-four authenticated endpoints',
+                'subject' => 'Twenty-six authenticated endpoints',
                 'body' => 'Schedules, sub-schedules, events, categories, sales and refunds, and read access to attendee feedback.',
             ],
             [
@@ -568,6 +568,8 @@
             ['POST', '/api/events/{subdomain}', 'Events', 'Create an event on a schedule'],
             ['PUT', '/api/events/{id}', 'Events', 'Update it'],
             ['DELETE', '/api/events/{id}', 'Events', 'Delete it'],
+            ['POST', '/api/events/{id}/cancel', 'Events', 'Call it off and keep its sales'],
+            ['POST', '/api/events/{id}/restore', 'Events', 'Undo a cancellation'],
             ['POST', '/api/events/flyer/{event_id}', 'Events', 'Attach a flyer image'],
             ['GET', '/api/categories', 'Categories', 'The system category list'],
             ['GET', '/api/categories/{subdomain}', 'Categories', 'The effective list for one schedule'],
@@ -582,7 +584,7 @@
 
         // Published surfaces, all served as static files out of public/.
         $specFiles = [
-            ['/api/openapi.json', 'OpenAPI 3.0.3', 'Sixteen paths, twenty-six operations, request and response schemas.'],
+            ['/api/openapi.json', 'OpenAPI 3.0.3', 'Eighteen paths, twenty-eight operations, request and response schemas.'],
             ['/llms.txt', 'Short brief', 'The product in one page: schedule types, auth, plans, rate limits.'],
             ['/llms-full.txt', 'Long brief', 'The same, expanded, for a model with room to read.'],
             ['/.well-known/agents.json', 'Agent flows', 'Four named flows with their steps written out: register and set up, create an event with tickets, sell tickets, manage a schedule.'],
@@ -841,7 +843,7 @@
                 <div class="es-commit-num mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-commit-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The API</p>
                 <h2 class="es-balance es-commit-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Twenty-four endpoints, <span class="es-commit-grad">one header.</span>
+                    Twenty-six endpoints, <span class="es-commit-grad">one header.</span>
                 </h2>
                 <p class="es-commit-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Send an <span class="es-commit-mono es-commit-accent">X-API-Key</span> header, get JSON back. Here is the whole surface, transcribed from the route file rather than described.

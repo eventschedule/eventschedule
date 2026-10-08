@@ -47,6 +47,9 @@ class ApiEventController extends Controller
                 'schedule_type' => 'nullable|string|in:single,recurring',
                 'tickets_enabled' => 'nullable|boolean',
                 'group_id' => 'nullable|string',
+                // Not `boolean`: that rule refuses the words "true" and "false", which is what a
+                // query string carries.
+                'is_cancelled' => 'nullable|in:0,1,true,false',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -126,6 +129,11 @@ class ApiEventController extends Controller
         // Filter by RSVP enabled
         if ($request->has('rsvp_enabled')) {
             $events->where('rsvp_enabled', $request->boolean('rsvp_enabled'));
+        }
+
+        // Cancelled events are listed beside the rest unless the caller asks for one or the other
+        if ($request->filled('is_cancelled')) {
+            $events->where('is_cancelled', filter_var($request->is_cancelled, FILTER_VALIDATE_BOOLEAN));
         }
 
         // Filter by sub-schedule (group)
@@ -265,6 +273,10 @@ class ApiEventController extends Controller
                 'error' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
+        }
+
+        if ($refusal = $this->refuseCancelledInBody($request, false)) {
+            return $refusal;
         }
 
         // 'manual' is a documented alias the API has always accepted, but events.payment_method is a
@@ -495,6 +507,10 @@ class ApiEventController extends Controller
                     ]],
                 ], 422);
             }
+        }
+
+        if ($refusal = $this->refuseCancelledInBody($request, (bool) $event->is_cancelled)) {
+            return $refusal;
         }
 
         // 'manual' is a documented alias the API has always accepted, but events.payment_method is a
@@ -755,6 +771,128 @@ class ApiEventController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
+    /**
+     * Cancel an event: it keeps its row and its sales, stops being sold, leaves connected
+     * calendars, and the people registered are told when the caller asks. An appointment booking
+     * is cancelled through its sale, which frees the slot. EventLifecycleService::cancel() is the
+     * whole of it, shared with the admin portal.
+     */
+    public function cancel(Request $request, $id)
+    {
+        [$event, $refusal] = $this->eventToActOn($id);
+        if ($refusal) {
+            return $refusal;
+        }
+
+        try {
+            $request->validate([
+                'notify_attendees' => 'nullable|boolean',
+                'message' => 'nullable|string|max:'.EventLifecycleService::NOTE_LENGTH,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        $outcome = app(EventLifecycleService::class)->cancel(
+            $event,
+            auth()->id(),
+            notifyAttendees: $request->boolean('notify_attendees'),
+            note: $request->input('message'),
+        );
+
+        return $this->lifecycleReply($event, match ($outcome) {
+            EventLifecycleService::ALREADY_CANCELLED => 'Event was already cancelled',
+            EventLifecycleService::BOOKING_CANCELLED => 'Appointment cancelled',
+            default => 'Event cancelled successfully',
+        });
+    }
+
+    /**
+     * Undo a cancellation. Nobody is emailed, and a boost or an installment plan that the
+     * cancellation stopped stays stopped.
+     */
+    public function restore(Request $request, $id)
+    {
+        [$event, $refusal] = $this->eventToActOn($id);
+        if ($refusal) {
+            return $refusal;
+        }
+
+        // A cancelled booking has given its slot back, and somebody else may hold it by now.
+        if ($event->appointment_type_id) {
+            return response()->json([
+                'error' => 'An appointment booking cannot be restored. Its slot was freed when it was cancelled.',
+            ], 422);
+        }
+
+        $outcome = app(EventLifecycleService::class)->restore($event, auth()->id());
+
+        return $this->lifecycleReply(
+            $event,
+            $outcome === EventLifecycleService::NOT_CANCELLED ? 'Event was not cancelled' : 'Event restored successfully'
+        );
+    }
+
+    /**
+     * The event an action endpoint is about, or the refusal: the same three answers show(),
+     * update() and destroy() give.
+     *
+     * @return array{0: ?Event, 1: ?\Illuminate\Http\JsonResponse}
+     */
+    private function eventToActOn($id): array
+    {
+        $event = Event::with('roles')->find(UrlUtils::decodeId($id));
+
+        if (! $event) {
+            return [null, response()->json(['error' => 'Event not found'], 404)];
+        }
+
+        if (! auth()->user()->canEditEvent($event)) {
+            return [null, response()->json(['error' => 'Unauthorized'], 403)];
+        }
+
+        if (! $event->isPro()) {
+            return [null, response()->json(['error' => 'API usage is limited to Pro accounts'], 403)];
+        }
+
+        return [$event, null];
+    }
+
+    private function lifecycleReply(Event $event, string $message)
+    {
+        $event = $event->fresh(['roles', 'tickets', 'addons', 'parts']);
+
+        return response()->json([
+            'data' => $event->toApiData(),
+            'meta' => ['message' => $message],
+        ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * `is_cancelled` is part of the event object, so a client that reads an event and writes it
+     * back sends it. The stored value passes. A different one is refused: dropped in silence, a
+     * script that set it would be told 200 and leave the event on, and applied here it would be a
+     * cancellation with none of what a cancellation does.
+     */
+    private function refuseCancelledInBody(Request $request, bool $stored)
+    {
+        $sent = $request->input('is_cancelled');
+
+        if ($sent === null || filter_var($sent, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === $stored) {
+            return null;
+        }
+
+        return response()->json([
+            'error' => 'Validation failed',
+            'errors' => ['is_cancelled' => [
+                'An event is cancelled with POST /api/events/{id}/cancel and brought back with POST /api/events/{id}/restore. It cannot be changed in the body of a create or an update.',
+            ]],
+        ], 422);
+    }
+
     public function destroy(Request $request, $id)
     {
         $event = Event::with('roles')->find(UrlUtils::decodeId($id));
@@ -789,7 +927,7 @@ class ApiEventController extends Controller
         // on the form.
         if ($event->sales()->exists()) {
             return response()->json([
-                'error' => 'This event has sales and cannot be deleted. Cancel it in the admin portal instead, so buyers keep their records and can be notified.',
+                'error' => 'This event has sales and cannot be deleted. Cancel it instead with POST /api/events/{id}/cancel, so buyers keep their records and can be notified.',
             ], 422);
         }
 

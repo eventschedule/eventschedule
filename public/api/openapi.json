@@ -1268,6 +1268,14 @@
             }
           },
           {
+            "name": "is_cancelled",
+            "in": "query",
+            "description": "true for cancelled events only, false to leave them out. Without it both are listed.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "description": "Page number (default 1)",
@@ -1486,7 +1494,7 @@
         "operationId": "delete_event",
         "tags": ["Events"],
         "summary": "Delete an event",
-        "description": "Permanently deletes an event. The authenticated user must have permission to edit the event.",
+        "description": "Permanently deletes an event. The authenticated user must have permission to edit the event. An event that has sales is not deleted: cancel it with POST /events/{id}/cancel instead.",
         "parameters": [
           {
             "name": "id",
@@ -1542,6 +1550,207 @@
           },
           "404": {
             "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The event has sales and cannot be deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/cancel": {
+      "post": {
+        "operationId": "cancel_event",
+        "tags": ["Events"],
+        "summary": "Cancel an event",
+        "description": "Calls an event off without deleting it. The event keeps its page and every sale, leaves the public calendar and any connected calendar, and stops selling. Running boost campaigns and installment plans are stopped. Sales are not refunded. An event that is already cancelled is left as it is. An appointment booking is cancelled through its sale.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notify_attendees": {
+                    "type": "boolean",
+                    "description": "Email the people who bought, registered or asked to be told. Nobody is emailed about a draft."
+                  },
+                  "message": {
+                    "type": "string",
+                    "maxLength": 280,
+                    "description": "A note added under the cancellation email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The event, cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Event cancelled successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized to edit this event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error (a message longer than 280 characters)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/restore": {
+      "post": {
+        "operationId": "restore_event",
+        "tags": ["Events"],
+        "summary": "Restore a cancelled event",
+        "description": "Undoes a cancellation. The event returns to the public calendar and to connected calendars. Nobody is emailed, and a boost campaign or installment plan that the cancellation stopped stays stopped. An event that is not cancelled is left as it is.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event, restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Event"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Event restored successfully"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized to edit this event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "An appointment booking cannot be restored",
             "content": {
               "application/json": {
                 "schema": {
@@ -2621,6 +2830,18 @@
           "is_private": {
             "type": "boolean",
             "description": "Whether the event is private (hidden from calendar, only accessible via direct link)"
+          },
+          "is_cancelled": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Whether the event is cancelled. Changed only through POST /events/{id}/cancel and /restore"
+          },
+          "cancelled_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "description": "When the event was cancelled"
           },
           "is_password_protected": {
             "type": "boolean",

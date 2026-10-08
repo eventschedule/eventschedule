@@ -35,6 +35,8 @@
             <x-doc-nav-link href="#create-event" search="create event post /api/events tickets agenda recurrence visibility venue members payment method daily cap"><span class="api-method-dot api-method-post"></span>Create Event</x-doc-nav-link>
             <x-doc-nav-link href="#update-event" search="update event put /api/events partial replaces removes promo codes passes venue members"><span class="api-method-dot api-method-put"></span>Update Event</x-doc-nav-link>
             <x-doc-nav-link href="#delete-event" search="delete event /api/events sales deleted appointment"><span class="api-method-dot api-method-delete"></span>Delete Event</x-doc-nav-link>
+            <x-doc-nav-link href="#cancel-event" search="cancel event post /api/events/cancel call off notify attendees sales is_cancelled"><span class="api-method-dot api-method-post"></span>Cancel Event</x-doc-nav-link>
+            <x-doc-nav-link href="#restore-event" search="restore event post /api/events/restore undo cancellation"><span class="api-method-dot api-method-post"></span>Restore Event</x-doc-nav-link>
             <x-doc-nav-link href="#upload-flyer" search="upload flyer image post /api/events/flyer multipart"><span class="api-method-dot api-method-post"></span>Upload Flyer</x-doc-nav-link>
             <x-doc-nav-link href="#list-categories" search="list categories get /api/categories"><span class="api-method-dot api-method-get"></span>List Categories</x-doc-nav-link>
         </x-doc-nav-group>
@@ -851,7 +853,7 @@
                             <code class="doc-inline-code">/api/events</code>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of events on the schedules where you are the owner or an admin, newest start date first. On the hosted service an event is only listed if at least one of its schedules is on a Pro or Enterprise plan. Appointment bookings are never returned here; they are not calendar events.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Drafts, internal and unlisted events are all included, so check <code class="doc-inline-code">is_draft</code>, <code class="doc-inline-code">is_internal</code> and <code class="doc-inline-code">is_private</code> before republishing a row on a public site. Each row is <a href="#event-object" class="doc-link">the event object</a>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Drafts, internal, unlisted and cancelled events are all included, so check <code class="doc-inline-code">is_draft</code>, <code class="doc-inline-code">is_internal</code>, <code class="doc-inline-code">is_private</code> and <code class="doc-inline-code">is_cancelled</code> before republishing a row on a public site. Each row is <a href="#event-object" class="doc-link">the event object</a>.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
@@ -866,6 +868,7 @@
                                     <tr><td><code class="doc-inline-code">tickets_enabled</code></td><td>Filter by whether tickets are enabled (boolean)</td></tr>
                                     <tr><td><code class="doc-inline-code">rsvp_enabled</code></td><td>Filter by whether RSVP/registration is enabled (boolean)</td></tr>
                                     <tr><td><code class="doc-inline-code">group_id</code></td><td>Filter by sub-schedule (encoded sub-schedule ID)</td></tr>
+                                    <tr><td><code class="doc-inline-code">is_cancelled</code></td><td><code class="doc-inline-code">true</code> for cancelled events only, <code class="doc-inline-code">false</code> to leave them out. Without it both are listed.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -918,7 +921,7 @@
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a single event by its encoded ID, including its ticket types, add-ons, members, agenda parts, venue, recurring configuration and visibility flags. Requires owner or admin access on one of the event's schedules, and a Pro or Enterprise plan. An appointment booking, which <a href="#list-events" class="doc-link">List Events</a> leaves out, can be read here by its ID.</p>
                         <h3 class="doc-subheading" id="event-object">The event object</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">List, Show, Create and Update Event and Upload Flyer return this shape, and so do the <code class="doc-inline-code">event.*</code> <a href="{{ route('marketing.docs.developer.webhooks') }}#payload" class="doc-link">webhooks</a>. A field with nothing stored is <code class="doc-inline-code">null</code>, except the few marked as present only in some cases.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">List, Show, Create, Update, Cancel and Restore Event and Upload Flyer return this shape, and so do the <code class="doc-inline-code">event.*</code> <a href="{{ route('marketing.docs.developer.webhooks') }}#payload" class="doc-link">webhooks</a>. A field with nothing stored is <code class="doc-inline-code">null</code>, except the few marked as present only in some cases.</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Field</th><th>Description</th></tr></thead>
@@ -928,6 +931,7 @@
                                     <tr><td><code class="doc-inline-code">starts_at</code>, <code class="doc-inline-code">duration</code></td><td>Start in UTC (<code class="doc-inline-code">Y-m-d H:i:s</code>) and length in hours</td></tr>
                                     <tr><td><code class="doc-inline-code">category_id</code>, <code class="doc-inline-code">category_name</code>, <code class="doc-inline-code">category_color</code></td><td>The category's integer ID, with its name and colour as the schedule has them</td></tr>
                                     <tr><td><code class="doc-inline-code">is_draft</code>, <code class="doc-inline-code">is_private</code>, <code class="doc-inline-code">is_internal</code></td><td>Visibility flags, see <a href="#create-event" class="doc-link">Create Event</a></td></tr>
+                                    <tr><td><code class="doc-inline-code">is_cancelled</code>, <code class="doc-inline-code">cancelled_at</code></td><td>Whether the event is cancelled, and when (ISO 8601, <code class="doc-inline-code">null</code> otherwise). Read-only: change it with <a href="#cancel-event" class="doc-link">Cancel Event</a> and <a href="#restore-event" class="doc-link">Restore Event</a>. Sending back the value you read is accepted on create and update; a different one is a <code class="doc-inline-code">422</code>.</td></tr>
                                     <tr><td><code class="doc-inline-code">is_password_protected</code></td><td>Whether the event page asks for a password. The password itself is never returned.</td></tr>
                                     <tr><td><code class="doc-inline-code">event_url</code>, <code class="doc-inline-code">registration_url</code></td><td>The online or external event link, and the external registration link</td></tr>
                                     <tr><td><code class="doc-inline-code">venue_id</code>, <code class="doc-inline-code">venue_name</code>, <code class="doc-inline-code">venue_address1</code>, <code class="doc-inline-code">venue_subdomain</code></td><td>The event's venue schedule</td></tr>
@@ -1227,8 +1231,8 @@
                             <span class="api-method-pill api-method-pill-delete px-2 py-1 rounded text-sm font-medium">DELETE</span>
                             <code class="doc-inline-code">/api/events/{id}</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Permanently delete an event. Requires owner or admin access on one of its schedules and a Pro or Enterprise plan. There is no undo, so hide the event with <code class="doc-inline-code">is_draft</code> instead if you may want it back.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">An event that has sales is not deleted. The reply is <code class="doc-inline-code">422</code> and nothing changes, whether those sales are paid, refunded or cancelled, because the sale records would go with the event. Cancel it in the admin panel instead, which keeps the records and lets you tell the buyers.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Permanently delete an event. Requires owner or admin access on one of its schedules and a Pro or Enterprise plan. There is no undo, so if you may want it back, hide the event with <code class="doc-inline-code">is_draft</code> or <a href="#cancel-event" class="doc-link">cancel it</a> instead.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">An event that has sales is not deleted. The reply is <code class="doc-inline-code">422</code> and nothing changes, whether those sales are paid, refunded or cancelled, because the sale records would go with the event. <a href="#cancel-event" class="doc-link">Cancel it</a> instead, which keeps the records and lets you tell the buyers.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Deleting also removes the synced copy from any connected Google Calendar, Outlook calendar and CalDAV calendar, cancels any running boost campaign, and deletes its gallery photos and sponsor logo files. Unless the event was a draft, an <code class="doc-inline-code">event.deleted</code> <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhook</a> is sent with the event's final state.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">An appointment booking is the exception. It is cancelled, not deleted: the slot is freed, the booking and its sale are kept, the guest of a booking that was still live is emailed, and no webhook is sent. That reply is a bare <code class="doc-inline-code">{"message": "Appointment cancelled"}</code> with no <code class="doc-inline-code">data</code> wrapper.</p>
                     </div>
@@ -1250,6 +1254,92 @@
                 </div>
             </section>
     
+            <!-- Cancel Event -->
+            <section id="cancel-event" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Cancel Event
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/events/{id}/cancel</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Call an event off without deleting it. The event keeps its page, which now says it is cancelled, and it keeps every sale and registration. It leaves the schedule's public calendar, stops selling, and is removed from any connected Google Calendar, Outlook calendar and CalDAV calendar. Any running boost campaign is stopped and refunded, and installment plans stop charging. Requires owner or admin access on one of its schedules and a Pro or Enterprise plan.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">This is the way to stop an event that has sales, which <a href="#delete-event" class="doc-link">Delete Event</a> refuses. Sales are not refunded by this call: refund each one through <a href="#update-sale" class="doc-link">Update Sale</a> or in the admin panel.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Send <code class="doc-inline-code">notify_attendees</code> as <code class="doc-inline-code">true</code> to email the people who bought, registered or asked to be told, with an optional <code class="doc-inline-code">message</code> of up to 280 characters under it. Buyers are emailed only when the schedule sends from its own address. Nobody is emailed about a draft, and nobody is emailed unless you ask.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Unless the event is a draft, an <code class="doc-inline-code">event.cancelled</code> <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhook</a> is sent. Cancelling an event that is already cancelled changes nothing and answers <code class="doc-inline-code">200</code>. An appointment booking is cancelled through its sale, which frees the slot and emails the guest. The reply is the event object.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/events/evt123/cancel"</span> \
+         -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+         -H <span class="code-string">"Content-Type: application/json"</span> \
+         -d <span class="code-string">'{"notify_attendees": true, "message": "The hall is flooded."}'</span></code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response (200)</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"data"</span>: {
+            <span class="code-string">"id"</span>: <span class="code-string">"evt123"</span>,
+            <span class="code-string">"name"</span>: <span class="code-string">"Jazz Night"</span>,
+            <span class="code-string">"is_cancelled"</span>: <span class="code-value">true</span>,
+            <span class="code-string">"cancelled_at"</span>: <span class="code-string">"2026-10-08T09:30:00+00:00"</span>
+        },
+        <span class="code-string">"meta"</span>: {
+            <span class="code-string">"message"</span>: <span class="code-string">"Event cancelled successfully"</span>
+        }
+    }</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+    
+            <!-- Restore Event -->
+            <section id="restore-event" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                            </svg>
+                            Restore Event
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/events/{id}/restore</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Undo a cancellation. The event returns to the public calendar and to connected calendars, and sales reopen. Requires owner or admin access on one of its schedules and a Pro or Enterprise plan.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Nobody is emailed. A boost campaign or an installment plan that the cancellation stopped stays stopped. Unless the event is a draft, an <code class="doc-inline-code">event.updated</code> webhook is sent, with <code class="doc-inline-code">is_cancelled</code> back to <code class="doc-inline-code">false</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Restoring an event that is not cancelled changes nothing and answers <code class="doc-inline-code">200</code>. An appointment booking cannot be restored and answers <code class="doc-inline-code">422</code>: its slot was freed when it was cancelled.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/events/evt123/restore"</span> \
+         -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response (200)</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"data"</span>: {
+            <span class="code-string">"id"</span>: <span class="code-string">"evt123"</span>,
+            <span class="code-string">"name"</span>: <span class="code-string">"Jazz Night"</span>,
+            <span class="code-string">"is_cancelled"</span>: <span class="code-value">false</span>,
+            <span class="code-string">"cancelled_at"</span>: <span class="code-value">null</span>
+        },
+        <span class="code-string">"meta"</span>: {
+            <span class="code-string">"message"</span>: <span class="code-string">"Event restored successfully"</span>
+        }
+    }</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
             <!-- Upload Flyer -->
             <section id="upload-flyer" class="doc-section api-endpoint-section">
                 <div class="api-endpoint-row">

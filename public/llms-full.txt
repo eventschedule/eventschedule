@@ -889,7 +889,7 @@ curl -X DELETE https://eventschedule.com/api/schedules/the-blue-note/groups/gP5r
 
 #### GET /events
 
-List events owned by the authenticated user. Can be filtered by schedule and date range. Only events belonging to Pro schedules are included in the results.
+List events owned by the authenticated user. Can be filtered by schedule, date range and whether the event is cancelled. Only events belonging to Pro schedules are included in the results. Drafts and cancelled events are listed beside the rest, so check `is_draft` and `is_cancelled` before republishing a row.
 
 **Authentication**: Required
 **Plan**: Pro required (events on non-Pro schedules are silently filtered out)
@@ -900,6 +900,7 @@ List events owned by the authenticated user. Can be filtered by schedule and dat
 | subdomain | string | - | Filter events by schedule subdomain |
 | starts_after | date | - | Filter events starting on or after this date (Y-m-d) |
 | starts_before | date | - | Filter events starting on or before this date (Y-m-d) |
+| is_cancelled | boolean | - | `true` for cancelled events only, `false` to leave them out. Without it both are listed |
 | page | integer | 1 | Page number |
 | per_page | integer | 100 | Results per page (max 500) |
 
@@ -1194,7 +1195,7 @@ curl -X PUT https://eventschedule.com/api/events/vN4wR8 \
 
 #### DELETE /events/{id}
 
-Permanently delete an event.
+Permanently delete an event. An event that has sales is not deleted (422): cancel it with `POST /events/{id}/cancel` instead, which keeps the sale records.
 
 **Authentication**: Required (must have permission to edit)
 **Plan**: Pro required
@@ -1223,6 +1224,68 @@ curl -X DELETE https://eventschedule.com/api/events/vN4wR8 \
 - `401` - Missing or invalid API key
 - `403` - Unauthorized to delete this event, or not a Pro account
 - `404` - Event not found
+- `422` - The event has sales and cannot be deleted
+
+---
+
+#### POST /events/{id}/cancel
+
+Call an event off without deleting it. The event keeps its page, which now says it is cancelled, and it keeps every sale and registration. It leaves the schedule's public calendar and any connected Google, Outlook or CalDAV calendar, and stops selling. Running boost campaigns are stopped and refunded, and installment plans stop charging. Sales are not refunded by this call.
+
+Unless the event is a draft, an `event.cancelled` webhook is sent. Cancelling an event that is already cancelled changes nothing and answers 200. An appointment booking is cancelled through its sale, which frees the slot and emails the guest.
+
+**Authentication**: Required (must have permission to edit)
+**Plan**: Pro required
+
+**Path parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | The encoded ID of the event |
+
+**Request body** (JSON, optional):
+| Field | Type | Description |
+|-------|------|-------------|
+| notify_attendees | boolean | Email the people who bought, registered or asked to be told. Buyers are emailed only when the schedule sends from its own address. Nobody is emailed about a draft |
+| message | string | A note added under the cancellation email (max 280 chars) |
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/events/vN4wR8/cancel \
+  -H "X-API-Key: es_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"notify_attendees": true, "message": "The hall is flooded."}'
+```
+
+**Success response** (200): the Event object, with `is_cancelled` true and `cancelled_at` set, and `meta.message` "Event cancelled successfully".
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized to edit this event, or not a Pro account
+- `404` - Event not found
+- `422` - Validation error (a message longer than 280 characters)
+
+---
+
+#### POST /events/{id}/restore
+
+Undo a cancellation. The event returns to the public calendar and to connected calendars, and sales reopen. Nobody is emailed. A boost campaign or installment plan that the cancellation stopped stays stopped. Unless the event is a draft, an `event.updated` webhook is sent. Restoring an event that is not cancelled changes nothing and answers 200.
+
+**Authentication**: Required (must have permission to edit)
+**Plan**: Pro required
+
+**Example**:
+```bash
+curl -X POST https://eventschedule.com/api/events/vN4wR8/restore \
+  -H "X-API-Key: es_abc123..."
+```
+
+**Success response** (200): the Event object, with `is_cancelled` false and `cancelled_at` null, and `meta.message` "Event restored successfully".
+
+**Error responses**:
+- `401` - Missing or invalid API key
+- `403` - Unauthorized to edit this event, or not a Pro account
+- `404` - Event not found
+- `422` - An appointment booking cannot be restored
 
 ---
 
@@ -1580,6 +1643,8 @@ Fan comments, photos and videos submitted on events for schedules you own or adm
 | venue_id | string | Yes | Encoded ID of associated venue schedule |
 | flyer_image_url | string | Yes | URL of the flyer image |
 | is_private | boolean | No | Whether the event is private (hidden from calendar, only accessible via direct link) |
+| is_cancelled | boolean | No | Whether the event is cancelled. Read-only: changed with POST /events/{id}/cancel and /restore. Sending back the value you read is accepted; a different one is a 422 |
+| cancelled_at | datetime | Yes | When the event was cancelled (ISO 8601) |
 | is_password_protected | boolean | No | Whether the event page is protected by a password |
 | schedule_type | string | No | "single" or "recurring" |
 | recurring_frequency | string | Yes | Recurrence frequency. Only present for recurring events |

@@ -4657,6 +4657,10 @@ class Event extends Model
         $data->is_private = (bool) $this->is_private;
         $data->is_draft = (bool) $this->is_draft;
         $data->is_internal = (bool) $this->is_internal;
+        // Read-only here: an event is cancelled and restored through its own endpoints, which do
+        // more than flip the flag (connected calendars, boosts, the people registered).
+        $data->is_cancelled = (bool) $this->is_cancelled;
+        $data->cancelled_at = $this->cancelled_at?->toIso8601String();
         $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;

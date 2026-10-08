@@ -5,7 +5,7 @@
     @endphp
 
     <x-slot name="title">REST API for AI Agents & Developers - Event Schedule</x-slot>
-    <x-slot name="description">27 REST endpoints, an OpenAPI 3.0 spec, llms.txt and agents.json. One POST creates an event with its tickets; one PUT refunds a sale.</x-slot>
+    <x-slot name="description">29 REST endpoints, an OpenAPI 3.0 spec, llms.txt and agents.json. One POST creates an event with its tickets; one PUT refunds a sale.</x-slot>
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
     <x-slot name="structuredData">
@@ -797,11 +797,13 @@
                 ['DELETE', '/api/schedules/{subdomain}/groups/{group_id}', 'Events survive; their sub-schedule reference is cleared.'],
             ]],
             ['Events', 'The big one. Tickets, agenda parts, members and recurrence all ride along.', [
-                ['GET', '/api/events', 'Paginated, newest first. Ten filters, including tickets_enabled and rsvp_enabled.'],
+                ['GET', '/api/events', 'Paginated, newest first. Eleven filters, including tickets_enabled, rsvp_enabled and is_cancelled.'],
                 ['GET', '/api/events/{id}', 'One event with its tickets, members and agenda parts.'],
                 ['POST', '/api/events/{subdomain}', 'Create an event on a schedule. Carries its own 30-per-minute throttle.'],
                 ['PUT', '/api/events/{id}', 'Partial update. Recurrence, tickets and agenda parts survive being omitted.'],
                 ['DELETE', '/api/events/{id}', 'Delete it, and withdraw it from any synced calendar.'],
+                ['POST', '/api/events/{id}/cancel', 'Call it off and keep its sales. Optionally email the people registered, with a note.'],
+                ['POST', '/api/events/{id}/restore', 'Undo a cancellation. Nobody is emailed.'],
                 ['POST', '/api/events/flyer/{event_id}', 'Multipart upload of a flyer_image for an existing event.'],
             ]],
             ['Categories', 'Read-only lookups so you can send a category_id you know exists.', [
@@ -1125,7 +1127,7 @@ HTML,
                     <div class="ax-hero-desc">
                         <span class="ax-name" aria-hidden="true">DESCRIPTION</span>
                         <p class="ax-prose es-fade-up es-d-2">
-                            {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-four behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, feedback and fan content. JSON in, JSON out, one header.
+                            {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-six behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, feedback and fan content. JSON in, JSON out, one header.
                         </p>
                         <p class="ax-prose es-fade-up es-d-2">
                             An OpenAPI 3.0 spec, <span class="ax-k">llms.txt</span> and <span class="ax-k">agents.json</span> ship with it, so an agent can discover this API and drive it without a human reading the docs first.
@@ -1381,7 +1383,7 @@ HTML,
                                     </div>
                                 </div>
                                 <p class="ax-call-note" data-reveal>
-                                    Ten filters on the events list, including whether tickets or RSVP are switched on, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
+                                    Eleven filters on the events list, including whether tickets or RSVP are switched on, whether an event is cancelled, a venue, a sub-schedule and a date window. You narrow server-side rather than pulling a year and filtering in the agent.
                                 </p>
                             </div>
 

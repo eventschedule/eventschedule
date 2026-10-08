@@ -646,7 +646,7 @@ return [
             'blurb' => 'Programmatically manage schedules and events over REST.',
             'icon' => 'code',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'developer/webhooks' => [
@@ -657,7 +657,7 @@ return [
             'blurb' => 'HMAC-signed POST notifications for sales, events and check-ins.',
             'icon' => 'webhook',
             'published' => '2026-03-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
     ],

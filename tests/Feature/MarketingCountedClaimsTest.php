@@ -163,12 +163,12 @@ class MarketingCountedClaimsTest extends TestCase
     }
 
     /**
-     * /for-ai-agents prints the API as a ledger of 27 rows and states that number
+     * /for-ai-agents prints the API as a ledger of 29 rows and states that number
      * in its own meta description. The count is the easy half: what actually
      * matters is that each printed row is a route that exists, because a reader
      * of that page is an agent about to call it.
      *
-     * 27, not 33: the page documents the three auth routes plus the 24 behind the
+     * 29, not 35: the page documents the three auth routes plus the 26 behind the
      * key, and leaves out the four machine-to-machine ones (translation
      * suggestions, federation), the /admin/realtime browser beacon and the
      * operator's growth data pull (/api/internal/growth), none of which anything
@@ -223,11 +223,11 @@ class MarketingCountedClaimsTest extends TestCase
 
         $source = $this->page('open-source');
         $this->assertMatchesRegularExpression(
-            '/Sixteen paths, twenty-six operations/i',
+            '/Eighteen paths, twenty-eight operations/i',
             $source,
             "/open-source states the OpenAPI shape; public/api/openapi.json now has {$paths} paths and {$operations} operations"
         );
-        $this->assertSame(16, $paths);
-        $this->assertSame(26, $operations);
+        $this->assertSame(18, $paths);
+        $this->assertSame(28, $operations);
     }
 }
