@@ -1547,9 +1547,9 @@ HTML,
                             <div class="ax-note-tags">
                                 <span class="ax-tag ax-tag-pro">pro</span>
                             </div>
-                            <h3>Flyers, as a second call</h3>
+                            <h3>Flyers, by address or as a file</h3>
                             <p>
-                                Artwork is multipart, so it gets its own request. Create the event, then POST a <span class="ax-k">flyer_image</span> to the flyer endpoint with the returned ID.
+                                Send a <span class="ax-k">flyer_image_url</span> with the event and the picture is fetched and stored with it, in the same call. A file of your own is multipart, so it gets its own request: POST a <span class="ax-k">flyer_image</span> to the flyer endpoint with the returned ID.
                             </p>
                             <div class="ax-box">
 <pre class="ax-code" dir="ltr" data-clip-ok>{!! $axPre['flyer'] !!}</pre>

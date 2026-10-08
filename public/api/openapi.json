@@ -3217,6 +3217,13 @@
               }
             }
           },
+          "flyer_image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 2048,
+            "description": "The address of a picture to use as the flyer. It is fetched once, before anything is saved, and stored as our own file: a public http or https address that answers within 10 seconds with a JPEG, PNG, GIF or WebP of at most 8 MB, else a 422. On update a new address replaces the flyer, null removes it, and the address the event already reports is no change"
+          },
           "external_id": {
             "type": "string",
             "nullable": true,

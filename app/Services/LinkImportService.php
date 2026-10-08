@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Utils\GeminiUtils;
 use App\Utils\IcsImportUtils;
 use App\Utils\JsonLdEventUtils;
+use App\Utils\RemoteImage;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Client\ConnectionException;
@@ -596,18 +597,13 @@ class LinkImportService
 
     private function storeImage(string $url, int $seconds = 8): ?string
     {
-        $contents = UrlUtils::safeFetch($url, $seconds);
+        $image = RemoteImage::read($url, $seconds, self::MAX_IMAGE_BYTES);
 
-        if (! is_string($contents) || $contents === '' || strlen($contents) > self::MAX_IMAGE_BYTES) {
+        if (isset($image['reason'])) {
             return null;
         }
 
-        $info = @getimagesizefromstring($contents);
-        $extension = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'][$info[2] ?? 0] ?? null;
-
-        if (! $extension) {
-            return null;
-        }
+        ['contents' => $contents, 'extension' => $extension] = $image;
 
         $directory = storage_path('app/temp');
         if (! is_dir($directory)) {

@@ -1046,6 +1046,7 @@ Create a new event under a schedule.
 |-------|------|----------|-------------|
 | name | string | Yes | Event name (max 255 chars) |
 | starts_at | string | Yes | Start date/time in UTC (Y-m-d H:i:s format) |
+| flyer_image_url | string | No | The address of a picture to use as the flyer (http or https, max 2048 chars). It is fetched once, before anything is saved, and stored as our own file: a public address that answers within 10 seconds with a JPEG, PNG, GIF or WebP of at most 8 MB, else a `422` and nothing is created or changed. Larger than 2000 pixels is resized. On update a new address replaces the flyer, `null` removes it, and the address the event already reports is no change |
 | external_id | string | No | The id your own system knows this event by (text or a number, max 255 chars). Unique for the schedule that owns the event and compared exactly, so `aB3` and `Ab3` are two ids. An id the schedule already has an event for returns `409` with that event's `id` under `data`, and nothing is created, unless `upsert` is true |
 | upsert | boolean | No | With `external_id`: `true` updates the event that already has the id instead of answering `409`. The first call creates (201, `meta.created` true), later calls update (200, `meta.created` false). The update follows the rules of PUT /events/{id}: nothing is required, a field not sent keeps its stored value, a new event's defaults are not applied again (an event made a draft by hand stays a draft), and it is not counted against the daily cap. Send `tickets`, `addons` or `event_parts` only to change them, each existing row with its `id`. Without an `external_id` it is a `422` |
 | duration | number | No | Duration in hours (0 to 8760, decimals allowed) |
@@ -1297,7 +1298,7 @@ curl -X POST https://eventschedule.com/api/events/vN4wR8/restore \
 
 #### POST /events/flyer/{event_id}
 
-Upload a flyer image for an event. Any existing flyer image will be replaced.
+Upload a flyer image for an event. Any existing flyer image will be replaced, and an image larger than 2000 pixels is resized. To set a flyer from an address instead of a file, send `flyer_image_url` when creating or updating the event. To remove a flyer, send `"flyer_image_url": null` to PUT /events/{id}.
 
 **Authentication**: Required (must own the event)
 **Plan**: Pro required
@@ -1648,7 +1649,7 @@ Fan comments, photos and videos submitted on events for schedules you own or adm
 | event_url | string | Yes | External URL |
 | registration_url | string | Yes | External registration URL |
 | venue_id | string | Yes | Encoded ID of associated venue schedule |
-| flyer_image_url | string | Yes | URL of the flyer image |
+| flyer_image_url | string | Yes | Address of the flyer image in our storage. Sending an address in this field on create or update fetches that picture as the flyer |
 | is_private | boolean | No | Whether the event is private (hidden from calendar, only accessible via direct link) |
 | external_id | string | Yes | The id your own system gave the event. Look an event up with GET /events?external_id= |
 | is_cancelled | boolean | No | Whether the event is cancelled. Read-only: changed with POST /events/{id}/cancel and /restore. Sending back the value you read is accepted; a different one is a 422 |
@@ -1912,7 +1913,7 @@ Create an event with ticket types and optionally upload a flyer. Requires an exi
 
 **Steps**:
 1. `create_event` - Create event with `tickets_enabled: true`, currency, payment method, and ticket array
-2. `upload_flyer` - Optionally upload a flyer image using the event ID from step 1
+2. `upload_flyer` - Optionally upload a flyer image file using the event ID from step 1 (a flyer at a public address needs no second step: send `flyer_image_url` in step 1)
 
 ### sell_tickets
 

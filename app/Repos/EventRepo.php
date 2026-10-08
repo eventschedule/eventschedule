@@ -28,6 +28,7 @@ use App\Utils\SponsorUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -447,12 +448,83 @@ class EventRepo
     }
 
     /**
+     * Make $file the event's flyer: checked, the flyer it replaces deleted, resized, stored, saved.
+     *
+     * One implementation for the three ways a flyer arrives as a file: the event form's upload,
+     * the API's upload endpoint, and a picture the API fetched from an address. The API's
+     * endpoint used to keep a copy of this that deleted the old flyer before it had checked the
+     * new one and never resized, so a 6000px poster sent that way was stored whole.
+     *
+     * The type is read from the name's extension AND from the bytes: either alone is whatever
+     * the sender says.
+     *
+     * @throws ValidationException
+     */
+    public function storeFlyer(Event $event, UploadedFile $file): void
+    {
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
+            throw ValidationException::withMessages([
+                'flyer_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp',
+            ]);
+        }
+
+        $this->deleteFlyerFile($event);
+
+        // Resize oversized flyers before storage. Graphic generation
+        // decodes these via GD, which OOMs on multi-megapixel images on
+        // small PHP-FPM workers (e.g. DigitalOcean App Platform's 128MB
+        // cap). We resize the temp file in place so storeAs() uploads
+        // the smaller version, which works for both local and S3 disks.
+        // An animated flyer is stored whole, since a re-encode keeps one
+        // frame; graphic generation budgets that decode itself
+        // (AbstractEventDesign::safeImageCreateFromString()).
+        ImageUtils::resizeImageToMax($file->getRealPath(), 2000);
+
+        $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
+        $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+        $event->flyer_image_url = $filename;
+        $event->save();
+    }
+
+    /** Take the flyer off an event. The model's saving hook removes its resized copies. */
+    public function removeFlyer(Event $event): void
+    {
+        if (! ($event->getAttributes()['flyer_image_url'] ?? null)) {
+            return;
+        }
+
+        $this->deleteFlyerFile($event);
+
+        $event->flyer_image_url = null;
+        $event->save();
+    }
+
+    private function deleteFlyerFile(Event $event): void
+    {
+        $path = $event->getAttributes()['flyer_image_url'] ?? null;
+
+        if (! $path) {
+            return;
+        }
+
+        if (config('filesystems.default') == 'local') {
+            $path = 'public/'.$path;
+        }
+
+        Storage::delete($path);
+    }
+
+    /**
      * $allowExistingVenueClaim lets this caller honour "I manage this venue" for a venue that
      * ALREADY EXISTS (ownerless ones only - see claimVenueOwnership()). It is a capability the
      * caller grants explicitly, and it defaults to false, because there is nothing about the
      * request itself that can tell the two cases apart safely - see the gate below.
      */
-    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false, ?string $importSource = null, ?string $importBatch = null, ?string $externalId = null)
+    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null, bool $allowExistingVenueClaim = false, ?string $importSource = null, ?string $importBatch = null, ?string $externalId = null, ?UploadedFile $flyer = null)
     {
         $this->aiImageRejected = false;
 
@@ -1687,42 +1759,13 @@ class EventRepo
 
         $this->restoreAutoSourcedPivots($event, $pivotBefore);
 
-        if ($request->hasFile('flyer_image')) {
-            $file = $request->file('flyer_image');
+        // A flyer the caller hands over as a file of its own (the API, for a picture it fetched
+        // from an address) stands where an uploaded one would, and outranks the two below
+        // exactly as an upload does.
+        $flyerFile = $flyer ?? ($request->hasFile('flyer_image') ? $request->file('flyer_image') : null);
 
-            // Validate file extension and MIME type
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            $extension = strtolower($file->getClientOriginalExtension());
-            if (! in_array($extension, $allowedExtensions) || ! in_array($file->getMimeType(), $allowedMimeTypes)) {
-                throw ValidationException::withMessages([
-                    'flyer_image' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp',
-                ]);
-            }
-
-            if ($event->flyer_image_url) {
-                $path = $event->getAttributes()['flyer_image_url'];
-                if (config('filesystems.default') == 'local') {
-                    $path = 'public/'.$path;
-                }
-                Storage::delete($path);
-            }
-
-            // Resize oversized flyers before storage. Graphic generation
-            // decodes these via GD, which OOMs on multi-megapixel images on
-            // small PHP-FPM workers (e.g. DigitalOcean App Platform's 128MB
-            // cap). We resize the temp file in place so storeAs() uploads
-            // the smaller version, which works for both local and S3 disks.
-            // An animated flyer is stored whole, since a re-encode keeps one
-            // frame; graphic generation budgets that decode itself
-            // (AbstractEventDesign::safeImageCreateFromString()).
-            ImageUtils::resizeImageToMax($file->getRealPath(), 2000);
-
-            $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
-            $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-
-            $event->flyer_image_url = $filename;
-            $event->save();
+        if ($flyerFile) {
+            $this->storeFlyer($event, $flyerFile);
         }
 
         // The name EventController::generateFlyer() wrote, posted back by the form. It is stored and
@@ -1730,7 +1773,7 @@ class EventRepo
         // is saved under (AiImageIssuance). The shape check alone accepted any PNG flyer, which an
         // uploaded one is too, and refused every AI flyer saved as a JPEG or WebP. Anything else is
         // ignored and deletes nothing; the name already stored is the same form posted again.
-        if (! $request->hasFile('flyer_image') && $request->input('ai_flyer_image')) {
+        if (! $flyerFile && $request->input('ai_flyer_image')) {
             $aiFilename = $request->input('ai_flyer_image');
 
             if ($aiFilename !== ($event->getAttributes()['flyer_image_url'] ?? null)) {
@@ -1764,7 +1807,7 @@ class EventRepo
         // Read + re-write (not Storage::copy) so the destination inherits the disk's default
         // public visibility - the same write path as a normal upload. Storage::copy() would
         // instead retain the source ACL, which is unreliable on S3/Spaces and could 403.
-        if (! $request->hasFile('flyer_image') && ! $request->input('ai_flyer_image') && $request->input('clone_flyer_image')) {
+        if (! $flyerFile && ! $request->input('ai_flyer_image') && $request->input('clone_flyer_image')) {
             $cloneFilename = $request->input('clone_flyer_image');
             if (is_string($cloneFilename) && preg_match('/^flyer_[a-z0-9]+\.(jpg|jpeg|png|gif|webp)$/', $cloneFilename)) {
                 $sourcePath = config('filesystems.default') == 'local' ? 'public/'.$cloneFilename : $cloneFilename;

@@ -938,7 +938,7 @@
                                     <tr><td><code class="doc-inline-code">is_password_protected</code></td><td>Whether the event page asks for a password. The password itself is never returned.</td></tr>
                                     <tr><td><code class="doc-inline-code">event_url</code>, <code class="doc-inline-code">registration_url</code></td><td>The online or external event link, and the external registration link</td></tr>
                                     <tr><td><code class="doc-inline-code">venue_id</code>, <code class="doc-inline-code">venue_name</code>, <code class="doc-inline-code">venue_address1</code>, <code class="doc-inline-code">venue_subdomain</code></td><td>The event's venue schedule</td></tr>
-                                    <tr><td><code class="doc-inline-code">flyer_image_url</code></td><td>URL of the flyer image</td></tr>
+                                    <tr><td><code class="doc-inline-code">flyer_image_url</code></td><td>Address of the flyer image in our storage, or <code class="doc-inline-code">null</code>. See <a href="#event-flyer-url" class="doc-link">Flyer from an address</a> for what sending it does.</td></tr>
                                     <tr><td><code class="doc-inline-code">schedule_type</code></td><td><code class="doc-inline-code">single</code> or <code class="doc-inline-code">recurring</code></td></tr>
                                     <tr><td><code class="doc-inline-code">recurring_frequency</code>, <code class="doc-inline-code">recurring_interval</code>, <code class="doc-inline-code">days_of_week</code>, <code class="doc-inline-code">recurring_end_type</code>, <code class="doc-inline-code">recurring_end_value</code></td><td>Present only on a recurring event. <code class="doc-inline-code">days_of_week</code> reads <code class="doc-inline-code">"1111111"</code> for every frequency other than weekly and every_n_weeks.</td></tr>
                                     <tr><td><code class="doc-inline-code">rsvp_enabled</code>, <code class="doc-inline-code">rsvp_limit</code>, <code class="doc-inline-code">tickets_enabled</code></td><td>Registration and ticketing switches</td></tr>
@@ -1050,6 +1050,7 @@
                                     <tr><td><code class="doc-inline-code">category_id</code></td><td>No</td><td>Category ID, which must be in this schedule's effective category list (see <a href="#list-categories" class="doc-link">List Categories</a>)</td></tr>
                                     <tr><td><code class="doc-inline-code">category</code></td><td>No</td><td>Category name, matched case- and punctuation-insensitively against the same list. Ignored when <code class="doc-inline-code">category_id</code> is present; an unmatched name returns <code class="doc-inline-code">422 Category not found</code>.</td></tr>
                                     <tr><td><code class="doc-inline-code">schedule</code></td><td>No</td><td>Sub-schedule slug to file the event under. An unknown slug returns <code class="doc-inline-code">422 Sub-schedule not found</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">flyer_image_url</code></td><td>No</td><td>The address of a picture to use as the flyer (http or https, max 2048 characters). It is fetched and stored with the event. See <a href="#event-flyer-url" class="doc-link">Flyer from an address</a> below.</td></tr>
                                     <tr><td><code class="doc-inline-code">external_id</code></td><td>No</td><td>The id your own system knows this event by (text or a number, max 255 characters). See <a href="#event-external-id" class="doc-link">External ID</a> below.</td></tr>
                                     <tr><td><code class="doc-inline-code">upsert</code></td><td>No</td><td><code class="doc-inline-code">true</code> to update the event that already has this <code class="doc-inline-code">external_id</code> instead of getting a <code class="doc-inline-code">409</code> (boolean). See <a href="#event-upsert" class="doc-link">Create or update in one call</a> below.</td></tr>
                                 </tbody>
@@ -1135,6 +1136,14 @@
                             <li>Send one of <code class="doc-inline-code">ends_at</code> and <code class="doc-inline-code">duration</code>. The event object carries both, so a client that reads an event and writes it back sends both, and that is accepted: the one that differs from the stored value is taken as the change. Change both to values that disagree and the reply is <code class="doc-inline-code">422</code>.</li>
                             <li>Move only <code class="doc-inline-code">starts_at</code> and send the rest back as read, and the event moves whole: it keeps its length and ends later.</li>
                             <li><code class="doc-inline-code">"ends_at": null</code> changes nothing. To take the length off an event, send <code class="doc-inline-code">duration</code> as <code class="doc-inline-code">null</code> or <code class="doc-inline-code">0</code>.</li>
+                        </ul>
+                        <h3 class="doc-subheading" id="event-flyer-url">Flyer from an address</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Send <code class="doc-inline-code">flyer_image_url</code> and the picture at that address becomes the event's flyer, in the same call. It is downloaded once and stored as a file of ours, so the event does not depend on the address afterwards, and the <code class="doc-inline-code">flyer_image_url</code> you read back is our copy's address, not the one you sent. To send a file of your own instead, use <a href="#upload-flyer" class="doc-link">Upload Flyer</a>.</p>
+                        <ul class="doc-list mb-6">
+                            <li>The address has to be public and answer within 10 seconds with a JPEG, PNG, GIF or WebP of at most 8 MB. What kind of picture it is, is read from the file itself, not from the address or the server's content type.</li>
+                            <li>The picture is fetched before anything is saved. If it cannot be had, the reply is <code class="doc-inline-code">422</code> with the reason under <code class="doc-inline-code">errors.flyer_image_url</code>, and the event is not created or changed.</li>
+                            <li>A picture wider or taller than 2,000 pixels is resized to fit. An animated GIF is stored as it is.</li>
+                            <li>On <a href="#update-event" class="doc-link">Update Event</a>, a new address replaces the flyer and <code class="doc-inline-code">null</code> removes it. The address the event already reports is no change, so an event that is read and written back keeps its flyer and nothing is downloaded.</li>
                         </ul>
                         <h3 class="doc-subheading" id="event-external-id">External ID</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">external_id</code> is the id your own system knows an event by: a post number, a row's key, a UUID. Send it when you create an event, and your next sync can find that event again instead of adding a second one. It is returned in <a href="#event-object" class="doc-link">the event object</a> and in every event webhook, and <code class="doc-inline-code">GET /api/events?external_id=...</code> looks an event up by it.</p>
@@ -1400,11 +1409,12 @@
                                 <tbody>
                                     <tr><td>Formats</td><td>jpg, jpeg, png, gif, webp</td></tr>
                                     <tr><td>Maximum size</td><td>10 MB</td></tr>
+                                    <tr><td>Larger than 2,000 pixels</td><td>Resized to fit. An animated GIF is stored as it is</td></tr>
                                     <tr><td>Existing flyer</td><td>Replaced, and the old file is deleted from storage</td></tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mt-6">The response is the full event record, so you can read the new <code class="doc-inline-code">flyer_image_url</code> straight back from <code class="doc-inline-code">data</code>. There is no endpoint for removing a flyer.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-6">The response is the full event record, so you can read the new <code class="doc-inline-code">flyer_image_url</code> straight back from <code class="doc-inline-code">data</code>. To remove a flyer, send <code class="doc-inline-code">"flyer_image_url": null</code> to <a href="#update-event" class="doc-link">Update Event</a>. To set one from an address instead of a file, in the same call that creates the event, see <a href="#event-flyer-url" class="doc-link">Flyer from an address</a>.</p>
                     </div>
                     <div class="api-endpoint-code">
                         <div class="doc-code-block">

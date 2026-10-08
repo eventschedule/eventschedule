@@ -14,13 +14,14 @@ use App\Services\AuditService;
 use App\Services\EventLifecycleService;
 use App\Utils\GeminiUtils;
 use App\Utils\ImportedTime;
+use App\Utils\RemoteImage;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -322,6 +323,11 @@ class ApiEventController extends Controller
             return $refusal;
         }
 
+        [$flyerUrl, , $refusal] = $this->flyerAddressFrom($request, null);
+        if ($refusal) {
+            return $refusal;
+        }
+
         // 'manual' is a documented alias the API has always accepted, but events.payment_method is a
         // MySQL enum that has never contained it, so it could only ever fail on write. Normalise it
         // to the value it plainly means rather than leaving a rule that accepts an unstorable input.
@@ -425,10 +431,18 @@ class ApiEventController extends Controller
             return $errorResponse;
         }
 
+        // The flyer, fetched before anything is saved and before the lock below is taken: a
+        // picture that cannot be had refuses the request with nothing made, and nobody waits on
+        // somebody else's server.
+        [$flyer, $refusal] = $this->fetchFlyer($flyerUrl);
+        if ($refusal) {
+            return $refusal;
+        }
+
         // Two requests carrying the same new id must not both pass the check above and both
         // create: the second waits for the first, then finds its event. The unique index is the
         // backstop, and it reads as the same conflict.
-        $save = fn () => $this->eventRepo->saveEvent($role, $request, null, true, $scheduleTz, externalId: $externalId);
+        $save = fn () => $this->eventRepo->saveEvent($role, $request, null, true, $scheduleTz, externalId: $externalId, flyer: $flyer);
 
         $holder = null;
 
@@ -456,6 +470,10 @@ class ApiEventController extends Controller
             if (! $holder) {
                 return $this->externalIdConflict(null);
             }
+        } catch (ValidationException $e) {
+            return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } finally {
+            $this->forgetFlyer($flyer);
         }
 
         // Another request made the event while this one waited. Without upsert that is the
@@ -623,6 +641,11 @@ class ApiEventController extends Controller
         }
 
         if ($refusal = $this->takeEndsAt($request, $event)) {
+            return $refusal;
+        }
+
+        [$flyerUrl, $removeFlyer, $refusal] = $this->flyerAddressFrom($request, $event);
+        if ($refusal) {
             return $refusal;
         }
 
@@ -868,8 +891,14 @@ class ApiEventController extends Controller
 
         $this->keepAttachments($request, $event, $currentRole, $sentVenue, $sentMembers);
 
+        // Last, when nothing above can still refuse the request, and before anything is saved.
+        [$flyer, $refusal] = $this->fetchFlyer($flyerUrl);
+        if ($refusal) {
+            return $refusal;
+        }
+
         try {
-            $event = $this->eventRepo->saveEvent($currentRole, $request, $event, true, $scheduleTz);
+            $event = $this->eventRepo->saveEvent($currentRole, $request, $event, true, $scheduleTz, flyer: $flyer);
         } catch (QueryException $e) {
             if (! $this->isDuplicateExternalId($e)) {
                 throw $e;
@@ -879,6 +908,14 @@ class ApiEventController extends Controller
                 'error' => 'Validation failed',
                 'errors' => ['external_id' => ['Another event on the same schedule already has this external_id.']],
             ], 422);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } finally {
+            $this->forgetFlyer($flyer);
+        }
+
+        if ($removeFlyer) {
+            $this->eventRepo->removeFlyer($event);
         }
 
         foreach ($passEventsKept as $ticketId => $ids) {
@@ -1213,6 +1250,100 @@ class ApiEventController extends Controller
     }
 
     /**
+     * The largest picture taken from an address. Under the 10 MB at which the guarded fetch cuts
+     * a body off, so that a picture which is merely too big is told so: one past the fetch's own
+     * cap is an aborted transfer, and reads as "could not be fetched".
+     */
+    private const FLYER_MAX_BYTES = 8 * 1024 * 1024;
+
+    private const FLYER_FETCH_SECONDS = 10;
+
+    /**
+     * What a request says about the flyer through `flyer_image_url`: the address to fetch a new
+     * one from, or that the flyer is to be removed, or nothing.
+     *
+     * The event object reports the flyer under this name, so a client that reads an event and
+     * writes it back sends the address of the flyer the event already has. That is no change,
+     * and must not be a download of our own file through the front door. Null removes the
+     * flyer, which is also what an event without one reads as.
+     *
+     * Only judged here. The fetch waits until nothing else can refuse the request.
+     *
+     * @return array{0: ?string, 1: bool, 2: ?\Illuminate\Http\JsonResponse}
+     */
+    private function flyerAddressFrom(Request $request, ?Event $event): array
+    {
+        if (! $request->has('flyer_image_url')) {
+            return [null, false, null];
+        }
+
+        $value = $request->input('flyer_image_url');
+
+        if ($value === null || $value === '') {
+            return [null, $event !== null, null];
+        }
+
+        $refuse = fn (string $message) => [null, false, response()->json([
+            'error' => 'Validation failed',
+            'errors' => ['flyer_image_url' => [$message]],
+        ], 422)];
+
+        if (! is_string($value) || strlen($value) > 2048 || ! preg_match('#^https?://#i', $value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
+            return $refuse('The flyer_image_url must be an http or https address of at most 2048 characters.');
+        }
+
+        if ($event && $value === $event->flyer_image_url) {
+            return [null, false, null];
+        }
+
+        return [$value, false, null];
+    }
+
+    /**
+     * Fetch a flyer from an address and hand it back as a file saveEvent() can store. Through
+     * the guard every outbound fetch uses, and judged by its bytes, not by what its address or
+     * its server call it.
+     *
+     * @return array{0: ?UploadedFile, 1: ?\Illuminate\Http\JsonResponse}
+     */
+    private function fetchFlyer(?string $url): array
+    {
+        if ($url === null) {
+            return [null, null];
+        }
+
+        $image = RemoteImage::read($url, self::FLYER_FETCH_SECONDS, self::FLYER_MAX_BYTES);
+
+        if (isset($image['reason'])) {
+            return [null, response()->json([
+                'error' => 'Validation failed',
+                'errors' => ['flyer_image_url' => [match ($image['reason']) {
+                    RemoteImage::TOO_LARGE => 'The image is larger than 8 MB.',
+                    RemoteImage::NOT_AN_IMAGE => 'The address did not return a JPEG, PNG, GIF or WebP image.',
+                    default => 'The image could not be fetched. The address has to be public, answer within '.self::FLYER_FETCH_SECONDS.' seconds and send at most 8 MB.',
+                }]],
+            ], 422)];
+        }
+
+        $path = tempnam(sys_get_temp_dir(), 'flyer');
+
+        if ($path === false || file_put_contents($path, $image['contents']) === false) {
+            return [null, response()->json(['error' => 'The image could not be stored. Try again.'], 500)];
+        }
+
+        // "test" mode, as the import does for a picture it fetched: the file was never an HTTP
+        // upload, and without it isValid() would say so.
+        return [new UploadedFile($path, 'flyer.'.$image['extension'], null, null, true), null];
+    }
+
+    private function forgetFlyer(?UploadedFile $flyer): void
+    {
+        if ($flyer && is_file($flyer->getPathname())) {
+            @unlink($flyer->getPathname());
+        }
+    }
+
+    /**
      * `is_cancelled` is part of the event object, so a client that reads an event and writes it
      * back sends it. The stored value passes. A different one is refused: dropped in silence, a
      * script that set it would be told 200 and leave the event on, and applied here it would be a
@@ -1335,25 +1466,16 @@ class ApiEventController extends Controller
             ], 422);
         }
 
-        if ($event->flyer_image_url) {
-            $path = $event->getAttributes()['flyer_image_url'];
-            if (config('filesystems.default') == 'local') {
-                $path = 'public/'.$path;
-            }
-            Storage::delete($path);
+        // The same code the event form and a flyer given by address go through: the new file is
+        // checked before the old one is deleted, and a poster larger than 2000px is resized.
+        try {
+            $this->eventRepo->storeFlyer($event, $request->file('flyer_image'));
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
         }
-
-        $file = $request->file('flyer_image');
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        $extension = strtolower($file->getClientOriginalExtension());
-        if (! in_array($extension, $allowedExtensions)) {
-            return response()->json(['error' => 'Invalid file type'], 422);
-        }
-        $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
-        $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-
-        $event->flyer_image_url = $filename;
-        $event->save();
 
         return response()->json([
             'data' => $event->toApiData(),
