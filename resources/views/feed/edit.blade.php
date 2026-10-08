@@ -64,6 +64,11 @@
                             </label>
                             @endforeach
                         </div>
+                        {{-- "Leave it" has let events go by that the other two would not have:
+                             changing it reaches back to every one of them at the next read. --}}
+                        @if ($alreadyGone > 0)
+                        <x-page-notice tone="warn" class="mt-3">{{ trans_choice('messages.feeds_gone_reaches', $alreadyGone, ['count' => number_format($alreadyGone)]) }}</x-page-notice>
+                        @endif
                         @else
                         <p>{{ __('messages.feeds_gone_cannot') }}</p>
                         @endif
@@ -95,9 +100,10 @@
                             <div>
                                 <x-input-label for="feed-zone" :value="__('messages.feeds_zone')" />
                                 <select id="feed-zone" name="source_timezone" class="{{ $select }}">
-                                    @foreach (timezone_identifiers_list() as $zone)
-                                    <option value="{{ $zone }}" {{ old('source_timezone', $feed->source_timezone) === $zone ? 'selected' : '' }}>{{ str_replace('_', ' ', $zone) }}</option>
-                                    @endforeach
+                                    {{-- The shared list, which keeps a stored zone PHP's own list does
+                                         not name: without it the select fell on Africa/Abidjan, and
+                                         saving a new name moved every start. --}}
+                                    <x-timezone-options :selected="old('source_timezone', $feed->source_timezone)" />
                                 </select>
                                 <p class="event-hint">{{ __('messages.feeds_zone_edit_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('source_timezone')" />

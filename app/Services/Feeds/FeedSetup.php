@@ -73,7 +73,7 @@ class FeedSetup
             return ['ok' => false, 'reason' => 'unsupported'];
         }
 
-        $timezone = $timezone && in_array($timezone, timezone_identifiers_list(), true) ? $timezone : $role->captureTimezone();
+        $timezone = \App\Utils\TimezoneUtils::canonicalize($timezone) ?? $role->captureTimezone();
         $keepLocalClock = ! $role->isVenue();
         $reader = FeedKind::reader($kind);
         // Unzoned times are read on the feed's clock and everything is placed on the schedule's,
@@ -192,7 +192,7 @@ class FeedSetup
             'group_id' => $choices['group_id'] ?? null,
             'category_id' => $choices['category_id'] ?? null,
             'add_organizer' => (bool) ($choices['add_organizer'] ?? false),
-            'source_timezone' => $zone && in_array($zone, timezone_identifiers_list(), true) ? $zone : $role->captureTimezone(),
+            'source_timezone' => \App\Utils\TimezoneUtils::canonicalize($zone) ?? $role->captureTimezone(),
             'can_see_leaving' => $canSeeLeaving,
             'baseline_batch' => strtolower(Str::random(12)),
             'next_check_at' => now(),

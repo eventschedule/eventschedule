@@ -489,7 +489,7 @@ class FeedEngineGuardsTest extends TestCase
         $feed = $this->feed(['publish_mode' => EventFeed::DRAFT]);
         $this->entries = [$this->entry('a', 'One'), $this->entry('b', 'Two', 11)];
         $this->read($feed);
-        $this->assertSame(2, app(FeedActions::class)->publishAll($feed->fresh()));
+        $this->assertSame(['asked' => 2, 'published' => 0], app(FeedActions::class)->publishAll($feed->fresh(), $this->role, $this->owner));
 
         $this->answer = Http::response('down', 500);
         $this->assertSame('http_error', $this->read($feed)['status']);

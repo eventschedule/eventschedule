@@ -76,9 +76,13 @@ class EventFeedItem extends Model
             return;
         }
 
-        static::where('event_id', $event->id)
-            ->whereIn('state', [self::STATE_IMPORTED, self::STATE_DECIDE])
-            ->update(['state' => self::STATE_DISMISSED, 'pending' => null, 'publish_requested_at' => null]);
+        $items = static::where('event_id', $event->id)->whereIn('state', [self::STATE_IMPORTED, self::STATE_DECIDE]);
+        $feeds = (clone $items)->pluck('event_feed_id')->unique()->all();
+
+        $items->update(['state' => self::STATE_DISMISSED, 'pending' => null, 'publish_requested_at' => null]);
+
+        // The tab's number, at once: it said "3 waiting" until the next read otherwise.
+        EventFeed::whereIn('id', $feeds)->get()->each(fn (EventFeed $feed) => $feed->recount());
     }
 
     public function feed(): BelongsTo

@@ -145,7 +145,7 @@ class FeedActionsTest extends TestCase
         $this->entries = [$this->entry('a', 'Wanted'), $this->entry('b', 'Not wanted', 11)];
         $this->read($feed);
 
-        $this->assertSame(1, $this->actions()->skip($feed->fresh(), $this->owner, [$this->itemOf($feed, 'b')->id]));
+        $this->assertSame(['skipped' => 1, 'kept' => 0], $this->actions()->skip($feed->fresh(), $this->owner, [$this->itemOf($feed, 'b')->id]));
 
         $this->assertNull($this->named('Not wanted'));
         $this->assertSame(EventFeedItem::STATE_SKIPPED, $this->itemOf($feed, 'b')->state);
@@ -158,8 +158,129 @@ class FeedActionsTest extends TestCase
 
         // A published event is not a draft to skip.
         $this->actions()->publish($feed->fresh(), $this->role, $this->owner, [$this->itemOf($feed, 'a')->id]);
-        $this->assertSame(0, $this->actions()->skip($feed->fresh(), $this->owner, [$this->itemOf($feed, 'a')->id]));
+        $this->assertSame(['skipped' => 0, 'kept' => 0], $this->actions()->skip($feed->fresh(), $this->owner, [$this->itemOf($feed, 'a')->id]));
         $this->assertNotNull($this->named('Wanted'));
+    }
+
+    /**
+     * Skip is "not this one", said of what the feed brought, and it deletes for good. A draft
+     * the owner has already worked on is theirs: it stays, as it does when a feed is removed or
+     * its first read undone, and the page says so.
+     */
+    public function test_a_draft_the_owner_has_worked_on_is_not_skipped(): void
+    {
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'As it came'), $this->entry('b', 'Rewritten', 11)];
+        $this->read($feed);
+        $this->named('Rewritten')->forceFill(['description' => 'Our own words about it.'])->save();
+
+        $ids = [$this->itemOf($feed, 'a')->id, $this->itemOf($feed, 'b')->id];
+        $this->assertSame(['skipped' => 1, 'kept' => 1], $this->actions()->skip($feed->fresh(), $this->owner, $ids));
+
+        $this->assertNull($this->named('As it came'));
+        $this->assertNotNull($this->named('Rewritten'));
+        $this->assertSame(EventFeedItem::STATE_IMPORTED, $this->itemOf($feed, 'b')->state);
+        $this->assertSame(1, $feed->fresh()->waiting_count);
+    }
+
+    /**
+     * Publish all asks the next run to do it. A feed that no run reads, paused or on a plan
+     * without feeds, has no next run: the asking sat there while the page said "being
+     * published", in the very state where it also said "You can still publish".
+     */
+    public function test_publish_all_on_a_feed_that_is_not_being_read_publishes_in_the_request_a_page_at_a_time(): void
+    {
+        $feed = $this->feed();
+        $this->entries = array_map(fn ($n) => $this->entry('e'.$n, 'Event '.$n, 10 + $n), range(1, FeedActions::PUBLISH_AT_ONCE + 2));
+        $this->read($feed);
+        $this->assertSame(FeedActions::PUBLISH_AT_ONCE + 2, Event::where('is_draft', true)->count());
+        $this->actions()->pause($feed->fresh());
+
+        $this->assertSame(['asked' => 0, 'published' => FeedActions::PUBLISH_AT_ONCE], $this->actions()->publishAll($feed->fresh(), $this->role, $this->owner));
+        // Soonest first, so what is left is what happens last.
+        $this->assertEqualsCanonicalizing(['Event 26', 'Event 27'], Event::where('is_draft', true)->pluck('name')->all());
+        $this->assertSame(0, $feed->items()->whereNotNull('publish_requested_at')->count(), 'nothing is left asked for with nobody to do it');
+        $this->assertSame(2, $feed->fresh()->waiting_count);
+
+        // Not paused, on a plan that has no feeds: the same.
+        $this->actions()->resume($feed->fresh());
+        $this->role->forceFill(['plan_type' => 'pro'])->save();
+        $this->assertSame(['asked' => 0, 'published' => 2], $this->actions()->publishAll($feed->fresh(), $this->role->fresh(), $this->owner));
+        $this->assertSame(0, Event::where('is_draft', true)->count());
+    }
+
+    /** A draft the source has since called off is not waiting for anybody to publish it. */
+    public function test_a_draft_called_off_at_the_source_is_not_waiting_to_be_published(): void
+    {
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'Goes ahead'), $this->entry('b', 'Called off', 11)];
+        $this->read($feed);
+        $this->entries = [$this->entry('a', 'Goes ahead'), $this->entry('b', 'Called off', 11, 'STATUS:CANCELLED')];
+        $this->read($feed);
+        $this->assertTrue((bool) $this->named('Called off')->is_cancelled);
+        $this->assertTrue((bool) $this->named('Called off')->is_draft);
+
+        $this->assertSame(1, $feed->fresh()->waiting_count);
+        $this->assertSame(0, $this->actions()->publish($feed->fresh(), $this->role, $this->owner, [$this->itemOf($feed, 'b')->id]));
+        $this->assertTrue((bool) $this->named('Called off')->is_draft);
+
+        $this->actions()->pause($feed->fresh());
+        $this->assertSame(['asked' => 0, 'published' => 1], $this->actions()->publishAll($feed->fresh(), $this->role, $this->owner));
+        $this->assertTrue((bool) $this->named('Called off')->is_draft);
+    }
+
+    /**
+     * "Leave it" lets events go by that the other two choices would have acted on. Changing it
+     * reaches back to every one of them at the next read, so the Edit page says how many first.
+     */
+    public function test_how_many_events_a_change_of_what_happens_to_a_gone_event_would_reach(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'left_action' => EventFeed::LEFT_KEEP]);
+        $this->entries = [$this->entry('a', 'Stays'), $this->entry('b', 'Left', 11), $this->entry('c', 'Left too', 12)];
+        $this->read($feed);
+        $this->assertSame(0, $this->actions()->alreadyGone($feed->fresh()));
+
+        $this->entries = [$this->entry('a', 'Stays')];
+        $this->read($feed);
+        $this->assertSame(0, $this->actions()->alreadyGone($feed->fresh()), 'missed once is not gone');
+        $this->readLater($feed);
+        $this->assertSame(2, $this->actions()->alreadyGone($feed->fresh()));
+        $this->assertFalse((bool) $this->named('Left')->is_cancelled, 'and under "Leave it" nothing was done to them');
+
+        // One that is cancelled already, or over, is not something a change would reach.
+        $this->named('Left')->forceFill(['is_cancelled' => true])->save();
+        $this->assertSame(1, $this->actions()->alreadyGone($feed->fresh()));
+        $this->named('Left too')->forceFill(['starts_at' => now()->subDay()->utc()->format('Y-m-d H:i:s')])->save();
+        $this->assertSame(0, $this->actions()->alreadyGone($feed->fresh()));
+    }
+
+    /**
+     * The tab's number is kept on the feed by each read. A draft published or deleted from the
+     * event's own form changed nothing there, so the tab said "3 waiting" for up to an hour.
+     */
+    public function test_the_stored_counts_follow_what_is_done_from_the_events_own_form(): void
+    {
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'Deleted from its form'), $this->entry('b', 'Published from its form', 11), $this->entry('c', 'Still waiting', 12)];
+        $this->read($feed);
+        $this->assertSame(3, $feed->fresh()->waiting_count);
+
+        // Deleted: counted at once, by the same call that keeps the feed from bringing it back.
+        $this->actingAs($this->owner)->delete(route('event.delete', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->named('Deleted from its form')->id)]));
+        $this->assertNull($this->named('Deleted from its form'));
+        $this->assertSame(2, $feed->fresh()->waiting_count);
+
+        // Published: nothing tells the feed, so the page counts when it opens.
+        $this->named('Published from its form')->forceFill(['is_draft' => false])->save();
+        $this->assertSame(2, $feed->fresh()->waiting_count);
+        $this->actingAs($this->owner)->get(route('role.feeds.show', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($feed->id)]))->assertOk();
+        $this->assertSame(1, $feed->fresh()->waiting_count);
+
+        // And so does the tab that lists the feeds, whose query loads a count beside each.
+        $this->named('Still waiting')->forceFill(['is_draft' => false])->save();
+        $this->actingAs($this->owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'feeds']))->assertOk()
+            ->assertDontSee(trans_choice('messages.feeds_waiting', 1, ['count' => 1]));
+        $this->assertSame(0, $feed->fresh()->waiting_count);
     }
 
     /**
@@ -174,7 +295,7 @@ class FeedActionsTest extends TestCase
         $this->read($feed);
         $feed->forceFill(['next_check_at' => now()->addHour()])->save();
 
-        $this->assertSame(2, $this->actions()->publishAll($feed->fresh()));
+        $this->assertSame(['asked' => 2, 'published' => 0], $this->actions()->publishAll($feed->fresh(), $this->role, $this->owner));
         $this->assertSame(2, Event::where('is_draft', true)->count(), 'nothing is published in the request itself');
         $this->assertTrue($feed->fresh()->next_check_at->lte(now()), 'the next run picks it up');
 
@@ -185,13 +306,13 @@ class FeedActionsTest extends TestCase
         // Asked for, and then an hour passes with no run.
         $this->entries[] = $this->entry('c', 'Three', 12);
         $this->read($feed);
-        $this->actions()->publishAll($feed->fresh());
+        $this->actions()->publishAll($feed->fresh(), $this->role, $this->owner);
         $this->travel(61)->minutes();
         $this->read($feed);
         $this->assertTrue((bool) $this->named('Three')->is_draft);
 
         // Asked for, and then the feed is paused.
-        $this->actions()->publishAll($feed->fresh());
+        $this->actions()->publishAll($feed->fresh(), $this->role, $this->owner);
         $this->actions()->pause($feed->fresh());
         $this->assertSame(0, $feed->items()->whereNotNull('publish_requested_at')->count());
     }
@@ -362,10 +483,29 @@ class FeedActionsTest extends TestCase
         $this->assertSame(EventFeed::PAUSED_UNDO, $feed->pause_reason);
         $this->assertNotNull($byHand->fresh());
 
-        // Resumed, what was taken back returns for a look, as a draft.
+        // Just undone, and not read since: there is nothing of a first read to take back.
+        $this->assertFalse($this->actions()->canUndoFirstRead($feed->fresh()));
+
+        // Resumed, it is a first read again, which is what undoing it was for: the address or
+        // the clock is put right and the feed starts over. What was taken back returns as the
+        // feed's setting says, published here, and with the first read's mark, which is what
+        // keeps it out of the email to followers. (It used to return as a draft whatever the
+        // setting, without the mark, so publishing each one announced it.)
         $this->actions()->resume($feed);
+        $this->assertNull($feed->fresh()->baseline_done_at);
+        $this->assertNotSame('abcdef012345', $feed->fresh()->baseline_batch);
         $this->read($feed);
-        $this->assertTrue((bool) $this->named('Plain')->is_draft);
+        $plain = $this->named('Plain');
+        $this->assertFalse((bool) $plain->is_draft);
+        $this->assertSame($feed->fresh()->baseline_batch, $plain->import_batch);
+        $this->assertNotNull($feed->fresh()->baseline_done_at);
+
+        // And it can be taken back again. What the first undo kept is not this read's to remove.
+        $this->assertTrue($this->actions()->canUndoFirstRead($feed->fresh()));
+        $this->assertSame(['removed' => 1, 'kept' => 0], $this->actions()->undoFirstRead($feed->fresh(), $this->owner));
+        $this->assertEqualsCanonicalizing(['Made by hand', 'Has a fan', 'Our own title', 'Arrived an hour later'], Event::pluck('name')->all());
+        $this->actions()->resume($feed->fresh());
+        $this->read($feed);
 
         // A day after the first read is over, there is no taking it back.
         $this->travel(25)->hours();

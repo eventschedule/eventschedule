@@ -114,6 +114,42 @@ class EventFeed extends Model
     }
 
     /**
+     * What waits for somebody, counted now: drafts to look over, and decisions.
+     *
+     * @return array{0: int, 1: int}
+     */
+    public function waitingNow(): array
+    {
+        return [
+            $this->items()
+                ->where('state', EventFeedItem::STATE_IMPORTED)
+                ->whereHas('event', fn ($query) => $query->where('is_draft', true)->where('is_cancelled', false))
+                ->count(),
+            $this->items()->where('state', EventFeedItem::STATE_DECIDE)->count(),
+        ];
+    }
+
+    /**
+     * Bring the stored counts up to date, where they are read without a read having run: a
+     * draft published or deleted from the event's own form changes them, and the tab's number
+     * said "3 waiting" for the hour until the next read. Written by query, so that a feed loaded
+     * with a count beside it (withCount) can be recounted too.
+     */
+    public function recount(): static
+    {
+        [$waiting, $decide] = $this->waitingNow();
+
+        if ($waiting !== (int) $this->waiting_count || $decide !== (int) $this->decide_count) {
+            static::whereKey($this->id)->toBase()->update(['waiting_count' => $waiting, 'decide_count' => $decide]);
+            $this->waiting_count = $waiting;
+            $this->decide_count = $decide;
+            $this->syncOriginalAttributes(['waiting_count', 'decide_count']);
+        }
+
+        return $this;
+    }
+
+    /**
      * Whether more SOURCES are failing at once than their own troubles would explain: at least
      * five sites, and half of all the sites being read. Then the fault is likelier ours (the
      * network, an address of ours that a host blocks), so nobody is mailed that THEIR feed is

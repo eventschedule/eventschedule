@@ -54,6 +54,9 @@ class ImportFeeds extends Command
             return self::SUCCESS;
         }
 
+        // What the reads have to say by email waits until the lock is let go of.
+        $importer->holdMail();
+
         try {
             $deadline = microtime(true) + max(1, (int) $this->option('seconds'));
             $only = $this->option('feed');
@@ -116,6 +119,7 @@ class ImportFeeds extends Command
             }
         } finally {
             $lock->release();
+            $importer->sendHeldMail();
         }
 
         return self::SUCCESS;

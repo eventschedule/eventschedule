@@ -3854,7 +3854,10 @@ class RoleController extends Controller
                 $feeds = \App\Models\EventFeed::where('role_id', $role->id)
                     ->withCount(['items as events_count' => fn ($query) => $query->whereNotNull('event_id')])
                     ->orderBy('id')
-                    ->get();
+                    ->get()
+                    // Counted now, on the one tab that lists them: a draft published from the
+                    // event's own form leaves the stored number behind until the next read.
+                    ->each(fn (\App\Models\EventFeed $feed) => $feed->recount());
                 $feedsCount = $feeds->count();
                 $feedsWaiting = (int) ($feeds->sum('waiting_count') + $feeds->sum('decide_count'));
             } else {

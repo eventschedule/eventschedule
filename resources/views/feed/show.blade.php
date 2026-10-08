@@ -18,10 +18,29 @@
         $failing = $feed->failure_count > 0 && $failingSince->lt(now()->subDay());
         $held = count($feed->held_leaving ?? []);
         $reads = $feed->stats['reads'] ?? [];
-        $requested = $feed->items()->whereNotNull('publish_requested_at')->count();
-        $readText = $feed->last_success_at
-            ? __('messages.feeds_read_at', ['time' => $at($feed->last_success_at)->format($clock), 'next' => $at($feed->next_check_at ?? now()->addHour())->format($clock)])
-            : __('messages.feeds_read_soon');
+        // Whether a run reads this feed at all. Where none does, nothing is "being published"
+        // and nothing is read next, and the page must not say so.
+        $reading = $allowed && ! $feed->isPaused();
+        $requested = $reading ? $feed->items()->whereNotNull('publish_requested_at')->count() : 0;
+        // A try that is due is "within a minute", never "2 minutes ago".
+        $nextTry = $feed->next_check_at && $feed->next_check_at->gt(now()->addMinute()) ? $feed->next_check_at : now()->addSeconds(90);
+        $readText = match (true) {
+            // Beside "Not read since Thursday" the last good read is not news; the next try is.
+            $failing => __('messages.feeds_trying_again', ['when' => $nextTry->diffForHumans()]),
+            $feed->last_success_at !== null => __('messages.feeds_read_at', ['time' => $at($feed->last_success_at)->format($clock), 'next' => $at($feed->next_check_at ?? now()->addHour())->format($clock)]),
+            default => __('messages.feeds_read_soon'),
+        };
+        // The feed's state in a word: the mark in the header and the title of the card when
+        // nothing waits, which said "Up to date" over a feed that was paused or could not be read.
+        [$stateTone, $stateText] = match (true) {
+            ! $allowed => ['', __('messages.feeds_status_off_plan')],
+            $feed->isPaused() => ['is-warn', __('messages.feeds_status_paused')],
+            $failing => ['is-bad', $feed->last_success_at ? __('messages.feeds_status_failing', ['date' => $at($feed->last_success_at)->translatedFormat('D j M')]) : __('messages.feeds_status_failing_never')],
+            $feed->baseline_done_at === null => ['', __($feed->last_success_at ? 'messages.feeds_status_first' : 'messages.feeds_status_never')],
+            default => ['is-on', __('messages.feeds_status_ok')],
+        };
+        // Where no run publishes for it, Publish all does a page of them in the request.
+        $publishNow = ! $reading && $waiting->total() > $publishAtOnce;
     @endphp
 
     @include('feed.partials.styles')
@@ -30,24 +49,16 @@
         <x-page-header :title="$feed->name" :back="$feedsUrl" :back-label="__('messages.feeds_tab')">
             <x-slot name="status">
                 <div class="feed-line">
-                    @if (! $allowed)
-                    <span class="event-status">{{ __('messages.feeds_status_off_plan') }}</span>
-                    @elseif ($feed->isPaused())
-                    <span class="event-status is-warn">{{ __('messages.feeds_status_paused') }}</span>
-                    @elseif ($feed->decide_count > 0)
+                    @if ($reading && $feed->decide_count > 0)
                     <span class="event-status is-warn">{{ trans_choice('messages.feeds_status_decide', $feed->decide_count, ['count' => number_format($feed->decide_count)]) }}</span>
-                    @elseif ($failing)
-                    <span class="event-status is-bad">{{ $feed->last_success_at ? __('messages.feeds_status_failing', ['date' => $at($feed->last_success_at)->translatedFormat('D j M')]) : __('messages.feeds_status_failing_never') }}</span>
-                    @elseif ($feed->baseline_done_at === null)
-                    <span class="event-status">{{ __($feed->last_success_at ? 'messages.feeds_status_first' : 'messages.feeds_status_never') }}</span>
                     @else
-                    <span class="event-status is-on">{{ __('messages.feeds_status_ok') }}</span>
+                    <span class="event-status {{ $stateTone }}">{{ $stateText }}</span>
                     @endif
                     @if ($waiting->total() > 0)
                     <a href="#waiting" class="event-link">{{ trans_choice('messages.feeds_waiting', $waiting->total(), ['count' => number_format($waiting->total())]) }}</a>
                     @endif
                     <span>{{ trans_choice('messages.feeds_events_count', $eventsCount, ['count' => number_format($eventsCount)]) }}</span>
-                    @if ($allowed && ! $feed->isPaused())
+                    @if ($reading)
                     <span>{{ $readText }}</span>
                     <form method="post" action="{{ route('role.feeds.read', $here) }}">@csrf<button type="submit" class="event-link">{{ __('messages.feeds_read_now') }}</button></form>
                     @endif
@@ -140,7 +151,8 @@
                                     <input type="hidden" name="answer" value="apply">
                                     <h3 tabindex="-1" v-pre>{{ __($moved ? 'messages.feeds_confirm_move_title' : 'messages.feeds_confirm_cancel_title', ['name' => $event->name]) }}</h3>
                                     <p>{{ $moved ? $says.'. '.__('messages.feeds_confirm_move_text') : __('messages.feeds_confirm_cancel_text') }}</p>
-                                    @if ($people > 0)
+                                    {{-- Offered only where the email would reach somebody. --}}
+                                    @if ($canTell[$item->id])
                                     <x-toggle name="notify" :id="'notify-'.$itemHash" :checked="true" :label="__('messages.feeds_confirm_notify')" :help="__('messages.feeds_confirm_notify_help')" />
                                     <textarea name="note" rows="2" maxlength="280" class="block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" placeholder="{{ __('messages.feeds_confirm_note') }}"></textarea>
                                     @endif
@@ -167,11 +179,15 @@
                     @if ($requested > 0)
                     <span class="event-list-sub" role="status">{{ trans_choice('messages.feeds_publishing_requested', $requested, ['count' => number_format($requested)]) }}</span>
                     @endif
+                    {{-- The form's first button is the one Enter presses, from a tick box too, and
+                         the first one here deletes. This one stands in front of it and does
+                         nothing: a disabled default button means Enter submits nothing. --}}
+                    <button type="submit" form="feed-review" disabled hidden tabindex="-1" aria-hidden="true"></button>
                     {{-- For what is ticked. Shown once something is (the script at the foot); with no
-                         script they are simply there. --}}
-                    <button type="submit" form="feed-review" name="action" value="skip" class="page-tool" data-feed-bulk>{{ __('messages.feeds_skip_selected') }}</button>
+                         script they are simply there. Skip deletes for good, so it asks first. --}}
+                    <button type="submit" form="feed-review" name="action" value="skip" class="page-tool" data-feed-bulk data-confirm="{{ __('messages.feeds_skip_selected_confirm') }}">{{ __('messages.feeds_skip_selected') }}</button>
                     <button type="submit" form="feed-review" name="action" value="publish" class="page-tool" data-feed-bulk>{{ __('messages.feeds_publish_selected') }}</button>
-                    <button type="submit" form="feed-publish-all" class="page-tool" style="border-color:transparent;background:var(--brand-button-bg);color:#fff">{{ __('messages.feeds_publish_all', ['count' => number_format($waiting->total())]) }}</button>
+                    <button type="submit" form="feed-publish-all" class="page-tool" style="border-color:transparent;background:var(--brand-button-bg);color:#fff">{{ $publishNow ? __('messages.feeds_publish_next', ['count' => number_format($publishAtOnce)]) : __('messages.feeds_publish_all', ['count' => number_format($waiting->total())]) }}</button>
                 </x-slot>
                 <form method="post" id="feed-review" action="{{ route('role.feeds.review', $here) }}">
                     @csrf
@@ -213,7 +229,7 @@
                                 <td class="c-actions">
                                     <a href="{{ $event->getGuestUrl($role->subdomain) }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view') }}</a>
                                     <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="event-link">{{ __('messages.edit') }}</a>
-                                    <button type="submit" name="skip_one" value="{{ $itemHash }}" class="event-link event-link-quiet">{{ __('messages.skip') }}</button>
+                                    <button type="submit" name="skip_one" value="{{ $itemHash }}" class="event-link event-link-quiet" data-confirm="{{ __('messages.feeds_skip_confirm') }}">{{ __('messages.feeds_skip') }}</button>
                                     <button type="submit" name="publish_one" value="{{ $itemHash }}" class="event-link">{{ __('messages.publish') }}</button>
                                 </td>
                             </tr>
@@ -232,10 +248,10 @@
                 </x-slot>
             </x-page-card>
             {{-- Its own form, named by the button above: a form cannot stand inside another. --}}
-            <form method="post" id="feed-publish-all" action="{{ route('role.feeds.publish_all', $here) }}" data-confirm="{{ __('messages.feeds_publish_all_confirm', ['count' => number_format($waiting->total())]) }}">@csrf</form>
+            <form method="post" id="feed-publish-all" action="{{ route('role.feeds.publish_all', $here) }}" data-confirm="{{ $publishNow ? __('messages.feeds_publish_next_confirm', ['count' => number_format($publishAtOnce)]) : __('messages.feeds_publish_all_confirm', ['count' => number_format($waiting->total())]) }}">@csrf</form>
             @elseif ($decisions->isEmpty())
             <div class="ap-card rounded-xl">
-                <x-page-empty compact :title="__('messages.feeds_status_ok')" :text="__('messages.feeds_nothing_waiting')" />
+                <x-page-empty compact :title="$stateText" :text="__('messages.feeds_nothing_waiting')" />
             </div>
             @endif
 

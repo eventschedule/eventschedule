@@ -63,7 +63,6 @@
                     <li><b>{{ __('messages.feeds_works_calendar_title') }}</b> {{ __('messages.feeds_works_calendar_text') }}</li>
                     <li><b>{{ __('messages.feeds_works_rss_title') }}</b> {{ __('messages.feeds_works_rss_text') }}</li>
                     <li><b>{{ __('messages.feeds_works_page_title') }}</b> {{ __('messages.feeds_works_page_text') }}</li>
-                    <li><b>{{ __('messages.feeds_works_jolioo_title') }}</b> {{ __('messages.feeds_works_jolioo_text') }}</li>
                 </ul>
             </div>
         </form>
@@ -193,9 +192,9 @@
                                 <div>
                                     <x-input-label for="feed-zone" :value="__('messages.feeds_zone')" />
                                     <select id="feed-zone" name="source_timezone" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                        @foreach (timezone_identifiers_list() as $zone)
-                                        <option value="{{ $zone }}" {{ old('source_timezone', $found['timezone']) === $zone ? 'selected' : '' }}>{{ str_replace('_', ' ', $zone) }}</option>
-                                        @endforeach
+                                        {{-- The shared list, which keeps a zone PHP's own list does not
+                                             name: without it the select fell on its first entry. --}}
+                                        <x-timezone-options :selected="old('source_timezone', $found['timezone'])" />
                                     </select>
                                     <p class="event-hint">{{ __('messages.feeds_zone_help') }}</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('source_timezone')" />

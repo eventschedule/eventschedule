@@ -88,6 +88,11 @@ class AdminFeedsPageTest extends TestCase
 
         // The figures over the list.
         $html = $response->getContent();
+        // The schedule's name opens the schedule. The raw id went into the address once, and
+        // the page behind it decodes an encoded one: every one of these links was a 404.
+        $schedule = route('admin.schedules.edit', ['role' => $this->role->encodeId()]);
+        $this->assertStringContainsString('href="'.$schedule.'"', $html);
+        $this->admin()->get($schedule)->assertOk()->assertSee('Springfield Events');
         $this->assertSame(1, substr_count($html, route('admin.feeds.resume', ['hash' => UrlUtils::encodeId(EventFeed::where('name', 'Paused by its team')->value('id'))])));
         // Read now for what is being read; nothing to press for a plan that cannot read.
         $this->assertStringContainsString(route('admin.feeds.read', ['hash' => UrlUtils::encodeId(EventFeed::where('name', 'Cannot be read')->value('id'))]), $html);

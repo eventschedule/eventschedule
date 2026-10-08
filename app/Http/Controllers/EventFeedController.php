@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\EventFeed;
 use App\Models\EventFeedItem;
 use App\Models\Role;
+use App\Rules\UsableTimezone;
 use App\Services\AuditService;
+use App\Services\EventChangeNotifier;
 use App\Services\Feeds\FeedActions;
 use App\Services\Feeds\FeedSetup;
 use App\Utils\UrlUtils;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 /**
  * A schedule's feeds: the addresses it keeps reading for events.
@@ -62,6 +66,21 @@ class EventFeedController extends Controller
         };
     }
 
+    /**
+     * Hold a post on the Add page to its rules. What is refused goes back to the Add page by
+     * name, never "back": the page a checked address is shown on is the answer to a POST, and
+     * going back to it is a GET of an address that only takes one, which was a 404. And a field
+     * that arrives as a list where text belongs is refused here, not thrown on further in.
+     */
+    private function heldTo(Request $request, Role $role, array $rules): void
+    {
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            throw (new ValidationException($validator))->redirectTo(route('role.feeds.create', ['subdomain' => $role->subdomain]));
+        }
+    }
+
     public function create(Request $request, string $subdomain)
     {
         $role = $this->schedule($subdomain);
@@ -87,6 +106,11 @@ class EventFeedController extends Controller
         if ($why = $this->cannotAdd($role)) {
             return redirect($this->tab($role))->with('error', $why);
         }
+
+        $this->heldTo($request, $role, [
+            'address' => 'nullable|string|max:2048',
+            'source_timezone' => ['nullable', new UsableTimezone],
+        ]);
 
         $address = trim((string) $request->input('address'));
         // Typed without its scheme, as an address usually is.
@@ -115,6 +139,16 @@ class EventFeedController extends Controller
             return redirect($this->tab($role))->with('error', $why);
         }
 
+        $this->heldTo($request, $role, [
+            'feed_token' => 'nullable|string',
+            'name' => 'nullable|string|max:120',
+            'publish_mode' => 'required|in:'.implode(',', EventFeed::PUBLISH_MODES),
+            'left_action' => 'nullable|in:'.implode(',', EventFeed::LEFT_ACTIONS),
+            'source_timezone' => ['nullable', new UsableTimezone],
+            'group_id' => 'nullable|string',
+            'category_id' => 'nullable|integer',
+        ]);
+
         $checked = $this->setup->opened($request->input('feed_token'), $role, $request->user());
 
         // Too long on the page, or not a check of ours: looked at again rather than added blind.
@@ -125,13 +159,6 @@ class EventFeedController extends Controller
         if ($role->feeds()->where('url_hash', EventFeed::hashOf($checked['url']))->exists()) {
             return redirect($this->tab($role))->with('error', __('messages.feeds_problem_already_added'));
         }
-
-        $request->validate([
-            'name' => 'nullable|string|max:120',
-            'publish_mode' => 'required|in:'.implode(',', EventFeed::PUBLISH_MODES),
-            'left_action' => 'nullable|in:'.implode(',', EventFeed::LEFT_ACTIONS),
-            'source_timezone' => 'nullable|timezone',
-        ]);
 
         $feed = $this->setup->add($role, $request->user(), $checked, [
             'name' => $request->input('name'),
@@ -184,7 +211,9 @@ class EventFeedController extends Controller
             return $role;
         }
 
-        $feed = $this->feed($role, $hash);
+        // Counted now: a draft published or deleted from the event's own form leaves the stored
+        // numbers behind until the next read.
+        $feed = $this->feed($role, $hash)->recount();
 
         $decisions = $feed->items()
             ->where('state', EventFeedItem::STATE_DECIDE)
@@ -198,7 +227,8 @@ class EventFeedController extends Controller
         // Soonest first: the one that happens on Saturday is the one to look at today.
         $waiting = $feed->items()
             ->where('state', EventFeedItem::STATE_IMPORTED)
-            ->whereHas('event', fn ($query) => $query->where('is_draft', true))
+            // A draft the source has since called off is not waiting to be published.
+            ->whereHas('event', fn ($query) => $query->where('is_draft', true)->where('is_cancelled', false))
             ->with(['event.roles', 'event.creatorRole'])
             ->orderBy('starts_at')
             ->orderBy('id')
@@ -216,10 +246,15 @@ class EventFeedController extends Controller
             'feed' => $feed,
             'decisions' => $decisions,
             'signedUp' => $signedUp,
+            // Whether anybody would get the email the decision offers to send: a sale with no
+            // address, or a guest who has since unsubscribed, is somebody signed up and nobody
+            // to write to.
+            'canTell' => $decisions->mapWithKeys(fn (EventFeedItem $item) => [$item->id => EventChangeNotifier::hasAnyoneToTell($item->event)]),
             'waiting' => $waiting,
             'eventsCount' => $feed->items()->whereNotNull('event_id')->count(),
             'canUndo' => $this->actions->canUndoFirstRead($feed),
             'allowed' => EventFeed::allowedFor($role),
+            'publishAtOnce' => FeedActions::PUBLISH_AT_ONCE,
         ]);
     }
 
@@ -236,6 +271,8 @@ class EventFeedController extends Controller
             'role' => $role,
             'feed' => $feed,
             'eventsCount' => $feed->items()->whereNotNull('event_id')->count(),
+            // What a change away from "Leave it" would reach at the next read.
+            'alreadyGone' => $feed->left_action === EventFeed::LEFT_KEEP ? $this->actions->alreadyGone($feed) : 0,
         ]);
     }
 
@@ -252,7 +289,9 @@ class EventFeedController extends Controller
             'name' => 'required|string|max:120',
             'publish_mode' => 'required|in:'.implode(',', EventFeed::PUBLISH_MODES),
             'left_action' => 'nullable|in:'.implode(',', EventFeed::LEFT_ACTIONS),
-            'source_timezone' => 'required|timezone',
+            'source_timezone' => ['required', new UsableTimezone],
+            'group_id' => 'nullable|string',
+            'category_id' => 'nullable|integer',
         ]);
 
         $clockChanged = $this->actions->edit($feed, [
@@ -266,7 +305,10 @@ class EventFeedController extends Controller
 
         AuditService::log(AuditService::FEED_UPDATE, $request->user()->id, 'Role', $role->id, null, null, 'feed:'.$feed->id.' settings');
 
-        return redirect($this->page($role, $feed))->with('message', __($clockChanged ? 'messages.feeds_saved_clock' : 'messages.feeds_saved'));
+        // "Being read again" is only said of a feed that is being read.
+        $reading = $clockChanged && ! $feed->isPaused() && EventFeed::allowedFor($role);
+
+        return redirect($this->page($role, $feed))->with('message', __($reading ? 'messages.feeds_saved_clock' : 'messages.feeds_saved'));
     }
 
     /** Read it on the next run. */
@@ -373,8 +415,16 @@ class EventFeedController extends Controller
         }
 
         $done = $this->actions->skip($feed, $request->user(), $ids);
+        $said = trans_choice('messages.feeds_skipped_count', $done['skipped'], ['count' => number_format($done['skipped'])]);
 
-        return redirect()->back()->with('message', trans_choice('messages.feeds_skipped_count', $done, ['count' => number_format($done)]));
+        if ($done['kept'] > 0) {
+            $kept = trans_choice('messages.feeds_skipped_kept', $done['kept'], ['count' => number_format($done['kept'])]);
+
+            // Nothing skipped at all is not a success with a footnote.
+            return redirect()->back()->with(...($done['skipped'] > 0 ? ['message', $said.' '.$kept] : ['error', $kept]));
+        }
+
+        return redirect()->back()->with('message', $said);
     }
 
     public function publishAll(Request $request, string $subdomain, string $hash)
@@ -385,9 +435,12 @@ class EventFeedController extends Controller
         }
 
         $feed = $this->feed($role, $hash);
-        $asked = $this->actions->publishAll($feed);
+        $done = $this->actions->publishAll($feed, $role, $request->user());
 
-        return redirect($this->page($role, $feed))->with('message', trans_choice('messages.feeds_publish_all_done', $asked, ['count' => number_format($asked)]));
+        // Asked of the next read, or, on a feed that is not being read, done here a page at a time.
+        return redirect($this->page($role, $feed).($done['asked'] ? '' : '#waiting'))->with('message', $done['asked']
+            ? trans_choice('messages.feeds_publish_all_done', $done['asked'], ['count' => number_format($done['asked'])])
+            : trans_choice('messages.feeds_published_count', $done['published'], ['count' => number_format($done['published'])]));
     }
 
     /** The owner's answer to something the feed would not do on its own. */

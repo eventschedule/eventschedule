@@ -112,6 +112,17 @@ class FeedImporter
         private FeedNotifier $notifier,
     ) {}
 
+    /** Mail waits while a run holds the lock on every feed, and goes when the run lets go of it. */
+    public function holdMail(): void
+    {
+        $this->notifier->hold();
+    }
+
+    public function sendHeldMail(): void
+    {
+        $this->notifier->release();
+    }
+
     /**
      * @param  float  $deadline  microtime(true) at which the read has to have stopped starting
      *                           new work.
@@ -185,7 +196,10 @@ class FeedImporter
                 ->whereIn('id', $this->inThisRead)
                 ->exists();
 
-            if (($fetched->ok() && ! $waiting) || $feed->created_at->lt($now->copy()->subDays(self::FIRST_READ_DAYS))) {
+            // Counted from when the feed was added, or from when its first read was undone.
+            $from = isset($feed->stats['baseline_from']) ? Carbon::parse($feed->stats['baseline_from']) : $feed->created_at;
+
+            if (($fetched->ok() && ! $waiting) || $from->lt($now->copy()->subDays(self::FIRST_READ_DAYS))) {
                 $feed->baseline_done_at = $now;
             }
         }
@@ -1060,11 +1074,7 @@ class FeedImporter
     /** What the tab's badge shows: events waiting to be looked over, and decisions. */
     public function count(EventFeed $feed): void
     {
-        $feed->waiting_count = $feed->items()
-            ->where('state', EventFeedItem::STATE_IMPORTED)
-            ->whereHas('event', fn ($query) => $query->where('is_draft', true)->where('is_cancelled', false))
-            ->count();
-        $feed->decide_count = $feed->items()->where('state', EventFeedItem::STATE_DECIDE)->count();
+        [$feed->waiting_count, $feed->decide_count] = $feed->waitingNow();
     }
 
     /** A read that did not happen: said in a key, tried again later, and paused if it goes on. */

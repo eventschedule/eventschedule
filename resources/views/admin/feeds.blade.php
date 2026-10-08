@@ -82,7 +82,7 @@
                         @endphp
                         <tr>
                             <td class="c-main">
-                                <a href="{{ route('admin.schedules.edit', $feed->role) }}" class="c-strong"><bdi>{{ $feed->role->name }}</bdi></a>
+                                <a href="{{ route('admin.schedules.edit', ['role' => $feed->role->encodeId()]) }}" class="c-strong"><bdi>{{ $feed->role->name }}</bdi></a>
                                 <span class="c-sub" dir="ltr">{{ $feed->role->subdomain }}</span>
                             </td>
                             <td class="c-wrap">

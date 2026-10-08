@@ -314,6 +314,124 @@ class FeedMailTest extends TestCase
         $this->assertSame([FeedNotification::DECIDE], $this->sentTo($this->owner));
         $this->assertSame('First', $this->factsSentTo($this->owner, FeedNotification::DECIDE)['event']);
         $this->assertSame(2, $feed->fresh()->decide_count);
+
+        // It waits for tomorrow's email, and tomorrow it is written. Only what a read had just
+        // raised was ever looked at, so this one was mailed by nobody, on that day or any other.
+        $this->assertCount(1, $feed->fresh()->stats['decide_owed']);
+        $this->travel(21)->hours();
+        $this->read($feed);
+
+        $this->assertSame([FeedNotification::DECIDE, FeedNotification::DECIDE], $this->sentTo($this->owner));
+        $second = Notification::sent($this->owner, FeedNotification::class)->last()->facts();
+        $this->assertSame(['Second', 0], [$second['event'], $second['more']]);
+        $this->assertArrayNotHasKey('items', $second, 'which ones are owed is the feed\'s own note, not part of the email');
+        $this->assertArrayNotHasKey('decide_owed', $feed->fresh()->stats);
+
+        // Once.
+        $this->travel(21)->hours();
+        $this->read($feed);
+        $this->assertCount(2, $this->sentTo($this->owner));
+    }
+
+    /** A decision answered before its email was due is not written about. */
+    public function test_a_decision_answered_before_its_email_was_due_is_not_mailed(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH]);
+        $this->entries = [$this->entry('a', 'Stays'), $this->entry('b', 'First', 20), $this->entry('c', 'Second', 25)];
+        $this->read($feed);
+        $this->signUp('First');
+        $this->signUp('Second');
+        $this->entries = [$this->entry('a', 'Stays'), $this->entry('c', 'Second', 25)];
+        $this->read($feed);
+        $this->readLater($feed);
+        $this->entries = [$this->entry('a', 'Stays')];
+        $this->read($feed);
+        $this->readLater($feed);
+        $this->assertCount(1, $feed->fresh()->stats['decide_owed']);
+
+        $second = $feed->items()->where('external_key', \App\Models\EventFeedItem::keyFor('c'))->firstOrFail();
+        app(\App\Services\Feeds\FeedActions::class)->keep($feed->fresh(), $second);
+        $this->travel(21)->hours();
+        $this->read($feed);
+
+        $this->assertCount(1, $this->sentTo($this->owner));
+        $this->assertArrayNotHasKey('decide_owed', $feed->fresh()->stats);
+    }
+
+    /**
+     * A mail server that is down for an hour was the one email about forty drafts, gone: the
+     * day's allowance was used and the feed no longer owed anything. An email that reached
+     * nobody is owed again, and the next read sends it.
+     */
+    public function test_an_email_that_reached_nobody_is_owed_again(): void
+    {
+        $mail = new class extends \Illuminate\Support\Testing\Fakes\NotificationFake
+        {
+            public bool $down = true;
+
+            public function send($notifiables, $notification)
+            {
+                if ($this->down) {
+                    throw new \RuntimeException('Connection could not be established with host "smtp.example.test"');
+                }
+
+                parent::send($notifiables, $notification);
+            }
+        };
+        Notification::swap($mail);
+
+        // Drafts.
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'One'), $this->entry('b', 'Two', 11)];
+        $this->read($feed);
+        $this->assertSame([], $this->sentTo($this->owner));
+        $this->assertGreaterThan(0, $feed->fresh()->stats['to_tell'] ?? 0);
+
+        $mail->down = false;
+        $this->read($feed);
+        $this->assertSame([FeedNotification::REVIEW], $this->sentTo($this->owner));
+        $this->assertArrayNotHasKey('to_tell', $feed->fresh()->stats);
+
+        // A decision.
+        $publishing = $this->feed(['file' => 'second', 'publish_mode' => EventFeed::PUBLISH]);
+        $this->entries = [$this->entry('x', 'Stays'), $this->entry('y', 'Leaves', 20)];
+        $this->read($publishing);
+        $this->signUp('Leaves');
+        $this->entries = [$this->entry('x', 'Stays')];
+        $this->read($publishing);
+        $mail->down = true;
+        $this->readLater($publishing);
+        $this->assertSame(1, $publishing->fresh()->decide_count);
+        $this->assertSame([FeedNotification::REVIEW], $this->sentTo($this->owner));
+        $this->assertCount(1, $publishing->fresh()->stats['decide_owed']);
+
+        $mail->down = false;
+        $this->read($publishing);
+        $this->assertSame([FeedNotification::REVIEW, FeedNotification::DECIDE], $this->sentTo($this->owner));
+        $this->assertArrayNotHasKey('decide_owed', $publishing->fresh()->stats);
+    }
+
+    /**
+     * One run reads every feed that is due under one lock. A mail server that takes ten seconds
+     * to answer was ten seconds in which no feed on the install was read, so what a read has to
+     * say waits until the run lets go.
+     */
+    public function test_mail_waits_while_a_run_holds_the_lock(): void
+    {
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'One')];
+        $importer = app(FeedImporter::class);
+
+        $importer->holdMail();
+        $importer->read($feed->fresh(), microtime(true) + 30);
+        $this->assertSame([], $this->sentTo($this->owner));
+
+        $importer->sendHeldMail();
+        $this->assertSame([FeedNotification::REVIEW], $this->sentTo($this->owner));
+
+        // And nothing is sent twice by letting go again.
+        $importer->sendHeldMail();
+        $this->assertCount(1, $this->sentTo($this->owner));
     }
 
     public function test_a_feed_that_stops_being_read_is_said_after_three_days_and_again_when_it_is_paused(): void

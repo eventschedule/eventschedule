@@ -95,6 +95,36 @@ class FeedCommandTest extends TestCase
         $this->assertCount(3, $this->asked);
     }
 
+    /** What a run has to say by email is said, and only once it has let go of the lock on every feed. */
+    public function test_a_runs_mail_is_sent_after_it_lets_go_of_the_lock(): void
+    {
+        $mail = new class extends \Illuminate\Support\Testing\Fakes\NotificationFake
+        {
+            /** @var list<bool> Whether the lock could be had at the moment of each send. */
+            public array $lockWasFree = [];
+
+            public function send($notifiables, $notification)
+            {
+                $lock = Cache::lock('feeds.import', 5);
+                $this->lockWasFree[] = $free = (bool) $lock->get();
+                if ($free) {
+                    $lock->release();
+                }
+
+                parent::send($notifiables, $notification);
+            }
+        };
+        \Illuminate\Support\Facades\Notification::swap($mail);
+        $this->feed('drafts.ics', ['publish_mode' => EventFeed::DRAFT]);
+
+        $this->artisan('app:import-feeds')->assertSuccessful();
+
+        $this->assertSame(1, Event::where('is_draft', true)->count());
+        \Illuminate\Support\Facades\Notification::assertSentTo($this->owner, \App\Notifications\FeedNotification::class);
+        $this->assertNotEmpty($mail->lockWasFree);
+        $this->assertNotContains(false, $mail->lockWasFree, 'mail was sent while the run still held the lock');
+    }
+
     /** Both rails start it every minute, and an HTTP cron may call more than once a minute. */
     public function test_a_run_that_finds_another_reading_does_nothing(): void
     {
@@ -118,6 +148,7 @@ class FeedCommandTest extends TestCase
     {
         $this->mock(FeedImporter::class, function ($mock) {
             $mock->shouldReceive('prune')->once()->andReturn(0);
+            $mock->shouldReceive('holdMail', 'sendHeldMail');
         });
 
         $this->artisan('app:import-feeds')->assertSuccessful();
@@ -126,6 +157,7 @@ class FeedCommandTest extends TestCase
         $this->travel(61)->minutes();
         $this->mock(FeedImporter::class, function ($mock) {
             $mock->shouldReceive('prune')->once()->andReturn(0);
+            $mock->shouldReceive('holdMail', 'sendHeldMail');
         });
         $this->artisan('app:import-feeds')->assertSuccessful();
     }
@@ -151,6 +183,7 @@ class FeedCommandTest extends TestCase
 
         $this->mock(FeedImporter::class, function ($mock) use ($broken) {
             $mock->shouldReceive('prune')->andReturn(0);
+            $mock->shouldReceive('holdMail', 'sendHeldMail');
             $mock->shouldReceive('read')->andReturnUsing(function (EventFeed $feed) use ($broken) {
                 if ($feed->id === $broken->id) {
                     throw new \RuntimeException('Something nobody expected');
@@ -181,6 +214,7 @@ class FeedCommandTest extends TestCase
 
         $this->mock(FeedImporter::class, function ($mock) use (&$seen) {
             $mock->shouldReceive('prune')->andReturn(0);
+            $mock->shouldReceive('holdMail', 'sendHeldMail');
             $mock->shouldReceive('read')->andReturnUsing(function (EventFeed $feed) use (&$seen) {
                 $seen = EventFeed::find($feed->id)->next_check_at;
 

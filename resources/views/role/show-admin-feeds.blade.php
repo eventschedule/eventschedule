@@ -14,6 +14,8 @@
         $failingSince = $feed->last_success_at ?? $feed->created_at;
         $failing = $feed->failure_count > 0 && $failingSince->lt(now()->subDay());
         $next = $feed->next_check_at;
+        // A try that is due is "within a minute", never "2 minutes ago".
+        $nextTry = $next && $next->gt(now()->addMinute()) ? $next : now()->addSeconds(90);
         $read = $feed->last_success_at
             ? __('messages.feeds_read_at', ['time' => $clock($feed->last_success_at), 'next' => $next ? $clock($next) : $clock(now()->addHour())])
             : __('messages.feeds_read_soon');
@@ -25,7 +27,7 @@
             $failing => [1, 'is-bad', $feed->last_success_at
                 ? __('messages.feeds_status_failing', ['date' => $feed->last_success_at->copy()->setTimezone($zone)->translatedFormat('D j M')])
                 : __('messages.feeds_status_failing_never'),
-                $next ? __('messages.feeds_trying_again', ['when' => $next->copy()->diffForHumans()]) : ''],
+                __('messages.feeds_trying_again', ['when' => $nextTry->diffForHumans()])],
             $feed->baseline_done_at === null => [3, '', $feed->last_success_at ? __('messages.feeds_status_first') : __('messages.feeds_status_never'), $read],
             default => [4, 'is-on', __('messages.feeds_status_ok'), $read],
         };
@@ -115,7 +117,9 @@
                     {{-- The site, never the address: for a private calendar the address is the key to it. --}}
                     <div class="event-list-sub"><span class="feed-addr" dir="ltr">{{ $feed->host }}</span></div>
                 </td>
-                <td><span class="feed-num">{{ number_format($feed->events_count) }}</span><span class="sm:hidden"> {{ mb_strtolower(__('messages.events')) }}</span></td>
+                {{-- A bare number under its column's heading; on a phone, where the heading is
+                     gone, the number with its noun in the right number ("1 event"). --}}
+                <td><span class="feed-num"><span class="hidden sm:inline">{{ number_format($feed->events_count) }}</span><span class="sm:hidden">{{ trans_choice('messages.feeds_events_count', $feed->events_count, ['count' => number_format($feed->events_count)]) }}</span></span></td>
                 <td data-label="{{ __('messages.feeds_col_new') }}">
                     {{ __($feed->publishes() ? 'messages.feeds_mode_publish' : 'messages.feeds_mode_draft') }}
                     @if ($feed->waiting_count > 0)

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\EventFeed;
+use App\Models\EventFeedItem;
 use App\Models\Role;
 use App\Models\User;
 use App\Utils\UrlUtils;
@@ -109,7 +110,16 @@ class ApFeedPagesTest extends TestCase
     public function test_the_tab_lists_each_feed_by_what_it_needs_and_shows_the_site_never_the_address(): void
     {
         $this->feed(['name' => 'Fine and quiet', 'url' => self::CALENDAR]);
-        $this->feed(['name' => 'Wants a decision', 'decide_count' => 2, 'waiting_count' => 12, 'publish_mode' => EventFeed::DRAFT]);
+        // Counted from what the feed holds, when the tab opens: the stored numbers alone would
+        // be put right to zero.
+        $deciding = $this->feed(['name' => 'Wants a decision', 'decide_count' => 2, 'waiting_count' => 12, 'publish_mode' => EventFeed::DRAFT]);
+        foreach (range(1, 14) as $n) {
+            $deciding->items()->create([
+                'external_id' => 'w'.$n, 'external_key' => EventFeedItem::keyFor('w'.$n), 'last_seen_at' => now(),
+                'state' => $n > 12 ? EventFeedItem::STATE_DECIDE : EventFeedItem::STATE_IMPORTED,
+                'event_id' => $this->createEvent($this->role, ['creator_role_id' => $this->role->id, 'is_draft' => $n <= 12])->id,
+            ]);
+        }
         $this->feed(['name' => 'Cannot be read', 'failure_count' => 5, 'last_success_at' => now()->subDays(3), 'last_status' => 'http_error']);
         $this->feed(['name' => 'Just added', 'baseline_done_at' => null, 'last_success_at' => null, 'next_check_at' => now()]);
         $this->feed(['name' => 'Waiting for a word', 'paused_at' => now(), 'pause_reason' => EventFeed::PAUSED_TRANSFER]);
@@ -124,7 +134,15 @@ class ApFeedPagesTest extends TestCase
             ->assertSee(__('messages.feeds_status_never'))
             ->assertSee(__('messages.feeds_status_ok'))
             ->assertSee(__('messages.feeds_read_soon'))
-            ->assertSee(trans_choice('messages.feeds_decide_title', 2, ['count' => 2]));
+            ->assertSee(trans_choice('messages.feeds_decide_title', 2, ['count' => 2]))
+            // True of every decision: one is also asked for about the owner's own work.
+            ->assertSee(__('messages.feeds_decide_text'))
+            ->assertDontSee('People have signed up');
+        // On a phone the column's heading is gone, and the number carries its own noun, in the
+        // right number: it used to read "1 events".
+        EventFeed::where('name', 'Fine and quiet')->first()->items()->create(['external_id' => 'one', 'external_key' => EventFeedItem::keyFor('one'), 'state' => EventFeedItem::STATE_IMPORTED, 'event_id' => $this->createEvent($this->role, ['creator_role_id' => $this->role->id])->id, 'last_seen_at' => now()]);
+        $this->assertStringContainsString('<span class="sm:hidden">'.trans_choice('messages.feeds_events_count', 1, ['count' => 1]).'</span>', $this->tab()->getContent());
+        $this->assertStringContainsString('<span class="sm:hidden">'.trans_choice('messages.feeds_events_count', 0, ['count' => 0]).'</span>', $this->tab()->getContent());
 
         // The key to a private calendar is not printed. Its site is.
         $response->assertDontSee(self::SECRET, false)->assertSee('93.184.216.34');
@@ -281,7 +299,9 @@ class ApFeedPagesTest extends TestCase
 
         $this->actingAs($this->owner)->get(route('role.feeds.create', ['subdomain' => $this->role->subdomain]))->assertOk()
             ->assertSee(__('messages.feeds_add_lead'))
-            ->assertSee(__('messages.feeds_works_jolioo_title'));
+            ->assertSee(__('messages.feeds_works_page_title'))
+            // Not offered until its reader has been run against a real feed of that kind.
+            ->assertDontSee(__('messages.feeds_works_jolioo_title'));
 
         $response = $this->check(self::CALENDAR)->assertOk();
 
@@ -409,7 +429,19 @@ class ApFeedPagesTest extends TestCase
         $this->assertSame(0, EventFeed::count());
 
         $this->travelBack();
-        $add(['feed_token' => $token, 'publish_mode' => 'sometimes'])->assertSessionHasErrors('publish_mode');
+        // Refused from the page a check is shown on, which is the answer to a POST: "back" was a
+        // GET of an address that only takes one, and a 404. It goes to the Add page by name.
+        $create = route('role.feeds.create', ['subdomain' => $this->role->subdomain]);
+        $checked = route('role.feeds.check', ['subdomain' => $this->role->subdomain]);
+        $this->from($checked);
+        $add(['feed_token' => $token, 'publish_mode' => 'sometimes'])->assertRedirect($create)->assertSessionHasErrors('publish_mode');
+        // A list where text belongs is refused, not thrown on further in.
+        $add(['feed_token' => [$token]])->assertRedirect($create)->assertSessionHasErrors('feed_token');
+        $add(['feed_token' => $token, 'group_id' => ['x']])->assertRedirect($create)->assertSessionHasErrors('group_id');
+        $add(['feed_token' => $token, 'source_timezone' => 'Mars/Olympus'])->assertRedirect($create)->assertSessionHasErrors('source_timezone');
+        $this->actingAs($this->owner)->from($checked)->post($checked, ['address' => [self::CALENDAR]])->assertRedirect($create)->assertSessionHasErrors('address');
+        $this->actingAs($this->owner)->postJson($checked, ['address' => [self::CALENDAR]])->assertStatus(422);
+        $this->assertSame(0, EventFeed::count());
         $add(['feed_token' => $token])->assertRedirect(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'feeds']));
         // The same check cannot add the same address twice.
         $add(['feed_token' => $token])->assertSessionHas('error', __('messages.feeds_problem_already_added'));

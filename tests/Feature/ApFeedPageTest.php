@@ -206,6 +206,148 @@ class ApFeedPageTest extends TestCase
         $as->post($this->url($feed, 'undo'))->assertSessionHas('error', __('messages.feeds_undo_too_late'));
     }
 
+    /**
+     * Skip deletes for good and asked nothing, and "Skip selected" was the review form's first
+     * button, which is the one Enter presses, from a tick box too.
+     */
+    public function test_skip_asks_first_and_enter_on_a_tick_box_presses_nothing(): void
+    {
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'One'), $this->entry('b', 'Two', 11)];
+        $this->read($feed);
+        $html = $this->actingAs($this->owner)->get($this->url($feed))->assertOk()->getContent();
+
+        preg_match_all('/<button[^>]*name="skip_one"[^>]*>/', $html, $rows);
+        $this->assertCount(2, $rows[0]);
+        foreach ($rows[0] as $button) {
+            $this->assertStringContainsString('data-confirm="'.e(__('messages.feeds_skip_confirm')).'"', $button);
+        }
+        $this->assertSame(1, preg_match('/<button[^>]*value="skip"[^>]*>/', $html, $selected));
+        $this->assertStringContainsString('data-confirm="'.e(__('messages.feeds_skip_selected_confirm')).'"', $selected[0]);
+
+        // The form's first submit button, in the order of the page, is the one Enter presses:
+        // the first that names the form, or that stands inside it. It is disabled, and a
+        // disabled default button means Enter submits nothing.
+        preg_match_all('/<button[^>]*type="submit"[^>]*>/', $html, $buttons, PREG_OFFSET_CAPTURE);
+        $form = strpos($html, 'id="feed-review"');
+        $first = collect($buttons[0])->first(fn (array $button) => str_contains($button[0], 'form="feed-review"') || $button[1] > $form);
+        $this->assertStringContainsString(' disabled', $first[0]);
+        $this->assertStringNotContainsString('name=', $first[0]);
+        $this->assertStringNotContainsString('data-feed-bulk', $first[0], 'and the script that shows the others never shows it');
+    }
+
+    /** A draft the owner has worked on is kept, and the page says so instead of "0 skipped". */
+    public function test_skipping_says_what_was_kept_because_it_was_changed(): void
+    {
+        $feed = $this->feed();
+        $this->entries = [$this->entry('a', 'As it came'), $this->entry('b', 'Rewritten', 11)];
+        $this->read($feed);
+        $this->named('Rewritten')->forceFill(['description' => 'Our own words about it.'])->save();
+        $post = fn (array $body) => $this->actingAs($this->owner)->from($this->url($feed))->post($this->url($feed, 'review'), $body);
+
+        $post(['skip_one' => $this->hashOf($feed, 'b')])->assertSessionHas('error', trans_choice('messages.feeds_skipped_kept', 1, ['count' => 1]));
+        $this->assertNotNull($this->named('Rewritten'));
+
+        $post(['action' => 'skip', 'items' => [$this->hashOf($feed, 'a'), $this->hashOf($feed, 'b')]])->assertSessionHas('message',
+            trans_choice('messages.feeds_skipped_count', 1, ['count' => 1]).' '.trans_choice('messages.feeds_skipped_kept', 1, ['count' => 1]));
+        $this->assertNull($this->named('As it came'));
+        $this->assertNotNull($this->named('Rewritten'));
+    }
+
+    /**
+     * On a feed that no run reads, Publish all does it in the request, a page at a time, and
+     * the button says so. It used to say "109 are being published" for as long as you looked.
+     */
+    public function test_publish_all_on_a_paused_feed_publishes_now_and_says_how_many(): void
+    {
+        $feed = $this->feed();
+        $this->entries = array_map(fn ($n) => $this->entry('e'.$n, 'Event '.$n, 10 + $n), range(1, 27));
+        $this->read($feed);
+        $as = $this->actingAs($this->owner);
+        $as->get($this->url($feed))->assertOk()->assertSee(__('messages.feeds_publish_all', ['count' => 27]))->assertDontSee(__('messages.feeds_publish_next', ['count' => 25]));
+
+        $as->post($this->url($feed, 'pause'));
+        $as->get($this->url($feed))->assertOk()
+            ->assertSee(__('messages.feeds_publish_next', ['count' => 25]))
+            ->assertSee(__('messages.feeds_publish_next_confirm', ['count' => 25]))
+            ->assertDontSee(__('messages.feeds_publish_all', ['count' => 27]));
+
+        $as->post($this->url($feed, 'publish_all'))->assertRedirect($this->url($feed).'#waiting')
+            ->assertSessionHas('message', trans_choice('messages.feeds_published_count', 25, ['count' => 25]));
+        $this->assertSame(2, Event::where('is_draft', true)->count());
+
+        // What is left fits in one press, and nothing is said to be on its way.
+        $as->get($this->url($feed))->assertOk()
+            ->assertSee(__('messages.feeds_publish_all', ['count' => 2]))
+            ->assertDontSee(trans_choice('messages.feeds_publishing_requested', 2, ['count' => 2]));
+        $as->post($this->url($feed, 'publish_all'))->assertSessionHas('message', trans_choice('messages.feeds_published_count', 2, ['count' => 2]));
+        $this->assertSame(0, Event::where('is_draft', true)->count());
+    }
+
+    /**
+     * What the page says of a feed is true of it: not "Up to date" over one that is paused or
+     * cannot be read, not the last good read beside "Not read since", and never a try that is
+     * due "2 minutes ago".
+     */
+    public function test_a_feed_that_is_paused_or_cannot_be_read_is_not_called_up_to_date(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH]);
+        $this->entries = [$this->entry('a', 'One')];
+        $this->read($feed);
+        $as = $this->actingAs($this->owner);
+        $tab = route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'feeds']);
+        $as->get($this->url($feed))->assertOk()->assertSee('<h3 v-pre>'.__('messages.feeds_status_ok').'</h3>', false)->assertSee(', next about ');
+
+        // Two days without a good read, and the next try already due.
+        $feed->forceFill(['failure_count' => 4, 'last_status' => 'http_error', 'last_success_at' => now()->subDays(2), 'next_check_at' => now()->subMinutes(2)])->save();
+        $failing = __('messages.feeds_status_failing', ['date' => now()->subDays(2)->setTimezone('Europe/Vienna')->translatedFormat('D j M')]);
+        foreach ([$this->url($feed), $tab] as $page) {
+            $as->get($page)->assertOk()
+                ->assertSee($failing)
+                ->assertSee(__('messages.feeds_trying_again', ['when' => now()->addSeconds(90)->diffForHumans()]))
+                ->assertDontSee(' ago')
+                ->assertDontSee(', next about ')
+                ->assertDontSee(__('messages.feeds_status_ok'));
+        }
+        $as->get($this->url($feed))->assertSee('<h3 v-pre>'.e($failing).'</h3>', false);
+
+        $as->post($this->url($feed, 'pause'));
+        $as->get($this->url($feed))->assertOk()
+            ->assertSee('<h3 v-pre>'.__('messages.feeds_status_paused').'</h3>', false)
+            ->assertDontSee(__('messages.feeds_status_ok'))
+            ->assertDontSee(__('messages.feeds_read_now'));
+    }
+
+    /**
+     * The decision's box offered "Email the people who signed up" whenever somebody had. Somebody
+     * who began to buy and never paid has signed up as far as the feed is concerned, and is
+     * nobody the email goes to: the offer was a switch that did nothing.
+     */
+    public function test_a_decision_offers_to_email_people_only_where_somebody_would_get_it(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH]);
+        $this->entries = [$this->entry('a', 'Stays'), $this->entry('b', 'Never paid', 11), $this->entry('c', 'Asked about', 12)];
+        $this->read($feed);
+        $this->createSale($this->named('Never paid'), $this->role, ['status' => 'unpaid']);
+        $asked = $this->named('Asked about');
+        $this->postJson(route('event.interest.join', ['subdomain' => $this->role->subdomain]), [
+            'email' => 'fan@fans.test', 'event_id' => UrlUtils::encodeId($asked->id),
+            'event_date' => $asked->getStartDateTime(null, true, $asked->scheduleTimezone())->format('Y-m-d'),
+        ])->assertOk();
+        $this->entries = [$this->entry('a', 'Stays')];
+        $this->read($feed);
+        $this->readLater($feed);
+        $this->assertSame(2, $feed->fresh()->decide_count);
+
+        $html = $this->actingAs($this->owner)->get($this->url($feed))->assertOk()->getContent();
+        $box = fn (string $uid) => \Illuminate\Support\Str::betweenFirst($html, 'id="confirm-'.$this->hashOf($feed, $uid).'"', '</form>');
+
+        $this->assertStringContainsString('name="notify"', $box('c'));
+        $this->assertStringContainsString(trans_choice('messages.feeds_signed_up', 1, ['count' => 1]), $html);
+        $this->assertStringNotContainsString('name="notify"', $box('b'));
+        $this->assertStringNotContainsString('name="note"', $box('b'));
+    }
+
     public function test_a_decision_is_answered_from_the_page(): void
     {
         $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH]);
@@ -326,8 +468,63 @@ class ApFeedPageTest extends TestCase
         }
         $this->assertSame('Europe/Vienna', $feed->fresh()->source_timezone);
         $this->assertSame('Town hall', $feed->fresh()->name);
-        // The two saves that were taken, and none of the four that were refused.
+        // A list where text belongs is refused, not thrown on further in.
+        $as->put($this->url($feed, 'update'), ['name' => 'Town hall', 'publish_mode' => 'draft', 'source_timezone' => 'Europe/Vienna', 'group_id' => ['x']])->assertSessionHasErrors('group_id');
+        $as->put($this->url($feed, 'update'), ['name' => 'Town hall', 'publish_mode' => 'draft', 'source_timezone' => ['Europe/Vienna']])->assertSessionHasErrors('source_timezone');
+        // The two saves that were taken, and none of the six that were refused.
         $this->assertSame(2, \App\Models\AuditLog::where('action', 'schedule.feed_update')->count());
+    }
+
+    /**
+     * A zone stored under a name PHP's list no longer offers (a browser that reported
+     * Asia/Calcutta) matched no option, so the select fell on its first entry and saving a new
+     * name moved every start to Africa/Abidjan. It is shown under the name it goes by now, and
+     * saving that is no change of clock.
+     */
+    public function test_a_stored_zone_the_list_does_not_name_is_kept_and_is_not_a_change_of_clock(): void
+    {
+        $feed = $this->feed();
+        $feed->forceFill(['source_timezone' => 'Asia/Calcutta', 'etag' => '"abc"', 'next_check_at' => now()->addHour()])->save();
+        $as = $this->actingAs($this->owner);
+
+        $html = $as->get($this->url($feed, 'edit'))->assertOk()->getContent();
+        $this->assertSame(1, preg_match_all('/<option value="[^"]+" selected/', \Illuminate\Support\Str::betweenFirst($html, 'name="source_timezone"', '</select>'), $selected));
+        $this->assertStringContainsString('value="Asia/Kolkata" selected', $selected[0][0]);
+
+        $as->put($this->url($feed, 'update'), ['name' => 'A new name', 'publish_mode' => 'draft', 'left_action' => 'cancel', 'source_timezone' => 'Asia/Kolkata'])
+            ->assertSessionHas('message', __('messages.feeds_saved'));
+        $feed->refresh();
+        $this->assertSame(['A new name', 'Asia/Kolkata', '"abc"'], [$feed->name, $feed->source_timezone, $feed->etag]);
+        $this->assertTrue($feed->next_check_at->isFuture(), 'the same clock under another name: nothing is read again');
+
+        // A real change of clock on a feed that is paused is saved, and not said to be read again.
+        $as->post($this->url($feed, 'pause'));
+        $as->put($this->url($feed, 'update'), ['name' => 'A new name', 'publish_mode' => 'draft', 'left_action' => 'cancel', 'source_timezone' => 'Europe/London'])
+            ->assertSessionHas('message', __('messages.feeds_saved'));
+        $this->assertSame('Europe/London', $feed->fresh()->source_timezone);
+    }
+
+    /**
+     * "Leave it" has let events go by. Changing it reaches back to every one of them at the next
+     * read, and the Edit page says how many before the choice is made.
+     */
+    public function test_the_edit_page_says_how_many_events_a_change_of_mind_would_reach(): void
+    {
+        $feed = $this->feed(['publish_mode' => EventFeed::PUBLISH, 'left_action' => EventFeed::LEFT_KEEP]);
+        $this->entries = [$this->entry('a', 'Stays'), $this->entry('b', 'Left', 11), $this->entry('c', 'Left too', 12)];
+        $this->read($feed);
+        $as = $this->actingAs($this->owner);
+        $notice = trans_choice('messages.feeds_gone_reaches', 2, ['count' => 2]);
+        $as->get($this->url($feed, 'edit'))->assertOk()->assertDontSee($notice);
+
+        $this->entries = [$this->entry('a', 'Stays')];
+        $this->read($feed);
+        $this->readLater($feed);
+        $as->get($this->url($feed, 'edit'))->assertOk()->assertSee($notice);
+
+        // Once the choice is made it is what the feed does, and there is nothing to warn of.
+        $feed->forceFill(['left_action' => EventFeed::LEFT_CANCEL])->save();
+        $as->get($this->url($feed, 'edit'))->assertOk()->assertDontSee($notice);
     }
 
     /**

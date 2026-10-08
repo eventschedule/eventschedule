@@ -31,7 +31,8 @@ class FeedActions
         return $feed->items()
             ->whereIn('id', $ids)
             ->where('state', EventFeedItem::STATE_IMPORTED)
-            ->whereHas('event', fn ($query) => $query->where('is_draft', true))
+            // A draft the source has since called off is not waiting to be published.
+            ->whereHas('event', fn ($query) => $query->where('is_draft', true)->where('is_cancelled', false))
             ->with('event')
             ->get();
     }
@@ -55,15 +56,21 @@ class FeedActions
      * "Not this one." The draft is deleted and the feed does not make it again, however long
      * the source goes on listing it. It can be added after all from the feed's list of events.
      *
-     * @return int How many were skipped.
+     * @return array{skipped: int, kept: int} How many were skipped, and how many were left
+     *                                        because they hold somebody's work.
      */
-    public function skip(EventFeed $feed, User $by, array $itemIds): int
+    public function skip(EventFeed $feed, User $by, array $itemIds): array
     {
-        $skipped = 0;
+        $skipped = $kept = 0;
 
         foreach ($this->waiting($feed, $itemIds) as $item) {
-            // A draft nobody can have signed up for. If somebody has all the same, it stays.
-            if ($this->writer->hasPeople($item->event)) {
+            // A draft nobody can have signed up for. If somebody has all the same, it stays. And
+            // so does one the owner has already worked on: Skip is "not this one", said of what
+            // the feed brought, and it deletes for good. What you changed stays, here as when a
+            // feed is removed or its first read undone.
+            if ($this->writer->hasPeople($item->event) || $this->writer->hasOwnersWork($item->event, $item)) {
+                $kept++;
+
                 continue;
             }
 
@@ -75,7 +82,7 @@ class FeedActions
 
         $this->recount($feed);
 
-        return $skipped;
+        return ['skipped' => $skipped, 'kept' => $kept];
     }
 
     /**
@@ -85,18 +92,51 @@ class FeedActions
      *
      * @return int How many were asked for.
      */
-    public function publishAll(EventFeed $feed): int
+    public function publishAll(EventFeed $feed, Role $role, User $by): array
     {
+        // A feed that is not being read (paused, or on a plan without feeds) has no run to do
+        // it: the asking would sit there while the page said "being published". A page of them
+        // is published now, in the request, and the button is pressed again for the next.
+        if ($feed->isPaused() || ! EventFeed::allowedFor($role)) {
+            $ids = $feed->items()
+                ->where('state', EventFeedItem::STATE_IMPORTED)
+                ->whereHas('event', fn ($query) => $query->where('is_draft', true)->where('is_cancelled', false))
+                ->orderBy('starts_at')
+                ->orderBy('id')
+                ->limit(self::PUBLISH_AT_ONCE)
+                ->pluck('id')
+                ->all();
+
+            return ['asked' => 0, 'published' => $this->publish($feed, $role, $by, $ids)];
+        }
+
         $asked = $feed->items()
             ->where('state', EventFeedItem::STATE_IMPORTED)
-            ->whereHas('event', fn ($query) => $query->where('is_draft', true))
+            ->whereHas('event', fn ($query) => $query->where('is_draft', true)->where('is_cancelled', false))
             ->update(['publish_requested_at' => now()]);
 
-        if ($asked && ! $feed->isPaused()) {
+        if ($asked) {
             $feed->forceFill(['next_check_at' => now()])->save();
         }
 
-        return $asked;
+        return ['asked' => $asked, 'published' => 0];
+    }
+
+    /** How many are published in one request, where no run will do it. */
+    public const PUBLISH_AT_ONCE = 25;
+
+    /**
+     * How many coming events have ALREADY left this feed and are still on the schedule, which
+     * is what "Mark it cancelled" or "Remove it" would reach at the next read if the feed is
+     * switched to it from "Leave it". Said on the Edit page, beside the choice, before Save.
+     */
+    public function alreadyGone(EventFeed $feed): int
+    {
+        return $feed->items()
+            ->where('state', EventFeedItem::STATE_IMPORTED)
+            ->where('missing_reads', '>=', FeedImporter::STRIKES)
+            ->whereHas('event', fn ($query) => $query->where('is_cancelled', false)->where('starts_at', '>', now()->utc()->format('Y-m-d H:i:s')))
+            ->count();
     }
 
     /** Read it on the next run instead of when it is due. Not more than once a minute. */
@@ -133,10 +173,11 @@ class FeedActions
      */
     public function edit(EventFeed $feed, array $choices): bool
     {
-        $zone = $choices['source_timezone'] ?? null;
-        $zone = $zone && in_array($zone, timezone_identifiers_list(), true) ? $zone : $feed->source_timezone;
+        $zone = \App\Utils\TimezoneUtils::canonicalize($choices['source_timezone'] ?? null) ?? $feed->source_timezone;
         $left = $choices['left_action'] ?? $feed->left_action;
-        $clockChanged = $zone !== $feed->source_timezone;
+        // A stored name saved under the name it goes by now (Asia/Calcutta, Asia/Kolkata) is
+        // the same clock: no times were read wrong, and nothing is asked for again.
+        $clockChanged = $zone !== (\App\Utils\TimezoneUtils::canonicalize($feed->source_timezone) ?? $feed->source_timezone);
 
         $feed->forceFill([
             'name' => mb_substr(trim((string) ($choices['name'] ?? '')), 0, 120) ?: $feed->name,
@@ -253,15 +294,27 @@ class FeedActions
 
     public function canUndoFirstRead(EventFeed $feed): bool
     {
-        return $feed->baseline_batch !== null
-            && $feed->items()->exists()
-            && ($feed->baseline_done_at === null || $feed->baseline_done_at->gt(now()->subHours(self::UNDO_HOURS)));
+        // Just undone, and not read since: there is nothing of a first read to take back.
+        if ($feed->baseline_batch === null || $feed->pause_reason === EventFeed::PAUSED_UNDO || ! $feed->items()->exists()) {
+            return false;
+        }
+
+        // While the first read is still going it can be taken back, and for a day after it
+        // ended. The importer ends a first read within a couple of days whatever is left
+        // (FeedImporter::FIRST_READ_DAYS), so "still going" cannot last for months.
+        return $feed->baseline_done_at === null || $feed->baseline_done_at->gt(now()->subHours(self::UNDO_HOURS));
     }
 
     /**
      * Take back a first read: the events it made go, unless somebody has signed up for one or
      * the owner has already worked on it, and the feed is left paused. For a day, for the case
      * the first read exists to be undone for: the wrong address, or the wrong clock.
+     *
+     * A true start over. What was removed is forgotten, and the first read is open again, so a
+     * feed resumed after the setting is put right reads as it did the first time: published or
+     * held as its setting says, with the first read's mark, and with nothing said to followers.
+     * (Kept as "removed" items, every event came back as a draft whatever the setting, and
+     * publishing them announced each one.)
      *
      * @return array{removed: int, kept: int}
      */
@@ -291,15 +344,22 @@ class FeedActions
                 continue;
             }
 
-            // "removed", so that a feed resumed later brings it back for a look.
-            $item->forceFill(['state' => EventFeedItem::STATE_REMOVED, 'imported' => null, 'pending' => null, 'publish_requested_at' => null])->save();
+            $item->delete();
             $this->lifecycle->delete($event, $by->id);
             $removed++;
         }
 
-        // What was matched or not yet made is forgotten, so that a resumed feed starts over.
-        $feed->items()->whereIn('state', [EventFeedItem::STATE_NEW, EventFeedItem::STATE_MATCHED])->delete();
-        $feed->forceFill(['etag' => null, 'last_modified' => null])->save();
+        // What was matched, not yet made, or removed by the feed is forgotten too.
+        $feed->items()->whereIn('state', [EventFeedItem::STATE_NEW, EventFeedItem::STATE_MATCHED, EventFeedItem::STATE_REMOVED])->delete();
+        $feed->forceFill([
+            'etag' => null,
+            'last_modified' => null,
+            'held_leaving' => null,
+            // The first read, again: a new mark, so that what was kept is not this read's to undo.
+            'baseline_done_at' => null,
+            'baseline_batch' => strtolower(\Illuminate\Support\Str::random(12)),
+            'stats' => ['baseline_from' => now()->toIso8601String()] + array_diff_key($feed->stats ?? [], ['whole_at' => true, 'quick' => true, 'to_tell' => true, 'continues_tomorrow' => true]),
+        ])->save();
         $this->recount($feed);
 
         return ['removed' => $removed, 'kept' => $kept];
