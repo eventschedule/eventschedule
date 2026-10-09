@@ -445,6 +445,13 @@
     .gk-headbar-top { display: grid; flex: none; place-items: center; width: 2.375rem; height: 2.375rem; border: 1px solid var(--gk-line); border-radius: .625rem; background: var(--gk-solid); color: var(--gk-ink); cursor: pointer; }
     .gk-headbar-top:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     .gk-headbar-top svg { width: 1rem; height: 1rem; }
+    {{-- Whatever the page brings to the top of the window (the map when it opens, the list after
+         "See all events here", a day's panel, a link to a section) stops under the bar's foot and
+         not behind it: the bar is .5rem + 2.375rem + .5rem, and half a rem of air. The map's own
+         title row and its Hide map button sat under the bar. Said whether or not the bar is on:
+         the map opens while the header is still there, and without this it was that very scroll
+         which sent the header away and brought the bar in over the map. --}}
+    html:has(#gp-header-bar) { scroll-padding-top: calc(3.875rem + env(safe-area-inset-top, 0px)); }
 
     @media (prefers-reduced-motion: reduce) {
         .gk-btn, .gk-link { transition-duration: 1ms; }

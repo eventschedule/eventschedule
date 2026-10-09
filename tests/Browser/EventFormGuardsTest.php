@@ -20,9 +20,10 @@ use Tests\DuskTestCase;
  * by the page that is actually posted rather than by a request a test writes by hand.
  *
  * PHPUnit covers the same ground from the server's side (EventTicketSetupProtectionTest,
- * EventFormStructureTest). This is the other half: the form a curator is really given, saved; the
- * form an owner is really given, with a carpool offer in it, saved; and the links people really
- * click in their email.
+ * EventFormStructureTest). This is the other half: the form's address as a curator that only
+ * lists the event really meets it (no form at all since 2026-10; before that, a form without the
+ * Tickets panel, whose save had to leave the ticket setup alone); the form an owner is really
+ * given, with a carpool offer in it, saved; and the links people really click in their email.
  *
  * Fixtures are written straight to the database. The journeys start at the edit form, and building
  * two accounts, three schedules and a ticketed event through the UI would only add flake.
@@ -91,7 +92,13 @@ class EventFormGuardsTest extends DuskTestCase
         $browser->waitUntil('! window.location.pathname.includes("edit-event")', 20);
     }
 
-    public function test_a_curator_saving_the_form_it_is_given_keeps_the_tickets(): void
+    /**
+     * Until 2026-10 a curator that listed an event was given its form without the Tickets panel,
+     * and this journey saved that form to show the ticket setup survived it. Listing an event is
+     * no longer running it (EventListingRightsTest), so the journey now ends at the door: no form,
+     * nothing of the ticket setup sent, and nothing changed.
+     */
+    public function test_a_curator_that_only_lists_an_event_is_not_given_its_form(): void
     {
         $owner = User::factory()->create(['email_verified_at' => now()]);
         $venue = $this->makeRole($owner, 'venue', 'guardvenue');
@@ -111,26 +118,26 @@ class EventFormGuardsTest extends DuskTestCase
         $event->roles()->attach($curator->id, ['is_accepted' => true]);
 
         $this->browse(function (Browser $browser) use ($curatorUser, $curator, $event) {
-            $browser->loginAs($curatorUser)->visit($this->editPath($curator, $event));
-            $browser->waitFor('#event_name', 15)->waitUntil('window.vueApp !== undefined', 15);
+            // A page of the curator's own first: the form's address answers by sending the
+            // browser back to where it came from.
+            $browser->loginAs($curatorUser)
+                ->visit('/'.$curator->subdomain.'/schedule')
+                ->visit($this->editPath($curator, $event))
+                ->waitUntil('! window.location.pathname.includes("edit-event")', 15);
 
             $page = $browser->script('return {
+                form: document.getElementById("edit-form") !== null,
                 panel: document.getElementById("section-tickets") !== null,
-                tickets: window.vueApp.tickets.length,
-                promoCodes: window.vueApp.promoCodes.length,
                 source: document.documentElement.innerHTML.indexOf("EARLYBIRD") !== -1,
             };')[0];
 
-            $this->assertFalse($page['panel'], 'the curator is not offered the Tickets panel');
-            $this->assertSame(0, $page['tickets'], 'and is not sent the ticket types');
-            $this->assertSame(0, $page['promoCodes']);
-            $this->assertFalse($page['source'], 'nor the promo code, anywhere in the page');
-
-            $this->renameAndSave($browser, 'Renamed by the curator');
+            $this->assertFalse($page['form'], 'a curator that only lists the event is not given its form');
+            $this->assertFalse($page['panel']);
+            $this->assertFalse($page['source'], 'nor the promo code, anywhere in the page it is sent to instead');
         });
 
         $saved = Event::findOrFail($event->id);
-        $this->assertSame('Renamed by the curator', $saved->name, 'the curator\'s save went through');
+        $this->assertSame('Jazz Night', $saved->name, 'nothing of the event was the curator\'s to change');
         $this->assertSame(['General'], $saved->tickets()->where('is_deleted', false)->pluck('type')->all());
         $this->assertSame(['EARLYBIRD'], $saved->promoCodes()->pluck('code')->all());
         $this->assertTrue((bool) $saved->tickets_enabled);

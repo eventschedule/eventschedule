@@ -158,9 +158,43 @@ class VenueMapJourneyTest extends DuskTestCase
             .'Array.prototype.filter.call(el.querySelectorAll("button"), function (b) { return b.textContent.trim() === '.json_encode($words).'; })[0].click();');
     }
 
+    /**
+     * A real press on something the journey has left at the very top of the window, where the
+     * slim header bar lies over it once the header has scrolled away: a visitor scrolls it into
+     * the clear first, and so does this. What the page brings to the top by ITSELF must not need
+     * that, which assertClearOfTheBar() holds.
+     */
+    private function reach(Browser $browser, string $selector): Browser
+    {
+        $browser->script('document.querySelector('.json_encode($selector).').scrollIntoView({ block: "center", behavior: "instant" });');
+
+        return $browser->click($selector);
+    }
+
+    /**
+     * The control is what a press at its own centre would land on, once the page has come to rest.
+     * The map brings itself to the top of the window as it opens, and its title row and Hide map
+     * used to end up behind the header bar (the page's scroll-padding-top is what stops that).
+     */
+    private function assertClearOfTheBar(Browser $browser, string $selector, string $message): void
+    {
+        $reached = 'function () { var el = document.querySelector('.json_encode($selector).'); if (! el) return false;'
+            .' var r = el.getBoundingClientRect(); var at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);'
+            .' return at !== null && el.contains(at); }';
+
+        // The page scrolls smoothly, so the answer is asked for until it holds still.
+        try {
+            $browser->waitUntil('('.$reached.')() && window.__mapTop === (window.__mapTop = Math.round(document.getElementById("gp-map").getBoundingClientRect().top))', 5);
+        } catch (\Facebook\WebDriver\Exception\TimeoutException $e) {
+            $this->fail($message.': '.json_encode($browser->script('var bar = document.getElementById("gp-header-bar"); return {'
+                .' mapTop: Math.round(document.getElementById("gp-map").getBoundingClientRect().top),'
+                .' barOn: bar.hasAttribute("data-on"), barFoot: Math.round(bar.getBoundingClientRect().bottom) };')[0]));
+        }
+    }
+
     private function openMap(Browser $browser): void
     {
-        $browser->click('#gp-map .gk-map-acts .gk-map-toggle')
+        $this->reach($browser, '#gp-map .gk-map-acts .gk-map-toggle')
             ->waitFor('.gk-map-leaflet .leaflet-marker-icon', 15)
             ->waitFor('.gk-map-item', 10)
             ->pause(500);
@@ -246,8 +280,9 @@ class VenueMapJourneyTest extends DuskTestCase
             $this->assertSame('gp-events', $this->js($browser, 'document.activeElement.id'), 'focus is on the list, not on the chip that would undo it');
             $browser->assertSeeIn('.gk-map-cta', 'Clear filter');
 
-            // And taken off again from the same place.
-            $browser->click('.gk-map-cta button')->waitUntil('window.calendarVueApp.selectedVenue === ""', 5);
+            // And taken off again from the same place. The page has just gone down to the list, so
+            // the button is at the window's top edge, under the header bar: a visitor scrolls up.
+            $this->reach($browser, '.gk-map-cta button')->waitUntil('window.calendarVueApp.selectedVenue === ""', 5);
 
             // Venues: back to the list beside the map, and focus on the row it came from.
             $browser->click('.gk-map-back')->waitUntilMissing('.gk-map-venue', 5);
@@ -283,6 +318,11 @@ class VenueMapJourneyTest extends DuskTestCase
             $this->visitor($browser, false);
             $this->page($browser, 'layout=calendar');
             $this->openMap($browser);
+
+            // The map has brought itself to the top of the window. That used to send the header away
+            // and bring the slim bar in over the map's own Hide button: it stops clear of where the
+            // bar lies, whether the bar has come in or not.
+            $this->assertClearOfTheBar($browser, '#gp-map .gk-map-acts .gk-map-toggle[aria-expanded="true"]', 'Hide map can be pressed where the page left it');
 
             // Next month, in the list's own way, with the map open.
             $month = $this->js($browser, 'window.calendarVueApp.pageMonth');

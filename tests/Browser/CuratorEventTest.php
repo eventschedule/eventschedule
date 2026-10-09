@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventRole;
 use App\Models\Role;
 use App\Models\User;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Traits\AccountSetupTrait;
@@ -21,7 +22,9 @@ class CuratorEventTest extends DuskTestCase
      * 1. First user creates a curator role
      * 2. Second user creates a curator role
      * 3. Third user follows both curator roles and creates an event added to both
-     * 4. First user edits the event (should fail - event no longer linked to both curators)
+     * 4. First user accepts the event, and is NOT given its form: a curator that lists an event
+     *    does not run it
+     * 5. Third user, whose schedule made the event, saves its form: it stays on both curators
      */
     public function test_curator_event_scenario(): void
     {
@@ -69,7 +72,7 @@ class CuratorEventTest extends DuskTestCase
             // Log out third user
             $this->logoutUser($browser, $user3Name);
 
-            // Step 4: First user logs back in and tries to edit the event
+            // Step 4: First user logs back in, accepts the event, and is not given its form
             $this->loginUser($browser, $user1Email, $user1Password);
             $browser->assertSee($user1Name);
 
@@ -85,13 +88,32 @@ class CuratorEventTest extends DuskTestCase
             $event = \App\Models\Event::where('name', 'Talent')->latest()->first();
             $eventUrl = $event->getGuestUrl('curator1');
 
-            // Assert that the number of records remains the same
+            // The venue, the talent and the two curators
             $this->assertEquals(EventRole::count(), 4,
                 'There should be 4 event_role records before editing the event');
 
+            // Listing an event is not running it (EventListingRightsTest): the curator's owner is
+            // offered no way into the event's form, and the form's address does not give it either.
+            $editPath = '/edit-event/'.UrlUtils::encodeId($event->id);
+
             $browser->visit($eventUrl)
-                ->waitForText('Edit Event', 5)
-                ->clickLink('Edit Event')
+                ->waitForText('Talent', 5)
+                ->assertDontSee('Edit Event');
+
+            $browser->visit('/curator1'.$editPath)
+                ->waitUntil('! window.location.pathname.includes("edit-event")', 10)
+                ->assertMissing('#edit-form');
+
+            $this->assertEquals(EventRole::count(), 4,
+                'Being turned away from the form changes nothing about where the event is listed');
+
+            // Step 5: the event's own person saves the form they are given, and the event stays
+            // on both curators. (Until 2026-10 it was the curator who saved here.)
+            $browser->visit('/curator1/schedule');
+            $this->logoutUser($browser, $user1Name);
+            $this->loginUser($browser, $user3Email, $user3Password);
+
+            $browser->visit('/talent'.$editPath)
                 ->waitFor('#edit-form', 10);
 
             // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
@@ -100,7 +122,7 @@ class CuratorEventTest extends DuskTestCase
                 document.getElementById('edit-form').requestSubmit();
             ");
 
-            $browser->waitForLocation('/curator1/schedule', 5)
+            $browser->waitForLocation('/talent/schedule', 5)
                 ->pause(1000)
                 ->assertSee('Talent');
 

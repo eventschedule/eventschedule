@@ -197,6 +197,9 @@ class GuestHeaderTest extends TestCase
         $this->assertGreaterThan(strpos($html, 'id="schedule-header"'), strpos($html, 'id="gp-header-bar"'));
         // Never inside the header's card, whose backdrop-filter would un-fix it.
         $this->assertStringNotContainsString('gp-header-bar', $this->header($html));
+        // What the page scrolls to the top of the window (the map as it opens) stops under the
+        // bar: without this its title row and Hide map were behind it (VenueMapJourneyTest).
+        $this->assertMatchesRegularExpression('~html:has\(#gp-header-bar\)\s*\{\s*scroll-padding-top:~', $html);
 
         $this->assertStringNotContainsString('id="gp-header-bar"', $this->page($role, '?graphic=1'));
     }
