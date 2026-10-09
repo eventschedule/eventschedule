@@ -450,8 +450,10 @@
          not behind it: the bar is .5rem + 2.375rem + .5rem, and half a rem of air. The map's own
          title row and its Hide map button sat under the bar. Said whether or not the bar is on:
          the map opens while the header is still there, and without this it was that very scroll
-         which sent the header away and brought the bar in over the map. --}}
-    html:has(#gp-header-bar) { scroll-padding-top: calc(3.875rem + env(safe-area-inset-top, 0px)); }
+         which sent the header away and brought the bar in over the map. Inside :where() and by
+         the bar's class, never its id: an owner's own rule for html, or for the bar's promised
+         id, has nothing here to beat (GuestKitTest). --}}
+    :where(html:has(.gk-headbar)) { scroll-padding-top: calc(3.875rem + env(safe-area-inset-top, 0px)); }
 
     @media (prefers-reduced-motion: reduce) {
         .gk-btn, .gk-link { transition-duration: 1ms; }
