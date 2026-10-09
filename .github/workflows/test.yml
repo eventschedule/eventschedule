@@ -85,12 +85,27 @@ jobs:
       # Do not answer a future OOM by raising memory_limit - that hides a real leak, which is what
       # the 1G ceiling is for. revalidate_freq=0 makes a rewritten PHP file take effect at once.
       # TestEnvironmentTest fails the build if this goes missing.
+      #
+      # On is not enough: it needs ROOM. opcache that has filled up keeps what it holds and caches
+      # nothing more, without a word, so every file first required after that is compiled again
+      # each time it is required - which is the leak above, back by another road. PHPUnit loads
+      # every test file before it runs one, and by 2026-10 those alone took 104 MB of the default
+      # 128. One feature test later the cache was full, resources/lang/en/messages.php was already
+      # outside it, and once routes/web.php no longer fitted either the run died at about test
+      # 5,150 with an OOM "in resources/lang/en/messages.php". Measured over the whole suite with
+      # these sizes: 209 MB of the 512 used, every file an app boot requires in the cache, and a
+      # peak of 251 MB against the 1G. When the suite outgrows them, raise them here: the tripwire
+      # is TestEnvironmentTest (fails at 75% full) and the line tests/bootstrap.php prints at the
+      # end of a run whose cache filled. file_update_protection stays at its default, which keeps a
+      # file written after the process started out of the cache: on a fresh checkout that is every
+      # compiled view, and compiling those again on each render costs time, not memory (measured).
+      # At 0 a file rewritten within one second is served stale (TranslationOverrideTest finds it).
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mbstring, intl, pdo, mysql
-          ini-values: memory_limit=1G, opcache.enable_cli=1, opcache.revalidate_freq=0
+          ini-values: memory_limit=1G, opcache.enable_cli=1, opcache.revalidate_freq=0, opcache.memory_consumption=512, opcache.interned_strings_buffer=64, opcache.max_accelerated_files=30000
           tools: composer
 
       - name: Install Composer dependencies

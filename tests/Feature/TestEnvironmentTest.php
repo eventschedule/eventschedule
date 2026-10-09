@@ -221,4 +221,42 @@ class TestEnvironmentTest extends TestCase
             .'routes/web.php closures and the full suite runs out of memory near the end.'
         );
     }
+
+    /**
+     * On is not enough: opcache needs room for the whole suite.
+     *
+     * Once it fills, it keeps what it holds and caches nothing more, without a word, and every
+     * file first required after that is compiled again each time it is required: the leak the
+     * test above is about, by a quieter road. PHPUnit loads every test file before it runs one,
+     * and in 2026-10 those alone took 104 MB of the default 128. routes/web.php stopped fitting on
+     * CI and the run died at about test 5,150, long before this file's turn, with an OOM "in
+     * resources/lang/en/messages.php", which is why this cannot wait for the cache to be full: it
+     * fails at three quarters, while there is still room, and that is the day to raise
+     * opcache.memory_consumption in .github/workflows/test.yml. By this point in a run nearly
+     * everything the suite loads has been loaded (209 of 512 MB when this was written).
+     * tests/bootstrap.php prints a line at the end of any run whose cache did fill.
+     */
+    public function test_opcache_has_room_for_the_whole_suite_on_ci(): void
+    {
+        if (getenv('GITHUB_ACTIONS') !== 'true') {
+            $this->markTestSkipped('Asserted on CI only: locally the sizes are php.ini settings, and tests/bootstrap.php says when they ran out.');
+        }
+
+        $status = function_exists('opcache_get_status') ? opcache_get_status(false) : false;
+        $this->assertIsArray($status, 'opcache is not answering: see the test above.');
+
+        $memory = $status['memory_usage'];
+        $total = $memory['used_memory'] + $memory['free_memory'] + $memory['wasted_memory'];
+        $taken = $memory['used_memory'] + $memory['wasted_memory'];
+        $advice = 'Raise opcache.memory_consumption (and opcache.interned_strings_buffer with it) in '
+            .'setup-php\'s ini-values in .github/workflows/test.yml. A full opcache stops caching, '
+            .'every app boot then compiles its files again, and the suite runs out of memory.';
+
+        $this->assertFalse($status['cache_full'], 'opcache has filled up. '.$advice);
+        $this->assertLessThan(
+            0.75,
+            $taken / $total,
+            sprintf('opcache is %d%% full (%d of %d MB). ', round(100 * $taken / $total), $taken / 1048576, $total / 1048576).$advice
+        );
+    }
 }
