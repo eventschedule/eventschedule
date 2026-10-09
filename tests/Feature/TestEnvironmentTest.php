@@ -128,6 +128,21 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * No test runs with the developer's real AI key.
+     *
+     * The suite loads the developer's .env, where GEMINI_API_KEY is a real, billed key, and CI
+     * has none. A page that offers AI import draws its form only where a key is set, so
+     * CustomFieldEventPageTest passed on a developer's machine and failed on CI for that alone;
+     * and a test one Http::fake() short of the parser would have spent real requests on fixtures.
+     * Asserted on the default every test inherits: removing the phpunit.xml entry fails this on
+     * any machine that has a key. A test that needs the AI branch sets the config itself.
+     */
+    public function test_no_test_runs_with_the_developers_ai_key(): void
+    {
+        $this->assertSame('', (string) config('services.google.gemini_key'), 'phpunit.xml must pin GEMINI_API_KEY empty.');
+    }
+
+    /**
      * The other half of the harness that only CI can disprove.
      *
      * public/build is gitignored and .github/workflows/test.yml never builds assets, so the real

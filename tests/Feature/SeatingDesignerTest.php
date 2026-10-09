@@ -402,10 +402,12 @@ class SeatingDesignerTest extends TestCase
         $viewer = $this->createOwner();
         $role->users()->attach($viewer->id, ['level' => 'viewer']);
 
+        // Since 2026-10 a viewer is given the calendar and their own days and no other tab, so
+        // the Seating tab and every action on it are not shown at all (TeamRolesAndLeaversTest).
         $this->actingAs($viewer)
             ->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'seating']))
-            ->assertOk()
-            ->assertSee('Grand Theatre')
+            ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']))
+            ->assertDontSee('Grand Theatre')
             ->assertDontSee(__('messages.seating_new_plan'))
             ->assertDontSee(__('messages.seating_duplicate'))
             ->assertDontSee(__('messages.seating_open_designer'));

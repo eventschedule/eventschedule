@@ -130,9 +130,10 @@ class GrowthExportTest extends TestCase
         // fields read where the ids live, 14 since the event_form section (what hand-made events
         // are saved with), 15 since traffic[] counts the guest "Submit your event" page, 16 since
         // it counts the guest pages, 17 since events made by a feed are a source of their own
-        // (imported_feed, which arrives with nobody at the keyboard). Bumping this is deliberate:
-        // a reader diffing two pulls needs to know the shape (or the meaning) moved.
-        $this->assertSame(17, $data['meta']['schema_version']);
+        // (imported_feed, which arrives with nobody at the keyboard), 18 since the blog section
+        // (which posts are read, crawlers left out). Bumping this is deliberate: a reader diffing
+        // two pulls needs to know the shape (or the meaning) moved.
+        $this->assertSame(18, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);

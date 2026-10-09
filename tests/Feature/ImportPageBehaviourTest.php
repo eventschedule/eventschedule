@@ -70,7 +70,7 @@ class ImportPageBehaviourTest extends TestCase
                 setInterval: () => 0, clearInterval() {},
                 confirm: () => true, alert() {}, Toastify: (options) => ({ showToast() { box.toasts = (box.toasts || []).concat(options.text); } }), flatpickr: () => ({}),
                 localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, navigator: { userAgent: 'node', clipboard: {} },
-                document: { addEventListener() {}, removeEventListener() {}, getElementById: element, querySelector: () => null, querySelectorAll: () => [], createElement: element, body: element('body'), documentElement: element('html'), activeElement: null, hidden: false },
+                document: { addEventListener() {}, removeEventListener() {}, getElementById: element, querySelector: (selector) => selector === 'meta[name="csrf-token"]' ? { getAttribute: () => 'page-token' } : null, querySelectorAll: () => [], createElement: element, body: element('body'), documentElement: element('html'), activeElement: null, hidden: false },
                 Vue: { createApp(options) { box.options = options; const app = { mount: () => ({}), component: () => app, use: () => app, directive: () => app, config: { globalProperties: {}, compilerOptions: {} } }; return app; } },
                 // A description editor, as the page's own gives one: each says which it is.
                 initTinyMDE: () => { const text = 'editor ' + (++box.editors); return { value: () => text, toTextArea() {}, _stopEditorObserver() {} }; },
@@ -90,8 +90,12 @@ class ImportPageBehaviourTest extends TestCase
                             }
                             return new Response(JSON.stringify({ success: true, event: { id: 'e' + box.saves.length, view_url: '#', edit_url: '#' } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
                         }
-                        // Anything that is not a POST is the curator's "Select".
-                        if ((options.method || 'GET') === 'GET') {
+                        // The curator's "Select": the listing address, which since 2026-10 answers a
+                        // POST only (StateChangingAddressTest), as the server would say here too.
+                        if (String(url).includes('/curate-event/')) {
+                            if ((options.method || 'GET') !== 'POST') {
+                                return new Response('', { status: 405 });
+                            }
                             box.selects++;
                             if (box.manual) { await new Promise(resolve => box.selecting.push(resolve)); }
                             return new Response(JSON.stringify({ success: true, event_url: '#' }), { status: 200, headers: { 'Content-Type': 'application/json' } });

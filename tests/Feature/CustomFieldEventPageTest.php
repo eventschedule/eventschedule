@@ -256,6 +256,9 @@ class CustomFieldEventPageTest extends TestCase
         }
 
         // The import page draws its questions on the server: one hint, under the one ticked public field.
+        // It is the AI form, drawn only where a key is set, and the key is said here: left to the
+        // machine, this passed beside a developer's real one and failed on CI, which has none.
+        config(['services.google.gemini_key' => 'test-key', 'services.openai.api_key' => null]);
         $html = $this->get(route('event.guest_import', ['subdomain' => $open->subdomain]))->assertOk()->getContent();
         $this->assertSame(1, substr_count($html, 'data-answer-on-event'));
     }

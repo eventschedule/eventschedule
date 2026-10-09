@@ -1535,7 +1535,10 @@ class ImageVariantsTest extends TestCase
         $withVariant = $this->createEvent($role, ['name' => 'Autumn Session', 'flyer_image_url' => 'flyer_abc123.png']);
         $withVariant->recordImageVariants(['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp']);
 
-        $withoutVariant = $this->createEvent($role, ['name' => 'Winter Session', 'flyer_image_url' => 'flyer_def456.png']);
+        // On a schedule of its own: the wall shows one event a schedule, so that no single
+        // schedule fills it.
+        $other = $this->createRole($this->createOwner(), 'talent', ['name' => 'Green Room']);
+        $withoutVariant = $this->createEvent($other, ['name' => 'Winter Session', 'flyer_image_url' => 'flyer_def456.png']);
 
         $html = $this->get('/')->assertOk()->getContent();
 
@@ -1554,7 +1557,10 @@ class ImageVariantsTest extends TestCase
         $sharp = $this->createEvent($role, ['name' => 'Sharp Session', 'flyer_image_url' => 'flyer_abc123.png']);
         $sharp->recordImageVariants(['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp']);
 
-        $this->createEvent($role, ['name' => 'Plain Session', 'flyer_image_url' => 'flyer_def456.png']);
+        // On a schedule of its own: the wall shows one event a schedule, so that no single
+        // schedule fills it.
+        $other = $this->createRole($this->createOwner(), 'talent', ['name' => 'Green Room']);
+        $this->createEvent($other, ['name' => 'Plain Session', 'flyer_image_url' => 'flyer_def456.png']);
 
         $html = $this->get('/')->assertOk()->getContent();
 
@@ -1602,8 +1608,10 @@ class ImageVariantsTest extends TestCase
         $shown = $this->createEvent($role, ['name' => 'Cached Session', 'flyer_image_url' => 'flyer_abc123.png']);
         $shown->recordImageVariants(['w480' => 'flyer_abc123_w480.webp', 'w960' => 'flyer_abc123_w960.webp']);
 
-        // Starts hidden, so the render that warms the cache does not contain it.
-        $later = $this->createEvent($role, [
+        // Starts hidden, so the render that warms the cache does not contain it. On a schedule
+        // of its own: the wall shows one event a schedule.
+        $other = $this->createRole($this->createOwner(), 'talent', ['name' => 'Green Room']);
+        $later = $this->createEvent($other, [
             'name' => 'Later Session',
             'flyer_image_url' => 'flyer_def456.png',
             'is_hidden_from_discovery' => true,

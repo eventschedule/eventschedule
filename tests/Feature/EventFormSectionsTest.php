@@ -501,7 +501,13 @@ class EventFormSectionsTest extends TestCase
         $this->assertStringContainsString('recentVenueIds: [],', $this->page($this->createUrl()));
     }
 
-    public function test_someone_refused_the_ticket_setup_gets_the_event_tab_and_no_tickets(): void
+    /**
+     * Until 2026-10 a curator that listed an event was given its form with the Event tab and no
+     * Tickets panel, and this held what that page left out. Listing an event is no longer editing
+     * it (EventListingRightsTest), so the curator is sent back, and what it is sent holds none of
+     * it either. EventTicketSetupProtectionTest holds the same from the save's side.
+     */
+    public function test_a_curator_that_only_lists_the_event_is_given_neither_its_form_nor_its_tickets(): void
     {
         $event = $this->createEvent($this->role, ['tickets_enabled' => true]);
         $this->createTicket($event, ['type' => 'SECRETTIER', 'price' => 25]);
@@ -510,15 +516,18 @@ class EventFormSectionsTest extends TestCase
         $curator = $this->createRole($curatorUser, 'curator');
         $event->roles()->attach($curator->id, ['is_accepted' => true]);
 
-        $html = $this->page($this->editUrl($event, $curator), $curatorUser);
+        $response = $this->actingAs($curatorUser)->get($this->editUrl($event, $curator));
 
-        $this->assertStringNotContainsString('id="section-tickets"', $html, 'sanity check: this user is refused the panel');
-        $this->assertStringNotContainsString('ticket_choice_tickets', $html);
+        $response->assertRedirect();
+        $html = (string) $response->getContent();
+        $this->assertStringNotContainsString('id="edit-form"', $html);
+        $this->assertStringNotContainsString('id="section-tickets"', $html);
         $this->assertStringNotContainsString('SECRETTIER', $html);
-        $this->assertStringContainsString('savedTicketTypes: 0,', $html, 'not even how many types there are');
-        // The Event tab is theirs to use.
-        $this->assertStringContainsString('id="event-basics"', $html);
-        $this->assertStringContainsString('id="event-location"', $html);
+
+        // Control: the schedule's own owner is given the form, and the tickets with it.
+        $own = $this->page($this->editUrl($event, $this->role));
+        $this->assertStringContainsString('id="section-tickets"', $own);
+        $this->assertStringContainsString('SECRETTIER', $own);
     }
 
     public function test_a_later_event_lands_on_a_strip_with_its_link_and_what_it_lacks(): void

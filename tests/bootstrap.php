@@ -30,6 +30,7 @@ foreach ([
     'BACKEND_GOOGLE_KEY',
     'DO_API_TOKEN',
     'DO_APP_ID',
+    'GEMINI_API_KEY',
     'ADMIN_REQUIRE_2FA',
 ] as $pinned) {
     if (array_key_exists($pinned, $_ENV)) {

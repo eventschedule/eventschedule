@@ -24,7 +24,8 @@ use Tests\TestCase;
  * and to read sponsor_mode with a default. So the same owner saving a Pro schedule's event from
  * their Free venue schedule, a Free curator that listed it, and every update through the API (which
  * never sends sponsor_mode) each wiped the event's sponsors, the last one deleting the logo files
- * as well. Nothing on screen said so in any of the three.
+ * as well. Nothing on screen said so in any of the three. (A curator that only lists an event no
+ * longer saves it at all, so the second case is played here by another owner's venue.)
  */
 class EventSponsorProtectionTest extends TestCase
 {
@@ -82,17 +83,32 @@ class EventSponsorProtectionTest extends TestCase
         $this->assertSponsorsKept($event, $logo, 'saved from the owner\'s Free venue schedule');
     }
 
-    public function test_a_free_schedule_that_lists_the_event_keeps_them(): void
+    /**
+     * Somebody else's Free schedule that the event is on. Until 2026-10 this was a curator that
+     * listed it; listing is no longer editing (EventListingRightsTest), and the schedule that still
+     * saves an event it did not make is the venue it is at.
+     */
+    public function test_another_owners_free_schedule_the_event_is_on_keeps_them(): void
     {
         [, , $event, $logo] = $this->sponsoredEvent();
+        $venueUser = $this->createOwner();
+        $venue = $this->createFreeRole($venueUser, 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $this->putUpdateEvent($venueUser, $venue, $event, ['name' => 'Renamed by the venue'])->assertRedirect();
+
+        $this->assertSame('Renamed by the venue', Event::find($event->id)->name, 'sanity check: the save went through, it was not refused');
+        $this->assertSponsorsKept($event, $logo, 'saved by a Free venue the event is at');
+
+        // The curator of before: its save is refused outright, so there is nothing to wipe.
         $curatorUser = $this->createOwner();
         $curator = $this->createFreeRole($curatorUser, 'curator');
         $event->roles()->attach($curator->id, ['is_accepted' => true]);
 
-        $this->putUpdateEvent($curatorUser, $curator, $event, ['name' => 'Renamed by the curator'])->assertRedirect();
+        $this->putUpdateEvent($curatorUser, $curator, $event, ['name' => 'Renamed by the curator']);
 
-        $this->assertSame('Renamed by the curator', Event::find($event->id)->name, 'sanity check: the save went through, it was not refused');
-        $this->assertSponsorsKept($event, $logo, 'saved by a Free curator that lists it');
+        $this->assertSame('Renamed by the venue', Event::find($event->id)->name);
+        $this->assertSponsorsKept($event, $logo, 'a Free curator that lists it');
     }
 
     /**
@@ -177,12 +193,14 @@ class EventSponsorProtectionTest extends TestCase
         $owner = $this->createOwner();
         $freeTalent = $this->createFreeRole($owner, 'talent');
         $event = $this->createEvent($freeTalent, ['creator_role_id' => $freeTalent->id]);
-        $curatorUser = $this->createOwner();
-        $curator = $this->createRole($curatorUser, 'curator');
-        $event->roles()->attach($curator->id, ['is_accepted' => true]);
-        $this->assertTrue($curator->isPro());
+        // The paid schedule is the venue the event is at (a curator that only lists it saves
+        // nothing of it since 2026-10).
+        $venueUser = $this->createOwner();
+        $venue = $this->createRole($venueUser, 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        $this->assertTrue($venue->isPro());
 
-        $this->putUpdateEvent($curatorUser, $curator, $event, ['sponsor_mode' => 'none'])->assertRedirect();
+        $this->putUpdateEvent($venueUser, $venue, $event, ['sponsor_mode' => 'none'])->assertRedirect();
 
         $this->assertSame('none', Event::find($event->id)->sponsor_mode);
     }

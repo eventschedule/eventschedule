@@ -139,6 +139,14 @@
              Http::fake(), as CustomDomainProvisioningTest does. -->
         <env name="DO_API_TOKEN" value="" force="true"/>
         <env name="DO_APP_ID" value="" force="true"/>
+        <!-- The same for the AI key. With a developer's real GEMINI_API_KEY in .env, every page
+             that offers AI import drew its form here and not on CI, so a test could pass on one
+             and fail on the other for that alone (CustomFieldEventPageTest did), and a test one
+             Http::fake() short of the parser would spend real, billed requests on fixtures. CI
+             never had a key. A test that needs the AI branch sets
+             config('services.google.gemini_key') itself, with Http::fake() where anything is
+             asked. -->
+        <env name="GEMINI_API_KEY" value="" force="true"/>
         <!-- Hosted admins must use two-factor authentication (auth.admin_requires_two_factor).
              Off here so admin tests need no 2FA fixture; AdminTwoFactorRequiredTest turns it on. -->
         <env name="ADMIN_REQUIRE_2FA" value="false" force="true"/>

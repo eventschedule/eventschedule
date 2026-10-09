@@ -255,6 +255,10 @@ class PricingPageTest extends TestCase
             'services.stripe_platform.price_yearly_amount' => '70',
             'services.stripe_platform.enterprise_price_monthly_amount' => '21',
             'services.stripe_platform.enterprise_price_yearly_amount' => '210',
+            // The trial's length is the installation's (TRIAL_DAYS), and the sentence below names
+            // it: .env.example ships 365, which is what CI runs with, and a machine with no value
+            // has 7. Said here so the sentence is the same on both.
+            'app.trial_days' => 7,
         ]);
         PlatformPricing::flush();
         $markup = $this->markup($this->page());

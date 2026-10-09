@@ -11,7 +11,11 @@
 if (!document.getElementById('iti-country-styles')) {
     var s = document.createElement('style');
     s.id = 'iti-country-styles';
-    s.textContent = '.dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #9ca3af; --iti-arrow-color: #d1d5db; } .dark .iti__dropdown-content { color: #d1d5db; } .dark .iti__selected-dial-code { color: #d1d5db; } .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; } .iti.iti--country-only { box-sizing: border-box; display: flex; align-items: center; width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); font-size: 1rem; line-height: 1.5rem; cursor: pointer; } .dark .iti.iti--country-only { border-color: #2d2d30; background: #1e1e1e; } .iti.iti--country-only:focus-within { border-color: var(--brand-blue); box-shadow: 0 0 0 1px var(--brand-blue); } .iti--country-only input.iti__tel-input, .iti--country-only input[type="tel"] { display: none !important; } .iti--country-only .iti__country-container { position: static; padding: 0; width: 100%; } .iti--country-only .iti__selected-country { width: 100%; height: auto; padding: 0; border: 0; background: none; } .iti--country-only .iti__selected-country-primary { width: 100%; padding: 0; border: none; background: none; box-shadow: none; height: auto; } .iti--country-only .iti__country-name-label { margin-left: 0.5rem; color: #111827; } .dark .iti--country-only .iti__country-name-label { color: #d1d5db; } .iti--country-only .iti__arrow { margin-left: auto; }';
+    // The last rule puts the list under the field and in line with it. The widget places its list
+    // against the flag, which here sits inside the field's padding, so the list began on top of
+    // the field's lower edge. partials/country-list-placement decides the rest (over the save bar,
+    // or above the field).
+    s.textContent = '.dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #9ca3af; --iti-arrow-color: #d1d5db; } .dark .iti__dropdown-content { color: #d1d5db; } .dark .iti__selected-dial-code { color: #d1d5db; } .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; } .iti.iti--country-only { box-sizing: border-box; display: flex; align-items: center; width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); font-size: 1rem; line-height: 1.5rem; cursor: pointer; } .dark .iti.iti--country-only { border-color: #2d2d30; background: #1e1e1e; } .iti.iti--country-only:focus-within { border-color: var(--brand-blue); box-shadow: 0 0 0 1px var(--brand-blue); } .iti--country-only input.iti__tel-input, .iti--country-only input[type="tel"] { display: none !important; } .iti--country-only .iti__country-container { position: static; padding: 0; width: 100%; } .iti--country-only .iti__selected-country { width: 100%; height: auto; padding: 0; border: 0; background: none; } .iti--country-only .iti__selected-country-primary { width: 100%; padding: 0; border: none; background: none; box-shadow: none; height: auto; } .iti--country-only .iti__country-name-label { margin-left: 0.5rem; color: #111827; } .dark .iti--country-only .iti__country-name-label { color: #d1d5db; } .iti--country-only .iti__arrow { margin-left: auto; } .iti.iti--country-only .iti__dropdown-content { top: 100%; inset-inline-start: 0; margin-inline-start: calc(var(--iti-border-width) * -1); }';
     document.head.appendChild(s);
 }
 
@@ -165,6 +169,7 @@ window.getCountryInput = function(id) {
 };
 
 </script>
+@include('partials.country-list-placement')
 @endonce
 
 <input type="hidden" name="{{ $name }}" id="{{ $inputId }}" value="{{ $value }}"

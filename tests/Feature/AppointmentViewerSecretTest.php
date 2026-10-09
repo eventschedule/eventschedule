@@ -64,10 +64,19 @@ class AppointmentViewerSecretTest extends TestCase
         $viewer = $this->createOwner();
         $this->followRole($viewer, $role, 'viewer');
 
+        // Since 2026-10 the bookings tab is for the people who run the schedule (it holds names,
+        // emails and phone numbers), so a viewer is sent to the calendar and never sees the list.
+        $schedule = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']);
+
         $this->actingAs($viewer)
             ->get($this->bookingsUrl($role))
+            ->assertRedirect($schedule)
+            ->assertDontSee($sale->secret);
+
+        // And the page a viewer IS given, which lists the booking on its calendar, carries no secret.
+        $this->actingAs($viewer)
+            ->get($schedule)
             ->assertOk()
-            ->assertSee('Jane')
             ->assertDontSee($sale->secret);
     }
 }

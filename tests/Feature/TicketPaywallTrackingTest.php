@@ -49,11 +49,15 @@ class TicketPaywallTrackingTest extends TestCase
             'first touch only: a later view must not move the stamp');
     }
 
-    /** An editor who is not the owner meets the paywall too, and is counted as themselves. */
+    /**
+     * An editor who is not the owner is counted as themselves. On hosted a team belongs to the
+     * Enterprise plan (TeamRolesAndLeaversTest), so that is the schedule an admin still edits.
+     */
     public function test_an_editor_is_stamped_on_their_own_row(): void
     {
         $owner = $this->createOwner();
-        $role = $this->createFreeRole($owner);
+        $role = $this->createRole($owner);
+        $this->assertTrue($role->isEnterprise(), 'sanity check: the plan that has a team');
         $editor = $this->createOwner();
         $role->users()->attach($editor->id, ['level' => 'admin']);
 
@@ -62,6 +66,22 @@ class TicketPaywallTrackingTest extends TestCase
 
         $this->assertNotNull($editor->fresh()->ticket_paywall_viewed_at);
         $this->assertNull($owner->fresh()->ticket_paywall_viewed_at);
+    }
+
+    /**
+     * An admin left on a schedule whose plan has no team (a downgrade) no longer edits it, since
+     * 2026-10, so the editor and its paywall are not theirs to see and they are not counted.
+     */
+    public function test_an_admin_of_a_schedule_whose_plan_has_no_team_is_refused_and_not_stamped(): void
+    {
+        $role = $this->createFreeRole($this->createOwner());
+        $admin = $this->createOwner();
+        $role->users()->attach($admin->id, ['level' => 'admin']);
+
+        $this->actingAs($admin);
+        $this->beacon($role->subdomain)->assertForbidden();
+
+        $this->assertNull($admin->fresh()->ticket_paywall_viewed_at);
     }
 
     /** Someone with no business in the schedule cannot put themselves in the stage through it. */

@@ -285,9 +285,11 @@ class ApiEventExternalIdTest extends TestCase
     }
 
     /**
-     * Whoever may edit an event includes an admin of a schedule that merely lists it. The id is in
-     * the OWNER's namespace: a curator that changed or cleared it would make the owner's next
-     * sync create a duplicate.
+     * Whoever may edit an event includes an admin of the venue it is at. The id is in the OWNER's
+     * namespace: a venue that changed or cleared it would make the owner's next sync create a
+     * duplicate. Until 2026-10 this was asked of a curator that merely listed the event; listing
+     * is no longer editing (EventListingRightsTest), so that curator is turned away before the
+     * question is reached, which the last lines hold.
      */
     public function test_only_the_owning_schedules_admins_can_change_it(): void
     {
@@ -295,21 +297,26 @@ class ApiEventExternalIdTest extends TestCase
         $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
         $event->forceFill(['external_id' => 'the-owners'])->save();
 
-        $curatorOwner = $this->createOwner();
-        $curator = $this->createCurator($curatorOwner);
-        $event->roles()->attach($curator->id, ['is_accepted' => true]);
-        $curatorKey = $this->keyFor($curatorOwner);
+        [, $venue, $venueKey] = $this->schedule('venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
         $url = '/api/events/'.UrlUtils::encodeId($event->id);
 
         foreach (['theirs', null] as $attempt) {
-            $this->putJson($url, ['external_id' => $attempt], $curatorKey)
+            $this->putJson($url, ['external_id' => $attempt], $venueKey)
                 ->assertStatus(422)
                 ->assertJsonValidationErrors('external_id');
         }
         $this->assertSame('the-owners', $event->fresh()->external_id);
 
         // The object read and written back carries the same value, and that is no change.
-        $this->putJson($url, ['short_description' => 'Listed by us', 'external_id' => 'the-owners'], $curatorKey)->assertOk();
+        $this->putJson($url, ['short_description' => 'At our place', 'external_id' => 'the-owners'], $venueKey)->assertOk();
+        $this->assertSame('the-owners', $event->fresh()->external_id);
+
+        $curatorOwner = $this->createOwner();
+        $curator = $this->createCurator($curatorOwner);
+        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+
+        $this->putJson($url, ['external_id' => 'theirs'], $this->keyFor($curatorOwner))->assertStatus(403);
         $this->assertSame('the-owners', $event->fresh()->external_id);
     }
 

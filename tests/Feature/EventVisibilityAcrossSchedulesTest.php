@@ -16,6 +16,7 @@ use Tests\TestCase;
  * schedule the form was OPENED from. That schedule's form has no Unlisted choice to show, so an
  * Enterprise schedule's Unlisted event saved from it - by the same owner's other schedule, or by a
  * curator that lists it - became a Draft and lost its password with nothing on screen to say so.
+ * (A curator that only lists an event no longer saves it, so that case is played by a venue.)
  */
 class EventVisibilityAcrossSchedulesTest extends TestCase
 {
@@ -37,18 +38,32 @@ class EventVisibilityAcrossSchedulesTest extends TestCase
         return $this->createEvent($talent, ['creator_role_id' => $talent->id, 'is_private' => true, 'event_password' => 'opensesame']);
     }
 
+    /**
+     * Somebody else's schedule without Enterprise that still saves the event: the venue it is at.
+     * Until 2026-10 these two tests saved as a curator that listed the event, which no longer
+     * saves it at all (EventListingRightsTest).
+     *
+     * @return array{0: \App\Models\User, 1: \App\Models\Role}
+     */
+    private function anotherOwnersFreeVenue(Event $event): array
+    {
+        $venueUser = $this->createOwner();
+        $venue = $this->createFreeRole($venueUser, 'venue');
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        return [$venueUser, $venue];
+    }
+
     public function test_an_unlisted_event_saved_by_a_schedule_without_enterprise_stays_unlisted(): void
     {
         $event = $this->unlistedEvent();
-        $curatorUser = $this->createOwner();
-        $curator = $this->createFreeRole($curatorUser, 'curator');
-        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        [$venueUser, $venue] = $this->anotherOwnersFreeVenue($event);
 
         // What that schedule's form posts: the flags as the page data had them, no pill pressed.
-        $this->putUpdateEvent($curatorUser, $curator, $event, ['name' => 'Renamed by the curator', 'is_draft' => 0, 'is_private' => 1, 'is_internal' => 0, 'event_password' => 'opensesame'])->assertRedirect();
+        $this->putUpdateEvent($venueUser, $venue, $event, ['name' => 'Renamed by the venue', 'is_draft' => 0, 'is_private' => 1, 'is_internal' => 0, 'event_password' => 'opensesame'])->assertRedirect();
 
         $fresh = Event::find($event->id);
-        $this->assertSame('Renamed by the curator', $fresh->name, 'sanity check: the save went through, it was not refused');
+        $this->assertSame('Renamed by the venue', $fresh->name, 'sanity check: the save went through, it was not refused');
         $this->assertSame('unlisted', $fresh->visibilityState());
         $this->assertSame('opensesame', $fresh->event_password);
     }
@@ -60,11 +75,9 @@ class EventVisibilityAcrossSchedulesTest extends TestCase
     public function test_the_password_survives_a_form_that_has_no_field_for_it(): void
     {
         $event = $this->unlistedEvent();
-        $curatorUser = $this->createOwner();
-        $curator = $this->createFreeRole($curatorUser, 'curator');
-        $event->roles()->attach($curator->id, ['is_accepted' => true]);
+        [$venueUser, $venue] = $this->anotherOwnersFreeVenue($event);
 
-        $this->putUpdateEvent($curatorUser, $curator, $event, ['name' => 'Renamed again', 'is_draft' => 0, 'is_private' => 1, 'is_internal' => 0])->assertRedirect();
+        $this->putUpdateEvent($venueUser, $venue, $event, ['name' => 'Renamed again', 'is_draft' => 0, 'is_private' => 1, 'is_internal' => 0])->assertRedirect();
 
         $fresh = Event::find($event->id);
         $this->assertSame('Renamed again', $fresh->name);

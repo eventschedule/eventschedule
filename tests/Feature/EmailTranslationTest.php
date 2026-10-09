@@ -54,7 +54,9 @@ class EmailTranslationTest extends TestCase
             $this->assertStringNotContainsString(' for Late Set', $html, $label);
         }
 
-        $this->assertStringContainsString('ausstehende Anfragen für Harbour', $this->inLocale('de', $mails['requests']));
+        // The name stands beside the word for what it names (ScheduleNamedInMailTest): a schedule
+        // is often called after a person or a place, and "Anfragen für Harbour" read as theirs.
+        $this->assertStringContainsString('ausstehende Anfragen für den Zeitplan &quot;Harbour&quot;', $this->inLocale('de', $mails['requests']));
         $this->assertStringContainsString('für Late Set', $this->inLocale('de', $mails['fan content']));
     }
 

@@ -38,6 +38,7 @@ if (!window._itiValidCountry) {
     };
 }
 </script>
+@include('partials.country-list-placement')
 @endonce
 
 <input type="hidden" name="{{ $name }}" id="{{ $inputId }}_hidden" value="{{ $value }}">
