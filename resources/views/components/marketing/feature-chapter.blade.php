@@ -1,5 +1,6 @@
 {{--
-    Chapter divider for the /features page.
+    Chapter divider, written for /features (which is a board of keys since 2026-10) and used
+    today by /for-venues.
 
     Five of these break the run of 20 banners into acts. The bled ghost numeral
     is the page's wayfinding signal - on mobile, where the dot nav is hidden,
@@ -10,7 +11,7 @@
 
     `ground="dark"` is a fixed-dark band (dark in light mode too) for pages that
     dive somewhere else mid-scroll, and `label` renames the eyebrow ("Act 01").
-    Both are opt-in; /features passes neither.
+    Both are opt-in.
 --}}
 @props([
     'number',

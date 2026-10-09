@@ -21,10 +21,10 @@ class MarketingHouseStyleTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * The five pages rebuilt around the homepage's own pieces (hero, line-up, bill, night band).
+     * The pages rebuilt around the homepage's own pieces (hero, line-up, bill, night band).
      * The homepage carries its own copy of the styles inline and is not one of them.
      */
-    private const PAGES = ['/features', '/pricing', '/use-cases', '/selfhost', '/docs'];
+    private const PAGES = ['/features', '/pricing', '/use-cases', '/selfhost', '/docs', '/examples'];
 
     /**
      * The marketing views that deliberately do NOT take the house style: the homepage (its own
@@ -122,7 +122,7 @@ class MarketingHouseStyleTest extends TestCase
         }
     }
 
-    public function test_the_features_page_keeps_its_night_chapter_and_its_bill(): void
+    public function test_the_features_page_keeps_its_night_chapter_and_its_board(): void
     {
         $html = $this->get('/features')->assertOk()->getContent();
 
@@ -131,9 +131,11 @@ class MarketingHouseStyleTest extends TestCase
         $this->assertNotFalse(strpos($html, 'id="promote"', $start), 'chapter 03 is no longer inside the night run');
         $this->assertLessThan(strpos($html, 'id="engage"'), strpos($html, 'id="promote"', $start), 'the night run does not end before chapter 04');
 
-        $this->assertSame(12, substr_count($html, 'class="hp-bill-name"'), 'the bill no longer lists the twelve');
+        // The board under the hero is the page's index: forty keys, and each bank's heading
+        // links the chapter it stands for (FeaturesPageTest holds the board itself).
+        $this->assertSame(40, preg_match_all('/<a href="[^"]+"\s+class="fb-key[^"]*"\s+data-fb-key="/', $html), 'the board no longer holds forty keys');
         foreach (['sell', 'schedule', 'promote', 'engage', 'own-it'] as $chapter) {
-            $this->assertStringContainsString('href="#'.$chapter.'"', $html, "the chapter index lost #{$chapter}");
+            $this->assertStringContainsString('href="#'.$chapter.'"', $html, "no bank links #{$chapter}");
             $this->assertStringContainsString('id="'.$chapter.'"', $html);
         }
     }

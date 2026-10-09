@@ -118,6 +118,8 @@ checklist:
 - [Cache pruning](#cache-pruning-appprune-cache)
 - [Event import](#event-import-2026-10-05) (a link, a list to choose from, Undo, and Google
   Calendar as a read-only source; nothing to do before the deploy, three checks after)
+- [The examples page](#the-examples-page-2026-10-09) (nothing before the deploy; a look and a
+  re-scrape after, and a command to run whenever the guest page's look changes)
 
 ### Checklist
 
@@ -668,6 +670,52 @@ a hand-picked Events block can go out with fewer rows than its author last saw i
 **After deploying:** send a test from the builder to a Gmail and to an Outlook inbox. Outlook for
 Windows was hardened by the same techniques as the transactional mail and has not been looked at
 in the app itself.
+
+### The examples page (2026-10-09)
+
+No migration, no env var, no scheduled entry.
+
+**What ships:** `/examples` rebuilt as two walls of the demo schedules' own pictures (the twelve
+hand-made examples, then the Springfield town on a wall of its own). A name typed on the page is
+set over every picture, and a picture that is pressed brings forward a photograph of that
+schedule's page as a phone shows it.
+
+**The photographs are files in the repository**, taken from the live demos by
+`php artisan app:generate-example-shots` and recorded in `config/example_shots.php` with the date
+they were taken, which the page prints. They show the guest page as it was that day. So:
+
+- **After a deploy that changes how a schedule's guest page looks**, run
+  `php artisan app:generate-example-shots --pages` on a dev machine. It needs Dusk's ChromeDriver
+  (`php artisan dusk:chrome-driver`) and loads the 18 public demo pages and three of Moe's
+  Tavern's, read-only. Read the table it prints (a name that changed since the last run is
+  marked) and the diff of `config/example_shots.php`, look at `/examples` locally, and commit the
+  pictures and the file together: `ExamplesPageTest` fails if the file names a picture that is not
+  there. Six of the demos can be edited by anybody, and the name on each photographed page is what
+  the page prints under its picture: a name that is not the demo's own means someone has been in,
+  and the hourly demo reset will put it back before a second run. If a page cannot be read, or
+  Moe's page lists no event, the command stops and writes nothing.
+- **What the command finds by its words on the guest page.** A change to any of these wants the
+  command changed in the same commit:
+  - the cookie banner, hidden before each photograph by the words "Allow all". If that button is
+    renamed the banner is in all 21 pictures, with no warning;
+  - the numbered parts of "Look closer" on Moe's page: Follow, Show All, Free entry, Add Photo,
+    Weekly, Buy Tickets or Get Tickets, Add to Calendar; the list and month switch by `list`,
+    `calendar` or `grid` in a button's label, title or id; and the line-up by the eight performer
+    names in `GenerateExampleShots::ACTS`, which are `DemoService`'s own.
+
+  A part that is not found has no number on the pictures, and its row says "Not in these
+  pictures". That is a designed state, not a fault ("Free entry" comes and goes with the day's
+  events), but it is also what a renamed button looks like.
+- `--art` alone re-makes the wall's pictures from the header and logo files in
+  `public/images/examples/` and `public/images/demo/`, with no browser. It is only needed when one
+  of those files changes or a schedule is added to `App\Utils\ExampleSchedules`.
+- The photographs keep their file names when they are taken again, so the page puts the day they
+  were taken on their addresses (`?v=2026-10-09`): a browser that kept an old picture would
+  otherwise show it under the new measurements.
+
+**After deploying:** open `https://eventschedule.com/examples`, type a name, press a picture. Then
+re-scrape the page in the Facebook Sharing Debugger and the LinkedIn Post Inspector: its link
+preview (`public/images/social/examples.jpg`) was re-cut and the image address carries no version.
 
 ### Guest page counts (2026-10-07)
 

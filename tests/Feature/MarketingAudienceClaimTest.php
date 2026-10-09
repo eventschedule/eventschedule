@@ -93,6 +93,10 @@ class MarketingAudienceClaimTest extends TestCase
             [
                 lang_path('en/marketing.php'),
                 app_path('Http/Controllers/MarketingController.php'),
+                // The audience blurbs and the /use-cases samples: copy that pages print but
+                // that no views/ glob sees.
+                config_path('marketing_audiences.php'),
+                config_path('marketing_directory.php'),
                 // The RENDERED comparison and replacement data. The controller
                 // builds these sentences by concatenating plan_price() into the
                 // middle of them, so a claim like "$5/month for ticketing" is

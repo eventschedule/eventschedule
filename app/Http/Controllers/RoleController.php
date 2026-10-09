@@ -7492,6 +7492,8 @@ class RoleController extends Controller
                 'image' => $event->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
                 'month' => $start->locale(app()->getLocale())->translatedFormat('M'),
                 'day' => $start->format('j'),
+                // The day itself, for the Style tab's preview, which draws the month an event is in.
+                'date' => $start->format('Y-m-d'),
             ];
         })->values()->all();
     }

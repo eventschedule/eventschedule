@@ -1063,7 +1063,7 @@ return [
     'notify_group_followers' => 'E-mails para seguidores',
     'notify_group_shared' => 'Caixa compartilhada',
     'address_is_public' => 'Este endereço é público: aparece na página da sua agenda e nos seus eventos.',
-    'style_row_header_layout' => 'Cabeçalho e layout',
+    'style_row_header' => 'Cabeçalho',
     'integration_row_feeds' => 'Texto do calendário e feeds',
     'language_and_time' => 'Idioma e hora',
     'show_announcement_bar' => 'Mostrar uma barra de avisos',

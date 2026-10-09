@@ -802,7 +802,7 @@ return [
     'notify_group_followers' => 'אימיילים לעוקבים',
     'notify_group_shared' => 'תיבת דואר משותפת',
     'address_is_public' => 'הכתובת הזו ציבורית: היא מוצגת בדף לוח הזמנים שלך ובאירועים שלך.',
-    'style_row_header_layout' => 'כותרת ופריסה',
+    'style_row_header' => 'כותרת',
     'integration_row_feeds' => 'טקסט ליומן ופידים',
     'language_and_time' => 'שפה וזמן',
     'show_announcement_bar' => 'הצגת פס הודעות',

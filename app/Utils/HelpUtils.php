@@ -30,10 +30,13 @@ class HelpUtils
                 'section-merge' => '/docs/creating-schedules#merge',
                 'section-style' => '/docs/schedule-styling#overview',
                 'section-gallery' => '/docs/creating-schedules#gallery',
-                'style-tab-animation' => '/docs/schedule-styling#list-animation',
-                'style-tab-background' => '/docs/schedule-styling#backgrounds',
-                // The row is "Header and layout": it opens on the header style, with custom CSS last.
+                // The Style tab's four rows, in the order of the page, by the id of the row itself.
+                // Header opens on the header style; Events on the default layout, with the event
+                // animation under it.
                 'style-tab-advanced' => '/docs/schedule-styling#header-style',
+                'style-tab-background' => '/docs/schedule-styling#backgrounds',
+                'style-tab-animation' => '/docs/schedule-styling#event-layout',
+                'style-tab-css' => '/docs/schedule-styling#custom-css',
                 'section-subschedules' => '/docs/creating-schedules#customize',
                 'customize-tab-subschedules' => '/docs/creating-schedules#customize-subschedules',
                 'customize-tab-custom-fields' => '/docs/creating-schedules#customize-custom-fields',

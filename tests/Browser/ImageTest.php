@@ -112,14 +112,19 @@ class ImageTest extends DuskTestCase
             $browser->script("document.getElementById('header_style_banner').checked = true; document.getElementById('header_style_banner').dispatchEvent(new Event('change', { bubbles: true }));");
             $browser->pause(300);
 
-            // Select "Custom" (empty value) from header_image dropdown
-            $browser->script("document.getElementById('header_image').value = ''; document.getElementById('header_image').dispatchEvent(new Event('input', { bubbles: true }));");
-            $browser->pause(500)
-                ->waitFor('#custom_header_input', 5);
+            // The header's pictures are a wall now (resources/js/components/StylePictureWall.vue),
+            // and its Upload tile presses the page's own file field, which is out of sight. A
+            // picture that arrives becomes the choice by itself.
+            $browser->waitUntil('!! window.StyleStudio && window.StyleStudio.state.ready === true', 15)
+                ->waitFor('#style-content-advanced .st-wall', 5);
+            $this->assertNotSame('', $browser->value('#header_image'), 'sanity check: no picture of its own yet');
 
             // Upload
             $browser->attach('#header_image_url', $imagePath)
-                ->waitFor('#header_image_url_preview_clear', 5);
+                ->waitFor('#style-content-advanced .st-choices .st-tile.is-on.has-picture', 5)
+                ->waitFor('#style-content-advanced [data-own="remove"]', 5);
+            $this->assertSame('', $browser->value('#header_image'), 'the picture that was uploaded is the header picture');
+            $this->assertNotNull($browser->script('return document.querySelector("#style-preview .st-pv-stage");')[0], 'and the preview shows it');
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
             $this->landOn($browser, '/talent/schedule', 30);
@@ -135,15 +140,24 @@ class ImageTest extends DuskTestCase
             $browser->waitFor('#section-style', 10);
             $browser->script("document.getElementById('style-tab-advanced').click();");
             $browser->pause(500);
-            // Ensure banner style so the header image block (and its delete button) is visible
+            // Ensure banner style so the header's pictures (and Remove, under the choices) are on the page
             $browser->script("document.getElementById('header_style_banner').checked = true; document.getElementById('header_style_banner').dispatchEvent(new Event('change', { bubbles: true }));");
             $browser->pause(300)
-                ->waitFor('#delete_header_image_button', 5);
+                ->waitUntil('!! window.StyleStudio && window.StyleStudio.state.ready === true', 15)
+                ->waitFor('#style-content-advanced .st-choices .st-tile.is-on.has-picture', 5)
+                ->waitFor('#style-content-advanced [data-own="remove"]', 5);
 
-            // Delete via AJAX (override confirm dialog)
+            // Remove deletes the stored picture at once, after the page's question (answered here)
             $browser->script('window.confirm = function() { return true; }');
-            $browser->script("document.querySelector('#delete_header_image_button button[data-delete-image-url]').click()");
-            $browser->waitUntilMissing('#delete_header_image_button', 15);
+            $browser->script("document.querySelector('#style-content-advanced [data-own=\"remove\"]').scrollIntoView({ block: 'center' });");
+            $browser->pause(200)
+                ->click('#style-content-advanced [data-own="remove"]')
+                ->waitUntil('document.getElementById("delete_header_image_button") === null', 15)
+                ->pause(300);
+
+            // With no picture of its own left, the header has none; the preview has let go of it too.
+            $this->assertSame('none', $browser->value('#header_image'));
+            $this->assertNull($browser->script('return document.querySelector("#style-preview .st-pv-stage");')[0]);
 
             // Verify DB
             $this->assertEmpty(Role::where('subdomain', 'talent')->first()->refresh()->header_image_url);
@@ -169,14 +183,15 @@ class ImageTest extends DuskTestCase
                 ->pause(500)
                 ->waitFor('#style_background_image', 5);
 
-            // Select "Custom" (empty value) from background_image dropdown
-            $browser->script("document.getElementById('background_image').value = ''; document.getElementById('background_image').dispatchEvent(new Event('input', { bubbles: true }));");
-            $browser->pause(500)
-                ->waitFor('#custom_image_input', 5);
+            // The same wall as the header's: the file field is the page's own, out of sight.
+            $browser->waitUntil('!! window.StyleStudio && window.StyleStudio.state.ready === true', 15)
+                ->waitFor('#style_background_image .st-wall', 5);
 
             // Upload
             $browser->attach('#background_image_url', $imagePath)
-                ->waitFor('#background_image_preview_clear', 5);
+                ->waitFor('#style_background_image .st-choices .st-tile.is-on.has-picture', 5)
+                ->waitFor('#style_background_image [data-own="remove"]', 5);
+            $this->assertSame('', $browser->value('#background_image'));
 
             $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
             $this->landOn($browser, '/talent/schedule', 30);
@@ -198,19 +213,17 @@ class ImageTest extends DuskTestCase
                 ->pause(500)
                 ->waitFor('#style_background_image', 5);
 
-            // Select Custom to reveal background image section
-            $browser->script("document.getElementById('background_image').value = ''; document.getElementById('background_image').dispatchEvent(new Event('input', { bubbles: true }));");
-            $browser->pause(500);
+            // The stored picture is the choice, with Remove under it
+            $browser->waitUntil('!! window.StyleStudio && window.StyleStudio.state.ready === true', 15)
+                ->waitFor('#style_background_image .st-choices .st-tile.is-on.has-picture', 5)
+                ->waitFor('#style_background_image [data-own="remove"]', 5);
 
-            // Show the custom_image_input container (it's hidden by toggleCustomImageInput when existing image present)
-            $browser->script("document.getElementById('custom_image_input').style.display = 'block';");
-            $browser->pause(300)
-                ->waitFor('#background_image_existing', 5);
-
-            // Delete via AJAX (override confirm dialog)
+            // Remove deletes it at once, after the page's question (answered here)
             $browser->script('window.confirm = function() { return true; }');
-            $browser->script("document.querySelector('#background_image_existing button[data-delete-image-url]').click()");
-            $browser->waitUntilMissing('#background_image_existing', 15);
+            $browser->script("document.querySelector('#style_background_image [data-own=\"remove\"]').scrollIntoView({ block: 'center' });");
+            $browser->pause(200)
+                ->click('#style_background_image [data-own="remove"]')
+                ->waitUntil('document.getElementById("background_image_existing") === null', 15);
 
             // Verify DB
             $this->assertEmpty(Role::where('subdomain', 'talent')->first()->refresh()->background_image_url);

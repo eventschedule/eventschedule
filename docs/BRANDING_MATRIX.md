@@ -199,8 +199,8 @@ the head, and `servesOnCustomDomain()` removes that one too.
    FAQ JSON-LD, and the file's own design comment), the operator-facing `marketing/saas.blade.php`
    and `marketing/selfhost.blade.php`, `marketing/docs/schedule-styling.blade.php#remove-branding`,
    the "Earned plans" callout in `marketing/docs/referral-program.blade.php`, and the free-plan
-   credit row of the spec sheet in `marketing/demos.blade.php` (`/examples`) plus the sentence
-   under it, to move with it.
+   credit row of the parts list (`$spec`, under "Look closer") in `marketing/demos.blade.php`
+   (`/examples`) plus the sentence under the list, to move with it.
 
 ## SEO note
 

@@ -72,7 +72,10 @@ class ScheduleFormShellTest extends TestCase
 
         $rows = [
             'details' => ['localization' => 'details-tab-localization', 'contact' => 'details-tab-contact'],
-            'style' => ['background' => 'style-content-background', 'advanced' => 'style-content-advanced'],
+            'style' => [
+                'advanced' => 'style-content-advanced', 'background' => 'style-content-background',
+                'animation' => 'style-content-animation', 'css' => 'style-content-css',
+            ],
             'customize' => [
                 'subschedules' => 'customize-tab-subschedules', 'custom-fields' => 'customize-tab-custom-fields',
                 'categories' => 'customize-tab-categories', 'custom-labels' => 'customize-tab-custom-labels',
@@ -117,8 +120,9 @@ class ScheduleFormShellTest extends TestCase
         foreach (['details-tab' => 'contact', 'customize-tab' => 'categories', 'settings-tab' => 'notifications', 'engagement-tab' => 'requests', 'integration-tab' => 'google'] as $class => $tab) {
             $this->assertMatchesRegularExpression('/<button type="button" class="event-subrow '.$class.'"[^>]*data-tab="'.$tab.'"/', $html);
         }
-        $this->assertStringContainsString('id="style-tab-background"', $html);
-        $this->assertStringContainsString('id="style-tab-advanced"', $html);
+        foreach (['advanced', 'background', 'animation', 'css'] as $row) {
+            $this->assertStringContainsString('id="style-tab-'.$row.'"', $html);
+        }
     }
 
     public function test_every_tab_says_what_it_holds_and_can_mark_itself_unsaved(): void
@@ -382,10 +386,11 @@ class ScheduleFormShellTest extends TestCase
         sort($sorted);
         $this->assertSame($sorted, $order);
 
-        // Style: the animation picker is a row, and the rows say what they hold.
+        // Style: the rows are named for the part of the page they change, and say what they hold.
         $this->assertMatchesRegularExpression('/data-row-group="style" data-tab="animation"\s+aria-expanded="false" aria-controls="style-content-animation"/', $html);
         $this->assertMatchesRegularExpression('/<div id="style-content-animation" class="event-subrow-body" hidden>/', $html);
-        $this->assertStringContainsString('<span class="event-row-title">'.__('messages.style_row_header_layout').'</span>', $html);
+        $this->assertStringContainsString('<span class="event-row-title">'.__('messages.style_row_header').'</span>', $html);
+        $this->assertStringContainsString('<span class="event-row-title">'.__('messages.events').'</span>', $html);
         $this->assertStringContainsString('<span class="event-row-title">'.__('messages.integration_row_feeds').'</span>', $html);
         $this->assertStringContainsString('<span class="event-row-title">'.__('messages.language_and_time').'</span>', $html);
 

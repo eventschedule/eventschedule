@@ -163,6 +163,7 @@
             --hp-line: rgba(10, 16, 32, 0.1);
             --hp-line-2: rgba(10, 16, 32, 0.17);
             --hp-blue: #2f66ea;
+            --hp-soft: #4767b0;
             --hp-glow: rgba(78, 129, 250, 0.22);
             --hp-card-shadow: 0 1px 2px rgba(10, 16, 32, 0.05), 0 18px 40px -22px rgba(10, 16, 32, 0.28);
             --hp-pop-shadow: 0 2px 4px rgba(10, 16, 32, 0.06), 0 28px 60px -24px rgba(10, 16, 32, 0.4);
@@ -185,6 +186,7 @@
             --hp-line: rgba(255, 255, 255, 0.09);
             --hp-line-2: rgba(255, 255, 255, 0.17);
             --hp-blue: #8db0ff;
+            --hp-soft: #9fb4e6;
             --hp-glow: rgba(78, 129, 250, 0.34);
             --hp-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 24px 50px -26px rgba(0, 0, 0, 0.9);
             --hp-pop-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 30px 70px -24px rgba(0, 0, 0, 0.95);
@@ -286,9 +288,14 @@
             padding-inline-end: 0.06em;
         }
         .dark .hp-ink-grad { background-image: linear-gradient(100deg, #7da5ff 0%, #38bdf8 55%, #5eead4 100%); }
+        {{-- The gradient is for the page's big moments (the headline, the three verbs, the night, the
+           figures, the last panel). A heading's second sentence is the same ink, quieter. --}}
+        .hp-soft { color: var(--hp-soft); }
 
         .hp-head { max-width: 46rem; }
         .hp-head.is-center { margin-inline: auto; text-align: center; }
+        #open-source > .hp-wrap > .hp-head { max-width: 62rem; }
+        #open-source > .hp-wrap > .hp-head .hp-lead { max-width: 46rem; margin-inline: auto; }
         .hp-head .hp-h2 { margin-top: 1rem; }
         .hp-head .hp-lead { margin-top: 1.1rem; }
 
@@ -856,9 +863,78 @@
             .hp-casts-label { grid-column: 1 / -1; }
             .hp-casts button { padding: 0 0.5rem; font-size: 0.98rem; }
         }
-        .hp-poster.is-plain { background: linear-gradient(165deg, #0b4f6c 0%, #0e7490 45%, #22d3ee 100%); }
+        {{-- The show, introduced: its poster and its ticket, under the switch that re-casts them,
+           so a press is answered right where it is made. From a laptop up the three stand beside
+           the section's heading. The ticket is the one that is scanned at the door further down
+           (same number), seen from its other side. The block is its own container, so the
+           poster's type is set from the room the block has. --}}
+        .hp-meet { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: clamp(1.5rem, 2.6vw, 2.25rem); }
+        @media (min-width: 96rem) {
+            {{-- A wide window has the room for the show to stand larger. --}}
+            .hp-meet { --hp-show: 41rem; }
+        }
+        .hp-meet > .hp-casts { margin-top: 0; }
+        .hp-show { position: relative; container-type: inline-size; width: 100%; max-width: 34rem; min-width: 0; }
+        @media (min-width: 640px) and (max-width: 1023px) {
+            .hp-show { max-width: 42rem; }
+        }
+        .hp-show-in { display: grid; grid-template-columns: minmax(0, 0.86fr) minmax(0, 1fr); align-items: center; }
+        .hp-show .hp-poster { z-index: 1; width: 100%; transform: rotate(-4deg); }
+        .hp-show .hp-poster-top { font-size: clamp(0.44rem, 1.75cqi, 0.68rem); }
+        #hp .hp-show .hp-poster-type small { overflow: visible; white-space: normal; }
+        {{-- The ticket is paper in both modes, like the one in the night, so its colours are literal. --}}
+        {{-- The tear is a bite cut out of both halves where they meet, so it falls right however
+           tall the name makes the head; a cut would take a box shadow with it, so the shadow is
+           the wrapper's. --}}
+        .hp-stub { position: relative; margin-inline-start: -1.6rem; color: #0a1020; filter: drop-shadow(0 0 26px rgba(78, 129, 250, 0.34)) drop-shadow(0 22px 26px rgba(10, 16, 32, 0.26)); }
+        .dark .hp-show .hp-poster { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 30px 70px -24px rgba(0, 0, 0, 0.95); }
+        .dark .hp-stub { filter: drop-shadow(0 0 40px rgba(78, 129, 250, 0.6)) drop-shadow(0 24px 30px rgba(0, 0, 0, 0.8)); }
+        .hp-stub-head { padding-block: clamp(0.9rem, 4cqi, 1.3rem) clamp(0.85rem, 3.6cqi, 1.2rem); padding-inline: calc(1.6rem + clamp(0.9rem, 4.2cqi, 1.5rem)) clamp(0.9rem, 4.2cqi, 1.5rem); border-radius: 1.2rem 1.2rem 0 0; background: linear-gradient(120deg, #2b5fe3, #0ea5e9 70%, #22d3ee); color: #fff; -webkit-mask-image: radial-gradient(circle 0.8rem at 0 100%, transparent 98%, #000), radial-gradient(circle 0.8rem at 100% 100%, transparent 98%, #000); mask-image: radial-gradient(circle 0.8rem at 0 100%, transparent 98%, #000), radial-gradient(circle 0.8rem at 100% 100%, transparent 98%, #000); -webkit-mask-composite: source-in; mask-composite: intersect; }
+        .hp-stub-head small { display: block; font-family: var(--hp-mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.88; }
+        .hp-stub-head strong { display: block; margin-top: 0.3rem; font-size: clamp(1.45rem, 7.6cqi, 2.6rem); font-weight: 700; font-variation-settings: 'wght' 860; letter-spacing: -0.035em; line-height: 1.02; overflow-wrap: anywhere; }
+        .hp-stub-head > span { display: block; margin-top: 0.3rem; font-size: clamp(0.78rem, 2.7cqi, 0.92rem); font-weight: 700; font-variation-settings: 'wght' 600; line-height: 1.35; opacity: 0.94; }
+        .hp-stub-body { position: relative; padding-block: 0.35rem clamp(0.8rem, 3.4cqi, 1.1rem); padding-inline: calc(1.6rem + clamp(0.9rem, 4.2cqi, 1.5rem)) clamp(0.9rem, 4.2cqi, 1.5rem); border-top: 2px dashed rgba(10, 16, 32, 0.22); border-radius: 0 0 1.2rem 1.2rem; background: #f8fafc; -webkit-mask-image: radial-gradient(circle 0.8rem at 0 0, transparent 98%, #000), radial-gradient(circle 0.8rem at 100% 0, transparent 98%, #000); mask-image: radial-gradient(circle 0.8rem at 0 0, transparent 98%, #000), radial-gradient(circle 0.8rem at 100% 0, transparent 98%, #000); -webkit-mask-composite: source-in; mask-composite: intersect; }
+        .hp-stub-rows { display: grid; }
+        .hp-stub-rows > span { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-block: clamp(0.42rem, 1.9cqi, 0.62rem); border-bottom: 1px solid rgba(10, 16, 32, 0.1); }
+        .hp-stub-rows i { font-family: var(--hp-mono); font-style: normal; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #56617c; }
+        .hp-stub-rows b { min-width: 0; overflow: hidden; font-size: clamp(0.9rem, 3.3cqi, 1.08rem); font-weight: 700; letter-spacing: -0.01em; text-align: end; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-stub-foot { display: flex; justify-content: space-between; margin-top: clamp(0.6rem, 2.4cqi, 0.85rem); font-family: var(--hp-mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; color: #56617c; }
+        {{-- What the block is, said in a line a reader can read: a label of a few points did not carry it. --}}
+        .hp-meet-note { max-width: 36rem; font-size: 1.02rem; line-height: 1.5; color: var(--hp-ink-2); text-wrap: balance; }
+        @container (max-width: 25rem) {
+            #hp .hp-show-in { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr); }
+            #hp .hp-show .hp-poster-top span:last-child { display: none; }
+            #hp .hp-stub { margin-inline-start: -1.1rem; }
+            #hp .hp-stub-head,
+            #hp .hp-stub-body { padding-inline-start: 1.9rem; }
+        }
+        @media (min-width: 1024px) {
+            .hp-meet { grid-template-columns: minmax(0, 1fr) minmax(0, min(var(--hp-show, 37rem), 55%)); grid-template-areas: "head casts" "head show" "head note"; align-items: start; column-gap: clamp(2.25rem, 4.6vw, 5rem); }
+            .hp-meet > .hp-head { grid-area: head; align-self: center; }
+            .hp-meet > .hp-casts { grid-area: casts; }
+            .hp-meet > .hp-show { grid-area: show; max-width: none; }
+            .hp-meet > .hp-meet-note { grid-area: note; }
+            .hp-meet .hp-casts button { min-height: 2.9rem; padding: 0 1.05rem; font-size: 1rem; }
+        }
+        @media (min-width: 1024px) and (max-width: 1359px) {
+            {{-- Four names do not fit one line beside the heading here: two and two, never three and one. --}}
+            .hp-meet .hp-casts { display: grid; grid-template-columns: repeat(2, minmax(0, max-content)); }
+            .hp-meet .hp-casts-label { grid-column: 1 / -1; }
+        }
+        {{-- A press of the switch is answered where it is pressed: the poster is pasted up again. --}}
+        html.es-anim .hp-show.is-swap .hp-poster { animation: hp-swap 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        html.es-anim .hp-show.is-swap .hp-stub { animation: hp-swap-stub 0.45s ease-out both; }
+        @keyframes hp-swap { from { opacity: 0; transform: rotate(5deg) scale(0.86) translateY(14px); } to { opacity: 1; transform: rotate(-4deg); } }
+        @keyframes hp-swap-stub { from { opacity: 0.35; transform: translateX(-0.6rem); } to { opacity: 1; transform: none; } }
+        {{-- A cast with no photograph of its own gets a poster that is drawn: a low moon over water. --}}
+        .hp-poster.is-plain {
+            background:
+                radial-gradient(circle at 70% 27%, #fff7d6 0, #fde68a 11.5%, rgba(253, 230, 138, 0.3) 12.5%, rgba(253, 230, 138, 0) 36%),
+                radial-gradient(130% 55% at 50% 112%, rgba(34, 211, 238, 0.6), transparent 62%),
+                linear-gradient(165deg, #052536 0%, #0a4a66 52%, #0e7490 100%);
+        }
         .hp-poster.is-plain img { display: none; }
-        .hp-poster.is-plain::after { background: linear-gradient(to top, rgba(4, 30, 44, 0.75) 6%, rgba(4, 30, 44, 0) 60%); }
+        .hp-poster.is-plain::after { background: linear-gradient(to top, rgba(4, 30, 44, 0.78) 6%, rgba(4, 30, 44, 0) 58%); }
         .hp-slots-type .hp-slots-meta { display: block; font-size: 0.8rem; font-weight: 400; color: var(--hp-ink-3); }
         #hp #features { --hp-tile: 6.25rem; padding-bottom: 0; }
         @media (min-width: 102rem) {
@@ -1067,11 +1143,11 @@
         }
         @keyframes hp-thread { from { transform: scaleY(0); } to { transform: scaleY(1); } }
         @media (min-width: 1024px) {
-            {{-- Sell is two pieces of markup, the second of them the night's band. The first
-               piece's thread runs on to the band and the band's own starts above it, so the act
-               hangs on one line. --}}
-            #hp .hp-wrap:has(+ .hp-night) > .hp-run::before,
-            #hp .hp-wrap:has(+ .hp-night) > .hp-run::after { bottom: -4rem; }
+            {{-- Sell is two pieces of markup, the evening and the night's band. The evening's
+               thread runs on to the band and the band's own starts above it, so the act hangs on
+               one line. --}}
+            #hp .hp-eve .hp-run::before,
+            #hp .hp-eve .hp-run::after { bottom: -4rem; }
             #hp .hp-night .hp-run::before,
             #hp .hp-night .hp-run::after { top: -12rem; }
         }
@@ -1130,10 +1206,12 @@
             @media (min-width: 1024px) {
                 .hp-verb { timeline-scope: --hp-card, --hp-piece; }
                 .hp-vband { view-timeline: --hp-card block; }
-                .hp-wrap:has(+ .hp-night) { view-timeline: --hp-piece block; }
+                .hp-eve { view-timeline: --hp-piece block; }
                 .hp-vband + .hp-wrap > .hp-run > .hp-step { animation: hp-step-on steps(1, end) both; animation-timeline: --hp-card; animation-range: exit 10% exit 60%; }
+                .hp-vband + .hp-eve .hp-run > .hp-step { animation: hp-step-on steps(1, end) both; animation-timeline: --hp-card; animation-range: exit 10% exit 60%; }
                 .hp-night .hp-run > .hp-step { animation: hp-step-on steps(1, end) both; animation-timeline: --hp-piece; animation-range: exit 92% exit 100%; }
                 html.es-anim .hp-vband + .hp-wrap > .hp-run > .hp-step,
+                html.es-anim .hp-vband + .hp-eve .hp-run > .hp-step,
                 html.es-anim .hp-night .hp-run > .hp-step { animation-name: hp-step-in; animation-timing-function: linear; }
             }
         }
@@ -1180,7 +1258,8 @@
         .hp-btn.is-small { min-height: 3rem; padding-inline: 1.25rem; font-size: 0.98rem; border-radius: 0.85rem; }
         .hp-beat-copy .hp-actions { margin-top: 1.5rem; gap: 0.75rem 1.25rem; }
         .hp-beat-copy .hp-h3 { font-size: clamp(1.9rem, 1.9vw + 1.05rem, 2.9rem); }
-        .hp-beat-copy .hp-h3 .hp-ink-grad { display: block; }
+        .hp-beat-copy .hp-h3 .hp-ink-grad,
+        .hp-beat-copy .hp-h3 .hp-soft { display: block; }
         .hp-beat-copy > p { margin-top: 1rem; font-size: 1.125rem; color: var(--hp-ink-2); text-wrap: pretty; }
         .hp-blurbs { display: grid; gap: 1.5rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--hp-line); }
         .hp-blurb { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: 1rem; }
@@ -1224,6 +1303,42 @@
             mask-image: linear-gradient(160deg, #000, transparent 62%);
             opacity: 0.8;
             pointer-events: none;
+        }
+        {{-- The light of the day the acts are told across. Plan is the morning: paper, with the
+           first light at one corner. Promote is the middle of the day: the stage is the sky
+           itself, and what stands on it is white. Sell is the evening, further down. --}}
+        #plan .hp-obj {
+            background:
+                radial-gradient(80% 78% at 10% 116%, rgba(34, 211, 238, 0.5), transparent 70%),
+                radial-gradient(64% 58% at 94% 112%, rgba(78, 129, 250, 0.28), transparent 70%),
+                linear-gradient(to bottom, #ffffff 0%, #f1faff 50%, #dff4fc 100%);
+        }
+        {{-- Low light, long shadows. --}}
+        #plan .hp-obj .hp-poster,
+        #plan .hp-obj .hp-card { box-shadow: 0 2px 4px rgba(10, 16, 32, 0.05), 0 48px 60px -32px rgba(12, 74, 110, 0.55); }
+        #promote { --hp-soft: var(--hp-blue); }
+        #promote .hp-obj {
+            border-color: transparent;
+            background:
+                radial-gradient(38rem 24rem at 88% -12%, rgba(165, 243, 252, 0.55), transparent 68%),
+                linear-gradient(155deg, #2456dc 0%, #1f78e4 52%, #0e9fe0 100%);
+            box-shadow: 0 2px 4px rgba(10, 16, 32, 0.06), 0 34px 70px -34px rgba(36, 86, 220, 0.75);
+        }
+        #promote .hp-obj::before { background-image: linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px); opacity: 1; }
+        .dark #plan .hp-obj {
+            background:
+                radial-gradient(70% 62% at 10% 114%, rgba(34, 211, 238, 0.44), transparent 70%),
+                radial-gradient(60% 50% at 94% 110%, rgba(78, 129, 250, 0.22), transparent 70%),
+                var(--hp-bg-2);
+        }
+        .dark #plan .hp-obj .hp-poster,
+        .dark #plan .hp-obj .hp-card { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 40px 60px -30px rgba(0, 0, 0, 0.95); }
+        .dark #promote .hp-obj {
+            border-color: rgba(125, 165, 255, 0.28);
+            background:
+                radial-gradient(38rem 24rem at 88% -12%, rgba(56, 189, 248, 0.42), transparent 68%),
+                linear-gradient(155deg, #0f3f8f 0%, #0b63a8 55%, #0a86b8 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 34px 70px -34px rgba(0, 0, 0, 0.9);
         }
         .hp-card {
             position: relative;
@@ -1298,15 +1413,23 @@
             justify-items: center;
             align-items: center;
             gap: clamp(0.75rem, 2vw, 1.75rem);
-            padding: clamp(1.25rem, 3.4vw, 3.25rem);
+            padding: clamp(1.25rem, 2.8vw, 2.6rem);
         }
         .hp-obj-ai .hp-poster { width: min(64%, 15rem); }
         .hp-obj-ai .hp-flow svg { transform: rotate(90deg); }
         .hp-obj-ai .hp-event { width: 100%; }
         @container (min-width: 33rem) {
-            #hp .hp-obj-ai { grid-template-columns: minmax(0, 0.9fr) auto minmax(0, 1fr); justify-items: stretch; }
+            #hp .hp-obj-ai { grid-template-columns: minmax(0, 0.9fr) auto minmax(0, 1.1fr); column-gap: clamp(0.6rem, 2.2cqi, 1.5rem); justify-items: stretch; }
+            #hp .hp-obj-ai .hp-synced { gap: 0.45rem; font-size: 0.76rem; white-space: nowrap; }
+            #hp .hp-obj-ai .hp-event-top span { white-space: nowrap; }
+            #hp .hp-obj-ai .hp-poster,
+            #hp .hp-obj-ai .hp-event { min-width: 0; }
             #hp .hp-obj-ai .hp-poster { width: auto; }
             #hp .hp-obj-ai .hp-flow svg { transform: none; }
+        }
+        @container (min-width: 43rem) {
+            #hp .hp-obj-ai .hp-field { padding: 0.75rem 0.85rem; font-size: 0.95rem; }
+            #hp .hp-obj-ai .hp-event-top strong { font-size: 1.25rem; }
         }
         .hp-poster {
             position: relative;
@@ -1319,9 +1442,9 @@
             transform: rotate(-3deg);
         }
         .hp-poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-        .hp-poster::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(18, 8, 4, 0.94) 6%, rgba(18, 8, 4, 0.2) 55%, rgba(18, 8, 4, 0.55)); }
+        .hp-poster::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(18, 8, 4, 0.94) 6%, rgba(18, 8, 4, 0.78) 34%, rgba(18, 8, 4, 0.3) 62%, rgba(18, 8, 4, 0.6)); }
         .hp-poster-type { position: absolute; inset: auto 0 0 0; z-index: 1; padding: 0 9% 9%; }
-        .hp-poster-type small { display: block; font-family: var(--hp-mono); font-size: clamp(0.5rem, 1.5cqi, 0.68rem); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #ffc46b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-poster-type small { display: block; font-family: var(--hp-mono); font-size: clamp(0.5rem, 1.5cqi, 0.68rem); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #ffd28a; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .hp-poster-type strong { display: block; margin-top: 0.3em; font-size: clamp(1.4rem, 5.6cqi, 2.9rem); font-weight: 700; font-variation-settings: 'wght' 880; letter-spacing: -0.05em; line-height: 0.92; text-transform: uppercase; }
         .hp-poster-type > span { display: block; margin-top: 0.7em; font-size: clamp(0.62rem, 1.75cqi, 0.82rem); font-weight: 700; line-height: 1.4; }
         .hp-poster-top { position: absolute; inset: 7% 9% auto 9%; z-index: 1; display: flex; justify-content: space-between; font-family: var(--hp-mono); font-size: clamp(0.5rem, 0.8vw, 0.68rem); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
@@ -1341,6 +1464,18 @@
             80% { transform: translateY(300%); opacity: 1; }
             100% { transform: translateY(300%); opacity: 0; }
         }
+        {{-- A line of the poster that has been read: ringed, with its number at the corner. The
+           ring is drawn outside the line's own box, so the poster's type does not move. --}}
+        .hp-read { position: relative; z-index: 3; }
+        #hp .hp-poster .hp-read { width: fit-content; max-width: 100%; overflow: visible; overflow-wrap: anywhere; white-space: normal; }
+        [dir="rtl"] #hp .hp-read::after { transform: translate(-50%, -50%); }
+        .hp-read::before { content: ""; position: absolute; inset: -0.32em -0.5em; border: 1.5px solid #67e8f9; border-radius: 0.5em; background: rgba(34, 211, 238, 0.14); box-shadow: 0 0 14px rgba(34, 211, 238, 0.45); pointer-events: none; }
+        .hp-read::after { content: attr(data-n); position: absolute; top: -0.32em; inset-inline-end: -0.5em; display: grid; place-items: center; width: 1.25rem; height: 1.25rem; border-radius: 999px; background: #67e8f9; font-family: var(--hp-display); font-size: 0.7rem; font-weight: 700; letter-spacing: 0; line-height: 1; color: #04101f; transform: translate(50%, -50%); pointer-events: none; }
+        .hp-read-n { display: grid; flex: none; place-items: center; width: 1.25rem; height: 1.25rem; margin-inline-start: auto; border-radius: 999px; background: var(--hp-blue); font-size: 0.7rem; font-weight: 700; line-height: 1; color: var(--hp-bg-2); }
+        html.es-anim [data-reveal] .hp-read::before,
+        html.es-anim [data-reveal] .hp-read::after { opacity: 0; transition: opacity 0.45s ease; transition-delay: calc(var(--i, 0) * 0.18s + 0.4s); }
+        html.es-anim [data-reveal].is-revealed .hp-read::before,
+        html.es-anim [data-reveal].is-revealed .hp-read::after { opacity: 1; }
         .hp-flow { display: flex; flex-direction: column; gap: 0.35rem; color: var(--hp-blue); }
         .hp-flow svg { width: 1.75rem; height: 1.75rem; }
         .hp-event { padding: clamp(0.9rem, 1.6vw, 1.35rem); }
@@ -1377,32 +1512,74 @@
         .hp-synced i { margin-inline-start: auto; width: 0.5rem; height: 0.5rem; border-radius: 999px; background: #22d3ee; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); animation: hp-pulse 2.4s ease-out infinite; }
         @keyframes hp-pulse { 70%, 100% { box-shadow: 0 0 0 0.6rem rgba(34, 211, 238, 0); } }
 
-        {{-- Promote: the page, and the ways out to people --}}
-        .hp-obj-share { display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; gap: 1.25rem; padding: clamp(1.25rem, 3vw, 2.75rem) clamp(1.25rem, 3vw, 2.75rem) 0; }
-        .hp-outs { display: flex; flex-wrap: wrap; gap: 0.6rem; order: -1; }
-        .hp-outs .hp-chip { position: relative; }
-        {{-- The newsletter and the ad, each as the small thing it is. In a narrow stage they would
-           crowd the page out, so there the three plain chips stand alone. --}}
-        .hp-outs .hp-mini { display: none; padding: 0; overflow: hidden; white-space: normal; }
-        .hp-mini > span { display: block; }
-        .hp-mini-head { display: flex !important; align-items: center; gap: 0.45rem; padding: 0.5rem 0.7rem; background: linear-gradient(100deg, #0284c7, #0891b2); font-size: 0.72rem; color: #fff; }
-        .hp-mini-head svg { width: 0.9rem; height: 0.9rem; }
-        .hp-mini-head.is-ad { background: none; color: var(--hp-ink); }
-        .hp-mini-head.is-ad i { flex: none; width: 1.5rem; height: 1.5rem; border-radius: 999px; background: linear-gradient(135deg, #fb923c, #f59e0b); }
-        .hp-mini-head.is-ad b { display: block; font-size: 0.72rem; line-height: 1.2; }
-        .hp-mini-head.is-ad small { display: block; font-size: 0.62rem; font-weight: 400; color: var(--hp-ink-3); }
-        .hp-mini-body { padding: 0.55rem 0.7rem 0.65rem; }
-        .hp-mini-hero { display: flex !important; align-items: center; justify-content: center; height: 2.6rem; border-radius: 0.5rem; background: linear-gradient(100deg, rgba(14, 165, 233, 0.2), rgba(34, 211, 238, 0.22)); font-size: 0.7rem; color: var(--hp-blue); }
-        .hp-mini-hero.is-ad { height: 3.4rem; background: linear-gradient(135deg, #fed7aa, #fde68a); color: #9a3412; }
-        .hp-mini-foot { display: flex !important; align-items: center; gap: 0.4rem; margin-top: 0.5rem; font-size: 0.74rem; }
-        .hp-mini-foot .hp-ok { width: 1.15rem; height: 1.15rem; }
-        .hp-mini-cta { margin-inline-start: auto; padding: 0.15rem 0.55rem; border-radius: 0.35rem; background: linear-gradient(100deg, #f97316, #f59e0b); font-size: 0.64rem; color: #431407; }
-        @container (min-width: 37rem) {
-            #hp .hp-obj-share { grid-template-columns: minmax(0, 1fr) 13.5rem; }
-            #hp .hp-outs .hp-mini { display: block; }
-            #hp .hp-outs { order: 0; flex-direction: column; flex-wrap: nowrap; align-self: center; gap: 0.85rem; padding-bottom: clamp(1.25rem, 3vw, 2.75rem); }
-            #hp .hp-outs .hp-chip::before { content: ""; position: absolute; top: 50%; inset-inline-end: 100%; width: 1.25rem; border-top: 2px dotted var(--hp-line-2); }
+        {{-- Promote: one schedule in three places, each named on the thing itself. The calendar
+           embedded in a site of their own, the page behind the link in a bio, and the poster that
+           is printed with its code. One composition at every width: the browser at the back, the
+           phone and the poster in front of it, in proportions that follow the stage's own room. --}}
+        .hp-obj-share { display: flex; flex-direction: column; min-height: clamp(22rem, 31vw, 29.5rem); padding: clamp(3.6rem, 12cqi, 5rem) clamp(1rem, 3vw, 2.5rem) 0; }
+        .hp-out { position: relative; }
+        .hp-out > .hp-chip { z-index: 4; bottom: calc(100% + 0.55rem); inset-inline-start: 0; }
+        .hp-out.is-site { width: 100%; margin-top: auto; }
+        .hp-out.is-phone { position: absolute; z-index: 2; inset-inline-end: 4%; bottom: 0; width: 44%; }
+        .hp-out.is-qr { position: absolute; z-index: 3; inset-inline-start: 4%; bottom: 6%; width: 32%; }
+        .hp-site-nav { display: flex; align-items: center; gap: clamp(0.6rem, 2.4cqi, 1.25rem); padding: 0.7rem clamp(1rem, 2vw, 1.5rem); border-bottom: 1px solid var(--hp-line); font-size: 0.78rem; white-space: nowrap; color: var(--hp-ink-3); }
+        .hp-site-nav b { flex: 0 1 auto; min-width: 0; margin-inline-end: auto; overflow: hidden; font-size: 0.98rem; font-variation-settings: 'wght' 840; letter-spacing: -0.02em; text-overflow: ellipsis; color: var(--hp-ink); }
+        .hp-site-nav .is-on { font-weight: 700; color: var(--hp-blue); }
+        .hp-site-nav span { flex: none; }
+        {{-- The name is never the thing that gives way: the site's other pages are. --}}
+        @container (max-width: 47rem) {
+            #hp .hp-site-nav span:not(.is-on) { display: none; }
         }
+        .hp-phone { padding: 0.4rem 0.4rem 0; border-radius: 1.75rem 1.75rem 0 0; background: #0a1020; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 34px 60px -22px rgba(4, 16, 31, 0.75); }
+        .hp-phone-screen { display: flex; flex-direction: column; gap: 0.5rem; aspect-ratio: 9 / 17; padding: 0.8rem 0.65rem 1.9rem; border-radius: 1.4rem 1.4rem 0 0; background: var(--hp-bg-2); color: var(--hp-ink); }
+        .dark .hp-phone-screen { background: #131a2e; }
+        .hp-phone-bar { align-self: center; max-width: 100%; margin-bottom: 0.2rem; overflow: hidden; padding: 0.18rem 0.6rem; border-radius: 999px; background: var(--hp-bg); font-family: var(--hp-mono); font-size: 0.5rem; text-overflow: ellipsis; white-space: nowrap; color: var(--hp-ink-2); }
+        .dark .hp-phone-bar { background: rgba(255, 255, 255, 0.07); }
+        .hp-phone-who { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.3rem 0.5rem; padding-bottom: 0.3rem; }
+        .hp-phone-who .hp-avatar { width: 2rem; height: 2rem; border-radius: 0.65rem; font-size: 0.9rem; }
+        .hp-phone-who b { overflow: hidden; font-size: 0.78rem; letter-spacing: -0.01em; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-phone-who .hp-follow { grid-column: 1 / -1; padding: 0.3rem; font-size: 0.66rem !important; text-align: center; }
+        .hp-phone-row { display: flex; align-items: center; gap: 0.5rem; min-width: 0; padding: 0.4rem; border: 1px solid var(--hp-line); border-radius: 0.7rem; }
+        .hp-phone-row .hp-tile { width: 2.1rem; height: 2.2rem; border-radius: 0.5rem; }
+        .hp-phone-row .hp-tile b { font-size: 0.46rem; }
+        .hp-phone-row .hp-tile i { font-size: 0.86rem; }
+        .hp-phone-row > span:last-child { min-width: 0; }
+        .hp-phone-row > span:last-child b { display: block; overflow: hidden; font-size: 0.72rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-phone-row > span:last-child i { display: block; font-style: normal; font-size: 0.62rem; color: var(--hp-ink-3); }
+        .hp-phone-cta { margin-top: auto; padding: 0.5rem; border-radius: 0.65rem; background: linear-gradient(100deg, #2b5fe3, #2f6fe9); font-size: 0.7rem; font-weight: 700; text-align: center; color: #fff; }
+        {{-- The printed poster is paper in both modes, so its colours are literal. --}}
+        .hp-qrp { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 0.9rem 0.7rem 0.75rem; border-radius: 0.4rem; background: #fdfcf8; color: #0a1020; box-shadow: 0 26px 50px -18px rgba(4, 16, 31, 0.7); text-align: center; transform: rotate(-7deg); }
+        .hp-qrp-top { max-width: 100%; overflow: hidden; font-family: var(--hp-mono); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.16em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; color: #56617c; }
+        .hp-qrp strong { font-size: clamp(0.72rem, 2.7cqi, 1.3rem); font-weight: 700; font-variation-settings: 'wght' 880; letter-spacing: -0.04em; line-height: 0.95; text-transform: uppercase; }
+        .hp-qrp svg { width: 76%; height: auto; }
+        {{-- The address breaks before its dot or not at all, never at a hyphen inside the name. --}}
+        .hp-qrp-url { display: none; max-width: 100%; overflow: hidden; font-family: var(--hp-mono); font-size: 0.5rem; font-weight: 700; line-height: 1.35; color: #36405a; }
+        .hp-qrp-url [data-cast] { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+        {{-- A narrow stage (a phone, or the column beside the words on a small laptop) has no room
+           to stand the three in front of each other: the browser stands whole at the top and the
+           phone and the poster under it, so no name lies over another thing's words. --}}
+        @container (max-width: 36.99rem) {
+            #hp .hp-obj-share { min-height: 0; padding-bottom: 0; }
+            #hp .hp-out.is-site { margin-top: 0; margin-bottom: clamp(14.5rem, 62cqi, 20rem); }
+            {{-- The browser shows its first event whole; the phone and the poster hang side by
+               side over its foot, each with its name on its own top edge. --}}
+            #hp .hp-site { border-bottom: 1px solid var(--hp-line); border-radius: 1.15rem; }
+            #hp .hp-site .hp-row:nth-child(n+2) { display: none; }
+            #hp .hp-site .hp-sched { padding-bottom: 3.25rem; }
+            #hp .hp-out > .hp-chip { padding: 0.42rem 0.7rem; font-size: 0.76rem; }
+            #hp .hp-out.is-phone > .hp-chip { bottom: calc(100% - 0.95rem); inset-inline: auto -0.35rem; }
+            #hp .hp-out.is-qr > .hp-chip { bottom: calc(100% - 0.7rem); inset-inline-start: -0.35rem; }
+            #hp .hp-out.is-qr { bottom: 9%; width: 34%; }
+        }
+        @container (min-width: 37rem) {
+            #hp .hp-out.is-site { width: 58%; margin-inline-start: 19.5%; }
+            #hp .hp-out.is-phone { inset-inline-end: 4.5%; width: 26%; }
+            #hp .hp-out.is-qr { inset-inline-start: 4.5%; bottom: 9%; width: 20%; }
+            #hp .hp-qrp-url { display: block; }
+        }
+        {{-- Beside a stage that is the sky's own blue, a blue button is one more piece of sky. --}}
+        #promote .hp-beat-copy .hp-btn-primary { background: var(--hp-ink); color: var(--hp-bg); box-shadow: 0 14px 30px -14px rgba(10, 16, 32, 0.75); }
+        #promote .hp-beat-copy .hp-btn-primary:hover { box-shadow: 0 20px 38px -14px rgba(10, 16, 32, 0.85), 0 0 0 1px var(--hp-blue); }
         .hp-browser { overflow: hidden; border-bottom: 0; border-radius: 1.15rem 1.15rem 0 0; }
         .hp-browser-bar { display: flex; align-items: center; gap: 0.4rem; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--hp-line); background: var(--hp-bg); }
         .dark .hp-browser-bar { background: #0c1120; }
@@ -1439,7 +1616,7 @@
         .hp-tt strong { display: block; font-size: 0.95rem; line-height: 1.25; }
         .hp-tt small { font-size: 0.78rem; color: var(--hp-ink-3); }
         .hp-tt-price { margin-inline-start: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
-        .hp-qty { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.2rem 0.3rem; border: 1px solid var(--hp-line-2); border-radius: 0.6rem; font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .hp-qty { display: inline-flex; flex: none; align-items: center; gap: clamp(0.3rem, 1.4cqi, 0.55rem); padding: 0.2rem 0.3rem; border: 1px solid var(--hp-line-2); border-radius: 0.6rem; font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
         .hp-qty b { display: inline-flex; align-items: center; justify-content: center; width: 1.4rem; height: 1.4rem; border-radius: 0.4rem; background: var(--hp-bg-3); font-weight: 700; color: var(--hp-ink-2); }
         .hp-code { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.85rem; font-size: 0.82rem; color: var(--hp-ink-2); }
         .hp-code b { min-width: 6.5rem; min-height: 1.5rem; padding: 0.15rem 0.5rem; border: 1px dashed var(--hp-line-2); border-radius: 0.4rem; font-family: var(--hp-mono); font-size: 0.76rem; letter-spacing: 0.06em; }
@@ -1448,7 +1625,7 @@
         .hp-sum.is-zero b { color: #15803d; }
         .dark .hp-sum.is-zero b { color: #86efac; }
         .hp-code + .hp-sum { margin-top: 0.85rem; border-top: 1px solid var(--hp-line); }
-        .hp-payout { position: relative; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: min(100%, 30rem); margin-top: 1rem; font-size: 0.86rem; font-weight: 700; font-variation-settings: 'wght' 600; color: var(--hp-ink-2); text-align: center; }
+        .hp-payout { position: relative; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: min(100%, 30rem); margin-top: 1rem; text-wrap: balance; font-size: 0.86rem; font-weight: 700; font-variation-settings: 'wght' 600; color: var(--hp-ink-2); text-align: center; }
         .hp-payout svg { flex: none; width: 1rem; height: 1rem; }
         .hp-pay { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; padding: 0.8rem; border-radius: 0.8rem; background: linear-gradient(100deg, #2b5fe3, #2f6fe9); font-size: 0.95rem; font-weight: 700; color: #fff; }
         .hp-zero {
@@ -1478,12 +1655,43 @@
         .hp-zero b { font-size: 1.7rem; font-weight: 700; font-variation-settings: 'wght' 880; letter-spacing: -0.05em; }
         .hp-zero span { margin-top: 0.3em; font-family: var(--hp-mono); font-size: 0.625rem; letter-spacing: 0.06em !important; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 
+        {{-- The evening: Sell's first piece, the full width of the window, and a thing of the day
+           only. The sky over it runs from the page's own ground through the day's blue into blue
+           hour, which the whole scene stands in, and reaches the night's black only at its foot,
+           where the band takes over. What is written on it is light and what stands on it stands
+           free, as the ticket does in the night, so every colour here is literal. At night, where
+           the page is dark already, none of this applies: the scene is drawn as the other acts'
+           are, and the band below it is the one lit room. --}}
+        .hp-eve { position: relative; }
+        html:not(.dark) #hp .hp-eve {
+            isolation: isolate;
+            padding-top: clamp(9.5rem, 17vh, 12.5rem);
+            {{-- One line of the night first: the foot of the sky and the head of the band rarely
+               meet on a whole pixel. The words start below the 11rem line at any width, where
+               the sky is already the deep blue they are measured against. --}}
+            background:
+                linear-gradient(#050814, #050814) bottom / 100% 1px no-repeat,
+                linear-gradient(to bottom, var(--hp-bg) 0, #cfe0ff 2rem, #8fb4fb 4.5rem, #4e81fa 7.25rem, #2a57cf 10rem, #183b9c 13.5rem, #102a78 18rem, #0c1e5a 25rem, #081340 calc(100% - 9rem), #050814 100%);
+            color: #eef2ff;
+        }
+        html:not(.dark) #hp .hp-eve .hp-run::before { background: rgba(169, 198, 255, 0.34); }
+        html:not(.dark) #hp .hp-eve .hp-beat-copy .hp-kicker { color: #e3ebff; }
+        html:not(.dark) #hp .hp-eve .hp-soft { color: #a9c6ff; }
+        html:not(.dark) #hp .hp-eve .hp-beat-copy > p { color: #dbe3f7; }
+        html:not(.dark) #hp .hp-eve .hp-paid { color: #c9d6f5; }
+        html:not(.dark) #hp .hp-eve .hp-more { color: #cfe0ff; }
+        html:not(.dark) #hp .hp-eve .hp-obj { border: 0; background: transparent; box-shadow: none; overflow: visible; }
+        html:not(.dark) #hp .hp-eve .hp-obj::before { display: none; }
+        html:not(.dark) #hp .hp-eve .hp-card { color: var(--hp-ink); }
+        html:not(.dark) #hp .hp-eve .hp-checkout { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 120px -14px rgba(141, 176, 255, 0.85), 0 40px 80px -30px rgba(2, 8, 32, 0.9); }
+        html:not(.dark) #hp .hp-eve .hp-payout { color: #dbe3f7; }
+        html:not(.dark) #hp .hp-eve .hp-zero { background: linear-gradient(135deg, #a5f3fc, #22d3ee); color: #04101f; box-shadow: 0 0 54px rgba(34, 211, 238, 0.6), 0 18px 40px -16px rgba(2, 8, 32, 0.9); }
         {{-- The night of the show, where Sell ends. The band is the full width of the window and
            dark in both modes (so its colours are literal). The page's light follows the story: by
-           day a dusk above the band and a dawn below it, which breaks into the ground of the
+           day the evening above it is its dusk, and a dawn below it breaks into the ground of the
            section that follows (--hp-dawn); at night, where the whole page is already dark, the
-           band is the one lit room. Its lights are layers of their own, so the band itself is one
-           flat colour under the text. --}}
+           band is the one lit room, with a dusk and a dawn of its own. Its lights are layers of
+           their own, so the band itself is one flat colour under the text. --}}
         .hp-night {
             position: relative;
             isolation: isolate;
@@ -1491,12 +1699,14 @@
             overflow: hidden;
             overflow: clip;
             --hp-dawn: var(--hp-bg-2);
-            margin-block: clamp(1.5rem, 4vw, 3.5rem) 0;
-            padding-block: clamp(8rem, 15vh, 11rem) clamp(16.5rem, 18vw + 11rem, 19.5rem);
-            {{-- The dark stops two pixels short of the band's top and bottom edges. The band rarely
-               starts on a whole pixel, and a browser that draws the dark and then the dusk over it,
-               each softened at that edge, leaves a grey hairline the width of the window. --}}
-            background: linear-gradient(#050814, #050814) 0 2px / 100% calc(100% - 4px) no-repeat;
+            {{-- One pixel over the evening's foot, for the same reason as the line above. The
+               door's own scene brings the room it needs above it. --}}
+            margin-block: -1px 0;
+            padding-block: 0 clamp(23.5rem, 23vw + 15.5rem, 31rem);
+            {{-- The dark stops two pixels short of the band's bottom edge. The band rarely ends
+               on a whole pixel, and a browser that draws the dark and then the dawn over it, each
+               softened at that edge, leaves a grey hairline the width of the window. --}}
+            background: linear-gradient(#050814, #050814) 0 0 / 100% calc(100% - 2px) no-repeat;
             color: #eef2ff;
         }
         .hp-night::before {
@@ -1505,12 +1715,18 @@
             inset: 0;
             z-index: -1;
             background:
-                linear-gradient(to bottom, var(--hp-bg) 0, var(--hp-bg) 2px, #c3cff0 2.2rem, #5a6fb4 5rem, #1b2759 8rem, rgba(5, 8, 20, 0) 11.5rem) top / 100% 11.5rem no-repeat,
-                linear-gradient(to top, var(--hp-dawn) 0, var(--hp-dawn) 2px, #bfe3f6 2.2rem, #4f9fd0 4.6rem, #16306a 7.6rem, rgba(5, 8, 20, 0) 11.5rem) bottom / 100% 11.5rem no-repeat,
+                linear-gradient(to bottom, #050814 0, rgba(5, 8, 20, 0) 9rem) top / 100% 9rem no-repeat,
+                radial-gradient(60% 9rem at 50% 100%, var(--hp-dawn), rgba(255, 255, 255, 0) 72%) bottom / 100% 9rem no-repeat,
+                linear-gradient(to top, var(--hp-dawn) 0, var(--hp-dawn) 2px, #bfe3f6 2.6rem, #4f9fd0 5.8rem, #16306a 9.6rem, rgba(5, 8, 20, 0) 14.5rem) bottom / 100% 14.5rem no-repeat,
                 radial-gradient(52rem 30rem at 72% 26%, rgba(47, 102, 234, 0.42), transparent 70%),
                 radial-gradient(34rem 22rem at 14% 78%, rgba(34, 211, 238, 0.16), transparent 70%);
         }
-        .dark .hp-night { --hp-dawn: var(--hp-bg-3); background: linear-gradient(#111d5a, #111d5a) 0 2px / 100% calc(100% - 4px) no-repeat; }
+        .dark .hp-night {
+            --hp-dawn: var(--hp-bg-3);
+            margin-block: clamp(1.5rem, 4vw, 3.5rem) 0;
+            padding-top: clamp(8rem, 15vh, 11rem);
+            background: linear-gradient(#111d5a, #111d5a) 0 2px / 100% calc(100% - 4px) no-repeat;
+        }
         .dark .hp-night::before {
             background:
                 linear-gradient(to bottom, var(--hp-bg) 0, var(--hp-bg) 2px, rgba(17, 29, 90, 0) 9rem) top / 100% 9rem no-repeat,
@@ -1523,12 +1739,12 @@
         .hp-night .hp-beat-copy .hp-h3 { font-size: clamp(2.5rem, 4.6vw, 4.9rem); line-height: 0.98; }
         .hp-night .hp-beat-copy > p { font-size: clamp(1.125rem, 0.4vw + 1.05rem, 1.3rem); }
         .hp-night .hp-beat-copy > p { color: #c5cde2; }
-        .hp-night .hp-step { border-color: rgba(125, 165, 255, 0.5); background: #0d1430; color: #eef2ff; box-shadow: 0 0 0 4px rgba(78, 129, 250, 0.16), 0 0 44px rgba(34, 211, 238, 0.4); }
-        .hp-night .hp-step b { color: #9fb1d6; }
-        .hp-night .hp-step .hp-vbars { background: linear-gradient(100deg, #4e81fa, #22d3ee); }
-        .hp-night .hp-step .hp-vbars i { background: rgba(4, 16, 31, 0.26); }
-        .hp-night .hp-step .hp-vbars i.is-done::after { background: #04101f; opacity: 0.55; }
-        .hp-night .hp-step .hp-vbars i.is-now::after { background: #04101f; }
+        :is(.hp-night, html:not(.dark) .hp-eve) .hp-step { border-color: rgba(125, 165, 255, 0.5); background: #0d1430; color: #eef2ff; box-shadow: 0 0 0 4px rgba(78, 129, 250, 0.16), 0 0 44px rgba(34, 211, 238, 0.4); }
+        :is(.hp-night, html:not(.dark) .hp-eve) .hp-step b { color: #9fb1d6; }
+        :is(.hp-night, html:not(.dark) .hp-eve) .hp-step .hp-vbars { background: linear-gradient(100deg, #4e81fa, #22d3ee); }
+        :is(.hp-night, html:not(.dark) .hp-eve) .hp-step .hp-vbars i { background: rgba(4, 16, 31, 0.26); }
+        :is(.hp-night, html:not(.dark) .hp-eve) .hp-step .hp-vbars i.is-done::after { background: #04101f; opacity: 0.55; }
+        :is(.hp-night, html:not(.dark) .hp-eve) .hp-step .hp-vbars i.is-now::after { background: #04101f; }
         {{-- The room under the band is not the tile's to ride over: it lets go with the words. --}}
         .hp-night .hp-run > .hp-step { margin-bottom: clamp(8rem, 14vw, 15rem); }
         .hp-night .hp-more { color: #a9c3ff; }
@@ -1557,17 +1773,18 @@
         @keyframes hp-beams { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
         {{-- The room. Five rows of thirty, the far row narrow and faint and the near one the width of
            the window, so the lights stand back from it without a 3D transform to flatten them. --}}
-        .hp-room { position: absolute; inset-inline: 0; bottom: clamp(8.5rem, 9vw + 4rem, 10.5rem); pointer-events: none; }
-        .hp-room-cap { margin-bottom: clamp(1.1rem, 2vw, 1.75rem); font-family: var(--hp-mono); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.16em; text-align: center; text-transform: uppercase; color: #9fb1d6; }
-        .hp-room-cap b { margin-inline-end: 0.2em; font-family: var(--hp-display); font-size: 1.5rem; font-variation-settings: 'wght' 840; letter-spacing: -0.03em; color: #67e8f9; text-shadow: 0 0 22px rgba(34, 211, 238, 0.6); vertical-align: -0.12em; }
-        .hp-crowd { display: grid; justify-items: center; }
+        .hp-room { position: absolute; inset-inline: 0; bottom: clamp(11rem, 9vw + 6.5rem, 13rem); pointer-events: none; }
+        .hp-room-cap { margin-bottom: clamp(1.6rem, 2.8vw, 2.75rem); font-family: var(--hp-mono); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.16em; text-align: center; text-transform: uppercase; color: #9fb1d6; }
+        .hp-room-cap b { display: block; margin-bottom: 0.5rem; font-family: var(--hp-display); font-size: clamp(2.75rem, 5vw, 4.75rem); font-variation-settings: 'wght' 860; letter-spacing: -0.04em; line-height: 0.9; color: #67e8f9; text-shadow: 0 0 22px rgba(34, 211, 238, 0.6); vertical-align: -0.12em; }
+        .hp-crowd { position: relative; display: grid; justify-items: center; }
+        .hp-crowd::before { content: ""; position: absolute; top: -4.5rem; left: 50%; width: 52%; height: 7rem; background: radial-gradient(closest-side, rgba(103, 232, 249, 0.3), rgba(78, 129, 250, 0.12) 55%, transparent); transform: translateX(-50%); pointer-events: none; }
         .hp-crowd > span { display: flex; justify-content: space-between; width: var(--w); margin-top: var(--g); opacity: var(--o); }
-        .hp-crowd > span:nth-child(1) { --w: 58%; --k: 0.45; --g: 0; --o: 0.5; }
-        .hp-crowd > span:nth-child(2) { --w: 68%; --k: 0.58; --g: 0.55rem; --o: 0.65; }
-        .hp-crowd > span:nth-child(3) { --w: 80%; --k: 0.72; --g: 0.8rem; --o: 0.8; }
-        .hp-crowd > span:nth-child(4) { --w: 92%; --k: 0.86; --g: 1.1rem; --o: 0.92; }
-        .hp-crowd > span:nth-child(5) { --w: 106%; --k: 1; --g: 1.45rem; --o: 1; }
-        .hp-crowd i { width: calc(var(--k) * clamp(0.34rem, 1.05vw, 0.85rem)); aspect-ratio: 1; border-radius: 999px; background: #3a4a80; opacity: 0.55; }
+        .hp-crowd > span:nth-child(1) { --w: 46%; --k: 0.4; --g: 0; --o: 0.45; }
+        .hp-crowd > span:nth-child(2) { --w: 58%; --k: 0.53; --g: 0.7rem; --o: 0.6; }
+        .hp-crowd > span:nth-child(3) { --w: 73%; --k: 0.68; --g: 1rem; --o: 0.78; }
+        .hp-crowd > span:nth-child(4) { --w: 91%; --k: 0.84; --g: 1.4rem; --o: 0.92; }
+        .hp-crowd > span:nth-child(5) { --w: 112%; --k: 1; --g: 1.9rem; --o: 1; }
+        .hp-crowd i { width: calc(var(--k) * clamp(0.5rem, 1.3vw, 1.2rem)); aspect-ratio: 1; border-radius: 999px; background: #3a4a80; opacity: 0.55; }
         .hp-crowd i.is-in { background: #67e8f9; opacity: 1; box-shadow: 0 0 0.7rem rgba(34, 211, 238, 0.9); }
         html.es-anim .hp-room:not(.is-revealed) .hp-crowd i.is-in { background: #3a4a80; opacity: 0.55; box-shadow: none; }
         html.es-anim .hp-room.is-revealed .hp-crowd i.is-in { animation: hp-seat 0.6s ease-out both; animation-delay: calc(var(--i) * 14ms + 0.3s); }
@@ -1621,21 +1838,49 @@
             #hp .hp-chip-in { top: 14%; right: 9%; }
         }
 
-        {{-- Promote: the audience, counted --}}
-        .hp-obj-grow { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 1.25rem; padding: clamp(1.25rem, 3vw, 2.75rem); }
-        .hp-chart { padding: clamp(1rem, 1.8vw, 1.5rem); }
-        .hp-chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
-        .hp-chart-head strong { font-size: clamp(1.6rem, 2.6vw, 2.3rem); font-weight: 700; font-variation-settings: 'wght' 840; letter-spacing: -0.04em; line-height: 1; }
-        .hp-chart-head span { font-size: 0.82rem; color: var(--hp-ink-3); }
-        .hp-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: clamp(0.4rem, 1vw, 0.85rem); height: clamp(7rem, 12vw, 10rem); margin-top: 1.25rem; }
-        .hp-bars .es-bar { border-radius: 0.5rem 0.5rem 0.15rem 0.15rem; background: linear-gradient(to top, rgba(78, 129, 250, 0.35), rgba(78, 129, 250, 0.6)); }
-        .hp-bars .es-bar.is-peak { background: linear-gradient(to top, #2f66ea, #22d3ee); box-shadow: 0 0 26px rgba(34, 211, 238, 0.5); }
-        .hp-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(0.4rem, 1vw, 0.85rem); margin-top: 0.5rem; text-align: center; font-family: var(--hp-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hp-ink-3); }
-        .hp-days .is-peak { color: var(--hp-blue); }
-        .hp-grow-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
-        @media (min-width: 640px) {
-            .hp-grow-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+        {{-- Promote: the digest that goes out by itself, beside the schedule's follower count and the
+           week's visits. The digest goes to confirmed subscribers; the followers are a second audience. --}}
+        .hp-obj-grow { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 1.1rem; padding: clamp(1.25rem, 3vw, 2.75rem); }
+        @container (min-width: 35rem) {
+            #hp .hp-obj-grow { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); align-items: center; gap: 0; }
+            {{-- The three stand as things on a table do: the count over the letter's corner, the chart below its foot. --}}
+            #hp .hp-grow-side { position: relative; z-index: 1; margin-inline-start: -2rem; }
+            #hp .hp-fans { transform: translateY(-1.1rem); }
+            #hp .hp-chart { transform: translateY(0.9rem); }
         }
+        {{-- Later the same day: the light has come down to the foot of the stage. --}}
+        #grow .hp-obj { background: radial-gradient(42rem 22rem at 8% 118%, rgba(165, 243, 252, 0.62), transparent 68%), linear-gradient(175deg, #1b49cc 0%, #1c6fdf 55%, #16a9e6 100%); }
+        .dark #grow .hp-obj { background: radial-gradient(42rem 22rem at 8% 118%, rgba(56, 189, 248, 0.45), transparent 68%), linear-gradient(175deg, #10286e 0%, #0d4a8e 55%, #0a7ab0 100%); }
+        .hp-grow-side { display: grid; gap: 1.1rem; min-width: 0; }
+        @container (min-width: 26rem) and (max-width: 34.99rem) {
+            {{-- One column of stage, but wide enough for the two small cards to stand side by side. --}}
+            #hp .hp-grow-side { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: start; }
+            #hp .hp-fans { flex-direction: column; align-items: flex-start; }
+        }
+        .hp-mail { display: flex; flex-direction: column; padding: clamp(1rem, 1.8vw, 1.4rem); }
+        .hp-mail-head { display: flex; align-items: center; gap: 0.7rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--hp-line); }
+        .hp-mail-head .hp-avatar { width: 2.4rem; height: 2.4rem; border-radius: 0.75rem; font-size: 1.05rem; }
+        .hp-mail-head > span:nth-child(2) { min-width: 0; }
+        .hp-mail-head b { display: block; overflow: hidden; font-size: 0.92rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-mail-head i { display: block; font-style: normal; font-size: 0.76rem; color: var(--hp-ink-3); }
+        .hp-mail-subject { margin-top: 0.9rem; font-size: clamp(1.05rem, 3cqi, 1.5rem); white-space: nowrap; font-weight: 700; font-variation-settings: 'wght' 840; letter-spacing: -0.03em; line-height: 1.1; }
+        .hp-mail-rows { display: grid; gap: 0.45rem; margin-top: 0.9rem; }
+        .hp-mail-rows > span { display: flex; align-items: center; gap: 0.7rem; min-width: 0; padding: 0.5rem 0.6rem; border: 1px solid var(--hp-line); border-radius: 0.8rem; }
+        .hp-mail-rows > span > span:last-child { min-width: 0; }
+        .hp-mail-rows > span > span:last-child b { display: block; overflow: hidden; font-size: 0.9rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-mail-rows > span > span:last-child i { display: block; font-style: normal; font-size: 0.76rem; color: var(--hp-ink-3); }
+        .hp-mail .hp-pay { margin-top: 0.9rem; }
+        .hp-mail-foot { display: flex; align-items: center; justify-content: center; gap: 0.45rem; margin-top: 0.75rem; font-size: 0.8rem; font-weight: 700; font-variation-settings: 'wght' 600; color: var(--hp-ink-3); }
+        .hp-mail-foot .hp-ok { width: 1.15rem; height: 1.15rem; }
+        .hp-chart { padding: clamp(0.9rem, 1.6vw, 1.25rem); }
+        .hp-chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+        .hp-chart-head strong { font-size: clamp(1.4rem, 2.2vw, 1.9rem); font-weight: 700; font-variation-settings: 'wght' 840; letter-spacing: -0.04em; line-height: 1; }
+        .hp-chart-head span { font-size: 0.72rem; line-height: 1.3; text-align: end; white-space: nowrap; color: var(--hp-ink-3); }
+        .hp-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: clamp(0.3rem, 0.8vw, 0.6rem); height: clamp(4.75rem, 8vw, 6.75rem); margin-top: 1rem; }
+        .hp-bars .es-bar { border-radius: 0.4rem 0.4rem 0.12rem 0.12rem; background: linear-gradient(to top, rgba(78, 129, 250, 0.35), rgba(78, 129, 250, 0.6)); }
+        .hp-bars .es-bar.is-peak { background: linear-gradient(to top, #2f66ea, #22d3ee); box-shadow: 0 0 26px rgba(34, 211, 238, 0.5); }
+        .hp-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(0.3rem, 0.8vw, 0.6rem); margin-top: 0.45rem; text-align: center; font-family: var(--hp-mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--hp-ink-3); }
+        .hp-days .is-peak { color: var(--hp-blue); }
         .hp-fans { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1.1rem; }
         .hp-faces { display: flex; }
         .hp-faces i { display: inline-flex; align-items: center; justify-content: center; width: 2.4rem; height: 2.4rem; margin-inline-start: -0.6rem; border: 2px solid var(--hp-bg-2); border-radius: 999px; font-style: normal; font-size: 0.8rem; font-weight: 700; color: #fff; }
@@ -1644,11 +1889,6 @@
         .hp-faces i.is-more { width: auto; min-width: 2.4rem; padding-inline: 0.5rem; background: var(--hp-bg-3); font-size: 0.72rem; color: var(--hp-ink-2); }
         .hp-fans strong { display: block; font-size: 1.15rem; font-variation-settings: 'wght' 820; letter-spacing: -0.02em; line-height: 1.2; }
         .hp-fans span { font-size: 0.8rem; color: var(--hp-ink-3); }
-        .hp-sent { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1.1rem; }
-        .hp-sent .hp-ico { width: 2.4rem; height: 2.4rem; }
-        .hp-sent strong { display: block; font-size: 0.95rem; line-height: 1.2; }
-        .hp-sent span { font-size: 0.8rem; color: var(--hp-ink-3); }
-        .hp-sent .hp-ok { margin-inline-start: auto; }
 
         {{-- ---------------------------------------------------------------
            4. The booking page's stage (appointments are the second half of Plan, above)
@@ -1795,12 +2035,11 @@
         .dark #hp .hp-num { background-image: linear-gradient(120deg, #7da5ff 0%, #38bdf8 55%, #5eead4 100%); }
         .hp-fig strong { display: block; margin-top: 1rem; font-size: 1.3rem; letter-spacing: -0.02em; }
         .hp-fig p { max-width: 17rem; margin: 0.4rem auto 0; font-size: 0.95rem; color: var(--hp-ink-3); }
-        {{-- The calculator. The component is /compare's own, left to do its sums; here it is given the
-           page's surfaces, and its two number fields are driven by the sliders above it. --}}
+        {{-- The calculator's two number fields are driven by the sliders above it and are not shown. --}}
         #fees { scroll-margin-top: 5.5rem; }
         .hp-keep { margin-top: clamp(3.5rem, 7vw, 6rem); }
         .hp-keep:not([data-fee-ready]) .hp-sliders { display: none; }
-        .hp-keep-head { display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; gap: 1.5rem 3rem; margin-bottom: 1.75rem; }
+        .hp-keep-head { display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; gap: 1.5rem 3rem; margin-bottom: clamp(2.75rem, 4.4vw, 3.5rem); }
         @media (min-width: 900px) {
             .hp-keep-head { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
         }
@@ -1811,24 +2050,88 @@
         .hp-slider span { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; font-size: 0.95rem; color: var(--hp-ink-2); }
         .hp-slider output { font-size: 1.6rem; font-weight: 700; font-variation-settings: 'wght' 840; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--hp-ink); }
         #hp .hp-slider input[type="range"] { display: block; width: 100%; height: 2rem; margin-top: 0.35rem; accent-color: #2f66ea; cursor: pointer; }
-        #hp .hp-calc { border: 1px solid var(--hp-line); border-radius: 1.9rem; background: var(--hp-bg-2); box-shadow: var(--hp-card-shadow); }
-        #hp .hp-calc > div:first-child { display: none; }
-        {{-- The calculator's closing sentence is its answer, so here it stands first, straight
-           under the sliders that change it, and the cards follow. Order only: the component's
-           markup and words are untouched. --}}
-        #hp .hp-calc { display: flex; flex-direction: column; }
+        {{-- The sheet the slip and the calculator stand on, lit low like the morning it is. It is
+           one grid: the slip, the caption, the rows, the calculator's closing sentence with its
+           button, and its small print the full width of the sheet. The calculator is /compare's
+           own component, left to do its sums and untouched; its boxes are dissolved here
+           (display: contents) so its parts can take their places, and they are found by their
+           order and by what they hold (the two number fields, the cards, the closing block). --}}
+        .hp-after { --pad: clamp(1.25rem, 3.4vw, 3rem); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; padding: var(--pad); border: 1px solid var(--hp-line); border-radius: 1.9rem; background: radial-gradient(60% 70% at 4% 112%, rgba(34, 211, 238, 0.3), transparent 70%), radial-gradient(44rem 18rem at 90% 0%, var(--hp-glow), transparent 70%), var(--hp-bg-2); box-shadow: var(--hp-card-shadow); }
+        .hp-after-main,
+        #hp .hp-calc,
         #hp .hp-calc > div:last-child { display: contents; }
-        #hp .hp-calc > div:last-child > p:first-child { order: -1; margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
-        #hp .hp-calc > div:last-child > a { align-self: center; }
-        #hp .hp-calc .mb-3 { font-size: 0.86rem; }
-        @media (max-width: 639px) {
-            #hp .hp-calc { padding: 1.1rem; }
-            #hp .hp-calc > div:nth-child(2) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
-            #hp .hp-calc > div:nth-child(2) > div { padding: 0.9rem 0.8rem; }
-            #hp .hp-calc [data-fee-total] { font-size: 1.35rem; }
-            #hp .hp-calc .mb-3 { font-size: 0.74rem; }
+        #hp .hp-calc > div:first-child { display: none; }
+        {{-- The slip is paper in both modes, so its colours are literal. Its torn foot is a mask,
+           which would cut a shadow off with it: the shadow is the wrapper's. It stands a little
+           proud of the sheet's top edge, as a thing laid on it would. --}}
+        .hp-slip-wrap { justify-self: center; width: min(100%, 20rem); margin-block: calc(-1 * var(--pad) - 1rem) 2.25rem; filter: drop-shadow(0 20px 22px rgba(10, 16, 32, 0.24)); transform: rotate(-2.5deg); }
+        .dark .hp-slip-wrap { filter: drop-shadow(0 24px 30px rgba(0, 0, 0, 0.7)); }
+        .hp-slip {
+            display: flex;
+            flex-direction: column;
+            padding: 1.6rem 1.4rem 2.4rem;
+            background: #fdfcf8;
+            color: #0a1020;
+            font-family: var(--hp-mono);
+            -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 0.85rem 100%;
+            mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 0.85rem 100%;
         }
-        #hp .hp-calc a[href*="sign_up"] { border-radius: 1rem; background: linear-gradient(100deg, #2b5fe3, #2f6fe9); }
+        .hp-slip-cap { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-align: center; text-transform: uppercase; color: #56617c; }
+        .hp-slip-name { margin-top: 0.6rem; padding-bottom: 1.05rem; border-bottom: 1px dashed rgba(10, 16, 32, 0.32); font-family: var(--hp-display); font-size: 1.75rem; font-weight: 700; font-variation-settings: 'wght' 860; letter-spacing: -0.03em; line-height: 1.1; text-align: center; overflow-wrap: anywhere; }
+        .hp-slip-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-top: 0.8rem; font-size: 0.88rem; }
+        .hp-slip-row i,
+        .hp-slip-total i { font-style: normal; color: #56617c; }
+        .hp-slip-row b { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .hp-slip-total { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(10, 16, 32, 0.32); font-size: 0.88rem; }
+        .hp-slip-total b { font-family: var(--hp-display); font-size: clamp(2.6rem, 3.6vw, 3.3rem); font-weight: 700; font-variation-settings: 'wght' 880; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+        .hp-after-cap { font-family: var(--hp-mono); font-size: 0.74rem; font-weight: 700; font-variation-settings: 'wght' 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--hp-ink-3); }
+        {{-- Each card is drawn as one row: the platform and its rate, a bar as long as what
+           selling there costs, and the figure. The bar is the comparison, so only our own bar is
+           in colour and the other three figures step back. --}}
+        #hp .hp-calc > div:nth-child(2) { display: block; margin-top: 0.4rem; }
+        #hp .hp-calc > div:nth-child(2) > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.2rem 1rem; padding: 0.95rem 0; border: 0; border-bottom: 1px solid var(--hp-line); border-radius: 0; background: none; box-shadow: none; }
+        #hp .hp-calc > div:nth-child(2) > div > div:not(:has(> [data-fee-total])) { grid-column: 1; margin: 0; }
+        #hp .hp-calc > div:nth-child(2) > div > div:nth-of-type(1) { grid-row: 1; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: var(--hp-ink); }
+        #hp .hp-calc > div:nth-child(2) > div > div:nth-of-type(2) { grid-row: 2; font-size: 0.84rem; line-height: 1.4; color: var(--hp-ink-3); text-wrap: balance; }
+        #hp .hp-calc > div:nth-child(2) > div > span { position: static; grid-column: 1; grid-row: 1; justify-self: start; align-self: center; padding: 0.2rem 0.55rem; background: linear-gradient(100deg, #2b5fe3, #2f6fe9); box-shadow: none; font-size: 0.62rem; letter-spacing: 0.1em; }
+        #hp .hp-calc > div:nth-child(2) > div:has(> span) > div:nth-of-type(1) { padding-inline-start: 3.55rem; }
+        #hp .hp-calc div:has(> [data-fee-total]) { display: contents; }
+        #hp .hp-calc [data-fee-total] { grid-column: 2; grid-row: 1 / 3; align-self: center; justify-self: end; font-size: clamp(1.2rem, 0.6vw + 1.05rem, 1.6rem); font-weight: 700; font-variation-settings: 'wght' 820; letter-spacing: -0.03em; line-height: 1.1; color: var(--hp-ink-2); }
+        #hp #fees .hp-calc [data-fee-total="eventschedule"] { font-variation-settings: 'wght' 880; color: var(--hp-ink); }
+        #hp .hp-calc div:has(> [data-fee-total]) > div:last-child { grid-column: 1 / -1; grid-row: 3; height: 0.85rem; margin-top: 0.45rem; overflow: visible; border-radius: 0.3rem; background: none; }
+        #hp .hp-calc [data-fee-bar] { min-width: 0.5rem; border-radius: 0.3rem; background: rgba(86, 97, 124, 0.42); transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 1.1s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: left; }
+        [dir="rtl"] #hp .hp-calc [data-fee-bar] { transform-origin: right; }
+        .dark #hp .hp-calc [data-fee-bar] { background: rgba(151, 163, 192, 0.45); }
+        #hp #fees .hp-calc [data-fee-bar="eventschedule"] { background: linear-gradient(90deg, #2f66ea, #22d3ee); box-shadow: 0 0 18px rgba(34, 211, 238, 0.45); }
+        {{-- The shared bar grows upward where it is a column of a chart; here it is a length. --}}
+        #hp .hp-calc .es-bar { transform: scaleX(0.02); }
+        #hp .hp-calc [data-reveal].is-revealed .es-bar, html:not(.es-anim) #hp .hp-calc .es-bar { transform: none; }
+        @media (min-width: 768px) {
+            #hp .hp-calc > div:nth-child(2) > div { grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) minmax(6rem, auto); grid-template-rows: auto auto; column-gap: 1.75rem; padding: 1.1rem 0; }
+            #hp .hp-calc > div:nth-child(2) > div > div:nth-of-type(1) { grid-row: 1; align-self: end; }
+            #hp .hp-calc > div:nth-child(2) > div > div:nth-of-type(2) { grid-row: 2; align-self: start; }
+            #hp .hp-calc > div:nth-child(2) > div > span { align-self: end; margin-bottom: 0.2rem; }
+            #hp .hp-calc div:has(> [data-fee-total]) > div:last-child { grid-column: 2; grid-row: 1 / 3; height: 1.5rem; margin-top: 0; }
+            #hp .hp-calc [data-fee-total] { grid-column: 3; grid-row: 1 / 3; }
+        }
+        @media (min-width: 1280px) {
+            #hp .hp-calc > div:nth-child(2) > div { grid-template-columns: minmax(0, 17rem) minmax(0, 1fr) minmax(6rem, auto); }
+        }
+        {{-- The calculator's closing sentence is its answer: it stands under the bars with the
+           button beside it, and the small print runs the width of the sheet under everything.
+           Order and place only: the component's words are untouched. --}}
+        #hp .hp-calc > div:last-child > p:first-child { margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; font-size: clamp(1.15rem, 0.6vw + 1rem, 1.4rem); font-weight: 700; letter-spacing: -0.02em; text-align: start; color: var(--hp-ink); }
+        #hp .hp-calc > div:last-child > a { justify-self: start; margin: 1.25rem 0 0; border-radius: 1rem; background: linear-gradient(100deg, #2b5fe3, #2f6fe9); }
+        #hp .hp-calc > div:last-child > p:last-of-type { max-width: none; margin: clamp(1.5rem, 3vw, 2.25rem) 0 0; padding-top: 1.25rem; border-top: 1px solid var(--hp-line); font-size: 0.8rem; line-height: 1.6; text-align: start; text-wrap: pretty; color: var(--hp-ink-3); }
+        @media (min-width: 900px) {
+            .hp-after { grid-template-columns: minmax(0, 20rem) minmax(0, 1fr) auto; grid-template-areas: "slip cap cap" "slip rows rows" "slip say btn" "note note note"; column-gap: clamp(2rem, 4vw, 4rem); }
+            .hp-slip-wrap { grid-area: slip; margin-bottom: 0; }
+            .hp-after-cap { grid-area: cap; }
+            #hp .hp-calc > div:nth-child(2) { grid-area: rows; }
+            #hp .hp-calc > div:last-child > p:first-child { grid-area: say; align-self: center; }
+            #hp .hp-calc > div:last-child > a { grid-area: btn; align-self: center; justify-self: end; margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+            #hp .hp-calc > div:last-child > p:last-of-type { grid-area: note; }
+        }
         .hp-figs-links { display: flex; flex-direction: column; align-items: center; gap: 1.1rem; margin-top: 2.25rem; }
         .hp-figs-note { max-width: 40rem; margin: clamp(1.5rem, 3vw, 2.25rem) auto 0; font-size: 1.05rem; color: var(--hp-ink-2); text-align: center; text-wrap: balance; }
         .hp-figs-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.75rem; }
@@ -1909,31 +2212,94 @@
 
         .hp-plug-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: clamp(2rem, 4vw, 3rem); }
         @media (min-width: 1024px) {
-            .hp-plug-grid { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(2rem, 4vw, 4rem); }
+            .hp-plug-grid { grid-template-columns: minmax(0, 0.64fr) minmax(0, 1.36fr); gap: clamp(2rem, 3.4vw, 3.5rem); }
         }
-        .hp-plugs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+        {{-- The wiring. Three columns from a tablet up: the calendars, the schedule, the money.
+           Each name is a plug with a lead to a rail, and the rail meets the schedule at its
+           middle; every line is a straight border, so the drawing holds at any width. On a
+           phone the schedule stands first and the two groups under it, with no lines. --}}
+        .hp-wire { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+        .hp-wire-cap { margin-bottom: 0.7rem; font-family: var(--hp-mono); font-size: 0.72rem; font-weight: 700; font-variation-settings: 'wght' 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hp-ink); }
+        .hp-wire-cap span { margin-inline-start: 0.5rem; color: var(--hp-ink-3); }
+        {{-- On a phone there are no wires to carry the direction, so each caption carries its mark. --}}
+        .hp-wire-cap svg { display: inline-block; width: 1.05rem; height: 1.05rem; margin-inline-end: 0.5rem; vertical-align: -0.22em; color: var(--hp-blue); }
+        [dir="rtl"] #hp .hp-wire-cap svg { transform: scaleX(-1); }
+        @media (max-width: 639px) {
+            .hp-wire { gap: 0; }
+            .hp-wire-side { position: relative; padding-top: 1.75rem; }
+            .hp-wire-side::before { content: ""; position: absolute; top: 0; inset-inline-start: 0.48rem; height: 1.4rem; border-inline-start: 2px solid rgba(78, 129, 250, 0.5); }
+            .hp-plug { gap: 0.55rem; padding: 0.6rem 0.7rem; font-size: 0.9rem; }
+            .hp-plug-logo { width: 1.7rem; height: 1.7rem; }
+        }
+        .hp-plugs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
         .hp-plug {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            height: 100%;
-            min-height: clamp(7rem, 11vw, 9.5rem);
-            padding: 1.1rem 0.6rem;
+            gap: 0.7rem;
+            min-height: 4rem;
+            padding: 0.7rem 1rem;
             border: 1px solid var(--hp-line);
-            border-radius: 1.25rem;
+            border-radius: 1rem;
             background: var(--hp-bg);
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 700;
             line-height: 1.25;
-            text-align: center;
             color: var(--hp-ink-2);
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
         }
         .dark .hp-plug { background: var(--hp-bg-2); }
-        .hp-plug:hover { transform: translateY(-3px); border-color: var(--hp-blue); box-shadow: var(--hp-card-shadow); color: var(--hp-ink); }
-        .hp-plug-logo { width: clamp(2.25rem, 3.4vw, 3rem); height: clamp(2.25rem, 3.4vw, 3rem); }
+        .hp-plug:hover { transform: translateY(-2px); border-color: var(--hp-blue); box-shadow: var(--hp-card-shadow); color: var(--hp-ink); }
+        .hp-plug-logo { flex: none; width: 2rem; height: 2rem; }
+        .hp-hub { order: -1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: clamp(1.5rem, 3vw, 2.5rem) 1.25rem; border-radius: 1.5rem; background: radial-gradient(18rem 12rem at 50% -20%, rgba(78, 129, 250, 0.6), transparent 70%), #0a1020; color: #eef2ff; box-shadow: 0 0 0 1px rgba(125, 165, 255, 0.25), 0 30px 60px -28px rgba(47, 102, 234, 0.8); text-align: center; }
+        .hp-hub .hp-avatar { width: 3.4rem; height: 3.4rem; margin-bottom: 0.5rem; border-radius: 1.05rem; font-size: 1.45rem; box-shadow: 0 0 34px rgba(34, 211, 238, 0.55); }
+        .hp-hub strong { max-width: 100%; font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1.2; overflow-wrap: anywhere; }
+        {{-- The address breaks before its dot or not at all, never at a hyphen inside the name. --}}
+        .hp-hub-url { max-width: 100%; overflow: hidden; font-family: var(--hp-mono); font-size: 0.68rem; line-height: 1.45; color: #9fb1d6; }
+        .hp-hub-url [data-cast] { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+        .hp-hub-row { display: flex; align-items: center; gap: 0.6rem; width: 100%; max-width: 15rem; margin-top: 0.95rem; padding: 0.5rem 0.6rem; border: 1px solid rgba(125, 165, 255, 0.26); border-radius: 0.85rem; background: rgba(255, 255, 255, 0.06); text-align: start; }
+        .hp-hub-row .hp-tile { width: 2.5rem; height: 2.6rem; background: rgba(125, 165, 255, 0.2); }
+        .hp-hub-row .hp-tile b { color: #a9c3ff; }
+        .hp-hub-row .hp-tile i { font-size: 1.05rem; }
+        .hp-hub-row > span:last-child { min-width: 0; }
+        .hp-hub-row > span:last-child b { display: block; overflow: hidden; font-size: 0.88rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+        .hp-hub-row > span:last-child i { display: block; font-style: normal; font-size: 0.72rem; color: #9fb1d6; }
+        .hp-wire-mark { display: none; }
+        @media (min-width: 640px) {
+            .hp-wire { --lead: clamp(1.1rem, 2.4vw, 1.9rem); grid-template-columns: minmax(0, 1fr) minmax(12.5rem, 0.95fr) minmax(0, 1fr); align-items: center; column-gap: calc(var(--lead) * 2); }
+            .hp-wire-side { position: relative; }
+            .hp-wire-cap { position: absolute; bottom: calc(100% + 0.2rem); inset-inline: 0 auto; margin: 0; white-space: nowrap; }
+            .hp-wire-cap svg { display: none; }
+            {{-- Hung from the far edge, so a caption longer than its column grows toward the middle. --}}
+            .hp-wire-side.is-out .hp-wire-cap { inset-inline: auto 0; text-align: end; }
+            .hp-plugs { position: relative; grid-template-columns: minmax(0, 1fr); }
+            .hp-plugs li { position: relative; }
+            .hp-hub { order: 0; position: relative; }
+            {{-- A lead from each plug to the rail, the rail, and the rail's own lead to the schedule. --}}
+            .hp-plugs li::after { content: ""; position: absolute; top: 50%; width: var(--lead); border-top: 2px solid rgba(78, 129, 250, 0.5); }
+            .hp-wire-side.is-in .hp-plugs li::after { inset-inline-start: 100%; }
+            .hp-wire-side.is-out .hp-plugs li::after { inset-inline-end: 100%; }
+            .hp-plugs::after { content: ""; position: absolute; top: 2rem; bottom: 2rem; border-inline-start: 2px solid rgba(78, 129, 250, 0.5); }
+            .hp-wire-side.is-in .hp-plugs::after { inset-inline-start: calc(100% + var(--lead) - 2px); }
+            .hp-wire-side.is-out .hp-plugs::after { inset-inline-end: calc(100% + var(--lead)); }
+            .hp-hub::before,
+            .hp-hub::after { content: ""; position: absolute; top: 50%; width: var(--lead); height: 2px; background: linear-gradient(90deg, #4e81fa, #22d3ee); }
+            .hp-hub::before { inset-inline-end: 100%; }
+            .hp-hub::after { inset-inline-start: 100%; }
+            {{-- Which way each wire carries: both ways on the calendars' side, one way on the money's. --}}
+            .hp-wire-mark { position: absolute; top: 50%; z-index: 1; display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border: 2px solid #4e81fa; border-radius: 999px; background: var(--hp-bg-2); color: var(--hp-blue); transform: translateY(-50%); }
+            .dark .hp-wire-mark { background: var(--hp-bg-3); }
+            .hp-wire-mark svg { width: 0.95rem; height: 0.95rem; }
+            .hp-wire-mark.is-in { inset-inline-end: calc(100% + var(--lead) / 2 - 0.85rem); }
+            .hp-wire-mark.is-out { inset-inline-start: calc(100% + var(--lead) / 2 - 0.85rem); border-color: #22d3ee; }
+            [dir="rtl"] #hp .hp-wire-mark.is-out svg { transform: scaleX(-1); }
+        }
+        @media (min-width: 640px) and (max-width: 1179px) {
+            {{-- Three columns in little room: smaller plugs, and a caption on two lines. --}}
+            .hp-plug { gap: 0.5rem; min-height: 3.5rem; padding: 0.55rem 0.65rem; font-size: 0.82rem; }
+            .hp-plug-logo { width: 1.6rem; height: 1.6rem; }
+            .hp-wire-cap span { display: block; margin-inline-start: 0; }
+            .hp-wire { grid-template-columns: minmax(0, 1fr) minmax(11rem, 0.9fr) minmax(0, 1fr); }
+        }
 
         {{-- ---------------------------------------------------------------
            9. Questions
@@ -2056,6 +2422,7 @@
                 animation: none !important;
             }
             .hp-mine { transition: none; }
+            #hp .hp-calc [data-fee-bar] { transition: none; }
             .hp-mine-phone .hp-mine.is-named { animation: none; }
             #hp .es-wall-card img { transition: none; }
             .hp-btn,
@@ -2125,6 +2492,7 @@
             'link' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />',
             'qr' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z" />',
             'code' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />',
+            'swap' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />',
         ];
         $hpArrow = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">' . $hpIcon['arrow'] . '</svg>';
         $hpCheck = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">' . $hpIcon['check'] . '</svg>';
@@ -2163,6 +2531,7 @@
         // A ticket's price in the dollar calculator, which is in dollars on every install (see
         // the component's header), not one of our own prices: those go through plan_price().
         $hpShowPriceText = '$'.$hpShowPrice;
+        $hpShowGrossText = '$'.number_format($hpShowTickets * $hpShowPrice);
         $hpFeePlatforms = ['eventschedule', 'eventbrite', 'luma', 'ticketleap'];
 
         $hpCasts = [
@@ -2505,7 +2874,7 @@
                     <div class="es-frame-glow" aria-hidden="true"></div>
                 </div>
             <div class="hp-stage-cap">
-                <h2 class="hp-h2" data-reveal>See it in <span class="hp-ink-grad">action</span></h2>
+                <h2 class="hp-h2" data-reveal>See it in action</h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.1s;">From first event to sold-out show, in one short tour.</p>
             </div>
         </div>
@@ -2611,11 +2980,11 @@
     <!-- 3. Plan, promote, sell: one show in three acts               -->
     <!-- ============================================================ -->
     <section id="features" class="hp-sec">
-        <div class="hp-wrap">
+        <div class="hp-wrap hp-meet">
             <div class="hp-head">
                 <span class="hp-kicker" data-reveal>One show, start to finish</span>
                 <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything you need to <span class="hp-ink-grad">fill seats</span>
+                    Everything you need to fill seats
                 </h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
                     One platform for scheduling, ticketing, newsletters, and check-ins.
@@ -2629,6 +2998,40 @@
                     <button type="button" data-cast-pick="{{ $hpCastKey }}" aria-pressed="{{ $hpCastKey === 'jazz' ? 'true' : 'false' }}">{{ $hpCast['label'] }}</button>
                 @endforeach
             </div>
+            {{-- The show the three acts are about, introduced before the first of them and
+                 standing beside the switch, so a press changes something that is on screen.
+                 Until 2026-10 the first thing a press changed was two screens further down.
+                 Its words are divs and spans on purpose: the acts count their own headings. --}}
+            <div class="hp-show" data-reveal="panel" data-cast-stage aria-hidden="true">
+                <div class="hp-show-in">
+                <div class="hp-poster">
+                    <img src="{{ asset('images/demo/demo_flyer_jazz.webp') }}" alt="" width="800" height="600" loading="lazy" decoding="async" data-cast-img>
+                    <div class="hp-poster-top"><span data-cast="tag">Live</span><span>{{ $wkSat->format('D j M') }}</span></div>
+                    <div class="hp-poster-type">
+                        <small><span data-cast="venue">The Blue Note</span> presents</small>
+                        <strong><span data-cast="line1">Jazz</span><br><span data-cast="line2">Night</span></strong>
+                        <span><span data-cast="verb">Doors</span> <span data-cast="time">8:00 PM</span> · {{ $hpShowPriceText }}</span>
+                    </div>
+                </div>
+                <div class="hp-stub">
+                    <div class="hp-stub-head">
+                        <small>Event Schedule</small>
+                        <strong data-cast="event">Jazz Night</strong>
+                        <span data-cast="tagline">Live jazz, five nights a week</span>
+                    </div>
+                    <div class="hp-stub-body">
+                        <span class="hp-stub-rows">
+                            <span><i>Where</i><b data-cast="venue">The Blue Note</b></span>
+                            <span><i>When</i><b>{{ $wkSat->format('D, M j') }}</b></span>
+                            <span><i data-cast="verb">Doors</i><b data-cast="time">8:00 PM</b></span>
+                            <span><i>Tickets</i><b>{{ $hpShowTickets }} at {{ $hpShowPriceText }}</b></span>
+                        </span>
+                        <span class="hp-stub-foot"><span>GA x1</span><span>#0042</span></span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <p class="hp-meet-note" data-reveal style="--reveal-delay: 0.3s;">The three acts below follow this one show, from its poster to its door.</p>
         </div>
 
         <!-- Act one of three: plan -->
@@ -2655,7 +3058,7 @@
 
                         <article id="how-it-works" class="hp-beat">
                             <div class="hp-beat-copy">
-                                <h4 class="hp-h3"><span class="hp-kicker">Create your schedule<span class="sr-only">: </span></span>Paste a poster. <span class="hp-ink-grad">Get an event.</span></h4>
+                                <h4 class="hp-h3"><span class="hp-kicker">Create your schedule<span class="sr-only">: </span></span>Paste a poster. <span class="hp-soft">Get an event.</span></h4>
                                 <p>Sign up free, then fill it however suits you: type an event in, connect a calendar, or paste a poster and let the AI read the details off it.</p>
                                 <p class="hp-fine">Set up in under 2 minutes.</p>
                                 <div class="hp-blurbs">
@@ -2680,11 +3083,13 @@
                             <div class="hp-objwrap"><div class="hp-obj hp-obj-ai es-ai-replay" data-reveal="panel" aria-hidden="true">
                                 <div class="hp-poster">
                                     <img src="{{ asset('images/demo/demo_flyer_jazz.webp') }}" alt="" width="800" height="600" loading="lazy" decoding="async" data-cast-img>
-                                    <div class="hp-poster-top"><span data-cast="tag">Live</span><span>{{ $wkSat->format('D j M') }}</span></div>
+                                    {{-- Three lines of the poster are marked as they are read, and each
+                                         mark's number stands on the field it became. --}}
+                                    <div class="hp-poster-top"><span data-cast="tag">Live</span><span class="hp-read" style="--i: 0;" data-n="1">{{ $wkSat->format('D j M') }}</span></div>
                                     <div class="hp-poster-type">
-                                        <small><span data-cast="venue">The Blue Note</span> presents</small>
+                                        <small class="hp-read" style="--i: 1;" data-n="2"><span data-cast="venue">The Blue Note</span> presents</small>
                                         <strong><span data-cast="line1">Jazz</span><br><span data-cast="line2">Night</span></strong>
-                                        <span><span data-cast="verb">Doors</span> <span data-cast="time">8:00 PM</span> · $25</span>
+                                        <span class="hp-read" style="--i: 2;" data-n="3"><span data-cast="verb">Doors</span> <span data-cast="time">8:00 PM</span> · $25</span>
                                     </div>
                                     <span class="hp-scan"></span>
                                 </div>
@@ -2702,15 +3107,18 @@
                                     <div class="hp-fields">
                                         <div class="es-ai-field hp-field" style="--i: 0;">
                                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['calendar'] !!}</svg>
-                                            <span>{{ $wkSat->format('D, M j') }} · <span data-cast="time">8:00 PM</span></span>
+                                            <span>{{ $wkSat->format('D, M j') }}</span>
+                                            <b class="hp-read-n">1</b>
                                         </div>
                                         <div class="es-ai-field hp-field" style="--i: 1;">
                                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['pin'] !!}</svg>
                                             <span data-cast="venue">The Blue Note</span>
+                                            <b class="hp-read-n">2</b>
                                         </div>
                                         <div class="es-ai-field hp-field" style="--i: 2;">
                                             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['ticket'] !!}</svg>
-                                            $25 a ticket
+                                            <span><span data-cast="verb">Doors</span> <span data-cast="time">8:00 PM</span> · $25</span>
+                                            <b class="hp-read-n">3</b>
                                         </div>
                                     </div>
                                     <div class="hp-synced">
@@ -2724,7 +3132,7 @@
 
                         <article id="appointments" class="hp-beat">
                             <div class="hp-beat-copy">
-                                <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-now"></i><i></i><i></i></span>Plan</span> Appointments<span class="sr-only">: </span></span>Take bookings. <span class="hp-ink-grad">Between shows.</span></h4>
+                                <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-now"></i><i></i><i></i></span>Plan</span> Appointments<span class="sr-only">: </span></span>Take bookings. <span class="hp-soft">Between shows.</span></h4>
                                 {{-- Not "get booked": that is the hero's payoff, and it was Calendly's own pitch
                                      besides. The claim here is bigger than a booking link, and it is the one
                                      thing no competitor in either category can make: the same calendar holds
@@ -2809,7 +3217,7 @@
 
                         <article id="share" class="hp-beat">
                             <div class="hp-beat-copy">
-                                <h4 class="hp-h3"><span class="hp-kicker">Share your link<span class="sr-only">: </span></span>One link. <span class="hp-ink-grad">Everywhere.</span></h4>
+                                <h4 class="hp-h3"><span class="hp-kicker">Share your link<span class="sr-only">: </span></span>One link. <span class="hp-soft">Everywhere.</span></h4>
                                 <p>You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.</p>
                                 <div class="hp-actions">
                                     <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Claim it free">Claim it free</span> {!! $hpArrow !!}</a>
@@ -2835,65 +3243,73 @@
                                 </div>
                             </div>
                             <div class="hp-objwrap"><div class="hp-obj hp-obj-share" data-reveal="panel" aria-hidden="true">
-                                <div class="hp-card hp-browser">
-                                    <div class="hp-browser-bar"><i></i><i></i><i></i><span class="hp-url"><span data-cast="slug">blue-note</span>{{ $claimSuffix }}</span></div>
-                                    <div class="hp-sched">
-                                        <div class="hp-sched-head">
-                                            <span class="hp-avatar" data-cast="initial">B</span>
-                                            <div>
-                                                <strong data-cast="venue">The Blue Note</strong>
-                                                <span data-cast="tagline">Live jazz, five nights a week</span>
-                                            </div>
-                                            <span class="hp-follow">Follow</span>
-                                        </div>
-                                        <div class="hp-rows">
-                                            <div class="hp-row">
-                                                <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
-                                                <div><strong data-cast="event">Jazz Night</strong><span><span data-cast="time">8:00 PM</span> · $25</span></div>
-                                                <span class="hp-pill hp-pill-green">Tickets</span>
-                                            </div>
-                                            <div class="hp-row">
-                                                <span class="hp-tile"><b>{{ $wkLater[0]->format('M') }}</b><i>{{ $wkLater[0]->format('j') }}</i></span>
-                                                <div><strong data-cast="next1">Open Mic</strong><span><span data-cast="next1time">7:30 PM</span> · Free</span></div>
-                                                <span class="hp-pill hp-pill-blue">RSVP</span>
-                                            </div>
-                                            <div class="hp-row">
-                                                <span class="hp-tile"><b>{{ $wkLater[1]->format('M') }}</b><i>{{ $wkLater[1]->format('j') }}</i></span>
-                                                <div><strong data-cast="next2">Blues & Brews</strong><span><span data-cast="next2time">9:00 PM</span> · $18</span></div>
-                                                <span class="hp-pill hp-pill-green">Tickets</span>
+                                {{-- The same schedule in the three places the sentence beside it names,
+                                     each with its name pinned to it: the calendar embedded in a site
+                                     of their own, the page behind the link in a bio, and a printed
+                                     poster with its code. --}}
+                                <div class="hp-out is-site">
+                                    <span class="hp-chip" style="--i: 2;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['code'] !!}</svg>Embed on your site</span>
+                                    <div class="hp-card hp-browser hp-site">
+                                        <div class="hp-browser-bar"><i></i><i></i><i></i><span class="hp-url">yourwebsite.com/events</span></div>
+                                        <div class="hp-site-nav"><b data-cast="venue">The Blue Note</b><span>Home</span><span>About</span><span class="is-on">Events</span><span>Contact</span></div>
+                                        <div class="hp-sched">
+                                            <div class="hp-rows">
+                                                <div class="hp-row">
+                                                    <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
+                                                    <div><strong data-cast="event">Jazz Night</strong><span><span data-cast="time">8:00 PM</span> · $25</span></div>
+                                                    <span class="hp-pill hp-pill-green">Tickets</span>
+                                                </div>
+                                                <div class="hp-row">
+                                                    <span class="hp-tile"><b>{{ $wkLater[0]->format('M') }}</b><i>{{ $wkLater[0]->format('j') }}</i></span>
+                                                    <div><strong data-cast="next1">Open Mic</strong><span><span data-cast="next1time">7:30 PM</span> · Free</span></div>
+                                                    <span class="hp-pill hp-pill-blue">RSVP</span>
+                                                </div>
+                                                <div class="hp-row">
+                                                    <span class="hp-tile"><b>{{ $wkLater[1]->format('M') }}</b><i>{{ $wkLater[1]->format('j') }}</i></span>
+                                                    <div><strong data-cast="next2">Blues & Brews</strong><span><span data-cast="next2time">9:00 PM</span> · $18</span></div>
+                                                    <span class="hp-pill hp-pill-green">Tickets</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="hp-outs">
+                                <div class="hp-out is-phone">
                                     <span class="hp-chip" style="--i: 0;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['link'] !!}</svg>Link in bio</span>
+                                    <div class="hp-phone">
+                                        <div class="hp-phone-screen">
+                                            <span class="hp-phone-bar"><span data-cast="slug">blue-note</span>{{ $claimSuffix }}</span>
+                                            <span class="hp-phone-who">
+                                                <span class="hp-avatar" data-cast="initial">B</span>
+                                                <b data-cast="venue">The Blue Note</b>
+                                                <span class="hp-follow">Follow</span>
+                                            </span>
+                                            <span class="hp-phone-row">
+                                                <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
+                                                <span><b data-cast="event">Jazz Night</b><i data-cast="time">8:00 PM</i></span>
+                                            </span>
+                                            <span class="hp-phone-row">
+                                                <span class="hp-tile"><b>{{ $wkLater[0]->format('M') }}</b><i>{{ $wkLater[0]->format('j') }}</i></span>
+                                                <span><b data-cast="next1">Open Mic</b><i data-cast="next1time">7:30 PM</i></span>
+                                            </span>
+                                            <span class="hp-phone-cta">Get tickets</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hp-out is-qr">
                                     <span class="hp-chip" style="--i: 1;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['qr'] !!}</svg>QR poster</span>
-                                    <span class="hp-chip" style="--i: 2;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['code'] !!}</svg>Embed on your site</span>
-                                    {{-- Kept under the 1,000-recipient Enterprise ceiling (Role::newsletterLimit):
-                                         the allowance counts recipients, so a send of 1,248 is not possible on
-                                         any plan. It is also the ONLY newsletter in the page's story: a second
-                                         one of 940 would be 1,880 in a month. --}}
-                                    <span class="hp-chip hp-mini" style="--i: 3;">
-                                        <span class="hp-mini-head"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['mail'] !!}</svg>This Week's Events</span>
-                                        <span class="hp-mini-body">
-                                            <span class="hp-mini-hero">Featured Event</span>
-                                            <span class="hp-mini-foot"><span class="hp-ok">{!! $hpCheck !!}</span>Sent to <span data-count-to="940">940</span> followers</span>
-                                        </span>
-                                    </span>
-                                    <span class="hp-chip hp-mini" style="--i: 4;">
-                                        <span class="hp-mini-head is-ad"><i></i><span><b data-cast="venue">The Blue Note</b><small>Sponsored</small></span></span>
-                                        <span class="hp-mini-body">
-                                            <span class="hp-mini-hero is-ad" data-cast="event">Jazz Night</span>
-                                            <span class="hp-mini-foot"><span class="hp-mini-cta">Learn More</span></span>
-                                        </span>
-                                    </span>
+                                    <div class="hp-qrp">
+                                        <span class="hp-qrp-top"><span data-cast="venue">The Blue Note</span></span>
+                                        <strong>Scan for<br>what's on</strong>
+                                        <svg viewBox="0 0 29 29" fill="currentColor"><path d="{{ $hpQr }}"/></svg>
+                                        <span class="hp-qrp-url"><span data-cast="slug">blue-note</span><wbr>{{ $claimSuffix }}</span>
+                                    </div>
                                 </div>
                             </div></div>
                         </article>
 
                         <article id="grow" class="hp-beat">
                             <div class="hp-beat-copy">
-                                <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-now"></i><i></i></span>Promote</span> Grow your audience<span class="sr-only">: </span></span>Keep them <span class="hp-ink-grad">coming back.</span></h4>
+                                <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-now"></i><i></i></span>Promote</span> Grow your audience<span class="sr-only">: </span></span>Keep them <span class="hp-soft">coming back.</span></h4>
                                 {{-- app:send-event-announcements, hourly on both rails: CONFIRMED
                                      role_subscribers get one digest per batch of newly published
                                      public events. Account followers are NOT included - they are
@@ -2911,36 +3327,46 @@
                                 </div>
                             </div>
                             <div class="hp-objwrap"><div class="hp-obj hp-obj-grow" data-reveal="panel" aria-hidden="true">
-                                <div class="hp-card hp-chart">
-                                    <div class="hp-chart-head">
-                                        <strong data-count-to="12,480">12,480</strong>
-                                        <span>page views this week</span>
-                                    </div>
-                                    <div class="hp-bars">
-                                        <div class="es-bar" style="height: 24%; --bd: 0.2s;"></div>
-                                        <div class="es-bar" style="height: 31%; --bd: 0.28s;"></div>
-                                        <div class="es-bar" style="height: 48%; --bd: 0.36s;"></div>
-                                        <div class="es-bar" style="height: 44%; --bd: 0.44s;"></div>
-                                        <div class="es-bar" style="height: 72%; --bd: 0.52s;"></div>
-                                        <div class="es-bar is-peak" style="height: 100%; --bd: 0.6s;"></div>
-                                        <div class="es-bar" style="height: 58%; --bd: 0.68s;"></div>
-                                    </div>
-                                    <div class="hp-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span class="is-peak">Sat</span><span>Sun</span></div>
+                                {{-- The digest, not a newsletter: app:send-event-announcements mails
+                                     confirmed subscribers by itself when new public events are
+                                     published, and does not draw on the newsletter allowance. Its
+                                     three dates are the three on the schedule above. --}}
+                                <div class="hp-card hp-mail">
+                                    <span class="hp-mail-head">
+                                        <span class="hp-avatar" data-cast="initial">B</span>
+                                        <span><b data-cast="venue">The Blue Note</b><i>to subscribers</i></span>
+                                    </span>
+                                    <strong class="hp-mail-subject">New dates announced</strong>
+                                    <span class="hp-mail-rows">
+                                        <span><span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span><span><b data-cast="event">Jazz Night</b><i data-cast="time">8:00 PM</i></span></span>
+                                        <span><span class="hp-tile"><b>{{ $wkLater[0]->format('M') }}</b><i>{{ $wkLater[0]->format('j') }}</i></span><span><b data-cast="next1">Open Mic</b><i data-cast="next1time">7:30 PM</i></span></span>
+                                        <span><span class="hp-tile"><b>{{ $wkLater[1]->format('M') }}</b><i>{{ $wkLater[1]->format('j') }}</i></span><span><b data-cast="next2">Blues & Brews</b><i data-cast="next2time">9:00 PM</i></span></span>
+                                    </span>
+                                    <span class="hp-pay">See the schedule</span>
+                                    <span class="hp-mail-foot"><span class="hp-ok">{!! $hpCheck !!}</span>Sent automatically</span>
                                 </div>
-                                <div class="hp-grow-row">
+                                <div class="hp-grow-side">
                                     <div class="hp-card hp-fans">
                                         <span class="hp-faces">
                                             <i style="background: #3b82f6;">M</i><i style="background: #0ea5e9;">J</i><i style="background: #06b6d4;">A</i><i style="background: #10b981;">S</i><i class="is-more">+936</i>
                                         </span>
-                                        <div><strong>940</strong><span>followers</span></div>
+                                        <div><strong data-count-to="940">940</strong><span>followers</span></div>
                                     </div>
-                                    <div class="hp-card hp-sent">
-                                        <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['mail'] !!}</svg></span>
-                                        {{-- The digest, not a second newsletter: app:send-event-announcements
-                                             mails confirmed subscribers by itself when new public events are
-                                             published, and does not draw on the newsletter allowance. --}}
-                                        <div><strong>New dates announced</strong><span>Digest sent automatically</span></div>
-                                        <span class="hp-ok">{!! $hpCheck !!}</span>
+                                    <div class="hp-card hp-chart">
+                                        <div class="hp-chart-head">
+                                            <strong data-count-to="12,480">12,480</strong>
+                                            <span>page views this week</span>
+                                        </div>
+                                        <div class="hp-bars">
+                                            <div class="es-bar" style="height: 24%; --bd: 0.2s;"></div>
+                                            <div class="es-bar" style="height: 31%; --bd: 0.28s;"></div>
+                                            <div class="es-bar" style="height: 48%; --bd: 0.36s;"></div>
+                                            <div class="es-bar" style="height: 44%; --bd: 0.44s;"></div>
+                                            <div class="es-bar" style="height: 72%; --bd: 0.52s;"></div>
+                                            <div class="es-bar is-peak" style="height: 100%; --bd: 0.6s;"></div>
+                                            <div class="es-bar" style="height: 58%; --bd: 0.68s;"></div>
+                                        </div>
+                                        <div class="hp-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span class="is-peak">Sat</span><span>Sun</span></div>
                                     </div>
                                 </div>
                             </div></div>
@@ -2968,6 +3394,9 @@
                     </div>
                 </div>
             </div>
+            {{-- The evening: tickets go on sale under a sky that darkens as it is read, and the
+                 night band below takes over where it ends. --}}
+            <div class="hp-eve">
             <div class="hp-wrap is-hung">
                 <div class="hp-run">
                     <div class="hp-step" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-done"></i><i class="is-now"></i></span><i>Sell</i><b>03 / 03</b></div>
@@ -2975,7 +3404,7 @@
 
                         <article id="tickets" class="hp-beat">
                             <div class="hp-beat-copy">
-                                <h4 class="hp-h3"><span class="hp-kicker">Ticketing<span class="sr-only">: </span></span>Tickets on sale. <span class="hp-ink-grad">No platform fees.</span></h4>
+                                <h4 class="hp-h3"><span class="hp-kicker">Ticketing<span class="sr-only">: </span></span>Tickets on sale. <span class="hp-soft">No platform fees.</span></h4>
                                 <p>Multiple ticket types, add-ons, promo codes and reserved seating. Switch on the "Notify me" card and, before tickets go on sale, visitors can ask to be told when they do.</p>
                                 <p class="hp-paid">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['lock'] !!}</svg>
@@ -3025,6 +3454,7 @@
 
                     </div>
                 </div>
+            </div>
             </div>
 
             <!-- The night of the show, the full width of the window -->
@@ -3131,7 +3561,7 @@
 
             <div id="fees" class="hp-keep" data-reveal>
                 <div class="hp-keep-head">
-                    <h3 class="hp-h3">Run the numbers on <span class="hp-ink-grad">your own show</span></h3>
+                    <h3 class="hp-h3">Run the numbers <span class="hp-soft">on your own show</span></h3>
                     {{-- The label is tied to the slider by id: an <output> inside a wrapping label
                          would take the label for itself and leave the slider with no name. The
                          figure beside it is for the eye; the slider says its own value. --}}
@@ -3149,7 +3579,25 @@
                 {{-- Three competitors whose rates were read off their own pricing pages (TicketFees
                      says which were and which were not): the default set carries one that could
                      not be re-checked, and this is the most visited page on the site. --}}
-                <x-marketing.fee-calculator :platforms="$hpFeePlatforms" :tickets="$hpShowTickets" :price="$hpShowPrice" id="hp-fee" class="hp-calc" />
+                {{-- The show's own takings, as the slip a till prints: plain arithmetic on the two
+                     sliders, and no claim of its own. What selling them costs is the
+                     calculator's, drawn here as one bar to a platform. --}}
+                <div class="hp-after">
+                    <div class="hp-slip-wrap">
+                        <div class="hp-slip">
+                            <span class="hp-slip-cap">The morning after</span>
+                            {{-- A space the eye never sees: without it the two run together when read out. --}}
+                            <strong class="hp-slip-name" data-fee-who><span data-cast="event">Jazz Night</span></strong>
+                            <span class="hp-slip-row"><i>Tickets sold</i> <b data-fee-n>{{ $hpShowTickets }}</b></span>
+                            <span class="hp-slip-row"><i>Ticket price</i> <b data-fee-p>{{ $hpShowPriceText }}</b></span>
+                            <span class="hp-slip-total"><i>Ticket sales</i> <b data-fee-gross>{{ $hpShowGrossText }}</b></span>
+                        </div>
+                    </div>
+                    <div class="hp-after-main">
+                        <p class="hp-after-cap">What selling them costs</p>
+                        <x-marketing.fee-calculator :platforms="$hpFeePlatforms" :tickets="$hpShowTickets" :price="$hpShowPrice" id="hp-fee" class="hp-calc" />
+                    </div>
+                </div>
             </div>
 
             <div class="hp-figs-links" data-reveal style="--reveal-delay: 0.2s;">
@@ -3330,7 +3778,7 @@
             <div class="hp-head is-center hp-discover-head">
                 <span class="hp-kicker" data-reveal>Discover</span>
                 <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
-                    Discover events across the <span class="hp-ink-grad">community</span>
+                    Discover events across the community
                 </h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
                     Upcoming events from across the community. Live music, fitness classes, comedy nights, community meetups, and more.
@@ -3384,13 +3832,19 @@
     <!-- 8. Integrations: the orbit                                   -->
     <!-- ============================================================ -->
     @php
+        // The same six names and links as ever, in the two groups the sentence beside them
+        // already speaks of: the calendars, and where the money goes.
         $hpPlugs = [
-            ['name' => 'google', 'label' => 'Google Calendar', 'href' => marketing_url('/google-calendar')],
-            ['name' => 'stripe', 'label' => 'Stripe', 'href' => marketing_url('/stripe')],
-            ['name' => 'invoiceninja', 'label' => 'Invoice Ninja', 'href' => marketing_url('/invoiceninja')],
-            ['name' => 'caldav', 'label' => 'CalDAV', 'href' => marketing_url('/caldav')],
-            ['name' => 'apple', 'label' => 'Apple Calendar', 'href' => marketing_url('/features/calendar-sync')],
-            ['name' => 'outlook', 'label' => 'Outlook', 'href' => marketing_url('/features/calendar-sync')],
+            'in' => [
+                ['name' => 'google', 'label' => 'Google Calendar', 'href' => marketing_url('/google-calendar')],
+                ['name' => 'outlook', 'label' => 'Outlook', 'href' => marketing_url('/features/calendar-sync')],
+                ['name' => 'apple', 'label' => 'Apple Calendar', 'href' => marketing_url('/features/calendar-sync')],
+                ['name' => 'caldav', 'label' => 'CalDAV', 'href' => marketing_url('/caldav')],
+            ],
+            'out' => [
+                ['name' => 'stripe', 'label' => 'Stripe', 'href' => marketing_url('/stripe')],
+                ['name' => 'invoiceninja', 'label' => 'Invoice Ninja', 'href' => marketing_url('/invoiceninja')],
+            ],
         ];
     @endphp
     <section id="integrations" class="hp-sec hp-alt">
@@ -3411,17 +3865,49 @@
                 </p>
             </div>
 
-            {{-- The six that used to circle in an orbit, standing still: same names, same links. --}}
-            <ul class="hp-plugs" data-reveal-group="60">
-                @foreach ($hpPlugs as $plug)
-                    <li data-reveal>
-                        <a href="{{ $plug['href'] }}" class="hp-plug">
-                            @include('marketing.partials.integration-logo', ['name' => $plug['name'], 'class' => 'hp-plug-logo'])
-                            <span>{{ $plug['label'] }}</span>
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
+            {{-- The six that used to circle in an orbit, and then stood in a row: same names, same
+                 links, now drawn as what each is plugged into. The schedule in the middle is the
+                 show's own (and the visitor's, once a name is typed). The two captions say only
+                 what the sentence beside them says. --}}
+            <div class="hp-wire" data-reveal="panel">
+                <div class="hp-wire-side is-in">
+                    <p class="hp-wire-cap" id="hp-wire-in"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['swap'] !!}</svg>Calendars <span>sync both ways</span></p>
+                    <ul class="hp-plugs" aria-labelledby="hp-wire-in">
+                        @foreach ($hpPlugs['in'] as $plug)
+                            <li>
+                                <a href="{{ $plug['href'] }}" class="hp-plug">
+                                    @include('marketing.partials.integration-logo', ['name' => $plug['name'], 'class' => 'hp-plug-logo'])
+                                    <span>{{ $plug['label'] }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="hp-hub" aria-hidden="true">
+                    <span class="hp-wire-mark is-in"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['swap'] !!}</svg></span>
+                    <span class="hp-avatar" data-cast="initial">B</span>
+                    <strong data-cast="venue">The Blue Note</strong>
+                    <span class="hp-hub-url"><span data-cast="slug">blue-note</span><wbr>{{ $claimSuffix }}</span>
+                    <span class="hp-hub-row">
+                        <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
+                        <span><b data-cast="event">Jazz Night</b><i data-cast="time">8:00 PM</i></span>
+                    </span>
+                    <span class="hp-wire-mark is-out"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['arrow'] !!}</svg></span>
+                </div>
+                <div class="hp-wire-side is-out">
+                    <p class="hp-wire-cap" id="hp-wire-out"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['arrow'] !!}</svg>Payments <span>straight to you</span></p>
+                    <ul class="hp-plugs" aria-labelledby="hp-wire-out">
+                        @foreach ($hpPlugs['out'] as $plug)
+                            <li>
+                                <a href="{{ $plug['href'] }}" class="hp-plug">
+                                    @include('marketing.partials.integration-logo', ['name' => $plug['name'], 'class' => 'hp-plug-logo'])
+                                    <span>{{ $plug['label'] }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -3468,7 +3954,7 @@
                 <div class="hp-head">
                     <span class="hp-kicker" data-reveal>Before you ask</span>
                     <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Frequently asked <span class="hp-ink-grad">questions</span>
+                        Frequently asked questions
                     </h2>
                     <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
                         Everything you need to know about sharing your events and selling tickets with Event Schedule.
@@ -3624,7 +4110,8 @@
             var castKey = 'jazz';
             var typed = '';
             var castEls = Array.prototype.slice.call(document.querySelectorAll('[data-cast]'));
-            var castImg = document.querySelector('[data-cast-img]');
+            var castImgs = Array.prototype.slice.call(document.querySelectorAll('[data-cast-img]'));
+            var castStage = document.querySelector('[data-cast-stage]');
             var castLabel = document.querySelector('[data-cast-label]');
             if (castLabel) {
                 castLabel.parentElement.setAttribute('data-ready', '');
@@ -3660,13 +4147,13 @@
                 if (castLabel) {
                     castLabel.textContent = typed ? 'See ' + title + ' as' : 'See it as';
                 }
-                if (castImg) {
+                castImgs.forEach(function (castImg) {
                     var plainPoster = !cast.img;
                     castImg.parentElement.classList.toggle('is-plain', plainPoster);
                     if (!plainPoster && castImg.getAttribute('src') !== cast.img) {
                         castImg.setAttribute('src', cast.img);
                     }
-                }
+                });
             };
             document.addEventListener('click', function (e) {
                 var pick = e.target && e.target.closest ? e.target.closest('[data-cast-pick]') : null;
@@ -3678,6 +4165,12 @@
                     other.setAttribute('aria-pressed', other === pick ? 'true' : 'false');
                 });
                 recast();
+                // The answer to the press, beside it: the show's poster is pasted up again.
+                if (castStage) {
+                    castStage.classList.remove('is-swap');
+                    void castStage.offsetWidth;
+                    castStage.classList.add('is-swap');
+                }
             });
             document.addEventListener('input', function (e) {
                 if (!e.target || !e.target.closest || !e.target.closest('.es-claim')) {
@@ -3714,6 +4207,28 @@
             if (calcStart) {
                 calcStart.setAttribute('data-claim-link', '');
             }
+            // The takings over the calculator: the two sliders multiplied, and nothing else.
+            var feeCount = document.querySelector('[data-fee-n]');
+            var feeEach = document.querySelector('[data-fee-p]');
+            var feeGross = document.querySelector('[data-fee-gross]');
+            var takings = function () {
+                var sold = document.querySelector('[data-fee-range="tickets"]');
+                var each = document.querySelector('[data-fee-range="price"]');
+                if (!sold || !each || !feeCount || !feeEach || !feeGross) {
+                    return;
+                }
+                var count = parseInt(sold.value, 10) || 0;
+                var price = parseInt(each.value, 10) || 0;
+                // Once a slider has been moved the numbers are no longer the jazz night's.
+                var who = document.querySelector('[data-fee-who]');
+                if (who && who.firstElementChild) {
+                    who.textContent = 'Your show';
+                }
+                var grouped = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+                feeCount.textContent = grouped(count);
+                feeEach.textContent = '$' + price;
+                feeGross.textContent = '$' + grouped(count * price);
+            };
             document.querySelectorAll('[data-fee-range]').forEach(function (range) {
                 var kind = range.getAttribute('data-fee-range');
                 var field = document.querySelector('.hp-calc [data-fee-input="' + kind + '"]');
@@ -3723,9 +4238,13 @@
                 }
                 // The sliders are shown only once they can do something.
                 range.closest('.hp-keep').setAttribute('data-fee-ready', '');
+                // A reload can hand the calculator's own field back a number the slider does not
+                // show; the two start on the same one.
+                field.value = range.value;
                 range.addEventListener('input', function () {
                     field.value = range.value;
                     field.dispatchEvent(new Event('input', { bubbles: true }));
+                    takings();
                     if (out) {
                         out.textContent = (kind === 'price' ? '$' : '') + range.value;
                     }

@@ -22,8 +22,7 @@
                         <div class="flex h-14 items-center rounded-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
                             <div
                                 data-reveal-date
-                                class="ms-2.5 flex flex-shrink-0 w-9 h-9 flex-col items-center justify-center rounded-md"
-                                :style="{ backgroundColor: accent, color: accentInk }"
+                                class="ms-2.5 flex flex-shrink-0 w-9 h-9 flex-col items-center justify-center rounded-md border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                             >
                                 <span class="text-[8px] font-bold uppercase leading-none">{{ card.month }}</span>
                                 <span class="mt-0.5 text-sm font-bold leading-none">{{ card.day }}</span>
@@ -33,7 +32,6 @@
                                     <h3
                                         v-if="card.name"
                                         class="truncate text-sm font-semibold leading-tight text-gray-900 dark:text-gray-100"
-                                        :style="{ fontFamily: fontStack }"
                                     >{{ card.name }}</h3>
                                     <h3 v-else class="h-2.5 w-28 rounded-full bg-gray-200 dark:bg-gray-700"></h3>
                                 </div>
@@ -96,15 +94,20 @@ import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 // The preview for the "Event animation" setting on the schedule edit page. It drives the SAME
 // attributes and stylesheet as the guest page (resources/css/list-reveal.css), with the owner's
-// own events, accent color and font, so what plays here is what their visitors will see.
+// own events, so what plays here is what their visitors will see.
+//
+// The cards are drawn as the page draws them: an event's name in the page's text face and its
+// date on a plain tile. They used to borrow the schedule's font and put the date on the accent,
+// which the page does for neither (the font is the schedule's NAME's), and the Style tab's
+// preview, standing beside this one, drew the same events differently. The accent is still what
+// the Curtain and Shine sweeps and a stand-in poster are made of.
 //
 // The radios themselves are server-rendered Blade (so posting, old() and validation work without
-// JS); this island listens to them, and to the accent color, font and default layout fields.
+// JS); this island listens to them, and to the accent color and default layout fields.
 
 const props = defineProps({
     saved: { type: String, default: 'none' },
     accentColor: { type: String, default: '#4E81FA' },
-    font: { type: String, default: '' },
     rtl: { type: Boolean, default: false },
     guestUrl: { type: String, default: '' },
     layout: { type: String, default: 'list' },
@@ -117,7 +120,6 @@ const stage = ref(null);
 const cardEls = ref([]);
 const selected = ref(props.saved);
 const accent = ref(props.accentColor || '#4E81FA');
-const font = ref(props.font);
 const layout = ref(props.layout);
 const switchedToList = ref(false);
 
@@ -141,18 +143,6 @@ const cards = computed(() => {
 });
 
 const stageAnimation = computed(() => (motionOk.value && selected.value !== 'none') ? selected.value : null);
-
-const fontStack = computed(() => font.value ? `'${font.value.replace(/_/g, ' ')}', sans-serif` : null);
-
-// Readable ink on the accent color: the same YIQ threshold the guest page uses.
-const accentInk = computed(() => {
-    const hex = (accent.value || '').replace('#', '');
-    if (hex.length !== 6) return '#FFFFFF';
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    return ((r * 299) + (g * 587) + (b * 114)) / 1000 >= 128 ? '#111827' : '#FFFFFF';
-});
 
 const supportsColorMix = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('color', 'color-mix(in srgb, red 50%, blue)');
 
@@ -253,8 +243,6 @@ function onChange(e) {
     } else if (t.name === 'event_layout' && t.checked) {
         layout.value = t.value;
         if (t.value !== 'list') switchedToList.value = false;
-    } else if (t.id === 'font_family') {
-        font.value = t.value;
     }
 }
 
@@ -294,8 +282,6 @@ onMounted(() => {
     if (accentInput && /^#[0-9A-Fa-f]{6}$/.test(accentInput.value)) accent.value = accentInput.value;
     const layoutInput = document.querySelector('input[name="event_layout"]:checked');
     if (layoutInput) layout.value = layoutInput.value;
-    const fontInput = document.getElementById('font_family');
-    if (fontInput && fontInput.value) font.value = fontInput.value;
 
     syncPreviewLink();
 

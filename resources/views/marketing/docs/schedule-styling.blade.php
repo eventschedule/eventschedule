@@ -5,16 +5,16 @@
     lede="Customize your schedule's visual appearance with colors, fonts, backgrounds, and more. Most changes show in a live preview before you save."
 >
     <x-slot:toc>
-        {{-- The Style section's own order: its first screen, its three rows, then what surrounds the form. --}}
+        {{-- The Style section's own order: its first screen, its four rows (Header, Background, Events, Custom CSS), then what surrounds the form. --}}
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
         <x-doc-nav-link href="#profile-image">Profile Image</x-doc-nav-link>
         <x-doc-nav-link href="#color-scheme">Accent Color</x-doc-nav-link>
         <x-doc-nav-link href="#typography">Font Family</x-doc-nav-link>
-        <x-doc-nav-link href="#list-animation">Event Animation</x-doc-nav-link>
-        <x-doc-nav-link href="#backgrounds">Background</x-doc-nav-link>
         <x-doc-nav-link href="#header-style">Header Style</x-doc-nav-link>
         <x-doc-nav-link href="#header-images">Header Image</x-doc-nav-link>
+        <x-doc-nav-link href="#backgrounds">Background</x-doc-nav-link>
         <x-doc-nav-link href="#event-layout">Default Layout</x-doc-nav-link>
+        <x-doc-nav-link href="#list-animation">Event Animation</x-doc-nav-link>
         <x-doc-nav-link href="#custom-css">Custom CSS</x-doc-nav-link>
         <x-doc-nav-link href="#hiding-sections">Hiding Sections</x-doc-nav-link>
         <x-doc-nav-link href="#live-preview">Live Preview</x-doc-nav-link>
@@ -36,13 +36,13 @@
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Choose the schedule in the sidebar and click <strong class="text-gray-900 dark:text-white">Edit Schedule</strong> at the top of its page.</li>
             <li>Choose <strong class="text-gray-900 dark:text-white">Style</strong> in the section list on the left (or from the accordion on mobile).</li>
-            <li>Set the branding at the top, then open the rows under it, watching the preview beside the form.</li>
+            <li>Set the branding at the top, then open the rows under it. The <a href="#live-preview" class="doc-link">preview</a> stays on screen while you do.</li>
             <li>Click <strong class="text-gray-900 dark:text-white">Save</strong>, in the bar at the bottom of the page. Nothing is applied to your public page until you do.</li>
         </ol>
 
-        <x-doc-screenshot id="schedule-styling--section-style" alt="The Style section of the schedule form: Square Profile Image, Accent Color and Font Family, with the AI Generator button in the title row and the Preview panel beside them" loading="eager" />
+        <x-doc-screenshot id="schedule-styling--section-style" alt="The Style section of the schedule form: Square Profile Image, Accent Color and Font Family, the Header, Background, Events and Custom CSS rows under them, and the Preview of the page beside them" loading="eager" />
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The Style section opens on its branding fields, with three rows under them that open in place. Each row says its current choice, so most never need opening. This page follows the same order:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The Style section opens on its branding fields, with four rows under them that open in place. Each row says its current choice, so most never need opening. The rows follow your page from top to bottom, and this guide follows the rows:</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -57,16 +57,20 @@
                         <td><a href="#profile-image" class="doc-link">Square Profile Image</a>, <a href="#color-scheme" class="doc-link">Accent Color</a>, <a href="#typography" class="doc-link">Font Family</a></td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Event animation</span></td>
-                        <td><a href="#list-animation" class="doc-link">How event cards arrive</a> as visitors scroll your schedule</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Header</span></td>
+                        <td><a href="#header-style" class="doc-link">Header Style</a> and <a href="#header-images" class="doc-link">Header Image</a></td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Background</span></td>
                         <td><a href="#backgrounds" class="doc-link">Background Type</a> (Gradient, Solid or Image) and the controls for whichever you pick: gradient colors and rotation, a solid color, or a background image</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Header and layout</span></td>
-                        <td><a href="#header-style" class="doc-link">Header Style</a>, <a href="#header-images" class="doc-link">Header Image</a>, <a href="#event-layout" class="doc-link">Default Layout</a>, <a href="#custom-css" class="doc-link">Custom CSS</a></td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Events</span></td>
+                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, and <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Custom CSS</span></td>
+                        <td><a href="#custom-css" class="doc-link">Your own CSS</a>, on Pro</td>
                     </tr>
                 </tbody>
             </table>
@@ -103,7 +107,7 @@
         </div>
         <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Best practices</div>
-            <p>Use a <strong class="text-gray-900 dark:text-white">square image</strong> (1:1 aspect ratio). Recommended minimum size is 400x400 pixels. PNG and JPG are accepted, and uploads must be under 2.5 MB. Use the small red cross on the thumbnail to remove an image you have already saved.</p>
+            <p>Use a <strong class="text-gray-900 dark:text-white">square image</strong> (1:1 aspect ratio). Recommended minimum size is 400x400 pixels. PNG and JPG are accepted, and uploads must be under 2.5 MB. Click the tile, or <strong class="text-gray-900 dark:text-white">Change</strong> beside it, to pick another image at any time. <strong class="text-gray-900 dark:text-white">Remove</strong> takes away one you have just picked, or deletes a saved one at once after asking.</p>
         </div>
 
         <h3 class="doc-subheading">It becomes your favicon too <x-doc-badge plan="pro" /></h3>
@@ -118,7 +122,7 @@
             </svg>
             Accent Color
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">One <strong class="text-gray-900 dark:text-white">Accent Color</strong> picker at the top of the Style section drives every highlighted element on your public pages. New schedules start on a standard blue.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">One <strong class="text-gray-900 dark:text-white">Accent Color</strong> at the top of the Style section drives every highlighted element on your public pages. Click the square to open your system's color picker, type a hex code into the box beside it (three or six digits, with or without the #), or start from one of the ten colors under it. New schedules start on a standard blue.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Where it appears</h3>
@@ -126,7 +130,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Text on top of it is calculated</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Event Schedule measures the brightness of your accent color and puts black text on light accents and white text on dark ones, so a button label stays readable whatever you choose. There is nothing to set.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Event Schedule measures the brightness of your accent color and puts black text on light accents and white text on dark ones, so a button label stays readable whatever you choose. Two kinds of accent are adjusted on a button, because as they are they would not read as one: a grey becomes near-black on the light page and near-white on the dark one, and a very dark color is lifted on the dark page. The preview shows the color your visitors get. There is nothing to set.</p>
             </div>
         </div>
         <div class="doc-callout doc-callout-tip">
@@ -143,20 +147,153 @@
             </svg>
             Font Family
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Font Family</strong> dropdown at the top of the Style section offers more than 230 Google Fonts. It sets the typeface your schedule's name is written in: in the header of your schedule page, and on the cards that name you on event pages. The rest of the page keeps the standard font.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Font Family</strong> field at the top of the Style section offers more than 230 Google Fonts. It sets the typeface your schedule's name is written in: in the header of your schedule page, and on the cards that name you on event pages. The rest of the page keeps the standard font.</p>
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Finding a font</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The dropdown is searchable, so you can type a name you already know. The arrows beside it step to the previous or next font alphabetically, which is the quickest way to browse.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The field shows your schedule's name in the font you have chosen. Click it to open the list, where every row is your schedule's name in that font, so you compare the fonts themselves and not their names. Type in the search box to find one you already know, or press the Up and Down arrow keys to step from one font to the next with the preview following.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Live sample</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your schedule's own name is rendered in the chosen font directly under the dropdown, and the preview panel updates too, so you can judge readability on your real text before saving.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">It is your schedule's own name that is drawn, in the field, in the list and in the preview, so you can judge readability on your real text before saving. A schedule in Hebrew, Arabic or Russian is offered only the fonts that have its letters.</p>
             </div>
         </div>
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Event graphics use their own font</div>
             <p>This setting styles web pages. <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event graphics</a> are drawn as images on the server with a bundled Noto Sans family (including Hebrew and Arabic variants), so changing your font here will not change them.</p>
+        </div>
+    </section>
+
+    <!-- Header Style -->
+    <section id="header-style" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v2.25m-18 0h18" />
+            </svg>
+            Header Style
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how the header appears at the top of your public schedule page under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Header &rarr; Header Style</strong>. Schedules use <strong class="text-gray-900 dark:text-white">Banner</strong> unless you change it, and the live preview updates as you switch between the two.</p>
+
+        <x-doc-screenshot id="schedule-styling--header-layout" alt="The Header row of the Style section, open: Header Style with Banner chosen, and under it the Header Image choices and a wall of ready-made pictures" />
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Banner</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A large header carrying your header image, a prominent logo, the schedule name, description and social links. The most spacious option, and the only one that can show a header image or a logo wall.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Compact</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A slim full-width bar at the top of the page with a small logo and the schedule name on one side, and the action cluster on the other: follow, submit and manage buttons, the filter button, and the calendar or list toggle. Your description and social or contact links move to a strip just beneath the bar.</p>
+            </div>
+        </div>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Header image and Compact</div>
+            <p>The header image applies to the <strong class="text-gray-900 dark:text-white">Banner</strong> style only. Compact draws no header image at all, but nothing is lost: the description and social links appear in the strip below the bar, and the picture you chose is kept for when you switch back. If a schedule was set to the old <strong class="text-gray-900 dark:text-white">Minimal</strong> style, it now reads as Compact, which is the same slim row under a clearer name.</p>
+        </div>
+    </section>
+
+    <!-- Header Image -->
+    <section id="header-images" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+            Header Image
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Header Image</strong> field, under Header Style in the Header row, sets the picture at the top of your schedule page. Four choices come first, each on a tile of its own, and the ready-made pictures follow as a wall of thumbnails:</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">None</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The default. A cleaner look with no header image, so your profile image and name take centre stage.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accent color gradient</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">No picture, but a soft wash of your <a href="#color-scheme" class="doc-link">accent color</a> across the top of the header, fading out behind your name.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue logo wall (or Talent logo wall)</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A grid of logos instead of a picture. On a talent or curator schedule the option is called <strong class="text-gray-900 dark:text-white">Venue logo wall</strong> and shows the venues hosting your approved events; on a venue schedule it is called <strong class="text-gray-900 dark:text-white">Talent logo wall</strong> and shows the talent performing at them. Each logo links to that schedule's page, and you can drag the list under the pictures to set the order. Only connected schedules that have a profile image appear, so the wall stays empty until at least one does, and the edit page warns you when that is the case.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Upload Image</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your own header. Click the tile to choose a file. Once a picture is there the tile shows it and reads <strong class="text-gray-900 dark:text-white">Custom</strong>, with <strong class="text-gray-900 dark:text-white">Change</strong> and <strong class="text-gray-900 dark:text-white">Remove</strong> under the tiles. Use a wide image, around 1200x400 pixels or a similar aspect ratio. PNG or JPG, under 2.5 MB. It is also the picture a shared link to your schedule shows, ahead of your profile image.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">31 preset headers</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made headers shown as thumbnails, including 5am Club, Arena, Fitness Morning, Music Potential, Networking and Bagels, Ready to Dance, The Stage Awaits and Yoga and Wellness. Click one to choose it: its name appears under the wall and the preview shows it at once. The first two lines are on the page and <strong class="text-gray-900 dark:text-white">Show All</strong> opens the rest, and the arrow keys step from one picture to the next.</p>
+            </div>
+        </div>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Needs the Banner header style</div>
+            <p>Header images and the logo wall are drawn by the <strong class="text-gray-900 dark:text-white">Banner</strong> <a href="#header-style" class="doc-link">header style</a> only, so the pictures are on the form only while Banner is chosen. Switch to Compact and they give way to a line that says so, with your choice kept for when you switch back.</p>
+        </div>
+    </section>
+
+    <!-- Background -->
+    <section id="backgrounds" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+            </svg>
+            Background
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Background</strong> row starts with a <strong class="text-gray-900 dark:text-white">Background Type</strong> choice of Gradient, Solid or Image. Picking one shows its own controls and puts the others away. The row's line names your choice beside a small swatch of it, so you can see it with the row closed.</p>
+
+        <h3 class="doc-subheading">Gradient</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every gradient is a swatch under <strong class="text-gray-900 dark:text-white">Colors</strong>: click one and the preview takes it. The first swatch, marked with a plus, is <strong class="text-gray-900 dark:text-white">Custom</strong>, for two colors of your own.</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Preset gradients</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Over 380 gradients from uiGradients, laid out in the order of the rainbow with the greys last, so you look for a color and not for a name such as Omolon or Purple Dream. The dots above the swatches jump to a color, the name of the one under your pointer is shown under them, and the arrow keys step from one to the next so you can watch the preview change.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom two-color gradient</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Choosing Custom shows two colors, each with a color picker and a hex box, so you can match your brand colors exactly. The Custom swatch itself shows the result.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Rotation</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A slider from 0 to 360 degrees sets the gradient angle, so you can make it vertical, horizontal, diagonal or anything between. It applies to preset and custom gradients alike.</p>
+            </div>
+        </div>
+
+        <h3 class="doc-subheading">Solid</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A single <strong class="text-gray-900 dark:text-white">Background Color</strong>. Click the square for your system's color picker, type a hex code such as <code class="doc-inline-code">#1a1a2e</code> into the box beside it, or start from one of the ten quiet colors under it.</p>
+
+        <h3 class="doc-subheading">Image</h3>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">37 preset backgrounds</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made backgrounds shown as thumbnails, including Abstract Sunrise, Bookshelf, Desert Retreat, Flower Field, Greyscale, River of Dreams and Stormy Night. Click one to choose it. The first two lines are on the page and <strong class="text-gray-900 dark:text-white">Show All</strong> opens the rest.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom upload</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Click <strong class="text-gray-900 dark:text-white">Upload Image</strong>, above the thumbnails, to use your own. Once a picture is there the tile shows it, with <strong class="text-gray-900 dark:text-white">Change</strong> and <strong class="text-gray-900 dark:text-white">Remove</strong> under it. PNG or JPG, under 2.5 MB. Dark, low-contrast images work best, because your event cards and text sit on top of them.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Default Layout -->
+    <section id="event-layout" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+            Default Layout
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how your events are displayed on your schedule page, under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Events &rarr; Default Layout</strong>. Two layouts exist:</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Calendar</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Events laid out on a month grid, one cell per day, loaded one month at a time. Best when the shape of the month matters, such as a venue with something on most nights. A day shows its first three events, more where its week has room, and the rest behind <strong class="text-gray-900 dark:text-white">+N more</strong>, which opens the whole day; a day with one event shows its picture. Pointing at an event, or a first tap on a touch screen, opens a card beside the day with its date, time, place and price, the way to its tickets or sign-up, and, on your own page, Add to Calendar and share. The arrow keys move between events and days, and Page Up and Page Down change the month.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Events in date order as full-width cards, loaded well beyond the current month. Best when each event deserves its own space, or when they are spread thinly across the year.</p>
+            </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A new schedule starts on <strong class="text-gray-900 dark:text-white">List</strong>. Either way this is only the default: visitors can switch between the two with the layout toggle in the header, and their choice is remembered in their own browser for that schedule. It never changes what anyone else sees, and it does not change your setting. On a phone, events are always shown as a list.</p>
+        <div class="doc-callout doc-callout-tip">
+            <div class="doc-callout-title">Per-embed override</div>
+            <p>Embeds ignore the visitor's saved preference, so the site doing the embedding stays in control. An embed can also override your default with <code class="doc-inline-code">?layout=calendar</code> or <code class="doc-inline-code">?layout=list</code>, so one page can carry the same schedule twice in both layouts. See <a href="{{ route('marketing.docs.sharing') }}#embed-parameters" class="doc-link">Embed URL Parameters</a>.</p>
         </div>
     </section>
 
@@ -168,7 +305,7 @@
             </svg>
             Event Animation
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Event animation</strong> row of the Style section, the first one under the branding fields, brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Event animation</strong> setting, under Default Layout in the <strong class="text-gray-900 dark:text-white">Events</strong> row of the Style section, brings your events to life as visitors scroll your schedule: each event card animates into place as it comes into view, then its details follow one after another: the title, the date (which flips down like a tear-off calendar page), the venue, the price and the performers. The first screen plays as an entrance when someone opens your link. It is off (<strong class="text-gray-900 dark:text-white">None</strong>) until you pick a style, and it is available on every plan.</p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -215,7 +352,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Preview before you save</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The preview above the styles plays your choice on your own events, in your accent color and font, and updates as you change them. Use <strong>Replay</strong> to watch it again, or <strong>See it on your schedule</strong> to open your real page with the style you picked, even before saving.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The stage above the styles plays your choice on your own events, drawn as your page draws them, with the sweeps of Shine and Curtain in your accent color. Use <strong>Replay</strong> to watch it again, or <strong>See it on your schedule</strong> to open your real page with the style you picked, even before saving.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Phones and computers</h4>
@@ -229,139 +366,6 @@
         </div>
     </section>
 
-    <!-- Background -->
-    <section id="backgrounds" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
-            </svg>
-            Background
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Background</strong> row starts with a <strong class="text-gray-900 dark:text-white">Background Type</strong> choice of Gradient, Solid or Image. Picking one reveals its own controls and hides the others.</p>
-
-        <h3 class="doc-subheading">Gradient</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Pick a preset from the searchable <strong class="text-gray-900 dark:text-white">Colors</strong> dropdown, or choose <strong class="text-gray-900 dark:text-white">Custom</strong> at the top of it to mix your own.</p>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Preset gradients</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Over 380 named gradients from uiGradients, listed alphabetically: Cosmic Fusion, Emerald Water, Netflix, Omolon, Purple Dream, Sunset and many more. The arrows beside the dropdown step through them so you can watch the preview change.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom two-color gradient</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Choosing Custom reveals two color pickers and a swatch of the result, so you can match your brand colors exactly.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Rotation</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A slider from 0 to 360 degrees sets the gradient angle, so you can make it vertical, horizontal, diagonal or anything between. It applies to preset and custom gradients alike.</p>
-            </div>
-        </div>
-
-        <h3 class="doc-subheading">Solid</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A single <strong class="text-gray-900 dark:text-white">Background Color</strong> picker. Use your operating system's color picker or type a six-digit hex code such as <code class="doc-inline-code">#1a1a2e</code>.</p>
-
-        <h3 class="doc-subheading">Image</h3>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">37 preset backgrounds</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made backgrounds listed alphabetically, including Abstract Sunrise, Bookshelf, Desert Retreat, Flower Field, Greyscale, River of Dreams and Stormy Night. Selecting one shows a thumbnail below the dropdown.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom upload</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Choose <strong class="text-gray-900 dark:text-white">Custom</strong> at the top of the dropdown to upload your own. PNG or JPG, under 2.5 MB. Dark, low-contrast images work best, because your event cards and text sit on top of them.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Header Style -->
-    <section id="header-style" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v2.25m-18 0h18" />
-            </svg>
-            Header Style
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how the header appears at the top of your public schedule page under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Header and layout &rarr; Header Style</strong>. Schedules use <strong class="text-gray-900 dark:text-white">Banner</strong> unless you change it, and the live preview updates as you switch between the two.</p>
-
-        <x-doc-screenshot id="schedule-styling--header-layout" alt="The Header and layout row of the Style section, open: Header Style with Banner chosen, Header Image, Default Layout and Custom CSS" />
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Banner</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A large header carrying your header image, a prominent logo, the schedule name, description and social links. The most spacious option, and the only one that can show a header image or a logo wall.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Compact</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A slim full-width bar at the top of the page with a small logo and the schedule name on one side, and the action cluster on the other: follow, submit and manage buttons, the filter button, and the calendar or list toggle. Your description and social or contact links move to a strip just beneath the bar.</p>
-            </div>
-        </div>
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Header image and Compact</div>
-            <p>The header image applies to the <strong class="text-gray-900 dark:text-white">Banner</strong> style only. Compact draws no header image at all, but nothing is lost: the description and social links appear in the strip below the bar. If a schedule was set to the old <strong class="text-gray-900 dark:text-white">Minimal</strong> style, it now reads as Compact, which is the same slim row under a clearer name.</p>
-        </div>
-    </section>
-
-    <!-- Header Image -->
-    <section id="header-images" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-            Header Image
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Header Image</strong> dropdown, under Header Style in the Header and layout row, creates the visual banner at the top of your schedule page. It offers five kinds of option, in this order:</p>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">None</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The default. A cleaner look with no header image, so your profile image and name take centre stage.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accent color gradient</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">No picture, but a soft wash of your <a href="#color-scheme" class="doc-link">accent color</a> across the top of the header, fading out behind your name.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue logo wall (or Talent logo wall)</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A grid of logos instead of a picture. On a talent or curator schedule the option is called <strong class="text-gray-900 dark:text-white">Venue logo wall</strong> and shows the venues hosting your approved events; on a venue schedule it is called <strong class="text-gray-900 dark:text-white">Talent logo wall</strong> and shows the talent performing at them. Each logo links to that schedule's page, and you can drag the list under the dropdown to set the order. Only connected schedules that have a profile image appear, so the wall stays empty until at least one does, and the edit page warns you when that is the case.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Custom</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Upload your own header. Use a wide image, around 1200x400 pixels or a similar aspect ratio. PNG or JPG, under 2.5 MB. It is also the picture a shared link to your schedule shows, ahead of your profile image.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">31 preset headers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ready-made headers listed alphabetically, including 5am Club, Arena, Fitness Morning, Music Potential, Networking and Bagels, Ready to Dance, The Stage Awaits and Yoga and Wellness. Use the arrows beside the dropdown to flick through them with the preview open.</p>
-            </div>
-        </div>
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Needs the Banner header style</div>
-            <p>Header images and the logo wall are drawn by the <strong class="text-gray-900 dark:text-white">Banner</strong> <a href="#header-style" class="doc-link">header style</a> only, so the <strong class="text-gray-900 dark:text-white">Header Image</strong> field is on the form only while Banner is chosen. Switch to Compact and the field is put away, with your choice kept for when you switch back.</p>
-        </div>
-    </section>
-
-    <!-- Default Layout -->
-    <section id="event-layout" class="doc-section">
-        <h2 class="doc-heading">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-            </svg>
-            Default Layout
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how your events are displayed on your schedule page, under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Header and layout &rarr; Default Layout</strong>. Two layouts exist:</p>
-        <div class="doc-fields">
-            <div class="doc-field">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Calendar</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Events laid out on a month grid, one cell per day, loaded one month at a time. Best when the shape of the month matters, such as a venue with something on most nights. A day shows its first three events, more where its week has room, and the rest behind <strong class="text-gray-900 dark:text-white">+N more</strong>, which opens the whole day; a day with one event shows its picture. Pointing at an event, or a first tap on a touch screen, opens a card beside the day with its date, time, place and price, the way to its tickets or sign-up, and, on your own page, Add to Calendar and share. The arrow keys move between events and days, and Page Up and Page Down change the month.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Events in date order as full-width cards, loaded well beyond the current month. Best when each event deserves its own space, or when they are spread thinly across the year.</p>
-            </div>
-        </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A new schedule starts on <strong class="text-gray-900 dark:text-white">List</strong>. Either way this is only the default: visitors can switch between the two with the layout toggle in the header, and their choice is remembered in their own browser for that schedule. It never changes what anyone else sees, and it does not change your setting. On a phone, events are always shown as a list.</p>
-        <div class="doc-callout doc-callout-tip">
-            <div class="doc-callout-title">Per-embed override</div>
-            <p>Embeds ignore the visitor's saved preference, so the site doing the embedding stays in control. An embed can also override your default with <code class="doc-inline-code">?layout=calendar</code> or <code class="doc-inline-code">?layout=list</code>, so one page can carry the same schedule twice in both layouts. See <a href="{{ route('marketing.docs.sharing') }}#embed-parameters" class="doc-link">Embed URL Parameters</a>.</p>
-        </div>
-    </section>
-
     <!-- Custom CSS -->
     <section id="custom-css" class="doc-section">
         <h2 class="doc-heading">
@@ -372,9 +376,9 @@
         </h2>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Pro feature</div>
-            <p><x-doc-badge plan="pro" /> The Custom CSS box is editable on <strong class="text-gray-900 dark:text-white">Pro</strong> and <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and on <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs, which count as Enterprise. Below Pro the box is shown read-only: CSS you saved earlier is kept, not deleted, but it is not applied to your pages until the schedule is back on Pro, when it also becomes editable again.</p>
+            <p><x-doc-badge plan="pro" /> The Custom CSS box is editable on <strong class="text-gray-900 dark:text-white">Pro</strong> and <strong class="text-gray-900 dark:text-white">Enterprise</strong>, and on <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> installs, which count as Enterprise. Below Pro the row carries a Pro badge and the box is shown read-only: CSS you saved earlier is kept, not deleted, but it is not applied to your pages until the schedule is back on Pro, when it also becomes editable again.</p>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">When the built-in controls do not reach far enough, write your own CSS under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Header and layout &rarr; Custom CSS</strong>, the last field of that row. It is added to every public page drawn in your schedule's own style: your schedule page, event pages, embeds, and the pages visitors reach from them such as booking, event requests and gift cards. Ticket, order and installment payment pages use the app's standard layout, so your CSS does not reach them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">When the built-in controls do not reach far enough, write your own CSS under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Custom CSS</strong>, the last row of the Style section. The row shows the first line of what you have written, so you can tell with it closed that some is set. It is added to every public page drawn in your schedule's own style: your schedule page, event pages, embeds, and the pages visitors reach from them such as booking, event requests and gift cards. Ticket, order and installment payment pages use the app's standard layout, so your CSS does not reach them.</p>
         <ul class="doc-list mb-6">
             <li>Override any of the built-in styles for complete control</li>
             <li>Fine-tune spacing, borders, radii and shadows</li>
@@ -395,7 +399,7 @@
             </svg>
             Hiding Sections <x-doc-badge plan="pro" />
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Every panel on your schedule page and on your event pages carries a stable <code class="doc-inline-code">id</code> that starts with <code class="doc-inline-code">gp-</code>. To remove one from the public page, add a <code class="doc-inline-code">display: none</code> rule for that id in <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Header and layout &rarr; Custom CSS</strong>. Nothing else has to change, and you can put back what you hid by deleting the line.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Every panel on your schedule page and on your event pages carries a stable <code class="doc-inline-code">id</code> that starts with <code class="doc-inline-code">gp-</code>. To remove one from the public page, add a <code class="doc-inline-code">display: none</code> rule for that id in <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Style &rarr; Custom CSS</strong>. Nothing else has to change, and you can put back what you hid by deleting the line.</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -531,11 +535,21 @@
             </svg>
             Live Preview
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Preview</strong> panel sits beside the Style form on wide screens and below it on narrow ones. It stays visible whichever row is open and redraws as you change the header style, images, background, accent color and font, so you can experiment freely without publishing anything half-finished.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Preview</strong> of your page stands beside the Style form and stays in place as you scroll, so it is still there with a row open. It draws your header, then your next events (or their month, in the Calendar layout) on your background, in your accent color and font, and redraws as you change any of them, so you can experiment freely without publishing anything half-finished.</p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">On a narrower screen</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a laptop with the sidebar open, a tablet or a phone, the preview is a strip pinned under the Style heading. It shows the part you are changing: your header, your background while the Background row is open, or your event cards while the Events row is open. The arrow beside it opens the whole preview.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Light and dark</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your visitors get the light or the dark version of your page according to their own device. The sun and moon buttons above the preview switch it between the two, and leave the theme of your own admin alone.</p>
+            </div>
+        </div>
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Save when you are happy</div>
-            <p>The preview is only a preview. Click <strong class="text-gray-900 dark:text-white">Save</strong> in the bar at the bottom of the page to apply your changes, then open your schedule page in a new tab to see the real thing, including any custom CSS, which the preview panel does not render.</p>
+            <p>The preview is only a preview. Click <strong class="text-gray-900 dark:text-white">Save</strong> in the bar at the bottom of the page to apply your changes, then use <strong class="text-gray-900 dark:text-white">View Schedule</strong> under the preview to open the real page in a new tab, including any custom CSS, which the preview does not draw. While changes are waiting, <strong class="text-gray-900 dark:text-white">Not saved yet</strong> stands beside that link, because the real page still shows what was last saved.</p>
         </div>
     </section>
 
@@ -626,27 +640,27 @@
             "step": [
                 {
                     "@type": "HowToStep",
-                    "name": "Choose Event Layout",
-                    "text": "Set the default layout for your schedule page: the month calendar grid, or a list of full-width event cards.",
-                    "url": "{{ url(route('marketing.docs.schedule_styling')) }}#event-layout"
-                },
-                {
-                    "@type": "HowToStep",
                     "name": "Upload Profile and Header Images",
                     "text": "Upload a square profile image and choose a header from 31 presets, upload a custom header, display a logo wall of your venues, or use no header.",
                     "url": "{{ url(route('marketing.docs.schedule_styling')) }}#profile-image"
                 },
                 {
                     "@type": "HowToStep",
+                    "name": "Choose Typography",
+                    "text": "Pick from more than 230 Google Fonts in a list that shows your schedule's name in each one.",
+                    "url": "{{ url(route('marketing.docs.schedule_styling')) }}#typography"
+                },
+                {
+                    "@type": "HowToStep",
                     "name": "Set Background and Colors",
-                    "text": "Choose a gradient from over 380 presets, a solid color, or a background image. Set your accent color for buttons and links.",
+                    "text": "Choose a gradient by its swatch from over 380 presets, a solid color, or a background image. Set your accent color for buttons and links.",
                     "url": "{{ url(route('marketing.docs.schedule_styling')) }}#backgrounds"
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Choose Typography",
-                    "text": "Select from more than 230 Google Fonts using the searchable dropdown, with a live sample of your schedule name.",
-                    "url": "{{ url(route('marketing.docs.schedule_styling')) }}#typography"
+                    "name": "Choose Event Layout",
+                    "text": "Set the default layout for your schedule page: the month calendar grid, or a list of full-width event cards.",
+                    "url": "{{ url(route('marketing.docs.schedule_styling')) }}#event-layout"
                 }
             ]
         }

@@ -642,7 +642,7 @@ return [
     'notify_group_followers' => 'Письма подписчикам',
     'notify_group_shared' => 'Общий ящик',
     'address_is_public' => 'Этот адрес виден всем: он показывается на странице расписания и в ваших событиях.',
-    'style_row_header_layout' => 'Заголовок и макет',
+    'style_row_header' => 'Заголовок',
     'integration_row_feeds' => 'Текст для календаря и ленты',
     'language_and_time' => 'Язык и время',
     'show_announcement_bar' => 'Показывать полосу объявлений',

@@ -512,7 +512,7 @@ return [
     'notify_group_followers' => 'رسائل البريد المرسلة إلى المتابعين',
     'notify_group_shared' => 'صندوق بريد مشترك',
     'address_is_public' => 'هذا العنوان عام: يظهر في صفحة جدولك وفي فعالياتك.',
-    'style_row_header_layout' => 'الترويسة والتخطيط',
+    'style_row_header' => 'الترويسة',
     'integration_row_feeds' => 'نص التقويم والخلاصات',
     'language_and_time' => 'اللغة والوقت',
     'show_announcement_bar' => 'إظهار شريط الإعلانات',

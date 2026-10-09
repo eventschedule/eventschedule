@@ -27,6 +27,7 @@ export default defineConfig({
                 'resources/js/newsletter-builder.js',
                 'resources/js/color-picker.js',
                 'resources/js/list-animation-picker.js',
+                'resources/js/style-studio.js',
                 'resources/js/seating-designer.js',
                 'resources/js/seating-picker.js',
                 'resources/js/seating-box-office.js',

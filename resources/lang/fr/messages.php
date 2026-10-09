@@ -624,7 +624,7 @@ return [
     'notify_group_followers' => 'E-mails aux abonnés',
     'notify_group_shared' => 'Boîte partagée',
     'address_is_public' => 'Cette adresse est publique : elle s\'affiche sur la page de votre planning et sur vos événements.',
-    'style_row_header_layout' => 'En-tête et disposition',
+    'style_row_header' => 'En-tête',
     'integration_row_feeds' => 'Texte du calendrier et flux',
     'language_and_time' => 'Langue et heure',
     'show_announcement_bar' => 'Afficher une barre d\'annonce',

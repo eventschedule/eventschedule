@@ -237,6 +237,10 @@ class MarketingTicketingTierTest extends TestCase
                 // so a tier claim can live here and never be seen by a views-only scan.
                 lang_path('en/messages.php'),
                 config_path('marketing_related.php'),
+                // The audience blurbs and the /use-cases samples: copy that pages print but
+                // that no views/ glob sees.
+                config_path('marketing_audiences.php'),
+                config_path('marketing_directory.php'),
                 // The RENDERED comparison and replacement data. The controller builds these
                 // sentences by concatenating plan_price() into the middle of them, so a claim is
                 // never a contiguous string in the source and a source-only scan cannot see it.

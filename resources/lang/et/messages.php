@@ -641,7 +641,7 @@ return [
     'notify_group_followers' => 'Kirjad jälgijatele',
     'notify_group_shared' => 'Ühine postkast',
     'address_is_public' => 'See aadress on avalik: seda näidatakse sinu ajakava lehel ja sinu sündmuste juures.',
-    'style_row_header_layout' => 'Päis ja paigutus',
+    'style_row_header' => 'Päis',
     'integration_row_feeds' => 'Kalendri tekst ja vood',
     'language_and_time' => 'Keel ja aeg',
     'show_announcement_bar' => 'Näita teateriba',

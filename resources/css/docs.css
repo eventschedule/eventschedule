@@ -258,6 +258,21 @@
     display: none !important;
 }
 
+/* The search marks what matched. docs.js writes the mark with utility classes,
+   but Tailwind does not read resources/js, so none of them was ever generated
+   and a match showed as the browser's own yellow on black. */
+[data-docs-search] mark {
+    padding: 0;
+    border-radius: 0.2rem;
+    background: rgba(78, 129, 250, 0.24);
+    color: inherit;
+}
+
+/* The guide a result belongs to. Its utility classes (gray-400, gray-500 in
+   dark) come to 2.5:1 and 3:1 on the results panel at 12px. */
+[data-docs-search] [role="option"] .truncate { color: #56617c; }
+.dark [data-docs-search] [role="option"] .truncate { color: #97a3c0; }
+
 /* The grid fades out before the content starts, so the hero band and the
    shell below meet without a hard seam. */
 .doc-hero-grid {

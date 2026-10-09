@@ -10,7 +10,7 @@
  * the prev/next chain.
  *
  * Consumed by App\Utils\DocsUtils, <x-docs-page>, the docs left rail, the
- * /docs index grid and the docs search index.
+ * /docs index (its line-up and stage) and the docs search index.
  *
  * IMPORTANT: this file is var_export()ed by `php artisan config:cache`.
  * Scalars and arrays only - never call route(), url() or __() here. Store
@@ -34,6 +34,9 @@
  *   blurb     - one line, used on the index cards and in search results
  *   icon      - key into resources/views/components/docs/icon.blade.php
  *   cluster   - index-page grouping (User Guide only)
+ *   shot      - User Guide only: the picture the /docs home shows beside this guide's name, a
+ *               file name under public/images/docs (the guide's own screenshots, light and
+ *               dark). shot_alt says what it shows.
  *   hub       - true when the page is also its group's landing page
  *   layout    - 'standard' (default) or 'reference' (wide, code-rail)
  *   plan      - optional 'pro' | 'enterprise', renders a badge in the hero
@@ -108,14 +111,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | The /docs index groups the User Guide into task-shaped clusters that
-    | mirror the admin portal's structure.
-    |
-    | 'cols' is how many cards sit in a row at the widest breakpoint; the grid
-    | spans themselves live in components/docs/card-grid.blade.php. Keep it that
-    | way: Tailwind's content globs cover resources/views/** but NOT config/, so
-    | a raw class string here is invisible to the JIT and silently never gets
-    | generated. Only 3 and 4 are supported, because both fill complete rows at
-    | every breakpoint with no filler tiles.
+    | mirror the admin portal's structure: the five acts its line-up is set
+    | under. 'accent' is the act's colour there (blue, sky, cyan, teal or
+    | emerald; the colours themselves are in the page's stylesheet).
     |
     */
 
@@ -124,32 +122,56 @@ return [
             'title' => 'Set up',
             'blurb' => 'Create an account, a schedule, and make it yours.',
             'accent' => 'blue',
-            'cols' => 3,
         ],
         'events' => [
             'title' => 'Events',
             'blurb' => 'Add events by hand, from text, or from a photo.',
             'accent' => 'sky',
-            'cols' => 3,
         ],
         'sell' => [
             'title' => 'Sell',
             'blurb' => 'Take money for tickets, passes and bookings.',
             'accent' => 'cyan',
-            'cols' => 5,
         ],
         'promote' => [
             'title' => 'Promote',
             'blurb' => 'Get your events in front of an audience.',
             'accent' => 'teal',
-            'cols' => 4,
         ],
         'manage' => [
             'title' => 'Manage',
             'blurb' => 'Run the day to day and see how it is going.',
             'accent' => 'emerald',
-            'cols' => 4,
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Screenshots that are not a whole screen of the admin portal
+    |--------------------------------------------------------------------------
+    |
+    | The /docs home shows the guides' screenshots with the admin portal's
+    | sidebar and top bar cut away. A picture named here is framed otherwise:
+    | 'page' is a page a visitor sees, which has neither and is shown at its
+    | full width; 'dialog' is a dialog open over the app, and is shown alone.
+    |
+    | 'empty_shots' are pictures of a screen with nothing on it yet. The
+    | guides need them (an empty state is what a new organizer sees); the
+    | home page passes them over.
+    |
+    */
+
+    'shot_frames' => [
+        'sharing--guest-portal' => 'page',
+        'allocated-seating--picker' => 'page',
+        'appointments--booking-page' => 'page',
+        'sharing--embed-dialog' => 'dialog',
+    ],
+
+    'empty_shots' => [
+        'getting-started--dashboard',
+        'managing-schedules--videos-tab',
+        'fan-content--videos-tab',
     ],
 
     /*
@@ -170,8 +192,10 @@ return [
             'title' => 'Getting Started',
             'blurb' => 'Create your account and set up your first schedule.',
             'icon' => 'bolt',
+            'shot' => 'creating-events--schedule-tab',
+            'shot_alt' => 'A schedule in the admin panel, on a month of events',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-09',
         ],
 
         'creating-schedules' => [
@@ -182,8 +206,10 @@ return [
             'title' => 'Creating Schedules',
             'blurb' => 'Configure details, settings, sub-schedules, auto import, and integrations.',
             'icon' => 'cog',
+            'shot' => 'creating-schedules--section-details',
+            'shot_alt' => 'The schedule form, open on its Details tab',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-09',
         ],
 
         'schedule-styling' => [
@@ -195,8 +221,10 @@ return [
             'title' => 'Schedule Styling',
             'blurb' => 'Customize colors, fonts, and branding for your schedule.',
             'icon' => 'swatch',
+            'shot' => 'schedule-styling--section-style',
+            'shot_alt' => 'The Style tab, with its live preview',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-09',
         ],
 
         'creating-events' => [
@@ -207,6 +235,8 @@ return [
             'title' => 'Creating Events',
             'blurb' => 'Add events and configure event settings.',
             'icon' => 'plus',
+            'shot' => 'creating-events--add-event',
+            'shot_alt' => 'The Add Event form',
             'published' => '2024-01-01',
             'modified' => '2026-10-08',
         ],
@@ -220,6 +250,8 @@ return [
             'title' => 'AI Import',
             'blurb' => 'Import events from a link, text, images, a Google calendar or Eventbrite.',
             'icon' => 'sparkles',
+            'shot' => 'creating-events--import',
+            'shot_alt' => 'The Import Events page',
             'published' => '2024-01-01',
             'modified' => '2026-10-08',
         ],
@@ -233,6 +265,8 @@ return [
             'title' => 'Scan Agenda',
             'blurb' => 'Use AI to scan a photo of a printed agenda and automatically create event parts.',
             'icon' => 'camera',
+            'shot' => 'scan-agenda--page',
+            'shot_alt' => 'The Scan Agenda page',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -246,6 +280,8 @@ return [
             'title' => 'Selling Tickets',
             'blurb' => 'Set up ticketing and manage sales.',
             'icon' => 'ticket',
+            'shot' => 'tickets--sales',
+            'shot_alt' => 'The Sales page, listing orders',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -260,6 +296,8 @@ return [
             'nav_title' => 'Subscriptions & Passes',
             'blurb' => 'Sell one pass a guest reuses across many events.',
             'icon' => 'pass',
+            'shot' => 'creating-events--tickets-tab',
+            'shot_alt' => 'The Tickets tab of an event, where a ticket type becomes a pass',
             'published' => '2026-06-11',
             'modified' => '2026-10-07',
         ],
@@ -272,7 +310,9 @@ return [
             'feature' => 'marketing.allocated_seating',
             'title' => 'Allocated Seating',
             'blurb' => 'Sell reserved seats from a plan of your venue.',
-            'icon' => 'ticket',
+            'icon' => 'seats',
+            'shot' => 'allocated-seating--designer',
+            'shot_alt' => 'The seating plan designer',
             'published' => '2026-08-23',
             'modified' => '2026-10-07',
         ],
@@ -286,6 +326,8 @@ return [
             'title' => 'Gift Cards',
             'blurb' => 'Sell prepaid gift cards buyers send to someone else.',
             'icon' => 'gift',
+            'shot' => 'gift-cards--settings',
+            'shot_alt' => 'The Gift Cards tab of a schedule',
             'published' => '2026-07-16',
             'modified' => '2026-10-07',
         ],
@@ -299,6 +341,8 @@ return [
             'title' => 'Appointments',
             'blurb' => 'Let guests book a time with you on a public page.',
             'icon' => 'clock',
+            'shot' => 'appointments--types',
+            'shot_alt' => 'The Appointments tab, listing appointment types',
             'published' => '2026-07-26',
             'modified' => '2026-10-07',
         ],
@@ -313,6 +357,8 @@ return [
             'nav_title' => 'Sharing',
             'blurb' => 'Embed, share on social, and grow followers.',
             'icon' => 'share',
+            'shot' => 'sharing--embed-dialog',
+            'shot_alt' => 'The Embed Schedule dialog',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -326,6 +372,8 @@ return [
             'title' => 'Event Graphics',
             'blurb' => 'Generate shareable images for social media.',
             'icon' => 'image',
+            'shot' => 'event-graphics--graphic-page',
+            'shot_alt' => 'The Events Graphic page',
             'published' => '2024-01-01',
             'modified' => '2026-10-08',
         ],
@@ -339,6 +387,8 @@ return [
             'title' => 'Newsletters',
             'blurb' => 'Send branded emails to your audience.',
             'icon' => 'mail',
+            'shot' => 'newsletters--create',
+            'shot_alt' => 'The newsletter builder',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -352,6 +402,8 @@ return [
             'title' => 'Boost',
             'blurb' => 'Promote events with automated Facebook and Instagram ads.',
             'icon' => 'megaphone',
+            'shot' => 'boost--page',
+            'shot_alt' => 'The Boost Event page',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -365,6 +417,8 @@ return [
             'title' => 'Managing Schedules',
             'blurb' => 'Manage events, team, availability, requests, and more.',
             'icon' => 'clipboard',
+            'shot' => 'managing-schedules--requests-tab',
+            'shot_alt' => 'The Requests tab, with an event waiting for an answer',
             'published' => '2024-01-01',
             'modified' => '2026-10-08',
         ],
@@ -378,6 +432,8 @@ return [
             'title' => 'Analytics',
             'blurb' => 'Track views, devices, traffic sources, and conversions.',
             'icon' => 'chart',
+            'shot' => 'analytics--dashboard',
+            'shot_alt' => 'The Analytics page',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -390,6 +446,8 @@ return [
             'title' => 'Account Settings',
             'blurb' => 'Manage your profile, payments, and API access.',
             'icon' => 'account',
+            'shot' => 'account-settings--settings',
+            'shot_alt' => 'The Settings page',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],
@@ -402,6 +460,8 @@ return [
             'title' => 'Referral Program',
             'blurb' => 'Earn free months by referring other organizers.',
             'icon' => 'referral',
+            'shot' => 'referral-link',
+            'shot_alt' => 'The Referral Program page',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',
         ],

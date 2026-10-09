@@ -11,9 +11,10 @@
  * Each entry: url, name, blurb, tags[], icon (raw SVG path markup, rendered
  * inside <x-marketing.audience-card>'s 24x24 stroke icon).
  *
- * Note: /use-cases still holds its own inline copies. As each page is rebuilt it
- * should be pointed here instead. The venue blurbs below are the rewritten,
- * venue-voiced set from the /for-venues rebuild, which is the canonical wording.
+ * /use-cases reads all four keys. What only that page adds to an audience (the
+ * schedule type its sign-up link carries, the words its search answers to, the
+ * sample it draws, and for nine venues the sentence it has always printed in
+ * place of the venue-voiced one below) is in config/marketing_directory.php.
  */
 
 return [
@@ -255,4 +256,16 @@ return [
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zm4-6h2m2 0h2m-6 3h2" />',
         ],
     ],
+
+    // The six kinds of event that happen on a screen. Listed on /use-cases only (there is no
+    // hub page for them), and kept here so every audience the directory prints is in one file.
+    'online' => [
+        ['url' => '/for-webinars', 'name' => 'Webinars', 'blurb' => 'Host webinars with free registration, paid tickets, and one link field for any platform.', 'tags' => ['Product Demos', 'Training Sessions', 'Workshops', 'Panel Discussions', 'All-Hands', 'Lectures'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
+        ['url' => '/for-online-classes', 'name' => 'Online Classes', 'blurb' => 'Schedule recurring classes, sell tickets, and put the join link on every student\'s ticket.', 'tags' => ['Yoga & Fitness', 'Cooking Classes', 'Art & Music Lessons', 'Language Courses', 'Coding Bootcamps', 'Tutoring'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />'],
+        ['url' => '/for-virtual-conferences', 'name' => 'Virtual Conferences', 'blurb' => 'Run multi-day programs with an agenda on each event and as many ticket types as you need.', 'tags' => ['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />'],
+        ['url' => '/for-live-qa-sessions', 'name' => 'Live Q&A Sessions', 'blurb' => 'Schedule live Q&A sessions with registration, ticketing, and streaming links.', 'tags' => ['AMAs', 'Town Halls', 'Expert Panels', 'Fireside Chats', 'Community Q&As', 'Office Hours'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />'],
+        ['url' => '/for-watch-parties', 'name' => 'Watch Parties', 'blurb' => 'Schedule screenings with registration and tickets, and one link field for any platform.', 'tags' => ['Premiere Screenings', 'Movie Nights', 'Sports Watch Parties', 'Series Finales', 'Documentary Screenings', 'Gaming Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />'],
+        ['url' => '/for-live-concerts', 'name' => 'Live Concerts', 'blurb' => 'List a hybrid show once, with the room and the join link on one event, and email fans directly.', 'tags' => ['Acoustic Sets', 'Rock Shows', 'Jazz Nights', 'Festival Streams', 'Album Release Shows', 'DJ Sets'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />'],
+    ],
+
 ];

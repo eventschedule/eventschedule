@@ -432,12 +432,13 @@
             </svg>
             Style
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Style</strong> section decides how your public pages look, with a preview beside the form. It has a guide of its own, <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. In the section's order:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">Style</strong> section decides how your public pages look, with a preview of your page that stays on screen while you work. It has a guide of its own, <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. In the section's order:</p>
         <ul class="doc-list">
             <li><strong class="text-gray-900 dark:text-white">On the page as it opens</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#profile-image" class="doc-link">Square Profile Image</a>, <a href="{{ route('marketing.docs.schedule_styling') }}#color-scheme" class="doc-link">Accent Color</a> and <a href="{{ route('marketing.docs.schedule_styling') }}#typography" class="doc-link">Font Family</a></li>
-            <li><strong class="text-gray-900 dark:text-white">Event animation</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll</li>
+            <li><strong class="text-gray-900 dark:text-white">Header</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#header-style" class="doc-link">Header Style</a> and <a href="{{ route('marketing.docs.schedule_styling') }}#header-images" class="doc-link">Header Image</a></li>
             <li><strong class="text-gray-900 dark:text-white">Background</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#backgrounds" class="doc-link">a gradient, a solid color or an image</a></li>
-            <li><strong class="text-gray-900 dark:text-white">Header and layout</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#header-style" class="doc-link">Header Style</a>, <a href="{{ route('marketing.docs.schedule_styling') }}#header-images" class="doc-link">Header Image</a>, <a href="{{ route('marketing.docs.schedule_styling') }}#event-layout" class="doc-link">Default Layout</a> and <a href="{{ route('marketing.docs.schedule_styling') }}#custom-css" class="doc-link">Custom CSS</a> <x-doc-badge plan="pro" /></li>
+            <li><strong class="text-gray-900 dark:text-white">Events</strong> - <a href="{{ route('marketing.docs.schedule_styling') }}#event-layout" class="doc-link">Default Layout</a>, and <a href="{{ route('marketing.docs.schedule_styling') }}#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll</li>
+            <li><strong class="text-gray-900 dark:text-white">Custom CSS</strong> <x-doc-badge plan="pro" /> - <a href="{{ route('marketing.docs.schedule_styling') }}#custom-css" class="doc-link">your own CSS</a></li>
         </ul>
     </section>
 

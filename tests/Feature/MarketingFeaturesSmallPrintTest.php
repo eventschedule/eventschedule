@@ -48,8 +48,8 @@ class MarketingFeaturesSmallPrintTest extends TestCase
      * Where each feature of docs/FEATURES.md stands on /features, keyed by its name in that file.
      *
      *   ROW       the name of its row in the small print, which must carry the plan's badge
-     *   ABOVE     the feature page of the banner or card that covers it, which that plan's line
-     *             under the list must link
+     *   ABOVE     the feature page of the key on the board that covers it, which that plan's
+     *             line under the list must link
      *   LEFT_OUT  why the page does not list it
      */
     private const ACCOUNTED = [
@@ -77,12 +77,12 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Recurring events' => [self::ABOVE, '/features/recurring-events'],
         'Shared notification address' => [self::LEFT_OUT, 'a notification setting, not a feature a visitor chooses a plan for'],
         'Newsletter management' => [self::ABOVE, '/features/newsletters'],
-        'Email subscribers (audience capture)' => [self::ROW, 'Email sign-up'],
+        'Email subscribers (audience capture)' => [self::ABOVE, '/features/newsletters'],
         'Event interest capture ("tell me when tickets go on sale")' => [self::ROW, 'Interest list'],
         'Automatic new-event announcements' => [self::ABOVE, '/features/newsletters'],
         'Embed calendar on website' => [self::ABOVE, '/features/embed-calendar'],
-        'Free event registration / RSVP' => [self::ROW, 'Free registration and RSVP'],
-        'Free ticket rows ($0) and free registration' => [self::ROW, 'Free registration and RSVP'],
+        'Free event registration / RSVP' => [self::ABOVE, '/features/registration'],
+        'Free ticket rows ($0) and free registration' => [self::ABOVE, '/features/registration'],
         'Ticket sales windows and volume discounts' => [self::ROW, 'Sales windows and group rates'],
         'Ticket-type custom fields' => [self::LEFT_OUT, 'the free corner of custom fields, which its own page states; the banner is the Pro feature'],
         'Appointment booking (1 free appointment type)' => [self::ABOVE, '/features/appointments'],
@@ -95,7 +95,8 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Generate event graphics' => [self::ABOVE, '/features/event-graphics'],
         'Venue logo wall header' => [self::ROW, 'Venue logo wall'],
         'Event animations' => [self::LEFT_OUT, 'a display setting of the schedule page, like its header style and its layout'],
-        'Backup & restore' => [self::LEFT_OUT, 'one of the twelve cards above; it has no feature page for a plan line to link'],
+        'Backup & restore' => [self::LEFT_OUT, 'named at the foot of chapter 05; it has no feature page for a plan line to link'],
+        'Short links' => [self::ABOVE, '/features/analytics'],
         '10 newsletter emails per month' => [self::ABOVE, '/features/newsletters'],
         'AI event parsing' => [self::ABOVE, '/features/ai'],
         'Import from a link' => [self::ROW, 'Import from a link'],
@@ -118,23 +119,24 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Event polls' => [self::ABOVE, '/features/polls'],
         'Event templates' => [self::ROW, 'Event templates'],
         'Check-in dashboard' => [self::ABOVE, '/features/check-in'],
-        'Ticket waitlist' => [self::ROW, 'Ticket waitlist'],
+        'Ticket waitlist' => [self::ABOVE, '/features/waitlist'],
         'Sale notification emails' => [self::ROW, 'Sale notification emails'],
         'Push notifications' => [self::ROW, 'Push notifications'],
         'Sales CSV export' => [self::ROW, 'Sales CSV export'],
         'Post-event feedback' => [self::ABOVE, '/features/feedback'],
         'Carpool matching' => [self::ABOVE, '/features/carpool'],
         'Embed ticket widget' => [self::ABOVE, '/features/embed-tickets'],
-        'Promo/discount codes' => [self::ROW, 'Promo codes'],
+        'Promo/discount codes' => [self::ABOVE, '/features/promo-codes'],
         'Gift cards' => [self::ABOVE, '/features/gift-cards'],
-        'Installment payments' => [self::ROW, 'Installment payments'],
+        'Installment payments' => [self::ABOVE, '/features/installments'],
         'Eventbrite import' => [self::ROW, 'Eventbrite import'],
         'Bulk attendee import' => [self::ROW, 'Bulk attendee import'],
         'Ticket add-ons' => [self::ROW, 'Ticket add-ons'],
         '100 newsletter emails per month' => [self::ABOVE, '/features/newsletters'],
         'Unlimited fan photos + bulk download' => [self::ABOVE, '/features/fan-videos'],
-        'Photo gallery (events + schedules)' => [self::ROW, 'Photo gallery'],
-        'Sponsor/partner logos' => [self::ROW, 'Sponsor and partner logos'],
+        'Photo gallery (events + schedules)' => [self::ABOVE, '/features/fan-videos'],
+        'Sponsor/partner logos' => [self::ABOVE, '/features/lineup'],
+        'Custom labels' => [self::ABOVE, '/features/custom-labels'],
         'Guest portal banner' => [self::ROW, 'Announcement banner'],
         'Custom guest favicon' => [self::LEFT_OUT, 'part of white label, which the Pro line names'],
 
@@ -147,7 +149,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         'Save parsed event parts' => [self::ROW, 'Agenda scanning'],
         'AI text processing on graphics' => [self::LEFT_OUT, 'a field of the graphic page, described beside the scheduled email it rides in'],
         'Email scheduling (graphic emails)' => [self::ROW, 'Scheduled graphic emails'],
-        'Allocated (reserved) seating' => [self::ROW, 'Reserved seating'],
+        'Allocated (reserved) seating' => [self::ABOVE, '/features/allocated-seating'],
         'Custom domains' => [self::ABOVE, '/features/custom-domain'],
         'Internal & unlisted events' => [self::ABOVE, '/features/private-events'],
         'Multiple team members' => [self::ABOVE, '/features/team-scheduling'],
@@ -246,7 +248,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         $rows = $this->rows();
 
         $this->assertNotEmpty($rows, 'the small print of /features was not found');
-        $this->assertSame(0, count($rows) % 4, 'the list no longer ends on a full row of four');
+        $this->assertSame(0, count($rows) % 6, 'the list no longer ends on a full row at two columns and at three');
 
         foreach ($rows as [$name, $href]) {
             $this->assertNotEmpty($href, "\"$name\" has no link: every row of the small print names a feature page");
@@ -329,8 +331,6 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         // Rows for things the app does that docs/FEATURES.md keeps outside its three plan tables.
         $elsewhere = [
             'PayPal checkout' => 'one of the payment gateways, with a page of its own',
-            'Short links' => 'schedule links, counted on the analytics page',
-            'The whole lineup' => 'the Participants tab of every event',
             'Audit log' => 'on every plan, described on the team scheduling page',
             'Nearby accommodation map' => 'the Accommodation Affiliate table, operator-enabled and free',
         ];

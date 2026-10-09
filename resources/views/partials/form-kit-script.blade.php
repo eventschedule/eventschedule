@@ -190,6 +190,13 @@
                 text.textContent = value.text || '';
                 slot.classList.toggle('is-empty', !! value.empty);
                 slot.classList.toggle('is-warn', !! value.warn);
+                // A row that has a chip (form-row's `chip`): what is chosen, as a swatch before
+                // the words. `chip` is a CSS background; none hides it.
+                var chip = slot.querySelector('.event-row-chip');
+                if (chip) {
+                    chip.hidden = ! value.chip;
+                    chip.style.background = value.chip || '';
+                }
             });
         });
     };

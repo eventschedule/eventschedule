@@ -7,6 +7,7 @@
     'warn' => false,
     'muted' => false,
     'locked' => null,
+    'chip' => false,
 ])
 {{-- A row that opens in place, where a tab inside a tab used to be: its name, then one line saying
      what it holds, so the setting can be read without opening it. `group` is the list the row
@@ -14,13 +15,15 @@
      which carries class event-subrow-body and the hidden attribute. The line is either given here
      (`summary`, for a page that reloads on save) or written by the page through FormKit.summary()
      under the key "group:tab". `muted` is for a line that says nothing is set ("Not connected"),
-     which reads quieter than one that names something. Opened and closed by
+     which reads quieter than one that names something. `chip` puts a small swatch before the
+     line (a picture, a gradient, a colour), painted by FormKit.refresh() from the `chip` its
+     summary returns and hidden while there is none. Opened and closed by
      partials/form-kit-script. --}}
 <button type="button" {{ $attributes->merge(['class' => 'event-subrow']) }}
     data-row-group="{{ $group }}" data-tab="{{ $tab }}"
     aria-expanded="false" aria-controls="{{ $pane ?? $group.'-tab-'.$tab }}">
     <span class="event-row-title">{{ $title }}</span>
-    <span class="event-row-summary {{ $warn ? 'is-warn' : '' }} {{ $muted || $summary === '' ? 'is-empty' : '' }}" data-summary="{{ $group }}:{{ $tab }}"><bdi>{{ $summary }}</bdi></span>
+    <span class="event-row-summary {{ $warn ? 'is-warn' : '' }} {{ $muted || $summary === '' ? 'is-empty' : '' }}" data-summary="{{ $group }}:{{ $tab }}">@if ($chip)<span class="event-row-chip" aria-hidden="true" hidden></span>@endif<bdi>{{ $summary }}</bdi></span>
     @if ($locked)
     <x-lock-badge :tier="$locked" class="event-row-lock" />
     @endif

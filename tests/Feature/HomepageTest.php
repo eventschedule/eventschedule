@@ -11,7 +11,9 @@ use Tests\TestCase;
 /**
  * The marketing homepage, as rebuilt in 2026-10 ("one show, start to finish"). Its features were
  * the days of that show's week at first; they are the three verbs of the headline and of the film
- * (plan, promote, sell) since later the same month.
+ * (plan, promote, sell) since later the same month, and since the round after that the acts are
+ * lit as one day: the show is introduced beside the switch, Sell's first scene stands under an
+ * evening sky, and the calculator is drawn as the show's takings and one bar to a platform.
  *
  * The page is one Blade view whose moving parts are wired together by names: a claim box and the
  * links that carry its name, a switch and the mock-up strings it re-casts, two sliders and the
@@ -335,7 +337,9 @@ class HomepageTest extends TestCase
 
             // The poster and the event read off it say the same day.
             $this->assertSame($show->format('D j M'), $this->text($x->query('//div['.$this->has('hp-poster-top').']/span[2]')->item(0)));
-            $this->assertStringStartsWith($show->format('D, M j').' ', $this->text($x->query('//div['.$this->has('hp-fields').']/div[1]')->item(0)));
+            $this->assertSame($show->format('D, M j'), $this->text($x->query('//div['.$this->has('hp-fields').']/div[1]/span')->item(0)));
+            // The show's own poster and ticket, beside the switch, say that day too.
+            $this->assertSame($show->format('D, M j'), $this->text($x->query('//*[@data-cast-stage]//span['.$this->has('hp-stub-rows').']/span[2]/b')->item(0)));
 
             // The booking page mock-up: whole weeks, and the one day picked is that week's Tuesday.
             $booked = $show->copy()->subDays(4);
@@ -363,6 +367,179 @@ class HomepageTest extends TestCase
         $this->assertSame(1, $x->query('//article['.$this->has('hp-beat').']//a[@href="#fees"]')->length);
         $this->assertSame(1, $x->query('//section[@id="top"]//a[@href="#showcase"][@data-video-open]')->length,
             'the hero no longer has its link to the film');
+    }
+
+    // ------------------------------------------------------------- one day
+
+    /**
+     * The show is introduced under the switch that re-casts it, so a press is answered where it is
+     * made. The script swaps a poster's picture and marks the picture's PARENT plain for a cast
+     * that has none, and it does so for every poster that carries one.
+     */
+    public function test_the_show_stands_under_the_switch_and_every_poster_can_be_recast(): void
+    {
+        $html = $this->html();
+        $x = $this->xpath($html);
+
+        $stage = $x->query('//section[@id="features"]//*[@data-cast-stage]');
+        $this->assertSame(1, $stage->length, 'the show is no longer introduced, or is introduced twice');
+        $stage = $stage->item(0);
+        $this->assertSame('true', $stage->getAttribute('aria-hidden'));
+        $this->assertTrue($stage->hasAttribute('data-reveal'));
+        $this->assertSame(1, $x->query('preceding-sibling::div['.$this->has('hp-casts').']', $stage)->length,
+            'the switch no longer stands with the show it re-casts');
+        $this->assertGreaterThanOrEqual(8, $x->query('.//*[@data-cast]', $stage)->length);
+        $this->assertSame(0, $x->query('.//*[self::h2 or self::h3 or self::h4 or self::a or self::button]', $stage)->length,
+            'the show is a picture: it holds no heading and nothing that takes focus');
+        // The ticket is the one scanned at the door: same number.
+        $this->assertSame(
+            $this->text($x->query('//div['.$this->has('hp-ticket-foot').']/span[2]')->item(0)),
+            $this->text($x->query('.//span['.$this->has('hp-stub-foot').']/span[2]', $stage)->item(0)),
+            'the ticket beside the switch and the ticket at the door carry different numbers');
+
+        $pictures = $x->query('//img[@data-cast-img]');
+        $this->assertSame(2, $pictures->length, 'the show\'s poster and the pasted poster');
+        foreach ($pictures as $picture) {
+            $this->assertStringContainsString('hp-poster', $picture->parentNode->getAttribute('class'),
+                'the script marks a picture\'s parent plain, and that parent is no longer the poster');
+            $this->assertSame('lazy', $picture->getAttribute('loading'));
+        }
+        $this->assertStringContainsString("document.querySelectorAll('[data-cast-img]')", $html);
+        $this->assertStringContainsString("document.querySelector('[data-cast-stage]')", $html);
+
+        // The line that says what the block is must be one a reader is given.
+        $note = $x->query('//section[@id="features"]//p['.$this->has('hp-meet-note').']');
+        $this->assertSame(1, $note->length);
+        $this->assertSame(0, $x->query('ancestor-or-self::*[@aria-hidden="true"]', $note->item(0))->length);
+    }
+
+    /** Three lines of the pasted poster are marked, and each mark's number stands on the field it became. */
+    public function test_the_poster_is_read_in_three_numbered_lines(): void
+    {
+        $x = $this->xpath($this->html());
+        $scene = $x->query('//article[@id="how-it-works"]')->item(0);
+
+        $marks = [];
+        foreach ($x->query('.//div['.$this->has('hp-poster').']//*['.$this->has('hp-read').']', $scene) as $mark) {
+            $marks[] = $mark->getAttribute('data-n');
+        }
+        $numbers = [];
+        foreach ($x->query('.//div['.$this->has('hp-fields').']/div/b['.$this->has('hp-read-n').']', $scene) as $number) {
+            $numbers[] = $this->text($number);
+        }
+
+        $this->assertSame(['1', '2', '3'], $marks);
+        $this->assertSame($marks, $numbers, 'a line of the poster and the field it became carry different numbers');
+        $this->assertSame(3, $x->query('.//div['.$this->has('hp-fields').']/div', $scene)->length);
+    }
+
+    /**
+     * Sell's first scene stands in the evening, between the act's card and the night, and the
+     * night follows it directly: the evening's sky ends in the night's own colour.
+     */
+    public function test_tickets_go_on_sale_in_the_evening_and_the_night_follows_it(): void
+    {
+        $x = $this->xpath($this->html());
+        $evening = $x->query('//section[@id="features"]/div[@id="sell"]/div['.$this->has('hp-eve').']');
+
+        $this->assertSame(1, $evening->length);
+        $evening = $evening->item(0);
+        $this->assertSame(1, $x->query('.//article[@id="tickets"]', $evening)->length);
+        $this->assertStringContainsString('hp-vband', $x->query('preceding-sibling::*[1]', $evening)->item(0)->getAttribute('class'));
+        $this->assertStringContainsString('hp-night', $x->query('following-sibling::*[1]', $evening)->item(0)->getAttribute('class'));
+        $this->assertSame(0, $x->query('//div['.$this->has('hp-eve').']//div['.$this->has('hp-night').']')->length);
+    }
+
+    /**
+     * The slip over the calculator is the two sliders multiplied and nothing else. The script
+     * replaces the show's name with "Your show" on the first move, and finds the name as the
+     * holder's one element child.
+     */
+    public function test_the_takings_are_the_two_sliders_multiplied(): void
+    {
+        $html = $this->html();
+        $x = $this->xpath($html);
+        $calc = $x->query('//*[@data-fee-calculator]')->item(0);
+        $tickets = (int) $calc->getAttribute('data-fee-tickets');
+        $price = (int) $calc->getAttribute('data-fee-price');
+
+        $this->assertSame((string) $tickets, $this->text($x->query('//*[@data-fee-n]')->item(0)));
+        $this->assertSame('$'.$price, $this->text($x->query('//*[@data-fee-p]')->item(0)));
+        $this->assertSame('$'.number_format($tickets * $price), $this->text($x->query('//*[@data-fee-gross]')->item(0)));
+
+        $who = $x->query('//*[@data-fee-who]');
+        $this->assertSame(1, $who->length);
+        $this->assertSame(1, $x->query('./*', $who->item(0))->length);
+        $this->assertSame('event', $x->query('./*', $who->item(0))->item(0)->getAttribute('data-cast'));
+
+        $this->assertStringContainsString("feeGross.textContent = '$' + grouped(count * price);", $html);
+        // The calculator's own fields start on the sliders' numbers, whatever a browser restored.
+        $this->assertStringContainsString('field.value = range.value;', $html);
+    }
+
+    /**
+     * The page draws each card of the shared calculator as a row: its name, its rate, a bar and
+     * its figure, found by their order and by what they hold. A card that grew a child, or lost
+     * the holder of its figure, would be drawn wrong with no error.
+     */
+    public function test_the_calculator_has_the_shape_the_rows_are_drawn_from(): void
+    {
+        $x = $this->xpath($this->html());
+        $cards = $x->query('//*[@data-fee-calculator]/div[2]/div');
+
+        $this->assertSame(4, $cards->length);
+        foreach ($cards as $at => $card) {
+            $this->assertSame(3, $x->query('./div', $card)->length, 'a card is its name, its rate, and the holder of its figure and bar');
+            $this->assertSame($at === 0 ? 1 : 0, $x->query('./span', $card)->length, 'only our own card carries a mark, and it is the card\'s one span');
+            $holder = $x->query('./div[3]', $card)->item(0);
+            $this->assertSame(1, $x->query('./*[@data-fee-total]', $holder)->length);
+            $this->assertSame(1, $x->query('./div[last()]/*[@data-fee-bar]', $holder)->length);
+            $this->assertSame(2, $x->query('./*', $holder)->length);
+        }
+        $this->assertSame('eventschedule', $x->query('.//*[@data-fee-bar]', $cards->item(0))->item(0)->getAttribute('data-fee-bar'));
+    }
+
+    /** The six names stand in two groups around the schedule, each group named by a caption a reader is given. */
+    public function test_the_six_integrations_are_wired_to_the_schedule_in_two_groups(): void
+    {
+        $x = $this->xpath($this->html());
+        $lists = $x->query('//section[@id="integrations"]//ul['.$this->has('hp-plugs').']');
+
+        $this->assertSame(2, $lists->length);
+        $counts = [];
+        foreach ($lists as $list) {
+            $caption = $x->query('//*[@id="'.$list->getAttribute('aria-labelledby').'"]');
+            $this->assertSame(1, $caption->length, 'a group of integrations is named by a caption that is not on the page');
+            $this->assertNotSame('', $this->text($caption->item(0)));
+            $counts[] = $x->query('./li/a['.$this->has('hp-plug').']', $list)->length;
+        }
+        $this->assertSame([4, 2], $counts, 'four calendars and two ways to be paid');
+
+        $hub = $x->query('//section[@id="integrations"]//div['.$this->has('hp-hub').']');
+        $this->assertSame(1, $hub->length);
+        $this->assertSame('true', $hub->item(0)->getAttribute('aria-hidden'));
+        $this->assertSame(0, $x->query('.//a | .//button', $hub->item(0))->length);
+    }
+
+    /**
+     * The three things in "One link. Everywhere." each carry their own name, and the stage they
+     * stand on is a picture: nothing in it takes focus.
+     */
+    public function test_each_way_out_is_named_on_the_thing_itself(): void
+    {
+        $x = $this->xpath($this->html());
+        $outs = $x->query('//article[@id="share"]//div['.$this->has('hp-out').']');
+
+        $this->assertSame(3, $outs->length);
+        $names = [];
+        foreach ($outs as $out) {
+            $chip = $x->query('./span['.$this->has('hp-chip').']', $out);
+            $this->assertSame(1, $chip->length);
+            $names[] = $this->text($chip->item(0));
+        }
+        sort($names);
+        $this->assertSame(['Embed on your site', 'Link in bio', 'QR poster'], $names);
+        $this->assertSame(0, $x->query('//article[@id="share"]//div['.$this->has('hp-obj').']//*[self::a or self::button or self::input]')->length);
     }
 
     // ------------------------------------------------------------- the casts
@@ -580,7 +757,7 @@ class HomepageTest extends TestCase
         $this->assertCount(3, $children, 'the calculator is no longer its fields, its cards and its closing block');
         $this->assertSame(2, $x->query('.//input[@data-fee-input]', $children[0])->length, 'the first child is hidden here as the row of fields');
         $this->assertGreaterThanOrEqual(4, $x->query('.//*[@data-fee-total]', $children[1])->length, 'the second child is laid out here as the cards');
-        $this->assertSame(1, $x->query('./p[1]//*[@data-fee-saving]', $children[2])->length, 'the closing block no longer opens with the sentence this page moves above the cards');
+        $this->assertSame(1, $x->query('./p[1]//*[@data-fee-saving]', $children[2])->length, 'the closing block no longer opens with the sentence this page sets beside its button');
         $this->assertSame(1, $x->query('./a[contains(@href, "/sign_up")]', $children[2])->length);
     }
 

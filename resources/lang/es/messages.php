@@ -620,7 +620,7 @@ return [
     'notify_group_followers' => 'Correos para seguidores',
     'notify_group_shared' => 'Buzón compartido',
     'address_is_public' => 'Esta dirección es pública: se muestra en la página de tu horario y en tus eventos.',
-    'style_row_header_layout' => 'Encabezado y diseño',
+    'style_row_header' => 'Encabezado',
     'integration_row_feeds' => 'Texto del calendario y feeds',
     'language_and_time' => 'Idioma y hora',
     'show_announcement_bar' => 'Mostrar una barra de anuncios',

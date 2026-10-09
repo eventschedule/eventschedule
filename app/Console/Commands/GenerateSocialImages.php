@@ -398,6 +398,17 @@ class GenerateSocialImages extends Command
                     document.head.appendChild(browseCard);
                 ");
 
+                // /saas (since its 2026-10 redesign) has a hero of two columns: its words, and
+                // the stack they are about. The rules above centre a hero's words across the
+                // frame, which printed this headline over the stack. Its card keeps the two side
+                // by side, without the name box, the layer labels and the row of checks.
+                // .sk-hero exists on that page alone.
+                $browser->script("
+                    var saasCard = document.createElement('style');
+                    saasCard.textContent = '#hp .sk-hero .sk-hero-grid { display: grid !important; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr) !important; align-items: center !important; width: auto !important; height: {$heroHeight}px !important; margin: 0 3.25rem !important; gap: 1rem !important; text-align: start !important; } #hp .sk-hero .sk-copy { display: block !important; position: static !important; transform: none !important; width: auto !important; margin: 0 !important; text-align: start !important; } #hp .sk-hero .hp-h1 { font-size: 3.7rem !important; } #hp .sk-hero .hp-sub { font-size: 1.3rem !important; margin-inline: 0 !important; } #hp .sk-hero .sk-chips, #hp .sk-hero .sk-tags { display: none !important; } #hp .sk-hero .sk-stage { max-width: none !important; } #hp .sk-hero .sk-rig { --u: 0.86rem !important; --dx: 0 !important; height: calc(var(--u) * 43) !important; padding-top: 0 !important; }';
+                    document.head.appendChild(saasCard);
+                ");
+
                 $browser->pause(1500);
 
                 // A hero taller than the frame clips at BOTH ends once it is centred, and the top

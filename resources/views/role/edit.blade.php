@@ -17,6 +17,7 @@
     @vite([
     'resources/js/color-picker.js',
     'resources/js/list-animation-picker.js',
+    'resources/js/style-studio.js',
     ])
 
     <!-- Step Indicator for Add Event Flow -->
@@ -56,63 +57,8 @@
             border-top: 1px solid rgb(var(--ap-border));
         }
 
-        #preview {
-            border: 1px solid #dbdbdb;
-            border-radius: 8px;
-            height: 210px;
-            width: 100%;
-            overflow: hidden;
-            background-size: cover;
-            background-position: center;
-            padding: 10px;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .dark #preview {
-            border-color: rgb(var(--ap-border));
-        }
-
-        .color-nav-button {
-            padding: 0.5rem 0.75rem;
-            min-height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.5rem;
-            border: 1px solid #e5e7eb;
-            background: linear-gradient(to bottom, #ffffff, #f9fafb);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .color-nav-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .color-nav-button:hover:not(:disabled) {
-            background: linear-gradient(to bottom, #f3f4f6, #eef0f3);
-        }
-
-        .color-nav-button:active:not(:disabled) {
-            background: linear-gradient(to bottom, #e8eaed, #e5e7eb);
-        }
-
-        .dark .color-nav-button {
-            border-color: rgba(255, 255, 255, 0.15);
-            background: linear-gradient(to bottom, #3a3a3d, #333336);
-            color: rgb(var(--ap-ink-2));
-        }
-
-        .dark .color-nav-button:hover:not(:disabled) {
-            border-color: rgba(255, 255, 255, 0.25);
-            background: linear-gradient(to bottom, #454548, rgb(var(--ap-border-strong)));
-        }
-
-        .dark .color-nav-button:active:not(:disabled) {
-            background: linear-gradient(to bottom, rgb(var(--ap-border)), rgb(var(--ap-rail-active)));
-        }
+        {{-- The Style tab: its grid, its preview and its pickers (plain CSS on the --ap-* tokens). --}}
+        @include('role.partials.style-studio-styles')
 
         /* A sub-schedule on one line: name, second name where there is one, colour. */
         .sched-sub-line {
@@ -266,13 +212,15 @@
                 select.appendChild(option);
             });
 
-            // If current font is not compatible, select the first available font
+            // If current font is not compatible, select the first available font. Said as a
+            // change once the page has finished setting itself up (the Style tab's pickers and the
+            // save bar both hear it); while it is setting up, it is not one.
             if (select.value !== currentValue) {
                 select.selectedIndex = 0;
-                onChangeFont();
+                if (window.FormKit && window.FormKit.isArmed()) {
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             }
-
-            updateFontNavButtons();
         }
 
         {{-- Saved values are written as JSON from a bare variable, never inside a quoted string:
@@ -304,20 +252,15 @@
             $('#language_code').val(@json($scriptLanguageCode));
             $('#timezone').val(@json(\App\Utils\TimezoneUtils::canonicalize(old('timezone', $role->timezone)) ?? old('timezone', $role->timezone)));
 
-            $('#header_image').trigger('input');
-
             updateFontOptions();
 
-            updatePreview();
             onChangeBackground();
             onChangeCountry();
-            onChangeFont();
-            updateImageNavButtons();
             toggleCustomImageInput();
-            updateHeaderNavButtons();
             toggleCustomHeaderInput();
-            updateFontNavButtons();
             toggleHeaderImageForStyle();
+            // Last: the fields are seeded now, so whoever draws from them reads what the page shows.
+            updatePreview();
             
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
@@ -421,36 +364,6 @@
                 });
             });
 
-            $('#header_image').on('input', function() {
-                var headerImageUrl = $(this).find(':selected').val();
-                if (isBuiltInHeader(headerImageUrl)) {
-                    // Preset header selected
-                    headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
-                    $('#header_image_preview').attr('src', headerImageUrl).show();
-                    $('#delete_header_image_button').hide();
-                } else if (headerImageUrl === '') {
-                    // Custom option selected - show existing custom image if available
-                    var existingCustomUrl = '{{ $role->header_image_url }}';
-                    $('#header_image_preview').hide();
-                    if (existingCustomUrl) {
-                        $('#delete_header_image_button').show();
-                    }
-                } else {
-                    // 'none' selected
-                    $('#header_image_preview').hide();
-                    $('#delete_header_image_button').hide();
-                }
-            });
-
-            $('#header_image_url').on('change', function() {
-                previewImage(this, 'header_image_url_preview');
-                updatePreview();
-            });
-
-            $('#background_image_url').on('change', function() {
-                previewImage(this, 'background_image_preview');
-                updatePreview();
-            });
         });
 
         function clearRoleFileInput(inputId, previewId, filenameId) {
@@ -469,7 +382,18 @@
             if (filenameSpan) {
                 filenameSpan.textContent = '';
             }
+            forgetAiPicture(inputId);
             updatePreview();
+        }
+
+        // A picture the AI generator made rides in a hidden field of its own, not in the file
+        // field. Removing the picture takes that field away too: left behind, the picture that
+        // had just been removed was saved all the same.
+        function forgetAiPicture(inputId) {
+            const made = document.getElementById({ profile_image: 'ai_profile_image', header_image_url: 'ai_header_image', background_image_url: 'ai_background_image' }[inputId] || '');
+            if (made) {
+                made.remove();
+            }
         }
 
         function clearHeaderFileInput() {
@@ -477,11 +401,9 @@
             input.value = '';
             document.getElementById('header_image_url_filename').textContent = '';
             document.getElementById('header_image_url_preview_clear').style.display = 'none';
-            // Hide the custom header preview, but keep preset header preview visible if any
-            const headerSelect = document.getElementById('header_image');
-            if (headerSelect.value === '') {
-                document.getElementById('header_image_preview').style.display = 'none';
-            }
+            // The picture itself goes too: left as it was, the preview went on showing it.
+            document.getElementById('header_image_url_preview').setAttribute('src', '#');
+            forgetAiPicture('header_image_url');
             updatePreview();
         }
 
@@ -520,11 +442,6 @@
                     clearBtn.style.display = 'inline-block';
                 }
                 updatePreview();
-
-                if (previewId === 'background_image_preview') {
-                    $('#style_background_image img:not(#background_image_preview)').hide();
-                    $('#style_background_image a').hide();
-                }
 
                 // Check dimensions/size asynchronously (for warnings only)
                 const img = new Image();
@@ -593,61 +510,6 @@
             }
         }
 
-        function onChangeFont() {
-            var font_family = $('#font_family').find(':selected').text();
-            var font_value = $('#font_family').val() || '';
-            var link = document.createElement('link');
-
-            // The copy this install serves (php artisan fonts:download), never Google Fonts.
-            link.href = @json(asset('vendor/fonts')) + '/' + encodeURIComponent(font_value.trim().replace(/ /g, '_')) + '/font.css';
-            link.rel = 'stylesheet';
-
-            document.head.appendChild(link);
-
-            link.onload = function() {
-                updatePreview();
-                $('#font_preview').css('font-family', "'" + font_family.trim() + "', sans-serif");
-            };
-        }
-
-        function getContrastColor(hex) {
-            hex = hex.replace('#', '');
-            var r = parseInt(hex.substring(0, 2), 16) / 255;
-            var g = parseInt(hex.substring(2, 4), 16) / 255;
-            var b = parseInt(hex.substring(4, 6), 16) / 255;
-            r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-            g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-            b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
-            var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-            return luminance > 0.25 ? '#000000' : '#ffffff';
-        }
-
-        // Returns the accent color only if it has >= 3:1 contrast against the given
-        // background, else the fallback (mirrors ColorUtils::readableAccentColor).
-        function getReadableAccent(accentColor, bgHex, fallback) {
-            try {
-                function lum(hex) {
-                    hex = hex.replace('#', '');
-                    var r = parseInt(hex.substr(0, 2), 16) / 255,
-                        g = parseInt(hex.substr(2, 2), 16) / 255,
-                        b = parseInt(hex.substr(4, 2), 16) / 255;
-                    r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-                    g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-                    b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
-                    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                }
-                var la = lum(accentColor), lb = lum(bgHex);
-                var ratio = (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
-                return ratio >= 3 ? accentColor : fallback;
-            } catch (e) {
-                return fallback;
-            }
-        }
-
-        // Real logo URLs for the logo-wall preview; reassigned by the order list's
-        // drag handler so the preview follows the drag order.
-        var logoWallPreviewUrls = @json($logoWallRoles->take(12)->pluck('profile_image_url'));
-
         // The Header Image choices that name no picture (Role::HEADER_IMAGE_KEYWORDS): anything
         // else that is not blank is a built-in header, with a thumbnail of its own.
         // A declaration with the list inside it, so it can be called from anywhere in this
@@ -656,189 +518,59 @@
             return !! value && @json(\App\Models\Role::HEADER_IMAGE_KEYWORDS).indexOf(value) === -1;
         }
 
+        // The Style tab's preview and pickers are drawn by its islands (resources/js/style-studio.js),
+        // which read the fields when they hear this. The name is the one a dozen places in this
+        // page already call whenever a field of the tab has changed; the HTML it used to build by
+        // joining strings, the schedule's name and the picture addresses among them, is gone.
         function updatePreview() {
-            var isDark = document.documentElement.classList.contains('dark');
-            var background = $('input[name="background"]:checked').val();
-            var backgroundColor = $('#background_color').val();
-            var backgroundColors = $('#background_colors').val();
-            var backgroundRotation = $('#background_rotation').val();
-            var fontColor = isDark ? '#F3F4F6' : '#151B26';
-            var fontFamily = $('#font_family').find(':selected').text().trim();
-            var accentColor = $('#accent_color').val() || '#4E81FA';
-            var langCode = $('#language_code').val();
-            var isRtl = (langCode === 'ar' || langCode === 'he');
-            var followTranslations = {
-                @foreach(array_keys(config('app.supported_languages')) as $lang)
-                    '{{ $lang }}': @json(__('messages.follow', [], $lang), JSON_UNESCAPED_UNICODE),
-                @endforeach
-            };
-            var followText = followTranslations[langCode] || followTranslations['en'];
-            var name = $('#name').val();
-            var headerImage = $('#header_image').val();
-            var profileImagePreview = $('#profile_image_preview').attr('src');
-            var existingProfileImage = '{{ $role->profile_image_url }}';
+            document.dispatchEvent(new CustomEvent('style:sync'));
+        }
 
-            if (! name) {
-                name = @json(__('messages.preview'), JSON_UNESCAPED_UNICODE);
-            } else if (name.length > 25) {
-                name = name.substring(0, 25) + '...';
-            }
-
-            $('#font_preview').text(name);
-
-            // Resolve header image URL
-            var headerUrl = '';
-            var isLogoWall = (headerImage === 'logos');
-            if (isBuiltInHeader(headerImage)) {
-                headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
-            } else if (headerImage === '') {
-                var customSrc = $('#header_image_url_preview').attr('src');
-                headerUrl = (customSrc && customSrc !== '#') ? customSrc : '{{ $role->header_image_url }}';
-            }
-
-            // Build header image HTML
-            var headerHtml = '';
-            if (headerUrl) {
-                headerHtml = '<div style="position: relative; width: 100%; height: 90px; border-radius: 12px 12px 0 0; overflow: hidden; flex-shrink: 0;">' +
-                    '<div style="width: 100%; height: 100%; background-image: url(\'' + headerUrl + '\'); background-size: cover; background-position: center;"></div>' +
-                '</div>';
-            } else if (isLogoWall && logoWallPreviewUrls.length) {
-                // Real venue logos; an empty wall renders no header, matching the GP page
-                var wallTiles = logoWallPreviewUrls.map(function(u) {
-                    return '<div style="width: 22px; height: 22px; background: #ffffff; border: 1px solid rgba(127,127,127,0.35); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">' +
-                        '<img src="' + u + '" style="max-width: 100%; max-height: 100%; object-fit: contain;" /></div>';
-                }).join('');
-                headerHtml = '<div style="width: 100%; height: 90px; border-radius: 12px 12px 0 0; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">' +
-                    '<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; padding: 8px; max-width: 85%;">' + wallTiles + '</div></div>';
-            }
-            var hasHeaderArea = !!headerUrl || (isLogoWall && logoWallPreviewUrls.length > 0);
-
-            // Resolve profile image
-            var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
-
-            // Build profile image HTML
-            var profileHtml = '';
-            var profileBorderColor = isDark ? '#1e1e1e' : '#ffffff';
-            var cardOverflow = 'hidden';
-            var cardMarginTop = '';
-            if (profileSrc) {
-                // On the lower edge of a picture or the logo wall; inside the card where there is neither.
-                profileHtml = '<div style="position: relative; z-index: 10; margin-top: ' + (hasHeaderArea ? '-22px' : '0') + ';">' +
-                    '<div style="width: 38px; height: 38px; border-radius: 9px; background-color: ' + profileBorderColor + '; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25);">' +
-                        '<img src="' + profileSrc + '" style="width: 34px; height: 34px; border-radius: 7px; object-fit: cover;" />' +
-                    '</div>' +
-                '</div>';
-            }
-
-            // Card background (semi-transparent to show background through edges)
-            var cardBg = isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)';
-
-            // Build content HTML: the logo with Follow beside it, the name under them, as the
-            // banner header draws them (role/partials/headers/banner).
-            // The wash of the accent, where that is the Header Image choice. The page lifts a dark
-            // accent into a light before it washes with it (GuestTheme's glow), so this does too.
-            var washTint = 'color-mix(in srgb, ' + accentColor + ' 72%, #ffffff)';
-            var washHtml = headerImage !== 'gradient' ? '' : '<div style="position: absolute; inset: 0 0 auto; height: 70px; border-radius: 16px 16px 0 0; background: linear-gradient(to bottom, color-mix(in srgb, ' + washTint + ' 44%, transparent), transparent); pointer-events: none;"></div>';
-            var contentHtml =
-                '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="position: relative; width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: ' + cardOverflow + '; ' + cardMarginTop + '">' +
-                    washHtml +
-                    headerHtml +
-                    '<div style="position: relative; z-index: 5; padding: ' + (hasHeaderArea ? '0' : '12px') + ' 16px 14px; display: flex; flex-direction: column;">' +
-                        '<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; min-height: 22px;' + (hasHeaderArea && ! profileSrc ? ' padding-top: 8px;' : '') + '">' +
-                            (profileHtml || '<span></span>') +
-                            '<div style="flex-shrink: 0;' + (hasHeaderArea && profileSrc ? ' padding-top: 28px;' : '') + '">' +
-                                '<div style="display: inline-block; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; background-color: ' + accentColor + '; color: ' + getContrastColor(accentColor) + '; box-shadow: 0 1px 2px rgba(0,0,0,0.15);">' +
-                                    followText +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
-                        '<div style="margin-top: 7px; font-size: 16px; font-weight: 700; font-synthesis: none; color: ' + fontColor + '; font-family: \'' + fontFamily + '\', sans-serif; line-height: 1.15; min-width: 0;">' + name + '</div>' +
-                    '</div>' +
-                '</div>';
-
-            // Apply content to preview container
-            var $preview = $('#preview');
-            $preview.html(contentHtml);
-
-            // Override the preview for the compact header style so it reads like the real
-            // full-screen layout: a full-width bar flush at the top, with a faint content hint below.
-            var headerStyle = $('input[name="header_style"]:checked').val() || 'banner';
-            if (headerStyle === 'compact') {
-                $preview.css('padding', '0'); // full-bleed: bar spans edge-to-edge like the real GP
-                var contrast = getContrastColor(accentColor);
-                var ctaPill = '<span style="display:inline-block;border-radius:6px;padding:4px 9px;font-size:10px;font-weight:600;white-space:nowrap;background-color:' + accentColor + ';color:' + contrast + ';">' + followText + '</span>';
-                var toggleHint = '<span style="display:inline-flex;flex-shrink:0;height:20px;border:1px solid ' + accentColor + ';border-radius:6px;overflow:hidden;">' +
-                    '<span style="width:20px;background-color:' + accentColor + ';"></span>' +
-                    '<span style="width:20px;"></span>' +
-                '</span>';
-                var dot = function (c) { return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:' + c + ';"></span>'; };
-                // Faint, centered "page content" beneath the full-width bar so the preview reads as the full-screen layout (full-width bar over centered body content).
-                var hintCard = '<div style="flex:1;height:34px;border-radius:8px;background-color:rgba(127,127,127,0.22);"></div>';
-                var contentHint =
-                    '<div style="margin:0 auto;max-width:80%;">' +
-                        '<div style="height:7px;width:42%;border-radius:4px;background-color:rgba(127,127,127,0.4);margin:0 auto 9px;"></div>' +
-                        '<div style="display:flex;gap:8px;">' + hintCard + hintCard + hintCard + '</div>' +
-                    '</div>';
-                var minLogo = profileSrc ? '<img src="' + profileSrc + '" style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;">' : '';
-                var minLine = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
-                var minDot = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
-                var minBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-                var barHtml =
-                    '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width:100%;overflow:hidden;background-color:' + cardBg + ';border-bottom:1px solid ' + minBorder + ';">' +
-                        '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
-                            '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' + minLogo +
-                                '<div style="font-size:15px;font-weight:600;color:' + fontColor + ';font-family:\'' + fontFamily + '\',sans-serif;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>' +
-                            '</div>' +
-                            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' + ctaPill + toggleHint + '</div>' +
-                        '</div>' +
-                        '<div style="border-top:1px solid ' + minBorder + ';padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
-                            '<div style="height:6px;border-radius:3px;background-color:' + minLine + ';flex:1;max-width:55%;"></div>' +
-                            '<div style="display:flex;gap:5px;flex-shrink:0;">' + dot(minDot) + dot(minDot) + dot(minDot) + '</div>' +
-                        '</div>' +
-                    '</div>';
-                $preview.html(
-                    '<div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">' +
-                        barHtml +
-                        '<div style="flex:1;padding:14px 16px;">' + contentHint + '</div>' +
-                    '</div>'
-                );
-            } else {
-                $preview.css('padding', '10px');
-            }
-
-            // Reset background styles before applying new ones
-            $preview.css('background-color', '').css('background-image', '');
-
-            // Apply background styles
-            if (background == 'gradient') {
-                $('#custom_colors').toggle(backgroundColors == '');
-                if (backgroundColors == '') {
-                    var customColor1 = $('#custom_color1').val();
-                    var customColor2 = $('#custom_color2').val();
-                    backgroundColors = customColor1 + ', ' + customColor2;
-                    $('#custom_gradient_preview').css('background', 'linear-gradient(to right, ' + customColor1 + ', ' + customColor2 + ')');
-                }
-
-                if (!backgroundRotation) {
-                    backgroundRotation = '0';
-                }
-
-                var gradient = 'linear-gradient(' + backgroundRotation + 'deg, ' + backgroundColors + ')';
-                $preview.css('background-image', gradient);
-            } else if (background == 'image') {
-
-                var backgroundImageUrl = $('#background_image').find(':selected').val();
-                if (backgroundImageUrl) {
-                    backgroundImageUrl = "{{ asset('images/backgrounds/thumbs') }}" + '/' + $('#background_image').find(':selected').val() + '.jpg';
-                } else {
-                    backgroundImageUrl = $('#background_image_preview').attr('src') || "{{ $role->background_image_url }}";
-                }
-
-                $preview.css('background-image', 'url("' + backgroundImageUrl + '")');
-            } else {
-                $preview.css('background-color', backgroundColor);
+        // The two colours of a gradient of the owner's own are asked only while "Custom" is the
+        // gradient chosen.
+        function toggleCustomColors() {
+            var colors = document.getElementById('background_colors');
+            var custom = document.getElementById('custom_colors');
+            if (colors && custom) {
+                custom.style.display = colors.value === '' ? '' : 'none';
             }
         }
+
+        // The logo's tile and the words beside it: a picture just chosen stands in front of the
+        // stored one, Change is what the chooser says once there is a picture, and the tile shows
+        // its own mark only while there is none.
+        function syncLogo() {
+            var tile = document.getElementById('profile_image_tile');
+            if (! tile) {
+                return;
+            }
+            var chosen = document.getElementById('profile_image_preview');
+            var pending = document.getElementById('profile_image_preview_clear');
+            var stored = document.getElementById('profile_image_stored');
+            var storedActions = document.getElementById('profile_image_existing');
+            var source = chosen ? chosen.getAttribute('src') : '';
+            var isPending = !! (pending && pending.style.display !== 'none' && source && source !== '#');
+            if (chosen) {
+                chosen.style.display = isPending ? '' : 'none';
+            }
+            if (stored) {
+                stored.style.display = isPending ? 'none' : '';
+            }
+            if (storedActions) {
+                storedActions.style.display = isPending ? 'none' : '';
+            }
+            var has = isPending || !! stored;
+            tile.classList.toggle('is-empty', ! has);
+            var change = document.getElementById('profile_image_change');
+            if (change) {
+                change.textContent = has ? change.dataset.change : change.dataset.choose;
+            }
+        }
+
+        document.addEventListener('style:sync', function () {
+            toggleCustomColors();
+            syncLogo();
+        });
 
         function onValidateClick() {
             $('#address_response').text(@json(__('messages.searching'), JSON_UNESCAPED_UNICODE) + '...').show();
@@ -911,64 +643,14 @@
             }
         }
 
-        function updateColorNavButtons() {
-            const select = document.getElementById('background_colors');
-            const prevButton = document.getElementById('prev_color');
-            const nextButton = document.getElementById('next_color');
-            
-            prevButton.disabled = select.selectedIndex === 0;
-            nextButton.disabled = select.selectedIndex === select.options.length - 1;
-        }
-
-        function changeBackgroundColor(direction) {
-            const select = document.getElementById('background_colors');
-            const newIndex = select.selectedIndex + direction;
-
-            if (newIndex >= 0 && newIndex < select.options.length) {
-                select.selectedIndex = newIndex;
-                updatePreview();
-                updateColorNavButtons();
-            }
-        }
-
-        function updateImageNavButtons() { 
-            const select = document.getElementById('background_image');
-            const prevButton = document.getElementById('prev_image');
-            const nextButton = document.getElementById('next_image');
-
-            prevButton.disabled = select.selectedIndex === 0;
-            nextButton.disabled = select.selectedIndex === select.options.length - 1;
-        }
-
-        function changeBackgroundImage(direction) {
-            const select = document.getElementById('background_image');
-            const newIndex = select.selectedIndex + direction;
-
-            if (newIndex >= 0 && newIndex < select.options.length) {
-                select.selectedIndex = newIndex;
-                updatePreview();
-                updateImageNavButtons();
-                toggleCustomImageInput();
-            }
-        }
-
+        // A picture of the owner's own is chosen, changed and removed from the wall above these
+        // (StylePictureWall.vue). The blocks themselves are what an owner sees only if the islands
+        // never start, so they are still shown and hidden by the field's value.
         function toggleCustomImageInput() {
             const select = document.getElementById('background_image');
             const customInput = document.getElementById('custom_image_input');
             const existingImg = document.getElementById('background_image_existing');
-            const thumbPreview = document.getElementById('background_image_thumb_preview');
-            const bgValue = select.value;
-            const isCustom = bgValue === '';
-
-            // Show/hide built-in background preview thumbnail
-            if (thumbPreview) {
-                if (bgValue && bgValue !== 'none' && bgValue !== '') {
-                    thumbPreview.src = "{{ asset('images/backgrounds/thumbs') }}" + '/' + bgValue + '.jpg';
-                    thumbPreview.style.display = '';
-                } else {
-                    thumbPreview.style.display = 'none';
-                }
-            }
+            const isCustom = select.value === '';
 
             if (existingImg) {
                 existingImg.style.display = isCustom ? '' : 'none';
@@ -978,44 +660,12 @@
             customInput.style.display = (isCustom && !hasExistingImage) ? 'block' : 'none';
         }
 
-        function updateHeaderNavButtons() { 
-            const select = document.getElementById('header_image');
-            const prevButton = document.getElementById('prev_header');
-            const nextButton = document.getElementById('next_header');
-
-            prevButton.disabled = select.selectedIndex === 0;
-            nextButton.disabled = select.selectedIndex === select.options.length - 1;
-        }
-
-        function changeHeaderImage(direction) {
-            const select = document.getElementById('header_image');
-            const newIndex = select.selectedIndex + direction;
-
-            if (newIndex >= 0 && newIndex < select.options.length) {
-                select.selectedIndex = newIndex;
-                updatePreview();
-                updateHeaderNavButtons();
-                toggleCustomHeaderInput();
-            }
-        }
-
         function toggleCustomHeaderInput() {
             const select = document.getElementById('header_image');
             const customInput = document.getElementById('custom_header_input');
             const deleteBtn = document.getElementById('delete_header_image_button');
-            const headerPreview = document.getElementById('header_image_preview');
             const headerValue = select.value;
             const isCustom = headerValue === '';
-
-            // Show/hide built-in header preview thumbnail
-            if (headerPreview) {
-                if (isBuiltInHeader(headerValue)) {
-                    headerPreview.src = "{{ asset('images/headers/thumbs') }}" + '/' + headerValue + '.jpg';
-                    headerPreview.style.display = '';
-                } else {
-                    headerPreview.style.display = 'none';
-                }
-            }
 
             // Show/hide existing custom image with delete button
             if (deleteBtn) {
@@ -1032,40 +682,20 @@
             }
         }
 
-        function updateFontNavButtons() {
-            const select = document.getElementById('font_family');
-            const prevButton = document.getElementById('prev_font');
-            const nextButton = document.getElementById('next_font');
-
-            prevButton.disabled = select.selectedIndex === 0;
-            nextButton.disabled = select.selectedIndex === select.options.length - 1;
-        }
-
-        function changeFont(direction) {
-            const select = document.getElementById('font_family');
-            const newIndex = select.selectedIndex + direction;
-
-            if (newIndex >= 0 && newIndex < select.options.length) {
-                select.selectedIndex = newIndex;
-                // A real change event, not direct calls: the data-action handler runs
-                // onChangeFont() and updateFontNavButtons(), and the event also reaches the
-                // unsaved-changes tracker and the event-animation preview.
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
-
-        // The header image applies to the Banner style only; show it for banner and hide
-        // it for the other styles (the chosen value is preserved while hidden).
+        // The header image belongs to the Banner style only. With another style chosen its
+        // pictures give way to one line that says so; the chosen value is kept and still posted.
         function toggleHeaderImageForStyle() {
             const styleRadio = document.querySelector('input[name="header_style"]:checked');
             const style = styleRadio ? (styleRadio.value || 'banner') : 'banner';
-            const headerImage = document.getElementById('header_image');
-            const group = headerImage ? headerImage.closest('.mb-6') : null;
+            const group = document.getElementById('style_header_image');
+            const note = document.getElementById('style_header_image_note');
             if (group) {
                 group.style.display = (style === 'banner') ? '' : 'none';
             }
+            if (note) {
+                note.hidden = style === 'banner';
+            }
         }
-
 
         </script>
 
@@ -2022,13 +1652,60 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="section-style" class="section-content lg:mt-0">
+                @php
+                    // What the Style tab's islands are told. Built here, not inside a directive:
+                    // a multi-line array argument does not compile.
+                    $styleFollowWords = [];
+                    foreach (array_keys(config('app.supported_languages')) as $styleLanguage) {
+                        $styleFollowWords[$styleLanguage] = __('messages.follow', [], $styleLanguage);
+                    }
+                    $styleLabels = [
+                        'preview' => __('messages.preview'),
+                        'light' => __('messages.theme_light'),
+                        'dark' => __('messages.theme_dark'),
+                        'viewSchedule' => __('messages.view_schedule'),
+                        'notSaved' => __('messages.list_animation_unsaved'),
+                        'search' => __('messages.search'),
+                        'noResults' => __('messages.no_results_found'),
+                        'showAll' => __('messages.show_all'),
+                        'showLess' => __('messages.show_less'),
+                        'change' => __('messages.change'),
+                        'remove' => __('messages.remove'),
+                        'chooseFile' => __('messages.choose_file'),
+                        'uploadImage' => __('messages.upload_image'),
+                        'custom' => __('messages.custom'),
+                        'color' => __('messages.color'),
+                    ];
+                    $styleProps = fn (array $props) => json_encode($props, JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_UNICODE);
+                    // Ten colours to start an accent from, and ten quiet grounds for a plain background.
+                    $styleAccentPresets = ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#14B8A6', '#0EA5E9', '#4E81FA', '#A855F7', '#EC4899', '#111827'];
+                    $styleGroundPresets = ['#FFFFFF', '#F3F4F6', '#E7E5E4', '#FDF6E3', '#FCE7F3', '#DBEAFE', '#DCFCE7', '#374151', '#111827', '#000000'];
+                    // The picture choices a refused save had made come back, as every other choice
+                    // on this tab does: these two were read from the stored schedule alone.
+                    // A posted "Custom" is an empty value, which comes back as null: so whether it was
+                    // posted at all is asked of the flashed input itself, not of old()'s answer.
+                    $styleOld = session()->getOldInput();
+                    $styleScalar = fn ($value) => is_scalar($value) ? (string) $value : '';
+                    $effectiveHeaderImage = array_key_exists('header_image', $styleOld) ? $styleScalar($styleOld['header_image']) : (string) $role->header_image;
+                    $headerImageIsNone = $effectiveHeaderImage === 'none' || ($effectiveHeaderImage === '' && ! $role->header_image_url);
+                    $effectiveBackgroundImage = array_key_exists('background_image', $styleOld) ? $styleScalar($styleOld['background_image']) : (string) $role->background_image;
+                @endphp
+                {{-- The pickers of this tab (the font list, the gradients, the two walls of pictures,
+                     the hex fields, the preview) are small Vue islands on EMPTY elements
+                     (resources/js/style-studio.js). Each is a view of a field that stays in this
+                     markup and carries the value: it sets the field and dispatches input and change,
+                     and never when it starts. What is marked st-native is out of sight while the
+                     islands run (the st-js class, which this page's script takes off again if they
+                     never start). Styles: role/partials/style-studio-styles. --}}
+                <div id="section-style" class="section-content lg:mt-0 st-js"
+                    data-font-base="{{ asset('vendor/fonts') }}"
+                    data-header-thumbs="{{ asset('images/headers/thumbs') }}"
+                    data-background-thumbs="{{ asset('images/backgrounds/thumbs') }}">
                     <div>
 
-                    <div class="flex flex-col xl:flex-row xl:gap-12">
-                        <div class="w-full xl:w-1/2">
+                    <div class="st-wrap">
 
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                    <h2 class="st-head text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                         <span class="section-heading-name inline-flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 3 3 0 005.78-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
@@ -2057,103 +1734,394 @@
                             @endif
                         @endif
                     </h2>
+                    {{-- A mark at the foot of the heading: once it has gone under the top bar, the
+                         preview is holding its place (style-studio.js, class is-stuck). --}}
+                    <span class="st-mark" aria-hidden="true"></span>
 
+                    <!-- Preview: beside the fields from 1280px, a strip under the heading below that -->
+                    <div class="st-side">
+                        <div class="vue-style-preview" data-props="{{ $styleProps([
+                            'events' => $listAnimationPreviewEvents ?? [],
+                            'followWords' => $styleFollowWords,
+                            'guestUrl' => $role->exists ? $role->getGuestUrl() : '',
+                            'labels' => $styleLabels,
+                        ]) }}"></div>
+                    </div>
 
+                    <div class="st-main">
 
-                    <!-- Branding Tab Content -->
+                    <!-- Branding: always on the page -->
                     <div id="style-content-branding">
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.square_profile_image')" />
                                 <input id="profile_image" name="profile_image" type="file" class="hidden"
                                     accept="image/png, image/jpeg" data-file-trigger="profile_image" data-filename-target="profile_image_filename" data-preview-target="profile_image_preview" />
-                                <div id="profile_image_choose" style="{{ $role->profile_image_url ? 'display:none' : '' }}">
-                                    <div class="mt-1 flex items-center gap-3">
-                                        <button type="button" data-trigger-file-input="profile_image"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{ __('messages.choose_file') }}
-                                        </button>
-                                        <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                                    </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
-                                    <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                        {{ __('messages.image_size_warning') }}
-                                    </p>
-                                </div>
-
-                                <div id="profile_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                    <img id="profile_image_preview" src="#" alt="Profile Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
-                                    <button type="button" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                                </div>
-
-                                @if ($role->profile_image_url)
-                                <div id="profile_image_existing" class="relative inline-block mt-4 pt-1" data-show-on-delete="profile_image_choose">
-                                    <img src="{{ $role->profile_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src="{{ $role->profile_image_url }}" />
-                                    <button type="button"
-                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}"
-                                        data-delete-image-token="{{ csrf_token() }}"
-                                        data-delete-image-parent="true"
-                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
-                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                {{-- The tile and the words beside it. Change is offered while a picture
+                                     is stored: it used to take deleting the stored one first. The three
+                                     ids are the ones the page's script, the AI generator and the browser
+                                     tests go by: _choose (the chooser), _preview_clear (a picture that
+                                     was just chosen) and _existing (the stored one). --}}
+                                <div class="st-logo">
+                                    <button type="button" class="st-logo-tile" id="profile_image_tile" data-trigger-file-input="profile_image" aria-label="{{ __('messages.choose_file') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                         </svg>
+                                        @if ($role->profile_image_url)
+                                        <img id="profile_image_stored" src="{{ $role->profile_image_url }}" alt="" />
+                                        @endif
+                                        <img id="profile_image_preview" src="#" alt="" style="display: none;" />
                                     </button>
+                                    <div class="st-logo-actions">
+                                        <div id="profile_image_choose">
+                                            <button type="button" class="event-link" id="profile_image_change" data-trigger-file-input="profile_image"
+                                                data-choose="{{ __('messages.choose_file') }}" data-change="{{ __('messages.change') }}">{{ $role->profile_image_url ? __('messages.change') : __('messages.choose_file') }}</button>
+                                        </div>
+                                        <div id="profile_image_preview_clear" style="display: none;">
+                                            <button type="button" class="event-link is-danger" data-clear-file-input="profile_image" data-clear-preview="profile_image_preview" data-clear-filename="profile_image_filename">{{ __('messages.remove') }}</button>
+                                        </div>
+                                        @if ($role->profile_image_url)
+                                        <div id="profile_image_existing">
+                                            <button type="button" class="event-link is-danger"
+                                                data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'profile']) }}"
+                                                data-delete-image-token="{{ csrf_token() }}"
+                                                data-delete-image-stored="profile_image_stored">{{ __('messages.remove') }}</button>
+                                        </div>
+                                        @endif
+                                        <span id="profile_image_filename" class="st-logo-name"></span>
+                                    </div>
                                 </div>
-                                @endif
+                                <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+                                <p id="profile_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
                             </div>
 
                             <div class="mb-6">
                                 <x-input-label for="accent_color" :value="__('messages.accent_color')" />
-                                <x-text-input id="accent_color" name="accent_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('accent_color', $role->accent_color)" data-action="update-preview-on-input" />
+                                <div class="st-color">
+                                    <x-text-input id="accent_color" name="accent_color" type="color" class="st-well"
+                                        :value="old('accent_color', $role->accent_color)" data-action="update-preview-on-input" />
+                                    <div class="vue-style-color" data-props="{{ $styleProps(['field' => 'accent_color', 'label' => __('messages.accent_color'), 'presets' => $styleAccentPresets]) }}"></div>
+                                </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('accent_color')" />
                             </div>
 
                             <div class="mb-6">
                                 <x-input-label for="font_family" :value="__('messages.font_family')" />
-                                <div class="flex items-center gap-1">
-                                    <select id="font_family" name="font_family" data-searchable data-action="font-family-change"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        @foreach($fonts as $font)
-                                        <option value="{{ $font->value }}"
-                                            {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
-                                            {{ $font->label }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button"
-                                            id="prev_font"
-                                            class="color-nav-button"
-                                            data-nav-action="changeFont" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            id="next_font"
-                                            class="color-nav-button"
-                                            data-nav-action="changeFont" data-nav-direction="1"
-                                            title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                <select id="font_family" name="font_family" data-action="font-family-change"
+                                    class="st-native mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach($fonts as $font)
+                                    <option value="{{ $font->value }}"
+                                        {{ $role->font_family == $font->value ? 'SELECTED' : '' }}>
+                                        {{ $font->label }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="vue-style-font" data-props="{{ $styleProps(['field' => 'font_family', 'labels' => $styleLabels]) }}"></div>
                                 <x-input-error class="mt-2" :messages="$errors->get('font_family')" />
-                                <div id="font_preview" class="mt-3 text-4xl text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
-                                    {{ $role->name }}
-                                </div>
                             </div>
                     </div>
 
                     <div class="event-subrows">
-                    {{-- A row of its own: seven tiles used to stand between the branding fields and the
-                         two rows under them. --}}
-                    <x-form-row group="style" tab="animation" :title="__('messages.list_animation')" pane="style-content-animation" class="style-tab-button" id="style-tab-animation" />
+                    {{-- The rows follow the page from top to bottom: its header, the ground behind
+                         it, the events on it, then CSS of the owner's own. Their ids are the ones
+                         Help, the setup guide and links from other pages name. --}}
+
+                    <!-- Header -->
+                    <x-form-row group="style" tab="advanced" :title="__('messages.style_row_header')" pane="style-content-advanced" class="style-tab-button" id="style-tab-advanced" chip />
+                    <div id="style-content-advanced" class="event-subrow-body" hidden>
+                            <!-- Header Style -->
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.header_style')" />
+                                @php $currentHeaderStyle = old('header_style', $role->headerStyle()); @endphp
+                                <div class="mt-2 event-pills flex-wrap">
+                                    @foreach(['banner', 'compact'] as $hs)
+                                    <label class="event-pill" for="header_style_{{ $hs }}">
+                                        <input type="radio"
+                                            id="header_style_{{ $hs }}"
+                                            name="header_style"
+                                            value="{{ $hs }}"
+                                            data-action="header-style-change"
+                                            {{ $currentHeaderStyle === $hs ? 'checked' : '' }}
+                                            class="sr-only">
+                                        <span>{{ __('messages.header_style_' . $hs) }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.header_style_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('header_style')" />
+                            </div>
+
+                            {{-- The header image belongs to the Banner style. With Compact chosen its
+                                 pictures give way to one line that says so; the choice is kept. --}}
+                            <div class="mb-6" id="style_header_image">
+                                <x-input-label for="header_image" :value="__('messages.header_image')" />
+                                <select id="header_image" name="header_image"
+                                    class="st-native mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                    data-action="header-image-input">
+                                    <option value="none" {{ $headerImageIsNone ? 'SELECTED' : '' }}>
+                                        {{ __('messages.none') }}</option>
+                                    <option value="gradient" {{ $effectiveHeaderImage === 'gradient' ? 'SELECTED' : '' }}>
+                                        {{ __('messages.header_image_gradient') }}</option>
+                                    <option value="logos" {{ $effectiveHeaderImage === 'logos' ? 'SELECTED' : '' }}>
+                                        {{ $role->isVenue() ? __('messages.header_image_logos_talent') : __('messages.header_image_logos_venue') }}</option>
+                                    @foreach($headers as $header => $name)
+                                    <option value="{{ $header }}"
+                                        {{ ! $headerImageIsNone && (string) $effectiveHeaderImage === (string) $header ? 'SELECTED' : '' }}>
+                                        {{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="vue-style-wall" data-props="{{ $styleProps([
+                                    'field' => 'header_image',
+                                    'kind' => 'header',
+                                    'label' => __('messages.header_image'),
+                                    'labels' => $styleLabels,
+                                ]) }}"></div>
+
+                                <div id="logo_wall_settings" style="display:none;">
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $role->isVenue() ? __('messages.header_image_logos_help_venue') : __('messages.header_image_logos_help') }}
+                                    </p>
+                                    @if ($logoWallRoles->isEmpty())
+                                    <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <div class="text-sm text-gray-800 dark:text-gray-200">
+                                            {{ $role->isVenue() ? __('messages.logo_wall_empty_warning_venue') : __('messages.logo_wall_empty_warning') }}
+                                        </div>
+                                    </div>
+                                    @else
+                                    <div class="mt-3">
+                                        <x-input-label :value="__('messages.logo_wall_order')" />
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.logo_wall_order_help') }}</p>
+                                        <input type="hidden" name="logo_wall_order" id="logo_wall_order_input" value="" />
+                                        <ul id="logo-wall-list" class="mt-2 space-y-1">
+                                            @foreach ($logoWallRoles as $wallRole)
+                                            <li class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                                data-role-id="{{ \App\Utils\UrlUtils::encodeId($wallRole->id) }}">
+                                                <span class="drag-handle cursor-grab text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M7 2a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 2zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 8zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 14zm6-12a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 2zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 8zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 14z"/>
+                                                    </svg>
+                                                </span>
+                                                <img src="{{ $wallRole->profile_image_url }}" alt="" class="w-8 h-8 rounded object-contain bg-white flex-shrink-0" />
+                                                <span class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ $wallRole->translatedName() }}</span>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                {{-- A picture of the owner's own. The wall above presses these: its
+                                     Upload tile opens the chooser, and Change and Remove under the
+                                     choices do the rest. What is here is shown only if the islands
+                                     never start. --}}
+                                <div class="st-native">
+                                <div id="custom_header_input" style="display:none" class="mt-4">
+                                    <input id="header_image_url" name="header_image_url" type="file" class="hidden"
+                                        accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" data-preview-target="header_image_url_preview" />
+                                    <div class="mt-1 flex items-center gap-3">
+                                        <button type="button" data-trigger-file-input="header_image_url" class="event-link">{{ __('messages.choose_file') }}</button>
+                                        <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    </div>
+                                    <div id="header_image_url_preview_clear" class="pt-3" style="display: none;">
+                                        <img id="header_image_url_preview" src="#" alt="" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                                        <button type="button" id="clear-header-file-btn" class="event-link is-danger">{{ __('messages.remove') }}</button>
+                                    </div>
+                                </div>
+
+                                @if ($role->header_image_url)
+                                <div id="delete_header_image_button" class="mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
+                                    <img src="{{ $role->header_image_url }}" alt="" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                                    <button type="button" class="event-link is-danger"
+                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
+                                        data-delete-image-token="{{ csrf_token() }}">{{ __('messages.remove') }}</button>
+                                </div>
+                                @endif
+                                </div>
+
+                                <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
+                                <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
+                            </div>
+                            <div class="mb-6" id="style_header_image_note" hidden>
+                                <span class="st-label">{{ __('messages.header_image') }}</span>
+                                <p class="st-note">{{ __('messages.header_image_banner_only') }}</p>
+                            </div>
+                    </div>
+
+                    <!-- Background -->
+                    <x-form-row group="style" tab="background" :title="__('messages.background')" pane="style-content-background" class="style-tab-button" id="style-tab-background" chip />
+                    <div id="style-content-background" class="event-subrow-body" hidden>
+
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.background_type')" />
+                                {{-- old(): a refused save used to come back on the stored type. --}}
+                                <div class="mt-2 event-pills flex-wrap">
+                                    @foreach(['gradient', 'solid', 'image'] as $background)
+                                    <label class="event-pill" for="background_type_{{ $background }}">
+                                        <input type="radio"
+                                            id="background_type_{{ $background }}"
+                                            name="background"
+                                            value="{{ $background }}"
+                                            {{ old('background', $role->background) == $background ? 'checked' : '' }}
+                                            class="sr-only"
+                                            data-action="background-type-change">
+                                        <span>{{ __('messages.' . $background) }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('background')" />
+                            </div>
+
+                            <div class="mb-6" id="style_background_solid" style="display:none">
+                                <x-input-label for="background_color" :value="__('messages.background_color')" />
+                                <div class="st-color">
+                                    <x-text-input id="background_color" name="background_color" type="color" class="st-well"
+                                        :value="old('background_color', $role->background_color)" data-action="update-preview-on-input" />
+                                    <div class="vue-style-color" data-props="{{ $styleProps(['field' => 'background_color', 'label' => __('messages.background_color'), 'presets' => $styleGroundPresets]) }}"></div>
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
+                            </div>
+
+                            <div class="mb-6" id="style_background_image" style="display:none">
+                                <x-input-label for="background_image" :value="__('messages.image')" />
+                                <select id="background_image" name="background_image"
+                                    class="st-native mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                    data-action="background-image-input">
+                                    @foreach($backgrounds as $background => $name)
+                                    <option value="{{ $background }}"
+                                        {{ (string) $effectiveBackgroundImage === (string) $background ? 'SELECTED' : '' }}>
+                                        {{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="vue-style-wall" data-props="{{ $styleProps([
+                                    'field' => 'background_image',
+                                    'kind' => 'background',
+                                    'label' => __('messages.image'),
+                                    'labels' => $styleLabels,
+                                ]) }}"></div>
+
+                                {{-- As under the header's wall: pressed by the wall, shown only if the
+                                     islands never start. --}}
+                                <div class="st-native">
+                                <div id="custom_image_input" style="display:none" class="mt-4">
+                                    <input id="background_image_url" name="background_image_url" type="file" class="hidden"
+                                        accept="image/png, image/jpeg" data-file-trigger="background_image_url" data-filename-target="background_image_url_filename" data-preview-target="background_image_preview" />
+                                    <div class="mt-1 flex items-center gap-3">
+                                        <button type="button" data-trigger-file-input="background_image_url" class="event-link">{{ __('messages.choose_file') }}</button>
+                                        <span id="background_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    </div>
+                                    <div id="background_image_preview_clear" class="pt-3" style="display: none;">
+                                        <img id="background_image_preview" src="" alt="" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                                        <button type="button" class="event-link is-danger" data-clear-file-input="background_image_url" data-clear-preview="background_image_preview" data-clear-filename="background_image_url_filename">{{ __('messages.remove') }}</button>
+                                    </div>
+                                </div>
+
+                                @if ($role->background_image_url)
+                                <div id="background_image_existing" class="mt-4 pt-1">
+                                    <img src="{{ $role->background_image_url }}" alt="" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600" />
+                                    <button type="button" class="event-link is-danger"
+                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
+                                        data-delete-image-token="{{ csrf_token() }}">{{ __('messages.remove') }}</button>
+                                </div>
+                                @endif
+                                </div>
+
+                                {{-- A refused upload has somewhere to say so: this field had no line for it. --}}
+                                <x-input-error class="mt-2" :messages="$errors->get('background_image_url')" />
+                                <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                    {{ __('messages.image_size_warning') }}
+                                </p>
+                            </div>
+
+                            <div id="style_background_gradient" style="display:none">
+                                <div class="mb-6">
+                                    <x-input-label for="background_colors" :value="__('messages.colors')" />
+                                    <select id="background_colors" name="background_colors" data-action="background-colors-input"
+                                        class="st-native mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        @foreach($gradients as $gradient => $name)
+                                        <option value="{{ $gradient }}"
+                                            {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="vue-style-gradient" data-props="{{ $styleProps([
+                                        'field' => 'background_colors',
+                                        'label' => __('messages.colors'),
+                                        'labels' => $styleLabels,
+                                        'credit' => __('messages.gradients_from', ['name' => 'uiGradients']),
+                                        'creditUrl' => 'https://uigradients.com',
+                                    ]) }}"></div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
+
+                                    <div id="custom_colors" style="display:none" class="mt-4">
+                                        <div class="st-custom">
+                                            <div class="st-color">
+                                                <x-input-label for="custom_color1" :value="__('messages.color').' 1'" class="sr-only" />
+                                                <x-text-input id="custom_color1" name="custom_color1" type="color" class="st-well"
+                                                    :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
+                                                    data-action="update-preview-on-input" />
+                                                <div class="vue-style-color" data-props="{{ $styleProps(['field' => 'custom_color1', 'label' => __('messages.color').' 1']) }}"></div>
+                                            </div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor"
+                                                class="st-arrow rtl:-scale-x-100" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                            </svg>
+                                            <div class="st-color">
+                                                <x-input-label for="custom_color2" :value="__('messages.color').' 2'" class="sr-only" />
+                                                <x-text-input id="custom_color2" name="custom_color2" type="color" class="st-well"
+                                                    :value="old('custom_color2', $role->background_colors ? (explode(', ', $role->background_colors)[1] ?? '') : '')"
+                                                    data-action="update-preview-on-input" />
+                                                <div class="vue-style-color" data-props="{{ $styleProps(['field' => 'custom_color2', 'label' => __('messages.color').' 2']) }}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <x-input-label for="background_rotation" :value="__('messages.rotation')" />
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <input id="background_rotation" name="background_rotation" type="range"
+                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                            data-action="rotation-input"
+                                            value="{{ old('background_rotation', $role->background_rotation ?? 0) }}" min="0" max="360" />
+                                        <span id="rotation_value" class="text-sm text-gray-600 dark:text-gray-400 w-12 text-end">{{ old('background_rotation', $role->background_rotation ?? 0) }}°</span>
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- Events: the default layout, and how the cards arrive -->
+                    <x-form-row group="style" tab="animation" :title="__('messages.events')" pane="style-content-animation" class="style-tab-button" id="style-tab-animation" />
                     <div id="style-content-animation" class="event-subrow-body" hidden>
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.default_layout')" />
+                                <div class="mt-2 event-pills flex-wrap">
+                                    @foreach(['calendar', 'list'] as $layout)
+                                    <label class="event-pill" for="event_layout_{{ $layout }}">
+                                        <input type="radio"
+                                            id="event_layout_{{ $layout }}"
+                                            name="event_layout"
+                                            value="{{ $layout }}"
+                                            {{-- eventLayout(), not the raw column: it normalises the dead
+                                                 'grid' enum value so a legacy row still shows a selection.
+                                                 old(): a refused save used to come back on the stored one. --}}
+                                            {{ old('event_layout', $role->eventLayout()) == $layout ? 'checked' : '' }}
+                                            class="sr-only">
+                                        <span>{{ __('messages.' . $layout) }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.default_layout_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
+                            </div>
+
                         {{-- Event animation: how event cards arrive as visitors scroll the schedule
                              (resources/css/list-reveal.css). The radios are plain Blade so the form
                              posts without JS; the island above them plays the chosen design on the
@@ -2186,7 +2154,6 @@
                             <div class="vue-list-animation-picker mb-4" data-props="{{ json_encode([
                                 'saved' => $role->listAnimation(),
                                 'accentColor' => $role->accent_color ?: '#4E81FA',
-                                'font' => $role->font_family ?: '',
                                 'rtl' => in_array($role->language_code, ['ar', 'he'], true),
                                 'guestUrl' => $listAnimationGuestUrl,
                                 'layout' => $role->eventLayout(),
@@ -2238,378 +2205,12 @@
                             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.list_animation_device_motion') }}</p>
                         </fieldset>
                     </div>
-                    <!-- Background Tab Content -->
-                    <x-form-row group="style" tab="background" :title="__('messages.background')" pane="style-content-background" class="style-tab-button" id="style-tab-background" />
-                    <div id="style-content-background" class="event-subrow-body" hidden>
 
-                            <div class="mb-6">
-                                <x-input-label :value="__('messages.background_type')" />
-                                {{-- old(): a refused save used to come back on the stored type. --}}
-                                <div class="mt-2 event-pills flex-wrap">
-                                    @foreach(['gradient', 'solid', 'image'] as $background)
-                                    <label class="event-pill" for="background_type_{{ $background }}">
-                                        <input type="radio"
-                                            id="background_type_{{ $background }}"
-                                            name="background"
-                                            value="{{ $background }}"
-                                            {{ old('background', $role->background) == $background ? 'checked' : '' }}
-                                            class="sr-only"
-                                            data-action="background-type-change">
-                                        <span>{{ __('messages.' . $background) }}</span>
-                                    </label>
-                                    @endforeach
-                                </div>
-                                <x-input-error class="mt-2" :messages="$errors->get('background')" />
-                            </div>
-
-                            <div class="mb-6" id="style_background_solid" style="display:none">
-                                <x-input-label for="background_color" :value="__('messages.background_color')" />
-                                <x-text-input id="background_color" name="background_color" type="color" class="mt-1 block w-1/2"
-                                    :value="old('background_color', $role->background_color)" data-action="update-preview-on-input" />
-                                <x-input-error class="mt-2" :messages="$errors->get('background_color')" />
-                            </div>
-
-                            @php
-                                $effectiveBackgroundImage = $role->background_image;
-                                if ($role->background_image_url && !$effectiveBackgroundImage) {
-                                    $effectiveBackgroundImage = ''; // Custom
-                                }
-                            @endphp
-                            <div class="mb-6" id="style_background_image" style="display:none">
-                                <x-input-label for="image" :value="__('messages.image')" />
-                                <div class="flex items-center gap-1">
-                                    <select id="background_image" name="background_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                        data-searchable data-action="background-image-input">
-                                        @foreach($backgrounds as $background => $name)
-                                        <option value="{{ $background }}"
-                                            {{ $effectiveBackgroundImage == $background ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button"
-                                            id="prev_image"
-                                            class="color-nav-button"
-                                            data-nav-action="changeBackgroundImage" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            id="next_image"
-                                            class="color-nav-button"
-                                            data-nav-action="changeBackgroundImage" data-nav-direction="1"
-                                            title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <img id="background_image_thumb_preview"
-                                    src="{{ $role->background_image && $role->background_image !== 'none' ? asset('images/backgrounds/thumbs/' . $role->background_image . '.jpg') : '' }}"
-                                    alt="Background Image Preview"
-                                    style="max-height:200px; max-width:100%; {{ $effectiveBackgroundImage && $effectiveBackgroundImage !== 'none' && $effectiveBackgroundImage !== '' ? '' : 'display:none;' }}"
-                                    class="pt-3" />
-
-                                <div id="custom_image_input" style="display:none" class="mt-4">
-                                    <input id="background_image_url" name="background_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" data-file-trigger="background_image_url" data-filename-target="background_image_url_filename" data-update-preview="true" />
-                                    <div class="mt-1 flex items-center gap-3">
-                                        <button type="button" data-trigger-file-input="background_image_url"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{ __('messages.choose_file') }}
-                                        </button>
-                                        <span id="background_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                                    </div>
-                                    <p id="background_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                        {{ __('messages.image_size_warning') }}
-                                    </p>
-
-                                    <div id="background_image_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="background_image_preview" src="" alt="Background Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
-                                        <button type="button" data-clear-file-input="background_image_url" data-clear-preview="background_image_preview" data-clear-filename="background_image_url_filename" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                                    </div>
-                                </div>
-
-                                @if ($role->background_image_url)
-                                <div id="background_image_existing" class="relative inline-block mt-4 pt-1">
-                                    <img src="{{ $role->background_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src="{{ $role->background_image_url }}" />
-                                    <button type="button"
-                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'background']) }}"
-                                        data-delete-image-token="{{ csrf_token() }}"
-                                        data-delete-image-parent="true"
-                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
-                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                @endif
-                            </div>
-
-                            <div id="style_background_gradient" style="display:none">
-                                <div class="mb-6">
-                                    <x-input-label for="background_colors" :value="__('messages.colors')" />
-                                    <div class="flex items-center gap-1">
-                                        <select id="background_colors" name="background_colors" data-searchable data-action="background-colors-input"
-                                            class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                            @foreach($gradients as $gradient => $name)
-                                            <option value="{{ $gradient }}"
-                                                {{ $role->background_colors == $gradient || (! array_key_exists($role->background_colors, $gradients) && ! $gradient) ? 'SELECTED' : '' }}>
-                                                {{ $name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <button type="button"
-                                                id="prev_color"
-                                                class="color-nav-button"
-                                                data-nav-action="changeBackgroundColor" data-nav-direction="-1"
-                                                title="{{ __('messages.previous') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                            </svg>
-                                        </button>
-                                        <button type="button"
-                                                id="next_color"
-                                                class="color-nav-button"
-                                                data-nav-action="changeBackgroundColor" data-nav-direction="1"
-                                                title="{{ __('messages.next') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="text-xs pt-1">
-                                        <x-link href="https://uigradients.com" target="_blank">{{ __('messages.gradients_from', ['name' => 'uiGradients']) }}</x-link>
-                                    </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('background_colors')" />
-
-                                    <div id="custom_colors" style="display:none" class="mt-4">
-                                        <div class="flex items-end gap-3">
-                                            <div class="flex-1 min-w-0">
-                                            <x-input-label for="custom_color1" :value="__('messages.color').' 1'" class="text-xs" />
-                                            <x-text-input id="custom_color1" name="custom_color1" type="color"
-                                                class="mt-1 block w-full h-10"
-                                                :value="old('custom_color1', $role->background_colors ? explode(', ', $role->background_colors)[0] : '')"
-                                                data-action="update-preview-on-input" />
-                                            </div>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor"
-                                                class="w-5 h-5 text-gray-400 shrink-0 mb-2.5 rtl:-scale-x-100">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                                            </svg>
-                                            <div class="flex-1 min-w-0">
-                                            <x-input-label for="custom_color2" :value="__('messages.color').' 2'" class="text-xs" />
-                                            <x-text-input id="custom_color2" name="custom_color2" type="color"
-                                                class="mt-1 block w-full h-10"
-                                                :value="old('custom_color2', $role->background_colors ? (explode(', ', $role->background_colors)[1] ?? '') : '')"
-                                                data-action="update-preview-on-input" />
-                                            </div>
-                                        </div>
-                                        <div id="custom_gradient_preview" class="mt-2 h-3 rounded-full"></div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-6">
-                                    <x-input-label for="background_rotation" :value="__('messages.rotation')" />
-                                    <div class="flex items-center gap-3 mt-1">
-                                        <input id="background_rotation" name="background_rotation" type="range"
-                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                                            data-action="rotation-input"
-                                            value="{{ old('background_rotation', $role->background_rotation ?? 0) }}" min="0" max="360" />
-                                        <span id="rotation_value" class="text-sm text-gray-600 dark:text-gray-400 w-12 text-end">{{ old('background_rotation', $role->background_rotation ?? 0) }}°</span>
-                                    </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('background_rotation')" />
-                                </div>
-                            </div>
-                    </div>
-
-                    <!-- Advanced Tab Content -->
-                    <x-form-row group="style" tab="advanced" :title="__('messages.style_row_header_layout')" pane="style-content-advanced" class="style-tab-button" id="style-tab-advanced" />
-                    <div id="style-content-advanced" class="event-subrow-body" hidden>
-                            <!-- Header Style -->
-                            <div class="mb-6">
-                                <x-input-label :value="__('messages.header_style')" />
-                                @php $currentHeaderStyle = old('header_style', $role->headerStyle()); @endphp
-                                <div class="mt-2 event-pills flex-wrap">
-                                    @foreach(['banner', 'compact'] as $hs)
-                                    <label class="event-pill" for="header_style_{{ $hs }}">
-                                        <input type="radio"
-                                            id="header_style_{{ $hs }}"
-                                            name="header_style"
-                                            value="{{ $hs }}"
-                                            data-action="header-style-change"
-                                            {{ $currentHeaderStyle === $hs ? 'checked' : '' }}
-                                            class="sr-only">
-                                        <span>{{ __('messages.header_style_' . $hs) }}</span>
-                                    </label>
-                                    @endforeach
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.header_style_help') }}</p>
-                                <x-input-error class="mt-2" :messages="$errors->get('header_style')" />
-                            </div>
-
-                            @php
-                                $effectiveHeaderImage = $role->header_image;
-                                if ($role->header_image_url && !$effectiveHeaderImage) {
-                                    $effectiveHeaderImage = ''; // Custom
-                                }
-                            @endphp
-                            <div class="mb-6">
-                                <x-input-label for="header_image" :value="__('messages.header_image')" />
-                                <div class="flex items-center gap-1">
-                                    <select id="header_image" name="header_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                        data-searchable data-action="header-image-input">
-                                        <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
-                                            {{ __('messages.none') }}</option>
-                                        <option value="gradient" {{ $effectiveHeaderImage == 'gradient' ? 'SELECTED' : '' }}>
-                                            {{ __('messages.header_image_gradient') }}</option>
-                                        <option value="logos" {{ $effectiveHeaderImage == 'logos' ? 'SELECTED' : '' }}>
-                                            {{ $role->isVenue() ? __('messages.header_image_logos_talent') : __('messages.header_image_logos_venue') }}</option>
-                                        @foreach($headers as $header => $name)
-                                        <option value="{{ $header }}"
-                                            {{ $effectiveHeaderImage == $header ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button"
-                                            id="prev_header"
-                                            class="color-nav-button"
-                                            data-nav-action="changeHeaderImage" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            id="next_header"
-                                            class="color-nav-button"
-                                            data-nav-action="changeHeaderImage" data-nav-direction="1"
-                                            title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <div id="logo_wall_settings" style="display:none;">
-                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $role->isVenue() ? __('messages.header_image_logos_help_venue') : __('messages.header_image_logos_help') }}
-                                    </p>
-                                    @if ($logoWallRoles->isEmpty())
-                                    <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                        </svg>
-                                        <div class="text-sm text-gray-800 dark:text-gray-200">
-                                            {{ $role->isVenue() ? __('messages.logo_wall_empty_warning_venue') : __('messages.logo_wall_empty_warning') }}
-                                        </div>
-                                    </div>
-                                    @else
-                                    <div class="mt-3">
-                                        <x-input-label :value="__('messages.logo_wall_order')" />
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.logo_wall_order_help') }}</p>
-                                        <input type="hidden" name="logo_wall_order" id="logo_wall_order_input" value="" />
-                                        <ul id="logo-wall-list" class="mt-2 space-y-1">
-                                            @foreach ($logoWallRoles as $wallRole)
-                                            <li class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                                                data-role-id="{{ \App\Utils\UrlUtils::encodeId($wallRole->id) }}">
-                                                <span class="drag-handle cursor-grab text-gray-400 dark:text-gray-500 flex-shrink-0">
-                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M7 2a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 2zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 8zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 14zm6-12a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 2zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 8zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 14z"/>
-                                                    </svg>
-                                                </span>
-                                                <img src="{{ $wallRole->profile_image_url }}" alt="" class="w-8 h-8 rounded object-contain bg-white flex-shrink-0" />
-                                                <span class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ $wallRole->translatedName() }}</span>
-                                            </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    @endif
-                                </div>
-
-                                <div id="custom_header_input" style="display:none" class="mt-4">
-                                    <input id="header_image_url" name="header_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" />
-                                    <div class="mt-1 flex items-center gap-3">
-                                        <button type="button" data-trigger-file-input="header_image_url"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{ __('messages.choose_file') }}
-                                        </button>
-                                        <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                                    </div>
-                                    <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
-                                        <button type="button" id="clear-header-file-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
-                                    <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                        {{ __('messages.image_size_warning') }}
-                                    </p>
-                                </div>
-
-                                <img id="header_image_preview"
-                                    src="{{ $role->header_image && ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true) ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
-                                    alt="Header Image Preview"
-                                    style="max-height:120px; {{ $effectiveHeaderImage && ! in_array($effectiveHeaderImage, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true) ? '' : 'display:none;' }}"
-                                    class="pt-3 cursor-pointer" data-lightbox-src />
-
-                                @if ($role->header_image_url)
-                                <div id="delete_header_image_button" class="relative inline-block mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
-                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src="{{ $role->header_image_url }}" />
-                                    <button type="button"
-                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
-                                        data-delete-image-token="{{ csrf_token() }}"
-                                        data-delete-image-parent="true"
-                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
-                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                @endif
-
-                            </div>
-
-                            <div class="mb-6">
-                                <x-input-label :value="__('messages.default_layout')" />
-                                <div class="mt-2 event-pills flex-wrap">
-                                    @foreach(['calendar', 'list'] as $layout)
-                                    <label class="event-pill" for="event_layout_{{ $layout }}">
-                                        <input type="radio"
-                                            id="event_layout_{{ $layout }}"
-                                            name="event_layout"
-                                            value="{{ $layout }}"
-                                            {{-- eventLayout(), not the raw column: it normalises the dead
-                                                 'grid' enum value so a legacy row still shows a selection.
-                                                 old(): a refused save used to come back on the stored one. --}}
-                                            {{ old('event_layout', $role->eventLayout()) == $layout ? 'checked' : '' }}
-                                            class="sr-only">
-                                        <span>{{ __('messages.' . $layout) }}</span>
-                                    </label>
-                                    @endforeach
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.default_layout_help') }}</p>
-                                <x-input-error class="mt-2" :messages="$errors->get('event_layout')" />
-                            </div>
-
+                    <!-- Custom CSS -->
+                    <x-form-row group="style" tab="css" :title="__('messages.custom_css')" pane="style-content-css" class="style-tab-button" id="style-tab-css" :locked="$role->isPro() ? null : 'pro'" />
+                    <div id="style-content-css" class="event-subrow-body" hidden>
                             <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
-                                <x-input-label for="custom_css" :value="__('messages.custom_css')" />
+                                <x-input-label for="custom_css" :value="__('messages.custom_css')" class="sr-only" />
                                 @if ($role->isPro())
                                 <textarea id="custom_css" name="custom_css" {{ is_demo_mode() ? 'disabled' : '' }}
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm font-mono text-sm"
@@ -2620,7 +2221,7 @@
                                 </x-link>
                                 <x-input-error class="mt-2" :messages="$errors->get('custom_css')" />
                                 @elseif ($role->custom_css)
-                                <textarea disabled
+                                <textarea disabled id="custom_css_stored"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm font-mono text-sm opacity-60"
                                     rows="6">{{ $role->custom_css }}</textarea>
                                 <p class="mt-1 text-sm text-amber-600 dark:text-amber-400">{{ __('messages.custom_css_grandfathered') }}</p>
@@ -2651,13 +2252,8 @@
                     </div>
 
 
-                        </div>
+                    </div>
 
-                        <!-- Preview (always visible, right column on desktop) -->
-                        <div class="w-full xl:w-1/2 mt-6 xl:mt-0">
-                            <x-input-label :value="__('messages.preview')" />
-                            <div id="preview" class="h-[210px] w-full"></div>
-                        </div>
                     </div>
 
                     </div>
@@ -6263,9 +5859,10 @@ document.querySelectorAll('.import-field-toggle').forEach(function(toggle) {
     });
 });
 
-// The Style tab's rows. Branding is always on the page; Background and Advanced open in place.
+// The Style tab's rows. Branding is always on the page; Header (advanced), Background, Events
+// (animation) and Custom CSS open in place.
 function showStyleTab(tabName) {
-    if (tabName === 'animation' || tabName === 'background' || tabName === 'advanced') {
+    if (tabName === 'animation' || tabName === 'background' || tabName === 'advanced' || tabName === 'css') {
         window.FormKit.openRow('style', tabName);
     } else {
         window.FormKit.closeRows('style');
@@ -7697,27 +7294,50 @@ document.addEventListener('DOMContentLoaded', function() {
         return kit.join([kit.value('#address1'), kit.value('#city')]) || { text: '', empty: true };
     });
 
-    // Style
+    // Style. A part that is "none" is left out, so a row never reads "Banner · None". The chip
+    // beside two of the lines (the picture, the gradient) is asked of the tab's islands, which
+    // know the addresses; without them the line is words alone.
+    function styleChip(kind) {
+        return window.StyleStudio && window.StyleStudio[kind] ? window.StyleStudio[kind]() : '';
+    }
     function backgroundSummary() {
         var type = kit.radio('background');
+        var text = radioLabel('background');
         if (type === 'gradient') {
-            return kit.join([radioLabel('background'), kit.chosen('#background_colors')]);
+            text = kit.join([text, kit.chosen('#background_colors')]);
+        } else if (type === 'image') {
+            text = kit.join([text, kit.chosen('#background_image')]);
+        } else {
+            text = kit.join([text, kit.value('#background_color').toUpperCase()]);
         }
-        if (type === 'image') {
-            return kit.join([radioLabel('background'), kit.chosen('#background_image')]);
-        }
-        return radioLabel('background');
+        return { text: text, chip: styleChip('backgroundChip') };
     }
     kit.summary('section-style', function() {
         return kit.join([kit.chosen('#font_family'), radioLabel('background')]);
     });
-    kit.summary('style:animation', function() {
-        return radioLabel('list_animation');
+    kit.summary('style:advanced', function() {
+        if (kit.radio('header_style') !== 'banner') {
+            return { text: radioLabel('header_style'), chip: '' };
+        }
+        return {
+            text: kit.join([radioLabel('header_style'), kit.value('#header_image') === 'none' ? '' : kit.chosen('#header_image')]),
+            chip: styleChip('headerChip'),
+        };
     });
     kit.summary('style:background', backgroundSummary);
-    kit.summary('style:advanced', function() {
-        return kit.join([radioLabel('header_style'), radioLabel('event_layout'), kit.value('#custom_css') ? words.custom_css : '']);
+    // The animation is named under Calendar too: it plays on a phone, and whenever a visitor
+    // switches to the list.
+    kit.summary('style:animation', function() {
+        return kit.join([radioLabel('event_layout'), kit.radio('list_animation') === 'none' ? '' : radioLabel('list_animation')]);
     });
+    kit.summary('style:css', function() {
+        var css = document.querySelector('#custom_css, #custom_css_stored');
+        var first = css ? String(css.value || '').trim().split('\n')[0].trim().slice(0, 60) : '';
+        return first ? { text: first } : { text: words.none, empty: true };
+    });
+    // The islands start after this script has run; once they have, the lines are drawn again so
+    // the chips are there.
+    document.addEventListener('style:ready', function() { kit.refresh(); });
 
     // Gallery, Videos and Links
     kit.summary('section-gallery', function() {
@@ -8019,6 +7639,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     kit.refresh();
+    // The Style tab's pickers are islands laid over fields that are out of sight while they run
+    // (class st-js on the tab). If the islands have not started a few seconds after the page
+    // has loaded (a build that failed, a blocked script), the fields come back: the tab is then
+    // today's dropdowns, and still saves.
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var styleTab = document.getElementById('section-style');
+            if (styleTab && ! window.StyleStudio) {
+                styleTab.classList.remove('st-js');
+            }
+        }, 5000);
+    });
     // Not the controls that belong to another form and only sit inside this one's markup (the
     // merge target): choosing one is not a change to the schedule.
     kit.track(form, { ignore: '[form]:not([form="edit-form"])' });
@@ -8907,7 +8539,7 @@ function removeCustomLabel(btn) {
 }
 @endif
 
-function deleteRoleImage(url, token, element) {
+function deleteRoleImage(url, token, element, storedId) {
     if (!confirm(@json(__('messages.are_you_sure'), JSON_UNESCAPED_UNICODE))) {
         return;
     }
@@ -8927,8 +8559,16 @@ function deleteRoleImage(url, token, element) {
                     var target = document.getElementById(showTarget);
                     if (target) target.style.display = '';
                 }
+                // The stored picture drawn somewhere else (the logo's tile) goes with it.
+                var stored = storedId ? document.getElementById(storedId) : null;
+                if (stored) stored.remove();
                 if (typeof toggleCustomHeaderInput === 'function') toggleCustomHeaderInput();
                 if (typeof toggleCustomImageInput === 'function') toggleCustomImageInput();
+                // Whoever draws from the fields is told: the preview went on showing a picture
+                // that had just been deleted. The fields are read again first, because a picture
+                // wall then asks what was read whether a picture of the owner's own is left.
+                if (typeof updatePreview === 'function') updatePreview();
+                document.dispatchEvent(new CustomEvent('style:image-removed'));
             } else {
                 location.reload();
             }
@@ -9496,10 +9136,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 var ids = Array.from(logoWallList.querySelectorAll('[data-role-id]'))
                     .map(function(el) { return el.dataset.roleId; });
                 document.getElementById('logo_wall_order_input').value = JSON.stringify(ids);
-                var imgs = Array.from(logoWallList.querySelectorAll('img')).map(function(i) { return i.src; });
-                logoWallPreviewUrls = imgs.slice(0, 12);
+                // The preview reads the order from the list itself.
                 updatePreview();
+                // A drag fires no input event: the tab is marked by hand, or the bar said
+                // "unsaved changes" without naming Style.
+                window.FormKit.markDirty('section-style');
                 if (window._markFormDirty) window._markFormDirty();
+                window.FormKit.refresh();
             }
         });
     }
@@ -9512,37 +9155,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Navigation action map for prev/next buttons ---
-    var navActionMap = {
-        changeHeaderImage: changeHeaderImage,
-        changeBackgroundImage: changeBackgroundImage,
-        changeBackgroundColor: changeBackgroundColor,
-        changeFont: changeFont
-    };
-
     // --- Delegated click handler on document ---
     document.addEventListener('click', function(e) {
         var btn = e.target.closest('[data-action]');
         if (!btn) {
-            // Check for nav action buttons
-            var navBtn = e.target.closest('[data-nav-action]');
-            if (navBtn) {
-                // The arrows change a select with no input event: say so, or the bar reads
-                // "No unsaved changes" with a new font or background waiting to be saved.
-                window.FormKit.markDirty('section-style');
-                if (window._markFormDirty) { window._markFormDirty(); }
-                setTimeout(window.FormKit.refresh, 0);
-                var fn = navActionMap[navBtn.dataset.navAction];
-                if (fn) fn(parseInt(navBtn.dataset.navDirection));
-                return;
-            }
-
             // Check for trigger file input buttons
             var triggerBtn = e.target.closest('[data-trigger-file-input]');
             if (triggerBtn) {
                 var fileInput = document.getElementById(triggerBtn.dataset.triggerFileInput);
                 if (fileInput) {
-                    fileInput.value = null;
+                    // The field is not emptied first: Change is offered while a picture is
+                    // waiting, and a chooser that was cancelled must leave that picture alone.
                     fileInput.click();
                 }
                 return;
@@ -9558,7 +9181,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check for delete image buttons
             var deleteBtn = e.target.closest('[data-delete-image-url]');
             if (deleteBtn) {
-                deleteRoleImage(deleteBtn.dataset.deleteImageUrl, deleteBtn.dataset.deleteImageToken, deleteBtn.parentElement);
+                deleteRoleImage(deleteBtn.dataset.deleteImageUrl, deleteBtn.dataset.deleteImageToken, deleteBtn.parentElement, deleteBtn.dataset.deleteImageStored);
                 return;
             }
 
@@ -9679,18 +9302,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateEventFieldRegexResult(el.closest('.event-custom-field-item'));
                 break;
             case 'header-image-input':
-                updatePreview();
-                updateHeaderNavButtons();
                 toggleCustomHeaderInput();
+                updatePreview();
                 break;
             case 'background-image-input':
-                updatePreview();
-                updateImageNavButtons();
                 toggleCustomImageInput();
+                updatePreview();
                 break;
             case 'background-colors-input':
                 updatePreview();
-                updateColorNavButtons();
                 break;
             case 'rotation-input':
                 updatePreview();
@@ -9718,12 +9338,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 updatePreview();
                 break;
             case 'font-family-change':
-                onChangeFont();
-                updateFontNavButtons();
+                updatePreview();
                 break;
             case 'header-style-change':
-                updatePreview();
                 toggleHeaderImageForStyle();
+                updatePreview();
                 break;
             case 'sponsor-background-change':
                 updateSponsorBackground();
@@ -9744,18 +9363,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 applyEventFieldRegexPreset(el);
                 break;
             case 'header-image-input':
-                updatePreview();
-                updateHeaderNavButtons();
                 toggleCustomHeaderInput();
+                updatePreview();
                 break;
             case 'background-image-input':
-                updatePreview();
-                updateImageNavButtons();
                 toggleCustomImageInput();
+                updatePreview();
                 break;
             case 'background-colors-input':
                 updatePreview();
-                updateColorNavButtons();
                 break;
             case 'language-change':
                 updateFontOptions();
@@ -10598,6 +10214,7 @@ window.handleAiStyleResults = function(data) {
         var fontSelect = document.getElementById('font_family');
         if (fontSelect) {
             fontSelect.value = data.font_family;
+            fontSelect.dispatchEvent(new Event('input', { bubbles: true }));
             fontSelect.dispatchEvent(new Event('change', { bubbles: true }));
             var fontAction = fontSelect.getAttribute('data-action');
             if (fontAction) {
@@ -10617,16 +10234,14 @@ window.handleAiStyleResults = function(data) {
         input.value = data.profile_image_filename;
         document.getElementById('edit-form').appendChild(input);
 
+        // Shown as a picture that was just chosen: syncLogo() (on style:sync, below) puts it in
+        // the tile in front of the stored one, with its own Remove.
         var previewClear = document.getElementById('profile_image_preview_clear');
         var previewImg = document.getElementById('profile_image_preview');
         if (previewImg && previewClear) {
             previewImg.src = data.profile_image_url;
-            previewClear.style.display = '';
+            previewClear.style.display = 'inline-block';
         }
-        var chooseDiv = document.getElementById('profile_image_choose');
-        if (chooseDiv) chooseDiv.style.display = 'none';
-        var existingDiv = document.getElementById('profile_image_existing');
-        if (existingDiv) existingDiv.style.display = 'none';
     }
 
     // Apply header image
@@ -10688,6 +10303,15 @@ window.handleAiStyleResults = function(data) {
 
     // Branding is always on the page: close whichever row was open so the result is in view.
     showStyleTab('branding');
+
+    // A picture arrives in a hidden field, with no event from any field: the tab is marked
+    // unsaved by hand, and whoever draws from the fields reads them again.
+    if (data.profile_image_filename || data.header_image_filename || data.background_image_filename) {
+        window.FormKit.markDirty('section-style');
+        if (window._markFormDirty) window._markFormDirty();
+    }
+    updatePreview();
+    window.FormKit.refresh();
 };
 </script>
 @endif

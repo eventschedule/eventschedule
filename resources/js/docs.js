@@ -760,9 +760,11 @@ function initSearch(root) {
             e.preventDefault();
             selected = selected <= 0 ? results.length - 1 : selected - 1;
             render();
-        } else if (e.key === 'Enter' && selected >= 0) {
+        } else if (e.key === 'Enter') {
+            // With no row chosen, Enter opens the best match: a search that
+            // shows results and then ignores Enter reads as broken.
             e.preventDefault();
-            window.location.href = results[selected].url;
+            window.location.href = results[Math.max(selected, 0)].url;
         }
     });
 

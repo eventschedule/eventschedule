@@ -1,5 +1,6 @@
 {{--
-    Full-width feature banner for the /features page.
+    Full-width feature banner, written for /features (which is a board of keys since 2026-10)
+    and used today by /for-talent and /for-venues.
 
     One component so all 20 banners stay identical in structure - the old page
     hand-rolled each one and drifted (a missing hover class, mismatched link
@@ -15,7 +16,7 @@
     would silently never fire.
 
     `ground="dark"` is a fixed-dark band, dark in light mode too, for pages that
-    dive somewhere else mid-scroll. Opt-in; /features passes only white/gray.
+    dive somewhere else mid-scroll. Opt-in.
 
     `shot` puts a REAL screen in the frame instead of a drawn panel: the name of a picture
     under public/images/docs (the user guide's screenshots, light and dark, png and webp, made

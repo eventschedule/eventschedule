@@ -410,6 +410,18 @@
     .dark .event-subrow .event-row-summary.is-warn {
       color: #fcd34d;
     }
+    /* What a row has chosen, as a small swatch before its words (form-row's chip). */
+    .event-row-chip {
+      display: inline-block;
+      vertical-align: -0.25rem;
+      width: 1.75rem;
+      height: 1.125rem;
+      margin-inline-end: 0.5rem;
+      border-radius: 0.3125rem;
+      background-size: cover;
+      background-position: center;
+      box-shadow: inset 0 0 0 1px rgb(var(--ap-border-strong));
+    }
     .event-subrow-body {
       padding: 0.75rem 0 0.5rem;
       border-bottom: 1px solid rgb(var(--ap-border));

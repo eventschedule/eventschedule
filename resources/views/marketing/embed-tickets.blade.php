@@ -69,9 +69,9 @@
            not about the journey of a snippet - it is about the part
            itself, seen from the inside. /for-ai-agents owns "The
            Console" (request/response ledger, block cursor), /selfhost
-           owns "The Terminal" (window chrome), /open-source owns "The
-           Commit Log" (spine, unified diff). So: no terminal, no diff,
-           no fake browser bar.
+           owns "The Terminal" (window chrome), /open-source owns "View
+           source" (quoted code with line numbers and a marked line).
+           So: no terminal, no quoted source, no fake browser bar.
 
            THE SIGNATURE SHAPE is a DIMENSION LINE - a hairline with end
            ticks and a monospace label - which is how a datasheet says

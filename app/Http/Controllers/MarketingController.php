@@ -6812,183 +6812,26 @@ class MarketingController extends Controller
     }
 
     /**
-     * Demos page - showcase demo schedules grouped by category
+     * Examples page: the demo schedules, on two walls of their own pictures
      */
     public function demos()
     {
-        $categories = $this->getDemoSchedulesByCategory();
+        $categories = \App\Utils\ExampleSchedules::byCategory();
         $allSchedules = collect($categories)->flatten(1);
+        // What app:generate-example-shots wrote: the schedules' pictures at the size the wall
+        // uses, and the photographs of their pages. Empty on an install that has not run it.
+        $pictures = \App\Utils\ExampleSchedules::shots();
 
         return view('marketing.demos', [
             'categories' => $categories,
             'scheduleCount' => $allSchedules->count(),
             'allSchedules' => $allSchedules->toArray(),
+            'walls' => \App\Utils\ExampleSchedules::walls($categories, $pictures['art']),
+            'art' => $pictures['art'],
+            'shots' => $pictures['shots'],
+            'xray' => $pictures['xray'],
+            'shotsDate' => $pictures['taken'],
         ]);
-    }
-
-    /**
-     * Get demo schedules organized by industry category
-     * Hardcoded data - no database query needed
-     * All URLs point to production eventschedule.com
-     */
-    protected function getDemoSchedulesByCategory(): array
-    {
-        return [
-            'Fitness & Wellness' => [
-                [
-                    'subdomain' => 'meditationclasses',
-                    'name' => 'Meditation Classes',
-                    'description' => 'Daily guided sessions for mindfulness and calm',
-                    'url' => 'https://meditationclasses.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_meditationclasses.png',
-                    'header_image_url' => 'images/examples/header_meditationclasses.png',
-                ],
-                [
-                    'subdomain' => 'weekendyogaretreat',
-                    'name' => 'Weekend Yoga Retreat',
-                    'description' => 'Multi-day weekend retreat with yoga classes',
-                    'url' => 'https://weekendyogaretreat.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_weekendyogaretreat.jpg',
-                    'header_image_url' => 'images/examples/header_weekendyogaretreat.jpeg',
-                ],
-                [
-                    'subdomain' => 'hikingclub',
-                    'name' => 'Hiking Club',
-                    'description' => 'Weekly group hikes and outdoor adventures',
-                    'url' => 'https://hikingclub.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_hikingclub.png',
-                    'header_image_url' => 'images/examples/header_hikingclub.png',
-                ],
-            ],
-            'Music & Entertainment' => [
-                [
-                    'subdomain' => 'battleofthebands',
-                    'name' => 'Battle of the Bands',
-                    'description' => 'Live competition showcasing local bands',
-                    'url' => 'https://battleofthebands.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_battleofthebands.jpg',
-                    'header_image_url' => 'images/examples/header_battleofthebands.jpg',
-                ],
-                [
-                    'subdomain' => 'sufficientgroundscoffeemusic',
-                    'name' => 'Sufficient Grounds',
-                    'description' => 'Acoustic sets and open mic nights at a cafe',
-                    'url' => 'https://sufficientgroundscoffeemusic.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_sufficientgroundscoffeemusic.jpg',
-                    'header_image_url' => 'images/examples/header_sufficientgroundscoffeemusic.png',
-                ],
-                [
-                    'subdomain' => 'villageidiot',
-                    'name' => 'Village Idiot',
-                    'description' => 'Weekly live music lineup at a neighborhood pub',
-                    'url' => 'https://villageidiot.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_villageidiot.png',
-                    'header_image_url' => 'images/examples/header_villageidiot.png',
-                ],
-            ],
-            'Community & Recreation' => [
-                [
-                    'subdomain' => 'communityyouthgroup',
-                    'name' => 'Community Youth Group',
-                    'description' => 'Activities and meetups for young people',
-                    'url' => 'https://communityyouthgroup.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_communityyouthgroup.png',
-                    'header_image_url' => 'images/examples/header_communityyouthgroup.png',
-                ],
-                [
-                    'subdomain' => 'karateclub',
-                    'name' => 'Karate Club',
-                    'description' => 'Martial arts classes for all skill levels',
-                    'url' => 'https://karateclub.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_karateclub.jpg',
-                    'header_image_url' => 'images/examples/header_karateclub.jpg',
-                ],
-                [
-                    'subdomain' => 'countyfairgrounds',
-                    'name' => 'County Fairgrounds',
-                    'description' => 'Seasonal events, fairs, and community gatherings',
-                    'url' => 'https://countyfairgrounds.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_countyfairgrounds.png',
-                    'header_image_url' => 'images/examples/header_countyfairgrounds.jpg',
-                ],
-            ],
-            'Creative & Workshops' => [
-                [
-                    'subdomain' => 'nateswoodworkingshop',
-                    'name' => "Nate's Woodworking Shop",
-                    'description' => 'Hands-on woodworking classes and projects',
-                    'url' => 'https://nateswoodworkingshop.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_nateswoodworkingshop.png',
-                    'header_image_url' => 'images/examples/header_nateswoodworkingshop.png',
-                ],
-                [
-                    'subdomain' => 'painting',
-                    'name' => 'Painting',
-                    'description' => 'Painting sessions for beginners and artists',
-                    'url' => 'https://painting.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_painting.jpg',
-                    'header_image_url' => 'images/examples/header_painting.jpg',
-                ],
-                [
-                    'subdomain' => 'pagesbooknookshop',
-                    'name' => 'Pages Book Nook Shop',
-                    'description' => 'Author readings, book clubs, and signings',
-                    'url' => 'https://pagesbooknookshop.eventschedule.com/',
-                    'profile_image_url' => 'images/examples/profile_pagesbooknookshop.png',
-                    'header_image_url' => 'images/examples/header_pagesbooknookshop.png',
-                ],
-            ],
-            'Springfield' => [
-                [
-                    'subdomain' => 'simpsons',
-                    'name' => 'Springfield Events',
-                    'description' => 'Community events across Springfield venues',
-                    'url' => 'https://simpsons.eventschedule.com/',
-                    'profile_image_url' => 'images/demo/demo_profile_donuts.jpg',
-                    'header_image_url' => 'images/demo/demo_header_town.jpg',
-                ],
-                [
-                    'subdomain' => 'demo-moestavern',
-                    'name' => "Moe's Tavern",
-                    'description' => 'Live music, trivia, and open mic nights',
-                    'url' => 'https://demo-moestavern.eventschedule.com/',
-                    'profile_image_url' => 'images/demo/demo_profile_beer.jpg',
-                    'header_image_url' => 'images/demo/demo_header_bar.jpg',
-                ],
-                [
-                    'subdomain' => 'demo-amphitheater',
-                    'name' => 'Springfield Amphitheater',
-                    'description' => 'Outdoor concerts and performances',
-                    'url' => 'https://demo-amphitheater.eventschedule.com/',
-                    'profile_image_url' => 'images/demo/demo_profile_amphitheater.jpg',
-                    'header_image_url' => 'images/demo/demo_header_concert.jpg',
-                ],
-                [
-                    'subdomain' => 'demo-bowlarama',
-                    'name' => "Barney's Bowl-A-Rama",
-                    'description' => 'Bowling leagues, tournaments, and cosmic bowling nights',
-                    'url' => 'https://demo-bowlarama.eventschedule.com/',
-                    'profile_image_url' => 'images/demo/demo_profile_bowling.jpg',
-                    'header_image_url' => 'images/demo/demo_header_bowling.jpg',
-                ],
-                [
-                    'subdomain' => 'demo-aztectheater',
-                    'name' => 'The Aztec Theater',
-                    'description' => "Classic films and premieres at Springfield's art deco cinema",
-                    'url' => 'https://demo-aztectheater.eventschedule.com/',
-                    'profile_image_url' => 'images/demo/demo_profile_popcorn.jpg',
-                    'header_image_url' => 'images/demo/demo_header_theater.jpg',
-                ],
-                [
-                    'subdomain' => 'demo-lardlad',
-                    'name' => 'Lard Lad Donuts',
-                    'description' => 'Donut tastings, coffee events, and sweet celebrations',
-                    'url' => 'https://demo-lardlad.eventschedule.com/',
-                    'profile_image_url' => 'images/demo/demo_profile_donut_box.jpg',
-                    'header_image_url' => 'images/demo/demo_header_donuts.jpg',
-                ],
-            ],
-        ];
     }
 
     /**
@@ -7673,16 +7516,16 @@ class MarketingController extends Controller
             ['page' => 'Schedule Styling', 'section' => 'Default Layout', 'description' => 'Choose between the month calendar and the list as your schedule\'s default layout.', 'url' => $r['schedule_styling'].'#event-layout', 'category' => 'User Guide', 'keywords' => 'calendar grid list layout display default'],
             ['page' => 'Schedule Styling', 'section' => 'Header Style', 'description' => 'Choose the Banner or Compact header style for your public schedule page.', 'url' => $r['schedule_styling'].'#header-style', 'category' => 'User Guide', 'keywords' => 'header style banner compact slim full-width bar'],
             ['page' => 'Schedule Styling', 'section' => 'Profile Image', 'description' => 'Upload and set your profile or logo image, which also becomes your favicon on Pro.', 'url' => $r['schedule_styling'].'#profile-image', 'category' => 'User Guide', 'keywords' => 'logo avatar photo favicon browser tab icon apple touch home screen'],
-            ['page' => 'Schedule Styling', 'section' => 'Header Image', 'description' => 'Set header banners with presets, custom uploads, or a venue logo wall.', 'url' => $r['schedule_styling'].'#header-images', 'category' => 'User Guide', 'keywords' => 'banner cover header logo wall venue logos'],
-            ['page' => 'Schedule Styling', 'section' => 'Background', 'description' => 'Choose solid color, gradient, or image backgrounds.', 'url' => $r['schedule_styling'].'#backgrounds', 'category' => 'User Guide', 'keywords' => 'background color gradient image'],
-            ['page' => 'Schedule Styling', 'section' => 'Accent Color', 'description' => 'Select accent colors for buttons and interactive elements.', 'url' => $r['schedule_styling'].'#color-scheme', 'category' => 'User Guide', 'keywords' => 'color accent theme palette scheme'],
-            ['page' => 'Schedule Styling', 'section' => 'Font Family', 'description' => 'Choose custom fonts from Google Fonts.', 'url' => $r['schedule_styling'].'#typography', 'category' => 'User Guide', 'keywords' => 'font text typeface google fonts typography'],
+            ['page' => 'Schedule Styling', 'section' => 'Header Image', 'description' => 'Pick a header picture from a wall of presets, upload your own, or show a venue logo wall.', 'url' => $r['schedule_styling'].'#header-images', 'category' => 'User Guide', 'keywords' => 'banner cover header logo wall venue logos pictures thumbnails upload accent gradient'],
+            ['page' => 'Schedule Styling', 'section' => 'Background', 'description' => 'Choose a gradient by its swatch, a solid color, or an image background.', 'url' => $r['schedule_styling'].'#backgrounds', 'category' => 'User Guide', 'keywords' => 'background color gradient image swatch rotation hex upload'],
+            ['page' => 'Schedule Styling', 'section' => 'Accent Color', 'description' => 'Set the accent color for buttons and highlights, with a picker, a hex code or a preset.', 'url' => $r['schedule_styling'].'#color-scheme', 'category' => 'User Guide', 'keywords' => 'color accent theme palette scheme hex'],
+            ['page' => 'Schedule Styling', 'section' => 'Font Family', 'description' => 'Choose a Google Font from a list that shows your schedule\'s name in each one.', 'url' => $r['schedule_styling'].'#typography', 'category' => 'User Guide', 'keywords' => 'font text typeface google fonts typography search'],
             ['page' => 'Schedule Styling', 'section' => 'Event Animation', 'description' => 'Animate event cards as visitors scroll your schedule.', 'url' => $r['schedule_styling'].'#list-animation', 'category' => 'User Guide', 'keywords' => 'animation motion scroll reveal rise focus slide deal shine curtain effect'],
             ['page' => 'Schedule Styling', 'section' => 'AI Style Generator', 'description' => 'Use AI to generate cohesive branding, images, colors, and fonts (Enterprise).', 'url' => $r['schedule_styling'].'#ai-style-generator', 'category' => 'User Guide', 'keywords' => 'ai generate style branding images automatic'],
             ['page' => 'Schedule Styling', 'section' => 'Remove Branding', 'description' => 'Remove the "Powered by Event Schedule" badge (Pro), and what a selfhosted install keeps.', 'url' => $r['schedule_styling'].'#remove-branding', 'category' => 'User Guide', 'keywords' => 'branding badge powered by white label selfhost attribution credit licence'],
             ['page' => 'Schedule Styling', 'section' => 'Custom CSS', 'description' => 'Add custom CSS for advanced styling (Pro).', 'url' => $r['schedule_styling'].'#custom-css', 'category' => 'User Guide', 'keywords' => 'css stylesheet custom code'],
             ['page' => 'Schedule Styling', 'section' => 'Hiding Sections', 'description' => 'Hide any panel on your schedule or event pages with one line of CSS (Pro).', 'url' => $r['schedule_styling'].'#hiding-sections', 'category' => 'User Guide', 'keywords' => 'hide remove section panel css display none notify me performer list'],
-            ['page' => 'Schedule Styling', 'section' => 'Live Preview', 'description' => 'Preview styling changes in real time.', 'url' => $r['schedule_styling'].'#live-preview', 'category' => 'User Guide', 'keywords' => 'preview real-time'],
+            ['page' => 'Schedule Styling', 'section' => 'Live Preview', 'description' => 'See your header, events, background and colors as you change them, in light and dark.', 'url' => $r['schedule_styling'].'#live-preview', 'category' => 'User Guide', 'keywords' => 'preview real-time light dark view schedule not saved'],
 
             // Managing Schedules
             ['page' => 'Managing Schedules', 'section' => 'Overview', 'description' => 'Introduction to the schedule admin panel and tabs.', 'url' => $r['managing_schedules'].'#overview', 'category' => 'User Guide', 'keywords' => 'admin panel dashboard'],

@@ -515,7 +515,7 @@ return [
     'notify_group_followers' => 'E-Mails an Follower',
     'notify_group_shared' => 'Gemeinsames Postfach',
     'address_is_public' => 'Diese Adresse ist öffentlich: Sie wird auf Ihrer Zeitplan-Seite und bei Ihren Veranstaltungen angezeigt.',
-    'style_row_header_layout' => 'Kopfzeile und Layout',
+    'style_row_header' => 'Kopfzeile',
     'integration_row_feeds' => 'Kalendertext und Feeds',
     'language_and_time' => 'Sprache und Zeit',
     'show_announcement_bar' => 'Ankündigungsleiste anzeigen',

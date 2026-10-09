@@ -1059,7 +1059,7 @@ return [
     'notify_group_followers' => 'E-mails aan volgers',
     'notify_group_shared' => 'Gedeelde inbox',
     'address_is_public' => 'Dit adres is openbaar: het staat op je schemapagina en bij je evenementen.',
-    'style_row_header_layout' => 'Kop en layout',
+    'style_row_header' => 'Kop',
     'integration_row_feeds' => 'Agendatekst en feeds',
     'language_and_time' => 'Taal en tijd',
     'show_announcement_bar' => 'Aankondigingsbalk tonen',

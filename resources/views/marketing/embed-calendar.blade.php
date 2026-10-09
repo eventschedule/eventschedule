@@ -57,9 +57,9 @@
            the metaphor: you paste once, and the rectangle is never out
            of date again.
 
-           DEVICES THIS PAGE MUST NOT BUILD. /open-source owns "The
-           Commit Log": a spine with nodes, path chips and a unified
-           diff. /for-ai-agents owns "The Console": a request/response
+           DEVICES THIS PAGE MUST NOT BUILD. /open-source owns "View
+           source": quotations of the app's own code with line numbers,
+           a marked line and path chips. /for-ai-agents owns "The Console": a request/response
            ledger, a block-cursor status line and an always-dark code
            surface. /selfhost owns "The Terminal" with window chrome.
            So there is no gutter of line numbers, no +/- diff, no fake
@@ -85,8 +85,9 @@
            as gradient heading text, because a paste starts life as
            selected text. #0b4fc7 (6.29 on the cool ground) and #9cc0ff
            (11.6 on the ink ground). Deliberately not the shared brand
-           ramp #4E81FA -> #0EA5E9 -> #22D3EE, and deliberately not
-           /open-source's near-monochrome #1e40af / #8fb3ff. No cyan or
+           ramp #4E81FA -> #0EA5E9 -> #22D3EE, and deliberately not the
+           near-monochrome #1e40af / #8fb3ff that /open-source carried
+           until its 2026-10 rebuild. No cyan or
            sky stop: /for-djs, /for-venues and /for-dance-groups hold
            those.
 

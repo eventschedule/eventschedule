@@ -173,7 +173,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Style</span></td>
-                        <td>Your <strong class="text-gray-900 dark:text-white">Square Profile Image</strong> (your logo), accent colour and font, with a preview beside them. Three rows under them: <strong class="text-gray-900 dark:text-white">Event animation</strong>, <strong class="text-gray-900 dark:text-white">Background</strong>, and <strong class="text-gray-900 dark:text-white">Header and layout</strong>, which holds the header style, header image, default event layout and custom CSS. Full reference in <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. Custom CSS requires <x-doc-badge plan="pro" link /></td>
+                        <td>Your <strong class="text-gray-900 dark:text-white">Square Profile Image</strong> (your logo), accent colour and font, with a preview of your page beside them. Four rows under them, in the order of your page: <strong class="text-gray-900 dark:text-white">Header</strong> (the header style and header image), <strong class="text-gray-900 dark:text-white">Background</strong>, <strong class="text-gray-900 dark:text-white">Events</strong> (the default layout and the event animation) and <strong class="text-gray-900 dark:text-white">Custom CSS</strong>. Full reference in <a href="{{ route('marketing.docs.schedule_styling') }}" class="doc-link">Schedule Styling</a>. Custom CSS requires <x-doc-badge plan="pro" link /></td>
                         <td>Every schedule</td>
                     </tr>
                     <tr>
