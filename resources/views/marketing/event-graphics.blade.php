@@ -776,7 +776,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-gal-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        You already have the artwork. Event Schedule hangs the flyers sitting on your upcoming events into one image, and writes the caption to go with it. There is no editor to open, no template to fill in and no canvas to drag things around on. You decide how the work is hung, and press generate.
+                        You already have the artwork. Event Schedule hangs the flyers sitting on your upcoming events into one image, and writes the caption to go with it. There is no editor to open, no template to fill in and no canvas to drag things around on. You decide how the work is hung, and the image redraws as you choose.
                     </p>
 
                     <div class="es-fade-up es-d-3 mb-9 flex flex-wrap gap-2">
@@ -1284,7 +1284,7 @@
                 </div>
 
                 <!-- 6 -->
-                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                <div id="scheduled-email" class="es-bento group relative scroll-mt-24 lg:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-gal-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">

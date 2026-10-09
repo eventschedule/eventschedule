@@ -326,13 +326,13 @@ class GuestFunnelTest extends TestCase
     {
         $fan = $this->createOwner();
 
-        $this->actingAs($fan)->get(route('role.follow', ['subdomain' => $this->role->subdomain]), $this->browser());
+        $this->actingAs($fan)->post(route('role.follow', ['subdomain' => $this->role->subdomain]), [], $this->browser());
         $this->assertTrue($fan->fresh()->isConnected($this->role->subdomain));
         $this->assertSame(1, $this->stat('gp_follows'));
 
         // Pressing Follow again changes nothing, so it counts nothing (from another address, so
         // this is not the once-a-day rule answering).
-        $this->actingAs($fan)->get(route('role.follow', ['subdomain' => $this->role->subdomain]), $this->browser('203.0.113.50'));
+        $this->actingAs($fan)->post(route('role.follow', ['subdomain' => $this->role->subdomain]), [], $this->browser('203.0.113.50'));
         $this->assertSame(1, $this->stat('gp_follows'));
         auth()->logout();
 
@@ -344,7 +344,7 @@ class GuestFunnelTest extends TestCase
         // A follow made as the stop on the way to a booking request is not somebody choosing to follow.
         $booker = $this->createOwner();
         $this->actingAs($booker)->withSession(['pending_request' => $this->role->subdomain])
-            ->get(route('role.follow', ['subdomain' => $this->role->subdomain]), $this->browser('203.0.113.52'));
+            ->post(route('role.follow', ['subdomain' => $this->role->subdomain]), [], $this->browser('203.0.113.52'));
         $this->assertTrue($booker->fresh()->isConnected($this->role->subdomain));
         $this->assertSame(2, $this->stat('gp_follows'));
     }

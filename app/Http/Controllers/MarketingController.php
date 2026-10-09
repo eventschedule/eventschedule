@@ -310,6 +310,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Event Lineup page: the lineup, pages for the acts listed, the logo wall and sponsors
+     */
+    public function lineup()
+    {
+        return view('marketing.lineup');
+    }
+
+    /**
      * Community Event Calendar page
      */
     public function communityEventCalendar()
@@ -7873,15 +7881,16 @@ class MarketingController extends Controller
 
             // Event Graphics
             ['page' => 'Event Graphics', 'section' => 'Overview', 'description' => 'Generate a shareable image and ready-to-paste text from your upcoming events, free on every plan.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'graphics images social media flyer free plan credit watermark download copy'],
-            ['page' => 'Event Graphics', 'section' => 'Image Size', 'description' => 'Fit the graphic to a fixed social format: Square, Portrait, Story, or Landscape, or leave it on Auto.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'image size square portrait story landscape auto 1080 1200 630 social format instagram facebook dimensions aspect ratio'],
-            ['page' => 'Event Graphics', 'section' => 'Events Per Schedule', 'description' => 'Cap how many events any one talent or venue can contribute so a single act or room cannot fill the graphic.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'events per schedule max limit cap talent venue variety diversity same band repeat dominate spread lineup unlimited'],
+            ['page' => 'Event Graphics', 'section' => 'Layout and Shape', 'description' => 'Grid, Rows or List, flyers per row, and a fixed social shape: Square, Portrait, Story or Wide, or leave it on Natural.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'layout grid rows list flyers per row shape image size square portrait story wide landscape natural auto 1080 1200 630 social format instagram facebook dimensions aspect ratio'],
+            ['page' => 'Event Graphics', 'section' => 'Which Events', 'description' => 'Which upcoming events are used, how many, a limit per talent or venue, and leaving recurring events out.', 'url' => $r['event_graphics'].'#events', 'category' => 'User Guide', 'keywords' => 'events number of events limit per talent venue per schedule max cap variety diversity same band repeat dominate spread lineup unlimited recurring exclude flyer required'],
+            ['page' => 'Event Graphics', 'section' => 'Dates and Numbers', 'description' => 'A date strip on or above each flyer, your own text in place of the date, and a numbered badge per flyer.', 'url' => $r['event_graphics'].'#dates-and-numbers', 'category' => 'User Guide', 'keywords' => 'date strip overlay above flyer show text number badge numbered flyers'],
             ['page' => 'Event Graphics', 'section' => 'Header & Footer Text', 'description' => 'Add a headline above and a sign-off below the events.', 'url' => $r['event_graphics'].'#header-footer-text', 'category' => 'User Guide', 'keywords' => 'header footer text headline tagline branding signoff'],
-            ['page' => 'Event Graphics', 'section' => 'Text Template', 'description' => 'Customize text formatting for event graphics.', 'url' => $r['event_graphics'].'#text-template', 'category' => 'User Guide', 'keywords' => 'template text format'],
+            ['page' => 'Event Graphics', 'section' => 'Text Template', 'description' => 'How each event is written in the caption that goes with the graphic.', 'url' => $r['event_graphics'].'#text-template', 'category' => 'User Guide', 'keywords' => 'template text format caption wording whatsapp bold'],
             ['page' => 'Event Graphics', 'section' => 'Quick Reference', 'description' => 'Essential template variables at a glance.', 'url' => $r['event_graphics'].'#quick-reference', 'category' => 'User Guide', 'keywords' => 'variables reference cheatsheet price discount before after coupon'],
             ['page' => 'Event Graphics', 'section' => 'All Template Variables', 'description' => 'Complete list of available template variables.', 'url' => $r['event_graphics'].'#variables', 'category' => 'User Guide', 'keywords' => 'variables placeholders tokens price discount before after coupon'],
-            ['page' => 'Event Graphics', 'section' => 'AI Text Prompt', 'description' => 'Use AI to transform generated text (Enterprise).', 'url' => $r['event_graphics'].'#ai-prompt', 'category' => 'User Guide', 'keywords' => 'ai prompt transform text'],
-            ['page' => 'Event Graphics', 'section' => 'Email Scheduling', 'description' => 'Schedule automatic graphic emails (Enterprise).', 'url' => $r['event_graphics'].'#email-scheduling', 'category' => 'User Guide', 'keywords' => 'email schedule automatic send'],
-            ['page' => 'Event Graphics', 'section' => 'Text Options', 'description' => 'The switches that decide what the text beside the graphic includes.', 'url' => $r['event_graphics'].'#text-options', 'category' => 'User Guide', 'keywords' => 'text options url link short'],
+            ['page' => 'Event Graphics', 'section' => 'AI Text Prompt', 'description' => 'Tell AI how to rewrite the caption (Enterprise).', 'url' => $r['event_graphics'].'#ai-prompt', 'category' => 'User Guide', 'keywords' => 'ai prompt transform text rewrite caption instruction'],
+            ['page' => 'Event Graphics', 'section' => 'Email Scheduling', 'description' => 'Have the graphic and its caption emailed daily, weekly or monthly (Enterprise).', 'url' => $r['event_graphics'].'#email-scheduling', 'category' => 'User Guide', 'keywords' => 'email schedule scheduled automatic send it now last sent'],
+            ['page' => 'Event Graphics', 'section' => 'Caption Options', 'description' => 'The switches that decide what the caption beside the graphic includes.', 'url' => $r['event_graphics'].'#text-options', 'category' => 'User Guide', 'keywords' => 'caption text options url link short https event id english every upcoming event'],
 
             // Analytics
             ['page' => 'Analytics', 'section' => 'Overview', 'description' => 'Introduction to the analytics dashboard.', 'url' => $r['analytics'].'#overview', 'category' => 'User Guide', 'keywords' => 'analytics dashboard stats'],

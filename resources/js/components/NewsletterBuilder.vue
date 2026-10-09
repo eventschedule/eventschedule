@@ -815,7 +815,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <iframe ref="livePreviewFrame" class="block border-0 bg-white"
+                        <iframe ref="livePreviewFrame" class="block border-0 bg-white" sandbox
                                 :style="previewFrameStyle"
                                 srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Loading preview...</body></html>">
                         </iframe>

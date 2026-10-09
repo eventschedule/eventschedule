@@ -3,6 +3,9 @@
 // DevTools protocol with Node's built-in WebSocket, and frames are encoded by the ffmpeg that
 // Playwright ships (mjpeg in, VP8 WebM out). See README.md.
 //
+// The film is cut: the page lists its hard cuts in window.CUTS, and a frame's motion-blur
+// samples are kept on that frame's own side of each (see frameTimes).
+//
 //   node render.mjs --preview --out=preview.webm       960x540, 30fps, no motion blur
 //   node render.mjs --final --out=showreel.webm        1920x1080, 60fps, 8 to 16-sample motion blur
 //   node render.mjs --mobile --mp4=showreel-m.mp4      960x540, 30fps, motion blur, H.264 only
@@ -11,7 +14,8 @@
 // Options: --theme=dark|light (default dark), --from=S --to=S (seconds), --workers=N, --scale=F,
 //          --fps=N, --samples=N, --keep, --port-base=N (default 9400; give two parallel renders
 //          different bases), --mp4=FILE (also write H.264; needs a full ffmpeg on PATH or
-//          FFMPEG_FULL), --poster=FILE with --poster-at=S (the frame at S seconds; default the last)
+//          FFMPEG_FULL), --poster=FILE with --poster-at=S (a clean still at S seconds; default the
+//          last frame)
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -68,7 +72,7 @@ class CDP {
 
 async function launch(i) {
   const port = portBase + i, dir = fs.mkdtempSync(path.join(os.tmpdir(), 'showreel-chrome-'));
-  const proc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, '--hide-scrollbars', '--force-device-scale-factor=1',
+  const proc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, '--hide-scrollbars', '--force-device-scale-factor=1', '--force-color-profile=srgb',
     '--no-first-run', '--no-default-browser-check', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--mute-audio', 'about:blank'], { stdio: 'ignore' });
   let targets;
   for (let k = 0; k < 100; k++) { try { targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json(); if (targets.some(t => t.type === 'page')) break; } catch {} await sleep(100); }
@@ -97,10 +101,13 @@ async function grab(cdp, t, format = 'jpeg') {
 }
 
 // The page lists its fastest windows in window.FAST; frames inside them get fastSamples.
-let FAST = [];
+let FAST = [], CUTS = [];
+// A frame's blur samples stay on its own side of a hard cut (window.CUTS): a frame that straddled
+// one would average two shots into a one-frame dissolve.
 function frameTimes(f) {
-  const n = FAST.some(([a, b]) => f / fps >= a && f / fps <= b) ? fastSamples : samples, ts = [];
-  for (let s = 0; s < n; s++) ts.push(Math.min(DUR - 1e-4, Math.max(0, (f + (n > 1 ? ((s + .5) / n - .5) * shutter : 0)) / fps)));
+  const c = f / fps, n = FAST.some(([a, b]) => c >= a && c <= b) ? fastSamples : samples, ts = [];
+  const lo = Math.max(0, ...CUTS.filter(k => k <= c + 1e-9)), hi = Math.min(DUR, ...CUTS.filter(k => k > c + 1e-9));
+  for (let s = 0; s < n; s++) ts.push(Math.min(hi - 1e-4, Math.max(lo, (f + (n > 1 ? ((s + .5) / n - .5) * shutter : 0)) / fps)));
   return ts;
 }
 
@@ -129,6 +136,7 @@ async function video() {
     if (a >= b) return;
     const { cdp, close } = await launch(w);
     FAST = (await cdp.send('Runtime.evaluate', { expression: 'window.FAST || []', returnByValue: true })).result.value;
+    CUTS = (await cdp.send('Runtime.evaluate', { expression: 'window.CUTS || []', returnByValue: true })).result.value;
     const blend = fastSamples > 1 ? spawn('python3', [path.join(here, 'blend.py'), tmp], { stdio: ['pipe', 'ignore', 'inherit'] }) : null;
     try {
       for (let f = a; f < b; f++) {
@@ -179,16 +187,20 @@ async function video() {
     console.log(`${mp4} (${(fs.statSync(mp4).size / 1048576).toFixed(1)} MB)`);
   }
   // The poster is what a visitor sees before the reel plays, and all they ever see under reduced
-  // motion, Save-Data or iOS Low Power Mode, so it is a chosen frame (--poster-at), not just the
-  // last one. Re-encoded at quality 82: it is a 1080p frame that phones load too.
+  // motion, Save-Data or iOS Low Power Mode, so it is a chosen moment (--poster-at), not just the
+  // last frame. It is taken as its own PNG still, with no motion blur and no JPEG behind it, and
+  // saved once at quality 82: it is a 1080p frame that phones load too.
   if (A.poster) {
-    const at = A['poster-at'] != null ? Math.round(+A['poster-at'] * fps) - f0 : files.length - 1;
-    if (at < 0 || at >= files.length) throw new Error(`--poster-at=${A['poster-at']} is outside the rendered range`);
+    const at = A['poster-at'] != null ? +A['poster-at'] : to - 1 / fps;
+    if (at < 0 || at >= DUR) throw new Error(`--poster-at=${A['poster-at']} is outside the film`);
+    const { cdp, close } = await launch(0);
+    let png; try { png = await grab(cdp, at, 'png'); } finally { close(); }
+    const still = path.join(tmp, 'poster.png'); fs.writeFileSync(still, png);
     await new Promise((res, rej) => {
-      const p = spawn('python3', ['-c', 'import sys; from PIL import Image; Image.open(sys.argv[1]).save(sys.argv[2], quality=82, optimize=True, progressive=True)', path.join(tmp, files[at]), path.resolve(A.poster)], { stdio: 'inherit' });
+      const p = spawn('python3', ['-c', 'import sys; from PIL import Image; Image.open(sys.argv[1]).convert("RGB").save(sys.argv[2], quality=82, optimize=True, progressive=True)', still, path.resolve(A.poster)], { stdio: 'inherit' });
       p.on('close', c => c ? rej(new Error(`poster encode exited ${c}`)) : res());
     });
-    console.log(`${path.resolve(A.poster)} (frame at ${((at + f0) / fps).toFixed(2)}s)`);
+    console.log(`${path.resolve(A.poster)} (still at ${at.toFixed(2)}s)`);
   }
   if (A.keep) console.log(`frames kept in ${tmp}`); else fs.rmSync(tmp, { recursive: true, force: true });
   if (webm) console.log(`${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB) in ${((Date.now() - started) / 1000).toFixed(0)}s`);

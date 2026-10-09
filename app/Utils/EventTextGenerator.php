@@ -95,10 +95,18 @@ class EventTextGenerator
 
     /**
      * Get the default text template
+     *
+     * ONE default, for the Events graphic page and for the server. The page used to carry its
+     * own copy with a {short_description} line this one lacked, so what a schedule previewed
+     * (and saved, on its first Save) was not what a request with no template produced. A line
+     * whose variables are all empty is dropped, so an event with no short description reads as
+     * it did before. A schedule whose scheduled email was on with no wording stored had the
+     * earlier wording written down for it (migration keep_graphic_email_wording), so no email
+     * that was already going out gained the line.
      */
     public static function getDefaultTemplate()
     {
-        return "*{day_name}* {date_dmy} | {time}\n*{event_name}*:\n{venue} | {city}\n{url}";
+        return "*{day_name}* {date_dmy} | {time}\n*{event_name}*:\n{short_description}\n{venue} | {city}\n{url}";
     }
 
     /**
@@ -244,6 +252,12 @@ class EventTextGenerator
         foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
             $index = $fieldConfig['index'] ?? $fallbackIndex;
             $fallbackIndex++;
+            // A private answer is the owner's alone: it is not written into an address, a text or a
+            // graphic that other people are shown. Its token stays empty.
+            if (! empty($fieldConfig['private'])) {
+                continue;
+            }
+
             if ($index >= 1 && $index <= 10) {
                 $value = $customFieldValues[$fieldKey] ?? '';
                 // Convert boolean values to Yes/No for switch type

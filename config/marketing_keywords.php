@@ -92,6 +92,7 @@ return [
     '/features/waitlist' => ['keyword' => 'ticket waitlist'],
     '/features/registration' => ['keyword' => 'free event registration'],
     '/features/booking-requests' => ['keyword' => 'booking request form'],
+    '/features/lineup' => ['keyword' => 'event lineup'],
     '/features/white-label' => ['keyword' => 'remove branding', 'match' => ['remove Event Schedule branding']],
 
     // Audiences

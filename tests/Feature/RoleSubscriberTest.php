@@ -470,7 +470,7 @@ class RoleSubscriberTest extends TestCase
         $user = $this->createOwner();
 
         $this->actingAs($user)
-            ->get(route('role.follow', ['subdomain' => $this->role->subdomain]))
+            ->post(route('role.follow', ['subdomain' => $this->role->subdomain]))
             ->assertRedirect();
 
         $this->assertSame(1, \DB::table('role_user')

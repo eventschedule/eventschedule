@@ -22,7 +22,7 @@
     .es-date-month { color: var(--es-date-month); }
     .dark .es-date-month { color: var(--es-date-month-dark); }
 </style>
-<div class="flex h-full flex-col" id="calendar-app">
+<div class="flex h-full flex-col" id="calendar-app" data-vue-root>
 @php
     $role = $role ?? null;
     // A custom label is the schedule owner's own text, and this whole partial is one Vue mount:
@@ -5048,7 +5048,7 @@ if (typeof FileReader !== 'undefined') {
     calendarApp.config.globalProperties.FileReader = FileReader;
 }
 calendarApp.directive('list-reveal', listReveal);
-const calendarAppInstance = calendarApp.mount('#calendar-app');
+const calendarAppInstance = calendarApp.mount('#calendar-app[data-vue-root]');
 window.calendarVueApp = calendarAppInstance;
 
 // The filter buttons in the schedule's header (role/partials/headers/tools): a badge on each

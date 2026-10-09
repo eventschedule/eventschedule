@@ -575,6 +575,15 @@ class NewsletterService
         return $html;
     }
 
+    /**
+     * What ties a click link to the one address it was written for. Without it the link went
+     * wherever its last segment said, for anybody holding any recipient's token.
+     */
+    public static function clickSignature(string $token, string $url): string
+    {
+        return substr(hash_hmac('sha256', 'newsletter-click|'.$token.'|'.$url, (string) config('app.key')), 0, 32);
+    }
+
     public function rewriteLinks(string $html, NewsletterRecipient $recipient): string
     {
         return preg_replace_callback(
@@ -597,7 +606,7 @@ class NewsletterService
                     return $matches[0];
                 }
                 $encodedUrl = rtrim(strtr(base64_encode($url), '+/', '-_'), '=');
-                $trackingUrl = url('/nl/c/'.$recipient->token.'/'.$encodedUrl);
+                $trackingUrl = url('/nl/c/'.$recipient->token.'/'.self::clickSignature((string) $recipient->token, $url).'/'.$encodedUrl);
 
                 return '<a '.$matches[1].'href="'.$trackingUrl.'"';
             },

@@ -209,7 +209,7 @@
         </div>
 
         {{-- Vue submission app --}}
-        <div id="event-submit-app">
+        <div id="event-submit-app" data-vue-root>
 
           <form v-show="!submitted && step === 'form'" @submit.prevent="submitEvent" @paste="onFormPaste" novalidate>
 

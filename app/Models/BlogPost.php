@@ -17,6 +17,26 @@ class BlogPost extends Model
     /** similar_text() percent at or above which a title counts as a repeat. */
     public const QUALITY_MAX_SIMILARITY = 80.0;
 
+    /** Posts a section needs before it is a page of its own: a chip, an indexable page, a sitemap line. */
+    public const SECTION_MIN_POSTS = 3;
+
+    /**
+     * The blog's sections: one a post, chosen from this list, in the order the index shows them.
+     * `line` is the sentence under the section's name on its own page.
+     */
+    public const CATEGORIES = [
+        'selling-tickets' => ['name' => 'Selling tickets', 'line' => 'Pricing, ticket types, fees, door sales and refunds.'],
+        'promotion' => ['name' => 'Getting the word out', 'line' => 'Flyers, social posts, listings and anything else that fills the room.'],
+        'on-the-day' => ['name' => 'On the day', 'line' => 'The door, check-in, helpers, late changes and what to do when plans move.'],
+        'calendars' => ['name' => 'Calendars and websites', 'line' => 'Putting your events on your own site and keeping every calendar in step.'],
+        'email' => ['name' => 'Email and followers', 'line' => 'Building a list from your events and writing to it.'],
+        'classes' => ['name' => 'Classes and series', 'line' => 'Anything that repeats: classes, workshops, passes and weekly nights.'],
+        'venues' => ['name' => 'Venues and bookings', 'line' => 'Taking bookings, sharing dates with performers and running a room.'],
+        'online' => ['name' => 'Online events', 'line' => 'Streams, webinars and events with one foot in each world.'],
+        'planning' => ['name' => 'Planning', 'line' => 'Budgets, sponsors, access and the work before the doors open.'],
+        'by-event' => ['name' => 'By kind of event', 'line' => 'How people who run your kind of event set theirs up.'],
+    ];
+
     public function encodeId()
     {
         return UrlUtils::encodeId($this->id);
@@ -35,6 +55,13 @@ class BlogPost extends Model
         'author_name',
         'is_published',
         'view_count',
+        'category',
+        'primary_query',
+        'faq',
+        'source',
+        'held_reason',
+        'redirect_slug',
+        'review',
     ];
 
     protected $casts = [
@@ -42,6 +69,8 @@ class BlogPost extends Model
         'published_at' => 'datetime',
         'is_published' => 'boolean',
         'noindex' => 'boolean',
+        'faq' => 'array',
+        'review' => 'array',
     ];
 
     // Generic header images that work well for blog posts
@@ -108,10 +137,21 @@ class BlogPost extends Model
         return $slug;
     }
 
+    /**
+     * Posts a visitor can read. A post merged into another (redirect_slug) is not one of them:
+     * its address answers with a redirect, and it is on no list, feed or sitemap.
+     */
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
-            ->where('published_at', '<=', now());
+            ->where('published_at', '<=', now())
+            ->whereNull('redirect_slug');
+    }
+
+    /** Drafts the check held back (BlogWriter::store()), waiting for somebody to look. */
+    public function scopeHeldForReview($query)
+    {
+        return $query->where('is_published', false)->whereNotNull('held_reason');
     }
 
     /**
@@ -161,7 +201,7 @@ class BlogPost extends Model
         }
 
         // Generate excerpt from content if not provided
-        $content = strip_tags($this->content);
+        $content = strip_tags((string) $this->content);
 
         return Str::limit($content, 160);
     }
@@ -208,7 +248,243 @@ class BlogPost extends Model
 
         $html = \App\Utils\MarkdownUtils::demoteH1($html, false);
 
-        return self::followFirstPartyLinks($html);
+        return self::withSectionIds(self::followFirstPartyLinks($html));
+    }
+
+    /**
+     * An id on every h2, so the contents list can link to it.
+     *
+     * The purifier allows no id, so every h2 arrives bare, and the id is built here from its text
+     * alone: lower-case letters, digits and hyphens under an "s-" prefix, which no page mounts
+     * (MarkdownUtils::RESERVED_IDS) and no text can break out of.
+     */
+    public static function withSectionIds(string $html): string
+    {
+        $seen = [];
+
+        return preg_replace_callback('~<h2>(.*?)</h2>~is', function ($match) use (&$seen) {
+            $id = self::sectionId($match[1], $seen);
+
+            return '<h2 id="'.$id.'">'.$match[1].'</h2>';
+        }, $html) ?? $html;
+    }
+
+    /**
+     * The rendered post in two parts: what comes before its first h2 (the opening, which answers
+     * the search), and everything from that heading on. The page puts its picture and, on a
+     * phone, its contents list between the two, so neither stands in front of the answer.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function openingAndRest(): array
+    {
+        $html = $this->renderedContent();
+        $at = stripos($html, '<h2');
+
+        // A post that opens on a heading (most of those written before the opening was asked
+        // for): its first section is its opening, so the split moves to the second heading.
+        if ($at !== false && trim(substr($html, 0, $at)) === '') {
+            $at = stripos($html, '<h2', $at + 3);
+        }
+
+        if ($at === false) {
+            return [$html, ''];
+        }
+
+        return [substr($html, 0, $at), substr($html, $at)];
+    }
+
+    /** @param  array<string, true>  $seen */
+    private static function sectionId(string $headingHtml, array &$seen): string
+    {
+        $slug = Str::slug(html_entity_decode(strip_tags($headingHtml), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $base = 's-'.($slug !== '' ? Str::limit($slug, 60, '') : 'section');
+        $id = $base;
+
+        for ($n = 2; isset($seen[$id]); $n++) {
+            $id = $base.'-'.$n;
+        }
+        $seen[$id] = true;
+
+        return $id;
+    }
+
+    /**
+     * The post's sections, as the contents list needs them: [['id' => ..., 'text' => ...], ...].
+     *
+     * @return list<array{id: string, text: string}>
+     */
+    public function sections(): array
+    {
+        preg_match_all('~<h2 id="([^"]+)">(.*?)</h2>~is', $this->renderedContent(), $found, PREG_SET_ORDER);
+
+        return array_map(fn ($h) => [
+            'id' => $h[1],
+            'text' => trim(html_entity_decode(strip_tags($h[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+        ], $found);
+    }
+
+    /** The post's section: the stored one, or the nearest fit for a post from before sections. */
+    public function categoryKey(): string
+    {
+        if ($this->category && isset(self::CATEGORIES[$this->category])) {
+            return $this->category;
+        }
+
+        return self::guessCategory((string) $this->slug, (string) $this->title, (array) ($this->tags ?? []));
+    }
+
+    public function categoryName(): string
+    {
+        return self::CATEGORIES[$this->categoryKey()]['name'];
+    }
+
+    /**
+     * The line over a card's title. An audience post names its audience ("For Museums"): two
+     * thirds of all posts are audience posts, so their section's name sorted nothing.
+     */
+    public function kicker(): string
+    {
+        if ($this->categoryKey() === 'by-event') {
+            static $parents = null;
+
+            if ($parents === null) {
+                $parents = [];
+                foreach (config('sub_audiences', []) as $audience) {
+                    foreach ($audience['sub_audiences'] as $sub) {
+                        $parents[$sub['slug']] = $audience['title'];
+                    }
+                }
+            }
+
+            if (isset($parents[$this->slug])) {
+                return 'For '.$parents[$this->slug];
+            }
+        }
+
+        return $this->categoryName();
+    }
+
+    /**
+     * Where a post from before sections belongs, from its slug, title and tags. The backfill
+     * command stores this once; until it has run the pages ask here.
+     *
+     * @param  array<int, string>  $tags
+     */
+    public static function guessCategory(string $slug, string $title, array $tags = []): string
+    {
+        if (str_starts_with($slug, 'for-') && function_exists('get_sub_audience_info') && get_sub_audience_info($slug)) {
+            return 'by-event';
+        }
+
+        $text = mb_strtolower($title.' '.implode(' ', $tags));
+
+        $rules = [
+            'online' => '~online|virtual|live ?stream|youtube|webinar|hybrid~',
+            'classes' => '~recurring|class(es)?\b|workshop|weekly|series|dojo|lesson~',
+            'selling-tickets' => '~ticket|pricing|price|sell|payment|stripe|paypal|fee|monetiz|revenue|refund~',
+            'on-the-day' => '~check-?in|door|volunteer|logistics|cancel|last-minute|waitlist|attendance track|on-site~',
+            'email' => '~email|newsletter|subscriber|own your audience|fan connection|list\b~',
+            'venues' => '~venue|booking|band and venue|gig|open house~',
+            'calendars' => '~calendar|embed|sync|website|schedule~',
+            'promotion' => '~promot|marketing|flyer|social|fanbase|attract|reach|qr code~',
+        ];
+
+        foreach ($rules as $key => $pattern) {
+            if (preg_match($pattern, $text)) {
+                return $key;
+            }
+        }
+
+        return 'planning';
+    }
+
+    public function scopeInCategory($query, string $key)
+    {
+        return $query->where('category', $key);
+    }
+
+    /**
+     * Three posts to read next: from the same section, the most shared tags first and the newest
+     * first after that. A post kept out of the index is not offered.
+     */
+    public function relatedPosts(int $limit = 3)
+    {
+        $mine = array_map('mb_strtolower', (array) ($this->tags ?? []));
+        $columns = ['id', 'title', 'slug', 'excerpt', 'tags', 'category', 'featured_image', 'published_at'];
+
+        // An audience post is read next to its own audience's other posts (a museum reader wants
+        // the other museum posts, not any of the 150), before the rest of its section.
+        $siblings = collect();
+        $siblingSlugs = $this->audienceSiblingSlugs();
+        if ($siblingSlugs !== []) {
+            $siblings = static::published()
+                ->where('noindex', false)
+                ->whereIn('slug', $siblingSlugs)
+                ->orderByDesc('published_at')
+                ->limit($limit)
+                ->get($columns);
+        }
+
+        if ($siblings->count() >= $limit) {
+            return $siblings->values();
+        }
+
+        $rest = static::published()
+            ->where('id', '!=', $this->id)
+            ->whereNotIn('id', $siblings->pluck('id'))
+            ->where('noindex', false)
+            ->where('category', $this->categoryKey())
+            ->orderByDesc('published_at')
+            ->limit(60)
+            ->get($columns)
+            ->sortByDesc(fn ($post) => [
+                count(array_intersect($mine, array_map('mb_strtolower', (array) ($post->tags ?? [])))),
+                $post->published_at?->timestamp,
+            ])
+            ->take($limit - $siblings->count());
+
+        return $siblings->concat($rest)->values();
+    }
+
+    /**
+     * The slugs of the other posts written for this post's audience (config/sub_audiences.php),
+     * or none when this is not an audience post.
+     *
+     * @return list<string>
+     */
+    public function audienceSiblingSlugs(): array
+    {
+        foreach (config('sub_audiences', []) as $audience) {
+            $slugs = array_column($audience['sub_audiences'], 'slug');
+
+            if (in_array($this->slug, $slugs, true)) {
+                return array_values(array_diff($slugs, [$this->slug]));
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * The questions a post answers, for its FAQPage data.
+     *
+     * @return list<array{q: string, a: string}>
+     */
+    public function faqItems(): array
+    {
+        $items = [];
+
+        foreach ((array) ($this->faq ?? []) as $item) {
+            $q = trim((string) ($item['question'] ?? $item['q'] ?? ''));
+            $a = trim((string) ($item['answer'] ?? $item['a'] ?? ''));
+
+            if ($q !== '' && $a !== '') {
+                $items[] = ['q' => $q, 'a' => $a];
+            }
+        }
+
+        return $items;
     }
 
     /**
@@ -442,6 +718,25 @@ class BlogPost extends Model
         }
 
         return $this->featured_image_url;
+    }
+
+    /**
+     * The 384x192 copy of the header image a card shows (public/images/headers/thumbs), or the
+     * full image when that copy has not been generated.
+     */
+    public function thumbUrl(): ?string
+    {
+        if (! $this->featured_image) {
+            return null;
+        }
+
+        $name = pathinfo(basename($this->featured_image), PATHINFO_FILENAME);
+
+        if ($name !== '' && is_file(public_path('images/headers/thumbs/'.$name.'.webp'))) {
+            return url('/images/headers/thumbs/'.$name.'.webp');
+        }
+
+        return webp_path($this->featured_image_url);
     }
 
     public function getUrlAttribute()

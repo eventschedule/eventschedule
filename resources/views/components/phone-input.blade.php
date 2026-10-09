@@ -69,20 +69,6 @@ if (!window._itiValidCountry) {
         wrapper.style.setProperty('width', '100%', 'important');
     }
 
-    // Match height to adjacent text/email input (covers cascade quirks on some pages).
-    // The > 20 floor guards against partial CSS (Vite dev) where a reference input hasn't
-    // finished styling and reports an unusably small height.
-    function matchHeight() {
-        var form = input.closest('form');
-        var refInput = form && form.querySelector('input[type="text"], input[type="email"]');
-        if (refInput && refInput.offsetHeight > 20) {
-            input.style.setProperty('height', refInput.offsetHeight + 'px', 'important');
-        }
-    }
-    requestAnimationFrame(matchHeight);
-    window.addEventListener('load', matchHeight);
-    window.addEventListener('resize', matchHeight);
-
     // If we have an initial value, set it
     if (hidden.value) {
         iti.setNumber(hidden.value);

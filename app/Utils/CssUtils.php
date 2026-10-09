@@ -60,6 +60,10 @@ class CssUtils
             '/(behavior|binding|-moz-binding)\s*:/i',
             // Block url() with external protocols or data URIs
             '/url\s*\(\s*["\']?\s*(https?:|data:|\/\/)/i',
+            // image-set() and image() take an address as a bare string, with no url() around it.
+            // The whole call goes, so nothing of the address is left in the stylesheet.
+            '/(?:-webkit-)?image-set\s*\([^)]*\)?/i',
+            '/(?<![\w-])image\s*\([^)]*\)?/i',
             // Block @font-face entirely (external font loading)
             '/@font-face\s*\{[^}]*\}/is',
             // Block @charset manipulation

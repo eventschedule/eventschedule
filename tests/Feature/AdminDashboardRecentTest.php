@@ -174,8 +174,8 @@ class AdminDashboardRecentTest extends TestCase
 
     /**
      * An import larger than one read is still one row, counted whole, with the rest of the list
-     * under it. Mutation: read one page only (EVENT_PAGES = 1): the list is that single row and
-     * its count stops at 59.
+     * under it. Mutation: look at sixty events only (EVENT_SCAN = 60): the list is that single row
+     * and its count stops at 59.
      */
     public function test_an_import_larger_than_one_read_is_still_one_row(): void
     {
@@ -223,6 +223,34 @@ class AdminDashboardRecentTest extends TestCase
 
         $this->assertSame(['Just now', 'Imported 0', 'This morning'], array_column($rows, 'name'));
         $this->assertSame([0, 11, 0], array_column($rows, 'more'));
+    }
+
+    /**
+     * The list costs the same number of queries with an import in it as without: the candidates
+     * are read narrow and in one go, and only the rows that are shown are loaded with their
+     * schedules. It used to read sixty whole events and their schedules at a time until the list
+     * was full, which on the day of an import was five times over. Mutation: go back to a page at
+     * a time.
+     */
+    public function test_an_import_costs_the_list_no_more_queries(): void
+    {
+        foreach ([1, 2, 3] as $hours) {
+            $role = $this->createRole($this->createOwner());
+            $this->createEvent($role, ['creator_role_id' => $role->id, 'created_at' => now()->subHours($hours)]);
+        }
+        $without = $this->queriesRunBy(fn () => (new AdminDashboard)->recentEvents());
+
+        $importer = $this->createRole($this->createOwner(), 'venue', ['name' => 'Importer']);
+        foreach (range(0, 69) as $index) {
+            $this->createEvent($importer, [
+                'creator_role_id' => $importer->id,
+                'created_at' => now()->subMinutes(5)->subSeconds($index),
+            ]);
+        }
+        $with = $this->queriesRunBy(fn () => (new AdminDashboard)->recentEvents());
+
+        $this->assertCount(4, (new AdminDashboard)->recentEvents()['rows']);
+        $this->assertSame($without, $with);
     }
 
     /** Events with no owning schedule on record are never taken for one another's burst. */

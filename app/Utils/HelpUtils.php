@@ -213,7 +213,19 @@ class HelpUtils
         '{subdomain}/import/ai' => '/docs/ai-import',
         '{subdomain}/import/eventbrite' => '/docs/ai-import#eventbrite-import',
         '{subdomain}/scan-agenda' => '/docs/scan-agenda',
-        '{subdomain}/events-graphic*' => '/docs/event-graphics',
+        // The page's five rows, by the pane each one opens (the row's aria-controls, which is what
+        // navigation.blade.php reads from a button[data-row-group] click). A flat mapping opened
+        // the top of the guide whichever setting was on screen.
+        '{subdomain}/events-graphic*' => [
+            'doc' => '/docs/event-graphics',
+            'anchors' => [
+                'graphic-pane-events' => '/docs/event-graphics#events',
+                'graphic-pane-flyers' => '/docs/event-graphics#dates-and-numbers',
+                'graphic-pane-header' => '/docs/event-graphics#header-footer-text',
+                'graphic-pane-caption' => '/docs/event-graphics#text-template',
+                'graphic-pane-email' => '/docs/event-graphics#email-scheduling',
+            ],
+        ],
         'events' => '/docs/getting-started',
         // Explicit rather than load-bearing: '{subdomain}/merge-venues*' above already matches
         // this page, because resolvePattern() substitutes '*' for {subdomain} when there is no

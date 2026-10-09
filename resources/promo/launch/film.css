@@ -1,0 +1,167 @@
+/* Doors: the launch film. Every colour is a token here, or in F.C in js/stage.js for what code
+   paints on a canvas. The world is the house before doors: a black mirror floor, haze, and the
+   product's real screens standing in it as slabs of lit glass. */
+@font-face{font-family:"RHD";src:url("fonts/RedHatDisplay-latin.woff2") format("woff2");font-weight:300 900;font-display:block;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"RHD";src:url("fonts/RedHatDisplay-latin-ext.woff2") format("woff2");font-weight:300 900;font-display:block;
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"SG";src:url("fonts/SpaceGrotesk-latin.woff2") format("woff2");font-weight:300 700;font-display:block}
+@font-face{font-family:"InterV";src:url("fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-display:block}
+
+:root{
+  --void:#03050b;--navy:#070b18;--navy2:#0d1630;--hair:#1c2a52;--rim:191,216,255;
+  --g1:#4e81fa;--g2:#0ea5e9;--g3:#22d3ee;
+  --grad:linear-gradient(100deg,#7aa2ff 0%,#38bdf8 55%,#4fe3ea 100%);
+  --ink:#f4f7ff;--ink2:#8fa3cc;--ink3:#5d6f99;
+  --warm:#ffb45e;--warm2:#ffe2b8;--ok:#34d399;
+  --font:"RHD","InterV",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --label:"SG","RHD",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#010207;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow:hidden}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+#frame{position:relative;width:min(100%,calc((100dvh - 110px)*16/9));aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:var(--void);box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--void);contain:strict}
+body.render #app{padding:0;gap:0}
+body.render #frame{width:100vw;height:100vh;border-radius:0;box-shadow:none}
+body.render #bar{display:none}
+
+/* player chrome (preview only) */
+#bar{width:min(100%,calc((100dvh - 110px)*16/9));display:flex;align-items:center;gap:12px;color:var(--ink2);font-size:13px;font-variant-numeric:tabular-nums}
+#bar button{appearance:none;border:0;background:rgba(255,255,255,.06);color:var(--ink);width:38px;height:38px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none}
+#bar button:hover{background:rgba(255,255,255,.12)}
+#bar svg{width:18px;height:18px}
+#bar select{appearance:none;background:rgba(255,255,255,.06);color:var(--ink);border:0;border-radius:10px;height:38px;padding:0 14px;font:inherit}
+#scrub{flex:1;min-width:0;accent-color:#7aa2ff;height:4px}
+#tc{flex:none;min-width:110px;text-align:right}
+#shotid{flex:none;min-width:40px;font-family:var(--mono);color:var(--ink3)}
+
+/* ---------- the stage ----------
+   #scene owns the perspective and is flat, so a whole-scene effect may sit on it. Inside it only
+   transforms go on nodes that carry 3D children: a filter, an opacity, a mask, an overflow or a
+   blend mode there flattens everything under it. Those belong on leaves. */
+.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
+canvas.full{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+#scene{position:absolute;left:0;top:0;width:1920px;height:1080px;perspective:2600px;perspective-origin:960px 540px}
+#world,.set{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+#dark{position:absolute;inset:0;background:#010206;opacity:0;pointer-events:none}
+#stamp{position:absolute;inset:0;background:#dbe8ff;opacity:0;pointer-events:none}
+
+/* the floor: a faint grid of light that fogs out before any horizon */
+#floor{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+#grid{position:absolute;left:-4000px;top:-4000px;width:8000px;height:8000px;
+  background-image:linear-gradient(rgba(96,130,230,var(--ga,.4)) 2px,transparent 2px),linear-gradient(90deg,rgba(96,130,230,var(--ga,.4)) 2px,transparent 2px);
+  background-size:240px 240px;background-position:-1px -1px;
+  -webkit-mask-image:radial-gradient(circle var(--fog,2100px) at var(--mx,4000px) var(--mz,4000px),#000 0,rgba(0,0,0,.5) 40%,transparent 100%);
+          mask-image:radial-gradient(circle var(--fog,2100px) at var(--mx,4000px) var(--mz,4000px),#000 0,rgba(0,0,0,.5) 40%,transparent 100%)}
+
+/* ---------- the glass slab ----------
+   A real screen inside a box: a soft light of its own colour behind it, a back, four true sides,
+   the screen, a body of glass, a rim whose bright corner follows the turn, and one band of
+   specular light. Every child is a leaf. */
+.slab{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+.slab>i,.slab>img{position:absolute;display:block;left:0;top:0}
+.sl-glow{border-radius:0;opacity:var(--glow,.5);-webkit-mask-image:radial-gradient(closest-side,#000 0,rgba(0,0,0,.6) 46%,rgba(0,0,0,.18) 74%,transparent 100%);mask-image:radial-gradient(closest-side,#000 0,rgba(0,0,0,.6) 46%,rgba(0,0,0,.18) 74%,transparent 100%)}
+.sl-back{background:#070c1c}
+.sl-side{background:linear-gradient(var(--sd,90deg),rgba(var(--rim),.5),rgba(40,60,120,.55) 60%,rgba(8,12,26,.9))}
+.sl-face{overflow:hidden;background:#0a1020}
+.sl-face>img{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.sl-face>.dom{position:absolute;inset:0}
+.sl-dim{background:rgba(3,5,11,var(--dim,.1))}
+.sl-glass{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,0) 20%,rgba(7,11,24,0) 72%,rgba(7,11,24,.26))}
+.sl-glass.lit{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 14%,rgba(13,22,48,0) 80%,rgba(13,22,48,.1))}
+.sl-rim{padding:1.6px;background:linear-gradient(var(--rim-a,140deg),rgba(var(--rim),.98),rgba(var(--rim),.16) 34%,rgba(var(--rim),.05) 60%,rgba(var(--rim),.38));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.sl-spec{overflow:hidden}
+.sl-spec::before{content:"";position:absolute;top:-10%;bottom:-10%;left:var(--spec-x,-40%);width:14%;transform:skewX(-16deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,var(--spec-a,.1)) 45%,rgba(255,255,255,var(--spec-a,.1)) 55%,transparent)}
+/* its reflection in the floor: a softened copy, upside down, fading within half its height */
+.refl{position:absolute;left:0;top:0;display:block;opacity:var(--ro,.3);
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,.25) 26%,transparent 52%);mask-image:linear-gradient(to top,rgba(0,0,0,.95),rgba(0,0,0,.25) 26%,transparent 52%)}
+/* a slab standing out of focus: one leaf, its softened copy */
+.far{position:absolute;left:0;top:0;display:block;border-radius:14px}
+
+/* ---------- type ---------- */
+.gtext{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+/* the line a shot carries: always the same place, clear of the bottom 15% */
+.cap{position:absolute;left:120px;bottom:206px;display:flex;align-items:flex-start;gap:22px;font-size:68px;font-weight:700;letter-spacing:-.028em;line-height:1.14;color:var(--ink);white-space:nowrap}
+.cap::before{content:"";width:24px;height:24px;margin-top:28px;border-radius:7px;background:linear-gradient(135deg,#4e81fa,#22d3ee);flex:none}
+.cap.warm::before{background:linear-gradient(135deg,#ffb45e,#ffe2b8)}
+.cap .ln{display:block}
+.cap b{font-weight:800;font-variant-numeric:tabular-nums}
+.capscrim{position:absolute;left:-220px;bottom:96px;width:1560px;height:300px;background:radial-gradient(closest-side,rgba(3,5,11,.62) 0,rgba(3,5,11,.36) 50%,rgba(3,5,11,0) 100%)}
+/* the hook's lines: statement size, in the middle band */
+.big{position:absolute;left:120px;top:612px;font-size:116px;font-weight:800;letter-spacing:-.04em;line-height:1.04;color:var(--ink);white-space:nowrap}
+.bigscrim{position:absolute;left:-300px;top:500px;width:2100px;height:380px;background:radial-gradient(closest-side,rgba(3,5,11,.74) 0,rgba(3,5,11,.46) 52%,rgba(3,5,11,0) 100%)}
+.mask{display:block;overflow:hidden;padding:.06em .06em .12em 0;margin:-.06em 0 -.12em}
+.mask>span{display:inline-block;will-change:auto}
+.label{font-family:var(--label);font-weight:500;font-size:22px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+
+/* ---------- cards: full-frame type ---------- */
+.card{position:absolute;inset:0;overflow:hidden}
+/* the faint grid of the homepage's hero, behind a card */
+.card.lines::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(96,130,230,.11) 2px,transparent 2px),linear-gradient(90deg,rgba(96,130,230,.11) 2px,transparent 2px);background-size:240px 240px;background-position:119px 59px;
+  -webkit-mask-image:radial-gradient(ellipse 1500px 800px at 30% 46%,#000 10%,transparent 78%);mask-image:radial-gradient(ellipse 1500px 800px at 30% 46%,#000 10%,transparent 78%)}
+/* the three verbs: the full stop is the rounded square of light that the whole film counts in */
+.vix{position:absolute;left:150px;top:214px}
+.vbars{position:absolute;left:150px;top:262px;display:flex;gap:14px}
+.vbars i{width:112px;height:8px;border-radius:4px;background:rgba(143,163,204,.22)}
+.vbars i.on{background:linear-gradient(90deg,#4e81fa,#22d3ee)}
+.vbars i.done{background:rgba(122,162,255,.55)}
+.vword{position:absolute;left:138px;top:318px;font-size:320px;font-weight:800;letter-spacing:-.04em;line-height:1.1;color:var(--ink);white-space:nowrap}
+.vword .stop{display:inline-block;width:.2em;height:.2em;margin-left:.035em;border-radius:.052em;background:transparent;vertical-align:baseline}
+.vstop{position:absolute;left:0;top:0;width:64px;height:64px;border-radius:16.6px;background:linear-gradient(135deg,#4e81fa,#0ea5e9 55%,#22d3ee)}
+/* statements: two lines, the second in the gradient (the homepage's own system) */
+.stmt{position:absolute;left:150px;top:346px;font-size:128px;font-weight:800;letter-spacing:-.04em;line-height:1.08;white-space:nowrap}
+.veil{position:absolute;inset:0;background:radial-gradient(ellipse 1500px 900px at 26% 50%,rgba(3,5,11,.84),rgba(3,5,11,.5) 55%,rgba(3,5,11,.12) 100%)}
+/* the mark and the name */
+.lock{position:absolute;left:0;top:0;display:flex;align-items:center;gap:22px;white-space:nowrap}
+.lock svg{width:116px;height:80px;overflow:visible;flex:none}
+.lock .w{font-family:"InterV",var(--font);font-size:58px;letter-spacing:-.035em;line-height:1;color:var(--ink)}
+.lock .w b{font-weight:760}.lock .w i{font-style:normal;font-weight:420;color:#c7d3ee}
+/* the end card */
+.end .h1{position:absolute;left:150px;top:300px;font-size:124px;font-weight:800;letter-spacing:-.038em;line-height:1.08;white-space:nowrap}
+.pill{position:absolute;left:150px;top:612px;display:inline-flex;align-items:center;gap:16px;padding:15px 30px 16px 24px;border-radius:999px;border:1.5px solid rgba(191,216,255,.24);background:rgba(13,22,48,.72);font-size:34px;font-weight:560;letter-spacing:-.01em;color:#dfe7fb;white-space:nowrap}
+.pill::before{content:"";width:16px;height:16px;border-radius:50%;background:#34d399;box-shadow:0 0 18px rgba(52,211,153,.9)}
+.fine{position:absolute;left:152px;top:720px;font-size:34px;font-weight:500;letter-spacing:-.012em;color:var(--ink2);white-space:nowrap}
+.site{position:absolute;left:150px;top:782px;font-size:70px;font-weight:760;letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
+/* "0%": lit type standing on the mirror floor (in the world, so each piece is a leaf) */
+.zero{position:absolute;left:0;top:0;font-size:720px;font-weight:900;letter-spacing:-.06em;line-height:.82;white-space:nowrap;padding:0 .06em .04em 0}
+.zero.r{opacity:.22;-webkit-mask-image:linear-gradient(to top,#000 0,rgba(0,0,0,.3) 30%,transparent 62%);mask-image:linear-gradient(to top,#000 0,rgba(0,0,0,.3) 30%,transparent 62%)}
+.pf{position:absolute;left:0;top:0;font-size:132px;font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--ink);white-space:nowrap}
+.pf.r{opacity:.16;-webkit-mask-image:linear-gradient(to top,#000 0,transparent 80%);mask-image:linear-gradient(to top,#000 0,transparent 80%)}
+/* the ten names of s37 */
+.more{position:absolute;left:150px;top:150px;width:1620px;display:flex;flex-wrap:wrap;gap:18px 46px;align-items:baseline}
+.more span{display:inline-block;font-weight:800;letter-spacing:-.035em;line-height:1.02;white-space:nowrap;transform-origin:0 70%}
+.more .a{font-size:112px;color:var(--ink)}.more .b{font-size:84px}.more .c{font-size:66px;color:#aebde0}
+/* a terminal, drawn */
+.term{position:absolute;inset:0;background:linear-gradient(180deg,#0b1226,#070b18);font-family:var(--mono);font-size:30px;line-height:1.7;color:#cfe0ff;padding:74px 44px 0;white-space:pre}
+.term::before{content:"";position:absolute;left:30px;top:28px;width:14px;height:14px;border-radius:50%;background:#2a3a66;box-shadow:26px 0 0 #2a3a66,52px 0 0 #2a3a66}
+.term .p{color:#4fe3ea}.term .o{color:#8fa3cc}.term .u{color:#7aa2ff}.term .k{display:inline-block;width:.6em;height:1.1em;background:#cfe0ff;vertical-align:-.2em}
+/* the doorway of s32, and its label */
+.door{position:absolute;left:0;top:0;background:linear-gradient(180deg,#ffe9c8,#ffbe72 55%,#ff9a3d)}
+
+/* ---------- drawn over real screens ---------- */
+.patch{background:#fff}
+.ring{border:5px solid transparent;border-radius:14px;background:linear-gradient(135deg,#4e81fa,#22d3ee) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box exclude,linear-gradient(#000 0 0)}
+.warmfill{border-radius:14px;background:rgba(255,180,94,.34);box-shadow:inset 0 0 0 4px #ffb45e}
+/* a value lifted off the flyer on its way to the event */
+.fly{position:absolute;left:0;top:0;padding:10px 22px 12px;border-radius:14px;background:#0d1630;border:2px solid rgba(191,216,255,.6);color:#f4f7ff;font-size:40px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+/* the film's own labels (never dressed as the app's interface) */
+.chip{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:16px;padding:16px 30px 18px 24px;border-radius:999px;background:rgba(13,22,48,.9);border:2px solid rgba(191,216,255,.34);font-size:40px;font-weight:650;letter-spacing:-.015em;color:#e8eefc;white-space:nowrap}
+.chip::before{content:"";width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#4e81fa,#22d3ee);flex:none}
+.chip.ok::before{background:#34d399;border-radius:50%}
+.odo{position:absolute;left:0;top:0;font-size:300px;font-weight:800;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scanblade{position:absolute;left:-6%;width:112%;height:10px;border-radius:5px;background:linear-gradient(90deg,transparent,#bfe9ff 18%,#fff 50%,#bfe9ff 82%,transparent);box-shadow:0 0 34px 10px rgba(125,200,255,.7)}
+.site{white-space:nowrap}
+.fakesite{position:absolute;inset:0;background:#f3f4f8;padding:38px 46px}
+.fakesite i{display:block;border-radius:8px;background:#dfe3ec}
+/* a real card riding in screen space (the door's numbers, over the room) */
+.hudcard{position:absolute;left:0;top:0;transform-origin:50% 50%;border-radius:18px;overflow:hidden;box-shadow:0 0 0 1.5px rgba(191,216,255,.5),0 30px 80px -20px rgba(0,0,0,.8),0 0 90px -10px rgba(120,160,255,.35)}
+.hudcard img{display:block;width:100%;height:100%}
+.hudcard::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 30%),rgba(3,5,11,.16)}
+/* the thumbnail's type */
+.thumb .tz{position:absolute;left:104px;top:176px;font-size:510px;font-weight:900;letter-spacing:-.06em;line-height:1;white-space:nowrap;padding-right:.06em}
+.thumb .tp{position:absolute;left:122px;top:676px;font-size:156px;font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--ink);white-space:nowrap}

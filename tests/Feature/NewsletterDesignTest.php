@@ -629,7 +629,8 @@ class NewsletterDesignTest extends TestCase
         $saved = NewsletterRecipient::create(['newsletter_id' => $newsletter->id, 'email' => 'reader@example.com', 'name' => 'Reader', 'token' => Str::random(64), 'status' => 'sent', 'sent_at' => now()]);
         $encoded = rtrim(strtr(base64_encode('Https://x.example.com/menu'), '+/', '-_'), '=');
 
-        $this->get("/nl/c/{$saved->token}/{$encoded}")->assertRedirect();
+        $signature = NewsletterService::clickSignature($saved->token, 'Https://x.example.com/menu');
+        $this->get("/nl/c/{$saved->token}/{$signature}/{$encoded}")->assertRedirectContains('x.example.com/menu');
         $this->assertNotNull($saved->fresh()->clicked_at);
     }
 

@@ -216,7 +216,7 @@
           </div>
         </div>
 
-        <div id="event-submit-app">
+        <div id="event-submit-app" data-vue-root>
           <form id="booking-request-form" v-show="!submitted && step === 'form'" @submit.prevent="submitEvent" novalidate>
 
             <div v-if="draftRestored" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-3 text-sm text-blue-800 dark:text-blue-200" aria-live="polite">

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\AdminDashboard;
 use App\Services\DemoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -189,5 +190,38 @@ class AdminDashboardEventsTest extends TestCase
         $this->assertSame(6, $events['all_time']);
         $this->assertSame(3, $events['new_30d']);
         $this->assertSame(50.0, $events['new_change']);
+    }
+
+    /**
+     * Demo content is Role::constrainDemoContent(), which has three arms: the demo's contact
+     * address on the schedule, the demo schedule's own subdomain, and anything the demo account
+     * owns. The page reads which schedules those are once and leaves their events out of every
+     * count and both lists. Mutation: build the list of demo schedules from one arm alone.
+     */
+    public function test_demo_content_is_left_out_whichever_way_it_is_demo(): void
+    {
+        $demoAccount = User::factory()->create(['email' => DemoService::DEMO_EMAIL, 'email_verified_at' => now()]);
+        $demo = [
+            $this->createRole($this->createOwner(), 'venue', ['name' => 'By address', 'email' => DemoService::DEMO_EMAIL]),
+            $this->createRole($this->createOwner(), 'venue', ['name' => 'By subdomain', 'subdomain' => DemoService::DEMO_ROLE_SUBDOMAIN]),
+            $this->createRole($demoAccount, 'venue', ['name' => 'By owner']),
+        ];
+        foreach ($demo as $role) {
+            $this->createEvent($role, ['name' => 'At '.$role->name, 'starts_at' => $this->hoursFromNow(48)]);
+        }
+        $this->createEvent($this->venue, ['name' => 'Real', 'starts_at' => $this->hoursFromNow(48)]);
+
+        $dashboard = new AdminDashboard;
+        $events = $dashboard->events();
+
+        $this->assertSame(1, $events['total']);
+        $this->assertSame(1, $events['all_time']);
+        $this->assertSame(1, $events['new_30d']);
+        $this->assertSame(['Real'], array_column($dashboard->recentEvents()['rows'], 'name'));
+
+        $schedules = array_column($dashboard->recentSchedules()['rows'], 'name');
+        sort($schedules);
+        $this->assertSame(['The Band', 'The Room'], $schedules);
+        $this->assertSame(2, $dashboard->recentSchedules()['total']);
     }
 }

@@ -407,7 +407,8 @@ class Ticket extends Model
         $data['is_allocated'] = $this->isAllocated($date);
         $data['max_per_order'] = $this->max_per_order ?: null;
         $data['price'] = $this->price;
-        $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
+        // Never the raw text: a ticket from before description_html has none stored, and this goes to v-html.
+        $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? MarkdownUtils::convertToHtml($this->description)) : null;
         $data['image_url'] = $this->image_url ?: null;
         $data['url'] = $this->url ?: null;
         $data['quantity'] = $this->availableQuantity($date);

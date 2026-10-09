@@ -565,7 +565,7 @@
                         <td>Re-run consent to obtain a refresh token</td>
                     </tr>
                     <tr>
-                        <td><code class="doc-inline-code">GET /google-calendar/disconnect</code></td>
+                        <td><code class="doc-inline-code">POST /google-calendar/disconnect</code></td>
                         <td>Disconnect Google Calendar: remove the change channels, revoke the grant at Google and clear the tokens and sync records</td>
                     </tr>
                     <tr>

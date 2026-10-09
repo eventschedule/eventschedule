@@ -489,8 +489,11 @@ class GoogleCalendarController extends Controller
             $event = \App\Models\Event::findOrFail(UrlUtils::decodeId($eventId));
 
             // Check if user has permission to sync this event
+            // The schedule's own people, never a follower: Role::users() counts followers, so
+            // anybody following a schedule could copy its drafts, unlisted events and bookings
+            // into their own calendar.
             if (! $event->roles->contains(function ($role) use ($user) {
-                return $role->users->contains($user);
+                return $user->isMember($role->subdomain);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
@@ -562,8 +565,11 @@ class GoogleCalendarController extends Controller
             $event = \App\Models\Event::findOrFail(UrlUtils::decodeId($eventId));
 
             // Check if user has permission to unsync this event
+            // The schedule's own people, never a follower: Role::users() counts followers, so
+            // anybody following a schedule could copy its drafts, unlisted events and bookings
+            // into their own calendar.
             if (! $event->roles->contains(function ($role) use ($user) {
-                return $role->users->contains($user);
+                return $user->isMember($role->subdomain);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
@@ -785,8 +791,11 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => __('messages.not_authorized')], 403);
             }
 
+            // A team member. A follower's row is a link too, and with a calendar on it every
+            // event saved here was pushed to them, unlisted and password events included.
             $roleUser = \App\Models\RoleUser::where('user_id', $user->id)
                 ->where('role_id', $role->id)
+                ->where('level', '!=', 'follower')
                 ->first();
 
             if (! $roleUser) {

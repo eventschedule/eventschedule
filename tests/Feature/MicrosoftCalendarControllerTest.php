@@ -121,7 +121,7 @@ class MicrosoftCalendarControllerTest extends TestCase
 
         Http::fake(['graph.microsoft.com/*' => Http::response('', 204)]);
 
-        $response = $this->actingAs($user)->get('/microsoft-calendar/disconnect');
+        $response = $this->actingAs($user)->post('/microsoft-calendar/disconnect');
 
         $response->assertRedirect();
 

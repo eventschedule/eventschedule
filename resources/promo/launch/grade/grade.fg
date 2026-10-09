@@ -1,0 +1,14 @@
+# The grade: one graph for stills (tools/grade-still.sh) and for the film (encode.sh).
+# @W@ and @H@ are the frame's size. Input 0 is the picture, input 1 the 16-bit vignette mask.
+# Worked in 16-bit RGB so the navy gradients do not band; grain goes on last, on luma.
+# The glows are blurred at a fixed small size (480 or 240 wide), not at a fraction of the frame, so
+# a 960 rough cut, a 1920 still and the 2560 master bloom by the same share of the picture.
+[0:v]format=gbrp16le,curves=master='0/0 0.07/0.05 0.5/0.5 0.9/0.925 1/1':blue='0/0.012 0.5/0.505 1/0.985':red='0/0 0.5/0.497 1/1',split=4[base][h1][h2][h3];
+[h1]colorlevels=rimin=0.80:gimin=0.80:bimin=0.80,scale=480:270:flags=bilinear,gblur=sigma=7:steps=3,scale=@W@:@H@:flags=bicubic[bloom];
+[h2]colorlevels=rimin=0.86:gimin=0.86:bimin=0.86,colorchannelmixer=rr=1:gg=0.5:bb=0.24,scale=240:135:flags=bilinear,gblur=sigma=8:steps=3,scale=@W@:@H@:flags=bicubic[hal];
+[h3]colorlevels=rimin=0.93:gimin=0.93:bimin=0.93,colorchannelmixer=rr=0.5:gg=0.72:bb=1,scale=480:270:flags=bilinear,gblur=sigma=70:sigmaV=0.7:steps=2,scale=@W@:@H@:flags=bicubic[streak];
+[base][bloom]blend=all_mode=screen:all_opacity=0.34[b1];
+[b1][hal]blend=all_mode=screen:all_opacity=0.22[b2];
+[b2][streak]blend=all_mode=screen:all_opacity=0.26[b3];
+[1:v]format=gbrp16le[vg];
+[b3][vg]blend=all_mode=multiply,format=yuv444p10le,noise=c0s=5:c0f=t+u[out]

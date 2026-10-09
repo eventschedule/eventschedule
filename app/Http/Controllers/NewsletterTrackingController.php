@@ -35,7 +35,51 @@ class NewsletterTrackingController extends Controller
         ]);
     }
 
+    /** The link as mail has carried it since 2026-10: signed for its own address. */
+    public function trackSignedClick(string $token, string $signature, string $encodedUrl)
+    {
+        return $this->click($token, $encodedUrl, $signature);
+    }
+
+    /** The link as older mail carries it, with nothing to say the address is the mail's own. */
     public function trackClick(string $token, string $encodedUrl)
+    {
+        return $this->click($token, $encodedUrl, null);
+    }
+
+    /**
+     * An unsigned link is followed only to an address the mail could have held: one of this
+     * install's own pages, or an address written in the newsletter. Anything else goes to the
+     * schedule that sent the mail, so a link in an old mail never ends on an error page and never
+     * on a page somebody else chose.
+     */
+    private function mailCouldHold(string $url, $newsletter): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $ours = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+
+        if ($host !== '' && $ours !== '' && ($host === $ours || str_ends_with($host, '.'.$ours))) {
+            return true;
+        }
+
+        if ($host !== '' && \App\Models\Role::where('custom_domain_host', $host)->where('custom_domain_mode', 'direct')->where('custom_domain_status', 'active')->exists()) {
+            return true;
+        }
+
+        if (! $newsletter) {
+            return false;
+        }
+
+        // With or without its scheme: the views add "https://" to an address typed without one.
+        $written = (string) json_encode($newsletter->blocks, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $address = preg_replace('#^https?://#i', '', $url);
+
+        // Written there as an address of its own. A plain "contains" also followed a link to any
+        // host that is the TAIL of one the newsletter named.
+        return $address !== '' && preg_match('#(?<![A-Za-z0-9.\-])'.preg_quote($address, '#').'#', $written) === 1;
+    }
+
+    private function click(string $token, string $encodedUrl, ?string $signature)
     {
         $url = base64_decode(strtr($encodedUrl, '-_', '+/'));
 
@@ -57,9 +101,15 @@ class NewsletterTrackingController extends Controller
             abort(404);
         }
 
-        $isFirstClick = $recipient->recordClick($url);
-
         $newsletter = $recipient->newsletter;
+
+        $signed = $signature !== null && hash_equals(\App\Services\NewsletterService::clickSignature($token, $url), $signature);
+
+        if (! $signed && ! $this->mailCouldHold($url, $newsletter)) {
+            return redirect($newsletter?->role?->getGuestUrl() ?: url('/'), 302);
+        }
+
+        $isFirstClick = $recipient->recordClick($url);
 
         if ($isFirstClick && $recipient->status !== 'test' && $newsletter) {
             $newsletter->increment('click_count');

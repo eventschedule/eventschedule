@@ -555,6 +555,36 @@
             font-family: inherit !important;
         }
 
+        /* A phone field is the size of the fields beside it. It has a rule of its own because the
+           country widget (intl-tel-input) makes room for its flag and dial code with an inline
+           padding on one side: an !important on the sides would overrule that, and the number
+           would be typed under the flag. So only top and bottom are said firmly. */
+        input[type="tel"] {
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 1.15rem !important;
+            line-height: 1.5 !important;
+            padding-block: 0.75rem !important;
+            padding-inline: 1rem;
+            font-family: inherit !important;
+        }
+        /* The dial code is read as part of the number, so it is the number's size. */
+        .iti__selected-dial-code {
+            font-size: 1.15rem;
+            line-height: 1.5;
+        }
+        /* The flag is a button, and a page's own rule for its buttons (the event form's
+           min-width: 100px) stretched it: the widget measures that button to place the number,
+           so the number began a third of the way along the field. */
+        .iti__selected-country {
+            min-width: 0;
+            min-height: 0;
+        }
+        /* The widget zeroes its field's margin, so the gap under the label is given back on the
+           wrapper: without it the field sits a little above the one beside it. */
+        .iti:has(> .iti__tel-input.mt-1) {
+            margin-top: 0.25rem;
+        }
+
 
     </style>
 

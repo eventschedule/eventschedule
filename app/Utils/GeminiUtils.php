@@ -142,9 +142,12 @@ class GeminiUtils
 
         $textProvider = config('services.ai.text_provider', 'gemini');
 
+        // The OpenAI path takes one message, so a system instruction rides at its head there.
+        $openAiPrompt = ! empty($options['system_instruction']) ? $options['system_instruction']."\n\n".$prompt : $prompt;
+
         if ($textProvider === 'openai') {
             if (config('services.openai.api_key')) {
-                return OpenAIUtils::sendTextRequest($prompt, $imageData, $purpose);
+                return OpenAIUtils::sendTextRequest($openAiPrompt, $imageData, $purpose);
             }
             if (! config('services.google.gemini_key')) {
                 return null;
@@ -152,7 +155,7 @@ class GeminiUtils
         } else {
             if (! config('services.google.gemini_key')) {
                 if (config('services.openai.api_key')) {
-                    return OpenAIUtils::sendTextRequest($prompt, $imageData, $purpose);
+                    return OpenAIUtils::sendTextRequest($openAiPrompt, $imageData, $purpose);
                 }
 
                 return null;
@@ -186,6 +189,10 @@ class GeminiUtils
                 ['response_mime_type' => 'application/json'],
             ),
         ];
+
+        if (! empty($options['system_instruction'])) {
+            $data['system_instruction'] = ['parts' => [['text' => $options['system_instruction']]]];
+        }
 
         // Add image data if provided
         if ($imageData) {
@@ -2590,152 +2597,55 @@ class GeminiUtils
         return OpenAIUtils::sendImageGenerationRequest($prompt, '16:9');
     }
 
-    public static function generateBlogPost($topic, $parentPageUrl = null, $parentPageTitle = null, $features = [])
+    /**
+     * One structured answer from the text model: a system instruction, a prompt, and the shape
+     * the answer must take. Returns the decoded object, or null when the provider gave nothing
+     * usable (no key, a timeout, a quota, an answer that is not the object asked for).
+     *
+     * $options:
+     *   system       the system instruction
+     *   schema       the answer's shape (Gemini's response_schema); with it the answer is always
+     *                parseable, where "return ONLY raw JSON" in a prompt failed about one call in six
+     *   temperature  float
+     *   model        a model id, when this job wants another than the content model
+     *   timeout      seconds
+     *   stage        a name for this call, for a test's fake responder and nothing else
+     */
+    public static function structured(string $prompt, array $options = []): ?array
     {
-        // Randomly select a length to vary content length. Not 'short' (300-500 words): the
-        // unattended generators reject anything under BlogPost::QUALITY_MIN_WORDS, so a short
-        // post was a guaranteed rejection and a wasted API call.
-        $lengths = ['medium', 'long'];
-        $length = $lengths[array_rand($lengths)];
-
-        $config = config('ai_prompts.blog_post');
-
-        // Build the internal links requirement based on whether we have parent page info.
-        // The apex from marketing_url(), not a hardcoded www. host: www. is a redirect hop.
-        $baseUrl = preg_replace('~^(https?://)www\.~i', '$1', rtrim(marketing_url(), '/'));
-
-        if ($parentPageUrl && $parentPageTitle) {
-            $linksRequirement = str_replace(
-                [':base_url', ':parent_url', ':parent_title'],
-                [$baseUrl, ltrim($parentPageUrl, '/'), $parentPageTitle],
-                $config['links_with_parent']
-            );
-        } else {
-            $linksRequirement = str_replace(':base_url', $baseUrl, $config['links_without_parent']);
-        }
-
-        // Build features context if available
-        $featuresRequirement = '';
-        if (! empty($features)) {
-            $featuresRequirement = str_replace(':features', implode(', ', $features), $config['features_line']);
-        }
-
-        $prompt = str_replace(
-            [':topic', ':length', ':features_requirement', ':links_requirement'],
-            [$topic, $length, $featuresRequirement, $linksRequirement],
-            $config['base']
-        );
-
-        try {
-            $data = self::sendRequest($prompt);
-
-            // Handle quota exceeded or other errors gracefully
-            if ($data === null || empty($data)) {
-                throw new \Exception('Gemini API quota exceeded or unavailable');
-            }
-
-            UsageTrackingService::track(UsageTrackingService::GEMINI_BLOG);
-
-            if (isset($data[0])) {
-                $result = $data[0];
-
-                // Ensure all required fields exist
-                $result['title'] = $result['title'] ?? 'Blog Post about '.$topic;
-                $result['content'] = $result['content'] ?? '<p>Content about '.$topic.' will be generated here.</p>';
-                $result['excerpt'] = $result['excerpt'] ?? 'A brief summary about '.$topic;
-                $result['tags'] = $result['tags'] ?? ['events', 'scheduling'];
-                $result['meta_title'] = $result['meta_title'] ?? $result['title'];
-                $result['meta_description'] = $result['meta_description'] ?? $result['excerpt'];
-                $result['image_category'] = $result['image_category'] ?? 'general';
-
-                // Select appropriate image based on category
-                $result['featured_image'] = self::selectImageForCategory($result['image_category']);
-
-                // Reject placeholder titles from incomplete API responses
-                if (stripos($result['title'] ?? '', 'Blog Post about') === 0) {
-                    \Log::warning('Rejecting blog post with placeholder title: '.$result['title']);
-
-                    return null;
-                }
-
-                return $result;
-            }
-
-            throw new \Exception('Invalid response structure from Gemini API');
-        } catch (\Exception $e) {
-            \Log::error('Failed to generate blog post: '.$e->getMessage());
-
-            return null;
-        }
-    }
-
-    public static function generateBlogTopic($recentTitles)
-    {
-        $titlesText = ! empty($recentTitles) ? implode("\n- ", $recentTitles) : 'No recent posts';
-
-        $styles = [
-            "Phrase as a 'how to' question targeting a specific problem event organizers search for (e.g., 'How to sell event tickets without paying platform fees', 'How to sync your event calendar with Google Calendar')",
-            "Phrase as a practical tips post (e.g., '5 Ways to Boost Event Attendance', '7 Mistakes to Avoid When Planning Your First Event')",
-            'Is relevant to event planning, community building, or hosting successful events',
-        ];
-        $style = $styles[array_rand($styles)];
-
-        $prompt = str_replace([':titles', ':style'], [$titlesText, $style], config('ai_prompts.blog_topic.base'));
-
-        try {
-            $data = self::sendRequest($prompt);
-
-            if ($data === null || empty($data)) {
-                return null;
-            }
-
-            UsageTrackingService::track(UsageTrackingService::GEMINI_BLOG_TOPIC);
-
-            if (isset($data[0]['topic'])) {
-                return $data[0]['topic'];
-            }
-
-            return null;
-        } catch (\Exception $e) {
-            \Log::error('Failed to generate blog topic: '.$e->getMessage());
-
-            return null;
-        }
-    }
-
-    private static function selectImageForCategory($category)
-    {
-        $imageMap = [
-            'business' => ['Lets_do_Business.png', 'Network_Summit.png', 'Synergy.png'],
-            'wellness' => ['Yoga_and_Wellness.png', 'Peaceful_Studio.png', 'Meditation.png', 'Mindful.png'],
-            'sports' => ['Sports_Centre.png', 'Fitness_Morning.png', 'Arena.png', 'Sports_and_Youth.png'],
-            'music' => ['Music_Potential.png', 'The_Stage_Awaits.png', 'Ready_to_Dance.png'],
-            'networking' => ['Network_Summit.png', 'Networking_and_Bagels.png', 'People_of_the_World.png'],
-            'family' => ['Kids_Bonanza.png', 'Sports_and_Youth.png'],
-            'productivity' => ['5am_Club.png', 'Chess_Vibrancy.png', 'Warming_Up.png'],
-            'nature' => ['Nature_Calls.png', 'Flowerful_Life.png'],
-            'arts' => ['Literature.png', 'Music_Potential.png', 'The_Stage_Awaits.png'],
-            'general' => ['Lets_do_Business.png', 'All_Hands_on_Deck.png', 'Flowerful_Life.png', 'Chill_Evening.png'],
+        $request = [
+            'stage' => $options['stage'] ?? null,
+            'timeout' => (int) ($options['timeout'] ?? 100),
         ];
 
-        $images = $imageMap[$category] ?? $imageMap['general'];
-
-        // Get available header images (already excludes recently used ones)
-        $availableImages = \App\Models\BlogPost::getAvailableHeaderImages();
-
-        // Filter to only include images from the current category
-        $categoryImages = array_intersect_key($availableImages, array_flip($images));
-
-        // If no category images are available, use any available image
-        if (empty($categoryImages)) {
-            $categoryImages = $availableImages;
+        if (! empty($options['model'])) {
+            $request['model'] = $options['model'];
+        }
+        if (trim((string) ($options['system'] ?? '')) !== '') {
+            $request['system_instruction'] = trim((string) $options['system']);
         }
 
-        // If still no images available, fall back to any image from the category
-        if (empty($categoryImages)) {
-            $categoryImages = array_flip($images);
+        $generation = [];
+        if (isset($options['temperature'])) {
+            $generation['temperature'] = (float) $options['temperature'];
+        }
+        if (! empty($options['schema'])) {
+            $generation['response_schema'] = $options['schema'];
+        }
+        if ($generation !== []) {
+            $request['generation_config'] = $generation;
         }
 
-        return array_rand($categoryImages);
+        try {
+            $rows = self::sendRequest($prompt, null, 'content', $request);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+
+        $row = is_array($rows) ? ($rows[0] ?? null) : null;
+
+        return is_array($row) && $row !== [] ? $row : null;
     }
 }

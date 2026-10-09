@@ -123,17 +123,17 @@
         $adminTabs = array_filter([
             'schedule' => ['label' => __('messages.schedule'), 'params' => $tab == 'schedule' ? [] : $monthParams],
             'templates' => $isEditorHere ? ['label' => __('messages.templates')] : null,
-            'videos' => $role->isCurator() ? ['label' => __('messages.videos')] : null,
+            'videos' => $isEditorHere && $role->isCurator() ? ['label' => __('messages.videos')] : null,
             'availability' => $role->isTalent() ? ['label' => __('messages.availability'), 'params' => $tab == 'availability' ? [] : $monthParams] : null,
-            'appointments' => ['label' => __('messages.appointments'), 'count' => $pendingBookingCount, 'waiting' => true],
+            'appointments' => $isEditorHere ? ['label' => __('messages.appointments'), 'count' => $pendingBookingCount, 'waiting' => true] : null,
             'seating' => $role->isVenue() && $isEditorHere ? ['label' => __('messages.seating_plans')] : null,
-            'requests' => count($requests) ? ['label' => __('messages.requests'), 'count' => count($requests), 'waiting' => true] : null,
+            'requests' => $isEditorHere && count($requests) ? ['label' => __('messages.requests'), 'count' => count($requests), 'waiting' => true] : null,
             // Shown once the schedule has a feed, and while the page itself is open (which is how
             // the first one is added). Its count is what waits for somebody: drafts and decisions.
             'feeds' => $isEditorHere && (($feedsCount ?? 0) > 0 || $tab == 'feeds') ? ['label' => __('messages.feeds_tab'), 'count' => $feedsWaiting ?? 0, 'waiting' => true] : null,
-            'followers' => (config('app.hosted') || config('app.is_testing') || $subscribersCount) ? ['label' => __('messages.followers'), 'count' => count($followers) + $subscribersCount] : null,
-            'team' => ['label' => __('messages.team'), 'count' => count($members) > 1 ? count($members) : 0],
-            'plan' => config('app.hosted') ? ['label' => __('messages.plan')] : null,
+            'followers' => $isEditorHere && (config('app.hosted') || config('app.is_testing') || $subscribersCount) ? ['label' => __('messages.followers'), 'count' => count($followers) + $subscribersCount] : null,
+            'team' => $isEditorHere ? ['label' => __('messages.team'), 'count' => count($members) > 1 ? count($members) : 0] : null,
+            'plan' => $isEditorHere && config('app.hosted') ? ['label' => __('messages.plan')] : null,
         ]);
     @endphp
 
@@ -312,7 +312,7 @@
                             </a>
                             @endif
                             @endif
-                            <a href="#" id="events-graphic-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                            <a href="{{ route('event.generate_graphic', ['subdomain' => $role->subdomain]) }}" id="events-graphic-link" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d="M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" />
                                 </svg>
@@ -473,10 +473,6 @@ document.addEventListener('click', function(e) {
 });
 @endif
 
-function handleEventsGraphicClick() {
-    window.location.href = '{{ route("event.generate_graphic", ["subdomain" => $role->subdomain]) }}';
-}
-
 function syncEventsFromDropdown() {
     // Check if user has Google token and role has calendar ID
     @if (!auth()->user()->google_token || !$role->hasGoogleCalendarIntegration())
@@ -617,14 +613,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Events graphic link
-    var graphicLink = document.getElementById('events-graphic-link');
-    if (graphicLink) {
-        graphicLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            handleEventsGraphicClick();
-        });
-    }
+    // The Events graphic entry is a real link (it was href="#" and a script, which a new tab
+    // or a middle click could not follow).
 
     // Embed schedule link
     var embedLink = document.getElementById('embed-schedule-link');

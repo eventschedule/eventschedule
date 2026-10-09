@@ -82,6 +82,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::domain('blog.'._base_domain())->group(function () {
             Route::get('/', [BlogController::class, 'index'])->name('blog.index');
             Route::get('/feed', [BlogController::class, 'feed'])->name('blog.feed');
+            Route::get('/topics/{category}', [BlogController::class, 'index'])->name('blog.category');
             Route::get('/{slug}', [BlogController::class, 'show'])->name('blog.show');
         });
     }
@@ -114,7 +115,8 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // shares one with every other throttled route on the host.
         Route::get('/api/venue-map', [\App\Http\Controllers\VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
-        Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
+        Route::post('/follow', [RoleController::class, 'follow'])->name('role.follow');
+        Route::get('/follow', [RoleController::class, 'followLanding']);
         // Claiming a schedule the app created while somebody entered an event, and the other
         // answer to the same page: this is not me. Registered ahead of the /{slug} catch-alls, and
         // throttled because both send a signed-out visitor into sign-up. The limiters are NAMED for
@@ -184,7 +186,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
         Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
-        Route::get('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
+        Route::post('/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
         Route::post('/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
         Route::post('/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60,submit_comment');
         Route::post('/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60,submit_photo');
@@ -378,6 +380,9 @@ Route::post('/clear-pending-request', [EventController::class, 'clearPendingRequ
 
 // Newsletter tracking routes (public, no auth)
 Route::get('/nl/o/{token}', [NewsletterTrackingController::class, 'trackOpen'])->name('newsletter.track_open')->middleware('throttle:60,1');
+// The link a newsletter carries is signed for its own address. Ahead of the older form below,
+// whose encodedUrl takes anything.
+Route::get('/nl/c/{token}/{signature}/{encodedUrl}', [NewsletterTrackingController::class, 'trackSignedClick'])->name('newsletter.track_signed_click')->where(['signature' => '[0-9a-f]{32}', 'encodedUrl' => '[A-Za-z0-9_-]+'])->middleware('throttle:60,1');
 Route::get('/nl/c/{token}/{encodedUrl}', [NewsletterTrackingController::class, 'trackClick'])->name('newsletter.track_click')->where('encodedUrl', '.*')->middleware('throttle:60,1');
 Route::get('/nl/u/{token}', [NewsletterTrackingController::class, 'showUnsubscribe'])->name('newsletter.show_unsubscribe');
 Route::post('/nl/u/{token}', [NewsletterTrackingController::class, 'unsubscribe'])->name('newsletter.unsubscribe')->middleware('throttle:newsletter_unsubscribe');
@@ -743,7 +748,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/google-calendar/redirect', [GoogleCalendarController::class, 'redirect'])->name('google.calendar.redirect');
     Route::get('/google-calendar/callback', [GoogleCalendarController::class, 'callback'])->name('google.calendar.callback');
     Route::get('/google-calendar/reauthorize', [GoogleCalendarController::class, 'reauthorize'])->name('google.calendar.reauthorize');
-    Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
+    Route::post('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
     Route::get('/google-calendar/import/{subdomain}/calendars', [GoogleCalendarController::class, 'importCalendars'])->name('google.calendar.import_calendars')->middleware('throttle:30,1');
     Route::post('/google-calendar/import/{subdomain}/events', [GoogleCalendarController::class, 'importEvents'])->name('google.calendar.import_events')->middleware('throttle:30,1');
@@ -757,7 +762,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/microsoft-calendar/redirect', [MicrosoftCalendarController::class, 'redirect'])->name('microsoft.calendar.redirect');
     Route::get('/microsoft-calendar/callback', [MicrosoftCalendarController::class, 'callback'])->name('microsoft.calendar.callback');
     Route::get('/microsoft-calendar/reauthorize', [MicrosoftCalendarController::class, 'reauthorize'])->name('microsoft.calendar.reauthorize');
-    Route::get('/microsoft-calendar/disconnect', [MicrosoftCalendarController::class, 'disconnect'])->name('microsoft.calendar.disconnect');
+    Route::post('/microsoft-calendar/disconnect', [MicrosoftCalendarController::class, 'disconnect'])->name('microsoft.calendar.disconnect');
     Route::get('/microsoft-calendar/calendars', [MicrosoftCalendarController::class, 'getCalendars'])->name('microsoft.calendar.calendars');
     Route::post('/microsoft-calendar/sync/{subdomain}', [MicrosoftCalendarController::class, 'sync'])->name('microsoft.calendar.sync');
     Route::post('/microsoft-calendar/sync-event/{subdomain}/{eventId}', [MicrosoftCalendarController::class, 'syncEvent'])->name('microsoft.calendar.sync_event');
@@ -792,13 +797,13 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
     Route::post('/{subdomain}/subscription/resume', [SubscriptionController::class, 'resume'])->name('subscription.resume');
     Route::post('/{subdomain}/subscription/swap', [SubscriptionController::class, 'swap'])->name('subscription.swap');
-    Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
+    Route::post('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     // How a schedule's venues are placed on its venue map, for its editors.
     Route::get('/{subdomain}/venue-map/status', [\App\Http\Controllers\VenueMapController::class, 'status'])->name('role.venue_map.status');
     Route::put('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'mark'])->name('role.venue_map.mark');
     Route::delete('/{subdomain}/venue-map/marks/{venue}', [\App\Http\Controllers\VenueMapController::class, 'unmark'])->name('role.venue_map.unmark');
-    Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
+    Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email')->middleware('throttle:10,1');
     Route::post('/{subdomain}/notification-email/resend', [NotificationEmailController::class, 'resend'])->name('role.notification_email.resend')->middleware('throttle:5,1');
     Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');
     Route::delete('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
@@ -840,7 +845,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/events-graphic/test-email', [GraphicController::class, 'sendTestEmail'])->name('event.graphic_test_email');
     Route::post('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'uploadHeaderImage'])->name('event.graphic_upload_header_image');
     Route::delete('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'deleteHeaderImage'])->name('event.graphic_delete_header_image');
-    Route::get('/{subdomain}/clear-videos/{event_hash}/{role_hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
+    Route::post('/{subdomain}/clear-videos/{event_hash}/{role_hash}', [EventController::class, 'clearVideos'])->name('event.clear_videos');
     Route::post('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::post('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
@@ -1000,7 +1005,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         : '(?!docs(?=/|$)|admin(?=/|$))[^/]+';
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|feeds|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
 
-    Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
+    Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image')->middleware('throttle:60,1');
 
     // The organizer gallery editor uploads each photo the moment it is added, as a draft that
     // the edit form's Save commits (GalleryUtils::sync()). A 50-photo drop is 50 requests, hence
@@ -1256,6 +1261,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
             Route::delete('/admin/blog/{blog_post}', [BlogController::class, 'destroy'])->name('blog.destroy');
             Route::post('/admin/blog/{blog_post}/noindex', [BlogController::class, 'toggleNoindex'])->name('blog.noindex');
             Route::post('/admin/blog/generate-content', [BlogController::class, 'generateContent'])->name('blog.generate-content');
+            // The review of the posts already published. Its routes come before the ones that
+            // take a post's id, so "review" is never read as one.
+            Route::get('/admin/blog-review', [BlogController::class, 'review'])->name('blog.review');
+            Route::post('/admin/blog-review', [BlogController::class, 'runReview'])->name('blog.review.run');
+            Route::post('/admin/blog-review/claims', [BlogController::class, 'checkClaims'])->name('blog.review.claims');
+            Route::post('/admin/blog/{blog_post}/merge', [BlogController::class, 'merge'])->name('blog.merge');
         }
     });
 });
@@ -1315,6 +1326,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/waitlist', [MarketingController::class, 'waitlist'])->name('marketing.waitlist');
         Route::get('/features/registration', [MarketingController::class, 'registration'])->name('marketing.registration');
         Route::get('/features/booking-requests', [MarketingController::class, 'bookingRequests'])->name('marketing.booking_requests');
+        Route::get('/features/lineup', [MarketingController::class, 'lineup'])->name('marketing.lineup');
         Route::get('/features/installments', [MarketingController::class, 'installments'])->name('marketing.installments');
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -1595,6 +1607,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/waitlist', [MarketingController::class, 'waitlist'])->name('marketing.waitlist');
             Route::get('/features/registration', [MarketingController::class, 'registration'])->name('marketing.registration');
             Route::get('/features/booking-requests', [MarketingController::class, 'bookingRequests'])->name('marketing.booking_requests');
+            Route::get('/features/lineup', [MarketingController::class, 'lineup'])->name('marketing.lineup');
             Route::get('/features/installments', [MarketingController::class, 'installments'])->name('marketing.installments');
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
@@ -1914,6 +1927,7 @@ if (config('app.is_nexus')) {
             Route::get('/for-meetup-groups', fn () => redirect('https://'._base_domain().'/for-meetup-groups', 301));
             Route::get('/features/registration', fn () => redirect('https://'._base_domain().'/features/registration', 301));
             Route::get('/features/booking-requests', fn () => redirect('https://'._base_domain().'/features/booking-requests', 301));
+            Route::get('/features/lineup', fn () => redirect('https://'._base_domain().'/features/lineup', 301));
             Route::get('/community-event-calendar', fn () => redirect('https://'._base_domain().'/community-event-calendar', 301));
             Route::get('/wordpress-event-calendar', fn () => redirect('https://'._base_domain().'/wordpress-event-calendar', 301));
             Route::get('/event-landing-page', fn () => redirect('https://'._base_domain().'/event-landing-page', 301));
@@ -2122,6 +2136,7 @@ if (config('app.is_nexus')) {
     Route::get('/for-meetup-groups', fn () => redirect()->route('home'));
     Route::get('/features/registration', fn () => redirect()->route('home'));
     Route::get('/features/booking-requests', fn () => redirect()->route('home'));
+    Route::get('/features/lineup', fn () => redirect()->route('home'));
     Route::get('/community-event-calendar', fn () => redirect()->route('home'));
     Route::get('/wordpress-event-calendar', fn () => redirect()->route('home'));
     Route::get('/event-landing-page', fn () => redirect()->route('home'));
@@ -2253,6 +2268,7 @@ if (config('app.hosted') && config('app.is_nexus')) {
 if (config('app.is_nexus') && (config('app.is_testing') || config('app.env') == 'local')) {
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/feed', [BlogController::class, 'feed'])->name('blog.feed');
+    Route::get('/blog/topics/{category}', [BlogController::class, 'index'])->name('blog.category');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }
 
@@ -2272,7 +2288,8 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/api/venue-map', [\App\Http\Controllers\VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
-    Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
+    Route::post('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
+    Route::get('/{subdomain}/follow', [RoleController::class, 'followLanding']);
     Route::get('/{subdomain}/claim', [RoleController::class, 'claimStart'])->name('role.claim.start')->middleware('throttle:20,1,schedule_claim');
     Route::post('/{subdomain}/claim', [RoleController::class, 'claimConfirm'])->name('role.claim.confirm')->middleware('throttle:5,1,schedule_claim');
     Route::get('/{subdomain}/not-me', [RoleController::class, 'claimNotMe'])->name('role.claim.not_me')->middleware('throttle:20,1,schedule_claim');
@@ -2310,7 +2327,7 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
-    Route::get('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
+    Route::post('/{subdomain}/curate-event/{hash}', [EventController::class, 'curate'])->name('event.curate');
     Route::post('/{subdomain}/submit-video/{event_hash}', [EventController::class, 'submitVideo'])->name('event.submit_video')->middleware('throttle:10,60');
     Route::post('/{subdomain}/submit-comment/{event_hash}', [EventController::class, 'submitComment'])->name('event.submit_comment')->middleware('throttle:20,60,submit_comment');
     Route::post('/{subdomain}/submit-photo/{event_hash}', [EventController::class, 'submitPhoto'])->name('event.submit_photo')->middleware('throttle:10,60,submit_photo');

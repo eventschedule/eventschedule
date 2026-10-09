@@ -105,8 +105,10 @@ class HostedBlogBreadcrumbTest extends TestCase
             $html = $this->get($requestBase.'/'.$slug)->assertOk()->getContent();
             $crumbs = $this->breadcrumbs($html);
 
-            $this->assertSame(['Home', 'Blog', $title], array_column($crumbs, 'name'), "{$slug}: crumb names");
-            $this->assertSame([$home, $blogUrl, $blogUrl.'/'.$slug], array_column($crumbs, 'item'), "{$slug}: crumb URLs");
+            // Home > Blog > the post's section > the post.
+            $section = BlogPost::where('slug', $slug)->first()->categoryKey();
+            $this->assertSame(['Home', 'Blog', BlogPost::CATEGORIES[$section]['name'], $title], array_column($crumbs, 'name'), "{$slug}: crumb names");
+            $this->assertSame([$home, $blogUrl, $blogUrl.'/topics/'.$section, $blogUrl.'/'.$slug], array_column($crumbs, 'item'), "{$slug}: crumb URLs");
             $this->assertSame(blog_url('/'.$slug), $blogUrl.'/'.$slug);
             $this->assertStringContainsString('<link rel="canonical" href="'.blog_url('/'.$slug).'">', $html);
         }

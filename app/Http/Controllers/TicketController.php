@@ -1550,8 +1550,30 @@ class TicketController extends Controller
         }
     }
 
+    /**
+     * A sale is for a date the event happens on.
+     *
+     * Stock, the house limit and the RSVP limit are all kept per date, and the date used to be
+     * taken as posted: every unused date had a full allotment, so a sold-out ticket type sold
+     * again under another date, outside the real night's counts. This is the test the event page
+     * applies to the date in its own address, and the one the attendee import and the box office
+     * already made. A request with no date is given the event's own, as before.
+     */
+    private function assertSaleDateIsTheEvents(Event $event, $date): void
+    {
+        if ($date === null || $date === '') {
+            return;
+        }
+
+        if (! is_string($date) || ! Event::isOccurrenceDate($date) || ! $event->matchesDate($date, $event->scheduleTimezone())) {
+            throw new \App\Exceptions\BusinessException(__('messages.invalid_request'));
+        }
+    }
+
     private function assertLegTicketsAvailable(array $leg, Event $event, bool $isPaymentLink): void
     {
+        $this->assertSaleDateIsTheEvents($event, $leg['event_date'] ?? null);
+
         // Check ticket availability with row locking (skip for payment link mode)
         if (! $isPaymentLink) {
             // Resolve event_date for one-time events (hidden field may be empty)
@@ -2349,6 +2371,8 @@ class TicketController extends Controller
             $sale = DB::transaction(function () use ($request, $event, $user, $subdomain) {
                 // Lock the event row to prevent race conditions
                 $event = Event::lockForUpdate()->find($event->id);
+
+                $this->assertSaleDateIsTheEvents($event, $request->event_date);
 
                 // Check capacity
                 $guests = $request->input('guests', []);

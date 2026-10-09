@@ -92,6 +92,7 @@ class RouteLoadTest extends DuskTestCase
                 '/features/availability',
                 '/features/registration',
                 '/features/booking-requests',
+                '/features/lineup',
 
                 // Integration pages
                 '/google-calendar',

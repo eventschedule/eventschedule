@@ -327,7 +327,7 @@ return [
             'blurb' => 'Generate shareable images for social media.',
             'icon' => 'image',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-08',
         ],
 
         'newsletters' => [

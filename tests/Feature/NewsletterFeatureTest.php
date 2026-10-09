@@ -14,8 +14,8 @@ use Tests\TestCase;
 
 class NewsletterFeatureTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     private function makeNewsletter($role, $user, array $attrs = []): Newsletter
     {
@@ -48,7 +48,7 @@ class NewsletterFeatureTest extends TestCase
         $role = $this->createRole($owner);
         $follower = $this->createOwner();
 
-        $this->actingAs($follower)->get(route('role.follow', ['subdomain' => $role->subdomain]));
+        $this->actingAs($follower)->post(route('role.follow', ['subdomain' => $role->subdomain]));
 
         $this->assertDatabaseHas('role_user', [
             'role_id' => $role->id,
@@ -65,7 +65,7 @@ class NewsletterFeatureTest extends TestCase
         $newsletter = $this->makeNewsletter($role, $owner);
         $rid = UrlUtils::encodeId($role->id);
 
-        $this->actingAs($owner)->post(route('newsletter.send', ['hash' => UrlUtils::encodeId($newsletter->id)]) . '?role_id=' . $rid);
+        $this->actingAs($owner)->post(route('newsletter.send', ['hash' => UrlUtils::encodeId($newsletter->id)]).'?role_id='.$rid);
 
         // Recipients are materialized and the newsletter transitions out of draft.
         $this->assertDatabaseHas('newsletter_recipients', ['newsletter_id' => $newsletter->id]);
@@ -79,7 +79,7 @@ class NewsletterFeatureTest extends TestCase
         $newsletter = $this->makeNewsletter($role, $owner);
         $rid = UrlUtils::encodeId($role->id);
 
-        $this->actingAs($owner)->post(route('newsletter.schedule', ['hash' => UrlUtils::encodeId($newsletter->id)]) . '?role_id=' . $rid, [
+        $this->actingAs($owner)->post(route('newsletter.schedule', ['hash' => UrlUtils::encodeId($newsletter->id)]).'?role_id='.$rid, [
             'scheduled_at' => now()->addHours(2)->format('Y-m-d H:i'),
         ]);
 
@@ -95,7 +95,7 @@ class NewsletterFeatureTest extends TestCase
         $role = $this->createRole($owner);
         $rid = UrlUtils::encodeId($role->id);
 
-        $this->actingAs($owner)->post(route('newsletter.segment.store') . '?role_id=' . $rid, [
+        $this->actingAs($owner)->post(route('newsletter.segment.store').'?role_id='.$rid, [
             'name' => 'VIPs',
             'type' => 'manual',
             'emails' => "alice@example.com, Alice\nbob@example.com, Bob",
@@ -114,7 +114,7 @@ class NewsletterFeatureTest extends TestCase
         $segment = NewsletterSegment::create(['role_id' => $role->id, 'name' => 'Imported', 'type' => 'manual']);
         $rid = UrlUtils::encodeId($role->id);
 
-        $this->actingAs($owner)->post(route('newsletter.import.store') . '?role_id=' . $rid, [
+        $this->actingAs($owner)->post(route('newsletter.import.store').'?role_id='.$rid, [
             'segment_target' => 'existing',
             'segment_id' => UrlUtils::encodeId($segment->id),
             'entries' => [
@@ -132,7 +132,7 @@ class NewsletterFeatureTest extends TestCase
         $role = $this->createRole($owner);
         $rid = UrlUtils::encodeId($role->id);
 
-        $this->actingAs($owner)->post(route('newsletter.template.store') . '?role_id=' . $rid, [
+        $this->actingAs($owner)->post(route('newsletter.template.store').'?role_id='.$rid, [
             'name' => 'Welcome Template',
             'template' => 'modern',
             'blocks' => json_encode([['type' => 'heading', 'data' => ['text' => 'Hi']]]),
@@ -182,9 +182,14 @@ class NewsletterFeatureTest extends TestCase
         $target = 'https://example.com/landing';
         $encoded = strtr(base64_encode($target), '+/', '-_');
 
-        // The tracker appends UTM params, so assert the destination contains the target.
-        $this->get(route('newsletter.track_click', ['token' => $recipient->token, 'encodedUrl' => $encoded]))
-            ->assertRedirectContains($target);
+        // The link as the mail carries it, signed for its own address (an unsigned one is followed
+        // only to an address the newsletter held: NewsletterClickLinkTest). The tracker appends
+        // UTM params, so assert the destination contains the target.
+        $this->get(route('newsletter.track_signed_click', [
+            'token' => $recipient->token,
+            'signature' => \App\Services\NewsletterService::clickSignature($recipient->token, $target),
+            'encodedUrl' => rtrim($encoded, '='),
+        ]))->assertRedirectContains($target);
 
         $this->assertNotNull($recipient->fresh()->clicked_at);
     }
@@ -218,7 +223,7 @@ class NewsletterFeatureTest extends TestCase
         $newsletter = $this->makeNewsletter($role, $owner);
         $rid = UrlUtils::encodeId($role->id);
 
-        $this->actingAs($owner)->post(route('newsletter.ab_test', ['hash' => UrlUtils::encodeId($newsletter->id)]) . '?role_id=' . $rid, [
+        $this->actingAs($owner)->post(route('newsletter.ab_test', ['hash' => UrlUtils::encodeId($newsletter->id)]).'?role_id='.$rid, [
             'test_field' => 'subject',
             'sample_percentage' => 20,
             'winner_criteria' => 'open_rate',

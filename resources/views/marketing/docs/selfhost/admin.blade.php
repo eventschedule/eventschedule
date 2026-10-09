@@ -977,6 +977,8 @@
             Blog (Manage)
         </h2>
         <p class="text-gray-600 dark:text-gray-300">The Blog page manages the posts of the marketing site's blog: a list with each post's status, views and word count, <strong class="text-gray-900 dark:text-white">Create Post</strong>, and edit, preview and delete on each row. The blog belongs to the marketing site, which only eventschedule.com serves, so this page and its entry in the Manage row are missing on every other install, selfhosted or SaaS.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4">A post the scheduled writer finished but its check would not publish is kept as a draft marked <strong class="text-gray-900 dark:text-white">Held</strong>, with the reason under its title: fix it and publish it, publish it as it is, or delete it. The check looks at what a post says about the product, the pages it links to, its length and its wording. On the create and edit forms, <strong class="text-gray-900 dark:text-white">Generate Content</strong> writes a post from a topic and shows what the check made of it above the form; nothing is saved until you save.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-4"><strong class="text-gray-900 dark:text-white">Review</strong> goes through the posts already published: what the check finds in each, which posts are on the same subject, and what is proposed (keep, rewrite, merge into another post, or hide from search engines). It changes nothing by itself. <strong class="text-gray-900 dark:text-white">Merge</strong> on a row makes that post's address redirect to the other one, and keeps its text.</p>
     </section>
 
     <!-- System: Audit Log -->

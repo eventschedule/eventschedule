@@ -70,6 +70,9 @@ return [
         // the model name would be sent to the API blank. Same reason as the plan prices below.
         'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL') ?: 'gemini-2.5-flash',
         'gemini_content_model' => env('GEMINI_CONTENT_MODEL') ?: 'gemini-2.5-flash',
+        // The blog's writer (App\Services\Blog\BlogWriter) alone: it follows a long brief, and a newer
+        // model kept every rule where the content model needed a second attempt. Empty: the content model.
+        'gemini_blog_model' => env('GEMINI_BLOG_MODEL') ?: null,
         'gemini_image_model' => env('GEMINI_IMAGE_MODEL') ?: 'imagen-4.0-ultra-generate-001',
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

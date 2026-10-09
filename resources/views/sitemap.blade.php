@@ -289,6 +289,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/features/booking-requests') !!}
     </url>
     <url>
+        <loc>{{ url('/features/lineup') }}</loc>
+        {!! $lastmodTag('/features/lineup') !!}
+    </url>
+    <url>
         <loc>{{ url('/features/installments') }}</loc>
         {!! $lastmodTag('/features/installments') !!}
     </url>

@@ -66,6 +66,11 @@ return [
     // then call the whole page a booking request form.
     '/features/booking-requests' => 'creating-schedules#engagement-requests',
 
+    // The lineup, the pages made for the acts on it, the logo wall and sponsors are four sections of
+    // three guides. The Participants tab is where a reader starts, and Pages Created for Others
+    // follows it on the same page.
+    '/features/lineup' => 'creating-events#participants',
+
     // Free sign-ups first, paid tickets only sometimes.
     '/for-meetup-groups' => 'tickets#registration',
     '/for-nonprofits' => 'tickets#registration',

@@ -213,7 +213,7 @@
         </div>
 
         <h3 class="doc-subheading">Event Graphics</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> feature to generate shareable images showing multiple upcoming events, ready for a weekly social media post. Open it from <strong class="text-gray-900 dark:text-white">Actions &rarr; Events Graphic</strong> in the admin portal. Generating graphics is free on every plan; having AI write the text that goes with them, and emailing graphics on a schedule, are Enterprise features.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Use the <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">Event Graphics</a> feature to generate shareable images showing multiple upcoming events, ready for a weekly social media post. Open it from <strong class="text-gray-900 dark:text-white">Actions &rarr; Events graphic</strong> in the admin portal. Generating graphics is free on every plan; having AI write the text that goes with them, and emailing graphics on a schedule, are Enterprise features.</p>
     </section>
 
     <!-- Followers -->

@@ -360,13 +360,15 @@ class Event extends Model
      * Each is the literal first segment of a route registered ahead of the event routes, whose
      * next segment takes an encoded event id, so /{slug}/{id} - or the dated, gallery or .ics URL
      * after it - reached that route instead: an event slugged "carpool" opened its carpool board,
-     * one slugged "curate-event" a GET that curates it, and a venue's event with an act called
-     * "book" (the other schedule's subdomain is the slug there) the booking form. guestUrlSlug()
+     * and a venue's event with an act called "book" (the other schedule's subdomain is the slug
+     * there) the booking form. Listing an event ("curate-event") and clearing its videos were
+     * GETs on this list until 2026-10; they are posted now, and a route that answers no GET
+     * shadows nothing. guestUrlSlug()
      * writes such a slug as "{slug}-event". With the id in the URL the slug is decoration - every
      * guest route resolves the event by its id - so existing events are fixed with no migration,
      * and their old URLs never reached them anyway.
      *
-     * book, carpool, curate-event and promo are guest routes on both kinds of install, map-image a
+     * book, carpool and promo are guest routes on both kinds of install, map-image a
      * hosted one. The rest are signed-in app routes, which selfhost registers under
      * /{subdomain}/... ahead of its guest routes. ShadowedEventSlugTest reads both route tables and
      * fails when this list and they drift apart.
@@ -374,9 +376,7 @@ class Event extends Model
     public const SHADOWED_SLUGS = [
         'book',
         'carpool',
-        'clear-videos',
         'clone-event',
-        'curate-event',
         'download-photos',
         'edit-event',
         'feeds',

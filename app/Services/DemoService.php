@@ -87,6 +87,24 @@ class DemoService
     }
 
     /**
+     * The demo's schedules, by the same predicate, for a caller that asks about many events.
+     *
+     * demoEventIdsQuery() inside a NOT IN is answered per event: MySQL probes event_role, then the
+     * schedule, then its owner, for every event the outer query visits. /admin/dashboard visits
+     * every event several times, and paid that on each visit for a few dozen schedules. With the
+     * schedules read once, the same exclusion is a list of ids against the pivot's own index.
+     *
+     * @return array<int, int>
+     */
+    public static function demoRoleIds(): array
+    {
+        return Role::constrainDemoContent(DB::table('roles'))
+            ->pluck('roles.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * Check if the given user is the demo user
      */
     public static function isDemoUser(?User $user): bool

@@ -589,7 +589,7 @@
         // row exists only where the install can issue a pass ($walletLive), so without one it is
         // swapped for the free-registration row rather than dropped, and the door side stays at ten.
         $saleSide = [
-            ['Tell me when tickets go on sale', 'Switch on the "Notify me" card and, before anything is on sale, a visitor can leave an email address, no account needed, and hear once when tickets go on sale and again shortly before it starts. You see how many are waiting. Free on every plan.'],
+            ['Tell me when tickets go on sale', 'Switch on the "Notify me" card and, before anything is on sale, a visitor can leave an email address, no account needed, and hear once when tickets go on sale and again shortly before it starts. You see how many are waiting. Free on every plan.', 'interest-list'],
             ['Ticket types', 'Each one has its own name, price, quantity, optional sales window and optional cap per order, so one buyer cannot take the whole allocation. Zero is a valid price, and that ticket still gets a QR code.'],
             ['Promo codes and group rates', 'A code takes a percentage or a fixed amount off, with usage limits, an expiry date and per-ticket targeting. A volume discount unlocks a lower rate once one ticket line reaches a set quantity.'],
             ['Add-ons', 'Parking, merchandise, a meal package. Priced separately and never discounted by a promo code.'],
@@ -597,8 +597,8 @@
             ['Passes and subscriptions', 'One purchase a guest reuses across many events, with its own usage rules.'],
             ['Your own Stripe or PayPal', 'Buyers pay by card, Apple Pay or Google Pay through Stripe, or from a PayPal balance or card, straight into your account. You choose the method per event.'],
             ['Installments', 'A buyer splits the price over monthly charges. The first is taken at checkout and the ticket is valid straight away; the rest come off the saved card on their own.'],
-            ['One cart, several events', 'Somebody buying into three of your nights pays once, as a single amount, instead of running checkout three times.'],
-            ['Refunds that move the money', 'Refund a Stripe or PayPal sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. On Pro, like the sale it reverses.'],
+            ['One cart, several events', 'Somebody buying into three of your nights pays once, as a single amount, instead of running checkout three times.', 'cart'],
+            ['Refunds that move the money', 'Refund a Stripe or PayPal sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. On Pro, like the sale it reverses.', 'refunds'],
         ];
 
         $doorSide = [
@@ -607,7 +607,7 @@
                 ? ['Add to Google Wallet', 'The ticket page, the order page and the confirmation email carry an Add to Google Wallet button, free registrations included. The pass holds the same QR code, so it scans like any other ticket.']
                 : ['Free registrations too', 'A free registration gets a QR code in its confirmation email on the same terms as a paid ticket, and checks in the same way.'],
             ['Your own email sender', 'Optional. Add one once in the schedule\'s settings, under Integrations, Email Settings, and confirmations leave from your own address. Until you do, they leave from ours.'],
-            ['Individual tickets', 'Turn it on and every guest on the order gets their own email and their own code.'],
+            ['Individual tickets', 'Turn it on and every guest on the order gets their own email and their own code.', 'individual-tickets'],
             ['If the plans change', 'Change the date, the time or the venue and the editor asks whether to email everyone holding a ticket, with a note from you; cancelling offers the same. Buyers hear once your own email sender is added, and the interest list hears either way.'],
             ['Scan from a phone', 'Sales, then Scan Tickets, then point the camera. No hardware to buy or rent.'],
             ['One admission per ticket', 'A second scan comes back as an orange warning over the holder details, and no second admission is recorded.'],
@@ -617,10 +617,10 @@
         ];
 
         $afterSale = [
-            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used. The first paid sale on an event notifies you, whatever plan you are on.', 'Pro'],
-            ['Sales CSV export', 'Buyer, ticket type, amount, promo code, payment method, check-in status and every custom answer.', 'Pro'],
+            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the ticket type, the amount, the status and any code used. The first paid sale on an event notifies you, whatever plan you are on.', 'Pro', 'sale-notifications'],
+            ['Sales CSV export', 'Buyer, ticket type, amount, promo code, payment method, check-in status and every custom answer.', 'Pro', 'sales-export'],
             ['Ticket waitlist', 'When a date sells out, guests can join. One person is notified at a time, with a 24 hour link to buy.', 'Pro'],
-            ['Bulk attendee import', 'Paste rows or upload a CSV for people who paid out of band. Up to 5,000 in one go.', 'Pro'],
+            ['Bulk attendee import', 'Paste rows or upload a CSV for people who paid out of band. Up to 5,000 in one go.', 'Pro', 'attendee-import'],
             ['Gift cards', 'Sell a balance somebody sends to a recipient by email, redeemable against tickets on your schedule.', 'Pro'],
             ['Post-event feedback', 'Star ratings and comments collected from ticket buyers and registrants after the event ends.', 'Pro'],
             ['Webhooks', 'POST notifications for sales, cancellations and check-ins, into whatever you already run.', 'Pro'],
@@ -821,8 +821,10 @@
                 <div class="es-turn-card p-6 sm:p-7" data-reveal="panel">
                     <p class="es-turn-tag mb-5">The sale side</p>
                     <dl class="space-y-4" data-reveal-group="60">
-                        @foreach ($saleSide as [$sTitle, $sBody])
-                            <div data-reveal>
+                        {{-- A row with a third entry is one /features links to by name, so it carries that id. --}}
+                        @foreach ($saleSide as $saleRow)
+                            @php [$sTitle, $sBody] = $saleRow; $sAnchor = $saleRow[2] ?? null; @endphp
+                            <div @if ($sAnchor) id="{{ $sAnchor }}" @endif class="scroll-mt-24" data-reveal>
                                 <dt class="es-turn-ink text-sm font-bold">{{ $sTitle }}</dt>
                                 <dd class="es-turn-muted mt-1 text-sm leading-relaxed">{{ $sBody }}</dd>
                             </div>
@@ -843,8 +845,9 @@
                 <div class="es-turn-card p-6 sm:p-7" data-reveal="panel">
                     <p class="es-turn-tag mb-5">The door side</p>
                     <dl class="space-y-4" data-reveal-group="60">
-                        @foreach ($doorSide as [$dTitle, $dBody])
-                            <div data-reveal>
+                        @foreach ($doorSide as $doorRow)
+                            @php [$dTitle, $dBody] = $doorRow; $dAnchor = $doorRow[2] ?? null; @endphp
+                            <div @if ($dAnchor) id="{{ $dAnchor }}" @endif class="scroll-mt-24" data-reveal>
                                 <dt class="es-turn-ink text-sm font-bold">{{ $dTitle }}</dt>
                                 <dd class="es-turn-muted mt-1 text-sm leading-relaxed">{{ $dBody }}</dd>
                             </div>
@@ -912,10 +915,15 @@
                 </div>
             </div>
 
-            <div class="mt-8 grid gap-4 md:grid-cols-3" data-reveal-group="90">
+            {{-- Four, so the pair /features names in one row, sales windows and group rates, sit side by side. --}}
+            <div class="mt-8 grid gap-4 md:grid-cols-2" data-reveal-group="90">
                 <div class="es-turn-card p-6" data-reveal="panel">
                     <h3 class="es-turn-ink mb-2 text-base font-bold">A window is a date, not a countdown</h3>
                     <p class="es-turn-muted text-sm leading-relaxed">A sales start and end are stored as single moments in time, so an early bird ends on the date you set. Separately, a per-event option keeps selling until the event ends rather than stopping at the start time.</p>
+                </div>
+                <div class="es-turn-card p-6" data-reveal="panel">
+                    <h3 class="es-turn-ink mb-2 text-base font-bold">A group rate rewards the bigger order</h3>
+                    <p class="es-turn-muted text-sm leading-relaxed">Give a ticket type a minimum quantity, two or more, and a percentage or a fixed amount comes off once one order reaches it. It comes off that ticket line only, never off an add-on, and a promo code is then worked out on what is left, so the two never discount the same money twice.</p>
                 </div>
                 <div class="es-turn-card p-6" data-reveal="panel">
                     <h3 class="es-turn-ink mb-2 text-base font-bold">Inventory is per date</h3>
@@ -1205,8 +1213,9 @@
             </div>
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="70">
-                @foreach ($afterSale as [$aTitle, $aBody, $aPlan])
-                    <div class="es-turn-card flex flex-col p-6" data-reveal="panel">
+                @foreach ($afterSale as $afterRow)
+                    @php [$aTitle, $aBody, $aPlan] = $afterRow; $aAnchor = $afterRow[3] ?? null; @endphp
+                    <div @if ($aAnchor) id="{{ $aAnchor }}" @endif class="es-turn-card flex scroll-mt-24 flex-col p-6" data-reveal="panel">
                         <span class="es-turn-plan es-turn-plan-pro mb-3 self-start">{{ $aPlan }}</span>
                         <h3 class="es-turn-ink mb-2 text-base font-bold">{{ $aTitle }}</h3>
                         <p class="es-turn-muted text-sm leading-relaxed">{{ $aBody }}</p>

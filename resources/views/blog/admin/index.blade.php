@@ -18,6 +18,7 @@
     <div class="page-head">
         <p class="page-lead">{{ __('messages.blog_posts_description') }}</p>
         <div class="page-actions">
+            <x-secondary-link href="{{ route('blog.review') }}">{{ __('messages.review') }}</x-secondary-link>
             <x-brand-link href="{{ route('blog.create') }}">
                 <svg class="-ms-0.5 me-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -28,6 +29,21 @@
     </div>
 
     <div class="page-shell page-stack">
+        {{-- A post the check held is a draft with its reason: it is here to be fixed, published
+             as it is, or deleted. Until 2026-10 a post that failed the check was thrown away. --}}
+        @if ($held > 0 || $heldOnly)
+        <x-page-notice :tone="$held > 0 ? 'warn' : 'info'">
+            {{ trans_choice('messages.admin_alert_blog_posts_held', $held, ['count' => $held]) }}
+            <x-slot name="action">
+                @if ($heldOnly)
+                <a href="{{ route('blog.admin.index') }}" class="event-link">{{ __('messages.all') }}</a>
+                @else
+                <a href="{{ route('blog.admin.index', ['held' => 1]) }}" class="event-link">{{ __('messages.view') }}</a>
+                @endif
+            </x-slot>
+        </x-page-notice>
+        @endif
+
         @if ($posts->count() > 0)
         <div>
         <div class="ap-card rounded-xl overflow-hidden">
@@ -56,6 +72,12 @@
                                 @if ($post->excerpt)
                                 <span class="c-sub"><bdi>{{ Str::limit($post->excerpt, 90) }}</bdi></span>
                                 @endif
+                                @if ($post->held_reason && ! $post->is_published)
+                                <span class="c-sub text-amber-700 dark:text-amber-400"><bdi>{{ __('messages.blog_held_because') }}: {{ Str::limit(str_replace("\n", '; ', $post->held_reason), 260) }}</bdi></span>
+                                @endif
+                                @if ($post->redirect_slug)
+                                <span class="c-sub"><bdi>{{ __('messages.blog_redirects_to') }} {{ $post->redirect_slug }}</bdi></span>
+                                @endif
                             </td>
                             {{-- What state the post is in, and the day it went or goes out. --}}
                             <td>
@@ -63,6 +85,8 @@
                                 <span class="event-status is-on">{{ __('messages.published') }}</span>
                                 @elseif ($scheduled)
                                 <span class="event-status is-info">{{ __('messages.scheduled') }}</span>
+                                @elseif ($post->held_reason)
+                                <span class="event-status is-warn">{{ __('messages.blog_held') }}</span>
                                 @else
                                 <span class="event-status">{{ __('messages.draft') }}</span>
                                 @endif

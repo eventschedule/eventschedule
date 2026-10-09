@@ -120,7 +120,7 @@ class AppointmentPrivacyTest extends TestCase
             ['GET', "$sub/$slug/$hash?embed=1&tickets=true", []],
             ['GET', "$sub/$slug/$hash/ical", []],
             ['GET', "$sub/carpool/$hash", []],
-            ['GET', "$sub/curate-event/$hash", []],
+            ['POST', "$sub/curate-event/$hash", []],
             ['GET', "$sub/seating/state?event_id=$hash", []],
             ['POST', "$sub/submit-comment/$hash", ['comment' => 'Hello']],
             ['POST', "$sub/submit-video/$hash", ['youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']],

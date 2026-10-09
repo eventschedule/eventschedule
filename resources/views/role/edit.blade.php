@@ -275,13 +275,23 @@
             updateFontNavButtons();
         }
 
+        {{-- Saved values are written as JSON from a bare variable, never inside a quoted string:
+             Blade's escaping leaves a backslash alone, and one at the end of a value ended the
+             string it was printed in. --}}
+        @php
+            $scriptValue = fn ($value) => is_scalar($value) ? (string) $value : '';
+            $scriptBackground = $scriptValue(old('background', $role->background));
+            $scriptBackgroundColors = $scriptValue(old('background_colors', $role->background_colors));
+            $scriptFontFamily = $scriptValue(old('font_family', $role->font_family));
+            $scriptLanguageCode = $scriptValue(old('language_code', $role->language_code));
+        @endphp
         document.addEventListener('DOMContentLoaded', () => {
-            $('#background').val('{{ old('background', $role->background) }}');
-            $('#background_colors').val('{{ old('background_colors', $role->background_colors) }}');
+            $('#background').val(@json($scriptBackground));
+            $('#background_colors').val(@json($scriptBackgroundColors));
 
             // If stored background_colors doesn't match any preset option, select "Custom"
             var $bgColors = $('#background_colors');
-            var storedBgColors = '{{ old('background_colors', $role->background_colors) }}';
+            var storedBgColors = @json($scriptBackgroundColors);
             if (storedBgColors && $bgColors.val() !== storedBgColors) {
                 $bgColors.val('');
                 // Pre-populate custom color inputs from stored values
@@ -290,8 +300,8 @@
                 if (storedColors.length >= 2) $('#custom_color2').val(storedColors[1]);
             }
 
-            $('#font_family').val('{{ old('font_family', $role->font_family) }}');
-            $('#language_code').val('{{ old('language_code', $role->language_code) }}');
+            $('#font_family').val(@json($scriptFontFamily));
+            $('#language_code').val(@json($scriptLanguageCode));
             $('#timezone').val(@json(\App\Utils\TimezoneUtils::canonicalize(old('timezone', $role->timezone)) ?? old('timezone', $role->timezone)));
 
             $('#header_image').trigger('input');
@@ -3548,7 +3558,7 @@
                             </p>
                         </div>
                         @if (!is_demo_mode())
-                        <div class="hidden" id="subdomain-edit" x-data="{ domain: '{{ old('custom_domain', $role->custom_domain) }}', mode: '{{ old('custom_domain_mode', $role->custom_domain_mode) ?: 'subdomain' }}' }">
+                        <div class="hidden" id="subdomain-edit" data-domain="{{ old('custom_domain', $role->custom_domain) }}" data-mode="{{ old('custom_domain_mode', $role->custom_domain_mode) ?: 'subdomain' }}" x-data="{ domain: $el.dataset.domain, mode: $el.dataset.mode }">
                             <input type="hidden" name="custom_domain_mode" :value="mode === 'subdomain' ? '' : mode">
 
                             {{-- Mode radios (hosted only) --}}
@@ -6526,7 +6536,7 @@ function showImportOutput(output, message, isSuccess = true) {
                         <div class="mb-4">
                             <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __("messages.console_output") }}:</h4>
                             <div class="bg-gray-100 dark:bg-gray-700 rounded p-3 max-h-96 overflow-y-auto">
-                                <pre class="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap">${output}</pre>
+                                <pre class="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap">${escapeHtml(output)}</pre>
                             </div>
                         </div>
                     ` : ''}

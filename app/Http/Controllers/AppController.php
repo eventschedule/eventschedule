@@ -60,17 +60,17 @@ class AppController extends Controller
             return response()->json(['success' => false, 'error' => 'Not available'], 403);
         }
 
-        // Require authentication unless this is the initial setup (no users exist yet)
-        if (! auth()->check()) {
-            try {
-                $hasUsers = \App\Models\User::exists();
-            } catch (\Exception $e) {
-                // Table may not exist yet during initial setup
-                $hasUsers = false;
-            }
-            if ($hasUsers) {
-                return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
-            }
+        // Only the setup wizard asks this, and only before the install has an account. Open to
+        // every signed-in person after that, it had the server open a connection to any host and
+        // port they named, on a route that is outside the CSRF check.
+        try {
+            $hasUsers = \App\Models\User::exists();
+        } catch (\Throwable $e) {
+            // Table may not exist yet during initial setup
+            $hasUsers = false;
+        }
+        if ($hasUsers) {
+            return response()->json(['success' => false, 'error' => 'Unauthorized'], 403);
         }
 
         $host = $request->input('host');

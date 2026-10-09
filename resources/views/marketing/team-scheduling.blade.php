@@ -888,6 +888,30 @@
                 </div>
             </div>
 
+            {{-- The handover: what the Owner card's last line means, spelled out. /features links here by name. --}}
+            <div id="transfer" class="es-line-card mt-8 scroll-mt-24 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-8 md:grid-cols-2">
+                    <div>
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-line-ink text-xl font-bold">The owner's seat can change hands</h3>
+                            <span class="es-line-plan">Free</span>
+                        </div>
+                        <p class="es-line-muted mb-4">
+                            A venue is sold, an organizer moves on, or you set a schedule up for somebody and want it to be theirs. From your own row on the Team tab, choose Transfer ownership and enter the new owner's email address.
+                        </p>
+                        <p class="es-line-muted text-sm">
+                            Nothing moves until they accept, and accepting means signing in with the address you sent it to: the link on its own is not enough. They can decline instead, and a request nobody answers lapses after seven days. You can resend it or cancel it while you wait.
+                        </p>
+                    </div>
+                    <ul class="es-line-muted space-y-3 text-sm">
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Every event, follower, image and setting goes with the schedule.</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Ticket money for its events starts settling into the new owner's payment account, so they should check theirs before the next sale.</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>On eventschedule.com the previous owner is not charged for it again. The schedule keeps its plan until the period already paid for ends, and the new owner adds a card to carry on.</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>On Enterprise and on a selfhosted install you can stay on as an admin. Free and Pro hold one member, so there you step off as they step on.</span></li>
+                    </ul>
+                </div>
+            </div>
+
             <p class="es-line-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
                 A follower is not one of these. Following a schedule is a public action anybody can take on the guest page, and it gives no access to the admin panel at all.
                 <a href="{{ marketing_url('/features/newsletters') }}" class="es-line-link font-medium hover:underline">What following actually does</a>

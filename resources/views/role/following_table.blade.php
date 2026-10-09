@@ -128,15 +128,19 @@
                             @endif
 
                             <div class="py-1" data-popup-target="{{ $menuId }}">
-                                {{-- data-confirm on a link is asked by the layout before the
-                                     browser follows it. --}}
-                                <a href="{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ __('messages.are_you_sure') }}"
+                                {{-- A form, not a link: unfollowing changes something, so it is
+                                     posted with the page's token. data-confirm on a form is asked
+                                     by the layout before it is sent. --}}
+                                <form method="POST" action="{{ route('role.unfollow', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ __('messages.are_you_sure') }}">
+                                @csrf
+                                <button type="submit"
                                    class="group flex items-center w-full px-4 py-2.5 text-sm text-start text-red-700 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
                                     <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                     <span>{{ __('messages.unfollow') }}</span>
-                                </a>
+                                </button>
+                                </form>
                             </div>
                         </div>
                     </div>

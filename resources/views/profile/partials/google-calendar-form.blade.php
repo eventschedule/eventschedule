@@ -53,8 +53,10 @@
                         <span class="event-status is-on">{{ __('messages.google_calendar_connected') }}</span>
                     </div>
                     <div class="settings-picked-actions">
-                        <a href="{{ route('google.calendar.disconnect') }}" id="disconnect-google-calendar"
-                           data-confirm="{{ __('messages.settings_confirm_disconnect_calendar') }}" class="event-link is-danger">{{ __('messages.disconnect') }}</a>
+                        <form method="POST" action="{{ route('google.calendar.disconnect') }}" class="inline">
+                            @csrf
+                            <button type="submit" id="disconnect-google-calendar" data-confirm="{{ __('messages.settings_confirm_disconnect_calendar') }}" class="event-link is-danger">{{ __('messages.disconnect') }}</button>
+                        </form>
                     </div>
                 </div>
                 {{-- Connected is half of it: nothing syncs until a schedule is told to. --}}

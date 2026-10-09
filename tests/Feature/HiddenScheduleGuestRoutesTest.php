@@ -123,7 +123,7 @@ class HiddenScheduleGuestRoutesTest extends TestCase
             ['GET', '/'.$event->slug.'/'.$hash.'/ical', []],
             ['GET', '/'.$event->slug.'/'.$hash.'/2030-01-07/ical', []],
             ['GET', '/guest-search-youtube?q=jazz', []],
-            ['GET', '/curate-event/'.$hash, []],
+            ['POST', '/curate-event/'.$hash, []],
             // Gemini is paid per call, so this one must stop at the lookup.
             ['POST', '/guest-parse', ['event_details' => 'Jazz night on Friday at eight']],
             ['POST', '/submit-video/'.$hash, ['youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']],

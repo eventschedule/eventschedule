@@ -1204,7 +1204,7 @@ curl -X PUT https://eventschedule.com/api/events/vN4wR8 \
 
 Permanently delete an event. An event that has sales is not deleted (422): cancel it with `POST /events/{id}/cancel` instead, which keeps the sale records.
 
-**Authentication**: Required (must have permission to edit)
+**Authentication**: Required (the person who made the event, or an owner or admin of the schedule that owns it; a schedule that only lists the event gets a 403)
 **Plan**: Pro required
 
 **Path parameters**:

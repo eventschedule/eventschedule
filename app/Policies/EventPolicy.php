@@ -12,8 +12,9 @@ class EventPolicy
         return $user->canEditEvent($event);
     }
 
+    /** Deleting, cancelling and restoring: the event's own people, not every schedule it is on. */
     public function delete(User $user, Event $event): bool
     {
-        return $user->canEditEvent($event);
+        return $user->runsEvent($event);
     }
 }

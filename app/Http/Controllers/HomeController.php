@@ -145,7 +145,9 @@ class HomeController extends Controller
         if ($subdomain) {
             $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
-            return redirect()->route('role.follow', ['subdomain' => $subdomain]);
+            // Done here, not by sending the browser to the follow address: that address no longer
+            // follows when it is merely opened.
+            return app(\App\Http\Controllers\RoleController::class)->follow($request, $subdomain);
         }
 
         $user = $request->user();

@@ -84,13 +84,19 @@ class VerifyEmail extends BaseVerifyEmail
 
     protected function verificationUrl($notifiable)
     {
-        return URL::temporarySignedRoute(
+        // Signed by path: the request that checks the link may see another scheme or host than
+        // the one that mailed it (a proxy that is not trusted, the app subdomain), and a signature
+        // over the whole address would then fail for the person it was sent to.
+        $path = URL::temporarySignedRoute(
             $this->type == 'user' ? 'verification.verify' : 'role.verification.verify',
             Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
             $this->type == 'user'
                 ? ['id' => $notifiable->getKey(), 'hash' => sha1($notifiable->getEmailForVerification())]
-                : ['subdomain' => $this->subdomain, 'hash' => sha1($notifiable->getEmailForVerification())]
+                : ['subdomain' => $this->subdomain, 'hash' => sha1($notifiable->getEmailForVerification())],
+            absolute: false
         );
+
+        return URL::to($path);
     }
 
     /**

@@ -20,6 +20,28 @@ class MarkdownUtils
      *                        operator-authored legal documents opt in, because a
      *                        cookie list and a retention schedule are tables.
      */
+    /**
+     * Ids a description may not carry, because a page's own script finds an element by them.
+     *
+     * The second group is every element a page MOUNTS by its id: a description that carried one
+     * and came first in the page was the element the app started on. MarkdownReservedIdsTest
+     * reads the views and fails the build when a mount is added and not listed here.
+     */
+    public const RESERVED_IDS = [
+        'app', 'ticket-selector', 'gp-event-form',
+        'gp-event-cta', 'gp-mobile-cta', 'name', 'gp-agenda',
+        'calendar-pop-up-menu', 'calendar-card-dropdown',
+        'calendar-mobile-sheet', 'calendar-mobile-overlay', 'mobile-calendar-cta',
+
+        'backup-app', 'booking-app', 'boost-modal-app', 'calendar-app', 'cancel-subscription-app',
+        'card-element', 'carpool-app', 'create-segment-app', 'dashboard-customize', 'es-cart-app',
+        'es-lightbox-app', 'event-import-app', 'event-picker-app', 'event-submit-app',
+        'eventbrite-app', 'follow-consent-modal-app', 'import-attendees-app', 'import-emails-app',
+        'payment-element', 'promo-form-app', 'promo-payment-element', 'realtime-app', 'rsvp-form',
+        'scan-agenda-app', 'schedule-realtime', 'suggestions-app', 'support-admin-app',
+        'support-chat-widget', 'support-presence-app', 'translations-app', 'videos-app',
+    ];
+
     public static function convertToHtml($markdown, bool $tables = false)
     {
         if (! $markdown) {
@@ -70,12 +92,7 @@ class MarkdownUtils
         // Defense-in-depth: stop user-authored ids (including heading slugs) from
         // clobbering app element ids that page JavaScript looks up. Keep this list
         // in sync if those element ids change.
-        $config->set('Attr.IDBlacklist', [
-            'app', 'ticket-selector', 'gp-event-form',
-            'gp-event-cta', 'gp-mobile-cta', 'name', 'gp-agenda',
-            'calendar-pop-up-menu', 'calendar-card-dropdown',
-            'calendar-mobile-sheet', 'calendar-mobile-overlay', 'mobile-calendar-cta',
-        ]);
+        $config->set('Attr.IDBlacklist', self::RESERVED_IDS);
 
         $purifier = new HTMLPurifier($config);
 

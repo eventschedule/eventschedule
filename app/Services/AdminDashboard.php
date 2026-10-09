@@ -34,7 +34,8 @@ use Throwable;
  *   payload use, on every query written here. Not the `demo-%` subdomain shape the page used to
  *   test. The one exception is the "Outside Stripe" line of the revenue card: those three counts
  *   are AdminPlanCounts, which keeps the older test because /admin/schedules, the page they come
- *   from, uses it everywhere.
+ *   from, uses it everywhere. Which schedules are demo is read ONCE (demoRoleIds()) and handed to
+ *   each query as ids: asked inside the query, it was answered again for every event.
  * - An event belongs to the page while one of its schedules is not deleted. Deleting a schedule
  *   keeps its events (ScheduleDeletionService), and they are on no page anyone can open.
  * - An upcoming event has an occurrence still to come (Event::scopeHasUpcomingOccurrence(), so a
@@ -44,7 +45,14 @@ use Throwable;
  * - Active users are ActiveDays; recurring revenue is RecurringRevenue. Neither is restated here.
  *
  * build() isolates each card: this is the page an admin lands on, and one failing query should
- * cost one card, not the page.
+ * cost one card, not the page. It also times each one (timings()), which the page sends as a
+ * Server-Timing header: the page's first run against production's data took longer than a request
+ * is allowed, and nothing said which card.
+ *
+ * What a query here costs is how many events it READS, so three rules hold for all of them. Start
+ * from `events` (EVENTS_FIRST). Never read every event to answer for a few: the newest-events list
+ * walks the created_at index and stops, the 30-day figures are bounded by created_at. And never
+ * load a whole event or schedule that is not going to be shown.
  */
 class AdminDashboard
 {
@@ -54,13 +62,25 @@ class AdminDashboard
     public const LIST_VISIBLE = 8;
 
     /**
-     * Events read at a time before bursts are collapsed down to LIST_ROWS, and how many times.
-     * One read fills the list unless imports crowd it; the rest are for the day one schedule
-     * brings in a few hundred at once.
+     * How many of the newest events are looked at before bursts are collapsed down to LIST_ROWS.
+     * Twenty fill the list unless imports crowd it; the rest are for the day one schedule brings
+     * in a few hundred at once. Three columns each, so the number costs little.
      */
-    private const EVENT_FETCH = 60;
+    private const EVENT_SCAN = 300;
 
-    private const EVENT_PAGES = 5;
+    /**
+     * Opens the select list of every query here that filters `events` by a subquery, so that
+     * `events` is the table the query starts from.
+     *
+     * Without it MySQL rewrites `EXISTS (on a live schedule)` as a semijoin, and is then free to
+     * start from the schedules instead: every schedule, every pivot row, every event fetched one
+     * at a time by its id, duplicates removed in a temporary table. For a count that is slow. For
+     * the newest-events list it meant sorting every event there is to keep sixty, with the index
+     * on created_at never used. The modifier rules the rewrite out (MySQL documents that it does),
+     * so each subquery is answered beside the event it is asked of: a probe, or a set gathered
+     * once (see onLiveSchedule() and liveEventIds()). MariaDB reads the modifier the same way.
+     */
+    private const EVENTS_FIRST = 'STRAIGHT_JOIN';
 
     /** Events one schedule creates within this many seconds of each other are one row. */
     private const BURST_SECONDS = 600;
@@ -70,6 +90,12 @@ class AdminDashboard
     private CarbonImmutable $now;
 
     private CarbonImmutable $start;
+
+    /** @var array<string, float> card => milliseconds, for the last build() */
+    private array $timings = [];
+
+    /** @var array<int, int>|null */
+    private ?array $demoRoleIds = null;
 
     public function __construct(?CarbonImmutable $now = null)
     {
@@ -85,14 +111,14 @@ class AdminDashboard
         $hosted = (bool) config('app.hosted');
 
         $data = [
-            'signups' => $this->card(fn () => $this->signups()),
-            'active' => $this->card(fn () => $this->activeUsers()),
-            'revenue' => $hosted ? $this->card(fn () => $this->revenue()) : null,
-            'events' => $this->card(fn () => $this->events()),
-            'federation' => $this->card(fn () => $this->federation()),
-            'schedules' => $this->card(fn () => $this->recentSchedules()),
-            'recentEvents' => $this->card(fn () => $this->recentEvents()),
-            'system' => $this->card(fn () => $this->system()),
+            'signups' => $this->card('signups', fn () => $this->signups()),
+            'active' => $this->card('active', fn () => $this->activeUsers()),
+            'revenue' => $hosted ? $this->card('revenue', fn () => $this->revenue()) : null,
+            'events' => $this->card('events', fn () => $this->events()),
+            'federation' => $this->card('federation', fn () => $this->federation()),
+            'schedules' => $this->card('schedules', fn () => $this->recentSchedules()),
+            'recentEvents' => $this->card('recentEvents', fn () => $this->recentEvents()),
+            'system' => $this->card('system', fn () => $this->system()),
         ];
 
         // A new install: no schedule, no event, and nobody but the person looking. Their own
@@ -113,8 +139,10 @@ class AdminDashboard
         return AdminDashboardSample::data($empty);
     }
 
-    private function card(callable $build): ?array
+    private function card(string $name, callable $build): ?array
     {
+        $started = hrtime(true);
+
         try {
             return $build();
         } catch (Throwable $e) {
@@ -126,7 +154,50 @@ class AdminDashboard
             report($e);
 
             return null;
+        } finally {
+            $this->timings[$name] = (hrtime(true) - $started) / 1e6;
         }
+    }
+
+    /**
+     * How long each card of the last build() took, in milliseconds.
+     *
+     * @return array<string, float>
+     */
+    public function timings(): array
+    {
+        return $this->timings;
+    }
+
+    /**
+     * timings() as a Server-Timing header, with whatever else the caller timed. Durations only.
+     * Read it in the browser's network panel, on the page's own request.
+     *
+     * @param  array<string, float>  $also  name => milliseconds
+     */
+    public function serverTiming(array $also = []): string
+    {
+        $entries = [];
+        foreach ($this->timings + $also as $name => $milliseconds) {
+            $entries[] = sprintf('%s;dur=%.1f', $name, $milliseconds);
+        }
+
+        return implode(', ', $entries);
+    }
+
+    /** The demo's schedules, read once for this page. Empty where there is no demo. */
+    private function demoRoleIds(): array
+    {
+        return $this->demoRoleIds ??= DemoService::demoRoleIds();
+    }
+
+    /**
+     * For whereNotIn('events.id', ...): the events on a demo schedule. MySQL reads it once, from
+     * the pivot's (role_id, event_id) index, and no schedule or owner is looked up per event.
+     */
+    private function demoEventIds(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('event_role')->whereIn('role_id', $this->demoRoleIds())->select('event_id');
     }
 
     /**
@@ -344,77 +415,108 @@ class AdminDashboard
     public function events(): array
     {
         $utc = $this->now->utc();
+        $horizons = [
+            'next_24h' => $utc->addHours(24)->format('Y-m-d H:i:s'),
+            'next_7' => $utc->addDays(7)->format('Y-m-d H:i:s'),
+            'next_30' => $utc->addDays(30)->format('Y-m-d H:i:s'),
+        ];
 
-        $inner = $this->upcoming()->toBase()->selectRaw(
-            "(events.event_url IS NOT NULL AND events.event_url <> '') as has_url,
-            EXISTS (SELECT 1 FROM event_role JOIN roles ON roles.id = event_role.role_id
-                WHERE event_role.event_id = events.id AND roles.type = 'venue') as has_venue,
-            (events.days_of_week IS NOT NULL) as is_series,
-            events.starts_at as starts_at"
-        );
-
-        // Conditional sums over a derived table: one scan, and nothing newer than MySQL 5.7 or
+        // ONE read of the events, four small columns of each upcoming one, added up here. Telling
+        // whether an event is still to come needs its row (Event::constrainToOccurrencesSince()),
+        // so this is the page's one pass over the whole table, and the reason there is only one:
+        // the split by attendance and the countries were two queries, each reading every event.
+        //
+        // venue_countries is the countries of the event's venues: null with no venue, '' for a
+        // venue with no country on record, otherwise the codes. Nothing newer than MySQL 5.7 or
         // MariaDB 10.3 can run.
-        $row = DB::query()->fromSub($inner, 'upcoming')->selectRaw(
-            'COUNT(*) as total,
-            COALESCE(SUM(has_url = 1 AND has_venue = 1), 0) as hybrid,
-            COALESCE(SUM(has_url = 1 AND has_venue = 0), 0) as online,
-            COALESCE(SUM(has_url = 0 AND has_venue = 1), 0) as in_person,
-            COALESCE(SUM(has_url = 0 AND has_venue = 0), 0) as no_location,
-            COALESCE(SUM(is_series = 1), 0) as recurring,
-            COALESCE(SUM(is_series = 0 AND starts_at < ?), 0) as next_24h,
-            COALESCE(SUM(is_series = 0 AND starts_at < ?), 0) as next_7,
-            COALESCE(SUM(is_series = 0 AND starts_at < ?), 0) as next_30',
-            [$utc->addHours(24)->format('Y-m-d H:i:s'), $utc->addDays(7)->format('Y-m-d H:i:s'), $utc->addDays(30)->format('Y-m-d H:i:s')]
-        )->first();
+        $upcoming = $this->upcoming()->toBase()->selectRaw(
+            self::EVENTS_FIRST." (events.event_url IS NOT NULL AND events.event_url <> '') as has_url,
+            (events.days_of_week IS NOT NULL) as is_series,
+            events.starts_at as starts_at,
+            (SELECT GROUP_CONCAT(DISTINCT LOWER(COALESCE(roles.country_code, '')))
+                FROM event_role JOIN roles ON roles.id = event_role.role_id
+                WHERE event_role.event_id = events.id AND roles.type = 'venue') as venue_countries"
+        )->cursor();
 
-        $countries = $this->upcoming()
-            ->join('event_role', 'events.id', '=', 'event_role.event_id')
-            ->join('roles', 'roles.id', '=', 'event_role.role_id')
-            ->where('roles.type', 'venue')
-            ->whereNotNull('roles.country_code')
-            ->where('roles.country_code', '!=', '')
-            ->toBase()
-            ->selectRaw('LOWER(roles.country_code) as code, COUNT(DISTINCT events.id) as events')
-            ->groupBy(DB::raw('LOWER(roles.country_code)'))
-            ->orderByRaw('COUNT(DISTINCT events.id) DESC')
-            ->limit(5)
-            ->get();
+        $count = ['total' => 0, 'hybrid' => 0, 'online' => 0, 'in_person' => 0, 'no_location' => 0, 'recurring' => 0]
+            + array_fill_keys(array_keys($horizons), 0);
+        $byCountry = [];
 
-        $previousStart = $this->start->subDays(30);
-        $all = DB::table('events')
-            ->whereNull('appointment_type_id')
-            ->whereNotIn('id', DemoService::demoEventIdsQuery())
+        foreach ($upcoming as $event) {
+            $hasUrl = (bool) $event->has_url;
+            $hasVenue = $event->venue_countries !== null;
+
+            $count['total']++;
+            $count[match (true) {
+                $hasUrl && $hasVenue => 'hybrid',
+                $hasUrl => 'online',
+                $hasVenue => 'in_person',
+                default => 'no_location',
+            }]++;
+
+            if ($event->is_series) {
+                $count['recurring']++;
+            } elseif ($event->starts_at !== null) {
+                foreach ($horizons as $horizon => $before) {
+                    // Both are UTC datetimes written the same way, so they compare as text.
+                    $count[$horizon] += (int) ($event->starts_at < $before);
+                }
+            }
+
+            // Once per country, however many of the event's venues are in it.
+            foreach (array_unique(array_filter(array_map('trim', explode(',', (string) $event->venue_countries)))) as $code) {
+                $byCountry[$code] = ($byCountry[$code] ?? 0) + 1;
+            }
+        }
+
+        // Most events first, and by code among equals so the order does not move between loads.
+        ksort($byCountry);
+        arsort($byCountry);
+        $countries = array_slice($byCountry, 0, 5, true);
+
+        // Two reads where there was one, so that neither opens every event. The total names no
+        // column but the id and appointment_type_id, which that column's index holds between
+        // them; the two windows are bounded by created_at, so they read sixty days of events.
+        // As one query it read every event ever made to tell which were from this month.
+        $allTime = (int) DB::table('events')
+            ->whereNull('events.appointment_type_id')
+            ->whereNotIn('events.id', $this->demoEventIds())
+            ->whereIn('events.id', self::liveEventIds())
+            ->selectRaw(self::EVENTS_FIRST.' COUNT(*) as total')
+            ->first()->total;
+
+        $added = DB::table('events')
+            ->whereNull('events.appointment_type_id')
+            ->whereNotIn('events.id', $this->demoEventIds())
             ->whereExists(self::onLiveSchedule())
+            ->where('events.created_at', '>=', $this->start->subDays(30))
+            ->where('events.created_at', '<=', $this->now)
             ->selectRaw(
-                'COUNT(*) as total,
-                COALESCE(SUM(created_at >= ? AND created_at <= ?), 0) as new_30d,
-                COALESCE(SUM(created_at >= ? AND created_at <= ?), 0) as previous_30d',
-                [$this->start, $this->now, $previousStart, $this->now->subDays(30)]
+                self::EVENTS_FIRST.' COALESCE(SUM(events.created_at >= ?), 0) as new_30d,
+                COALESCE(SUM(events.created_at <= ?), 0) as previous_30d',
+                [$this->start, $this->now->subDays(30)]
             )->first();
 
-        $total = (int) $row->total;
-        $recurring = (int) $row->recurring;
-        $new = (int) $all->new_30d;
-        $previous = (int) $all->previous_30d;
+        $new = (int) $added->new_30d;
+        $previous = (int) $added->previous_30d;
 
         return [
-            'total' => $total,
-            'in_person' => (int) $row->in_person,
-            'online' => (int) $row->online,
-            'hybrid' => (int) $row->hybrid,
-            'no_location' => (int) $row->no_location,
-            'one_off' => $total - $recurring,
-            'recurring' => $recurring,
-            'next_24h' => (int) $row->next_24h,
-            'next_7' => (int) $row->next_7,
-            'next_30' => (int) $row->next_30,
-            'countries' => $countries->map(fn ($country) => [
-                'code' => (string) $country->code,
-                'name' => CountryUtils::getName((string) $country->code),
-                'count' => (int) $country->events,
-            ])->all(),
-            'all_time' => (int) $all->total,
+            'total' => $count['total'],
+            'in_person' => $count['in_person'],
+            'online' => $count['online'],
+            'hybrid' => $count['hybrid'],
+            'no_location' => $count['no_location'],
+            'one_off' => $count['total'] - $count['recurring'],
+            'recurring' => $count['recurring'],
+            'next_24h' => $count['next_24h'],
+            'next_7' => $count['next_7'],
+            'next_30' => $count['next_30'],
+            'countries' => array_map(fn ($code, $events) => [
+                'code' => (string) $code,
+                'name' => CountryUtils::getName((string) $code),
+                'count' => $events,
+            ], array_keys($countries), $countries),
+            'all_time' => $allTime,
             'new_30d' => $new,
             'new_change' => $previous > 0 ? round((($new - $previous) / $previous) * 100, 1) : null,
         ];
@@ -428,13 +530,15 @@ class AdminDashboard
             ->where('events.is_cancelled', false)
             ->where('events.is_draft', false)
             ->whereNull('events.appointment_type_id')
-            ->whereNotIn('events.id', DemoService::demoEventIdsQuery())
-            ->whereExists(self::onLiveSchedule());
+            ->whereNotIn('events.id', $this->demoEventIds())
+            ->whereIn('events.id', self::liveEventIds());
     }
 
     /**
-     * For whereExists(): the event is on a schedule that is not deleted. Aliased, because the
-     * country query joins the same two tables for a reason of its own.
+     * "The event is on a schedule that is not deleted", in the two forms a query can ask it.
+     *
+     * For whereExists(): a probe per event, the pivot and then the schedule. Right for a query
+     * that looks at few events (the newest-events walk, the thirty-day figures).
      */
     private static function onLiveSchedule(): \Closure
     {
@@ -443,6 +547,19 @@ class AdminDashboard
             ->join('roles as live_role', 'live_role.id', '=', 'live_pivot.role_id')
             ->whereColumn('live_pivot.event_id', 'events.id')
             ->where('live_role.is_deleted', false);
+    }
+
+    /**
+     * For whereIn('events.id', ...): every such event, which MySQL gathers once and then looks
+     * each event up in. Right for a query that looks at them all (the upcoming pass, the total),
+     * where a probe per event was most of what the count cost.
+     */
+    private static function liveEventIds(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('event_role as live_pivot')
+            ->join('roles as live_role', 'live_role.id', '=', 'live_pivot.role_id')
+            ->where('live_role.is_deleted', false)
+            ->select('live_pivot.event_id');
     }
 
     /**
@@ -488,7 +605,7 @@ class AdminDashboard
         $base = fn () => Role::query()
             ->claimed()
             ->where('is_deleted', false)
-            ->whereNot(fn ($query) => Role::constrainDemoContent($query));
+            ->whereNotIn('roles.id', $this->demoRoleIds());
 
         $hosted = (bool) config('app.hosted');
 
@@ -538,10 +655,17 @@ class AdminDashboard
      * guest submission and an import are listed and flagged - they are the first sign of a new
      * organizer, the likeliest spam, and the reason twelve events appeared at once.
      *
-     * A burst from one schedule is one row: its newest event, and how many came with it. Events
-     * are read a page at a time until the list is full, so an import of a few hundred is still one
-     * row with the rest of the list under it, and its count is the whole burst (up to
-     * EVENT_FETCH x EVENT_PAGES events, past which the count is a floor).
+     * A burst from one schedule is one row: its newest event, and how many came with it. The
+     * newest EVENT_SCAN events are looked at, so an import of a few hundred is still one row with
+     * the rest of the list under it, and its count is the whole burst (up to EVENT_SCAN events,
+     * past which the count is a floor).
+     *
+     * Two reads, because what decides the list and what the list shows are different sizes. The
+     * first takes three columns of each candidate and walks the created_at index from its newest
+     * end, stopping at EVENT_SCAN: bursts are collapsed on those. Only the twenty that came
+     * through are then loaded whole, with their schedules. Read whole from the start, sixty at a
+     * time until the list filled, the day of an import loaded three hundred events and every
+     * schedule on them to show one row.
      *
      * The link is where the event is really shown. Event::canonicalTarget() picks a schedule that
      * serves it - accepted, claimed, not deleted - where naming the first claimed schedule sent
@@ -550,83 +674,92 @@ class AdminDashboard
      */
     public function recentEvents(): array
     {
-        $use24 = (bool) auth()->user()?->use_24_hour_time;
-        $rows = [];
+        $candidates = DB::table('events')
+            ->where('events.is_private', false)
+            ->whereNull('events.appointment_type_id')
+            ->whereNotIn('events.id', $this->demoEventIds())
+            ->whereExists(self::onLiveSchedule())
+            ->orderByDesc('events.created_at')
+            ->orderByDesc('events.id')
+            ->limit(self::EVENT_SCAN)
+            ->selectRaw(self::EVENTS_FIRST.' events.id, events.creator_role_id, events.created_at')
+            ->get();
+
+        $picked = [];
         $last = null;
-        $oldest = null;
 
-        for ($page = 0; $page < self::EVENT_PAGES; $page++) {
-            $events = Event::query()
-                ->with(['roles', 'creatorRole'])
-                ->where('events.is_private', false)
-                ->whereNull('events.appointment_type_id')
-                ->whereNotIn('events.id', DemoService::demoEventIdsQuery())
-                ->whereExists(self::onLiveSchedule())
-                ->when($oldest, fn ($query) => $query->where(fn ($older) => $older
-                    ->where('events.created_at', '<', $oldest->created_at)
-                    ->orWhere(fn ($same) => $same->where('events.created_at', $oldest->created_at)->where('events.id', '<', $oldest->id))))
-                ->orderByDesc('events.created_at')
-                ->orderByDesc('events.id')
-                ->limit(self::EVENT_FETCH)
-                ->get();
+        foreach ($candidates as $candidate) {
+            $createdAt = $candidate->created_at ? Carbon::parse($candidate->created_at)->getTimestamp() : 0;
+            $creator = $candidate->creator_role_id === null ? null : (int) $candidate->creator_role_id;
 
-            foreach ($events as $event) {
-                $createdAt = $event->created_at?->getTimestamp() ?? 0;
+            if ($last !== null && $creator !== null
+                && $creator === $last['creator']
+                && abs($last['at'] - $createdAt) <= self::BURST_SECONDS) {
+                $picked[$last['index']]['more']++;
+                $last['at'] = $createdAt;
 
-                if ($last !== null && $event->creator_role_id !== null
-                    && $event->creator_role_id === $last['creator']
-                    && abs($last['at'] - $createdAt) <= self::BURST_SECONDS) {
-                    $rows[$last['index']]['more']++;
-                    $last['at'] = $createdAt;
-
-                    continue;
-                }
-
-                // Full, and the last row's burst has ended: nothing further can change the list.
-                if (count($rows) === self::LIST_ROWS) {
-                    break 2;
-                }
-
-                [$publicUrl, $home] = $event->canonicalTarget();
-                $shownOn = $home ?? $event->getViewableRole();
-                $series = $event->days_of_week !== null;
-                $start = ! $series && $event->starts_at ? $event->getStartDateTime(null, true) : null;
-
-                $rows[] = [
-                    'name' => $event->name,
-                    'schedule' => $shownOn?->name,
-                    'series' => $series,
-                    'when' => $start ? $start->translatedFormat('D, M j').' · '.$start->format($use24 ? 'H:i' : 'g:i A') : null,
-                    'mode' => match ($event->getSchemaAttendanceMode()) {
-                        'https://schema.org/MixedEventAttendanceMode' => 'hybrid',
-                        'https://schema.org/OnlineEventAttendanceMode' => 'online',
-                        'https://schema.org/OfflineEventAttendanceMode' => 'in_person',
-                        default => 'no_location',
-                    },
-                    'flag' => match (true) {
-                        (bool) $event->is_draft => 'draft',
-                        (bool) $event->is_guest_submission => 'submitted',
-                        // Read as an attribute, never in a WHERE: a selfhost can run this code
-                        // before the migration that adds the column.
-                        filled($event->getAttribute('import_source')) => 'imported',
-                        default => null,
-                    },
-                    'more' => 0,
-                    'url' => $event->is_draft || ! $home || ! $publicUrl
-                        ? route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)])
-                        : $publicUrl,
-                    'image' => $event->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
-                    'created_at' => $event->created_at,
-                ];
-
-                $last = ['creator' => $event->creator_role_id, 'at' => $createdAt, 'index' => count($rows) - 1];
+                continue;
             }
 
-            if ($events->count() < self::EVENT_FETCH) {
+            // Full, and the last row's burst has ended: nothing further can change the list.
+            if (count($picked) === self::LIST_ROWS) {
                 break;
             }
 
-            $oldest = $events->last();
+            $picked[] = ['id' => (int) $candidate->id, 'more' => 0];
+            $last = ['creator' => $creator, 'at' => $createdAt, 'index' => count($picked) - 1];
+        }
+
+        if ($picked === []) {
+            return ['rows' => []];
+        }
+
+        $events = Event::query()
+            ->with(['roles', 'creatorRole'])
+            ->whereIn('events.id', array_column($picked, 'id'))
+            ->get()
+            ->keyBy('id');
+
+        $use24 = (bool) auth()->user()?->use_24_hour_time;
+        $rows = [];
+
+        foreach ($picked as $pick) {
+            // Deleted between the two reads.
+            if (! $event = $events->get($pick['id'])) {
+                continue;
+            }
+
+            [$publicUrl, $home] = $event->canonicalTarget();
+            $shownOn = $home ?? $event->getViewableRole();
+            $series = $event->days_of_week !== null;
+            $start = ! $series && $event->starts_at ? $event->getStartDateTime(null, true) : null;
+
+            $rows[] = [
+                'name' => $event->name,
+                'schedule' => $shownOn?->name,
+                'series' => $series,
+                'when' => $start ? $start->translatedFormat('D, M j').' · '.$start->format($use24 ? 'H:i' : 'g:i A') : null,
+                'mode' => match ($event->getSchemaAttendanceMode()) {
+                    'https://schema.org/MixedEventAttendanceMode' => 'hybrid',
+                    'https://schema.org/OnlineEventAttendanceMode' => 'online',
+                    'https://schema.org/OfflineEventAttendanceMode' => 'in_person',
+                    default => 'no_location',
+                },
+                'flag' => match (true) {
+                    (bool) $event->is_draft => 'draft',
+                    (bool) $event->is_guest_submission => 'submitted',
+                    // Read as an attribute, never in a WHERE: a selfhost can run this code
+                    // before the migration that adds the column.
+                    filled($event->getAttribute('import_source')) => 'imported',
+                    default => null,
+                },
+                'more' => $pick['more'],
+                'url' => $event->is_draft || ! $home || ! $publicUrl
+                    ? route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)])
+                    : $publicUrl,
+                'image' => $event->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
+                'created_at' => $event->created_at,
+            ];
         }
 
         return ['rows' => $rows];

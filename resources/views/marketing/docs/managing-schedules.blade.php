@@ -247,8 +247,8 @@
                         <td>The owner only, once their Google account is connected and the schedule has a Google Calendar linked</td>
                     </tr>
                     <tr>
-                        <td><strong>Events Graphic</strong></td>
-                        <td>Builds a shareable <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">graphic</a> of the month's events</td>
+                        <td><strong>Events graphic</strong></td>
+                        <td>Builds a shareable <a href="{{ route('marketing.docs.event_graphics') }}" class="doc-link">graphic</a> of your upcoming events, with a caption to post beside it</td>
                         <td>Everyone, including viewers</td>
                     </tr>
                     <tr>

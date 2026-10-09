@@ -55,8 +55,11 @@ class FollowerTest extends DuskTestCase
             // -----------------------------------------------
             // 2. Follow the schedule
             // -----------------------------------------------
-            $browser->visit('/otherschedule/follow')
-                ->waitForLocation('/following', 15)
+            // Following is a form posted with the page's token (what the Follow button sends);
+            // the address opened on its own only shows the schedule.
+            $browser->visit('/otherschedule');
+            $browser->script("window.esPostFollow('/otherschedule/follow');");
+            $browser->waitForLocation('/following', 15)
                 ->assertPathIs('/following')
                 ->waitForText('Other Schedule', 5);
 
@@ -68,8 +71,10 @@ class FollowerTest extends DuskTestCase
             // -----------------------------------------------
             // 4. Unfollow
             // -----------------------------------------------
-            $browser->visit('/otherschedule/unfollow')
-                ->waitForLocation('/following', 15)
+            // Unfollow is the row's own form on /following. Sent directly: its question is the
+            // layout's data-confirm, which a script's submit() does not raise.
+            $browser->script("document.querySelector('form[action$=\"/otherschedule/unfollow\"]').submit();");
+            $browser->waitForLocation('/following', 15)
                 ->pause(3500)
                 ->assertDontSee('Other Schedule');
         });

@@ -271,10 +271,12 @@ class EventTicketPanelAccessTest extends TestCase
     }
 
     /**
-     * SubscriptionController lets only the owner check out, so an editor who is not the owner
-     * would have been bounced with "not authorized" by the upgrade button.
+     * A team belongs to the Enterprise plan, which includes ticketing. On a plan without tickets
+     * there is no team to speak of: since 2026-10 a team admin left over from a downgrade is
+     * turned away from the form (User::isEditor() asks the plan, as the schedule's tab page did),
+     * where they used to be shown "ask the owner".
      */
-    public function test_an_editor_who_is_not_the_owner_is_told_to_ask_the_owner(): void
+    public function test_a_team_admin_on_a_plan_without_a_team_is_turned_away_from_the_form(): void
     {
         $owner = $this->createOwner();
         $role = $this->createFreeRole($owner);
@@ -283,14 +285,9 @@ class EventTicketPanelAccessTest extends TestCase
         $event = $this->createEvent($role, ['tickets_enabled' => true, 'payment_method' => 'stripe']);
         $this->createTicket($event, ['price' => 20, 'quantity' => 100]);
 
-        $html = $this->actingAs($editor)
-            ->get($this->editUrl($role, $event))
-            ->assertOk()
-            ->getContent();
+        $this->assertFalse($editor->fresh()->isEditor($role->subdomain));
 
-        $this->assertStringContainsString(__('messages.tickets_need_pro_title'), $html);
-        $this->assertStringContainsString(__('messages.plan_gate_ask_owner'), $html);
-        $this->assertStringNotContainsString('source=tickets', $html);
+        $this->actingAs($editor)->get($this->editUrl($role, $event))->assertRedirect();
     }
 
     /** The opening tag of the paid-ticket paywall banner, the element Vue's v-show drives. */

@@ -1169,7 +1169,7 @@
                 </a>
             </div>
 
-            <div class="es-wire-card mx-auto mt-6 max-w-4xl p-7" data-reveal="panel">
+            <div id="eventbrite" class="es-wire-card mx-auto mt-6 max-w-4xl scroll-mt-24 p-7" data-reveal="panel">
                 <div class="mb-4 flex flex-wrap items-center gap-2">
                     <span class="es-wire-port" aria-hidden="true">10</span>
                     <h3 class="es-wire-ink text-lg font-bold">If the money currently lands at Eventbrite</h3>
@@ -1297,7 +1297,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="100">
-                <div class="es-wire-card flex flex-col p-7" data-reveal="panel">
+                <div id="web-push" class="es-wire-card flex scroll-mt-24 flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <span class="es-wire-port" aria-hidden="true">11</span>
                         <span class="es-wire-dir">out</span>
@@ -1312,7 +1312,7 @@
                     </ul>
                 </div>
 
-                <div class="es-wire-card flex flex-col p-7" data-reveal="panel">
+                <div id="accommodation-map" class="es-wire-card flex scroll-mt-24 flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <span class="es-wire-port" aria-hidden="true">12</span>
                         <span class="es-wire-dir">out</span>
@@ -1364,7 +1364,7 @@
                 </div>
             </div>
 
-            <div class="es-wire-card mx-auto mt-6 max-w-4xl p-7" data-reveal="panel">
+            <div id="google-wallet" class="es-wire-card mx-auto mt-6 max-w-4xl scroll-mt-24 p-7" data-reveal="panel">
                 <div class="mb-4 flex flex-wrap items-center gap-2">
                     <span class="es-wire-port" aria-hidden="true">15</span>
                     <span class="es-wire-dir">out</span>

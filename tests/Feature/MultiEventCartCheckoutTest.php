@@ -504,9 +504,13 @@ class MultiEventCartCheckoutTest extends TestCase
         $friday = \Carbon\Carbon::now()->next(\Carbon\Carbon::FRIDAY)->format('Y-m-d');
         $saturday = \Carbon\Carbon::now()->next(\Carbon\Carbon::SATURDAY)->format('Y-m-d');
 
+        // A series that has already begun, so that the coming Friday and Saturday ARE two of its
+        // dates: checkout refuses a date the event does not happen on (SaleDateBelongsToTheEventTest),
+        // and the default fixture starts a week from now.
         $event = $this->createEvent($this->role, [
             'tickets_enabled' => true, 'payment_method' => 'cash', 'ticket_currency_code' => 'USD',
             'days_of_week' => '0000011',
+            'starts_at' => \Carbon\Carbon::now()->subDays(14)->setTime(12, 0)->format('Y-m-d H:i:s'),
         ]);
         $ticket = $this->createTicket($event, ['price' => 0, 'quantity' => 50]);
 

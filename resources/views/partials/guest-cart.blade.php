@@ -32,7 +32,7 @@
     $cartHasError = $cartError || $cartFieldErrors;
 @endphp
 @if (! request()->embed)
-<div id="es-cart-app" class="print:hidden {{ $role->show_accessibility_widget ? 'es-cart-above-a11y' : '' }}">
+<div id="es-cart-app" data-vue-root class="print:hidden {{ $role->show_accessibility_widget ? 'es-cart-above-a11y' : '' }}">
     <template v-if="legs.length > 0">
         {{-- Bottom-right is a crowded corner. The guest event page pins a full-width mobile CTA bar
              at bottom-0, and the accessibility launcher (when the owner enables it) sits at
@@ -611,7 +611,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 return invalidLegs.indexOf(leg.event_id + '|' + (leg.event_date || '')) !== -1;
             },
         },
-    }).mount('#es-cart-app');
+    }).mount('#es-cart-app[data-vue-root]');
 });
 </script>
 @endif

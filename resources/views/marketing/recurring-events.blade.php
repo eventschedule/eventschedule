@@ -1357,7 +1357,7 @@
                 </div>
 
                 <!-- 6 -->
-                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                <div id="clone" class="es-bento group relative scroll-mt-24 lg:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner es-loop-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="relative z-10">
                             <div class="mb-4 flex flex-wrap items-center gap-2">
@@ -1369,6 +1369,27 @@
                                 Running the class online as well? Mark it as an online event and paste the link.
                                 <a href="{{ marketing_url('/features/online-events') }}" class="es-loop-link font-medium hover:underline">How online events work</a>
                             </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 7: a full row, so the grid still ends on a filled corner -->
+                <div id="templates" class="es-bento group relative scroll-mt-24 md:col-span-2 lg:col-span-3" data-reveal="panel" data-tilt="2.5">
+                    <div class="es-tilt-inner es-loop-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10 grid gap-6 lg:grid-cols-2 lg:gap-12">
+                            <div>
+                                <div class="mb-4 flex flex-wrap items-center gap-2">
+                                    <h3 class="es-loop-ink text-xl font-bold">It repeats, but not on a pattern</h3>
+                                    <span class="es-loop-plan es-loop-plan-pro">Pro</span>
+                                </div>
+                                <p class="es-loop-muted">A quiz night that moves around the month, a touring show, a workshop you run whenever a room comes free: the same event again, on a date no rule could predict. Save it as a template and the next one starts from it, with the date left blank for you to set each time.</p>
+                            </div>
+                            <div class="es-loop-muted space-y-3 text-sm">
+                                <p>A template keeps the event's details, its ticket types and add-ons, its agenda and the people on the bill. One saved from a loop keeps its days of the week as well, and leaves behind the flyer, any event password and the date the series ends.</p>
+                                <p>Templates have a tab of their own on the schedule, and Use a Template beside Add Event opens the same list from the calendar. The new event opens in the ordinary form, already filled in, and nothing exists until you save it. Cloning one event, as above, is free on every plan.</p>
+                            </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

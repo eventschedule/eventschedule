@@ -1092,6 +1092,17 @@ return [
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run every show from one schedule.'],
     ],
 
+    // The other names on a schedule's pages. The first two are the pages this one deliberately
+    // leaves to others (the whole event page; an act asking a venue for a date), the third is
+    // where the rest of the page's look is set, and the fourth is the audience that lists the
+    // most acts.
+    'features/lineup' => [
+        ['title' => 'Event Landing Page', 'path' => '/event-landing-page', 'blurb' => 'Every event gets a free page: the flyer, the date, a map and a ticket button.'],
+        ['title' => 'Booking Requests', 'path' => '/features/booking-requests', 'blurb' => 'Acts ask you for a date on a form of your own.'],
+        ['title' => 'White Label', 'path' => '/features/white-label', 'blurb' => 'Remove branding and make the platform look like your product.'],
+        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
+    ],
+
     'community-event-calendar' => [
         ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Build a local events guide that fills itself from venue and talent schedules.'],
         ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],

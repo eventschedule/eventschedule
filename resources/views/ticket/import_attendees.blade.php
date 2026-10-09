@@ -712,7 +712,6 @@
                         if (entry.phone) iti.setNumber(entry.phone);
                         this.itiInstances[key] = iti;
                         iti._input = el;
-                        this.$nextTick(() => this.matchPhoneHeights());
                     },
                     pruneDetachedItiInstances() {
                         for (const [key, iti] of Object.entries(this.itiInstances)) {
@@ -722,19 +721,6 @@
                                 delete this.itiInstances[key];
                             }
                         }
-                    },
-                    matchPhoneHeights() {
-                        // Read the rendered height of a sibling text/email input inside the
-                        // entries table and copy it onto every tel input. Scoping to the table
-                        // avoids accidentally measuring the event-date picker above the table.
-                        const refInput = document.querySelector('#import-attendees-app table input[type=email]')
-                            || document.querySelector('#import-attendees-app table input[type=text]');
-                        if (!refInput) return;
-                        const h = refInput.offsetHeight;
-                        if (!h) return;
-                        document.querySelectorAll('#import-attendees-app .iti__tel-input').forEach(tel => {
-                            tel.style.setProperty('height', h + 'px', 'important');
-                        });
                     },
                     refreshPhoneInputs() {
                         // For existing entries that already have iti, re-sync values
@@ -1009,10 +995,8 @@
                             document.querySelectorAll('#import-attendees-app input[type=tel][data-key]').forEach(el => {
                                 this.setPhoneRef(el);
                             });
-                            this.matchPhoneHeights();
                         });
                     }
-                    window.addEventListener('resize', () => this.matchPhoneHeights());
                     // Warn on navigation with unsaved changes
                     window._importAttendeesIsDirty = false;
                     window.addEventListener('beforeunload', (e) => {

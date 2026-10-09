@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Doors</title>
+<meta name="description" content="Event Schedule: the 58-second launch film, built as one page.">
+<link rel="stylesheet" href="film.css">
+
+<div id="app">
+  <div id="frame"><div id="stage">
+    <canvas id="bg" class="full" width="1920" height="1080"></canvas>
+    <div id="scene"><div id="world"></div></div>
+    <canvas id="fx" class="full" width="1920" height="1080"></canvas>
+    <div id="hud" class="layer"></div>
+    <div id="dark"></div>
+    <div id="stamp"></div>
+  </div></div>
+
+  <div id="bar" role="group" aria-label="Player controls">
+    <button id="play" aria-label="Play"><svg viewBox="0 0 24 24" fill="currentColor" id="playIco"></svg></button>
+    <input id="scrub" type="range" min="0" max="58" step="0.001" value="0" aria-label="Seek">
+    <span id="tc">00.00 / 58.00</span>
+    <span id="shotid"></span>
+    <select id="score" aria-label="Score"><option value="">silent</option><option value="dawn">Dawn</option><option value="bloom">Bloom</option><option value="pulse">Pulse</option></select>
+  </div>
+</div>
+
+<script src="js/timeline.js"></script>
+<script>
+// The film's length in seconds.
+const DUR = TL.DUR;
+</script>
+<script src="plates/manifest.js"></script>
+<script src="js/lib.js"></script>
+<script src="js/stage.js"></script>
+<script src="js/type.js"></script>
+<script src="js/drawn.js"></script>
+<script src="js/film.js"></script>
+<script src="js/main.js"></script>

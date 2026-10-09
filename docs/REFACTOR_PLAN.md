@@ -315,7 +315,7 @@ Size: S/M/L for one focused session (L may take two - see Section 1). Risk names
 | F2a | role/edit JS extraction to Vite | L | Med | P1 |
 | F2b | role/edit jQuery/Alpine -> Vue per widget | L | High | F2a |
 | F3 | Calendar partial JS extraction (6 consumers) | L | High | F1 or F2a |
-| F4 | event/import + graphic/show JS extraction | M | Med | F1 |
+| F4 | event/import JS extraction (graphic/show was rebuilt on 2026-10-08 as one Vue mount: nothing left to extract) | M | Med | F1 |
 | F5 | event/show-guest server-side detangle | L | Med | P14 preferred (optional) |
 | O1 | for-* marketing consolidation (34 pages) | L | Med | P1 (stretch) |
 | O2 | NoFakeEmail blocklist -> data file | S | Low | P1 (optional) |
@@ -812,7 +812,7 @@ Same recipe. `resources/views/role/edit.blade.php` (7,953 lines, ~4,470 of JS, 7
 
 ### F4 - event/import + graphic/show JS extraction
 
-Same stage-A recipe, smaller: `resources/views/event/import.blade.php` (~1,754 JS lines) -> `resources/js/pages/event-import.js`; `resources/views/graphic/show.blade.php` (~1,554 JS lines) -> `resources/js/pages/graphic-show.js`. No Dusk additions - these two are manual-QA pages (import wizard run with a text paste + an image; graphic designer generate/download each layout). **Risk:** medium.
+Same stage-A recipe, smaller: `resources/views/event/import.blade.php` (~1,754 JS lines) -> `resources/js/pages/event-import.js`; `resources/views/graphic/show.blade.php` is no longer part of this: it was rebuilt on 2026-10-08 as one Vue mount with one copy of every field (about 450 lines of script where there were 1,554), held by `tests/Feature/GraphicPageTest.php`. No Dusk additions - the import page is manual QA (import wizard run with a text paste + an image). **Risk:** medium.
 
 ---
 

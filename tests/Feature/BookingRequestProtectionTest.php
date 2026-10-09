@@ -348,7 +348,7 @@ class BookingRequestProtectionTest extends TestCase
         $html = $this->pageHtml($this->schedule('venue', ['request_terms' => 'A 25% deposit confirms a booking.']));
 
         $terms = strpos($html, 'A 25% deposit confirms a booking.');
-        $mount = strpos($html, '<div id="event-submit-app">');
+        $mount = strpos($html, '<div id="event-submit-app" data-vue-root>');
         $this->assertNotFalse($terms);
         $this->assertNotFalse($mount);
         $this->assertLessThan($mount, $terms, 'the terms sit above the form, where they are read first and never compiled as a template');
@@ -374,7 +374,7 @@ class BookingRequestProtectionTest extends TestCase
 
         $html = $this->actingAs($visitor)->get(route('event.booking_request', ['subdomain' => $venue->subdomain]))->assertOk()->getContent();
 
-        $start = strpos($html, '<div id="event-submit-app">');
+        $start = strpos($html, '<div id="event-submit-app" data-vue-root>');
         $end = strpos($html, '<script', $start);
         $mounted = substr($html, $start, $end - $start);
         $this->assertGreaterThan(2, substr_count($mounted, e($payload)), 'the fixture should reach the mount');

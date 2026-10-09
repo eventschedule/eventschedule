@@ -184,8 +184,11 @@ class ApDoorPagesTest extends TestCase
             $this->assertSame(1, substr_count($list, 'id="following-menu-'.$row.'" class="ap-dropdown pop-up-menu hidden'), 'the menu starts closed');
         }
 
-        // Unfollow asks first, through the layout's own data-confirm.
-        $this->assertSame(1, substr_count($list, 'href="'.e(route('role.unfollow', ['subdomain' => $first->subdomain])).'" data-confirm="'.e(__('messages.are_you_sure')).'"'));
+        // Unfollow asks first, through the layout's own data-confirm, and is a form with the
+        // page's token: opened as an address it used to unfollow, for whoever's browser loaded it.
+        $this->assertSame(1, substr_count($list, '<form method="POST" action="'.e(route('role.unfollow', ['subdomain' => $first->subdomain])).'" data-confirm="'.e(__('messages.are_you_sure')).'"'));
+        $this->assertSame(0, substr_count($list, 'href="'.e(route('role.unfollow', ['subdomain' => $first->subdomain]))));
+        $this->assertSame(2, substr_count($list, 'name="_token"'), 'one token for each row\'s form');
         $this->assertSame(4, substr_count($list, 'data-copy-feed="'), 'an iCal and an RSS feed for each');
         $this->assertSame(2, substr_count($list, 'class="row-checkbox'));
         $this->assertSame(1, substr_count($list, 'id="select-all"'));

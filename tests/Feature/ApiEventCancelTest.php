@@ -196,9 +196,11 @@ class ApiEventCancelTest extends TestCase
     {
         [$owner, $role, $ownersKey] = $this->schedule();
         $event = $this->createEvent($role, ['creator_role_id' => $role->id, 'user_id' => $owner->id]);
-        // Somebody else's schedule lists it, accepted: they may edit it, as the portal lets them.
+        // The venue the event is at, accepted: its people may edit the event, as the portal lets
+        // them, and that is not the right to cancel it. (A curator that only lists an event has
+        // had no rights over it at all since 2026-10: EventListingRightsTest.)
         $lister = $this->createOwner();
-        $listing = $this->createRole($lister, 'curator');
+        $listing = $this->createRole($lister, 'venue');
         $event->roles()->attach($listing->id, ['is_accepted' => true]);
         $listersKey = $this->keyFor($lister);
         $this->assertTrue($lister->canEditEvent($event->fresh('roles')));
@@ -215,16 +217,22 @@ class ApiEventCancelTest extends TestCase
         $this->postJson($this->url($event, 'restore'), [], $listersKey)->assertStatus(403);
         $this->assertTrue((bool) $event->fresh()->is_cancelled);
 
-        // An admin of the owning schedule can, and so can whoever made the event.
+        // An admin of the owning schedule can.
         $admin = $this->createOwner();
         $role->users()->attach($admin->id, ['level' => 'admin']);
         $this->postJson($this->url($event, 'restore'), [], $this->keyFor($admin))->assertOk();
         $this->assertFalse((bool) $event->fresh()->is_cancelled);
 
-        $author = $this->createOwner();
-        $theirs = $this->createEvent($role, ['creator_role_id' => $role->id, 'user_id' => $author->id]);
-        $this->postJson($this->url($theirs, 'cancel'), [], $this->keyFor($author))->assertOk();
+        // Whoever made an event can while they are one of the people who run its schedule, and
+        // not once they are off the team (2026-10: "I made it" used to count for good).
+        $theirs = $this->createEvent($role, ['creator_role_id' => $role->id, 'user_id' => $admin->id]);
+        $this->postJson($this->url($theirs, 'cancel'), [], $this->keyFor($admin))->assertOk();
         $this->assertTrue((bool) $theirs->fresh()->is_cancelled);
+
+        $gone = $this->createOwner();
+        $left = $this->createEvent($role, ['creator_role_id' => $role->id, 'user_id' => $gone->id]);
+        $this->postJson($this->url($left, 'cancel'), [], $this->keyFor($gone))->assertStatus(403);
+        $this->assertFalse((bool) $left->fresh()->is_cancelled);
     }
 
     public function test_the_list_can_ask_for_cancelled_events_or_leave_them_out(): void

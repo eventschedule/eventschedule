@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "ContactPage",
         "name": "Contact Event Schedule",
-        "description": "One support address for Event Schedule, GitHub Issues for bugs and Discussions for ideas. Refunds and questions about an event go to the organizer who sold the ticket.",
+        "description": "One support address for Event Schedule, and GitHub Issues for bugs and ideas. Refunds and questions about an event go to the organizer who sold the ticket.",
         "url": "{{ url()->current() }}",
         "mainEntity": {
             "@type": "Organization",
@@ -430,7 +430,7 @@
 
         // Where a message should go, and why there. Every destination is a
         // surface that already exists: the user guide, the FAQ page, the
-        // public repo's Issues and Discussions tabs, and the support address.
+        // public repo's Issues tab, and the support address.
         $routes = [
             [
                 'what' => 'A how-to question',
@@ -472,8 +472,8 @@
             ],
             [
                 'what' => 'An idea, or a feature you want',
-                'label' => 'GitHub Discussions',
-                'href' => 'https://github.com/eventschedule/eventschedule/discussions',
+                'label' => 'GitHub Issues',
+                'href' => 'https://github.com/eventschedule/eventschedule/issues',
                 'external' => true,
                 'why' => 'Ideas are worth arguing out in the open, next to everyone else who wants a version of the same thing.',
             ],
@@ -511,7 +511,7 @@
         $faqs = [
             [
                 'q' => 'How do I contact Event Schedule?',
-                'a' => 'Email '.$supportEmail.'. For anything technical you can also open an issue or start a discussion on GitHub, both of which are public. There is no support portal to log into and no ticket number to quote.',
+                'a' => 'Email '.$supportEmail.'. For anything technical you can also open an issue on GitHub, which is public. There is no support portal to log into and no ticket number to quote.',
             ],
             [
                 'q' => 'Where do I report a bug?',
@@ -519,7 +519,7 @@
             ],
             [
                 'q' => 'How do I request a feature?',
-                'a' => 'Start a GitHub Discussion. Feature requests are worth putting in the open, because somebody else usually wants a version of the same thing. Email works too if you would rather not post publicly.',
+                'a' => 'Open a GitHub issue. Feature requests are worth putting in the open, because somebody else usually wants a version of the same thing. Email works too if you would rather not post publicly.',
             ],
             [
                 'q' => 'Is there a phone number?',
@@ -587,7 +587,7 @@
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-post-muted mb-9 max-w-xl text-lg sm:text-xl">
-                        Short, direct, one address. Email us, start a discussion, or file an issue. Event Schedule is open source, so everything except the email happens in public.
+                        Short, direct, one address. Email us or file an issue. Event Schedule is open source, so everything except the email happens in public.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap">
@@ -772,7 +772,7 @@
                         </li>
                         <li class="flex gap-3" data-reveal>
                             <svg aria-hidden="true" class="es-post-accent mt-0.5 h-5 w-5 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            <span>You do not need an account to write to us, or to read every issue and discussion in the repo.</span>
+                            <span>You do not need an account to write to us, or to read every issue in the repo.</span>
                         </li>
                     </ul>
                     <div class="mt-auto pt-6">

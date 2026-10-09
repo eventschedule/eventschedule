@@ -187,8 +187,11 @@ class MicrosoftCalendarController extends Controller
         try {
             $event = \App\Models\Event::findOrFail(UrlUtils::decodeId($eventId));
 
+            // The schedule's own people, never a follower: Role::users() counts followers, so
+            // anybody following a schedule could copy its drafts, unlisted events and bookings
+            // into their own calendar.
             if (! $event->roles->contains(function ($role) use ($user) {
-                return $role->users->contains($user);
+                return $user->isMember($role->subdomain);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
@@ -257,8 +260,11 @@ class MicrosoftCalendarController extends Controller
         try {
             $event = \App\Models\Event::findOrFail(UrlUtils::decodeId($eventId));
 
+            // The schedule's own people, never a follower: Role::users() counts followers, so
+            // anybody following a schedule could copy its drafts, unlisted events and bookings
+            // into their own calendar.
             if (! $event->roles->contains(function ($role) use ($user) {
-                return $role->users->contains($user);
+                return $user->isMember($role->subdomain);
             })) {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
@@ -314,8 +320,11 @@ class MicrosoftCalendarController extends Controller
         try {
             $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
 
-            if (! $role->users->contains($user)) {
-                return response()->json(['error' => 'Unauthorized'], 403);
+            // Owner only, as Google's sync is: this changes the schedule's sync direction and
+            // pulls with the CALLER's token. Role::users() counts followers, so anybody following
+            // the schedule could publish their own calendar onto it.
+            if ((int) $user->id !== (int) $role->user_id) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
             }
 
             $syncDirection = $request->input('sync_direction', $role->microsoft_sync_direction);

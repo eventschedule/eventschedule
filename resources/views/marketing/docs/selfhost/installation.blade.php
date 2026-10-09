@@ -417,7 +417,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Need Help?</div>
-            <p>If you encounter any issues during installation, check the <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" rel="noopener noreferrer" class="doc-link">GitHub Issues</a> or start a <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" rel="noopener noreferrer" class="doc-link">Discussion</a>.</p>
+            <p>If you encounter any issues during installation, check the <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" rel="noopener noreferrer" class="doc-link">GitHub Issues</a> or open a new one.</p>
         </div>
 
         <h3 class="doc-subheading">Next Steps</h3>

@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use PragmaRX\Google2FA\Google2FA;
@@ -70,12 +71,25 @@ class TwoFactorChallengeController extends Controller
             'recovery_code' => ['nullable', 'string', 'max:25'],
         ]);
 
+        // Wrong codes are counted against the ACCOUNT. The route's limit is per address, and
+        // signing in again renewed the five-minute window, so somebody holding the password could
+        // go on guessing the six digits.
+        $throttleKey = 'two-factor:'.$user->id;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return back()->withErrors(['code' => trans('auth.throttle', ['seconds' => $seconds, 'minutes' => ceil($seconds / 60)])]);
+        }
+
         // Try TOTP code first
         if ($request->filled('code')) {
             $google2fa = new Google2FA;
             $google2fa->setWindow(1);
 
             if (! $google2fa->verifyKey($user->two_factor_secret, $request->code)) {
+                RateLimiter::hit($throttleKey, 300);
+
                 return back()->withErrors(['code' => __('messages.two_factor_invalid_code')]);
             }
         }
@@ -96,6 +110,8 @@ class TwoFactorChallengeController extends Controller
             $index = array_search($hashedInput, $recoveryCodes);
 
             if ($index === false) {
+                RateLimiter::hit($throttleKey, 300);
+
                 return back()->withErrors(['recovery_code' => __('messages.two_factor_invalid_recovery_code')]);
             }
 
@@ -106,6 +122,8 @@ class TwoFactorChallengeController extends Controller
         } else {
             return back()->withErrors(['code' => __('messages.two_factor_code_required')]);
         }
+
+        RateLimiter::clear($throttleKey);
 
         // Clear 2FA session data
         $remember = $request->session()->get('login.remember', false);

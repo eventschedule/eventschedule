@@ -4,7 +4,7 @@
     $followInitiallyDismissed = $followUser ? (bool) $followUser->follow_consent_dismissed : false;
 @endphp
 
-<div id="follow-consent-modal-app"
+<div id="follow-consent-modal-app" data-vue-root
     data-is-guest="{{ $followIsGuest ? '1' : '0' }}"
     data-user-dismissed="{{ $followInitiallyDismissed ? '1' : '0' }}">
     <follow-consent-modal></follow-consent-modal>
@@ -12,12 +12,28 @@
 
 <script {!! nonce_attr() !!}>window.Vue || document.write('<script src="{{ asset('js/vue.global.prod.js') }}"{!! nonce_attr() !!}><\/script>')</script>
 <script {!! nonce_attr() !!}>
-// Fallback navigation if Vue fails to load - clicks on Follow triggers still navigate.
+// Following changes something, so it is sent as a form with the page's token and never opened
+// as an address: an address can be loaded by a page, a form with the token cannot be sent by one.
+window.esPostFollow = function (url) {
+    var form = document.createElement('form');
+    var token = document.querySelector('meta[name="csrf-token"]');
+    var field = document.createElement('input');
+    form.method = 'POST';
+    form.action = url;
+    field.type = 'hidden';
+    field.name = '_token';
+    field.value = token ? token.getAttribute('content') : '';
+    form.appendChild(field);
+    document.body.appendChild(form);
+    form.submit();
+};
+
+// Fallback if Vue fails to load - clicks on Follow triggers still follow.
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('[data-follow-trigger]');
     if (!btn || e.defaultPrevented) return;
     const url = btn.dataset.followUrl;
-    if (url) window.location.href = url;
+    if (url) window.esPostFollow(url);
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -107,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 contrastColor.value = btn.dataset.contrastColor || '#ffffff';
 
                 if (shouldSkip()) {
-                    if (followUrl.value) window.location.href = followUrl.value;
+                    if (followUrl.value) window.esPostFollow(followUrl.value);
                     return;
                 }
 
@@ -146,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
 
-                window.location.href = url;
+                window.esPostFollow(url);
             };
 
             const subscribeBody = computed(() =>
@@ -389,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
 `
         });
 
-    app.mount('#follow-consent-modal-app');
+    app.mount('#follow-consent-modal-app[data-vue-root]');
 });
 </script>
 

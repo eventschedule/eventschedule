@@ -386,6 +386,36 @@ class ScheduleTransferService
      * two of the previous owner's schedules is not claimed by whichever transfers first.
      * A curated event owned by somebody else's schedule is never touched.
      */
+    /**
+     * Somebody has left this schedule's team, or been made a viewer: the events they made on it
+     * pass to its owner. Their rights over those events end either way (User::madeAndStillRuns());
+     * this is what keeps the events from being left with nobody's name on them, and what sends
+     * the money from later sales to the schedule's owner.
+     *
+     * Not an event that has already taken money. A refund looks up the maker's payment account
+     * (StripeGateway::stripeContextFor()), so moving that row would leave its paid sales with no
+     * account to be refunded from.
+     */
+    public function handOverEventsOf(int $leaverId, Role $role): void
+    {
+        if (! $role->user_id || $leaverId === (int) $role->user_id) {
+            return;
+        }
+
+        Event::where('user_id', $leaverId)
+            ->where('creator_role_id', $role->id)
+            ->whereNotExists(function ($sales) {
+                $sales->selectRaw(1)
+                    ->from('sales')
+                    ->whereColumn('sales.event_id', 'events.id')
+                    ->whereIn('sales.status', ['paid', 'amount_mismatch', 'refunded'])
+                    ->where('sales.is_deleted', false);
+            })
+            // toBase(): see repointEvents() below.
+            ->toBase()
+            ->update(['user_id' => $role->user_id]);
+    }
+
     private function repointEvents(Role $role, int $previousOwnerId, int $newOwnerId): void
     {
         Event::where('user_id', $previousOwnerId)

@@ -72,7 +72,7 @@ class UnclaimedScheduleGuardsTest extends TestCase
         $placeholder = $this->placeholder();
 
         $this->actingAs($stranger)
-            ->get(route('role.follow', ['subdomain' => $placeholder->subdomain]))
+            ->post(route('role.follow', ['subdomain' => $placeholder->subdomain]))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('role_user', [
@@ -88,7 +88,7 @@ class UnclaimedScheduleGuardsTest extends TestCase
         $fan = $this->createOwner();
         $role = $this->createRole($owner);
 
-        $this->actingAs($fan)->get(route('role.follow', ['subdomain' => $role->subdomain]));
+        $this->actingAs($fan)->post(route('role.follow', ['subdomain' => $role->subdomain]));
 
         $this->assertDatabaseHas('role_user', [
             'role_id' => $role->id,

@@ -1119,16 +1119,20 @@
                 </div>
 
                 <!-- 3: banner -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                <div id="banner" class="es-bento group relative scroll-mt-24" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner es-slate2-card relative flex h-full flex-col overflow-hidden p-7">
                         <div class="mb-4 flex flex-wrap items-center gap-3">
                             <span class="es-slate2-plan es-slate2-plan-pro">Pro</span>
                             <p class="es-slate2-tag">Top of page</p>
                         </div>
                         <h3 class="es-slate2-ink mb-3 text-xl font-bold">A banner of your own</h3>
-                        <p class="es-slate2-muted text-sm">
+                        <p class="es-slate2-muted mb-3 text-sm">
                             Put your own announcement across the top of your guest pages. The top of
                             the page becomes yours in the same way the corner stops being ours.
+                        </p>
+                        <p class="es-slate2-muted mb-5 text-sm">
+                            Up to 500 characters, with Markdown for a link, on your schedule page and,
+                            with one more switch, on every event page as well.
                         </p>
                         <div class="es-slate2-sub mt-auto p-3">
                             <p class="es-slate2-ink text-xs font-semibold">Doors at 7. Bar cash only tonight.</p>

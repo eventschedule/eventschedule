@@ -99,9 +99,9 @@ class CurateHiddenEventTest extends TestCase
     private function assertAnswersAsAnUnknownEvent(User $as, Role $curator, Event $event): void
     {
         $asked = [
-            'a page' => fn (int $id) => $this->actingAs($as)->get($this->curateUrl($curator, $id)),
+            'a page' => fn (int $id) => $this->actingAs($as)->post($this->curateUrl($curator, $id)),
             // What the import page sends (event/import.blade.php).
-            'the import page' => fn (int $id) => $this->actingAs($as)->getJson($this->curateUrl($curator, $id), ['X-Requested-With' => 'XMLHttpRequest']),
+            'the import page' => fn (int $id) => $this->actingAs($as)->postJson($this->curateUrl($curator, $id), [], ['X-Requested-With' => 'XMLHttpRequest']),
         ];
 
         foreach ($asked as $how => $ask) {
@@ -142,7 +142,7 @@ class CurateHiddenEventTest extends TestCase
         $draft = $this->draft();
         $curator = $this->createCurator($this->venueOwner);
 
-        $this->actingAs($this->venueOwner)->get($this->curateUrl($curator, $draft->id))
+        $this->actingAs($this->venueOwner)->post($this->curateUrl($curator, $draft->id))
             ->assertRedirect()
             ->assertSessionHas('message', __('messages.event_added_to_schedule'));
 

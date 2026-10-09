@@ -16,6 +16,14 @@ class RoleEmailVerificationRequest extends FormRequest
      */
     public function authorize()
     {
+        // The link is proof that the mail arrived only if nobody else could have written it, and the
+        // id and the hash of the address are both known to the account itself. Signed by path, so
+        // a proxy or a second host in front of the app cannot make a good link look forged; the
+        // whole-address form is what mail sent before this check carries.
+        if (! $this->hasValidRelativeSignature() && ! $this->hasValidSignature()) {
+            return false;
+        }
+
         $role = Role::whereSubdomain($this->route('subdomain'))->firstOrFail();
 
         if (! hash_equals(sha1($role->getEmailForVerification()), (string) $this->route('hash'))) {

@@ -150,6 +150,7 @@ class RouteLoadTest extends TestCase
             '/features/carpool',
             '/features/registration',
             '/features/booking-requests',
+            '/features/lineup',
 
             // Integration pages
             '/google-calendar',

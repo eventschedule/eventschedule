@@ -409,6 +409,15 @@ class RoleController extends Controller
             ->with('message', __('messages.deleted_schedule'));
     }
 
+    /**
+     * The follow address opened as a page: an old link, a bookmark, or something that only loads
+     * it. Following shows a person's name and email to the schedule, so nothing is done here.
+     */
+    public function followLanding(Request $request, $subdomain)
+    {
+        return redirect(Role::findForGuestOrFail($subdomain)->getGuestUrl());
+    }
+
     public function follow(Request $request, $subdomain)
     {
         // A deleted schedule, or an unpublished one to anybody outside it, answers as an unknown
@@ -509,7 +518,9 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = $request->user();
 
-        if ($user->isConnected($role->subdomain)) {
+        // A follower only. An owner or a team member leaves from the Team tab; taken off here,
+        // an owner lost their own schedule and it could be marked deleted behind them.
+        if ($user->isFollowing($role->subdomain)) {
             $user->roles()->detach($role->id);
 
             if (! $role->email && $role->users()->count() === 0) {
@@ -530,7 +541,7 @@ class RoleController extends Controller
 
         foreach ($subdomains as $subdomain) {
             $role = Role::subdomain($subdomain)->first();
-            if ($role && $user->isConnected($role->subdomain)) {
+            if ($role && $user->isFollowing($role->subdomain)) {
                 $user->roles()->detach($role->id);
 
                 if (! $role->email && $role->users()->count() === 0) {
@@ -1030,7 +1041,7 @@ class RoleController extends Controller
             // owner can still merge a venue they (or another session) soft-deleted.
             // Mirror isEditableBy: followers can edit unclaimed venues, so allow them
             // to merge unclaimed soft-deleted ones too.
-            $allowedLevels = $source->isClaimed()
+            $allowedLevels = $source->isClaimed() || $source->hasRealOwner()
                 ? ['owner', 'admin']
                 : ['owner', 'admin', 'follower'];
 
@@ -1051,7 +1062,7 @@ class RoleController extends Controller
         // target. An unclaimed venue has no verified operator to protect from a
         // curator consolidating their own duplicates.
         if ($allowDeletedTarget && $target->is_deleted) {
-            $allowedLevels = $target->isClaimed()
+            $allowedLevels = $target->isClaimed() || $target->hasRealOwner()
                 ? ['owner', 'admin']
                 : ['owner', 'admin', 'follower'];
 
@@ -1182,10 +1193,9 @@ class RoleController extends Controller
             return collect();
         }
 
-        $eventIds = DB::table('event_role')
-            ->where('role_id', $schedule->id)
-            ->where('is_accepted', true)
-            ->pluck('event_id');
+        // The schedule's OWN events. Every accepted link used to count, so a curator relabelled
+        // the timezone of events it only lists, moving their real start for their own schedules.
+        $eventIds = $schedule->ownEvents()->wherePivot('is_accepted', true)->pluck('events.id');
 
         if ($eventIds->isEmpty()) {
             return collect();
@@ -1447,7 +1457,22 @@ class RoleController extends Controller
         // flag is false for Eventbrite, WhatsApp, and guest-submission paths.
         // Structural checks only; partition so a single bad row (e.g. someone
         // claimed a venue between page render and submit) doesn't abort the batch.
-        [$validated, $skipped] = $sources->partition(function ($source) use ($target) {
+        //
+        // Two things the group test does not prove, because a group is only "same name, same
+        // country, on one of this curator's coming events": that a source is nobody's, and that
+        // the caller has any say over the target.
+        $callerRunsTarget = DB::table('role_user')
+            ->where('role_id', $target->id)
+            ->where('user_id', $user->id)
+            ->whereIn('level', ['owner', 'admin'])
+            ->exists();
+
+        // A venue its owner deleted is not brought back by somebody else's tidying.
+        if ($target->is_deleted && $target->hasRealOwner() && ! $callerRunsTarget) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        [$validated, $skipped] = $sources->partition(function ($source) use ($target, $user, $callerRunsTarget) {
             if ($source->id === $target->id) {
                 return false;
             }
@@ -1457,6 +1482,19 @@ class RoleController extends Controller
 
             // Never destroy a claimed venue's verified record.
             if ($source->isClaimed()) {
+                return false;
+            }
+
+            // Nor a venue somebody runs, unless the caller is one of the people who run it. An
+            // owned venue with no verified contact is not a placeholder.
+            if ($source->hasRealOwner() && ! $user->isEditor($source->subdomain)) {
+                return false;
+            }
+
+            // A source's team comes over with it (performMerge() keeps each person's level). Onto
+            // a venue the caller does not run, that put the caller's own owner row on somebody
+            // else's venue.
+            if (! $callerRunsTarget && DB::table('role_user')->where('role_id', $source->id)->where('level', '!=', 'follower')->exists()) {
                 return false;
             }
 
@@ -3838,9 +3876,11 @@ class RoleController extends Controller
                 ->listingPromptSchedules(auth()->user(), $role);
         }
 
-        // Feeds: the addresses this schedule keeps reading for events. This page admits viewers,
-        // and feeds are for the people who run the schedule, so the tab's own gate is here.
-        if ($tab === 'feeds' && ! auth()->user()->isEditor($subdomain)) {
+        // This page admits viewers, for the calendar and their own days. Every other tab is for
+        // the people who run the schedule: followers, bookings and requests hold names, emails and
+        // phone numbers, the plan its card, and feeds the addresses the schedule reads. Asked
+        // here, because the tab strip alone used to hide only two of them.
+        if (! in_array($tab, ['schedule', 'availability'], true) && ! auth()->user()->isEditor($subdomain)) {
             return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
                 ->with('error', __('messages.not_authorized'));
         }
@@ -4243,6 +4283,9 @@ class RoleController extends Controller
 
         $roleUser->delete();
 
+        // The events they made here pass to the owner (not one that has taken money).
+        app(\App\Services\ScheduleTransferService::class)->handOverEventsOf((int) $userId, $role);
+
         // A feed this member added goes on reading an address only they chose. It waits until
         // somebody still on the team looks at it.
         \App\Models\EventFeed::pauseWhere(
@@ -4287,6 +4330,11 @@ class RoleController extends Controller
 
         $roleUser->level = $request->level;
         $roleUser->save();
+
+        // A viewer runs nothing here any more: as for somebody who leaves.
+        if ($roleUser->level === 'viewer') {
+            app(\App\Services\ScheduleTransferService::class)->handOverEventsOf((int) $userId, $role);
+        }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
             ->with('message', __('messages.member_level_updated'));
@@ -4759,7 +4807,8 @@ class RoleController extends Controller
         // stored from the request is deleted as an orphan the next time the schedule is saved or
         // removed, and it can be the name of another schedule's logo. The default curators are
         // held, below, to the ones the picker offered the person making the schedule.
-        $role->fill($request->except([...self::SERVER_OWNED_FIELDS, 'sponsor_logos', 'default_curator_ids']));
+        // A custom domain is set on the schedule's own form, where the plan and the address are checked.
+        $role->fill($request->except([...self::SERVER_OWNED_FIELDS, 'sponsor_logos', 'default_curator_ids', 'custom_domain', 'custom_domain_mode']));
         // sync_direction is fillable: hold it to what the person's Google connection may do.
         $role->sync_direction = self::googleDirectionFor($request->user(), $request->input('sync_direction'));
 
@@ -5468,6 +5517,12 @@ class RoleController extends Controller
         $oldCustomDomainStatus = $role->custom_domain_status;
 
         $existingSettings = $role->getEmailSettings();
+
+        // Asked here, before the calendar blocks below, which save as they go: a refusal after
+        // them would leave a half-saved form behind.
+        if (self::mailServerMovedWithoutPassword($existingSettings, (array) $request->input('email_settings', []))) {
+            return redirect()->back()->withInput()->withErrors(['email_settings.password' => __('messages.email_settings_password_again')]);
+        }
 
         // Handle sync_direction and calendar changes and webhook management.
         //
@@ -7494,6 +7549,11 @@ class RoleController extends Controller
 
     public function resendVerify(Request $request, $subdomain)
     {
+        // The schedule's own people only: this mails the schedule's address.
+        if (! $request->user()->isEditor($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
         if ($role->hasVerifiedEmail()) {
@@ -7697,7 +7757,13 @@ class RoleController extends Controller
 
         $roleUser = RoleUser::where('user_id', $user->id)
             ->where('role_id', $role->id)
+            ->where('level', '!=', 'follower')
             ->first();
+
+        // A team member's own days. Anybody else has no row to keep them on.
+        if (! $roleUser) {
+            return redirect(route('home'))->with('error', __('messages.not_authorized'));
+        }
 
         $dates = json_decode($roleUser->dates_unavailable);
         $available = json_decode($request->available_days);
@@ -7905,18 +7971,6 @@ class RoleController extends Controller
         // applyUnsubscribeLocale() has already validated it into the app locale.
         return redirect()->route('role.show_unsubscribe', ['lang' => app()->getLocale()])
             ->withErrors(['email' => __('messages.invalid_unsubscribe_link')]);
-    }
-
-    public function subscribe(Request $request, $subdomain)
-    {
-        $role = Role::subdomain($subdomain)->firstOrFail();
-
-        $role->is_subscribed = true;
-        $role->save();
-
-        return redirect()
-            ->back()
-            ->with('message', __('messages.subscribed'));
     }
 
     public function resendInvite(Request $request, $subdomain, $hash)
@@ -8271,7 +8325,8 @@ class RoleController extends Controller
         $role->slug_pattern = $pattern;
         $role->save();
 
-        $events = $role->events()->with('roles')->get();
+        // Its own events: a schedule an event is merely linked to does not rename that event's address.
+        $events = $role->ownEvents()->with('roles')->get();
         $count = 0;
         $usedSlugs = [];
 
@@ -8325,7 +8380,7 @@ class RoleController extends Controller
         }
 
         $categoryName = $role->getCategoryName($categoryId);
-        $eventIds = $role->events()->pluck('events.id');
+        $eventIds = $role->ownEvents()->pluck('events.id');
         $count = Event::whereIn('id', $eventIds)->update([
             'category_id' => $categoryId,
             'category_name' => $categoryName,
@@ -8921,6 +8976,33 @@ class RoleController extends Controller
     /**
      * Send test email to verify SMTP credentials
      */
+    /**
+     * The stored mail password belongs to the server it was typed for. A save or a test that names
+     * another server, port, sign-in name or encryption while leaving the password as the masked
+     * placeholder (or leaving it out) would send that password to wherever the new values point,
+     * and every member who may edit the schedule can post this form.
+     */
+    private static function mailServerMovedWithoutPassword(array $stored, array $submitted): bool
+    {
+        if (empty($stored['password'])) {
+            return false;
+        }
+
+        $typed = trim((string) ($submitted['password'] ?? ''));
+
+        if ($typed !== '' && $typed !== str_repeat('•', 10)) {
+            return false;
+        }
+
+        foreach (['host', 'port', 'username', 'encryption'] as $key) {
+            if (array_key_exists($key, $submitted) && (string) $submitted[$key] !== (string) ($stored[$key] ?? '')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function testEmail(Request $request, $subdomain): JsonResponse
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -8954,6 +9036,10 @@ class RoleController extends Controller
             // Convert port to integer if provided
             if (isset($submittedSettings['port']) && $submittedSettings['port'] !== '') {
                 $submittedSettings['port'] = (int) $submittedSettings['port'];
+            }
+
+            if (self::mailServerMovedWithoutPassword($existingSettings, $submittedSettings)) {
+                return response()->json(['error' => __('messages.email_settings_password_again')], 422);
             }
 
             // If password is all bullets, use the old value

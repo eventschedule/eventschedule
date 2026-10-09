@@ -56,7 +56,7 @@
             // The blog by route name, as the breadcrumb does: on the blog host the index's path
             // is "/" (which read as the homepage) and a post's is its bare slug (which could match
             // an unrelated section, pricing-* reading as /pricing).
-            $pathSlug = request()->routeIs('blog.index', 'blog.show') ? 'blog' : (trim(request()->path(), '/') ?: 'home');
+            $pathSlug = request()->routeIs('blog.index', 'blog.category', 'blog.show') ? 'blog' : (trim(request()->path(), '/') ?: 'home');
             $pathSlug = str_replace('/', '-', $pathSlug);
             // Fall back from an exact page image to a section image (e.g. docs-getting-started -> docs), then home.
             $section = explode('-', $pathSlug)[0];
@@ -209,8 +209,15 @@
         // and the path-based /blog) use these names.
         if (request()->routeIs('blog.index')) {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
+        } elseif (request()->routeIs('blog.category')) {
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
+            $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif (request()->routeIs('blog.show')) {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
+            // The post's section, when the page names one (blog/show does).
+            if (isset($breadcrumbSection, $breadcrumbSectionUrl)) {
+                $breadcrumbs[] = ['name' => trim((string) $breadcrumbSection), 'url' => trim((string) $breadcrumbSectionUrl)];
+            }
             $breadcrumbs[] = ['name' => $pageName, 'url' => $selfUrl];
         } elseif ($path === 'docs') {
             $breadcrumbs[] = ['name' => 'Documentation', 'url' => $selfUrl];

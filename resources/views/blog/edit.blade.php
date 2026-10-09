@@ -1,5 +1,6 @@
 <x-app-admin-layout>
     @php
+        $hasAi = config('services.google.gemini_key') || config('services.openai.api_key');
         $field = 'block w-full mt-1 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]';
         $help = 'mt-1 text-sm text-gray-500 dark:text-gray-400';
         $live = $blogPost->is_published && $blogPost->published_at && $blogPost->published_at <= now();
@@ -27,9 +28,18 @@
             </div>
         </div>
 
+        {{-- Rewrite this post from its own title: the form below is filled, and Save decides. --}}
+        @if ($hasAi)
+        <div class="page-stack mb-4">
+            @include('blog.admin._writer', ['writerTopic' => $blogPost->title, 'writerExcept' => $blogPost->slug])
+        </div>
+        @endif
+
         <form method="POST" action="{{ route('blog.update', $blogPost->encodeId()) }}" class="page-stack">
             @csrf
             @method('PUT')
+            <input type="hidden" name="primary_query" id="primary_query" value="{{ old('primary_query', $blogPost->primary_query) }}">
+            <input type="hidden" name="faq" id="faq" value="{{ old('faq', $blogPost->faq ? json_encode($blogPost->faq) : '') }}">
 
             <x-page-card>
                 <div class="page-form-fields">
@@ -51,6 +61,16 @@
                         <textarea name="excerpt" id="excerpt" rows="3" maxlength="500" dir="auto" class="{{ $field }}">{{ old('excerpt', $blogPost->excerpt) }}</textarea>
                         <p class="{{ $help }}">{{ __('messages.excerpt_help') }}</p>
                         <x-input-error :messages="$errors->get('excerpt')" class="mt-2" />
+                    </div>
+
+                    <div class="max-w-xs">
+                        <x-input-label for="category" :value="__('messages.blog_section')" />
+                        <select name="category" id="category" class="{{ $field }}">
+                            @foreach(\App\Models\BlogPost::CATEGORIES as $key => $section)
+                                <option value="{{ $key }}" {{ old('category', $blogPost->categoryKey()) == $key ? 'selected' : '' }}>{{ $section['name'] }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('category')" class="mt-2" />
                     </div>
 
                     <div>

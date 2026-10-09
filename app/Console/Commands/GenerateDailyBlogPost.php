@@ -2,37 +2,45 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PreviewsBlogPosts;
 use App\Models\BlogPost;
-use App\Utils\GeminiUtils;
+use App\Services\Blog\BlogWriter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class GenerateDailyBlogPost extends Command
 {
+    use PreviewsBlogPosts;
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:generate-daily-blog-post';
+    protected $signature = 'app:generate-daily-blog-post
+                            {--preview : Write a post now, print each stage and save nothing}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate a daily blog post using AI';
+    protected $description = 'Write a blog post on a topic the planner chooses';
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(BlogWriter $writer)
     {
         // The blog is the marketing site's, so it exists on the nexus only (see routes/web.php).
         if (! config('app.is_nexus')) {
             $this->info('Daily blog post generation only runs on eventschedule.com.');
 
             return 0;
+        }
+
+        if ($this->option('preview')) {
+            return $this->preview($writer->write());
         }
 
         // One post a day across BOTH generators (and the admin), not one per generator: up to two
@@ -66,54 +74,37 @@ class GenerateDailyBlogPost extends Command
             return 0;
         }
 
-        // Get recent titles for context
-        $recentTitles = BlogPost::orderBy('created_at', 'desc')
-            ->limit(15)
-            ->pluck('title')
-            ->toArray();
-
-        // Generate topic based on recent posts
-        $topic = GeminiUtils::generateBlogTopic($recentTitles);
-
-        if (! $topic) {
-            $this->error('Failed to generate blog topic.');
-
-            return 1;
-        }
-
-        // Generate full blog post
-        $postData = GeminiUtils::generateBlogPost($topic);
-
-        if (! $postData) {
-            $this->error('Failed to generate blog post.');
-
-            return 1;
-        }
-
-        $rejection = BlogPost::qualityGateFailure($postData);
-
-        if ($rejection !== null) {
-            Log::warning('Daily blog post rejected by the quality gate: '.$rejection, ['title' => $postData['title'] ?? null]);
-            $this->warn('Rejected by the quality gate: '.$rejection);
+        // A post takes three model calls and a minute or two, so the other generator (or an
+        // admin) may be part-way through one whose row does not exist yet.
+        if (! BlogWriter::claim()) {
+            $this->info('Another blog post is being written. Skipping.');
 
             return 0;
         }
 
-        // Create the blog post with randomized timestamp (up to 6 hours earlier)
-        $randomSeconds = rand(0, 6 * 60 * 60);
-        $blogPost = BlogPost::create([
-            'title' => $postData['title'],
-            'content' => $postData['content'],
-            'excerpt' => $postData['excerpt'] ?? null,
-            'tags' => $postData['tags'] ?? [],
-            'meta_title' => $postData['meta_title'] ?? null,
-            'meta_description' => $postData['meta_description'] ?? null,
-            'featured_image' => $postData['featured_image'] ?? null,
-            'is_published' => true,
-            'published_at' => now()->subSeconds($randomSeconds),
-        ]);
+        try {
+            $written = $writer->write();
 
-        $this->info("Created blog post: {$blogPost->title} (ID: {$blogPost->id})");
+            if ($written['post'] === null) {
+                Log::warning('Daily blog post: nothing was written ('.$written['error'].').');
+                $this->error('Nothing was written: '.$written['error'].'.');
+
+                return 1;
+            }
+
+            $post = $writer->store($written, BlogWriter::SOURCE_DAILY);
+        } finally {
+            BlogWriter::release();
+        }
+
+        if (! $post->is_published) {
+            Log::warning('Daily blog post held as a draft: '.$post->held_reason, ['id' => $post->id, 'title' => $post->title]);
+            $this->warn("Held as a draft (ID: {$post->id}): ".str_replace("\n", '; ', (string) $post->held_reason));
+
+            return 0;
+        }
+
+        $this->info("Created blog post: {$post->title} (ID: {$post->id})");
 
         return 0;
     }

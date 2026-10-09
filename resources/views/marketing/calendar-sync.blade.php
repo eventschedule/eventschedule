@@ -987,7 +987,7 @@
                         <p class="es-trip-muted text-sm">Being straight about it: this leg is one way, and it should be. It hands over a copy of one event, so if you later move the start time, their entry does not hear about it. Anybody who wants to stay current wants the feed instead, which is the last line of the same menu.</p>
                     </div>
 
-                    <div class="es-trip-card flex flex-col p-7" data-reveal="panel">
+                    <div id="feed" class="es-trip-card flex scroll-mt-24 flex-col p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
                             <h3 class="text-xl font-bold text-white">Everything: subscribe to the feed</h3>
                             <span class="es-trip-plan">Free</span>
@@ -1009,6 +1009,10 @@
                             <li class="flex gap-3">
                                 <svg aria-hidden="true" class="es-trip-lit-back mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>Live, not instant. The feed is cached for an hour, and Google Calendar can take several hours to re-read a subscription.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <svg aria-hidden="true" class="es-trip-lit-back mt-0.5 h-4 w-4 flex-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span>The RSS feed is for readers and aggregators rather than calendars. It carries up to fifty items, and a repeating event sends only its next date.</span>
                             </li>
                         </ul>
                         <p class="mt-auto pt-5">

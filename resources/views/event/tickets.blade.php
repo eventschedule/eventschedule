@@ -115,7 +115,6 @@
   <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
   <style {!! nonce_attr() !!}>
   .iti { display: block; }
-  .iti input.iti__tel-input { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; font-size: 1rem !important; line-height: 1.5rem !important; height: auto !important; }
   .dark .iti { --iti-dropdown-bg: rgb(var(--ap-bg)); --iti-hover-color: rgb(var(--ap-border)); --iti-border-color: rgb(var(--ap-border)); --iti-dialcode-color: rgb(var(--ap-ink-3)); --iti-arrow-color: rgb(var(--ap-ink-2)); }
   .dark .iti__dropdown-content { color: rgb(var(--ap-ink-2)); }
   .dark .iti__selected-dial-code { color: rgb(var(--ap-ink-2)); }
@@ -1269,7 +1268,7 @@
                 },
                 @endif
             },
-        }).mount('#ticket-selector');
+        }).mount('#ticket-selector[data-vue-root]');
     });
 </script>
 </x-slot>
@@ -1277,7 +1276,7 @@
 @if ($event->hasAllocatedSeating())
     @vite('resources/js/seating-picker.js')
 @endif
-<div id="ticket-selector">
+<div id="ticket-selector" data-vue-root>
     {{-- novalidate: the browser's own check runs BEFORE the submit event and stops at the first
          empty required field in the page, which is now the name, below the tickets. So pressing
          Checkout with nothing chosen asked for a name. validateForm() asks for a ticket first and

@@ -90,6 +90,7 @@ class GenerateSocialImages extends Command
         'features-carpool' => '/features/carpool',
         'features-registration' => '/features/registration',
         'features-booking-requests' => '/features/booking-requests',
+        'features-lineup' => '/features/lineup',
 
         // Integration pages
         'google-calendar' => '/google-calendar',

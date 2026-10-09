@@ -1,4 +1,16 @@
 <x-marketing-layout :hp="true">
+    @php
+        $postKey = $post->categoryKey();
+        $postSection = $post->categoryName();
+        $postSectionUrl = route('blog.category', $postKey);
+        [$postOpening, $postRest] = $post->openingAndRest();
+        $postSections = $post->sections();
+        $postFaq = $post->faqItems();
+        // "Updated" is worth a reader's eye only when it is a different day.
+        $postUpdated = $post->published_at && $post->updated_at && $post->updated_at->gt($post->published_at->copy()->addDay())
+            ? $post->updated_at
+            : null;
+    @endphp
     {{-- Both bounded in the model: the brand suffix only when it still fits in 60 characters,
          and the description cut at a word boundary to 160. See BlogPost::pageTitle(). --}}
     <x-slot name="title">{{ $post->pageTitle() }}</x-slot>
@@ -11,12 +23,11 @@
     {{-- blog_url() and the stored slug, not url()->current(): slugs match case-insensitively, so
          /For-Solo-Artists rendered this post too and called itself the canonical. --}}
     <x-slot name="canonical">{{ blog_url('/'.$post->slug) }}</x-slot>
-    @if($post->tags)
-    @endif
     <x-slot name="breadcrumbTitle">{{ $post->title }}</x-slot>
+    <x-slot name="breadcrumbSection">{{ $postSection }}</x-slot>
+    <x-slot name="breadcrumbSectionUrl">{{ $postSectionUrl }}</x-slot>
     <x-slot name="ogType">article</x-slot>
-    {{-- The 1200x600 JPEG twin, not the 1.9 MB PNG the page itself renders: see
-         BlogPost::socialImageUrl(). --}}
+    {{-- The 1200x600 JPEG twin, not the 1.9 MB PNG: see BlogPost::socialImageUrl(). --}}
     @if($post->socialImageUrl())
     <x-slot name="socialImage">{{ $post->socialImageUrl() }}</x-slot>
     @endif
@@ -28,7 +39,7 @@
     @if($post->updated_at ?: $post->published_at)
         <meta property="article:modified_time" content="{{ ($post->updated_at ?: $post->published_at)->toISOString() }}">
     @endif
-    <meta property="article:author" content="{{ $post->author_name }}">
+    <meta property="article:section" content="{{ $postSection }}">
     @if($post->tags)
         @foreach($post->tags as $tag)
             <meta property="article:tag" content="{{ $tag }}">
@@ -38,26 +49,29 @@
     </x-slot>
 
     <x-slot name="structuredData">
-    <!-- BlogPosting Structured Data -->
     @php
-        // Built as an array and emitted with SeoUtils::jsonLd: a Blade echo tag HTML-escapes but does
+        // Built as arrays and emitted with SeoUtils::jsonLd: a Blade echo tag HTML-escapes but does
         // NOT JSON-escape, so a double quote in a post title used to invalidate the whole block.
         //
         // author is the Organization, not a Person: "Event Schedule Team" was never a real byline,
         // and sharing the layout's Organization @id lets the two nodes merge.
+        $postUrl = blog_url('/'.$post->slug);
         $postingPayload = [
             '@context' => 'https://schema.org',
             '@type' => 'BlogPosting',
+            '@id' => $postUrl.'#post',
+            'url' => $postUrl,
             'headline' => $post->title,
-            'description' => $post->meta_description,
-            'image' => $post->socialImageUrl() ?: config('app.url').'/images/social/home.jpg',
+            'description' => $post->pageDescription(),
+            'image' => $post->socialImageUrl() ?: config('app.url').'/images/social/blog.jpg',
             'author' => \App\Utils\SeoUtils::organizationRef(),
             'publisher' => \App\Utils\SeoUtils::organization(),
-            'datePublished' => $post->published_at?->toISOString() ?: '',
-            'dateModified' => ($post->updated_at ?: $post->published_at)?->toISOString() ?: '',
+            'isPartOf' => ['@id' => blog_url().'#blog'],
+            'articleSection' => $postSection,
+            'inLanguage' => 'en',
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
-                '@id' => blog_url('/'.$post->slug),
+                '@id' => $postUrl,
             ],
             'speakable' => [
                 '@type' => 'SpeakableSpecification',
@@ -66,292 +80,174 @@
             'wordCount' => $post->wordCount(),
         ];
 
+        if ($post->published_at) {
+            $postingPayload['datePublished'] = $post->published_at->toISOString();
+            $postingPayload['dateModified'] = ($post->updated_at ?: $post->published_at)->toISOString();
+        }
+
         if ($post->tags) {
             $postingPayload['keywords'] = implode(', ', $post->tags);
         }
+
+        $faqPayload = $postFaq ? [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(fn ($item) => [
+                '@type' => 'Question',
+                'name' => $item['q'],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
+            ], $postFaq),
+        ] : null;
     @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {!! \App\Utils\SeoUtils::jsonLd($postingPayload) !!}
     </script>
+    @if ($faqPayload)
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {!! \App\Utils\SeoUtils::jsonLd($faqPayload) !!}
+    </script>
+    @endif
     </x-slot>
 
-    <style {!! nonce_attr() !!}>
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+    @include('blog.partials.styles')
 
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Override any existing hover styles that might conflict */
-        .prose a:hover,
-        .prose-lg a:hover {
-            text-decoration: underline !important;
-        }
-    </style>
-
-    <!-- Full-width Hero Header -->
-    <header class="relative overflow-hidden bg-[#0a0a0f]">
-        <!-- Animated gradient orbs - larger and more prominent -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-600/30 via-sky-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] bg-gradient-to-r from-sky-600/25 to-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
-            <div class="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-gradient-to-l from-blue-600/20 to-cyan-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
-        </div>
-
-        <!-- Grid pattern overlay -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
-
-        <div class="relative z-10 py-16 sm:py-20 lg:py-24">
-            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-                <!-- Breadcrumb -->
-                <nav class="mb-8" aria-label="Breadcrumb">
-                    <ol class="flex items-center justify-center space-x-2 text-sm">
-                        <li>
-                            <a href="{{ route('blog.index') }}" class="inline-flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                                </svg>
-                                {{ __('messages.blog') }}
-                            </a>
-                        </li>
-                        <li>
-                            <svg class="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                            </svg>
-                        </li>
-                        <li class="text-gray-500 truncate max-w-xs">{{ __('messages.article') }}</li>
-                    </ol>
+    <article class="blog-article">
+        <div class="hp-hero-sky" aria-hidden="true"></div>
+        <div class="blog-body">
+            <div>
+            <header class="blog-head">
+                <nav class="blog-crumbs" aria-label="Breadcrumb">
+                    <a href="{{ route('blog.index') }}">{{ __('messages.blog') }}</a>
+                    <span aria-hidden="true">/</span>
+                    <a href="{{ $postSectionUrl }}">{{ $postSection }}</a>
                 </nav>
 
-                <!-- Tags above title -->
-                @if($post->tags)
-                    <div class="flex flex-wrap gap-2 justify-center mb-6">
-                        @foreach($post->tags as $tag)
-                            <a href="{{ route('blog.index', ['tag' => $tag]) }}"
-                               class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition-colors border border-blue-500/30">
-                                #{{ $tag }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
+                <h1 itemprop="headline" class="blog-title">{{ $post->title }}</h1>
 
-                <!-- Title -->
-                <h1 itemprop="headline" class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
-                    {{ $post->title }}
-                </h1>
-
-                <!-- Meta info -->
-                <div class="flex items-center justify-center gap-4 text-sm text-gray-400 mb-8">
-                    @if($post->published_at)
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <time datetime="{{ $post->published_at->toISOString() }}">
-                                {{ $post->formatted_published_at }}
-                            </time>
-                        </div>
-                    @endif
-                    <span class="text-gray-600">•</span>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>{{ $post->reading_time }}</span>
-                    </div>
-                </div>
-
-                <!-- Excerpt -->
                 @if($post->excerpt)
-                    <p itemprop="description" class="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
-                        {{ $post->excerpt }}
-                    </p>
+                    <p itemprop="description" class="blog-dek">{{ $post->excerpt }}</p>
                 @endif
-            </div>
-        </div>
 
-        <!-- Bottom fade -->
-        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
-    </header>
+                <p class="blog-meta">
+                    @if($post->published_at)
+                        <time datetime="{{ $post->published_at->toDateString() }}">{{ $post->formatted_published_at }}</time>
+                    @endif
+                    @if($postUpdated)
+                        <span>Updated <time datetime="{{ $postUpdated->toDateString() }}">{{ $postUpdated->format('F j, Y') }}</time></span>
+                    @endif
+                    <span>{{ $post->reading_time }}</span>
+                </p>
+            </header>
 
-    <div class="bg-gray-50 dark:bg-gray-900 min-h-screen pb-12">
-        <article class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 -mt-4">
-
-            <!-- CTA Card -->
-            <div class="mb-8 overflow-visible relative z-20">
-                @if($subAudienceInfo)
-                    @php
-                        // Color mapping for parent audiences
-                        $colorMap = [
-                            'for-musicians' => ['from' => 'cyan-600', 'to' => 'teal-600', 'shadow' => 'cyan-500/25'],
-                            'for-bars' => ['from' => 'amber-500', 'to' => 'amber-600', 'shadow' => 'amber-500/25'],
-                            'for-restaurants' => ['from' => 'rose-500', 'to' => 'rose-600', 'shadow' => 'rose-500/25'],
-                            'for-nightclubs' => ['from' => 'fuchsia-600', 'to' => 'pink-600', 'shadow' => 'fuchsia-500/25'],
-                            'for-djs' => ['from' => 'indigo-600', 'to' => 'purple-600', 'shadow' => 'indigo-500/25'],
-                            'for-comedians' => ['from' => 'amber-500', 'to' => 'orange-500', 'shadow' => 'amber-500/25'],
-                            'for-music-venues' => ['from' => 'cyan-600', 'to' => 'cyan-700', 'shadow' => 'cyan-500/25'],
-                            'for-theaters' => ['from' => 'rose-600', 'to' => 'purple-600', 'shadow' => 'rose-500/25'],
-                            'for-comedy-clubs' => ['from' => 'pink-500', 'to' => 'pink-600', 'shadow' => 'pink-500/25'],
-                            'for-breweries-and-wineries' => ['from' => 'amber-500', 'to' => 'orange-500', 'shadow' => 'amber-500/25'],
-                            'for-art-galleries' => ['from' => 'fuchsia-600', 'to' => 'purple-600', 'shadow' => 'fuchsia-500/25'],
-                            'for-community-centers' => ['from' => 'emerald-500', 'to' => 'emerald-600', 'shadow' => 'emerald-500/25'],
-                            'for-circus-acrobatics' => ['from' => 'fuchsia-500', 'to' => 'fuchsia-600', 'shadow' => 'fuchsia-500/25'],
-                            'for-magicians' => ['from' => 'violet-600', 'to' => 'violet-700', 'shadow' => 'violet-500/25'],
-                            'for-spoken-word' => ['from' => 'rose-500', 'to' => 'rose-600', 'shadow' => 'rose-500/25'],
-                            'for-dance-groups' => ['from' => 'fuchsia-600', 'to' => 'pink-600', 'shadow' => 'fuchsia-500/25'],
-                            'for-theater-performers' => ['from' => 'purple-600', 'to' => 'purple-700', 'shadow' => 'purple-500/25'],
-                            'for-food-trucks-and-vendors' => ['from' => 'orange-500', 'to' => 'orange-600', 'shadow' => 'orange-500/25'],
-                            'for-fitness-and-yoga' => ['from' => 'emerald-500', 'to' => 'teal-500', 'shadow' => 'emerald-500/25'],
-                            'for-visual-artists' => ['from' => 'fuchsia-500', 'to' => 'pink-500', 'shadow' => 'fuchsia-500/25'],
-                            'for-workshop-instructors' => ['from' => 'amber-500', 'to' => 'orange-500', 'shadow' => 'amber-500/25'],
-                            'for-farmers-markets' => ['from' => 'emerald-500', 'to' => 'green-500', 'shadow' => 'emerald-500/25'],
-                            'for-hotels-and-resorts' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
-                            'for-libraries' => ['from' => 'amber-600', 'to' => 'amber-700', 'shadow' => 'amber-500/25'],
-                            'for-webinars' => ['from' => 'teal-600', 'to' => 'cyan-600', 'shadow' => 'teal-500/25'],
-                            'for-live-concerts' => ['from' => 'rose-500', 'to' => 'amber-500', 'shadow' => 'rose-500/25'],
-                            'for-online-classes' => ['from' => 'emerald-500', 'to' => 'teal-500', 'shadow' => 'emerald-500/25'],
-                            'for-virtual-conferences' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
-                            'for-live-qa-sessions' => ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'],
-                            'for-watch-parties' => ['from' => 'indigo-500', 'to' => 'cyan-500', 'shadow' => 'indigo-500/25'],
-                            'for-ai-agents' => ['from' => 'cyan-600', 'to' => 'emerald-600', 'shadow' => 'cyan-500/25'],
-                            'for-churches' => ['from' => 'amber-600', 'to' => 'amber-700', 'shadow' => 'amber-500/25'],
-                            'for-schools' => ['from' => 'sky-500', 'to' => 'blue-500', 'shadow' => 'sky-500/25'],
-                            'for-nonprofits' => ['from' => 'emerald-500', 'to' => 'teal-500', 'shadow' => 'emerald-500/25'],
-                            'for-festivals' => ['from' => 'rose-500', 'to' => 'amber-500', 'shadow' => 'rose-500/25'],
-                            'for-sports-leagues' => ['from' => 'emerald-500', 'to' => 'green-500', 'shadow' => 'emerald-500/25'],
-                            'for-museums' => ['from' => 'teal-600', 'to' => 'cyan-600', 'shadow' => 'teal-500/25'],
-                            'for-meetup-groups' => ['from' => 'cyan-600', 'to' => 'teal-600', 'shadow' => 'cyan-500/25'],
-                        ];
-                        $colors = $colorMap[$subAudienceInfo->parent_page] ?? ['from' => 'violet-500', 'to' => 'purple-500', 'shadow' => 'violet-500/25'];
-                    @endphp
-                    <a href="{{ marketing_url('/' . $subAudienceInfo->parent_page) }}" class="block group">
-                        <div class="bg-gradient-to-r from-{{ $colors['from'] }} to-{{ $colors['to'] }} rounded-2xl p-6 md:p-8 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-{{ $colors['shadow'] }} group-hover:scale-[1.02]">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div class="flex-1">
-                                    <h3 class="text-xl md:text-2xl font-bold text-white mb-2">
-                                        Learn more about Event Schedule for {{ $subAudienceInfo->parent_title }}
-                                    </h3>
-                                    <p class="text-white/90 text-base md:text-lg">
-                                        See how {{ $subAudienceInfo->sub_audience_name }} and others are using Event Schedule
-                                    </p>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <span class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-3 rounded-xl transition-colors">
-                                        {{ __('messages.learn_more') }}
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                @else
-                    <a href="{{ marketing_url('/') }}" class="block group">
-                        <div class="bg-gradient-to-r from-blue-500 via-blue-500 to-sky-500 rounded-2xl p-6 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/25 group-hover:scale-[1.02]">
-                            <div class="text-center">
-                                <p class="text-white text-lg font-medium">
-                                    {!! str_replace(':link', '<span class="font-bold underline">eventschedule.com</span>',  __('messages.try_event_schedule')) !!}
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                @endif
-            </div>
-
-            <!-- Featured Image -->
-            @if($post->featured_image_url)
-                <div class="mb-8">
-                    <picture>
-                        <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
-                        <img src="{{ $post->featured_image_url }}"
-                             alt="{{ $post->title }}"
-                             width="896"
-                             height="384"
-                             fetchpriority="high"
-                             class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-2xl shadow-lg">
-                    </picture>
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-8">
-                <!-- Content -->
-                <div class="prose prose-lg dark:prose-invert max-w-none" style="font-size: 1.125rem;">
-                    <style {!! nonce_attr() !!}>
-                        .prose-lg p { margin-bottom: 2rem !important; }
-                        .prose-lg h2 { font-size: 2rem !important; font-weight: 700 !important; margin-top: 2.5rem !important; margin-bottom: 1.5rem !important; line-height: 1.15 !important; }
-                        .prose-lg h3 { font-size: 1.5rem !important; font-weight: 600 !important; margin-top: 2rem !important; margin-bottom: 1rem !important; }
-                        .prose-lg h4 { font-size: 1.25rem !important; font-weight: 600 !important; margin-top: 1.5rem !important; margin-bottom: 0.75rem !important; }
-                        .prose-lg ol, .prose-lg ul { margin-bottom: 2rem !important; }
-                        .prose-lg li { margin-bottom: 0.5rem !important; }
-                        .prose-lg ul { list-style-type: disc !important; padding-left: 2rem !important; }
-                        .prose-lg ul li { display: list-item !important; }
-                        .dark .prose-lg { color: rgb(var(--ap-ink-2)); }
-                        .dark .prose-lg h2, .dark .prose-lg h3, .dark .prose-lg h4 { color: #fff; }
-                        .dark .prose-lg a { color: #a78bfa; }
-                        .dark .prose-lg strong { color: #fff; }
-                    </style>
-                    {!! $post->renderedContent() !!}
-                </div>
-                <!-- Related Posts -->
-                @if($relatedPosts->count() > 0)
-                    <div class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ __('messages.related_posts') }}</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            @foreach($relatedPosts as $relatedPost)
-                                <article class="group">
-                                    @if($relatedPost->featured_image_url)
-                                        <div class="mb-4">
-                                            <picture>
-                                                <source srcset="{{ webp_path($relatedPost->featured_image_url) }}" type="image/webp">
-                                                <img src="{{ $relatedPost->featured_image_url }}"
-                                                     alt="{{ $relatedPost->title }}"
-                                                     width="288"
-                                                     height="128"
-                                                     loading="lazy"
-                                                     decoding="async"
-                                                     class="w-full h-32 object-cover rounded-xl">
-                                            </picture>
-                                        </div>
-                                    @endif
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-                                        <a href="{{ route('blog.show', $relatedPost->slug) }}">
-                                            {{ $relatedPost->title }}
-                                        </a>
-                                    </h3>
-                                    <div class="flex items-center gap-x-4 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                        <time datetime="{{ $relatedPost->published_at->toISOString() }}">
-                                            {{ $relatedPost->formatted_published_at }}
-                                        </time>
-                                        <span>{{ $relatedPost->reading_time }}</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                                        {{ $relatedPost->excerpt }}
-                                    </p>
-                                </article>
-                            @endforeach
-                        </div>
+                {{-- The opening answers the search, so it stands first: the picture and, under a
+                     laptop's width, the contents list come after it. --}}
+                @if(trim($postOpening) !== '')
+                    <div class="blog-prose is-opening">
+                        {!! $postOpening !!}
                     </div>
                 @endif
-                <!-- Back to Blog -->
-                <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-                    <a href="{{ route('blog.index') }}"
-                       class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                        </svg>
-                        {{ __('messages.back_to_blog') }}
+
+                {{-- Only between two parts of a post: after a post with nothing below it, the
+                     picture would be the last thing on the page. --}}
+                @if($post->featured_image_url && trim($postRest) !== '')
+                    <figure class="blog-figure">
+                        <picture>
+                            <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
+                            {{-- Decoration: the picture is one of a stock set and says nothing the title does not. --}}
+                            <img src="{{ $post->featured_image_url }}" alt="" width="1536" height="768" loading="lazy" decoding="async">
+                        </picture>
+                    </figure>
+                @endif
+
+                @if(count($postSections) >= 4)
+                    <details class="blog-toc blog-toc-inline">
+                        <summary>In this post</summary>
+                        <ol>
+                            @foreach($postSections as $section)
+                                <li><a href="#{{ $section['id'] }}">{{ $section['text'] }}</a></li>
+                            @endforeach
+                        </ol>
+                    </details>
+                @endif
+
+                @if(trim($postRest) !== '')
+                    <div class="blog-prose">
+                        {!! $postRest !!}
+                    </div>
+                @endif
+
+                @if($subAudienceInfo)
+                    {{-- Under a laptop's width the rail is gone, so the audience's own page is offered here. --}}
+                    <aside class="blog-plug is-inline" aria-label="Event Schedule for {{ $subAudienceInfo->parent_title }}">
+                        <span class="hp-kicker">For {{ $subAudienceInfo->parent_title }}</span>
+                        <h2>Event Schedule for {{ $subAudienceInfo->parent_title }}</h2>
+                        <p>See how {{ $subAudienceInfo->sub_audience_name }} and others set up their schedule.</p>
+                        <a href="{{ marketing_url('/' . $subAudienceInfo->parent_page) }}" class="hp-more">
+                            See the page
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </a>
+                    </aside>
+                @endif
+            </div>
+
+            <aside class="blog-rail">
+                @if(count($postSections) >= 4)
+                    <nav class="blog-toc" aria-label="In this post">
+                        <span class="blog-toc-title">In this post</span>
+                        <ol>
+                            @foreach($postSections as $section)
+                                <li><a href="#{{ $section['id'] }}">{{ $section['text'] }}</a></li>
+                            @endforeach
+                        </ol>
+                    </nav>
+                @endif
+
+                <div class="blog-plug">
+                    @if($subAudienceInfo)
+                        <span class="hp-kicker">For {{ $subAudienceInfo->parent_title }}</span>
+                        <h2>Event Schedule for {{ $subAudienceInfo->parent_title }}</h2>
+                        <p>See how {{ $subAudienceInfo->sub_audience_name }} and others set up their schedule.</p>
+                        <a href="{{ marketing_url('/' . $subAudienceInfo->parent_page) }}" class="hp-more">
+                            See the page
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </a>
+                    @else
+                        <span class="hp-kicker">Event Schedule</span>
+                        <h2>One page for every event you run</h2>
+                        <p>A calendar people can follow, tickets with no platform fee, and email to the people who come.</p>
+                        <a href="{{ marketing_url('/features') }}" class="hp-more">
+                            See what it does
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                        </a>
+                    @endif
+                </div>
+            </aside>
+        </div>
+    </article>
+
+    @if($relatedPosts->count() > 0)
+        <section class="blog-related" aria-labelledby="blog-related-title">
+            <div class="blog-wrap">
+                <div class="blog-related-head">
+                    <div>
+                        <span class="hp-kicker">Keep reading</span>
+                        <h2 id="blog-related-title">{{ $subAudienceInfo ? 'More for '.$subAudienceInfo->parent_title : 'More on '.mb_strtolower($postSection) }}</h2>
+                    </div>
+                    <a href="{{ $postSectionUrl }}" class="hp-more">
+                        {{ $subAudienceInfo ? 'Every kind of event' : 'Every post in this section' }}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
                     </a>
                 </div>
+                <div class="blog-grid">
+                    @foreach($relatedPosts as $relatedPost)
+                        @include('blog.partials.card', ['card' => $relatedPost, 'cardLead' => false, 'cardHeading' => 'h3', 'cardSection' => false])
+                    @endforeach
+                </div>
             </div>
-        </article>
-    </div>
+        </section>
+    @endif
 
+    <x-marketing.hp-finale lead="A page for your events, free registration, and tickets with no platform fee.">
+        Put your next event on a page of its own
+    </x-marketing.hp-finale>
 </x-marketing-layout>

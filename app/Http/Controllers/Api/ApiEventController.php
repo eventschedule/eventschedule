@@ -1050,16 +1050,7 @@ class ApiEventController extends Controller
     /** The caller made the event, or is an owner or admin of the schedule that owns it. */
     private function runsTheEvent(Event $event): bool
     {
-        $user = auth()->user();
-
-        if ((int) $event->user_id === (int) $user->id) {
-            return true;
-        }
-
-        return $event->creator_role_id !== null && $user->roles()
-            ->where('roles.id', $event->creator_role_id)
-            ->wherePivotIn('level', ['owner', 'admin'])
-            ->exists();
+        return auth()->user()->runsEvent($event);
     }
 
     private function lifecycleReply(Event $event, string $message)
@@ -1452,6 +1443,11 @@ class ApiEventController extends Controller
 
         if (! auth()->user()->canEditEvent($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // As cancelling is: for the event's own people.
+        if (! auth()->user()->runsEvent($event)) {
+            return response()->json(['error' => 'Only the event\'s own schedule can delete it. A schedule that lists the event can take it off its own list instead.'], 403);
         }
 
         if (! $event->isPro()) {

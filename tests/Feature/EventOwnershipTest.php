@@ -35,13 +35,15 @@ class EventOwnershipTest extends TestCase
         $talent = $this->createRole($owner, 'talent');
         $event = $this->createEvent($talent, ['creator_role_id' => $talent->id]);
 
+        // The venue the event is at: one of the schedules that may still save it. (A curator that
+        // only lists an event saves nothing since 2026-10: EventListingRightsTest.)
         $curatorUser = $this->createOwner();
-        $curator = $this->createFreeRole($curatorUser, 'curator');
+        $curator = $this->createFreeRole($curatorUser, 'venue');
         $event->roles()->attach($curator->id, ['is_accepted' => true]);
 
-        $this->putUpdateEvent($curatorUser, $curator, $event, ['name' => 'Renamed by the curator', 'creator_role_id' => $curator->id])->assertRedirect();
+        $this->putUpdateEvent($curatorUser, $curator, $event, ['name' => 'Renamed by the venue', 'creator_role_id' => $curator->id])->assertRedirect();
 
-        $this->assertSame('Renamed by the curator', Event::find($event->id)->name, 'sanity check: the save went through, it was not refused');
+        $this->assertSame('Renamed by the venue', Event::find($event->id)->name, 'sanity check: the save went through, it was not refused');
         $this->assertSame($talent->id, Event::find($event->id)->creator_role_id);
         $this->assertSame($talent->id, Event::find($event->id)->ticketingRole()?->id, 'and so it still sells for the schedule that made it');
     }

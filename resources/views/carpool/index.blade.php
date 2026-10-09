@@ -98,7 +98,7 @@
 
         @else
         {{-- Main carpool content --}}
-        <div id="carpool-app">
+        <div id="carpool-app" data-vue-root>
 
             {{-- Direction filter tabs --}}
             <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
@@ -271,9 +271,9 @@
                 @if ($user && $myRequests->has($offer->id) && $myRequests[$offer->id]->status === 'approved')
                 <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-3">
                     <p class="text-sm font-medium text-green-800 dark:text-green-400 mb-1">{{ __('messages.carpool_contact_info') }}</p>
-                    <p class="text-sm text-green-700 dark:text-green-300">{{ __('messages.email') }}: {{ $offer->user->email }}</p>
+                    <p class="text-sm text-green-700 dark:text-green-300" v-pre>{{ __('messages.email') }}: {{ $offer->user->email }}</p>
                     @if ($offer->user->phone)
-                    <p class="text-sm text-green-700 dark:text-green-300">{{ __('messages.phone') }}: {{ $offer->user->phone }}</p>
+                    <p class="text-sm text-green-700 dark:text-green-300" v-pre>{{ __('messages.phone') }}: {{ $offer->user->phone }}</p>
                     @endif
                 </div>
                 @endif
@@ -481,7 +481,7 @@
                         <form method="POST" action="{{ route('carpool.store_review', ['subdomain' => $subdomain, 'event_hash' => $eventHash, 'offer_hash' => \App\Utils\UrlUtils::encodeId($offer->id)]) }}" class="mb-2">
                             @csrf
                             <input type="hidden" name="reviewed_user_id" value="{{ \App\Utils\UrlUtils::encodeId($reviewUser->id) }}">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.carpool_review_for', ['name' => $reviewUser->name]) }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1" v-pre>{{ __('messages.carpool_review_for', ['name' => $reviewUser->name]) }}</p>
                             <div class="flex items-center gap-2">
                                 <select name="rating" required class="px-2 py-1 text-sm rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
                                     @for ($i = 5; $i >= 1; $i--)
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         editSpotsOfferId: null,
                     };
                 }
-            }).mount('#carpool-app');
+            }).mount('#carpool-app[data-vue-root]');
         } catch (e) {
             console.error('Carpool Vue mount error:', e);
         }

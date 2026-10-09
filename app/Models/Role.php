@@ -1280,6 +1280,23 @@ class Role extends Model implements MustVerifyEmail
     }
 
     /**
+     * The events this schedule OWNS: made on it, or, for an event from before
+     * events.creator_role_id, first put on it. Narrower than events(), which is every event the
+     * schedule is linked to, a curator's listings and a venue's declined requests included.
+     * What a schedule does to "all its events" at once goes through this.
+     */
+    public function ownEvents()
+    {
+        return $this->events()->where(function ($query) {
+            $query->where('events.creator_role_id', $this->id)
+                ->orWhere(function ($query) {
+                    $query->whereNull('events.creator_role_id')
+                        ->whereRaw('event_role.id = (select min(first_link.id) from event_role as first_link where first_link.event_id = events.id)');
+                });
+        });
+    }
+
+    /**
      * Get non-owner members who have Google Calendar sync enabled
      */
     public function getMembersWithCalendarSync()
@@ -1287,7 +1304,8 @@ class Role extends Model implements MustVerifyEmail
         return $this->belongsToMany(User::class)
             ->withPivot('level', 'google_calendar_id')
             ->whereNotNull('role_user.google_calendar_id')
-            ->where('level', '!=', 'owner')
+            // Team members: a follower's row could carry a calendar until 2026-10.
+            ->whereNotIn('level', ['owner', 'follower'])
             ->get();
     }
 
@@ -2602,7 +2620,11 @@ class Role extends Model implements MustVerifyEmail
 
         // Unclaimed roles can be cleaned up by anyone who follows them.
         // Mirrors the rule already used in GeminiUtils for venue_is_editable.
-        return ! $this->isClaimed() && $user->isFollowing($this->subdomain);
+        //
+        // "Unclaimed" here has to mean that NOBODY runs it. isClaimed() also asks for a verified
+        // contact, and on hosted every change of email clears that stamp, so an owned schedule
+        // read as a placeholder: a follower could edit it and merge it away.
+        return ! $this->isClaimed() && ! $this->hasRealOwner() && $user->isFollowing($this->subdomain);
     }
 
     /**

@@ -42,40 +42,68 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            To open it, go to your schedule in the admin panel and choose <strong>Events Graphic</strong> from the <strong>Actions</strong> menu at the end of the schedule's title row. Anyone on the schedule's team can open the page and generate; saving the settings, uploading a header image and sending the scheduled email are for the owner and admins. The link above the page's title, named after your schedule, goes back to it.
+            To open it, go to your schedule in the admin panel and choose <strong>Events graphic</strong> from the <strong>Actions</strong> menu at the end of the schedule's title row. Anyone on the schedule's team can open the page and generate; saving the settings, uploading a header image and sending the scheduled email are for the owner and admins. The link above the page's title, named after your schedule, goes back to it.
         </p>
 
-        <x-doc-screenshot id="event-graphics--graphic-page" alt="The Events Graphic page: settings in three tabs on one side, the generated text and image on the other" loading="eager" />
+        <x-doc-screenshot id="event-graphics--graphic-page" alt="The Events graphic page: the settings in a column on one side, the image and its caption on the other" loading="eager" />
 
         <h3 class="doc-subheading">The page</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Settings</strong> are in three tabs, <strong class="text-gray-900 dark:text-white">Graphic</strong>, <strong class="text-gray-900 dark:text-white">Text</strong> and <strong class="text-gray-900 dark:text-white">Automation</strong>, with two buttons under them. <strong class="text-gray-900 dark:text-white">Run</strong> regenerates the preview from what is on screen; <strong class="text-gray-900 dark:text-white">Save Settings</strong> stores your choices for next time and for the scheduled email.</li>
-            <li><strong class="text-gray-900 dark:text-white">The text</strong> is shown first, with <strong class="text-gray-900 dark:text-white">Copy Text</strong>, plus <strong class="text-gray-900 dark:text-white">Share</strong> on devices whose browser can share a file, where it hands the image and the text to another app together.</li>
-            <li><strong class="text-gray-900 dark:text-white">The image</strong> is under it, with <strong class="text-gray-900 dark:text-white">Download</strong> and <strong class="text-gray-900 dark:text-white">Copy Image</strong>.</li>
-            <li><strong class="text-gray-900 dark:text-white">On a phone</strong> the settings fold into a <strong class="text-gray-900 dark:text-white">Settings</strong> panel you open, and the image and the text are two tabs, <strong class="text-gray-900 dark:text-white">Graphic</strong> and <strong class="text-gray-900 dark:text-white">Text</strong>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Settings</strong> are a column beside the result. <strong class="text-gray-900 dark:text-white">Layout</strong>, <strong class="text-gray-900 dark:text-white">Flyers per row</strong> and <strong class="text-gray-900 dark:text-white">Shape</strong> are always open, and five rows open in place under them: <strong class="text-gray-900 dark:text-white">Events</strong>, <strong class="text-gray-900 dark:text-white">Dates and numbers</strong>, <strong class="text-gray-900 dark:text-white">Header and footer</strong>, <strong class="text-gray-900 dark:text-white">Caption</strong> and <strong class="text-gray-900 dark:text-white">Scheduled email</strong>. Each row has a line under its name saying what it holds, so a setting can be read without opening it.</li>
+            <li><strong class="text-gray-900 dark:text-white">The image</strong> redraws by itself about half a second after you change something. While a new one is on its way the old one is dimmed and marked Updating, and its buttons are off. Under it are <strong class="text-gray-900 dark:text-white">Copy image</strong>, <strong class="text-gray-900 dark:text-white">Download</strong>, and <strong class="text-gray-900 dark:text-white">Share</strong> on devices whose browser can share a file, where it hands the image and the caption to another app together. <strong class="text-gray-900 dark:text-white">Refresh</strong> above it asks for a fresh one, for example after adding an event in another tab, and pressing the image enlarges it.</li>
+            <li><strong class="text-gray-900 dark:text-white">The caption</strong> stands beside the image on a wide window, with <strong class="text-gray-900 dark:text-white">Copy caption</strong>. On a smaller laptop one of the two is shown in full and the other as a single line with its button: opening the Caption row, or pressing the arrow beside the caption, swaps them.</li>
+            <li><strong class="text-gray-900 dark:text-white">Saving</strong> is not needed for a download: what you download is what is on screen. While something is unsaved a bar along the foot of the page names what changed, with <strong class="text-gray-900 dark:text-white">Discard changes</strong> and <strong class="text-gray-900 dark:text-white">Save</strong>. Save keeps your settings for next time, and the scheduled email uses the saved ones.</li>
+            <li><strong class="text-gray-900 dark:text-white">On a phone</strong> the image and the caption come first and the settings follow. A small copy of the image stays in the corner while you change a setting further down, and leads back up.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            If some upcoming events use a different timezone than the schedule, and so may show the wrong time on the graphic, a notice above the settings says how many, with <strong class="text-gray-900 dark:text-white">Review</strong> leading to the schedule so you can correct them before sharing.
+            If some upcoming events use a different timezone than the schedule, and so may show the wrong time on the graphic, a notice at the top of the page says how many, with <strong class="text-gray-900 dark:text-white">Review</strong> leading to the schedule so you can correct them before sharing.
         </p>
 
-        <h3 class="doc-subheading">What goes on the graphic</h3>
+        <h3 id="events" class="doc-subheading">Which events</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Every run reads your schedule's upcoming events, earliest first:
+            The page reads your schedule's upcoming events, earliest first:
         </p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Upcoming or ongoing only.</strong> An event that has started but not finished still counts.</li>
             <li><strong class="text-gray-900 dark:text-white">Flyer required for the image.</strong> Only events that have their own flyer image are drawn. Events without one still appear in the text, which needs no artwork.</li>
             <li><strong class="text-gray-900 dark:text-white">Hidden events stay hidden.</strong> Draft and internal events, unlisted events, password-protected events and cancelled events are never included.</li>
-            <li><strong class="text-gray-900 dark:text-white">Up to 20 events.</strong> That is the ceiling; <strong>Number of Events</strong> can lower it.</li>
-            <li><strong class="text-gray-900 dark:text-white">Recurring events can be left out</strong> with <strong>Exclude recurring events</strong> on the Automation tab, which affects both the image and the text.</li>
+            <li><strong class="text-gray-900 dark:text-white">Up to 20 events.</strong> That is the ceiling; <strong>Number of events</strong> can lower it.</li>
+            <li><strong class="text-gray-900 dark:text-white">Recurring events can be left out</strong> with <strong>Exclude recurring events</strong>, which affects both the image and the caption. The switch is offered once the schedule has a recurring event.</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The <strong>Events</strong> row holds the three settings that decide which events are used:
+        </p>
+        <div class="doc-table-wrap">
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>What it does</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong class="text-gray-900 dark:text-white">Number of events</strong></td>
+                        <td>How many upcoming events to include, from 1 to 20. "All, up to 20" uses the maximum.</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-gray-900 dark:text-white">Limit per talent or venue</strong></td>
+                        <td>Caps how many events any one talent or venue can contribute, from 1 to 10, so a single act or room cannot fill the graphic. It counts the talent and venue schedules attached to each event, not the schedule the graphic is for, and it fills the freed slots from further down the calendar. Because it counts venues too, the graphic can still come out shorter than Number of events when your events do not spread across enough different talents and venues: a residency at one room with a cap of 2 gives you 2 events, however many are coming up. Applies to the image and the caption alike. "No limit" is the default and changes nothing.</td>
+                    </tr>
+                    <tr>
+                        <td><strong class="text-gray-900 dark:text-white">Exclude recurring events</strong></td>
+                        <td>Leaves recurring events out of both the image and the caption.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
             Every flyer also carries a QR code in its lower corner pointing at that event's page, so a printed or projected graphic still leads people to the listing.
         </p>
 
-        <h3 class="doc-subheading">Layout Type</h3>
+        <h3 class="doc-subheading">Layout</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The Graphic tab starts with the layout. A line under the choices says what the chosen one suits.
+            Layout is the first choice on the page: three tiles, each with a sketch of what it draws, and a line under them describing the chosen one.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -106,9 +134,13 @@
             </table>
         </div>
 
-        <h3 class="doc-subheading">Image Size</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            <strong>Flyers per row</strong>, under the layout, is how many flyers are drawn before wrapping to the next row, from 1 to 10, or Auto. On Auto, Rows puts every flyer on one long line, so pick a number to wrap it; the page shows such a line at a readable height and lets you scroll along it. Flyers per row is switched off for List, which puts one event on each line.
+        </p>
+
+        <h3 class="doc-subheading">Shape</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong>Image Size</strong> fits the finished graphic to a fixed social-media shape. The graphic is scaled to fit inside the shape and centered, and the padding around it is filled with your schedule's own background, so nothing is ever cropped or stretched.
+            <strong>Shape</strong> fits the finished graphic to a fixed social-media shape. The graphic is scaled to fit inside the shape and centered, and the padding around it is filled with your schedule's own background, so nothing is ever cropped or stretched. Under the five shapes the page gives the chosen one's size in pixels and where it is used.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -119,19 +151,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Auto (fit to content)</td><td>The natural size, which grows with the number of events</td></tr>
+                    <tr><td>Natural</td><td>No fixed shape: the size the flyers need, which grows with the number of events</td></tr>
                     <tr><td>Square</td><td>1080 × 1080</td></tr>
                     <tr><td>Portrait</td><td>1080 × 1350</td></tr>
                     <tr><td>Story</td><td>1080 × 1920</td></tr>
-                    <tr><td>Landscape</td><td>1200 × 630</td></tr>
+                    <tr><td>Wide</td><td>1200 × 630</td></tr>
                 </tbody>
             </table>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            A fixed shape is a fixed number of pixels, so the more events you include the smaller each flyer is drawn inside it. Twenty events fill a grid roughly twice the width of a Square post, which halves every flyer and its text. If the artwork is coming out too small to read, lower <strong>Number of Events</strong> or switch back to Auto, which lets the graphic grow instead.
+            A fixed shape is a fixed number of pixels, so the more events you include the smaller each flyer is drawn inside it. Twenty events fill a grid roughly twice the width of a Square post, which halves every flyer and its text. If the artwork is coming out too small to read, lower <strong>Number of events</strong> or switch back to Natural, which lets the graphic grow instead.
         </p>
 
-        <h3 class="doc-subheading">The rest of the Graphic tab</h3>
+        <h3 id="dates-and-numbers" class="doc-subheading">Dates and numbers</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The <strong>Dates and numbers</strong> row holds what is drawn on each flyer. The date strip applies to Grid and Rows; the List layout writes each name and date itself.
+        </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -142,28 +177,16 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Show Text</strong></td>
-                        <td>Draws a date strip across the top of each flyer. <strong>None</strong> (the default) draws nothing, <strong>Overlay</strong> puts a translucent dark band over the artwork, and <strong>Above</strong> puts a solid dark bar just above it. Grid and Rows only.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Date on each flyer</strong></td>
+                        <td>Draws a date strip across the top of each flyer. <strong>None</strong> (the default) draws nothing, <strong>On the flyer</strong> puts a translucent dark band over the artwork, and <strong>Above the flyer</strong> puts a solid dark bar just above it. Grid and Rows only.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Overlay Text</strong></td>
-                        <td>Appears once Show Text is not None. Replaces the date in that strip with your own short template, for example <code class="doc-inline-code">{date_dmy} | {time}</code>. Leave it blank for the date on its own.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Text instead of the date</strong></td>
+                        <td>Appears once a date strip is chosen. Replaces the date in that strip with your own short wording, for example <code class="doc-inline-code">{date_dmy} | {time}</code>. The variables under the field can be pressed in. Leave it empty for the date on its own.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Flyers Per Row</strong></td>
-                        <td>How many flyers before wrapping to the next row, from 1 to 10, or Auto. Grid and Rows only.</td>
-                    </tr>
-                    <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Add Event Numbers</strong></td>
-                        <td>Puts a numbered badge on each flyer. Use <code class="doc-inline-code">{number}</code> in the text template so the list matches the badges. Grid and Rows only, and it also limits the text to the events that have a flyer, so the numbering cannot drift.</td>
-                    </tr>
-                    <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Number of Events</strong></td>
-                        <td>How many upcoming events to include, from 1 to 20. "All available" uses the maximum of 20.</td>
-                    </tr>
-                    <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Events Per Schedule</strong></td>
-                        <td>Caps how many events any one talent or venue can contribute, from 1 to 10, so a single act or room cannot fill the graphic. It counts the talent and venue schedules attached to each event, not the schedule the graphic is for, and it fills the freed slots from further down the calendar. Because it counts venues too, the graphic can still come out shorter than Number of Events when your events do not spread across enough different talents and venues: a residency at one room with a cap of 2 gives you 2 events, however many are coming up. Applies to the image and the text alike. "Unlimited" is the default and changes nothing.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Number each flyer</strong></td>
+                        <td>Puts a numbered badge on each flyer. Use <code class="doc-inline-code">{number}</code> in the caption's wording so the list matches the badges. It also limits the caption to the events that have a flyer, so the numbering cannot drift. List draws no badge, but the caption is limited in the same way and <code class="doc-inline-code">{number}</code> still works.</td>
                     </tr>
                 </tbody>
             </table>
@@ -171,7 +194,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Nothing to draw</div>
-            <p>If no upcoming event has a flyer image, the image panel says so instead of rendering. Add a flyer to at least one upcoming event, or use the text output on its own.</p>
+            <p>If no upcoming event has a flyer image, the image's place says so, with a link back to your schedule. Add a flyer to at least one upcoming event, or use the caption on its own: it is still there to copy.</p>
         </div>
     </section>
 
@@ -184,12 +207,12 @@
             Header &amp; Footer Text
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The last three settings on the Graphic tab brand the image itself. All three are optional, and all three are drawn in your schedule's own colors and reading direction.
+            The <strong>Header and footer</strong> row brands the image itself. Its three settings are all optional, and all three are drawn in your schedule's own colors and reading direction.
         </p>
         <div class="doc-fields mb-6">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Header Image</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Upload a JPG, PNG, GIF or WebP to run across the top of the graphic. It is scaled to the full width of the image and capped at 200 pixels tall, so a wide, short logo band works better than a tall one. Upload a new file to replace it, or remove it to go back to no header.</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Upload a JPG, PNG, GIF or WebP to run across the top of the graphic. It is scaled to the full width of the image and capped at 200 pixels tall, so a wide, short logo band works better than a tall one. Upload a new file to replace it, or remove it to go back to no header. Unlike the other settings it is saved the moment you choose it, without pressing Save, and the scheduled email uses it from the next send.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Header Text</h4>
@@ -206,7 +229,7 @@
 
         <h3 class="doc-subheading">Schedule Variables</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Header and footer text support a small set of schedule-wide variables. Unlike the per-event variables used in the <a href="#text-template" class="doc-link">text template</a> or in Overlay Text, these describe the schedule or the batch as a whole, not any single event.
+            Header and footer text support a small set of schedule-wide variables. The most used ones are buttons under each field: press one to put it in. Unlike the per-event variables used in the <a href="#text-template" class="doc-link">caption's wording</a> or on the date strip, these describe the schedule or the batch as a whole, not any single event.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -256,13 +279,13 @@
             Text Template
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong>Text</strong> tab controls the block of text next to the image. The template defines how one event is formatted, and it is repeated once per event, with a blank line between entries.
+            The <strong>Caption</strong> row controls the caption that goes with the image. The template defines how one event is written, and it is repeated once per event, with a blank line between entries.
         </p>
 
-        <x-doc-screenshot id="event-graphics--settings" alt="Event graphics settings" />
+        <x-doc-screenshot id="event-graphics--settings" alt="The Caption row open: how each event is written, with variables to press" />
 
         <h3 class="doc-subheading">Default Template</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Until you save a template of your own, the <strong>Text Template</strong> box opens filled in with this one:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Until you save a template of your own, the <strong>How each event is written</strong> box opens filled in with this one:</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -275,7 +298,7 @@
 {venue} | {city}
 {url}</code></pre>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">If you empty the box, a built-in template is used instead: the same four lines without <code class="doc-inline-code">{short_description}</code>. A scheduled email sent before any template was saved uses that one too. A template can be up to 2,000 characters.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same default is used if the box is empty, and by a scheduled email sent before any template was saved. <strong>Use the default wording</strong>, under the box, puts it back. The variables you are most likely to want are buttons under the box. A template can be up to 2,000 characters.</p>
 
         <h3 class="doc-subheading">Example Output</h3>
         <div class="doc-code-block">
@@ -288,7 +311,7 @@ Live jazz with local artists
 Central Park | New York
 example.com/summer-concert</code></pre>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The link has no <code class="doc-inline-code">https://</code> and no event id unless you turn on <strong>Include HTTPS</strong> or <strong>Include Event ID</strong>, described <a href="#text-options" class="doc-link">below</a>. An event with no short description has no third line.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The link has no <code class="doc-inline-code">https://</code> and no event id unless you turn on <strong>Start with https://</strong> or <strong>End with the event's ID</strong>, described <a href="#text-options" class="doc-link">below</a>. An event with no short description has no third line.</p>
 
         <div class="doc-callout doc-callout-tip mt-6">
             <div class="doc-callout-title">Tip</div>
@@ -332,7 +355,7 @@ example.com/summer-concert</code></pre>
 {coupon_code} {coupon_discount}</code></pre>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            One catch: a currency symbol, or any word you type yourself, is not punctuation, so it survives on its own. On a free event, where <code class="doc-inline-code">{price}</code> is blank, that first line still prints a lone <code class="doc-inline-code">&#8362;</code>. If your schedule mixes free and paid events, put the symbol on a line that always has something else on it. Overlay Text is stricter still: it never drops a line, so anything you type there prints even when every variable on it came back empty.
+            One catch: a currency symbol, or any word you type yourself, is not punctuation, so it survives on its own. On a free event, where <code class="doc-inline-code">{price}</code> is blank, that first line still prints a lone <code class="doc-inline-code">&#8362;</code>. If your schedule mixes free and paid events, put the symbol on a line that always has something else on it. The text on the date strip is stricter still: it never drops a line, so anything you type there prints even when every variable on it came back empty.
         </p>
 
         <h3 class="doc-subheading">Blank values clean themselves up</h3>
@@ -340,7 +363,7 @@ example.com/summer-concert</code></pre>
             You do not need a separate template for events that have no venue or no price. If a variable comes back empty, a stranded <code class="doc-inline-code">|</code> separator around it is removed, and a line left with nothing but punctuation is dropped from that event's entry.
         </p>
 
-        <h3 id="text-options" class="doc-subheading">The rest of the Text tab</h3>
+        <h3 id="text-options" class="doc-subheading">The rest of the Caption row</h3>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
@@ -351,20 +374,20 @@ example.com/summer-concert</code></pre>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Include all future events</strong></td>
-                        <td>Lists every upcoming event in the text, not only the ones shown on the image. Ignored while Add Event Numbers is on, so the numbering keeps matching the badges.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Include every upcoming event</strong></td>
+                        <td>Lists every upcoming event in the caption, not only the ones shown on the image. Switched off while Number each flyer is on, so the numbering keeps matching the badges.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Generate text in English</strong></td>
-                        <td>Produces the text, and the dates and details on the image, in English instead of the schedule language. Shown only for a non-English schedule whose translation target is English.</td>
+                        <td><strong class="text-gray-900 dark:text-white">In English</strong></td>
+                        <td>Produces the caption, and the dates and details on the image, in English instead of the schedule language. Shown only for a non-English schedule whose translation target is English.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Include HTTPS</strong></td>
+                        <td><strong class="text-gray-900 dark:text-white">Start with https://</strong></td>
                         <td>Keeps the <code class="doc-inline-code">https://</code> prefix on <code class="doc-inline-code">{url}</code>. Off by default, which is shorter and still auto-links in most apps.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Include Event ID</strong></td>
-                        <td>Keeps the event id in <code class="doc-inline-code">{url}</code>. Off by default, which produces the clean slug-only link.</td>
+                        <td><strong class="text-gray-900 dark:text-white">End with the event's ID</strong></td>
+                        <td>Keeps the event id in <code class="doc-inline-code">{url}</code> and, for a recurring event, its date, so the link opens that exact one. Off by default, which produces the clean slug-only link.</td>
                     </tr>
                 </tbody>
             </table>
@@ -553,7 +576,7 @@ example.com/summer-concert</code></pre>
                 <tbody>
                     <tr>
                         <td><code class="doc-inline-code">{number}</code></td>
-                        <td>1-based position in the list, matching the badge on the flyer when <strong>Add Event Numbers</strong> is on. Specific to the Event Graphics text panel; it has no value in calendar description templates.</td>
+                        <td>1-based position in the list, matching the badge on the flyer when <strong>Number each flyer</strong> is on. Specific to the Events graphic caption; it has no value in calendar description templates.</td>
                         <td>1</td>
                     </tr>
                     <tr>
@@ -735,12 +758,12 @@ example.com/summer-concert</code></pre>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Custom field variables follow the number shown beside each field in your schedule's settings. For example, if your first custom field is "Speaker Name", then <code class="doc-inline-code">{custom_1}</code> shows the speaker's name. A yes/no field prints as Yes or No.</p>
 
-        <h3 id="overlay-variables" class="doc-subheading">In Overlay Text</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The same variables work in the Overlay Text on the flyer strip, with four exceptions: <code class="doc-inline-code">{url}</code>, <code class="doc-inline-code">{number}</code>, <code class="doc-inline-code">{month_pad}</code> and <code class="doc-inline-code">{day_pad}</code> are text-only and are left as they are there. Keep overlay text short: it is drawn on one line across the width of a flyer.</p>
+        <h3 id="overlay-variables" class="doc-subheading">On the date strip</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The same variables work in <strong>Text instead of the date</strong> on the flyer strip, with four exceptions: <code class="doc-inline-code">{url}</code>, <code class="doc-inline-code">{number}</code>, <code class="doc-inline-code">{month_pad}</code> and <code class="doc-inline-code">{day_pad}</code> are caption-only and are left as they are there. Keep it short: it is drawn on one line across the width of a flyer.</p>
 
         <h3 id="localization" class="doc-subheading">Language and Direction</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Date and time variables like <code class="doc-inline-code">{day_name}</code>, <code class="doc-inline-code">{month_name}</code>, and <code class="doc-inline-code">{time}</code> are written in your schedule's language and respect its 24-hour time setting. Text for a Hebrew or Arabic schedule is also marked so it pastes right-to-left into apps like WhatsApp, while the event links stay intact.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">If your schedule uses a non-English language and translates into English, you can turn on <strong>Generate text in English</strong> on the Text tab to produce the text, and the dates and event details on the graphic itself, in English instead. English translations of event and venue names are used when available, falling back to the original values.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If your schedule uses a non-English language and translates into English, you can turn on <strong>In English</strong> in the Caption row to produce the caption, and the dates and event details on the graphic itself, in English instead. English translations of event and venue names are used when available, falling back to the original values.</p>
     </section>
 
     <div class="doc-callout doc-callout-plan">
@@ -758,7 +781,7 @@ example.com/summer-concert</code></pre>
         </h2>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Enterprise feature</div>
-            <p><x-doc-badge plan="enterprise" /> The AI Text Prompt field on the Text tab needs the <strong class="text-gray-900 dark:text-white">Enterprise</strong> plan. Below Enterprise the field is replaced by an upgrade note. On a <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install the plan is not the obstacle, but the instance needs its own AI key configured, otherwise the prompt is quietly skipped.</p>
+            <p><x-doc-badge plan="enterprise" /> The <strong>Tell AI how to rewrite the caption</strong> field, at the foot of the Caption row, needs the <strong class="text-gray-900 dark:text-white">Enterprise</strong> plan. Below Enterprise it carries a lock badge and an upgrade note in place of the field. On a <a href="{{ route('marketing.docs.selfhost') }}" class="doc-link">selfhosted</a> install the plan is not the obstacle, but the instance needs its own AI key configured, and the field says so when there is none.</p>
         </div>
 
         <h3 class="doc-subheading">How It Works</h3>
@@ -772,7 +795,7 @@ example.com/summer-concert</code></pre>
             <li>Add hashtags or mentions</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Generating takes a moment longer with a prompt set, so the text appears first and is replaced when the AI finishes. Your prompt is treated strictly as formatting instructions, and if it cannot be applied the original text is kept. The same prompt is applied to the scheduled email described below. A prompt can be up to 2,000 characters. On eventschedule.com each schedule gets 50 AI content requests a day, an allowance this prompt shares with the AI details generators of the event and schedule forms; a run past it leaves the text as the template wrote it.
+            AI rewrites the caption once when the page opens: the plain caption appears first and is replaced when the rewrite finishes, with a line above it saying it was rewritten. After you change a setting or the instruction the page does not rewrite again by itself. The line says which caption you are looking at, the plain one or one made with the earlier instruction, and offers <strong>Rewrite</strong>. Your instruction is treated strictly as formatting instructions, and if it cannot be applied the plain caption is kept and the page says so. The same instruction is applied to every scheduled email described below. An instruction can be up to 2,000 characters. On eventschedule.com each schedule gets 50 AI content requests a day, an allowance this field shares with the AI details generators of the event and schedule forms; past it the page says the limit was reached and keeps the plain caption.
         </p>
 
         <h3 class="doc-subheading">Example Prompts</h3>
@@ -799,10 +822,10 @@ example.com/summer-concert</code></pre>
         </h2>
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Enterprise feature</div>
-            <p><x-doc-badge plan="enterprise" /> Scheduled graphic emails need the <strong class="text-gray-900 dark:text-white">Enterprise</strong> plan. The controls live on the <strong>Automation</strong> tab of the settings panel.</p>
+            <p><x-doc-badge plan="enterprise" /> Scheduled graphic emails need the <strong class="text-gray-900 dark:text-white">Enterprise</strong> plan. The controls are in the <strong>Scheduled email</strong> row.</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Have the current graphic and its text emailed on a cadence, using whatever you last saved on the Graphic and Text tabs. This is an internal reminder rather than a campaign: it goes only to the addresses you type into <strong>Send To</strong>, never to the people following your schedule. To email your followers a designed campaign, use <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> instead.
+            Have the current graphic and its text emailed on a cadence, using the settings you last saved. This is an internal reminder rather than a campaign: it goes only to the addresses you type into <strong>To</strong>, never to the people following your schedule. One email goes to all of them, so each sees the others' addresses. To email your followers a designed campaign, use <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> instead.
         </p>
 
         <h3 class="doc-subheading">Configuration Options</h3>
@@ -816,41 +839,41 @@ example.com/summer-concert</code></pre>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Enable scheduled emails</strong></td>
-                        <td>Turns the schedule on. Saving with it on and no valid address is rejected.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Email the image and caption on a schedule</strong></td>
+                        <td>Turns the schedule on. Saving with it on and no valid address is refused, and the page marks the field. Under the switch the page says when the email last went.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Frequency</strong></td>
+                        <td><strong class="text-gray-900 dark:text-white">How often</strong></td>
                         <td>Daily, Weekly, or Monthly</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Send on Days</strong></td>
-                        <td>For Weekly: tick one or more days of the week. At least one is required.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Days</strong></td>
+                        <td>For Weekly: press one or more days of the week. At least one is required.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Day of Month</strong></td>
+                        <td><strong class="text-gray-900 dark:text-white">Day of the month</strong></td>
                         <td>For Monthly: the day to send on, from 1 to 28, so every month has it.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Send At</strong></td>
-                        <td>The hour to send, in your schedule's timezone. Delivery is at or shortly after that hour, and each day or month gets at most one send.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Time</strong></td>
+                        <td>The hour to send, in your schedule's timezone and written the way your schedule writes its own times. Delivery is at or shortly after that hour, and each day or month gets at most one send.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Send To</strong></td>
-                        <td>A comma-separated list of email addresses. Everyone on the list receives the same email.</td>
+                        <td><strong class="text-gray-900 dark:text-white">To</strong></td>
+                        <td>A comma-separated list of email addresses. Everyone on the list receives the same email, addressed to all of them.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <h3 class="doc-subheading">Test Email</h3>
+        <h3 class="doc-subheading">Send it now</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <strong>Send Test Email</strong> sends the real thing immediately, to the same <strong>Send To</strong> addresses, so save a valid address first. Use it to check the layout before you leave the schedule running.
+            <strong>Send it now</strong> sends the real thing immediately, to everyone in <strong>To</strong>. The email is built from the saved settings, so while something is unsaved the button reads <strong>Save and send it now</strong> and does both. Use it to check the result before you leave the schedule running.
         </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Nothing to send</div>
-            <p>If no upcoming event has a flyer image when the send is due, no email goes out, and the schedule tries again at the next cadence. A test email reports the same thing instead of sending an empty graphic.</p>
+            <p>If no upcoming event has a flyer image when the send is due, no email goes out, and the schedule tries again at the next cadence. Send it now reports the same thing instead of sending an empty graphic, and the line under the switch in the Scheduled email row says a send is skipped in that case.</p>
         </div>
     </section>
 
@@ -884,25 +907,25 @@ example.com/summer-concert</code></pre>
                 {
                     "@type": "HowToStep",
                     "name": "Open Event Graphics",
-                    "text": "Open your schedule in the admin panel and choose Events Graphic from the Actions menu.",
+                    "text": "Open your schedule in the admin panel and choose Events graphic from the Actions menu.",
                     "url": "{{ url(route('marketing.docs.event_graphics')) }}#overview"
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Choose a layout and size",
-                    "text": "Pick Grid, Rows or List on the Graphic tab, then fit the result to a square, portrait, story or landscape shape.",
+                    "name": "Choose a layout and shape",
+                    "text": "Pick Grid, Rows or List, then fit the result to a square, portrait, story or wide shape.",
                     "url": "{{ url(route('marketing.docs.event_graphics')) }}#overview"
                 },
                 {
                     "@type": "HowToStep",
-                    "name": "Customize the text template",
-                    "text": "Edit the text template using variables like {event_name}, {date_dmy}, {time}, and {venue} to control how event details are formatted.",
+                    "name": "Customize the caption",
+                    "text": "Edit how each event is written using variables like {event_name}, {date_dmy}, {time}, and {venue} to control how event details are formatted.",
                     "url": "{{ url(route('marketing.docs.event_graphics')) }}#text-template"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Download and share",
-                    "text": "Download or copy the image and copy the text to share on Instagram, Facebook, Twitter/X, WhatsApp, Telegram, or in a newsletter.",
+                    "text": "Download or copy the image and copy the caption to share on Instagram, Facebook, Twitter/X, WhatsApp, Telegram, or in a newsletter.",
                     "url": "{{ url(route('marketing.docs.event_graphics')) }}#overview"
                 }
             ]

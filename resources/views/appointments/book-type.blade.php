@@ -256,7 +256,7 @@
 
     {{-- max-w-5xl, and the rail is a fixed 20rem rather than a third: the extra width all goes to the
          picker, which is what turns the slot list into two readable columns. --}}
-    <div id="booking-app" data-props="{{ json_encode($props) }}" class="max-w-5xl mx-auto px-4 py-8">
+    <div id="booking-app" data-vue-root data-props="{{ json_encode($props) }}" class="max-w-5xl mx-auto px-4 py-8">
         {{-- The guest page background comes from the schedule's own theme and does not follow dark
              mode - and it defaults to a photo or a random gradient - so the widget needs an opaque
              surface of its own in BOTH modes, and every child carries an explicit text color. --}}
@@ -1019,7 +1019,7 @@
                         this.month = this.minDate.slice(0, 7);
                     }
                 },
-            }).mount('#booking-app');
+            }).mount('#booking-app[data-vue-root]');
         })();
     </script>
 @endif

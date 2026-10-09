@@ -33,7 +33,7 @@ class EventCurationModerationCharacterizationTest extends TestCase
         $curateUrl = '/'.$curator->subdomain.'/curate-event/'.UrlUtils::encodeId($event->id);
 
         // A curator editor curates -> attached pre-accepted.
-        $this->actingAs($curatorOwner)->get($curateUrl)
+        $this->actingAs($curatorOwner)->post($curateUrl)
             ->assertRedirect()
             ->assertSessionHas('message', __('messages.event_added_to_schedule'));
 
@@ -44,7 +44,7 @@ class EventCurationModerationCharacterizationTest extends TestCase
         ]);
 
         // Curating the same event again -> error flash, no duplicate.
-        $this->actingAs($curatorOwner)->get($curateUrl)
+        $this->actingAs($curatorOwner)->post($curateUrl)
             ->assertRedirect()
             ->assertSessionHas('error', __('messages.event_already_curated'));
 
@@ -70,7 +70,7 @@ class EventCurationModerationCharacterizationTest extends TestCase
 
         // Unauthenticated curate on an open-requests curator -> attached
         // WITHOUT acceptance (the is_accepted visibility gate).
-        $this->get('/'.$curator->subdomain.'/curate-event/'.UrlUtils::encodeId($event->id))
+        $this->post('/'.$curator->subdomain.'/curate-event/'.UrlUtils::encodeId($event->id))
             ->assertRedirect();
 
         $this->assertDatabaseHas('event_role', [

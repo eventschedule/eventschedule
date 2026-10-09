@@ -187,6 +187,12 @@ class SlugPatternUtils
         foreach ($roleCustomFields as $fieldKey => $fieldConfig) {
             $index = $fieldConfig['index'] ?? $fallbackIndex;
             $fallbackIndex++;
+            // A private answer is the owner's alone: it is not written into an address, a text or a
+            // graphic that other people are shown. Its token stays empty.
+            if (! empty($fieldConfig['private'])) {
+                continue;
+            }
+
             if ($index >= 1 && $index <= 10) {
                 $value = $customFieldValues[$fieldKey] ?? '';
                 // Convert boolean values to Yes/No for switch type

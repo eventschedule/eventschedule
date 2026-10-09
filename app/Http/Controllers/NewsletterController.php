@@ -28,10 +28,9 @@ class NewsletterController extends Controller
             return;
         }
 
-        // Allow owners/members of any role
-        $hasRole = auth()->user()->roles()
-            ->wherePivot('level', '!=', 'follower')
-            ->exists();
+        // The people who run a schedule. A viewer used to pass here, and with it could write and
+        // send a newsletter, import ten thousand addresses and read every recipient list.
+        $hasRole = $this->getRoles()->isNotEmpty();
 
         if (! $hasRole) {
             abort(403, __('messages.not_authorized'));
@@ -40,7 +39,11 @@ class NewsletterController extends Controller
 
     protected function getRoles()
     {
-        return auth()->user()->roles()->wherePivot('level', '!=', 'follower')->get();
+        $user = auth()->user();
+
+        return $user->roles()->wherePivotIn('level', ['owner', 'admin'])->get()
+            ->filter(fn ($role) => $user->planAllowsTeamAccess($role))
+            ->values();
     }
 
     protected function getRole(Request $request)
@@ -56,7 +59,7 @@ class NewsletterController extends Controller
         }
 
         if (! auth()->user()->isAdmin()) {
-            if ($role->pivot->level === 'follower') {
+            if (! in_array($role->pivot->level, ['owner', 'admin'], true) || ! auth()->user()->planAllowsTeamAccess($role)) {
                 abort(403);
             }
         }
@@ -784,7 +787,8 @@ class NewsletterController extends Controller
 
         $eventName = null;
         if (in_array($segment->type, ['ticket_buyers', 'waitlist']) && ! empty($segment->filter_criteria['event_id'])) {
-            $eventName = \App\Models\Event::find($segment->filter_criteria['event_id'])?->translatedName();
+            // One of this schedule's events: the id is stored as posted, and any event's name answered here.
+            $eventName = $role->events()->where('events.id', (int) $segment->filter_criteria['event_id'])->first()?->translatedName();
         }
 
         return view('newsletter.segment-edit', [

@@ -14,8 +14,10 @@
                     <span class="event-status is-on">{{ __('messages.microsoft_calendar_connected') }}</span>
                 </div>
                 <div class="settings-picked-actions">
-                    <a href="{{ route('microsoft.calendar.disconnect') }}" id="disconnect-microsoft-calendar"
-                       data-confirm="{{ __('messages.settings_confirm_disconnect_calendar') }}" class="event-link is-danger">{{ __('messages.disconnect') }}</a>
+                    <form method="POST" action="{{ route('microsoft.calendar.disconnect') }}" class="inline">
+                        @csrf
+                        <button type="submit" id="disconnect-microsoft-calendar" data-confirm="{{ __('messages.settings_confirm_disconnect_calendar') }}" class="event-link is-danger">{{ __('messages.disconnect') }}</button>
+                    </form>
                 </div>
             </div>
             {{-- Connected is half of it: nothing syncs until a schedule is told to. --}}

@@ -32,6 +32,13 @@ class BlogSeoTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** A browser's own headers: a post's view is counted only for a request that carries them. */
+    private const BROWSER = [
+        'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36',
+        'HTTP_ACCEPT' => 'text/html,application/xhtml+xml',
+        'HTTP_ACCEPT_LANGUAGE' => 'en-GB,en;q=0.9',
+    ];
+
     private function makePost(array $attributes = []): BlogPost
     {
         return BlogPost::create(array_merge([
@@ -57,7 +64,8 @@ class BlogSeoTest extends TestCase
         // Any later "now" will do: the point is that the view must not stamp it.
         $this->travelTo(Carbon::parse('2026-06-01 12:00:00'));
 
-        $body = $this->get('/blog/'.$post->slug)->assertOk()->getContent();
+        // A browser's request: a view is counted only for one (see the crawler test in BlogPagesTest).
+        $body = $this->get('/blog/'.$post->slug, self::BROWSER)->assertOk()->getContent();
 
         $fresh = BlogPost::find($post->id);
 
@@ -132,8 +140,8 @@ class BlogSeoTest extends TestCase
     {
         $post = $this->makePost();
 
-        $this->get('/blog/'.$post->slug)->assertOk();
-        $this->get('/blog/'.$post->slug)->assertOk();
+        $this->get('/blog/'.$post->slug, self::BROWSER)->assertOk();
+        $this->get('/blog/'.$post->slug, self::BROWSER)->assertOk();
 
         $this->assertSame(2, (int) BlogPost::find($post->id)->view_count);
     }
@@ -230,9 +238,10 @@ class BlogSeoTest extends TestCase
         $body = $this->get('/blog/'.$post->slug)->assertOk()->getContent();
 
         $this->assertSame(1, substr_count($body, '<h1'), 'the stored body contributes extra H1s');
-        $this->assertStringContainsString('<h2>Selling Tickets</h2>', $body, 'the body heading was dropped, not demoted');
-        $this->assertStringContainsString('<h2>Second</h2>', $body);
-        $this->assertStringContainsString('<h2>Sub</h2>', $body, 'an existing H2 was disturbed');
+        // Each h2 now carries the id the contents list links to (BlogPost::withSectionIds()).
+        $this->assertStringContainsString('<h2 id="s-selling-tickets">Selling Tickets</h2>', $body, 'the body heading was dropped, not demoted');
+        $this->assertStringContainsString('<h2 id="s-second">Second</h2>', $body);
+        $this->assertStringContainsString('<h2 id="s-sub">Sub</h2>', $body, 'an existing H2 was disturbed');
 
         // The RSS body is the same content through the same seam.
         $this->assertStringNotContainsString('<h1', $this->get('/blog/feed')->assertOk()->getContent());
@@ -240,10 +249,11 @@ class BlogSeoTest extends TestCase
 
     public function test_the_ai_prompt_no_longer_asks_for_an_h1(): void
     {
-        $prompt = config('ai_prompts.blog_post.base');
+        $prompt = config('ai_prompts.blog_writer_user');
 
         $this->assertStringNotContainsString('<h1>', $prompt);
         $this->assertStringContainsString('<h2>', $prompt);
+        $this->assertStringContainsString('No h1', $prompt);
     }
 
     public function test_the_blog_posting_block_survives_a_quote_in_the_title(): void
@@ -410,12 +420,17 @@ class BlogSeoTest extends TestCase
 
     public function test_the_ai_prompt_asks_for_plain_apex_links(): void
     {
-        foreach (['links_with_parent', 'links_without_parent'] as $key) {
-            $prompt = config('ai_prompts.blog_post.'.$key);
+        // The model is handed the addresses it may use (BlogLinks::targets()), each a plain apex
+        // URL: the old prompt showed a markdown link inside an href and the model copied it.
+        $prompt = config('ai_prompts.blog_writer_user');
 
-            $this->assertStringContainsString('href=":base_url', $prompt, $key);
-            $this->assertStringNotContainsString('href="[', $prompt, $key.' still puts markdown in an href');
-            $this->assertStringNotContainsString('www.', $prompt, $key);
+        $this->assertStringContainsString(':links', $prompt);
+        $this->assertStringNotContainsString('href="[', $prompt);
+        $this->assertStringContainsString('no [text](address)', $prompt);
+
+        foreach (array_keys(\App\Services\Blog\BlogLinks::targets()) as $url) {
+            $this->assertStringNotContainsString('www.', $url);
+            $this->assertStringNotContainsString('[', $url);
         }
     }
 

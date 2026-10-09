@@ -664,6 +664,97 @@ class EventFormKeepsWhatWasTypedTest extends TestCase
         $this->assertEmpty($addons[0]['image_url'], 'the page does not show a picture it is about to remove');
     }
 
+    /** The id the page's venue picker starts on, or null when it starts on none. */
+    private function pickedVenue(string $html): ?string
+    {
+        $this->assertSame(1, preg_match('/^\s*selectedVenue: (.*),\s*$/m', $html, $seed), 'the venue seed was not found on the page');
+        $venue = json_decode($seed[1], true);
+
+        return is_array($venue) ? ($venue['id'] ?? null) : null;
+    }
+
+    /** An event of the schedule's at a venue its owner also runs. */
+    private function eventAt(Role $venue): Event
+    {
+        $event = $this->createEvent($this->role);
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        return $event;
+    }
+
+    /**
+     * The venue picker was seeded from the stored event alone. Another venue chosen and a save
+     * refused over another field came back on the old venue, with nothing on the page to say so,
+     * and fixing that field and saving kept the event where it had been.
+     */
+    public function test_a_venue_chosen_before_a_refused_save_is_the_one_the_page_comes_back_on(): void
+    {
+        $venueA = $this->createVenueWithAddress($this->owner, ['name' => 'Venue A']);
+        $venueB = $this->createVenueWithAddress($this->owner, ['name' => 'Venue B', 'address1' => '9 Other St']);
+        $event = $this->eventAt($venueA);
+
+        $html = $this->refused($event, ['venue_id' => UrlUtils::encodeId($venueB->id), 'venue_submitted' => 1]);
+
+        $this->assertSame(UrlUtils::encodeId($venueB->id), $this->pickedVenue($html));
+        // A change is still measured against what is stored, so the question about telling the
+        // people who signed up is still asked when the save goes through.
+        $this->assertStringContainsString('savedVenueId: "'.UrlUtils::encodeId($venueA->id).'",', $html);
+        $this->assertStringContainsString('this.origVenueId = this.eventIsSaved ? this.savedVenueId', $html);
+        $this->assertSame([$venueA->id], $event->roles()->where('roles.type', 'venue')->pluck('roles.id')->all(), 'sanity check: the save really was refused');
+    }
+
+    public function test_a_venue_chosen_before_a_refused_first_save_comes_back_chosen(): void
+    {
+        $venue = $this->createVenueWithAddress($this->owner, ['name' => 'Venue A']);
+        $createUrl = route('event.create', ['subdomain' => 'keeptalent']);
+
+        $this->actingAs($this->owner)->from($createUrl)
+            ->post(route('event.store', ['subdomain' => 'keeptalent']), [
+                'name' => '', 'starts_at' => '2026-08-15 20:00:00', 'duration' => 2,
+                'venue_id' => UrlUtils::encodeId($venue->id), 'venue_submitted' => 1,
+            ])
+            ->assertRedirect($createUrl)
+            ->assertSessionHasErrors('name');
+
+        $html = $this->actingAs($this->owner)->get($createUrl)->assertOk()->getContent();
+
+        $this->assertSame(UrlUtils::encodeId($venue->id), $this->pickedVenue($html));
+    }
+
+    public function test_a_venue_taken_off_before_a_refused_save_stays_off(): void
+    {
+        $venue = $this->createVenueWithAddress($this->owner, ['name' => 'Venue A']);
+        $event = $this->eventAt($venue);
+
+        $html = $this->refused($event, ['venue_submitted' => 1]);
+
+        $this->assertNull($this->pickedVenue($html), 'the venue that was taken off does not come back as though it were chosen');
+    }
+
+    /** The id is whatever was posted, and a venue's data on the page is the whole schedule. */
+    public function test_a_refused_save_does_not_look_up_a_venue_the_page_did_not_offer(): void
+    {
+        $venue = $this->createVenueWithAddress($this->owner, ['name' => 'Venue A']);
+        $theirs = $this->createVenueWithAddress($this->createOwner(), ['name' => 'Somebody Elses Room', 'email' => 'private-room@gmail.com']);
+        $event = $this->eventAt($venue);
+
+        $html = $this->refused($event, ['venue_id' => UrlUtils::encodeId($theirs->id), 'venue_submitted' => 1]);
+
+        $this->assertStringNotContainsString('private-room@gmail.com', $html);
+        $this->assertNull($this->pickedVenue($html));
+    }
+
+    public function test_an_ordinary_load_starts_on_the_stored_venue(): void
+    {
+        $venue = $this->createVenueWithAddress($this->owner, ['name' => 'Venue A']);
+        $event = $this->eventAt($venue);
+
+        $html = $this->actingAs($this->owner)->get($this->editUrl($event))->assertOk()->getContent();
+
+        $this->assertSame(UrlUtils::encodeId($venue->id), $this->pickedVenue($html));
+        $this->assertStringContainsString('savedVenueId: "'.UrlUtils::encodeId($venue->id).'",', $html);
+    }
+
     /**
      * Before the page's script runs a browser shows whatever is not hidden from it. The Save button
      * read "{{ galleryFinishingText }}Saving..." on every load: two of its three labels had no

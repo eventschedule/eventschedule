@@ -1,6 +1,6 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
         <title>Event Schedule Blog</title>
         <link>{{ route('blog.index') }}</link>
@@ -17,19 +17,20 @@
         </image>
         @foreach($posts as $post)
         <item>
-            <title>{{ htmlspecialchars($post->title, ENT_XML1, 'UTF-8') }}</title>
+            {{-- Blade's own escaping is XML-safe; wrapping it in htmlspecialchars() escaped every title twice. --}}
+            <title>{{ $post->title }}</title>
             <link>{{ route('blog.show', $post->slug) }}</link>
             <guid isPermaLink="true">{{ route('blog.show', $post->slug) }}</guid>
-            <description>{{ htmlspecialchars($post->excerpt, ENT_XML1, 'UTF-8') }}</description>
+            <description>{{ $post->excerpt }}</description>
             @if($post->published_at)
             <pubDate>{{ $post->published_at->toRssString() }}</pubDate>
             @endif
             @if($post->author_name)
-            <author>{{ htmlspecialchars($post->author_name, ENT_XML1, 'UTF-8') }}</author>
+            <dc:creator>{{ $post->author_name }}</dc:creator>
             @endif
             @if($post->tags)
             @foreach($post->tags as $tag)
-            <category>{{ htmlspecialchars($tag, ENT_XML1, 'UTF-8') }}</category>
+            <category>{{ $tag }}</category>
             @endforeach
             @endif
             <content:encoded><![CDATA[{!! str_replace(']]>', ']]]]><![CDATA[>', $post->renderedContent()) !!}]]></content:encoded>

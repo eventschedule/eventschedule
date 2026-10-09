@@ -411,7 +411,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * Mirrors RoleController::viewAdmin(): your own schedule always, somebody else's only while
      * it is Enterprise. Keys on roles.user_id exactly like viewAdmin() does.
      */
-    private function planAllowsTeamAccess(Role $role): bool
+    public function planAllowsTeamAccess(Role $role): bool
     {
         return (int) $this->id === (int) $role->user_id || $role->isEnterprise();
     }
@@ -780,7 +780,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isEditor($subdomain): bool
     {
-        return $this->editor()->where('subdomain', $subdomain)->exists();
+        $role = $this->editor()->where('subdomain', $subdomain)->first();
+
+        // One rule for pages and saves. On hosted a team belongs to the Enterprise plan, and the
+        // schedule's tab page already turned a team admin away after a downgrade while every save
+        // behind this check still went through.
+        return $role !== null && $this->planAllowsTeamAccess($role);
     }
 
     public function isViewer($subdomain): bool
@@ -827,24 +832,110 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function canEditEvent($event)
     {
-        if ($this->id == $event->user_id) {
+        $owning = $this->owningScheduleId($event);
+
+        if ($this->madeAndStillRuns($event, $owning)) {
             return true;
         }
 
         // Check if user has owner or admin role level for any role associated with this event
         // (not just any member - followers should not be able to edit)
         foreach ($event->roles as $role) {
+            // Listing an event is not running it. Any curator can put a public event on its own
+            // list (EventController::curate(), or by naming a schedule as a source), so a
+            // curator's link carries rights over the event only where the curator is the event's
+            // own schedule.
+            if ($role->isCurator() && (int) $role->id !== $owning) {
+                continue;
+            }
+
+            // A schedule that said no to the event has no say over it.
+            if ((int) $role->id !== $owning && self::declined($role)) {
+                continue;
+            }
+
             $pivot = $this->roles()
                 ->where('roles.id', $role->id)
                 ->wherePivotIn('level', ['owner', 'admin'])
                 ->first();
 
-            if ($pivot) {
+            if ($pivot && $this->planAllowsTeamAccess($role)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Whose event it is: whoever made it, or an owner or admin of the schedule that owns it.
+     *
+     * Narrower than canEditEvent(), which reaches the venue and the performers an event is on.
+     * Deleting an event, cancelling it (which can mail every buyer) and restoring it are for the
+     * event's own people; a schedule the event is merely on can take it off its own list.
+     */
+    public function runsEvent($event): bool
+    {
+        $owning = $this->owningScheduleId($event);
+
+        if ($this->madeAndStillRuns($event, $owning)) {
+            return true;
+        }
+
+        return $owning !== null && $this->runsSchedule($owning);
+    }
+
+    /**
+     * The schedule an event belongs to. An event from before events.creator_role_id has none on
+     * record, and the schedule it was first put on stands in for it.
+     */
+    /**
+     * Whether the schedule turned the event down. The link stays, at is_accepted = false, and
+     * EventRole does not cast that column: it comes back as 0, never as false, and null is
+     * "not answered yet", which is not a refusal.
+     */
+    private static function declined($role): bool
+    {
+        $answer = $role->pivot->is_accepted ?? null;
+
+        return $answer !== null && ! $answer;
+    }
+
+    /**
+     * "I made it" counts while the person is still one of the people who run the event's
+     * schedule. It used to count for good: somebody removed from a team went on editing the
+     * events they had made there, cancelling them with a note mailed to buyers, refunding sales
+     * and reading who bought. An event with no schedule of its own stays its maker's.
+     */
+    private function madeAndStillRuns($event, ?int $owning): bool
+    {
+        if ($this->id != $event->user_id) {
+            return false;
+        }
+
+        return $owning === null || $this->runsSchedule($owning);
+    }
+
+    /** An owner or admin of the schedule, on a plan that lets a team member act there. */
+    private function runsSchedule(int $roleId): bool
+    {
+        $role = $this->roles()
+            ->where('roles.id', $roleId)
+            ->wherePivotIn('level', ['owner', 'admin'])
+            ->first();
+
+        return $role !== null && $this->planAllowsTeamAccess($role);
+    }
+
+    private function owningScheduleId($event): ?int
+    {
+        if ($event->creator_role_id) {
+            return (int) $event->creator_role_id;
+        }
+
+        $first = \Illuminate\Support\Facades\DB::table('event_role')->where('event_id', $event->id)->orderBy('id')->value('role_id');
+
+        return $first ? (int) $first : null;
     }
 
     public function canScanEvent($event)
@@ -860,7 +951,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->wherePivot('level', 'viewer')
                 ->first();
 
-            if ($pivot) {
+            if ($pivot && $this->planAllowsTeamAccess($role)) {
                 return true;
             }
         }
@@ -899,11 +990,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     private function hasEventRoleAccess(Event $event, bool $skipUnownedCurators): bool
     {
-        if ($this->id == $event->user_id) {
+        if ($this->madeAndStillRuns($event, $this->owningScheduleId($event))) {
             return true;
         }
 
         foreach ($event->roles as $role) {
+            // A schedule that said no to the event sees nothing of it, its buyers least of all.
+            if ($event->creator_role_id != $role->id && self::declined($role)) {
+                continue;
+            }
+
             if ($role->isCurator() && $event->creator_role_id != $role->id) {
                 // Private data: a curator that only lists an event never owns the creator's money.
                 if ($skipUnownedCurators) {
@@ -927,7 +1023,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->wherePivotIn('level', ['owner', 'admin'])
                 ->first();
 
-            if ($pivot) {
+            if ($pivot && $this->planAllowsTeamAccess($role)) {
                 return true;
             }
         }

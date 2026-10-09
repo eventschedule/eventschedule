@@ -1119,12 +1119,22 @@
         </div>
     </section>
 
-    {{-- The 12 cards above each have a page behind them. These rows are the rest:
-         most have only a docs section, and a few link to the smaller pages built
-         since. Every row cites the gate it is really behind (docs/FEATURES.md),
-         because a list like this goes stale the moment a tier moves. Keep the
-         count a multiple of four so the lg:grid-cols-4 grid ends on a full row,
-         and keep the "N more things" sentence below in step with it. --}}
+    {{-- The 12 cards above each have a page behind them. These rows are the rest,
+         and every one of them links to a FEATURE page, never to the user guide:
+         a page of its own where it has one, otherwise the section of a feature
+         page that describes it, by an id that page carries for this list
+         (MarketingFeaturesSmallPrintTest fails the build on a row with no link,
+         a link into /docs, or an anchor its page does not have). A new row with
+         no home gets a section written for it first. Every row cites the gate it
+         is really behind (docs/FEATURES.md), because a list like this goes stale
+         the moment a tier moves. And the list is COMPLETE against that file: every
+         feature in its Free, Pro and Enterprise tables is a row here, or is named
+         in its plan's line under the list ($alsoAbove), or is left out for a reason
+         the same test writes down. Until 2026-10 the Enterprise button showed two
+         rows, with reserved seating, feeds, the AI generators and the scheduled
+         graphic email on neither this list nor a banner. Keep the count a multiple
+         of four so the lg:grid-cols-4 grid ends on a full row, and keep the
+         "N more things" sentence below in step with it. --}}
     @php
         $alsoIncluded = [
             ['Installment payments', 'Split a ticket over monthly charges, taken off the saved card', 'Pro', '/features/installments'],
@@ -1132,29 +1142,90 @@
             ['Promo codes', 'Percentage or fixed, with usage limits and an expiry date', 'Pro', '/features/promo-codes'],
             ['Free registration and RSVP', 'Sign-ups with no payment step, a cap per date and a QR code for the door', 'Free', '/features/registration'],
             ['Ticket waitlist', 'Notify people automatically when a sold-out type frees up', 'Pro', '/features/waitlist'],
-            ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free'],
-            ['Sales windows and group rates', 'Open and close each ticket type on a date, and discount bigger orders', 'Free'],
+            ['Multi-event cart', 'One checkout across several of your events, paid as a single amount', 'Free', '/features/ticketing#cart'],
+            ['Sales windows and group rates', 'Open and close each ticket type on a date, and discount bigger orders', 'Free', '/features/ticketing#types'],
             ['PayPal checkout', 'Buyers pay into your own PayPal account, multi-event cart included', 'Pro', '/paypal'],
-            ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Pro', '/docs/tickets#managing-sales'],
-            ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/docs/tickets#interest-list'],
-            ['Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/docs/tickets#wallet-passes'],
-            ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro'],
-            ['Eventbrite import', 'Bring an existing run of events across in one go', 'Pro'],
-            ['Event templates', 'Save an event you repeat and start the next one from it', 'Pro'],
-            ['Sales CSV export', 'Every sale across every schedule you own, custom fields included', 'Pro'],
-            ['Push notifications', 'Browser and mobile web push mirroring your email alerts', 'Pro'],
-            ['Agenda scanning', 'Photograph a running order and get the parts back as event parts', 'Enterprise'],
-            ['WhatsApp event creation', 'Message or photograph an event and it lands on the schedule', 'Enterprise'],
-            ['Event cloning', 'Duplicate any event as the starting point for the next one', 'Free'],
-            ['Live calendar and RSS feeds', 'Guests subscribe from Add to Calendar, and a moved date updates itself', 'Free', '/docs/sharing#calendar-feeds'],
-            ['Email sign-up', 'One field; a confirmed address gets your new-event digest and an account', 'Free', '/docs/newsletters#email-subscribers'],
-            ['Short links', 'Each schedule link gets a short address like /instagram, with clicks counted', 'Free', '/docs/creating-schedules#videos-links'],
-            ['Schedule transfer', 'Hand a schedule and its ticket revenue to another account', 'Free'],
-            ['Pages for the acts you list', 'Name an act or venue who is not here yet and they get a page to claim', 'Free', '/docs/creating-events#claim'],
-            ['The whole lineup', 'Every act you list shows on the event page, linked where it has a page', 'Free'],
-            ['Sponsor and partner logos', 'A tiered logo wall on your schedule page, for the people funding it', 'Pro'],
-            ['Venue logo wall', 'A header of the venues you play, or the acts you host, from your approved events', 'Free'],
-            ['Announcement banner', 'A banner of your own across the top of your schedule\'s public pages', 'Pro'],
+            ['Reserved seating', 'Draw the room once and buyers pick their own seats off the map', 'Enterprise', '/features/allocated-seating'],
+            ['Individual tickets', 'Every guest on an order gets their own email and their own QR code', 'Pro', '/features/ticketing#individual-tickets'],
+            ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Pro', '/features/ticketing#refunds'],
+            ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/features/ticketing#interest-list'],
+            ['Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/features/integrations#google-wallet'],
+            ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro', '/features/ticketing#attendee-import'],
+            ['Sales CSV export', 'Every sale across every schedule you own, custom fields included', 'Pro', '/features/ticketing#sales-export'],
+            ['Sale notification emails', 'An email each time a ticket sells, with the buyer, the type and the amount', 'Pro', '/features/ticketing#sale-notifications'],
+            ['Push notifications', 'Browser and mobile web push mirroring your email alerts', 'Pro', '/features/integrations#web-push'],
+            ['Eventbrite import', 'Bring an existing run of events across in one go', 'Pro', '/features/integrations#eventbrite'],
+            ['Import from a link', 'Paste your events page or a calendar address and up to 100 events come across', 'Free', '/features/ai#link-import'],
+            ['Feeds from other sites', 'A calendar, an RSS feed or an events page your schedule re-reads about once an hour', 'Enterprise', '/features/ai#feeds'],
+            ['Event templates', 'Save an event you repeat and start the next one from it', 'Pro', '/features/recurring-events#templates'],
+            ['Event cloning', 'Duplicate any event as the starting point for the next one', 'Free', '/features/recurring-events#clone'],
+            ['Agenda scanning', 'Photograph a running order and get the parts back as event parts', 'Enterprise', '/features/ai#agenda'],
+            ['WhatsApp event creation', 'Message or photograph an event and it lands on the schedule', 'Enterprise', '/features/ai#whatsapp'],
+            ['AI flyers and styles', 'A poster from the event details, or a whole look for your schedule, generated', 'Enterprise', '/features/ai#generate'],
+            ['AI-written descriptions', 'A category and a description for an event, or a description for the schedule', 'Enterprise', '/features/ai#generate'],
+            ['Scheduled graphic emails', 'Your events graphic emailed daily, weekly or monthly to the addresses you list', 'Enterprise', '/features/event-graphics#scheduled-email'],
+            ['Live calendar and RSS feeds', 'Guests subscribe from Add to Calendar, and a moved date updates itself', 'Free', '/features/calendar-sync#feed'],
+            ['Email sign-up', 'One field; a confirmed address gets your new-event digest and an account', 'Free', '/features/newsletters#list'],
+            ['Short links', 'Each schedule link gets a short address like /instagram, with clicks counted', 'Free', '/features/analytics#short-links'],
+            ['Schedule transfer', 'Hand a schedule and its ticket revenue to another account', 'Free', '/features/team-scheduling#transfer'],
+            ['Audit log', 'When, who and what, for every event, member, sale and check-in on a schedule', 'Free', '/features/team-scheduling#log'],
+            ['Pages for the acts you list', 'Name an act or venue who is not here yet and they get a page to claim', 'Free', '/features/lineup#pages'],
+            ['The whole lineup', 'Every act you list shows on the event page, linked where it has a page', 'Free', '/features/lineup#bill'],
+            ['Event sources for curators', 'Follow venue and act schedules and everything they publish lands on your guide', 'Free', '/features/lineup#sources'],
+            ['Venue logo wall', 'A header of the venues you play, or the acts you host, from your approved events', 'Free', '/features/lineup#wall'],
+            ['Sponsor and partner logos', 'A tiered logo wall on your schedule page, for the people funding it', 'Pro', '/features/lineup#sponsors'],
+            ['Photo gallery', 'Your own photos on an event page, with captions, credits and a full-screen view', 'Pro', '/features/fan-videos#gallery'],
+            ['Announcement banner', 'A banner of your own across the top of your schedule\'s public pages', 'Pro', '/features/white-label#banner'],
+            ['Nearby accommodation map', 'Lodging near the venue on your event pages, once the site operator switches it on', 'Free', '/features/integrations#accommodation-map'],
+        ];
+        // A plan's rows are only the part of it that has no section above, so pressing a plan
+        // used to answer "what is on Enterprise?" with two rows. These are the rest of each
+        // plan's answer: what first arrives on that plan and has a banner or a card further up,
+        // by the feature page behind it. The tier of every entry is its table in
+        // docs/FEATURES.md, and MarketingFeaturesSmallPrintTest holds the two together.
+        $alsoAbove = [
+            'Free' => [
+                ['Calendar sync', '/features/calendar-sync'],
+                ['Recurring events', '/features/recurring-events'],
+                ['Sub-schedules', '/features/sub-schedules'],
+                ['Online events', '/features/online-events'],
+                ['AI import', '/features/ai'],
+                ['Newsletters, 10 emails a month', '/features/newsletters'],
+                ['Event graphics', '/features/event-graphics'],
+                ['Fan videos and photos', '/features/fan-videos'],
+                ['Analytics', '/features/analytics'],
+                ['Booking requests', '/features/booking-requests'],
+                ['Embed calendar', '/features/embed-calendar'],
+                ['One appointment type', '/features/appointments'],
+                ['Ticket scanning at the door', '/features/check-in'],
+            ],
+            'Pro' => [
+                ['Paid tickets', '/features/ticketing'],
+                ['Passes', '/features/passes'],
+                ['Gift cards', '/features/gift-cards'],
+                ['Paid appointments', '/features/appointments'],
+                ['Custom fields', '/features/custom-fields'],
+                ['Event polls', '/features/polls'],
+                ['Post-event feedback', '/features/feedback'],
+                ['Boost', '/features/boost'],
+                ['White label', '/features/white-label'],
+                ['Custom CSS', '/features/custom-css'],
+                ['Custom labels', '/features/custom-labels'],
+                ['Embed tickets', '/features/embed-tickets'],
+                ['Carpool', '/features/carpool'],
+                ['Check-in dashboard', '/features/check-in'],
+                ['API and webhooks', '/features/integrations#block'],
+                ['Invoice Ninja', '/invoiceninja'],
+                ['100 newsletter emails a month', '/features/newsletters'],
+                ['Unlimited fan photos', '/features/fan-videos'],
+            ],
+            'Enterprise' => [
+                ['Custom domains', '/features/custom-domain'],
+                ['Team members', '/features/team-scheduling'],
+                ['Internal and unlisted events', '/features/private-events'],
+                ['Availability', '/features/availability'],
+                ['1,000 newsletter emails a month', '/features/newsletters'],
+            ],
         ];
         $alsoBadge = [
             'Free' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
@@ -1169,7 +1240,7 @@
                     And the small print, which is mostly good news
                 </h2>
                 <p class="mt-3 text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.08s;">
-                    Twenty-eight more things the app does, and the plan each one sits on.
+                    Forty more things the app does, and the plan each one sits on.
                 </p>
                 {{-- "What do I get for free?" is the question this list is read for, so it can be
                      asked of it. The buttons show the rows that carry that plan's badge; every row
@@ -1184,20 +1255,27 @@
             </div>
             <dl id="also-list" class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="35">
                 @foreach ($alsoIncluded as $alsoRow)
-                    @php [$alsoName, $alsoDesc, $alsoTier] = $alsoRow; $alsoPath = $alsoRow[3] ?? null; @endphp
+                    @php [$alsoName, $alsoDesc, $alsoTier, $alsoPath] = $alsoRow; @endphp
                     <div class="border-gray-200 ltr:border-l ltr:pl-4 rtl:border-r rtl:pr-4 dark:border-white/10" data-also-row="{{ $alsoTier }}" data-reveal>
                         <dt class="flex flex-wrap items-center gap-2">
-                            @if ($alsoPath)
-                                <a href="{{ marketing_url($alsoPath) }}" class="inline-flex min-h-[24px] items-center text-sm font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoName }}</a>
-                            @else
-                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $alsoName }}</span>
-                            @endif
+                            <a href="{{ marketing_url($alsoPath) }}" class="inline-flex min-h-[24px] items-center text-sm font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoName }}</a>
                             <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $alsoBadge[$alsoTier] }}">{{ $alsoTier }}</span>
                         </dt>
                         <dd class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $alsoDesc }}</dd>
                     </div>
                 @endforeach
             </dl>
+            {{-- Shown with a plan pressed, by the script below: the rest of that plan's answer. --}}
+            <div id="also-above" class="mx-auto mt-8 max-w-4xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400" hidden>
+                @foreach ($alsoAbove as $alsoAboveTier => $alsoAboveLinks)
+                    <p data-also-above="{{ $alsoAboveTier }}" hidden>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ $alsoAboveTier }} also brings these, each with a section of its own further up:</span>
+                        @foreach ($alsoAboveLinks as [$alsoAboveName, $alsoAbovePath])
+                            <a href="{{ marketing_url($alsoAbovePath) }}" class="font-semibold text-blue-700 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-600 dark:text-blue-400 dark:decoration-blue-500/50">{{ $alsoAboveName }}</a>{{ $loop->last ? '.' : ',' }}
+                        @endforeach
+                    </p>
+                @endforeach
+            </div>
             <p class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
                 Selfhosted installs resolve to the top tier, so every row above is included.
                 <a href="{{ marketing_url('/pricing#compare') }}" class="font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-400 dark:decoration-blue-500/50">See the full plan comparison</a>.
@@ -1269,6 +1347,8 @@
             if (!bar || !list) return;
             var pills = bar.querySelectorAll('[data-also-tier]');
             var rows = list.querySelectorAll('[data-also-row]');
+            var above = document.getElementById('also-above');
+            var aboveLines = above ? above.querySelectorAll('[data-also-above]') : [];
             bar.hidden = false;
             bar.addEventListener('click', function (e) {
                 var pill = e.target.closest ? e.target.closest('[data-also-tier]') : null;
@@ -1281,6 +1361,10 @@
                     // in later, in the middle of a list the reader just asked for.
                     row.classList.add('is-revealed');
                 });
+                if (above) {
+                    above.hidden = tier === '';
+                    aboveLines.forEach(function (line) { line.hidden = line.getAttribute('data-also-above') !== tier; });
+                }
             });
         })();
     </script>

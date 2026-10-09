@@ -147,6 +147,18 @@ class RoleUpdateRequest extends FormRequest
             'source_groups.*' => ['nullable', 'string', 'max:255'],
             'custom_domain' => [
                 'nullable', 'string', 'url', 'max:255',
+                // An address that parses to a plain host. The `url` rule also passes one with a
+                // quote in its path or a port that cannot exist, and Role::setCustomDomainAttribute()
+                // keeps such a value whole, because it cannot parse it to trim it.
+                function ($attribute, $value, $fail) {
+                    if (! $value) {
+                        return;
+                    }
+                    $host = is_string($value) ? parse_url($value, PHP_URL_HOST) : null;
+                    if (! is_string($host) || ! preg_match('/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/i', $host) || preg_match('/[\'"<>\\\\\s]/', $value)) {
+                        $fail(__('validation.url', ['attribute' => $attribute]));
+                    }
+                },
                 Rule::unique('roles', 'custom_domain')->ignore($role->id),
                 function ($attribute, $value, $fail) use ($role) {
                     if (! $value) {

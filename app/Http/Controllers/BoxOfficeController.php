@@ -162,10 +162,12 @@ class BoxOfficeController extends Controller
             ]);
 
             foreach ($rows as $row) {
+                // A buyer's own words go through the guard the other exports use: a cell that
+                // opens with =, +, - or @ is a formula to the spreadsheet that opens this file.
                 fputcsv($handle, [
-                    $row['section'], $row['row'], $row['seat'], $row['status'],
-                    $row['name'], $row['email'], $row['note'],
-                    $row['ticket'] ?? '',
+                    \App\Utils\CsvUtils::sanitizeCell($row['section']), \App\Utils\CsvUtils::sanitizeCell($row['row']), \App\Utils\CsvUtils::sanitizeCell($row['seat']), $row['status'],
+                    \App\Utils\CsvUtils::sanitizeCell($row['name']), \App\Utils\CsvUtils::sanitizeCell($row['email']), \App\Utils\CsvUtils::sanitizeCell($row['note']),
+                    \App\Utils\CsvUtils::sanitizeCell($row['ticket'] ?? ''),
                     ! empty($row['arrived']) ? __('messages.yes') : '',
                 ]);
             }

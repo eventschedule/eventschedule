@@ -663,13 +663,22 @@ class EventController extends Controller
         $currencies = json_decode($currencies);
 
         // Prepare curator data for cloned event
+        //
+        // Not the source's venue or its performers. The payload's "curators" is every schedule the
+        // source was on (Event::curators() has no type filter), and each one carried here is a
+        // ticked box under "Also list on". The venue reaches the copy through the venue field and
+        // the performers through the Participants tab, and those decide them: ticked here as
+        // well, a copy given another venue was saved at both, and showed whichever of the two the
+        // database returned first, and a performer removed from the copy stayed on it. Done here
+        // and not in EventRepo::buildClonePayload(), because a stored template holds the old
+        // payload and comes through this loop too.
         $clonedCurators = collect([]);
         $clonedCuratorGroups = [];
         if ($clonedData && isset($clonedData['curators'])) {
             foreach ($clonedData['curators'] as $curatorId) {
                 $curatorIdDecoded = UrlUtils::decodeId($curatorId);
                 $curator = Role::find($curatorIdDecoded);
-                if ($curator) {
+                if ($curator && ! $curator->isVenue() && ! $curator->isTalent()) {
                     $clonedCurators->push($curator);
                     if (isset($clonedData['curator_groups'][$curatorId])) {
                         $clonedCuratorGroups[$curatorId] = $clonedData['curator_groups'][$curatorId];
@@ -1788,6 +1797,17 @@ class EventController extends Controller
             if ($event->is_private && (! $isEventMemberOrAdmin || ! $event->roles->contains('id', $role->id))) {
                 abort(404);
             }
+        }
+
+        // Only a curator lists somebody else's event. A venue and a performer are put on an event
+        // by the event's own people, in its form: attached here, any schedule could name itself
+        // the venue or a performer of a stranger's event, and be treated as one from then on.
+        if (! $role->isCurator()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+            }
+
+            return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         // Check if the user is authorized to curate events for this role
@@ -3150,6 +3170,15 @@ class EventController extends Controller
                     ]);
                 }
 
+                // An account with two-factor signs in on the sign-in page, which asks for its code.
+                // Signed in here, the password alone was enough for a full session.
+                if (auth()->user()->hasTwoFactorEnabled()) {
+                    Auth::guard('web')->logout();
+                    throw ValidationException::withMessages([
+                        'account_password' => [__('messages.two_factor_sign_in_first')],
+                    ]);
+                }
+
                 RateLimiter::clear($throttleKey);
 
                 $user = auth()->user();
@@ -4074,6 +4103,12 @@ class EventController extends Controller
     {
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
+        // The schedule's own editors. Any signed-in account could post here, to any schedule's
+        // address, and the file is kept on the server.
+        if (! $request->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
         $file = $request->file('image');

@@ -234,6 +234,28 @@ class AdminDashboardPageTest extends TestCase
     }
 
     /**
+     * The page says how long each card took, in a Server-Timing header. Production's database
+     * cannot be reached from a developer's machine, so the browser's network panel is where a
+     * slow card is found: the first production run of this page took longer than the request was
+     * allowed, and nothing said which card. Mutation: build a card outside card(), or drop the
+     * header.
+     */
+    public function test_the_page_says_how_long_each_card_took(): void
+    {
+        config(['app.hosted' => true, 'app.is_nexus' => true]);
+        $this->seedSomething();
+
+        $header = (string) $this->page()->headers->get('Server-Timing');
+
+        foreach (['signups', 'active', 'revenue', 'events', 'federation', 'schedules', 'recentEvents', 'system', 'alerts', 'realtime'] as $name) {
+            $this->assertMatchesRegularExpression('/(^|, )'.$name.';dur=\d+(\.\d+)?(,|$)/', $header, $name);
+        }
+
+        // Invented data is not timed: nothing was read to make it.
+        $this->assertFalse($this->page('?sample=1')->headers->has('Server-Timing'));
+    }
+
+    /**
      * A card whose query failed costs that card and nothing else: build() reports it and hands
      * the page null in its place. Every card in turn, on the install that has all of them, so a
      * partial that reads a figure without asking whether its card is there fails here.

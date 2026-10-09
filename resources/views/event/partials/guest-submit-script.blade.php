@@ -1235,5 +1235,5 @@
         },
     });
 
-    window.__submitApp = app.mount('#event-submit-app');
+    window.__submitApp = app.mount('#event-submit-app[data-vue-root]');
   </script>

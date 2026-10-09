@@ -15,6 +15,14 @@ class UserEmailVerificationRequest extends FormRequest
      */
     public function authorize()
     {
+        // The link is proof that the mail arrived only if nobody else could have written it, and the
+        // id and the hash of the address are both known to the account itself. Signed by path, so
+        // a proxy or a second host in front of the app cannot make a good link look forged; the
+        // whole-address form is what mail sent before this check carries.
+        if (! $this->hasValidRelativeSignature() && ! $this->hasValidSignature()) {
+            return false;
+        }
+
         if (! hash_equals((string) $this->user()->getKey(), (string) $this->route('id'))) {
             return false;
         }
@@ -24,6 +32,14 @@ class UserEmailVerificationRequest extends FormRequest
         }
 
         return true;
+    }
+
+    /**
+     * A link that is too old, or not the one that was mailed: the page that offers a new one.
+     */
+    protected function failedAuthorization()
+    {
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(redirect()->route('verification.notice'));
     }
 
     /**

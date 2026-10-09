@@ -1605,34 +1605,64 @@ class UrlUtils
         return true;
     }
 
+    /**
+     * Turn the addresses written in a piece of sanitized HTML into links.
+     *
+     * Only what is TEXT is linked. This runs over HTML the sanitizer has already passed, and an
+     * address inside a tag (an image's alt text, a title) is part of an attribute: wrapped in a
+     * link there, the link's own quotes ended the attribute and the rest of the tag was read as
+     * markup nobody had sanitized. So the HTML is walked tag by tag, and a tag is never touched.
+     */
     public static function convertUrlsToLinks($text)
     {
-        // Regex pattern to find <a> tags OR standalone URLs
-        // Group 1: Matches <a> tags (to be ignored)
-        // Group 2: Matches URLs (to be converted)
-        $pattern = '/(<a[^>]*>.*?<\/a>)|(?<![=\'"])\b(https?|ftp):\/\/([^\s<]+)/i';
+        if (! is_string($text) || $text === '') {
+            return (string) $text;
+        }
 
-        return preg_replace_callback($pattern, function ($matches) {
-            // If the first group is matched, it means we found an <a> tag.
-            // Return it as-is without changes.
-            if (! empty($matches[1])) {
-                return $matches[1];
+        $parts = preg_split('/(<[^>]*>)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+        if ($parts === false) {
+            return $text;
+        }
+
+        $insideLink = 0;
+        $html = '';
+
+        foreach ($parts as $index => $part) {
+            // Odd entries are the tags the split kept.
+            if ($index % 2 === 1) {
+                if (preg_match('/^<a[\s>]/i', $part)) {
+                    $insideLink++;
+                } elseif (preg_match('/^<\/a\s*>/i', $part)) {
+                    $insideLink = max(0, $insideLink - 1);
+                }
+
+                $html .= $part;
+
+                continue;
             }
 
-            // Otherwise, it's a standalone URL. Wrap it in an <a> tag.
+            // Text that is already a link's own is left as it is.
+            $html .= $insideLink > 0 ? $part : self::linkAddressesInText($part);
+        }
+
+        return $html;
+    }
+
+    private static function linkAddressesInText(string $text): string
+    {
+        if ($text === '') {
+            return $text;
+        }
+
+        return preg_replace_callback('/(?<![=\'"])\b(https?|ftp):\/\/([^\s<]+)/i', function ($matches) {
             $url = $matches[0];
-
-            // Block javascript: and data: URLs to prevent XSS
-            $lowerUrl = strtolower(trim($url));
-            if (str_starts_with($lowerUrl, 'javascript:') || str_starts_with($lowerUrl, 'data:')) {
-                return htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
-            }
 
             // Escape URL for safe HTML attribute and display
             $escapedUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
 
             return '<a href="'.$escapedUrl.'" target="_blank" rel="noopener noreferrer nofollow" class="text-blue-600 dark:text-blue-400 hover:underline">'.$escapedUrl.'</a>';
-        }, $text);
+        }, $text) ?? $text;
     }
 
     public static function getUrlMetadata($url)

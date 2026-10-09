@@ -821,7 +821,8 @@
             </div>
 
             {{-- Two by two: three that cross and the one that does not. Four cards in three
-                 columns would leave the last row a third full. --}}
+                 columns would leave the last row a third full. The fifth is not a fourth input:
+                 it is the link again, kept in sync, so it spans the row under them. --}}
             <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="90">
                 <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
                     <span class="es-spark-num mb-4">IN</span>
@@ -845,11 +846,11 @@
                     </div>
                 </div>
 
-                <div class="es-spark-card flex h-full flex-col p-7" data-reveal="panel">
+                <div id="link-import" class="es-spark-card flex h-full scroll-mt-24 flex-col p-7" data-reveal="panel">
                     <span class="es-spark-num mb-4">IN</span>
                     <h3 class="es-spark-ink mb-3 text-xl font-bold">A link to where they are listed</h3>
                     <p class="es-spark-muted mb-5">Paste the address of your events page or of a calendar and the import opens it for you. A calendar feed is read as written, repeating events included. A page that publishes its events as data is read from that data. Neither one uses AI. Any other page has its text read by the parser, exactly as if you had pasted it yourself.</p>
-                    <p class="es-spark-muted mb-5 text-sm">It is a one-time copy, not a subscription: read the link again to pick up what was added since. Links are read on your own import screen, not on the public submission form.</p>
+                    <p class="es-spark-muted mb-5 text-sm">It is a one-time copy, not a subscription: read the link again to pick up what was added since. The subscription is a feed, below. Links are read on your own import screen, not on the public submission form.</p>
                     <div class="mt-auto flex flex-wrap gap-2">
                         <span class="es-spark-chip">Calendar feed</span>
                         <span class="es-spark-chip">Events page</span>
@@ -864,6 +865,25 @@
                     <p class="es-spark-muted mt-auto text-sm">
                         Reading a link is something you do, once. A <a href="{{ marketing_url('/selfhost') }}" class="es-spark-link font-semibold hover:underline">selfhosted install</a> can also be given a list of source pages and cities and swept once a day by the import command. That runs on your own server with your own keys, so it is not part of the hosted service.
                     </p>
+                </div>
+
+                <div id="feeds" class="es-spark-card scroll-mt-24 p-7 sm:col-span-2" data-reveal="panel">
+                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-12">
+                        <div>
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <span class="es-spark-num">KEPT IN</span>
+                                <span class="es-spark-plan">Enterprise</span>
+                            </div>
+                            <h3 class="es-spark-ink mb-3 text-xl font-bold">A link it goes on reading</h3>
+                            <p class="es-spark-muted">A feed is the standing version of that link: an address your schedule reads again about once an hour. New events arrive on their own, a change at the source is copied to the event here, and anything you edited yourself stays as you left it.</p>
+                        </div>
+                        <ul class="es-spark-muted space-y-3 text-sm">
+                            <li>A calendar address, including a Google or Outlook calendar's public link, an RSS, Atom or JSON feed, or a page that carries its events as data. No AI reads a feed, so a read costs nothing against your allowance.</li>
+                            <li>New events are published as they arrive, or held as drafts for you to look over first.</li>
+                            <li>When an event leaves the feed you decide what happens here: leave it, mark it cancelled or remove it. An event people have signed up for is never changed without you.</li>
+                            <li>Up to ten feeds on a schedule, on the Enterprise plan. A selfhosted install has them.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

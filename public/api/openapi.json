@@ -1503,7 +1503,7 @@
         "operationId": "delete_event",
         "tags": ["Events"],
         "summary": "Delete an event",
-        "description": "Permanently deletes an event. The authenticated user must have permission to edit the event. An event that has sales is not deleted: cancel it with POST /events/{id}/cancel instead.",
+        "description": "Permanently deletes an event. Only the person who made the event, or an owner or admin of the schedule that owns it, can: a schedule that only lists the event gets a 403. An event that has sales is not deleted: cancel it with POST /events/{id}/cancel instead.",
         "parameters": [
           {
             "name": "id",

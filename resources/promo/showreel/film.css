@@ -1,0 +1,319 @@
+/* Plan, promote, sell: every colour the film paints lives in the tokens below (or in F.T in
+   js/rig.js, for what code paints at runtime), so the dark cut is one override block and never a
+   fork. The values are the homepage's own (#hp in resources/views/marketing/index.blade.php). */
+@font-face{font-family:"RHD";src:url("fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg_T6hR4jNCA.woff2") format("woff2");font-weight:300 900;font-display:block;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"RHD";src:url("fonts/8vIQ7wUr0m80wwYf0QCXZzYzUoTg8z6hR4jNCH5Z.woff2") format("woff2");font-weight:300 900;font-display:block;
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"InterV";src:url("fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-display:block}
+
+/* ten of the app's bundled display faces, for the posters other schedules have put up */
+@font-face{font-family:"P0";src:url("fonts/p/Anton.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P1";src:url("fonts/p/Abril_Fatface.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P2";src:url("fonts/p/Bebas_Neue.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P3";src:url("fonts/p/Playfair_Display.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P4";src:url("fonts/p/Righteous.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P5";src:url("fonts/p/Alfa_Slab_One.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P6";src:url("fonts/p/Pacifico.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P7";src:url("fonts/p/DM_Serif_Display.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P8";src:url("fonts/p/Oswald.woff2") format("woff2");font-weight:400 700;font-display:block}
+@font-face{font-family:"P9";src:url("fonts/p/Fredoka_One.woff2") format("woff2");font-weight:400 700;font-display:block}
+
+:root{
+  /* light cut: cool paper and navy */
+  --wall:#f4f6fb;--floor:#e6ebf5;--floor2:#dfe5f1;--cove:#e9edf6;
+  --paper:#ffffff;--paper2:#f4f6fb;--paper-back:#eef1f8;
+  --ink:#0a1020;--ink2:#36405a;--ink3:#56617c;
+  --line:rgba(10,16,32,.1);--line2:rgba(10,16,32,.17);
+  --blue:#2f66ea;
+  --grad:linear-gradient(100deg,#2f66ea 0%,#0b8fd8 55%,#0aa5c4 100%);
+  --key:radial-gradient(1180px 660px at 50% -6%,rgba(78,129,250,.2),transparent 70%),radial-gradient(700px 520px at 6% 34%,rgba(34,211,238,.14),transparent 70%),radial-gradient(700px 520px at 94% 38%,rgba(14,165,233,.13),transparent 70%);
+  --pool:radial-gradient(1000px 440px at 50% 24%,rgba(255,255,255,.95),rgba(255,255,255,0) 72%);
+  --card-shadow:0 1px 2px rgba(10,16,32,.05),0 18px 40px -22px rgba(10,16,32,.28);
+  --pop-shadow:0 2px 4px rgba(10,16,32,.06),0 28px 60px -24px rgba(10,16,32,.4);
+  --blank-bg:linear-gradient(160deg,#ffffff,#eaf0ff);--blank-ink:#2f66ea;--blank-edge:rgba(47,102,234,.8);--edge-blank:#b4c6f4;
+  --tile-dim:#dfe5f2;
+  --veil-a:rgba(244,246,251,.96);--veil-b:rgba(244,246,251,.86);
+  --flash-c:#2f66ea;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --font:"RHD","InterV",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",sans-serif;
+  --page:#e3e8f2;--chrome:rgba(10,16,32,.06);--chrome-hover:rgba(10,16,32,.12);--frame-shadow:0 30px 80px rgba(30,58,138,.18),0 0 0 1px rgba(10,16,32,.06);
+  --vig:radial-gradient(ellipse 80% 75% at 50% 46%,transparent 60%,rgba(30,58,138,.07) 100%);
+  --grain:.035;
+  /* one night for both cuts: the lights go down, and the room's own lights are what is bright */
+  --night-wall:radial-gradient(1300px 620px at 54% 4%,rgba(47,102,234,.3),transparent 72%),radial-gradient(900px 500px at 8% 96%,rgba(34,211,238,.1),transparent 70%),#04060f;
+  --night-floor:linear-gradient(to bottom,#070b1e 0,#04060f 240px,#02040a 100%);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --wall:#070a14;--floor:#0a0f1c;--floor2:#060912;--cove:#080c18;
+  --paper:#131a2e;--paper2:#0e1424;--paper-back:#1a2238;
+  --ink:#eef2ff;--ink2:#c5cde2;--ink3:#97a3c0;
+  --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.17);
+  --blue:#8db0ff;
+  --grad:linear-gradient(100deg,#7da5ff 0%,#38bdf8 55%,#5eead4 100%);
+  --key:radial-gradient(1180px 660px at 50% -6%,rgba(78,129,250,.34),transparent 70%),radial-gradient(700px 520px at 6% 34%,rgba(34,211,238,.14),transparent 70%),radial-gradient(700px 520px at 94% 38%,rgba(14,165,233,.16),transparent 70%);
+  --pool:radial-gradient(1000px 440px at 50% 24%,rgba(78,129,250,.2),rgba(78,129,250,0) 72%);
+  --card-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 50px -26px rgba(0,0,0,.9);
+  --pop-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 30px 70px -24px rgba(0,0,0,.95);
+  --blank-bg:linear-gradient(160deg,#1c2a5e,#131d45);--blank-ink:#a9c3ff;--blank-edge:rgba(141,176,255,.85);--edge-blank:#1c2850;
+  --tile-dim:#1b2440;
+  --veil-a:rgba(7,10,20,.94);--veil-b:rgba(7,10,20,.82);
+  --flash-c:#dbe8ff;
+  --page:#03050b;--chrome:rgba(255,255,255,.06);--chrome-hover:rgba(255,255,255,.12);--frame-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);
+  --vig:radial-gradient(ellipse 80% 75% at 50% 46%,transparent 55%,rgba(0,0,0,.5) 100%);
+  --grain:.05;
+  color-scheme:dark;
+}
+/* What is lettered or carded on the set takes the night's inks while the lights are down. */
+#stage.night{--paper:#0e1530;--paper2:#0a1026;--ink:#eef2ff;--ink2:#c5cde2;--ink3:#9fb1d6;--line:rgba(255,255,255,.1);--line2:rgba(255,255,255,.2);--blue:#8db0ff;
+  --tile-dim:#111a3a;--grad:linear-gradient(100deg,#7da5ff 0%,#38bdf8 55%,#67e8f9 100%);--flash-c:#dbe8ff;
+  --card-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 50px -26px rgba(0,0,0,.9);--pop-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 30px 70px -24px rgba(0,0,0,.95)}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow:hidden}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding-inline:16px;padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px))}
+#frame{position:relative;width:min(100%,calc((100dvh - 110px)*16/9));aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:var(--wall);box-shadow:var(--frame-shadow)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--wall);contain:strict;perspective:2400px;perspective-origin:960px 520px}
+body.render #app{padding:0;gap:0}
+body.render #frame{width:100vw;height:100vh;border-radius:0;box-shadow:none}
+body.render #bar{display:none}
+
+/* player chrome */
+#bar{width:min(100%,calc((100dvh - 110px)*16/9));display:flex;align-items:center;gap:12px;color:var(--ink2);font-size:13px;font-variant-numeric:tabular-nums}
+#bar button{appearance:none;border:0;background:var(--chrome);color:var(--ink);width:38px;height:38px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none;transition:background .2s}
+#bar button:hover{background:var(--chrome-hover)}
+#bar button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#bar button[aria-pressed="true"]{color:var(--blue)}
+#bar svg{width:18px;height:18px}
+#scrub{flex:1;min-width:0;accent-color:var(--blue);height:4px}
+#tc{flex:none;min-width:92px;text-align:right}
+@media (max-width:520px){#tc{min-width:0;font-size:12px}#loop{display:none}}
+
+/* ---------- the set ----------
+   A wall and a floor in real perspective. Only transforms may sit on the nodes that carry 3D
+   children (#world, #props, a sheet's hinges): overflow, filter, opacity, clip-path and mask on
+   such a node flatten everything under it. Those belong on leaves. */
+.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.a{position:absolute;left:0;top:0}
+canvas.full{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+#world,#props{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+#wall{position:absolute;left:-900px;top:-700px;width:3720px;height:1490px;transform:translateZ(-260px);transform-style:preserve-3d}
+#wallbg{position:absolute;inset:0;background:var(--wall)}
+#wallbg::before{content:"";position:absolute;inset:0;background:var(--key)}
+/* Seven columns, as behind the homepage's headline: the month in js/film.js stands on them. */
+#wallbg::after{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line) 1.5px,transparent 1.5px),linear-gradient(90deg,var(--line) 1.5px,transparent 1.5px);
+  background-size:264px 132px;background-position:936px 38px;
+  -webkit-mask-image:radial-gradient(ellipse 1300px 700px at 1860px 1000px,#000 16%,transparent 78%);mask-image:radial-gradient(ellipse 1300px 700px at 1860px 1000px,#000 16%,transparent 78%)}
+#wallcove{position:absolute;left:0;right:0;bottom:0;height:220px;background:linear-gradient(to top,var(--cove),transparent)}
+#wallfx{position:absolute;left:700px;top:400px;width:2320px;height:1090px}
+#wallo{position:absolute;left:900px;top:700px;width:0;height:0;transform-style:preserve-3d}
+#floor{position:absolute;left:0;top:0;width:0;height:0;transform:translate3d(0,790px,0) rotateX(90deg);transform-style:preserve-3d}
+#floor .pl{position:absolute;left:-1500px;top:-260px;width:4920px;height:1500px;
+  background:var(--pool),linear-gradient(to bottom,var(--cove) 0,var(--floor) 200px,var(--floor2) 100%)}
+#floor .pl::after{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(90deg,var(--line) 1.5px,transparent 1.5px);background-size:264px 100%;background-position:1536px 0;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0,transparent 520px);mask-image:linear-gradient(to bottom,#000 0,transparent 520px)}
+#floorfx{position:absolute;left:-400px;top:-260px;width:2720px;height:1100px}
+#flooro{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+/* the night ground, laid over the day's for the door and the room */
+#nightwall,#nightfloor{position:absolute;inset:0;opacity:0;pointer-events:none}
+#nightwall{background:var(--night-wall)}
+#nightfloor{background:var(--night-floor)}
+#beams{position:absolute;left:900px;top:560px;width:1920px;height:940px;opacity:0;transform-origin:50% 0;pointer-events:none;
+  background:conic-gradient(from 0deg at 62% -6%,transparent 150deg,rgba(103,232,249,.26) 163deg,transparent 172deg,rgba(125,165,255,.4) 180deg,transparent 188deg,rgba(103,232,249,.24) 197deg,transparent 210deg);
+  -webkit-mask-image:linear-gradient(to bottom,#000 30%,transparent 92%);mask-image:linear-gradient(to bottom,#000 30%,transparent 92%)}
+#grain{mix-blend-mode:overlay;opacity:var(--grain)}
+#vig{position:absolute;inset:0;pointer-events:none;background:var(--vig)}
+#flash{position:absolute;inset:0;background:var(--flash-c);opacity:0;pointer-events:none}
+.gtext{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+/* a line that rises into place from behind its own edge */
+.sm{overflow:hidden;padding:0 30px 14px 6px;margin:0 -30px -14px -6px}
+
+/* ---------- paper ----------
+   A sheet is a chain of strips, each hinged to the one below it. .pg is a hinge (transform only),
+   .ps a strip's front, .pe its edge, .pb its back. The faces inside a strip are whole sheets,
+   shifted so the strip shows its own slice. */
+.paper,.pg{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+.ps,.pb{position:absolute;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pb{background:var(--paper-back)}
+.pe{position:absolute;background:var(--edge,#b9c8ee)}
+.ps .sh,.pb .sh{position:absolute;inset:0;pointer-events:none}
+.face{position:absolute;left:0;overflow:hidden}
+
+/* the poster: the homepage's .hp-mine, blank and named */
+.hero .face{width:330px;height:440px;border-radius:22px;padding:26px 26px 24px;text-transform:uppercase}
+.hero .ft i{font-style:normal}
+.hero .ft{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.14em;white-space:nowrap}
+.hero .fn{position:absolute;left:24px;right:14px;bottom:70px;font-size:74px;font-weight:880;letter-spacing:-.045em;line-height:.93}
+.hero .ff{position:absolute;left:26px;right:20px;bottom:25px;font-family:var(--mono);font-size:13.5px;font-weight:600;letter-spacing:0;text-transform:none;white-space:nowrap}
+.hero .f-blank{background:var(--blank-bg);color:var(--blank-ink)}
+.hero .f-blank::after{content:"";position:absolute;inset:0;border:3px dashed var(--blank-edge);border-radius:22px}
+.hero .f-blank .fn{opacity:.78}
+/* The name fills the sheet from its foot, a notch a letter, with a line of light at the level. */
+.hero .f-named{color:#fff;-webkit-clip-path:inset(calc(100% - var(--fill,100%)) 0 0 0);clip-path:inset(calc(100% - var(--fill,100%)) 0 0 0)}
+.hero .wave{position:absolute;left:0;right:0;top:calc(100% - var(--fill,100%));height:5px;margin-top:-2px;background:#e3fbff;box-shadow:0 0 16px 5px rgba(34,211,238,.95),0 0 54px 18px rgba(34,211,238,.45);opacity:var(--wave,0)}
+.hero .f-named::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(255,255,255,.26),rgba(255,255,255,0) 38%);pointer-events:none}
+.hero .f-named::after{content:"";position:absolute;inset:0;border-radius:22px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28);pointer-events:none}
+.hero .f-jazz{background:linear-gradient(150deg,#2b5fe3 0%,#0b8fd8 55%,#22d3ee 100%)}
+.hero .f-comedy{background:radial-gradient(260px 200px at 78% 12%,rgba(255,196,107,.5),rgba(255,196,107,0) 70%),linear-gradient(165deg,#2a160c 0%,#1a0f0a 60%,#120904 100%);color:#ffc46b}
+.hero .f-comedy .ft{color:#fff5e6}
+.hero .f-yoga{background:linear-gradient(165deg,#0b4f6c 0%,#0e7490 45%,#22d3ee 100%)}
+.hero .f-yoga .fn{font-weight:520;letter-spacing:-.01em;line-height:.98}
+.hero .f-fest{background:linear-gradient(172deg,#0ea5e9 0%,#38bdf8 46%,#bae6fd 78%,#fde68a 100%);color:#0a1020}
+.hero .f-fest .sun{position:absolute;right:-46px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fde68a,#f59e0b 62%,#d97706)}
+.hero .f-fest::after{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
+/* a gig is written on it: who presents, what, when */
+.hero .f-gig{-webkit-clip-path:none;clip-path:none}
+.hero .f-gig .ft{justify-content:flex-start}
+.hero .f-gig .fn{bottom:86px}
+.hero .fw{position:absolute;left:26px;right:16px;bottom:30px;font-size:23px;font-weight:760;letter-spacing:.02em;white-space:nowrap}
+/* the reading beam, and what it finds: drawn on the sheet, so they bend with it */
+.hero .scan{position:absolute;left:0;right:0;top:0;height:var(--scan,0%);background:linear-gradient(180deg,rgba(103,232,249,0),rgba(103,232,249,.22));opacity:var(--scan-o,0);pointer-events:none}
+.hero .scan::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:6px;background:#d9fbff;box-shadow:0 0 18px 5px rgba(34,211,238,.95),0 0 60px 20px rgba(34,211,238,.4)}
+.hero .sbox{position:absolute;border-radius:12px;box-shadow:0 0 0 3px #a5f3fc,0 0 26px rgba(34,211,238,.6);background:rgba(165,243,252,.14);pointer-events:none}
+.hero .sb1{left:14px;top:12px;width:270px;height:42px;opacity:var(--b1,0)}
+.hero .sb2{left:14px;top:198px;width:250px;height:152px;opacity:var(--b2,0)}
+.hero .sb3{left:14px;top:366px;width:290px;height:48px;opacity:var(--b3,0)}
+
+/* ---------- on the wall ---------- */
+/* the address, lettered (not a field: on the homepage the whole picture is a link) */
+.addr{position:absolute;left:0;top:0;font-family:var(--mono);white-space:nowrap}
+.addr .a1{font-size:100px;font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--blue)}
+.addr .a2{font-size:57px;font-weight:600;line-height:1.3;color:var(--ink3)}
+.addr .a1>span{display:inline-block}
+.addr .ph{color:var(--ink3);opacity:.5}
+.addr .caret{display:inline-block;width:0;height:0;position:relative}
+.addr .caret::after{content:"";position:absolute;left:-2px;top:-86px;width:8px;height:104px;border-radius:4px;background:var(--blue)}
+/* the month, and what is on it */
+.mhead{position:absolute;left:0;top:0;width:264px;padding-left:18px;font-size:20px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+.mcell{position:absolute;left:0;top:0;width:264px;height:132px}
+.mcell u{position:absolute;left:18px;top:12px;font-size:25px;font-weight:720;text-decoration:none;color:var(--ink3);font-variant-numeric:tabular-nums}
+.mcell.dim u{opacity:.4}
+.wchip{position:absolute;left:0;top:0;display:flex;align-items:center;gap:11px;height:56px;padding:0 19px 0 16px;border-radius:16px;background:var(--paper);box-shadow:0 0 0 1.5px var(--line),var(--pop-shadow);font-size:26px;font-weight:740;white-space:nowrap;color:var(--ink);transform-origin:50% 0}
+.wchip i{width:13px;height:13px;border-radius:50%;background:var(--c,#2f66ea);flex:none}
+.mcell .wchip{left:14px;top:68px;height:50px;padding:0 15px 0 13px;font-size:22px;max-width:238px;overflow:hidden;transform-origin:0 50%}
+/* whose it is, large beside it */
+.castw{position:absolute;left:70px;top:250px;white-space:nowrap}
+.castw small{display:block;font-size:64px;font-weight:700;letter-spacing:-.03em;color:var(--ink2);margin-bottom:6px}
+.castw div{font-size:168px;font-weight:860;letter-spacing:-.05em;line-height:.98}
+/* the stamp is the hit of the film: solid, so it reads over anything behind it */
+.stamp{position:absolute;left:0;top:0;width:320px;height:320px;border-radius:50%;display:grid;place-content:center;text-align:center;text-transform:uppercase;color:#fff;
+  background:linear-gradient(135deg,#2b5fe3 0%,#0b8fd8 62%,#22d3ee 110%);box-shadow:inset 0 0 0 6px rgba(255,255,255,.9),0 0 0 9px rgba(47,102,234,.9),0 34px 70px -22px rgba(30,70,200,.75)}
+.stamp b{display:block;font-size:132px;font-weight:880;letter-spacing:-.05em;line-height:.9}
+.stamp span{display:block;margin-top:8px;font-family:var(--mono);font-size:23px;font-weight:700;letter-spacing:.14em;line-height:1.25}
+/* the count, above the room (only ever seen at night) */
+.count{position:absolute;left:0;top:0;text-align:center;white-space:nowrap}
+.count b{display:block;font-size:186px;font-weight:880;letter-spacing:-.05em;line-height:.86;color:#67e8f9;text-shadow:0 0 44px rgba(34,211,238,.55);font-variant-numeric:tabular-nums}
+.count span{display:block;margin-top:6px;font-size:42px;font-weight:620;letter-spacing:-.012em;color:#c5cde2}
+/* everyone else's posters */
+.wp{position:absolute;left:0;top:0;width:230px;height:306px;border-radius:16px;overflow:hidden;box-shadow:0 22px 46px -22px rgba(10,16,32,.6);color:#fff;text-transform:uppercase}
+.wp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wp .sh2{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,14,.9) 8%,rgba(10,8,14,.15) 60%,rgba(10,8,14,.5))}
+.wp .k{position:absolute;left:18px;right:14px;top:18px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;white-space:nowrap}
+.wp .n{position:absolute;left:16px;right:10px;bottom:46px;line-height:.92;letter-spacing:-.02em}
+.wp .d{position:absolute;left:18px;bottom:18px;font-size:13px;font-weight:760;letter-spacing:.04em;white-space:nowrap}
+.wp.mine{overflow:visible;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 26px 60px -18px rgba(47,102,234,.9),0 0 70px -6px rgba(34,211,238,.7)}
+.wp.mine .face{position:absolute;left:0;top:0;transform:scale(.697);transform-origin:0 0}
+
+/* ---------- props: one drawing for all of them (paper cards, a hairline, a long soft shadow) ---------- */
+.prop{position:absolute;left:0;top:0;transform-origin:50% 100%}
+.ecard{position:absolute;left:0;top:0;width:430px;height:392px;border-radius:26px;padding:30px 30px 0;background:var(--paper);box-shadow:0 0 0 1.5px var(--line),var(--pop-shadow);transform-origin:50% 100%}
+.ecard .ek,.slots .ek,.chart .ek{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.ecard .ek::before,.slots .ek::before,.chart .ek::before{content:"";width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#4e81fa,#22d3ee)}
+.slots .ek,.chart .ek{margin-bottom:18px}
+.ecard h4{margin:12px 0 22px;font-size:50px;font-weight:840;letter-spacing:-.04em;line-height:1;color:var(--ink);white-space:nowrap}
+.ecard .er{display:flex;align-items:center;height:62px;margin-bottom:12px;padding:0 20px;border-radius:14px;background:var(--paper2);box-shadow:inset 0 0 0 1.5px var(--line);font-size:27px;font-weight:680;color:var(--ink);white-space:nowrap;overflow:hidden}
+.ecard .er span{display:inline-block}
+.fly{position:absolute;left:0;top:0;padding:10px 18px;border-radius:14px;background:var(--paper);box-shadow:0 0 0 2.5px #22d3ee,var(--pop-shadow);font-size:27px;font-weight:740;color:var(--ink);white-space:nowrap}
+.slots{width:400px;height:356px;border-radius:26px;padding:28px 28px 0;background:var(--paper);box-shadow:0 0 0 1.5px var(--line),var(--pop-shadow)}
+.slots .sl{position:relative;height:72px;margin-bottom:14px;border-radius:16px;background:var(--paper2);box-shadow:inset 0 0 0 1.5px var(--line);font-size:32px;font-weight:740;line-height:72px;text-align:center;color:var(--ink);overflow:hidden}
+.slots .sl i{position:absolute;inset:0;background:linear-gradient(100deg,#2b5fe3,#2f6fe9);opacity:var(--pick,0)}
+.slots .sl span{position:relative}
+.slots .sl.pk{color:color-mix(in srgb,#fff calc(var(--pick,0)*100%),var(--ink))}
+.chart{width:440px;height:392px;border-radius:26px;padding:28px 30px 0;background:var(--paper);box-shadow:0 0 0 1.5px var(--line),var(--pop-shadow)}
+.chart h4{margin:0;font-size:66px;font-weight:860;letter-spacing:-.045em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.chart p{margin:6px 0 0;font-size:24px;font-weight:600;color:var(--ink2)}
+.chart .fl{position:absolute;right:30px;top:30px;padding:8px 16px;border-radius:999px;background:#dcfce7;color:#166534;font-size:22px;font-weight:760;white-space:nowrap;transform-origin:100% 50%}
+.chart .bars{position:absolute;left:30px;right:30px;bottom:30px;height:150px;display:flex;align-items:flex-end;gap:12px}
+.chart .bars i{flex:1;border-radius:9px 9px 3px 3px;background:var(--tile-dim);transform-origin:50% 100%}
+.chart .bars i.pk{background:linear-gradient(180deg,#22d3ee,#2f66ea)}
+.phone{width:156px;height:306px;padding:9px;border-radius:34px;background:linear-gradient(160deg,#18233f,#0a1020);box-shadow:0 0 0 1.5px rgba(255,255,255,.16),var(--pop-shadow)}
+.phone i{position:relative;display:block;width:100%;height:100%;border-radius:26px;overflow:hidden;background:var(--paper2)}
+.phone i::before{content:"";position:absolute;left:0;right:0;top:0;height:40px;background:var(--tile-dim)}
+.phone i::after{content:"";position:absolute;left:50%;top:14px;width:44px;height:9px;margin-left:-22px;border-radius:5px;background:var(--ink3);opacity:.5}
+.qrc{width:176px;height:176px;border-radius:22px;background:#fff;padding:20px;color:#0a1020;box-shadow:0 0 0 1.5px var(--line),0 0 0 9px rgba(47,102,234,.12),var(--pop-shadow)}
+.qrc svg{display:block;width:100%;height:100%}
+.brow{width:300px;height:216px;border-radius:20px;background:var(--paper);box-shadow:0 0 0 1.5px var(--line),var(--pop-shadow);overflow:hidden}
+.brow::before{content:"";display:block;height:38px;background:var(--tile-dim)}
+.brow::after{content:"";position:absolute;left:16px;top:13px;width:10px;height:10px;border-radius:50%;background:var(--ink3);box-shadow:17px 0 0 var(--ink3),34px 0 0 var(--ink3);opacity:.55}
+.env{width:236px;height:160px;border-radius:18px;background:var(--paper);box-shadow:0 0 0 1.5px var(--line),var(--pop-shadow);overflow:hidden}
+.env::before{content:"";position:absolute;left:-10px;right:-10px;top:-118px;height:236px;transform:rotate(45deg) scale(.72);transform-origin:50% 50%;border-radius:20px;background:var(--tile-dim);box-shadow:0 0 0 1.5px var(--line2)}
+.env::after{content:"";position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-12px 0 0 -19px;border-radius:50%;background:linear-gradient(135deg,#2b5fe3,#22d3ee);box-shadow:0 0 0 4px var(--paper)}
+/* a copy of the poster is the poster, small */
+.mini{position:absolute;left:0;top:0;width:72px;height:96px;border-radius:10px;overflow:hidden;color:#fff;text-transform:uppercase;background:linear-gradient(150deg,#2b5fe3 0%,#0b8fd8 55%,#22d3ee 100%);box-shadow:0 0 0 1px rgba(255,255,255,.3) inset,0 12px 26px -8px rgba(20,50,140,.6)}
+.mini b{position:absolute;left:8px;bottom:18px;font-size:17px;font-weight:880;letter-spacing:-.04em;line-height:.92}
+.mini u{position:absolute;left:8px;right:8px;bottom:8px;height:3px;border-radius:2px;background:rgba(255,255,255,.7);text-decoration:none}
+
+/* the ticket: white, blue and cyan only, as on the page */
+.ticket .face{width:240px;height:380px;border-radius:26px;background:#f8fafc;color:#0a1020;
+  -webkit-mask-image:radial-gradient(circle 15px at 0 152px,transparent 98%,#000),radial-gradient(circle 15px at 100% 152px,transparent 98%,#000);-webkit-mask-composite:source-in;
+  mask-image:radial-gradient(circle 15px at 0 152px,transparent 98%,#000),radial-gradient(circle 15px at 100% 152px,transparent 98%,#000);mask-composite:intersect}
+.ticket .th{height:152px;padding:22px 24px 0;background:linear-gradient(120deg,#2b5fe3,#0ea5e9 70%,#22d3ee);color:#fff}
+.ticket .th small{display:block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.ticket .th strong{display:block;margin-top:12px;font-size:40px;font-weight:860;letter-spacing:-.04em;line-height:1;white-space:nowrap}
+.ticket .th span{display:block;margin-top:10px;font-size:17px;font-weight:650;white-space:nowrap}
+.ticket .tb{height:228px;border-top:3px dashed rgba(10,16,32,.22);padding:20px 24px 0}
+.ticket .tq{position:relative;width:150px;height:150px;margin:0 auto;color:#0a1020}
+.ticket .tq svg{display:block;width:100%;height:100%}
+.ticket .tl{position:absolute;left:-10px;right:-10px;top:var(--tl,10%);height:5px;border-radius:3px;background:#a5f3fc;box-shadow:0 0 14px 4px rgba(34,211,238,.9),0 0 44px 12px rgba(34,211,238,.4);opacity:var(--tlo,0)}
+.ticket .tfo{display:flex;justify-content:space-between;margin-top:14px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;color:#36405a}
+.ticket .pb{background:#eef2f9}
+.chk{position:absolute;left:0;top:0;width:128px;height:128px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 9px rgba(34,197,94,.25),0 18px 44px rgba(22,163,74,.5);display:grid;place-items:center}
+
+/* ---------- screen space: one line a shot, the cards, the numerals, the words, the logo ---------- */
+/* a shot's line: top left, where the homepage's veil and pill never reach */
+.cap2{position:absolute;left:96px;top:0;display:flex;align-items:center;gap:20px;padding:10px 30px 12px 0;font-size:62px;font-weight:760;letter-spacing:-.03em;line-height:1.1;color:var(--ink);white-space:nowrap}
+.cap2::before{content:"";width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#4e81fa,#22d3ee);flex:none}
+.cap2::after{content:"";position:absolute;left:-90px;right:-110px;top:-46px;bottom:-46px;z-index:-1;background:radial-gradient(closest-side,var(--wall) 55%,transparent);opacity:.94}
+#stage.night .cap2::after{background:radial-gradient(closest-side,#04060f 55%,transparent)}
+/* a number that is the whole point of its shot */
+.bignum{position:absolute;left:1090px;top:0;white-space:nowrap;color:var(--ink)}
+.bignum b{display:block;font-size:400px;font-weight:880;letter-spacing:-.06em;line-height:.86;font-variant-numeric:tabular-nums}
+.bignum span{display:block;margin-top:10px;font-size:96px;font-weight:820;letter-spacing:-.04em}
+.bignum::after{content:"";position:absolute;left:-120px;right:-160px;top:-60px;bottom:-60px;z-index:-1;background:radial-gradient(closest-side,var(--wall) 50%,transparent);opacity:.92}
+/* the three verbs, the bill and the logo are cards: the set's own ground, full frame */
+.vcard,.lcard,.billc{position:absolute;inset:0;background:var(--key),var(--wall);overflow:hidden}
+.vcard::after,.lcard::after,.billc::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--line) 2px,transparent 2px),linear-gradient(90deg,var(--line) 2px,transparent 2px);background-size:274px 180px;background-position:1px 60px;
+  -webkit-mask-image:radial-gradient(ellipse 60% 62% at 50% 46%,#000 10%,transparent 76%);mask-image:radial-gradient(ellipse 60% 62% at 50% 46%,#000 10%,transparent 76%)}
+.vcard .ix{position:absolute;left:150px;top:136px;font-family:var(--mono);font-size:40px;font-weight:700;letter-spacing:.16em;color:var(--ink3);z-index:2}
+.vcard .bars{position:absolute;left:150px;top:214px;display:flex;gap:16px;z-index:2}
+.vcard .bars i{width:128px;height:12px;border-radius:6px;background:var(--line2)}
+.vcard .bars i.on{background:linear-gradient(90deg,#4e81fa,#22d3ee)}
+.vcard .bars i.done{background:var(--blue);opacity:.5}
+.vcard .vb{position:absolute;left:136px;top:262px;font-size:352px;font-weight:880;letter-spacing:-.055em;line-height:1.08;white-space:nowrap;transform-origin:0 60%;z-index:2;padding-right:30px}
+.billc{text-align:center;text-transform:uppercase;white-space:nowrap}
+.billc .top{position:absolute;left:150px;right:150px;top:112px;display:flex;justify-content:space-between;padding-bottom:20px;border-bottom:6px solid var(--ink);font-family:var(--mono);font-size:38px;font-weight:700;letter-spacing:.16em;color:var(--ink);transform-origin:50% 50%}
+.billc .rows{position:absolute;left:0;right:0;top:250px}
+.billc .r{display:block}
+.billc .n{display:inline-block;margin:0 .26em;font-weight:870;letter-spacing:-.035em;line-height:1.1;color:var(--ink)}
+.billc .n.bl{color:var(--blue)}
+.billc .r1 .n{font-size:108px}
+.billc .r2 .n{font-size:70px}
+.billc .r3 .n{font-size:49px;letter-spacing:-.02em}
+/* words over the wall of posters: they stand to the left, so ours can be seen beside them */
+#veil{position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse 60% 70% at 30% 44%,var(--veil-a) 0%,var(--veil-b) 52%,transparent 100%)}
+.fin{position:absolute;left:0;top:0;white-space:nowrap}
+.fin .sm{display:block;margin:0 0 0 -12px;padding:0 40px 26px 12px}
+.fin .f1{font-size:104px;font-weight:840;letter-spacing:-.04em;line-height:1.05;color:var(--ink)}
+.fin .f2{display:inline-block;font-size:214px;font-weight:880;letter-spacing:-.05em;line-height:1;padding:0 12px 10px}
+/* the name. Plain text under it on purpose: on the homepage the whole frame is a link to the
+   overview video, so anything button-shaped in the film would promise a click it cannot keep. */
+.lock{position:absolute;left:0;top:0;display:flex;align-items:center;gap:40px;white-space:nowrap}
+.lock svg{width:170px;height:170px;flex:none;overflow:visible}
+.lock .w{font-family:"InterV",var(--font);font-size:140px;line-height:1;letter-spacing:-.012em}
+.lock .w b{font-weight:740;color:var(--ink)}
+.lock .w i{font-style:normal;font-weight:330;color:var(--ink2)}
+.tagl{position:absolute;left:0;top:0;font-size:52px;font-weight:600;letter-spacing:-.015em;color:var(--ink2);white-space:nowrap}
+.site{position:absolute;left:0;top:0;font-family:var(--mono);font-size:40px;font-weight:600;color:var(--ink3);white-space:nowrap}

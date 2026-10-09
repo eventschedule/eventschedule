@@ -275,6 +275,20 @@
       : (! $event->exists && $visibilityNow === 'public' ? __('messages.publish') : __('messages.save'));
   // The same for "Also list on": the boxes as they were ticked, when the form is coming back.
   $curatorsFromOld = old('curators_submitted') ? array_map('strval', (array) old('curators', [])) : null;
+  // And for the venue: the one that was CHOSEN before the refusal, or none if it was taken off.
+  // Read from the stored event alone, another venue chosen and a save refused over another field
+  // came back on the old venue, with nothing to say so, and the next save kept the event there;
+  // on a new event it came back with no venue at all. Only a venue this page offers is looked up:
+  // toData() is the whole schedule, and the id is whatever was posted.
+  // What is STORED stays what a change is measured against (hasKeyChange): measured against the
+  // venue the page came back on, a venue changed before the refusal would no longer be a change,
+  // and the question about telling the people who signed up would not be asked.
+  $savedVenueId = $event->exists && $selectedVenue ? \App\Utils\UrlUtils::encodeId($selectedVenue->id) : null;
+  if (old('venue_submitted')) {
+      $venueFromOld = (string) old('venue_id', '');
+      $venueWasOffered = $venueFromOld !== '' && collect($venues)->contains('id', $venueFromOld);
+      $selectedVenue = $venueWasOffered ? \App\Models\Role::find(\App\Utils\UrlUtils::decodeId($venueFromOld)) : null;
+  }
   // The Engagement tab's four settings ("" same as the schedule, "1" on, "0" off), as last chosen.
   $engagementSettingsNow = [];
   foreach (['fan_comments_enabled', 'fan_photos_enabled', 'fan_videos_enabled', 'feedback_enabled'] as $engagementField) {
@@ -6425,6 +6439,7 @@
         eventIsSaved: @json($event->exists),
         // How the event is shown as SAVED. The save bar compares the choice on screen with it.
         savedVisibility: @json($event->exists ? $event->visibilityState() : null),
+        savedVenueId: @json($savedVenueId),
         // Set by the page's date helpers (updateScheduleTimePreview), which live outside Vue.
         whenLabel: '',
         categoryLabel: '',
@@ -9778,7 +9793,7 @@
       this.$nextTick(() => {
         this.origStartsAt = this.startsAt;
         this.origDuration = this.currentDuration;
-        this.origVenueId = this.selectedVenue ? this.selectedVenue.id : null;
+        this.origVenueId = this.eventIsSaved ? this.savedVenueId : (this.selectedVenue ? this.selectedVenue.id : null);
         this.origEventUrl = this.normalizeUrl(this.event.event_url);
         this.origIsOnline = this.isOnline;
         this.origIsInPerson = this.isInPerson;

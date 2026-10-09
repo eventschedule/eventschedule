@@ -21,27 +21,14 @@
         </div>
 
         <div class="page-stack">
-            @if ($hasAi)
-            <x-page-card :title="__('messages.ai_content_generation')" :lead="__('messages.ai_content_generation_description')">
-                <div class="flex flex-wrap items-end gap-3">
-                    <div class="min-w-[240px] flex-1">
-                        <x-input-label for="ai_topic" :value="__('messages.topic')" />
-                        <textarea id="ai_topic" rows="2" dir="auto" placeholder="{{ __('messages.blog_topic_placeholder') }}" class="{{ $field }}"></textarea>
-                    </div>
-                    <x-brand-button type="button" id="generate_btn">
-                        <svg class="w-5 h-5 -ms-0.5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        {{ __('messages.generate_content') }}
-                    </x-brand-button>
-                </div>
-            </x-page-card>
-            @else
-            <x-gemini-setup-guide optional :text="__('messages.blog_ai_needs_key')" />
-            @endif
+            @include('blog.admin._writer', ['writerTopic' => '', 'writerExcept' => null])
 
             <form method="POST" action="{{ route('blog.store') }}" class="page-stack">
                 @csrf
+                {{-- What a generated post knows about itself: the search it answers and the
+                     questions it ends on (its FAQPage data). --}}
+                <input type="hidden" name="primary_query" id="primary_query" value="{{ old('primary_query') }}">
+                <input type="hidden" name="faq" id="faq" value="{{ old('faq') }}">
 
                 <x-page-card>
                     <div class="page-form-fields">
@@ -63,6 +50,16 @@
                             <textarea name="excerpt" id="excerpt" rows="3" maxlength="500" dir="auto" class="{{ $field }}">{{ old('excerpt') }}</textarea>
                             <p class="{{ $help }}">{{ __('messages.excerpt_help') }}</p>
                             <x-input-error :messages="$errors->get('excerpt')" class="mt-2" />
+                        </div>
+
+                        <div class="max-w-xs">
+                            <x-input-label for="category" :value="__('messages.blog_section')" />
+                            <select name="category" id="category" class="{{ $field }}">
+                                @foreach(\App\Models\BlogPost::CATEGORIES as $key => $section)
+                                    <option value="{{ $key }}" {{ old('category', 'planning') == $key ? 'selected' : '' }}>{{ $section['name'] }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('category')" class="mt-2" />
                         </div>
 
                         <div>
@@ -134,85 +131,6 @@
                 altFormat: 'M j, Y H:i',
                 dateFormat: 'Y-m-d H:i',
             });
-
-            // The AI card is only on the page when the install has a key.
-            var generateBtn = document.getElementById('generate_btn');
-            if (generateBtn) {
-                generateBtn.addEventListener('click', generateContent);
-            }
         });
-
-        function generateContent() {
-            const topic = document.getElementById('ai_topic').value;
-
-            if (!topic.trim()) {
-                alert(@json(__('messages.please_enter_topic')));
-                return;
-            }
-
-            // Show loading state
-            const generateBtn = document.getElementById('generate_btn');
-            const originalText = generateBtn.innerHTML;
-            generateBtn.textContent = @json(__('messages.generating'));
-            generateBtn.disabled = true;
-
-            fetch('{{ route("blog.generate-content") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    topic: topic
-                })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Request failed');
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    alert(@json(__('messages.error')) + ': ' + data.error);
-                } else {
-                    // Fill in the form fields
-                    document.getElementById('title').value = data.title || '';
-                    document.getElementById('content').value = data.content || '';
-                    document.getElementById('excerpt').value = data.excerpt || '';
-                    document.getElementById('tags').value = data.tags ? data.tags.join(', ') : '';
-                    document.getElementById('meta_title').value = data.meta_title || '';
-                    document.getElementById('meta_description').value = data.meta_description || '';
-
-                    // Set featured image if provided
-                    if (data.featured_image) {
-                        const featuredImageSelect = document.getElementById('featured_image');
-                        for (let i = 0; i < featuredImageSelect.options.length; i++) {
-                            if (featuredImageSelect.options[i].value === data.featured_image) {
-                                featuredImageSelect.selectedIndex = i;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Show success message
-                    Toastify({
-                        text: @json(__('messages.content_generated')),
-                        duration: 3000,
-                        position: 'center',
-                        style: {
-                            background: '#4BB543',
-                        }
-                    }).showToast();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(@json(__('messages.failed_to_generate_content')));
-            })
-            .finally(() => {
-                // Reset button state
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
-            });
-        }
     </script>
 </x-app-admin-layout>

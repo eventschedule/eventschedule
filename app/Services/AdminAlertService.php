@@ -85,6 +85,9 @@ class AdminAlertService
         'federation',
         'translation_suggestions',
         'support_unread',
+        // Blue, a queue to read: posts the blog's writer finished and its check would not
+        // publish (BlogWriter::store()). Until 2026-10 a post that failed was thrown away.
+        'blog_posts_held',
         'boosts_disapproved',
         'domains_pending',
         'translations_unshared',
@@ -340,6 +343,8 @@ class AdminAlertService
 
             'translation_suggestions' => fn () => $isNexus ? TranslationSuggestion::pending()->count() : 0,
 
+            'blog_posts_held' => fn () => $isNexus ? \App\Models\BlogPost::heldForReview()->count() : 0,
+
             'support_unread' => fn () => $isHosted
                 ? SupportMessage::where('is_from_admin', false)->whereNull('read_at')->count()
                 : 0,
@@ -555,6 +560,7 @@ class AdminAlertService
             'federation' => ['system', 'federation', 'admin.federation', [], '', 'amber', __('messages.federation')],
             'translation_suggestions' => ['system', 'translations', 'admin.translations.suggestions', [], '', 'blue', __('messages.translations')],
             'support_unread' => ['system', 'support', 'admin.support', [], '', 'blue', 'Support'],
+            'blog_posts_held' => ['manage', 'blog', 'blog.admin.index', ['held' => 1], '', 'blue', __('messages.blog')],
             'boosts_disapproved' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'amber', 'Boost'],
             'domains_pending' => ['manage', 'domains', 'admin.domains', ['status' => 'pending'], '', 'amber', __('messages.domains')],
             'translations_unshared' => ['system', 'translations', 'admin.translations', [], '', 'blue', __('messages.translations')],

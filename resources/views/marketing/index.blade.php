@@ -140,10 +140,11 @@
     {{-- Every note in this stylesheet is a Blade comment, so none of them is sent to a visitor. --}}
     <style {!! nonce_attr() !!}>
         {{-- ==============================================================
-           The homepage. One show, followed from the poster to the morning
-           after: the hero stands between two walls of real posters, the
-           features are the days of that show's week, and the page goes
-           dark for the night of the show itself.
+           The homepage. One show, told in the film's three verbs (which
+           are the headline's own, in its control arm): the hero stands
+           between two walls of real posters, the features are that show's
+           three acts (plan, promote, sell), and the page goes dark for the
+           night of the show itself.
 
            Every class here is the page's own (hp-*) or is restated
            under #hp, and all of it is drawn with the page's own tokens,
@@ -209,17 +210,19 @@
         }
 
         .hp-wrap { width: min(100% - 2.5rem, 76rem); margin-inline: auto; }
-        {{-- The week hangs its calendar tiles in the margin where the window has one, so its text
-           starts on the same line as every other section's. --}}
+        {{-- An act hangs its tile in the margin where the window has one, so its text starts on
+           the same line as every other section's. --}}
         @media (min-width: 99rem) {
             .hp-wrap.is-hung {
                 width: auto;
-                margin-inline-start: calc((100% - 76rem) / 2 - 6.25rem - 4rem);
+                margin-inline-start: calc((100% - 76rem) / 2 - var(--hp-tile, 6.25rem) - 4rem);
                 margin-inline-end: calc((100% - 76rem) / 2);
             }
-            .hp-wrap.is-hung .hp-day { column-gap: 4rem; }
-            .hp-wrap.is-hung .hp-week::before,
-            html.es-anim .hp-wrap.is-hung .hp-week::after { inset-inline-start: 3.125rem; }
+            .hp-wrap.is-hung .hp-vrow,
+            .hp-wrap.is-hung .hp-run,
+            .hp-wrap.is-hung .hp-beat { column-gap: 4rem; }
+            .hp-wrap.is-hung .hp-run::before,
+            html.es-anim .hp-wrap.is-hung .hp-run::after { inset-inline-start: calc(var(--hp-tile) / 2); }
         }
         .hp-sec { position: relative; padding-block: clamp(4.5rem, 9vw, 8.5rem); }
         #hp section[id] { scroll-margin-top: 4.5rem; }
@@ -825,10 +828,10 @@
         [data-marquee="-1"] .hp-act:hover { color: var(--hp-blue); }
 
         {{-- ---------------------------------------------------------------
-           3. The week: one show from the poster to the morning after
+           3. Plan, promote, sell: one show in three acts
            --------------------------------------------------------------- --}}
 
-        {{-- The switch: whose week the mock-ups show. --}}
+        {{-- The switch: whose show the mock-ups tell. --}}
         .hp-casts { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-top: clamp(1.75rem, 3vw, 2.5rem); }
         .hp-casts-label { flex-basis: 100%; margin-bottom: 0.15rem; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: var(--hp-ink); }
         .hp-casts button {
@@ -857,9 +860,154 @@
         .hp-poster.is-plain img { display: none; }
         .hp-poster.is-plain::after { background: linear-gradient(to top, rgba(4, 30, 44, 0.75) 6%, rgba(4, 30, 44, 0) 60%); }
         .hp-slots-type .hp-slots-meta { display: block; font-size: 0.8rem; font-weight: 400; color: var(--hp-ink-3); }
-        .hp-week { position: relative; margin-top: clamp(2.5rem, 5vw, 4.5rem); }
-        #hp #features { padding-bottom: clamp(2rem, 4vw, 4rem); }
-        .hp-day {
+        #hp #features { --hp-tile: 6.25rem; padding-bottom: 0; }
+        @media (min-width: 102rem) {
+            #hp #features { --hp-tile: 7.75rem; }
+        }
+
+        {{-- An act opens on the card the film cuts to: which act of three, three bars, and the
+           verb. On the page the card is a band the width of the window with a ground of its own,
+           so the page cuts to it as the film does. --}}
+        .hp-verb { scroll-margin-top: 4.5rem; }
+        .hp-vband {
+            position: relative;
+            isolation: isolate;
+            margin-top: clamp(1.5rem, 4vw, 3.5rem);
+            border-block: 1px solid var(--hp-line-2);
+            box-shadow: 0 1.25rem 2rem -1.75rem rgba(10, 16, 32, 0.28);
+            background: var(--hp-bg-2);
+            overflow: hidden;
+            overflow: clip;
+        }
+        .hp-wrap + .hp-verb > .hp-vband { margin-top: clamp(3rem, 6vw, 5rem); }
+        {{-- One light, over the far end of the column the verb reads along, at any width. --}}
+        .hp-vband::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(48rem 26rem at calc(50% + min(30rem, 38vw)) -10%, var(--hp-glow), transparent 70%);
+            pointer-events: none;
+        }
+        [dir="rtl"] #hp .hp-vband::before { transform: scaleX(-1); }
+        {{-- The card is its own container: the bars span it, and the verb is sized from the room
+           it has, so "Promote." fits a phone on one line and never meets the list beside it. --}}
+        .hp-vcard {
+            position: relative;
+            container-type: inline-size;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto auto minmax(1.5rem, 1fr) auto;
+            grid-template-areas: "ix" "bars" "." "word";
+            min-height: clamp(13rem, 30vh, 17rem);
+            min-height: clamp(13rem, 30svh, 17rem);
+            padding-block: clamp(2rem, 4.5vw, 3.5rem) clamp(1.4rem, 3.4vw, 2.6rem);
+        }
+        {{-- The wall's seven columns, drawn on the card's own width (so none of them stands just
+           past the end of the bars) and fading toward the word. There is no line on the card's
+           far edge: on a phone that was a hard rule down the side of the screen. --}}
+        .hp-vcard::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(90deg, var(--hp-line) 1px, transparent 1px) 0 0 / calc(100% / 7) 100%;
+            -webkit-mask-image: linear-gradient(to left, #000, transparent 74%);
+            mask-image: linear-gradient(to left, #000, transparent 74%);
+            pointer-events: none;
+        }
+        [dir="rtl"] #hp .hp-vcard::before { transform: scaleX(-1); }
+        .hp-vcard > * { --hp-verb-size: 23cqi; --hp-has-room: 17rem; }
+        .hp-vcard-ix {
+            grid-area: ix;
+            font-family: var(--hp-mono);
+            font-size: 0.82rem;
+            font-weight: 700; font-variation-settings: 'wght' 600;
+            letter-spacing: 0.16em;
+            color: var(--hp-ink-3);
+        }
+        .hp-vbars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.4rem, 1cqi, 0.9rem); }
+        .hp-vcard > .hp-vbars { grid-area: bars; margin-top: 0.9rem; }
+        .hp-vbars i { position: relative; height: 0.36rem; border-radius: 999px; background: var(--hp-line-2); overflow: hidden; }
+        .hp-vbars i.is-done::after,
+        .hp-vbars i.is-now::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+        .hp-vbars i.is-done { background: transparent; }
+        .hp-vbars i.is-done::after { background: var(--hp-blue); opacity: 0.5; }
+        .hp-vbars i.is-now::after { background: linear-gradient(90deg, #4e81fa, #22d3ee); }
+        .hp-vcard-word {
+            grid-area: word;
+            {{-- A capital P stands in from its own edge and an S nearly on it: each is pulled to
+               the line the bars start on. --}}
+            margin-inline-start: -0.058em;
+            font-weight: 700;
+            font-variation-settings: 'wght' 880;
+            font-size: clamp(4rem, 19vw, 9rem);
+            line-height: 0.92;
+            letter-spacing: -0.055em;
+        }
+        @supports (width: 1cqi) {
+            .hp-vcard-word { font-size: clamp(4rem, var(--hp-verb-size), 13.75rem); }
+        }
+        .hp-verb:last-child .hp-vcard-word { margin-inline-start: -0.008em; }
+        .hp-vcard-word .hp-ink-grad { display: inline-block; padding-block-end: 0.05em; }
+        {{-- What the act holds, as its running order and two ways down the page. A phone has the
+           first of them right under the card, so it shows from a tablet up. --}}
+        .hp-vcard-has { display: none; }
+        .hp-vcard-has a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            white-space: nowrap;
+            color: var(--hp-ink);
+            transition: color 0.2s ease;
+        }
+        .hp-vcard-has a:hover { color: var(--hp-blue); }
+        .hp-vcard-has svg { width: 1.1rem; height: 1.1rem; color: var(--hp-blue); transform: rotate(90deg); transition: transform 0.2s ease; }
+        .hp-vcard-has a:hover svg { transform: rotate(90deg) translateX(3px); }
+        @media (min-width: 768px) {
+            .hp-vcard {
+                grid-template-columns: minmax(0, 1fr) auto;
+                grid-template-areas: "ix ix" "bars bars" ". ." "word has";
+                column-gap: 2.5rem;
+                {{-- Tall as a card on a wide window, never taller than a third of its width: a
+                   tablet held upright would otherwise get a band that is mostly air. --}}
+                min-height: clamp(17rem, min(44vh, 34vw), 30rem);
+                min-height: clamp(17rem, min(44svh, 34vw), 30rem);
+            }
+            {{-- The longest verb is 4.2 times its own size wide; the list is given its room first. --}}
+            .hp-vcard > * { --hp-verb-size: calc((100cqi - var(--hp-has-room)) / 4.2); }
+            .hp-vcard-has { grid-area: has; align-self: end; display: grid; justify-items: end; padding-bottom: calc(clamp(4rem, var(--hp-verb-size), 13.75rem) * 0.14 - 0.65rem); }
+        }
+        @media (min-width: 1280px) {
+            .hp-vcard > * { --hp-has-room: 19.5rem; }
+            .hp-vcard-has a { font-size: 1.4rem; }
+        }
+        @media (min-width: 1024px) {
+            .hp-vrow { display: grid; grid-template-columns: var(--hp-tile) minmax(0, 1fr); column-gap: clamp(1.75rem, 3.4vw, 4rem); }
+            .hp-vrow > .hp-vcard { grid-column: 2; }
+        }
+        {{-- The card arrives once: its bars draw to the act it has reached, and the verb rises. --}}
+        html.es-anim #hp .hp-vcard[data-reveal] { opacity: 1; transform: none; }
+        html.es-anim .hp-vcard[data-reveal] .hp-vbars i::after { transform: scaleX(0); transform-origin: 0 50%; transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        html.es-anim[dir="rtl"] .hp-vcard .hp-vbars i::after { transform-origin: 100% 50%; }
+        html.es-anim .hp-vcard .hp-vbars i:nth-child(1)::after { transition-delay: 0.15s; }
+        html.es-anim .hp-vcard .hp-vbars i:nth-child(2)::after { transition-delay: 0.4s; }
+        html.es-anim .hp-vcard .hp-vbars i:nth-child(3)::after { transition-delay: 0.65s; }
+        html.es-anim .hp-vcard[data-reveal].is-revealed .hp-vbars i::after { transform: scaleX(1); }
+        html.es-anim .hp-vcard .hp-vcard-word .hp-ink-grad,
+        html.es-anim .hp-vcard .hp-vcard-has { transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        html.es-anim .hp-vcard[data-reveal]:not(.is-revealed) .hp-vcard-word .hp-ink-grad { opacity: 0; transform: translateY(0.3em); }
+        html.es-anim .hp-vcard[data-reveal]:not(.is-revealed) .hp-vcard-has { opacity: 0; transform: translateY(0.8rem); }
+        html.es-anim .hp-vcard .hp-vcard-has { transition-delay: 0.35s; }
+
+        {{-- What an act holds: its tile in the margin, pinned for as long as the act is on
+           screen, and its features one under the other beside it. --}}
+        .hp-run { position: relative; }
+        .hp-beat {
             position: relative;
             display: grid;
             grid-template-columns: minmax(0, 1fr);
@@ -867,39 +1015,46 @@
             padding-block: clamp(2.25rem, 5vw, 4.5rem);
             scroll-margin-top: 5rem;
         }
-        .hp-day + .hp-day { border-top: 1px solid var(--hp-line); }
+        .hp-beat + .hp-beat { border-top: 1px solid var(--hp-line); }
         @media (min-width: 1024px) {
-            .hp-day {
-                grid-template-columns: 6.25rem minmax(0, 0.82fr) minmax(0, 1fr);
+            .hp-run {
+                display: grid;
+                grid-template-columns: var(--hp-tile) minmax(0, 1fr);
                 column-gap: clamp(1.75rem, 3.4vw, 4rem);
                 align-items: start;
             }
-            .hp-day + .hp-day { border-top: 0; }
-            {{-- The thread the days hang on. --}}
-            .hp-week::before {
+            .hp-beat {
+                grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+                column-gap: clamp(1.75rem, 3.4vw, 4rem);
+                align-items: start;
+            }
+            .hp-beat + .hp-beat { border-top: 0; }
+            {{-- The thread an act's features hang on. It comes down out of the card. --}}
+            .hp-run::before {
                 content: "";
                 position: absolute;
-                top: 3rem;
+                top: 0;
                 bottom: 3rem;
-                inset-inline-start: 3.125rem;
+                inset-inline-start: calc(var(--hp-tile) / 2);
                 width: 2px;
                 margin-inline-start: -1px;
                 background: var(--hp-line-2);
             }
-            .hp-date,
+            .hp-step,
             .hp-objwrap { position: sticky; top: 6.25rem; }
+            .hp-run > .hp-step { margin-top: clamp(2.25rem, 5vw, 4.5rem); }
         }
         @media (min-width: 1280px) {
-            .hp-day { grid-template-columns: 6.25rem minmax(0, 25rem) minmax(0, 1fr); }
+            .hp-beat { grid-template-columns: minmax(0, 25rem) minmax(0, 1fr); }
         }
         @supports (animation-timeline: view()) {
             @media (min-width: 1024px) {
-                html.es-anim .hp-week::after {
+                html.es-anim .hp-run::after {
                     content: "";
                     position: absolute;
-                    top: 3rem;
+                    top: 0;
                     bottom: 3rem;
-                    inset-inline-start: 3.125rem;
+                    inset-inline-start: calc(var(--hp-tile) / 2);
                     width: 2px;
                     margin-inline-start: -1px;
                     background: linear-gradient(#4e81fa, #0ea5e9 60%, #22d3ee);
@@ -912,23 +1067,23 @@
         }
         @keyframes hp-thread { from { transform: scaleY(0); } to { transform: scaleY(1); } }
         @media (min-width: 1024px) {
-            {{-- The week is three pieces of markup with Saturday's band between them. Each piece of
-               thread runs on to the band, and the band's own runs its whole height, so the days
-               hang on one line. --}}
-            #hp .hp-wrap:has(+ .hp-night) > .hp-week::before,
-            #hp .hp-wrap:has(+ .hp-night) > .hp-week::after { bottom: -4rem; }
-            #hp .hp-night + .hp-wrap > .hp-week::before,
-            #hp .hp-night + .hp-wrap > .hp-week::after { top: -4rem; }
-            #hp .hp-night .hp-week::before,
-            #hp .hp-night .hp-week::after { top: -12rem; bottom: -24rem; }
+            {{-- Sell is two pieces of markup, the second of them the night's band. The first
+               piece's thread runs on to the band and the band's own starts above it, so the act
+               hangs on one line. --}}
+            #hp .hp-wrap:has(+ .hp-night) > .hp-run::before,
+            #hp .hp-wrap:has(+ .hp-night) > .hp-run::after { bottom: -4rem; }
+            #hp .hp-night .hp-run::before,
+            #hp .hp-night .hp-run::after { top: -12rem; }
         }
 
-        {{-- A page off a wall calendar. --}}
-        .hp-date {
+        {{-- The tile: the card again, small enough to ride the margin. It keeps the blue cap of the
+           calendar page it replaces, with the three bars in it; a count in that cap ("01 / 03")
+           read as a date. --}}
+        .hp-step {
             z-index: 2;
             display: flex;
             flex-direction: column;
-            width: 6.25rem;
+            width: var(--hp-tile);
             overflow: hidden;
             border: 1px solid var(--hp-line-2);
             border-radius: 1.1rem;
@@ -936,50 +1091,100 @@
             box-shadow: var(--hp-card-shadow);
             text-align: center;
         }
-        .hp-date b {
-            padding: 0.3rem 0;
-            background: linear-gradient(100deg, #2b5fe3, #2f6fe9);
-            font-size: 0.74rem;
-            font-weight: 700;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #fff;
-        }
-        .hp-date i {
-            padding-top: 0.35rem;
+        .hp-step .hp-vbars { gap: 0.22rem; padding: 0.62rem 0.7rem; background: linear-gradient(100deg, #2b5fe3, #2f6fe9); }
+        .hp-step .hp-vbars i { height: 0.28rem; background: rgba(255, 255, 255, 0.34); }
+        .hp-step .hp-vbars i.is-done::after { background: #fff; opacity: 0.6; }
+        .hp-step .hp-vbars i.is-now::after { background: #fff; }
+        .hp-step > i {
+            padding-top: 0.75rem;
             font-style: normal;
-            font-size: 2.6rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            font-variation-settings: 'wght' 840;
-            letter-spacing: -0.05em;
+            font-variation-settings: 'wght' 860;
+            letter-spacing: -0.04em;
             line-height: 1;
         }
-        .hp-date span { padding-bottom: 0.5rem; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--hp-ink-3); }
+        .hp-step b {
+            padding: 0.45rem 0 0.7rem;
+            font-family: var(--hp-mono);
+            font-size: 0.7rem;
+            font-weight: 700; font-variation-settings: 'wght' 600;
+            letter-spacing: 0.14em;
+            line-height: 1;
+            color: var(--hp-ink-2);
+        }
+        @media (min-width: 102rem) {
+            .hp-step { border-radius: 1.25rem; }
+            .hp-step .hp-vbars { gap: 0.28rem; padding: 0.75rem 0.85rem; }
+            .hp-step .hp-vbars i { height: 0.34rem; }
+            .hp-step > i { padding-top: 0.9rem; font-size: 1.5rem; }
+            .hp-step b { padding: 0.5rem 0 0.85rem; font-size: 0.76rem; }
+        }
+        {{-- While a card is still on screen it says all of this itself, so the tile under it comes
+           in as the card leaves, and the night's tile as Sell's first piece (with a tile of its
+           own) leaves. Where motion is allowed it fades and settles; otherwise it is simply not
+           there and then there. Where a browser cannot tie the two, the tile is always there.
+           The change is over by the time the card is 60% gone: a card's own link stops with the
+           card's last 5rem still under the bar, and the tile has to have arrived by then. --}}
+        @supports (animation-timeline: view()) and (timeline-scope: --hp-card) {
+            @media (min-width: 1024px) {
+                .hp-verb { timeline-scope: --hp-card, --hp-piece; }
+                .hp-vband { view-timeline: --hp-card block; }
+                .hp-wrap:has(+ .hp-night) { view-timeline: --hp-piece block; }
+                .hp-vband + .hp-wrap > .hp-run > .hp-step { animation: hp-step-on steps(1, end) both; animation-timeline: --hp-card; animation-range: exit 10% exit 60%; }
+                .hp-night .hp-run > .hp-step { animation: hp-step-on steps(1, end) both; animation-timeline: --hp-piece; animation-range: exit 92% exit 100%; }
+                html.es-anim .hp-vband + .hp-wrap > .hp-run > .hp-step,
+                html.es-anim .hp-night .hp-run > .hp-step { animation-name: hp-step-in; animation-timing-function: linear; }
+            }
+        }
+        @keyframes hp-step-on { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes hp-step-in { from { opacity: 0; transform: translateY(0.75rem) scale(0.92); } to { opacity: 1; transform: none; } }
+        {{-- Below a laptop there is no margin to ride. The card stands right above an act's first
+           feature; the second says which act it belongs to in front of its own name. --}}
+        .hp-kicker-act { display: none; }
         @media (max-width: 1023px) {
-            .hp-day { row-gap: 0; }
-            .hp-day-copy { display: contents; }
-            .hp-day-copy > * { order: 3; }
-            .hp-day-copy > .hp-h3,
-            .hp-day-copy > .hp-h3 + p { order: 1; }
-            .hp-day > .hp-objwrap { order: 2; margin-block: 1.75rem 0.25rem; }
-            .hp-day > .hp-date { order: 0; margin-bottom: 1.25rem; }
-            .hp-date { flex-direction: row; align-items: center; width: auto; align-self: start; justify-self: start; gap: 0.6rem; padding-inline-end: 0.9rem; border-radius: 0.8rem; }
-            .hp-date b { align-self: stretch; display: flex; align-items: center; padding: 0 0.7rem; }
-            .hp-date i { padding: 0.25rem 0; font-size: 1.6rem; }
-            .hp-date span { padding: 0; }
+            .hp-beat { row-gap: 0; }
+            .hp-beat-copy { display: contents; }
+            .hp-beat-copy > * { order: 3; }
+            .hp-beat-copy > .hp-h3,
+            .hp-beat-copy > .hp-h3 + p { order: 1; }
+            .hp-beat > .hp-objwrap { order: 2; margin-block: 1.75rem 0.25rem; }
+            .hp-run > .hp-step { display: none; }
+            {{-- No fill: a solid chip that says PLAN reads as a price plan on a page that sells
+               some. Three bars and the verb are the card's own marks. --}}
+            #hp .hp-kicker-act {
+                display: inline;
+                margin-inline-end: 0.3rem;
+                font-family: var(--hp-mono);
+                font-size: 0.72rem;
+                font-variation-settings: 'wght' 600;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--hp-ink-2);
+            }
+            #hp .hp-kicker-act::after { content: "/"; margin-inline-start: 0.3rem; color: var(--hp-ink-3); }
+            #hp .hp-kicker-act .hp-vbars { display: inline-grid; width: 2rem; gap: 0.14rem; margin-inline-end: 0.4rem; vertical-align: 0.14em; }
+            #hp .hp-kicker-act .hp-vbars i { height: 0.22rem; }
+            #hp .hp-kicker-act .hp-vbars i:not([class]) { background: rgba(10, 16, 32, 0.3); }
+            .dark #hp .hp-kicker-act .hp-vbars i:not([class]) { background: rgba(255, 255, 255, 0.32); }
+            #hp .hp-night .hp-kicker-act { color: #c5cde2; }
+            #hp .hp-night .hp-kicker-act::after { color: #9fb1d6; }
+            #hp .hp-night .hp-kicker-act .hp-vbars i:not([class]) { background: rgba(159, 177, 214, 0.45); }
+            #hp .hp-night .hp-kicker-act .hp-vbars i.is-done { background: transparent; }
+            #hp .hp-night .hp-kicker-act .hp-vbars i.is-done::after { background: #8db0ff; opacity: 0.65; }
         }
 
-        .hp-day-copy .hp-kicker { display: block; margin-bottom: 0.8rem; font-family: var(--hp-display); font-size: 0.92rem; font-weight: 700; font-variation-settings: normal; letter-spacing: 0.01em; line-height: 1.4; text-transform: none; color: var(--hp-blue); }
-        .hp-day-copy .hp-kicker::before { display: none; }
-        .hp-night .hp-day-copy .hp-kicker { color: #8db0ff; }
+        .hp-beat-copy .hp-kicker { display: block; margin-bottom: 0.8rem; font-family: var(--hp-display); font-size: 0.92rem; font-weight: 700; font-variation-settings: normal; letter-spacing: 0.01em; line-height: 1.4; text-transform: none; color: var(--hp-blue); }
+        .hp-beat-copy .hp-kicker::before { display: none; }
+        .hp-night .hp-beat-copy .hp-kicker { color: #8db0ff; }
         .hp-btn.is-small { min-height: 3rem; padding-inline: 1.25rem; font-size: 0.98rem; border-radius: 0.85rem; }
-        .hp-day-copy .hp-actions { margin-top: 1.5rem; gap: 0.75rem 1.25rem; }
-        .hp-day-copy .hp-h3 { font-size: clamp(1.9rem, 1.9vw + 1.05rem, 2.9rem); }
-        .hp-day-copy .hp-h3 .hp-ink-grad { display: block; }
-        .hp-day-copy > p { margin-top: 1rem; font-size: 1.125rem; color: var(--hp-ink-2); text-wrap: pretty; }
+        .hp-beat-copy .hp-actions { margin-top: 1.5rem; gap: 0.75rem 1.25rem; }
+        .hp-beat-copy .hp-h3 { font-size: clamp(1.9rem, 1.9vw + 1.05rem, 2.9rem); }
+        .hp-beat-copy .hp-h3 .hp-ink-grad { display: block; }
+        .hp-beat-copy > p { margin-top: 1rem; font-size: 1.125rem; color: var(--hp-ink-2); text-wrap: pretty; }
         .hp-blurbs { display: grid; gap: 1.5rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--hp-line); }
         .hp-blurb { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: 1rem; }
-        .hp-blurb h4 { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
+        .hp-blurb h5 { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
         .hp-blurb p { margin-top: 0.3rem; font-size: 0.98rem; line-height: 1.55; color: var(--hp-ink-2); }
         .hp-blurb .hp-more { margin-top: 0.45rem; font-size: 0.95rem; }
         .hp-fine { margin-top: 0.4rem; font-size: 0.84rem; color: var(--hp-ink-3); }
@@ -993,7 +1198,7 @@
         }
         .hp-paid svg { flex: none; width: 1.1rem; height: 1.1rem; margin-top: 0.2rem; }
 
-        {{-- The stage each day's object stands on. Its wrapper is a container, so what stands on the
+        {{-- The stage each feature's object stands on. Its wrapper is a container, so what stands on the
            stage is laid out from the room the stage has, not from the window. --}}
         .hp-objwrap { container-type: inline-size; min-width: 0; }
         .hp-obj {
@@ -1086,7 +1291,7 @@
         .dark .hp-ok { background: rgba(34, 197, 94, 0.2); color: #86efac; }
         .hp-ok svg { width: 0.8rem; height: 0.8rem; }
 
-        {{-- Monday: the poster, read into an event --}}
+        {{-- Plan: the poster, read into an event --}}
         .hp-obj-ai {
             display: grid;
             grid-template-columns: minmax(0, 1fr);
@@ -1169,10 +1374,10 @@
             color: var(--hp-ink-3);
         }
         .hp-synced svg { width: 1.1rem; height: 1.1rem; }
-        .hp-synced i { margin-inline-start: auto; width: 0.5rem; height: 0.5rem; border-radius: 999px; background: #22d3ee; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); animation: hp-beat 2.4s ease-out infinite; }
-        @keyframes hp-beat { 70%, 100% { box-shadow: 0 0 0 0.6rem rgba(34, 211, 238, 0); } }
+        .hp-synced i { margin-inline-start: auto; width: 0.5rem; height: 0.5rem; border-radius: 999px; background: #22d3ee; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); animation: hp-pulse 2.4s ease-out infinite; }
+        @keyframes hp-pulse { 70%, 100% { box-shadow: 0 0 0 0.6rem rgba(34, 211, 238, 0); } }
 
-        {{-- Wednesday: the page, and the ways out to people --}}
+        {{-- Promote: the page, and the ways out to people --}}
         .hp-obj-share { display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; gap: 1.25rem; padding: clamp(1.25rem, 3vw, 2.75rem) clamp(1.25rem, 3vw, 2.75rem) 0; }
         .hp-outs { display: flex; flex-wrap: wrap; gap: 0.6rem; order: -1; }
         .hp-outs .hp-chip { position: relative; }
@@ -1224,7 +1429,7 @@
         html.es-anim [data-reveal] .hp-chip { opacity: 0; transform: translateY(10px) scale(0.94); transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: calc(var(--i, 0) * 0.16s + 0.45s); }
         html.es-anim [data-reveal].is-revealed .hp-chip { opacity: 1; transform: none; }
 
-        {{-- Friday: tickets on sale --}}
+        {{-- Sell: tickets on sale --}}
         .hp-obj-sell { display: grid; place-items: center; align-content: center; padding: 6.5rem clamp(1.25rem, 3vw, 2.75rem) clamp(1.25rem, 3vw, 2.75rem); }
         .hp-checkout { width: min(100%, 30rem); padding: clamp(1rem, 1.8vw, 1.6rem); }
         .hp-checkout-head { display: flex; align-items: center; gap: 0.8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--hp-line); }
@@ -1273,18 +1478,20 @@
         .hp-zero b { font-size: 1.7rem; font-weight: 700; font-variation-settings: 'wght' 880; letter-spacing: -0.05em; }
         .hp-zero span { margin-top: 0.3em; font-family: var(--hp-mono); font-size: 0.625rem; letter-spacing: 0.06em !important; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 
-        {{-- Saturday: the night of the show. The band is the full width of the window and dark in
-           both modes (so its colours are literal). The page's light follows the story: by day a
-           dusk above the band and a dawn below it; at night, where the whole page is already
-           dark, the band is the one lit room. Its lights are layers of their own, so the band
-           itself is one flat colour under the text. --}}
+        {{-- The night of the show, where Sell ends. The band is the full width of the window and
+           dark in both modes (so its colours are literal). The page's light follows the story: by
+           day a dusk above the band and a dawn below it, which breaks into the ground of the
+           section that follows (--hp-dawn); at night, where the whole page is already dark, the
+           band is the one lit room. Its lights are layers of their own, so the band itself is one
+           flat colour under the text. --}}
         .hp-night {
             position: relative;
             isolation: isolate;
             z-index: 1;
             overflow: hidden;
             overflow: clip;
-            margin-block: clamp(1.5rem, 4vw, 3.5rem);
+            --hp-dawn: var(--hp-bg-2);
+            margin-block: clamp(1.5rem, 4vw, 3.5rem) 0;
             padding-block: clamp(8rem, 15vh, 11rem) clamp(16.5rem, 18vw + 11rem, 19.5rem);
             {{-- The dark stops two pixels short of the band's top and bottom edges. The band rarely
                starts on a whole pixel, and a browser that draws the dark and then the dusk over it,
@@ -1299,29 +1506,31 @@
             z-index: -1;
             background:
                 linear-gradient(to bottom, var(--hp-bg) 0, var(--hp-bg) 2px, #c3cff0 2.2rem, #5a6fb4 5rem, #1b2759 8rem, rgba(5, 8, 20, 0) 11.5rem) top / 100% 11.5rem no-repeat,
-                linear-gradient(to top, var(--hp-bg) 0, var(--hp-bg) 2px, #bfe3f6 2.2rem, #4f9fd0 4.6rem, #16306a 7.6rem, rgba(5, 8, 20, 0) 11.5rem) bottom / 100% 11.5rem no-repeat,
+                linear-gradient(to top, var(--hp-dawn) 0, var(--hp-dawn) 2px, #bfe3f6 2.2rem, #4f9fd0 4.6rem, #16306a 7.6rem, rgba(5, 8, 20, 0) 11.5rem) bottom / 100% 11.5rem no-repeat,
                 radial-gradient(52rem 30rem at 72% 26%, rgba(47, 102, 234, 0.42), transparent 70%),
                 radial-gradient(34rem 22rem at 14% 78%, rgba(34, 211, 238, 0.16), transparent 70%);
         }
-        .dark .hp-night { background: linear-gradient(#111d5a, #111d5a) 0 2px / 100% calc(100% - 4px) no-repeat; }
+        .dark .hp-night { --hp-dawn: var(--hp-bg-3); background: linear-gradient(#111d5a, #111d5a) 0 2px / 100% calc(100% - 4px) no-repeat; }
         .dark .hp-night::before {
             background:
                 linear-gradient(to bottom, var(--hp-bg) 0, var(--hp-bg) 2px, rgba(17, 29, 90, 0) 9rem) top / 100% 9rem no-repeat,
-                linear-gradient(to top, var(--hp-bg) 0, var(--hp-bg) 2px, rgba(17, 29, 90, 0) 9rem) bottom / 100% 9rem no-repeat,
+                linear-gradient(to top, var(--hp-dawn) 0, var(--hp-dawn) 2px, rgba(17, 29, 90, 0) 9rem) bottom / 100% 9rem no-repeat,
                 radial-gradient(60rem 34rem at 72% 30%, rgba(78, 129, 250, 0.95), transparent 72%),
                 radial-gradient(40rem 26rem at 14% 78%, rgba(34, 211, 238, 0.42), transparent 70%),
                 radial-gradient(70rem 20rem at 50% 100%, rgba(14, 165, 233, 0.35), transparent 75%);
         }
-        .hp-night .hp-week,
-        .hp-night + .hp-wrap .hp-week { margin-top: 0; }
-        .hp-night .hp-week::before { background: rgba(125, 165, 255, 0.3); }
-        .hp-night .hp-day-copy .hp-h3 { font-size: clamp(2.5rem, 4.6vw, 4.9rem); line-height: 0.98; }
-        .hp-night .hp-day-copy > p { font-size: clamp(1.125rem, 0.4vw + 1.05rem, 1.3rem); }
-        .hp-night .hp-day { border-top: 0; }
-        .hp-night .hp-day-copy > p { color: #c5cde2; }
-        .hp-night .hp-date { border-color: rgba(125, 165, 255, 0.5); background: #0d1430; color: #eef2ff; box-shadow: 0 0 0 4px rgba(78, 129, 250, 0.16), 0 0 44px rgba(34, 211, 238, 0.4); }
-        .hp-night .hp-date b { background: linear-gradient(100deg, #4e81fa, #22d3ee); color: #04101f; }
-        .hp-night .hp-date span { color: #9fb1d6; }
+        .hp-night .hp-run::before { background: rgba(125, 165, 255, 0.3); }
+        .hp-night .hp-beat-copy .hp-h3 { font-size: clamp(2.5rem, 4.6vw, 4.9rem); line-height: 0.98; }
+        .hp-night .hp-beat-copy > p { font-size: clamp(1.125rem, 0.4vw + 1.05rem, 1.3rem); }
+        .hp-night .hp-beat-copy > p { color: #c5cde2; }
+        .hp-night .hp-step { border-color: rgba(125, 165, 255, 0.5); background: #0d1430; color: #eef2ff; box-shadow: 0 0 0 4px rgba(78, 129, 250, 0.16), 0 0 44px rgba(34, 211, 238, 0.4); }
+        .hp-night .hp-step b { color: #9fb1d6; }
+        .hp-night .hp-step .hp-vbars { background: linear-gradient(100deg, #4e81fa, #22d3ee); }
+        .hp-night .hp-step .hp-vbars i { background: rgba(4, 16, 31, 0.26); }
+        .hp-night .hp-step .hp-vbars i.is-done::after { background: #04101f; opacity: 0.55; }
+        .hp-night .hp-step .hp-vbars i.is-now::after { background: #04101f; }
+        {{-- The room under the band is not the tile's to ride over: it lets go with the words. --}}
+        .hp-night .hp-run > .hp-step { margin-bottom: clamp(8rem, 14vw, 15rem); }
         .hp-night .hp-more { color: #a9c3ff; }
         .hp-night .hp-ink-grad { background-image: linear-gradient(100deg, #7da5ff 0%, #38bdf8 55%, #67e8f9 100%); }
         .hp-doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-top: 1.75rem; }
@@ -1412,7 +1621,7 @@
             #hp .hp-chip-in { top: 14%; right: 9%; }
         }
 
-        {{-- Sunday: the morning after --}}
+        {{-- Promote: the audience, counted --}}
         .hp-obj-grow { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 1.25rem; padding: clamp(1.25rem, 3vw, 2.75rem); }
         .hp-chart { padding: clamp(1rem, 1.8vw, 1.5rem); }
         .hp-chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
@@ -1442,13 +1651,13 @@
         .hp-sent .hp-ok { margin-inline-start: auto; }
 
         {{-- ---------------------------------------------------------------
-           4. Tuesday's stage: the booking page (the day itself is in the week above)
+           4. The booking page's stage (appointments are the second half of Plan, above)
            --------------------------------------------------------------- --}}
 
         .hp-obj-book { display: grid; place-items: center; padding: clamp(1.25rem, 3vw, 2.75rem) clamp(1rem, 2.6vw, 2.5rem) clamp(2rem, 3.4vw, 3rem); }
         .hp-obj-book .hp-book-wrap { width: 100%; max-width: 37rem; }
-        .hp-day-copy > p strong { color: var(--hp-ink); }
-        .hp-day-copy .hp-checks { margin-top: 1.5rem; font-size: 1rem; }
+        .hp-beat-copy > p strong { color: var(--hp-ink); }
+        .hp-beat-copy .hp-checks { margin-top: 1.5rem; font-size: 1rem; }
         .hp-checks { display: grid; gap: 0.85rem; margin-top: 1.75rem; }
         .hp-checks li { display: flex; align-items: flex-start; gap: 0.75rem; color: var(--hp-ink-2); }
         .hp-checks .hp-ok { margin-top: 0.15rem; background: rgba(78, 129, 250, 0.14); color: var(--hp-blue); }
@@ -1921,15 +2130,13 @@
         $hpCheck = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">' . $hpIcon['check'] . '</svg>';
         $hpQr = 'M0 0h9v9H0V0zm2 2v5h5V2H2zm1 1h3v3H3V3zm17-3h9v9h-9V0zm2 2v5h5V2h-5zm1 1h3v3h-3V3zM0 20h9v9H0v-9zm2 2v5h5v-5H2zm1 1h3v3H3v-3zM12 0h2v2h-2V0zm3 0h2v4h-2V0zm-3 4h2v3h-2V4zm3 3h4v2h-4V7zm-3 3h3v2h-3v-2zm5 0h2v3h-2v-3zm7 1h2v2h-2v-2zm3-1h2v4h-2v-4zM0 12h2v2H0v-2zm3 0h4v2H3v-2zm5 1h2v4H8v-4zm3 3h2v2h-2v-2zm3-2h3v2h-3v-2zm5 1h2v3h-2v-3zm3 1h4v2h-4v-2zm5 1h2v2h-2v-2zm-15 4h4v2h-4v-2zm5 1h2v2h-2v-2zm3-2h2v4h-2v-4zm3 2h4v2h-4v-2zm-7 3h2v4h-2v-4zm-3 1h2v3h-2v-3zm8 0h3v2h-3v-2zm5-1h2v4h-2v-4z';
 
-        // The week the page follows is always the week after next: the show is never in the
-        // past, and a weekday can never disagree with its date (the mock-ups used to carry
-        // "Tue, Jul 15" beside "Sat, Jul 18", two different years).
+        // The show is always on the Saturday of the week after next, and the appointment on the
+        // Tuesday before it: the show is never in the past, and a weekday can never disagree
+        // with its date (the mock-ups used to carry "Tue, Jul 15" beside "Sat, Jul 18", two
+        // different years).
         $wkMon = \Carbon\Carbon::now()->startOfWeek(\Carbon\Carbon::MONDAY)->addWeeks(2);
         $wkTue = $wkMon->copy()->addDay();
-        $wkWed = $wkMon->copy()->addDays(2);
-        $wkFri = $wkMon->copy()->addDays(4);
         $wkSat = $wkMon->copy()->addDays(5);
-        $wkSun = $wkMon->copy()->addDays(6);
         $wkLater = [$wkSat->copy()->addDays(6), $wkSat->copy()->addDays(14)];
         // The booking window's month, Monday first, around the Tuesday being booked. Open hours
         // fall on Tuesdays and Thursdays.
@@ -1947,10 +2154,10 @@
             $bookDay->addDay();
         }
 
-        // Whose week the page follows. The jazz club is what the server renders; the switch above
-        // the week re-casts every mock-up from this list in the browser. Names, times and places
-        // only: the prices, the counts and every sentence about the product stay as they are.
-        // The show the calculator opens on is the one the week is about.
+        // Whose show the page tells. The jazz club is what the server renders; the switch above
+        // the three acts re-casts every mock-up from this list in the browser. Names, times and
+        // places only: the prices, the counts and every sentence about the product stay as they
+        // are. The show the calculator opens on is the one the acts are about.
         $hpShowTickets = 150;
         $hpShowPrice = 25;
         // A ticket's price in the dollar calculator, which is in dollars on every install (see
@@ -2169,7 +2376,7 @@
                  fold back into a table of contents, and two of the four (passes and gift cards on
                  Pro, reserved seating on Enterprise) are expansion features that belong to a reader
                  who has already decided and is scrolling. Both are still on this page, in the
-                 ticketing day and the "everything else" grid. --}}
+                 ticketing feature and the "everything else" grid. --}}
             <p class="es-fade-up es-d-4 hp-hero-foot">
                 <a href="#showcase" class="hp-demo" data-video-open>
                     <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></i>
@@ -2254,12 +2461,14 @@
                          display:none, so a visitor loads only their own theme's poster, and only if
                          they scroll this far.
                          Bump $showreelV whenever the reel is re-rendered: the files keep their names,
-                         so the query string is the only thing that busts a cached copy. --}}
+                         so the query string is the only thing that busts a cached copy.
+                         The ground behind the reels is the page's own (--hp-bg), which is the
+                         film's in both cuts, so nothing flashes before a poster arrives. --}}
                     @php
-                        $showreelV = '2026-10-03';
+                        $showreelV = '2026-10-08';
                         $showreelCuts = ['light' => 'event-schedule-showreel-light', 'dark' => 'event-schedule-showreel'];
                     @endphp
-                    <div class="relative aspect-video bg-[#f4f7fd] dark:bg-black">
+                    <div class="relative aspect-video" style="background: var(--hp-bg);">
                         @foreach ($showreelCuts as $cut => $reel)
                             <img data-showreel-poster="{{ $cut }}" src="{{ asset('videos/' . $reel . '-poster.jpg') }}?v={{ $showreelV }}" alt=""
                                  width="1920" height="1080" loading="lazy" decoding="async"
@@ -2399,7 +2608,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The week: one show, from the poster to the morning after  -->
+    <!-- 3. Plan, promote, sell: one show in three acts               -->
     <!-- ============================================================ -->
     <section id="features" class="hp-sec">
         <div class="hp-wrap">
@@ -2412,405 +2621,469 @@
                     One platform for scheduling, ticketing, newsletters, and check-ins.
                 </p>
             </div>
-            {{-- Whose week to follow. The page is written around one jazz club; a yoga studio or
+            {{-- Whose show to tell. The page is written around one jazz club; a yoga studio or
                  a festival should not have to read five screens of somebody else's show. --}}
             <div class="hp-casts" role="group" aria-labelledby="hp-casts-label" data-reveal style="--reveal-delay: 0.22s;">
-                <span class="hp-casts-label" id="hp-casts-label" data-cast-label>Follow the week of</span>
+                <span class="hp-casts-label" id="hp-casts-label" data-cast-label>See it as</span>
                 @foreach ($hpCasts as $hpCastKey => $hpCast)
                     <button type="button" data-cast-pick="{{ $hpCastKey }}" aria-pressed="{{ $hpCastKey === 'jazz' ? 'true' : 'false' }}">{{ $hpCast['label'] }}</button>
                 @endforeach
             </div>
         </div>
-        <div class="hp-wrap is-hung">
-            <div class="hp-week">
 
-                <!-- Monday: put it up -->
-                <article id="how-it-works" class="hp-day">
-                    <div class="hp-date" aria-hidden="true"><b>{{ $wkMon->format('D') }}</b><i>{{ $wkMon->format('j') }}</i><span>{{ $wkMon->format('M') }}</span></div>
-                    <div class="hp-day-copy">
-                        <h3 class="hp-h3"><span class="hp-kicker">Create your schedule<span class="sr-only">: </span></span>Monday. <span class="hp-ink-grad">Put it up.</span></h3>
-                        <p>Sign up free, then fill it however suits you: type an event in, connect a calendar, or paste a poster and let the AI read the details off it.</p>
-                        <p class="hp-fine">Set up in under 2 minutes.</p>
-                        <div class="hp-blurbs">
-                            <div class="hp-blurb">
-                                <span class="hp-ico bg-blue-100 dark:bg-blue-500/20"><svg class="text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['bulb'] !!}</svg></span>
-                                <div>
-                                    <h4>AI-Powered</h4>
-                                    <p>Paste a poster, a press release or a screenshot and get a filled-in event back. Generate flyers, descriptions and a whole brand style, and publish in 12 languages.</p>
-                                    <a href="{{ marketing_url('/features/ai') }}" class="hp-more" aria-label="Learn more about AI-powered features">Learn more {!! $hpArrow !!}</a>
-                                </div>
-                            </div>
-                            <div class="hp-blurb">
-                                <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['calendar'] !!}</svg></span>
-                                <div>
-                                    <h4>Calendar Sync</h4>
-                                    <p>Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows.</p>
-                                    <a href="{{ marketing_url('/features/calendar-sync') }}" class="hp-more" aria-label="Learn more about calendar sync">Learn more {!! $hpArrow !!}</a>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Act one of three: plan -->
+        <div id="plan" class="hp-verb">
+            <div class="hp-vband">
+                <div class="hp-wrap is-hung">
+                    <div class="hp-vrow">
+                        <header class="hp-vcard" data-reveal>
+                            <p class="hp-vcard-ix" aria-hidden="true">01 / 03</p>
+                            <span class="hp-vbars" aria-hidden="true"><i class="is-now"></i><i></i><i></i></span>
+                            <h3 class="hp-vcard-word"><span class="sr-only">Part 1 of 3: </span><span class="hp-ink-grad">Plan.</span></h3>
+                            <ul class="hp-vcard-has">
+                                <li><a href="#how-it-works">Create your schedule {!! $hpArrow !!}</a></li>
+                                <li><a href="#appointments">Appointments {!! $hpArrow !!}</a></li>
+                            </ul>
+                        </header>
                     </div>
-                    <div class="hp-objwrap"><div class="hp-obj hp-obj-ai es-ai-replay" data-reveal="panel" aria-hidden="true">
-                        <div class="hp-poster">
-                            <img src="{{ asset('images/demo/demo_flyer_jazz.webp') }}" alt="" width="800" height="600" loading="lazy" decoding="async" data-cast-img>
-                            <div class="hp-poster-top"><span data-cast="tag">Live</span><span>{{ $wkSat->format('D j M') }}</span></div>
-                            <div class="hp-poster-type">
-                                <small><span data-cast="venue">The Blue Note</span> presents</small>
-                                <strong><span data-cast="line1">Jazz</span><br><span data-cast="line2">Night</span></strong>
-                                <span><span data-cast="verb">Doors</span> <span data-cast="time">8:00 PM</span> · $25</span>
-                            </div>
-                            <span class="hp-scan"></span>
-                        </div>
-                        <div class="hp-flow">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['arrow'] !!}</svg>
-                        </div>
-                        <div class="hp-card hp-event">
-                            <div class="hp-event-top">
-                                <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
-                                <div>
-                                    <strong data-cast="event">Jazz Night</strong>
-                                    <span>Read from your poster</span>
-                                </div>
-                            </div>
-                            <div class="hp-fields">
-                                <div class="es-ai-field hp-field" style="--i: 0;">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['calendar'] !!}</svg>
-                                    <span>{{ $wkSat->format('D, M j') }} · <span data-cast="time">8:00 PM</span></span>
-                                </div>
-                                <div class="es-ai-field hp-field" style="--i: 1;">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['pin'] !!}</svg>
-                                    <span data-cast="venue">The Blue Note</span>
-                                </div>
-                                <div class="es-ai-field hp-field" style="--i: 2;">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['ticket'] !!}</svg>
-                                    $25 a ticket
-                                </div>
-                            </div>
-                            <div class="hp-synced">
-                                @include('marketing.partials.integration-logo', ['name' => 'google', 'class' => ''])
-                                On your Google Calendar too
-                                <i></i>
-                            </div>
-                        </div>
-                    </div></div>
-                </article>
-
-                <!-- Tuesday: the open hours between the shows -->
-                <article id="appointments" class="hp-day">
-                    <div class="hp-date" aria-hidden="true"><b>{{ $wkTue->format('D') }}</b><i>{{ $wkTue->format('j') }}</i><span>{{ $wkTue->format('M') }}</span></div>
-                    <div class="hp-day-copy">
-                        <h3 class="hp-h3"><span class="hp-kicker">Appointments<span class="sr-only">: </span></span> Tuesday. <span class="hp-ink-grad">Between shows.</span></h3>
-                        {{-- Not "get booked": that is the hero's payoff, and it was Calendly's own pitch
-                             besides. The claim here is bigger than a booking link, and it is the one
-                             thing no competitor in either category can make: the same calendar holds
-                             the shows and the open hours, and will not let one be booked over the
-                             other. That is also why this is a day of the show's own week and not a
-                             section of its own. The mock is the booking page as a guest sees it: open
-                             days only, never a named show (book-type.blade.php removes busy times,
-                             it does not explain them). --}}
-                        <p><strong>Your open hours, on the same page.</strong> Appointment booking, built in. Guests pick an open time in their own timezone, and the booking lands on your schedule.</p>
-                        <ul class="hp-checks">
-                            <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Weekly hours with buffers and minimum notice</span></li>
-                            <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Free or paid appointments with Stripe</span></li>
-                            <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Never double-booked against your synced calendars</span></li>
-                        </ul>
-                        <p style="margin-top: 1.5rem;">
-                            <a href="{{ route('marketing.appointments') }}" class="hp-more">Learn more<span class="sr-only"> about appointments</span> {!! $hpArrow !!}</a>
-                        </p>
-                    </div>
-                    <div class="hp-objwrap"><div class="hp-obj hp-obj-book" data-reveal="panel" aria-hidden="true">
-                        <div class="hp-book-wrap">
-                        <div class="hp-card hp-book">
-                        <div class="hp-browser-bar"><i></i><i></i><i></i><span class="hp-url"><span data-cast="slug">blue-note</span>{{ $claimSuffix }}/book</span></div>
-                        <div class="hp-book-grid">
-                            <div>
-                                <div class="hp-month-head">
-                                    <strong>{{ $wkTue->format('F') }}</strong>
-                                    <span><i>&lsaquo;</i><i>&rsaquo;</i></span>
-                                </div>
-                                <div class="hp-month">
-                                    <b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b>
-                                    @foreach ($bookCells as $bookCell)
-                                        <span @class([$bookCell['class'] => $bookCell['class'] !== ''])>{{ $bookCell['day'] }}</span>
-                                    @endforeach
-                                </div>
-                                <div class="hp-legend">
-                                    <span><i></i>Open hours</span>
-                                    <span>Times shown in your timezone</span>
-                                </div>
-                            </div>
-                            <div class="hp-slots">
-                                <strong class="hp-slots-type"><span data-cast="appt">Private hire viewing</span><span class="hp-slots-meta">30 min · Free</span></strong>
-                                <small>{{ $wkTue->format('D, M j') }}</small>
-                                <span class="hp-slot">9:00 AM</span>
-                                <span class="hp-slot">11:30 AM</span>
-                                <span class="hp-slot is-pick">{!! $hpCheck !!}3:00 PM</span>
-                                <span class="hp-slot">4:30 PM</span>
-                                <span class="hp-pay">Book</span>
-                            </div>
-                        </div>
-                    </div>
-                        <span class="hp-chip hp-chip-booked"><span class="hp-ok">{!! $hpCheck !!}</span>Booked · Tue 3:00 PM</span>
-                        </div>
-                    </div></div>
-                </article>
-
-                <!-- Wednesday: get the word out -->
-                <article class="hp-day">
-                    <div class="hp-date" aria-hidden="true"><b>{{ $wkWed->format('D') }}</b><i>{{ $wkWed->format('j') }}</i><span>{{ $wkWed->format('M') }}</span></div>
-                    <div class="hp-day-copy">
-                        <h3 class="hp-h3"><span class="hp-kicker">Share your link<span class="sr-only">: </span></span>Wednesday. <span class="hp-ink-grad">Get the word out.</span></h3>
-                        <p>You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.</p>
-                        <div class="hp-actions">
-                            <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Claim it free">Claim it free</span> {!! $hpArrow !!}</a>
-                        </div>
-                        <div class="hp-blurbs">
-                            <div class="hp-blurb">
-                                <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['mail'] !!}</svg></span>
-                                <div>
-                                    <h4>Newsletters</h4>
-                                    <p>Send branded emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
-                                    <p class="hp-fine">Templates · Audience segments · A/B testing</p>
-                                    <a href="{{ route('marketing.newsletters') }}" class="hp-more" aria-label="Learn more about newsletters">Learn more {!! $hpArrow !!}</a>
-                                </div>
-                            </div>
-                            <div class="hp-blurb">
-                                <span class="hp-ico bg-orange-100 dark:bg-orange-500/20"><svg class="text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['horn'] !!}</svg></span>
-                                <div>
-                                    <h4>Boost</h4>
-                                    <p>Turn any event into a Facebook or Instagram ad in minutes. Set your budget, pick your audience, and launch with no ad experience needed.</p>
-                                    <a href="{{ route('marketing.boost') }}" class="hp-more" aria-label="Learn more about Boost">Learn more {!! $hpArrow !!}</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hp-objwrap"><div class="hp-obj hp-obj-share" data-reveal="panel" aria-hidden="true">
-                        <div class="hp-card hp-browser">
-                            <div class="hp-browser-bar"><i></i><i></i><i></i><span class="hp-url"><span data-cast="slug">blue-note</span>{{ $claimSuffix }}</span></div>
-                            <div class="hp-sched">
-                                <div class="hp-sched-head">
-                                    <span class="hp-avatar" data-cast="initial">B</span>
-                                    <div>
-                                        <strong data-cast="venue">The Blue Note</strong>
-                                        <span data-cast="tagline">Live jazz, five nights a week</span>
-                                    </div>
-                                    <span class="hp-follow">Follow</span>
-                                </div>
-                                <div class="hp-rows">
-                                    <div class="hp-row">
-                                        <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
-                                        <div><strong data-cast="event">Jazz Night</strong><span><span data-cast="time">8:00 PM</span> · $25</span></div>
-                                        <span class="hp-pill hp-pill-green">Tickets</span>
-                                    </div>
-                                    <div class="hp-row">
-                                        <span class="hp-tile"><b>{{ $wkLater[0]->format('M') }}</b><i>{{ $wkLater[0]->format('j') }}</i></span>
-                                        <div><strong data-cast="next1">Open Mic</strong><span><span data-cast="next1time">7:30 PM</span> · Free</span></div>
-                                        <span class="hp-pill hp-pill-blue">RSVP</span>
-                                    </div>
-                                    <div class="hp-row">
-                                        <span class="hp-tile"><b>{{ $wkLater[1]->format('M') }}</b><i>{{ $wkLater[1]->format('j') }}</i></span>
-                                        <div><strong data-cast="next2">Blues & Brews</strong><span><span data-cast="next2time">9:00 PM</span> · $18</span></div>
-                                        <span class="hp-pill hp-pill-green">Tickets</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hp-outs">
-                            <span class="hp-chip" style="--i: 0;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['link'] !!}</svg>Link in bio</span>
-                            <span class="hp-chip" style="--i: 1;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['qr'] !!}</svg>QR poster</span>
-                            <span class="hp-chip" style="--i: 2;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['code'] !!}</svg>Embed on your site</span>
-                            {{-- Kept under the 1,000-recipient Enterprise ceiling (Role::newsletterLimit):
-                                 the allowance counts recipients, so a send of 1,248 is not possible on
-                                 any plan. It is also the ONLY newsletter in this week's story: a second
-                                 one of 940 would be 1,880 in a month. --}}
-                            <span class="hp-chip hp-mini" style="--i: 3;">
-                                <span class="hp-mini-head"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['mail'] !!}</svg>This Week's Events</span>
-                                <span class="hp-mini-body">
-                                    <span class="hp-mini-hero">Featured Event</span>
-                                    <span class="hp-mini-foot"><span class="hp-ok">{!! $hpCheck !!}</span>Sent to <span data-count-to="940">940</span> followers</span>
-                                </span>
-                            </span>
-                            <span class="hp-chip hp-mini" style="--i: 4;">
-                                <span class="hp-mini-head is-ad"><i></i><span><b data-cast="venue">The Blue Note</b><small>Sponsored</small></span></span>
-                                <span class="hp-mini-body">
-                                    <span class="hp-mini-hero is-ad" data-cast="event">Jazz Night</span>
-                                    <span class="hp-mini-foot"><span class="hp-mini-cta">Learn More</span></span>
-                                </span>
-                            </span>
-                        </div>
-                    </div></div>
-                </article>
-
-                <!-- Friday: tickets on sale -->
-                <article class="hp-day">
-                    <div class="hp-date" aria-hidden="true"><b>{{ $wkFri->format('D') }}</b><i>{{ $wkFri->format('j') }}</i><span>{{ $wkFri->format('M') }}</span></div>
-                    <div class="hp-day-copy">
-                        <h3 class="hp-h3"><span class="hp-kicker">Ticketing<span class="sr-only">: </span></span>Friday. <span class="hp-ink-grad">Tickets on sale.</span></h3>
-                        <p>Multiple ticket types, add-ons, promo codes and reserved seating. Switch on the "Notify me" card and, before tickets go on sale, visitors can ask to be told when they do.</p>
-                        <p class="hp-paid">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['lock'] !!}</svg>
-                            Get paid by Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
-                        </p>
-                        <div class="hp-actions">
-                            <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Get started">Get started</span> {!! $hpArrow !!}</a>
-                            <a href="#fees" class="hp-more">Compare the fees {!! $hpArrow !!}</a>
-                        </div>
-                    </div>
-                    <div class="hp-objwrap"><div class="hp-obj hp-obj-sell" data-reveal="panel" aria-hidden="true">
-                        <div class="hp-card hp-checkout">
-                            <div class="hp-checkout-head">
-                                <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
-                                <div>
-                                    <strong data-cast="event">Jazz Night</strong>
-                                    <span>Sat <span data-cast="time">8:00 PM</span> · <span data-cast="venue">The Blue Note</span></span>
-                                </div>
-                            </div>
-                            <div class="hp-tt">
-                                <div><strong>General admission</strong><small>GA · 150 tickets</small></div>
-                                <span class="hp-tt-price">$25</span>
-                                <span class="hp-qty"><b>&minus;</b>2<b>+</b></span>
-                            </div>
-                            <div class="hp-tt">
-                                <div><strong data-cast="tier2">VIP</strong><small data-cast="tier2note">Early entry</small></div>
-                                <span class="hp-tt-price">$45</span>
-                                <span class="hp-qty"><b>&minus;</b>0<b>+</b></span>
-                            </div>
-                            <div class="hp-tt">
-                                <div><strong data-cast="addon">Parking</strong><small>Add-on</small></div>
-                                <span class="hp-tt-price">$8</span>
-                                <span class="hp-qty"><b>&minus;</b>1<b>+</b></span>
-                            </div>
-                            <div class="hp-code">Promo code <b></b></div>
-                            <div class="hp-sum"><span>Tickets and add-ons</span><b>$58</b></div>
-                            <div class="hp-sum is-zero"><span>Platform fee</span><b>0%</b></div>
-                            <div class="hp-pay">Checkout · $58</div>
-                        </div>
-                        <div class="hp-zero"><b>0%</b><span>platform<br>fees</span></div>
-                        <p class="hp-payout">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['lock'] !!}</svg>
-                            Payments land in your own Stripe or PayPal account, not ours
-                        </p>
-                    </div></div>
-                </article>
-
+                </div>
             </div>
-        </div>
-
-        <!-- Saturday: the night of the show, the full width of the window -->
-        <div class="hp-night">
             <div class="hp-wrap is-hung">
-                <div class="hp-week">
-                    <article class="hp-day">
-                        <div class="hp-date" aria-hidden="true"><b>{{ $wkSat->format('D') }}</b><i>{{ $wkSat->format('j') }}</i><span>{{ $wkSat->format('M') }}</span></div>
-                        <div class="hp-day-copy">
-                            <h3 class="hp-h3"><span class="hp-kicker">QR Check-ins<span class="sr-only">: </span></span>Saturday. <span class="hp-ink-grad">Doors.</span></h3>
-                            <p>Every ticket carries a QR code you scan at the door, on any plan, with zero platform fees.</p>
-                            <p class="hp-doors" aria-hidden="true"><span><span data-cast="verb">Doors</span><b data-cast="time">8:00 PM</b></span><span>Checked in<b data-count-to="142">142</b></span><span>Tickets<b>150</b></span></p>
-                            <p style="margin-top: 1.5rem;">
-                                <a href="{{ marketing_url('/features/ticketing') }}" class="hp-more" aria-label="Learn more about ticketing and QR check-ins">Learn more {!! $hpArrow !!}</a>
-                            </p>
-                        </div>
-                        <div class="hp-objwrap"><div class="hp-obj hp-obj-door" data-reveal="panel" aria-hidden="true">
-                            <div class="hp-beams"></div>
-                            <div class="hp-ticket-wrap" data-tilt="12">
-                                <div class="hp-ticket es-tilt-inner">
-                                    <div class="hp-ticket-head">
-                                        <small>Event Schedule</small>
-                                        <strong data-cast="event">Jazz Night</strong>
-                                        <span>{{ $wkSat->format('D, M j') }} · <span data-cast="time">8:00 PM</span></span>
-                                    </div>
-                                    <div class="hp-ticket-body">
-                                        <div class="hp-ticket-qr">
-                                            <svg viewBox="0 0 29 29" fill="currentColor"><path d="{{ $hpQr }}"/></svg>
-                                            <div class="es-laser"></div>
+                <div class="hp-run">
+                    <div class="hp-step" aria-hidden="true"><span class="hp-vbars"><i class="is-now"></i><i></i><i></i></span><i>Plan</i><b>01 / 03</b></div>
+                    <div class="hp-beats">
+
+                        <article id="how-it-works" class="hp-beat">
+                            <div class="hp-beat-copy">
+                                <h4 class="hp-h3"><span class="hp-kicker">Create your schedule<span class="sr-only">: </span></span>Paste a poster. <span class="hp-ink-grad">Get an event.</span></h4>
+                                <p>Sign up free, then fill it however suits you: type an event in, connect a calendar, or paste a poster and let the AI read the details off it.</p>
+                                <p class="hp-fine">Set up in under 2 minutes.</p>
+                                <div class="hp-blurbs">
+                                    <div class="hp-blurb">
+                                        <span class="hp-ico bg-blue-100 dark:bg-blue-500/20"><svg class="text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['bulb'] !!}</svg></span>
+                                        <div>
+                                            <h5>AI-Powered</h5>
+                                            <p>Paste a poster, a press release or a screenshot and get a filled-in event back. Generate flyers, descriptions and a whole brand style, and publish in 12 languages.</p>
+                                            <a href="{{ marketing_url('/features/ai') }}" class="hp-more" aria-label="Learn more about AI-powered features">Learn more {!! $hpArrow !!}</a>
                                         </div>
-                                        <div class="hp-ticket-foot"><span>GA x1</span><span>#0042</span></div>
+                                    </div>
+                                    <div class="hp-blurb">
+                                        <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['calendar'] !!}</svg></span>
+                                        <div>
+                                            <h5>Calendar Sync</h5>
+                                            <p>Two-way sync with Google Calendar, Microsoft 365 and any CalDAV server. Edit an event in either place and the other follows.</p>
+                                            <a href="{{ marketing_url('/features/calendar-sync') }}" class="hp-more" aria-label="Learn more about calendar sync">Learn more {!! $hpArrow !!}</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <span class="hp-chip hp-chip-in" style="--i: 1;"><span class="hp-ok">{!! $hpCheck !!}</span>Checked in</span>
-                        </div></div>
-                    </article>
-                </div>
-            </div>
-            {{-- The room: one light for each of the 150 tickets, in rows that run the width of the
-                 window and stand back from it, 142 of them coming on as the band arrives. Which
-                 eight stay dark, and the order the rest come on in, are fixed sums, not chance:
-                 the page is cached. --}}
-            <div class="hp-room" data-reveal aria-hidden="true">
-                <p class="hp-room-cap"><b data-count-to="142">142</b> of 150 through the door</p>
-                <div class="hp-crowd">
-                    @for ($row = 0; $row < 5; $row++)
-                        <span>
-                            @for ($seat = $row * 30; $seat < $row * 30 + 30; $seat++)
-                                <i @class(['is-in' => ! in_array($seat, [7, 23, 41, 58, 76, 97, 118, 139], true)]) style="--i: {{ ($seat * 37) % 150 }};"></i>
-                            @endfor
-                        </span>
-                    @endfor
+                            <div class="hp-objwrap"><div class="hp-obj hp-obj-ai es-ai-replay" data-reveal="panel" aria-hidden="true">
+                                <div class="hp-poster">
+                                    <img src="{{ asset('images/demo/demo_flyer_jazz.webp') }}" alt="" width="800" height="600" loading="lazy" decoding="async" data-cast-img>
+                                    <div class="hp-poster-top"><span data-cast="tag">Live</span><span>{{ $wkSat->format('D j M') }}</span></div>
+                                    <div class="hp-poster-type">
+                                        <small><span data-cast="venue">The Blue Note</span> presents</small>
+                                        <strong><span data-cast="line1">Jazz</span><br><span data-cast="line2">Night</span></strong>
+                                        <span><span data-cast="verb">Doors</span> <span data-cast="time">8:00 PM</span> · $25</span>
+                                    </div>
+                                    <span class="hp-scan"></span>
+                                </div>
+                                <div class="hp-flow">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['arrow'] !!}</svg>
+                                </div>
+                                <div class="hp-card hp-event">
+                                    <div class="hp-event-top">
+                                        <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
+                                        <div>
+                                            <strong data-cast="event">Jazz Night</strong>
+                                            <span>Read from your poster</span>
+                                        </div>
+                                    </div>
+                                    <div class="hp-fields">
+                                        <div class="es-ai-field hp-field" style="--i: 0;">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['calendar'] !!}</svg>
+                                            <span>{{ $wkSat->format('D, M j') }} · <span data-cast="time">8:00 PM</span></span>
+                                        </div>
+                                        <div class="es-ai-field hp-field" style="--i: 1;">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['pin'] !!}</svg>
+                                            <span data-cast="venue">The Blue Note</span>
+                                        </div>
+                                        <div class="es-ai-field hp-field" style="--i: 2;">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['ticket'] !!}</svg>
+                                            $25 a ticket
+                                        </div>
+                                    </div>
+                                    <div class="hp-synced">
+                                        @include('marketing.partials.integration-logo', ['name' => 'google', 'class' => ''])
+                                        On your Google Calendar too
+                                        <i></i>
+                                    </div>
+                                </div>
+                            </div></div>
+                        </article>
+
+                        <article id="appointments" class="hp-beat">
+                            <div class="hp-beat-copy">
+                                <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-now"></i><i></i><i></i></span>Plan</span> Appointments<span class="sr-only">: </span></span>Take bookings. <span class="hp-ink-grad">Between shows.</span></h4>
+                                {{-- Not "get booked": that is the hero's payoff, and it was Calendly's own pitch
+                                     besides. The claim here is bigger than a booking link, and it is the one
+                                     thing no competitor in either category can make: the same calendar holds
+                                     the shows and the open hours, and will not let one be booked over the
+                                     other. That is also why it stands in Plan, beside the shows, and not in a
+                                     section of its own. The mock is the booking page as a guest sees it: open
+                                     days only, never a named show (book-type.blade.php removes busy times,
+                                     it does not explain them). --}}
+                                <p><strong>Your open hours, on the same page.</strong> Appointment booking, built in. Guests pick an open time in their own timezone, and the booking lands on your schedule.</p>
+                                <ul class="hp-checks">
+                                    <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Weekly hours with buffers and minimum notice</span></li>
+                                    <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Free or paid appointments with Stripe</span></li>
+                                    <li><span class="hp-ok">{!! $hpCheck !!}</span><span>Never double-booked against your synced calendars</span></li>
+                                </ul>
+                                <p style="margin-top: 1.5rem;">
+                                    <a href="{{ route('marketing.appointments') }}" class="hp-more">Learn more<span class="sr-only"> about appointments</span> {!! $hpArrow !!}</a>
+                                </p>
+                            </div>
+                            <div class="hp-objwrap"><div class="hp-obj hp-obj-book" data-reveal="panel" aria-hidden="true">
+                                <div class="hp-book-wrap">
+                                <div class="hp-card hp-book">
+                                <div class="hp-browser-bar"><i></i><i></i><i></i><span class="hp-url"><span data-cast="slug">blue-note</span>{{ $claimSuffix }}/book</span></div>
+                                <div class="hp-book-grid">
+                                    <div>
+                                        <div class="hp-month-head">
+                                            <strong>{{ $wkTue->format('F') }}</strong>
+                                            <span><i>&lsaquo;</i><i>&rsaquo;</i></span>
+                                        </div>
+                                        <div class="hp-month">
+                                            <b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b>
+                                            @foreach ($bookCells as $bookCell)
+                                                <span @class([$bookCell['class'] => $bookCell['class'] !== ''])>{{ $bookCell['day'] }}</span>
+                                            @endforeach
+                                        </div>
+                                        <div class="hp-legend">
+                                            <span><i></i>Open hours</span>
+                                            <span>Times shown in your timezone</span>
+                                        </div>
+                                    </div>
+                                    <div class="hp-slots">
+                                        <strong class="hp-slots-type"><span data-cast="appt">Private hire viewing</span><span class="hp-slots-meta">30 min · Free</span></strong>
+                                        <small>{{ $wkTue->format('D, M j') }}</small>
+                                        <span class="hp-slot">9:00 AM</span>
+                                        <span class="hp-slot">11:30 AM</span>
+                                        <span class="hp-slot is-pick">{!! $hpCheck !!}3:00 PM</span>
+                                        <span class="hp-slot">4:30 PM</span>
+                                        <span class="hp-pay">Book</span>
+                                    </div>
+                                </div>
+                            </div>
+                                <span class="hp-chip hp-chip-booked"><span class="hp-ok">{!! $hpCheck !!}</span>Booked · Tue 3:00 PM</span>
+                                </div>
+                            </div></div>
+                        </article>
+
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="hp-wrap is-hung">
-            <div class="hp-week">
+        <!-- Act two of three: promote -->
+        <div id="promote" class="hp-verb">
+            <div class="hp-vband">
+                <div class="hp-wrap is-hung">
+                    <div class="hp-vrow">
+                        <header class="hp-vcard" data-reveal>
+                            <p class="hp-vcard-ix" aria-hidden="true">02 / 03</p>
+                            <span class="hp-vbars" aria-hidden="true"><i class="is-done"></i><i class="is-now"></i><i></i></span>
+                            <h3 class="hp-vcard-word"><span class="sr-only">Part 2 of 3: </span><span class="hp-ink-grad">Promote.</span></h3>
+                            <ul class="hp-vcard-has">
+                                <li><a href="#share">Share your link {!! $hpArrow !!}</a></li>
+                                <li><a href="#grow">Grow your audience {!! $hpArrow !!}</a></li>
+                            </ul>
+                        </header>
+                    </div>
+                </div>
+            </div>
+            <div class="hp-wrap is-hung">
+                <div class="hp-run">
+                    <div class="hp-step" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-now"></i><i></i></span><i>Promote</i><b>02 / 03</b></div>
+                    <div class="hp-beats">
 
-                <!-- Sunday: the morning after -->
-                <article class="hp-day">
-                    <div class="hp-date" aria-hidden="true"><b>{{ $wkSun->format('D') }}</b><i>{{ $wkSun->format('j') }}</i><span>{{ $wkSun->format('M') }}</span></div>
-                    <div class="hp-day-copy">
-                        <h3 class="hp-h3"><span class="hp-kicker">Grow your audience<span class="sr-only">: </span></span>Sunday. <span class="hp-ink-grad">The morning after.</span></h3>
-                        {{-- app:send-event-announcements, hourly on both rails: CONFIRMED
-                             role_subscribers get one digest per batch of newly published
-                             public events. Account followers are NOT included - they are
-                             reached only by a newsletter the owner writes. --}}
-                        <p>Visitors leave an email address and get a digest automatically when you publish new events. Write a newsletter yourself whenever there is more to say.</p>
-                        <div class="hp-blurbs">
-                            <div class="hp-blurb">
-                                <span class="hp-ico bg-emerald-100 dark:bg-emerald-500/20"><svg class="text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['chart'] !!}</svg></span>
-                                <div>
-                                    <h4>Built-in Analytics</h4>
-                                    <p>Page views, traffic sources, devices, check-ins and revenue per event, on three tabs. Built in and first-party, so no Google Analytics account is required.</p>
-                                    <a href="{{ route('marketing.analytics') }}" class="hp-more" aria-label="Learn more about built-in analytics">Learn more {!! $hpArrow !!}</a>
+                        <article id="share" class="hp-beat">
+                            <div class="hp-beat-copy">
+                                <h4 class="hp-h3"><span class="hp-kicker">Share your link<span class="sr-only">: </span></span>One link. <span class="hp-ink-grad">Everywhere.</span></h4>
+                                <p>You get yourname.eventschedule.com. Put it in your bio, print the QR code on a poster, embed the calendar in your own site, or let guests subscribe to it from their own calendar app.</p>
+                                <div class="hp-actions">
+                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Claim it free">Claim it free</span> {!! $hpArrow !!}</a>
+                                </div>
+                                <div class="hp-blurbs">
+                                    <div class="hp-blurb">
+                                        <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['mail'] !!}</svg></span>
+                                        <div>
+                                            <h5>Newsletters</h5>
+                                            <p>Send branded emails to followers and ticket buyers with a drag-and-drop editor and A/B testing.</p>
+                                            <p class="hp-fine">Templates · Audience segments · A/B testing</p>
+                                            <a href="{{ route('marketing.newsletters') }}" class="hp-more" aria-label="Learn more about newsletters">Learn more {!! $hpArrow !!}</a>
+                                        </div>
+                                    </div>
+                                    <div class="hp-blurb">
+                                        <span class="hp-ico bg-orange-100 dark:bg-orange-500/20"><svg class="text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['horn'] !!}</svg></span>
+                                        <div>
+                                            <h5>Boost</h5>
+                                            <p>Turn any event into a Facebook or Instagram ad in minutes. Set your budget, pick your audience, and launch with no ad experience needed.</p>
+                                            <a href="{{ route('marketing.boost') }}" class="hp-more" aria-label="Learn more about Boost">Learn more {!! $hpArrow !!}</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="hp-objwrap"><div class="hp-obj hp-obj-share" data-reveal="panel" aria-hidden="true">
+                                <div class="hp-card hp-browser">
+                                    <div class="hp-browser-bar"><i></i><i></i><i></i><span class="hp-url"><span data-cast="slug">blue-note</span>{{ $claimSuffix }}</span></div>
+                                    <div class="hp-sched">
+                                        <div class="hp-sched-head">
+                                            <span class="hp-avatar" data-cast="initial">B</span>
+                                            <div>
+                                                <strong data-cast="venue">The Blue Note</strong>
+                                                <span data-cast="tagline">Live jazz, five nights a week</span>
+                                            </div>
+                                            <span class="hp-follow">Follow</span>
+                                        </div>
+                                        <div class="hp-rows">
+                                            <div class="hp-row">
+                                                <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
+                                                <div><strong data-cast="event">Jazz Night</strong><span><span data-cast="time">8:00 PM</span> · $25</span></div>
+                                                <span class="hp-pill hp-pill-green">Tickets</span>
+                                            </div>
+                                            <div class="hp-row">
+                                                <span class="hp-tile"><b>{{ $wkLater[0]->format('M') }}</b><i>{{ $wkLater[0]->format('j') }}</i></span>
+                                                <div><strong data-cast="next1">Open Mic</strong><span><span data-cast="next1time">7:30 PM</span> · Free</span></div>
+                                                <span class="hp-pill hp-pill-blue">RSVP</span>
+                                            </div>
+                                            <div class="hp-row">
+                                                <span class="hp-tile"><b>{{ $wkLater[1]->format('M') }}</b><i>{{ $wkLater[1]->format('j') }}</i></span>
+                                                <div><strong data-cast="next2">Blues & Brews</strong><span><span data-cast="next2time">9:00 PM</span> · $18</span></div>
+                                                <span class="hp-pill hp-pill-green">Tickets</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hp-outs">
+                                    <span class="hp-chip" style="--i: 0;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['link'] !!}</svg>Link in bio</span>
+                                    <span class="hp-chip" style="--i: 1;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['qr'] !!}</svg>QR poster</span>
+                                    <span class="hp-chip" style="--i: 2;"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['code'] !!}</svg>Embed on your site</span>
+                                    {{-- Kept under the 1,000-recipient Enterprise ceiling (Role::newsletterLimit):
+                                         the allowance counts recipients, so a send of 1,248 is not possible on
+                                         any plan. It is also the ONLY newsletter in the page's story: a second
+                                         one of 940 would be 1,880 in a month. --}}
+                                    <span class="hp-chip hp-mini" style="--i: 3;">
+                                        <span class="hp-mini-head"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['mail'] !!}</svg>This Week's Events</span>
+                                        <span class="hp-mini-body">
+                                            <span class="hp-mini-hero">Featured Event</span>
+                                            <span class="hp-mini-foot"><span class="hp-ok">{!! $hpCheck !!}</span>Sent to <span data-count-to="940">940</span> followers</span>
+                                        </span>
+                                    </span>
+                                    <span class="hp-chip hp-mini" style="--i: 4;">
+                                        <span class="hp-mini-head is-ad"><i></i><span><b data-cast="venue">The Blue Note</b><small>Sponsored</small></span></span>
+                                        <span class="hp-mini-body">
+                                            <span class="hp-mini-hero is-ad" data-cast="event">Jazz Night</span>
+                                            <span class="hp-mini-foot"><span class="hp-mini-cta">Learn More</span></span>
+                                        </span>
+                                    </span>
+                                </div>
+                            </div></div>
+                        </article>
+
+                        <article id="grow" class="hp-beat">
+                            <div class="hp-beat-copy">
+                                <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-now"></i><i></i></span>Promote</span> Grow your audience<span class="sr-only">: </span></span>Keep them <span class="hp-ink-grad">coming back.</span></h4>
+                                {{-- app:send-event-announcements, hourly on both rails: CONFIRMED
+                                     role_subscribers get one digest per batch of newly published
+                                     public events. Account followers are NOT included - they are
+                                     reached only by a newsletter the owner writes. --}}
+                                <p>Visitors leave an email address and get a digest automatically when you publish new events. Write a newsletter yourself whenever there is more to say.</p>
+                                <div class="hp-blurbs">
+                                    <div class="hp-blurb">
+                                        <span class="hp-ico bg-emerald-100 dark:bg-emerald-500/20"><svg class="text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['chart'] !!}</svg></span>
+                                        <div>
+                                            <h5>Built-in Analytics</h5>
+                                            <p>Page views, traffic sources, devices, check-ins and revenue per event, on three tabs. Built in and first-party, so no Google Analytics account is required.</p>
+                                            <a href="{{ route('marketing.analytics') }}" class="hp-more" aria-label="Learn more about built-in analytics">Learn more {!! $hpArrow !!}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hp-objwrap"><div class="hp-obj hp-obj-grow" data-reveal="panel" aria-hidden="true">
+                                <div class="hp-card hp-chart">
+                                    <div class="hp-chart-head">
+                                        <strong data-count-to="12,480">12,480</strong>
+                                        <span>page views this week</span>
+                                    </div>
+                                    <div class="hp-bars">
+                                        <div class="es-bar" style="height: 24%; --bd: 0.2s;"></div>
+                                        <div class="es-bar" style="height: 31%; --bd: 0.28s;"></div>
+                                        <div class="es-bar" style="height: 48%; --bd: 0.36s;"></div>
+                                        <div class="es-bar" style="height: 44%; --bd: 0.44s;"></div>
+                                        <div class="es-bar" style="height: 72%; --bd: 0.52s;"></div>
+                                        <div class="es-bar is-peak" style="height: 100%; --bd: 0.6s;"></div>
+                                        <div class="es-bar" style="height: 58%; --bd: 0.68s;"></div>
+                                    </div>
+                                    <div class="hp-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span class="is-peak">Sat</span><span>Sun</span></div>
+                                </div>
+                                <div class="hp-grow-row">
+                                    <div class="hp-card hp-fans">
+                                        <span class="hp-faces">
+                                            <i style="background: #3b82f6;">M</i><i style="background: #0ea5e9;">J</i><i style="background: #06b6d4;">A</i><i style="background: #10b981;">S</i><i class="is-more">+936</i>
+                                        </span>
+                                        <div><strong>940</strong><span>followers</span></div>
+                                    </div>
+                                    <div class="hp-card hp-sent">
+                                        <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['mail'] !!}</svg></span>
+                                        {{-- The digest, not a second newsletter: app:send-event-announcements
+                                             mails confirmed subscribers by itself when new public events are
+                                             published, and does not draw on the newsletter allowance. --}}
+                                        <div><strong>New dates announced</strong><span>Digest sent automatically</span></div>
+                                        <span class="hp-ok">{!! $hpCheck !!}</span>
+                                    </div>
+                                </div>
+                            </div></div>
+                        </article>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Act three of three: sell, which ends on the night of the show -->
+        <div id="sell" class="hp-verb">
+            <div class="hp-vband">
+                <div class="hp-wrap is-hung">
+                    <div class="hp-vrow">
+                        <header class="hp-vcard" data-reveal>
+                            <p class="hp-vcard-ix" aria-hidden="true">03 / 03</p>
+                            <span class="hp-vbars" aria-hidden="true"><i class="is-done"></i><i class="is-done"></i><i class="is-now"></i></span>
+                            <h3 class="hp-vcard-word"><span class="sr-only">Part 3 of 3: </span><span class="hp-ink-grad">Sell.</span></h3>
+                            <ul class="hp-vcard-has">
+                                <li><a href="#tickets">Ticketing {!! $hpArrow !!}</a></li>
+                                <li><a href="#doors">QR Check-ins {!! $hpArrow !!}</a></li>
+                            </ul>
+                        </header>
+                    </div>
+                </div>
+            </div>
+            <div class="hp-wrap is-hung">
+                <div class="hp-run">
+                    <div class="hp-step" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-done"></i><i class="is-now"></i></span><i>Sell</i><b>03 / 03</b></div>
+                    <div class="hp-beats">
+
+                        <article id="tickets" class="hp-beat">
+                            <div class="hp-beat-copy">
+                                <h4 class="hp-h3"><span class="hp-kicker">Ticketing<span class="sr-only">: </span></span>Tickets on sale. <span class="hp-ink-grad">No platform fees.</span></h4>
+                                <p>Multiple ticket types, add-ons, promo codes and reserved seating. Switch on the "Notify me" card and, before tickets go on sale, visitors can ask to be told when they do.</p>
+                                <p class="hp-paid">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">{!! $hpIcon['lock'] !!}</svg>
+                                    Get paid by Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
+                                </p>
+                                <div class="hp-actions">
+                                    <a href="{{ app_url('/sign_up') }}" class="hp-btn hp-btn-primary is-small" data-claim-link><span data-claim-label="Get started">Get started</span> {!! $hpArrow !!}</a>
+                                    <a href="#fees" class="hp-more">Compare the fees {!! $hpArrow !!}</a>
+                                </div>
+                            </div>
+                            <div class="hp-objwrap"><div class="hp-obj hp-obj-sell" data-reveal="panel" aria-hidden="true">
+                                <div class="hp-card hp-checkout">
+                                    <div class="hp-checkout-head">
+                                        <span class="hp-tile"><b>{{ $wkSat->format('M') }}</b><i>{{ $wkSat->format('j') }}</i></span>
+                                        <div>
+                                            <strong data-cast="event">Jazz Night</strong>
+                                            <span>Sat <span data-cast="time">8:00 PM</span> · <span data-cast="venue">The Blue Note</span></span>
+                                        </div>
+                                    </div>
+                                    <div class="hp-tt">
+                                        <div><strong>General admission</strong><small>GA · 150 tickets</small></div>
+                                        <span class="hp-tt-price">$25</span>
+                                        <span class="hp-qty"><b>&minus;</b>2<b>+</b></span>
+                                    </div>
+                                    <div class="hp-tt">
+                                        <div><strong data-cast="tier2">VIP</strong><small data-cast="tier2note">Early entry</small></div>
+                                        <span class="hp-tt-price">$45</span>
+                                        <span class="hp-qty"><b>&minus;</b>0<b>+</b></span>
+                                    </div>
+                                    <div class="hp-tt">
+                                        <div><strong data-cast="addon">Parking</strong><small>Add-on</small></div>
+                                        <span class="hp-tt-price">$8</span>
+                                        <span class="hp-qty"><b>&minus;</b>1<b>+</b></span>
+                                    </div>
+                                    <div class="hp-code">Promo code <b></b></div>
+                                    <div class="hp-sum"><span>Tickets and add-ons</span><b>$58</b></div>
+                                    <div class="hp-sum is-zero"><span>Platform fee</span><b>0%</b></div>
+                                    <div class="hp-pay">Checkout · $58</div>
+                                </div>
+                                <div class="hp-zero"><b>0%</b><span>platform<br>fees</span></div>
+                                <p class="hp-payout">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['lock'] !!}</svg>
+                                    Payments land in your own Stripe or PayPal account, not ours
+                                </p>
+                            </div></div>
+                        </article>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- The night of the show, the full width of the window -->
+            <div class="hp-night">
+                <div class="hp-wrap is-hung">
+                    <div class="hp-run">
+                        <div class="hp-step" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-done"></i><i class="is-now"></i></span><i>Sell</i><b>03 / 03</b></div>
+                        <div class="hp-beats">
+
+                            <article id="doors" class="hp-beat">
+                                <div class="hp-beat-copy">
+                                    <h4 class="hp-h3"><span class="hp-kicker"><span class="hp-kicker-act" aria-hidden="true"><span class="hp-vbars"><i class="is-done"></i><i class="is-done"></i><i class="is-now"></i></span>Sell</span> QR Check-ins<span class="sr-only">: </span></span>Doors <span class="hp-ink-grad">open.</span></h4>
+                                    <p>Every ticket carries a QR code you scan at the door, on any plan, with zero platform fees.</p>
+                                    <p class="hp-doors" aria-hidden="true"><span><span data-cast="verb">Doors</span><b data-cast="time">8:00 PM</b></span><span>Checked in<b data-count-to="142">142</b></span><span>Tickets<b>150</b></span></p>
+                                    <p style="margin-top: 1.5rem;">
+                                        <a href="{{ marketing_url('/features/ticketing') }}" class="hp-more" aria-label="Learn more about ticketing and QR check-ins">Learn more {!! $hpArrow !!}</a>
+                                    </p>
+                                </div>
+                                <div class="hp-objwrap"><div class="hp-obj hp-obj-door" data-reveal="panel" aria-hidden="true">
+                                    <div class="hp-beams"></div>
+                                    <div class="hp-ticket-wrap" data-tilt="12">
+                                        <div class="hp-ticket es-tilt-inner">
+                                            <div class="hp-ticket-head">
+                                                <small>Event Schedule</small>
+                                                <strong data-cast="event">Jazz Night</strong>
+                                                <span>{{ $wkSat->format('D, M j') }} · <span data-cast="time">8:00 PM</span></span>
+                                            </div>
+                                            <div class="hp-ticket-body">
+                                                <div class="hp-ticket-qr">
+                                                    <svg viewBox="0 0 29 29" fill="currentColor"><path d="{{ $hpQr }}"/></svg>
+                                                    <div class="es-laser"></div>
+                                                </div>
+                                                <div class="hp-ticket-foot"><span>GA x1</span><span>#0042</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="hp-chip hp-chip-in" style="--i: 1;"><span class="hp-ok">{!! $hpCheck !!}</span>Checked in</span>
+                                </div></div>
+                            </article>
+
                         </div>
                     </div>
-                    <div class="hp-objwrap"><div class="hp-obj hp-obj-grow" data-reveal="panel" aria-hidden="true">
-                        <div class="hp-card hp-chart">
-                            <div class="hp-chart-head">
-                                <strong data-count-to="12,480">12,480</strong>
-                                <span>page views this week</span>
-                            </div>
-                            <div class="hp-bars">
-                                <div class="es-bar" style="height: 24%; --bd: 0.2s;"></div>
-                                <div class="es-bar" style="height: 31%; --bd: 0.28s;"></div>
-                                <div class="es-bar" style="height: 48%; --bd: 0.36s;"></div>
-                                <div class="es-bar" style="height: 44%; --bd: 0.44s;"></div>
-                                <div class="es-bar" style="height: 72%; --bd: 0.52s;"></div>
-                                <div class="es-bar is-peak" style="height: 100%; --bd: 0.6s;"></div>
-                                <div class="es-bar" style="height: 58%; --bd: 0.68s;"></div>
-                            </div>
-                            <div class="hp-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span class="is-peak">Sat</span><span>Sun</span></div>
-                        </div>
-                        <div class="hp-grow-row">
-                            <div class="hp-card hp-fans">
-                                <span class="hp-faces">
-                                    <i style="background: #3b82f6;">M</i><i style="background: #0ea5e9;">J</i><i style="background: #06b6d4;">A</i><i style="background: #10b981;">S</i><i class="is-more">+936</i>
-                                </span>
-                                <div><strong>940</strong><span>followers</span></div>
-                            </div>
-                            <div class="hp-card hp-sent">
-                                <span class="hp-ico bg-sky-100 dark:bg-sky-500/20"><svg class="text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $hpIcon['mail'] !!}</svg></span>
-                                {{-- The digest, not a second newsletter: app:send-event-announcements
-                                     mails confirmed subscribers by itself when new public events are
-                                     published, and does not draw on the newsletter allowance. --}}
-                                <div><strong>New dates announced</strong><span>Digest sent automatically</span></div>
-                                <span class="hp-ok">{!! $hpCheck !!}</span>
-                            </div>
-                        </div>
-                    </div></div>
-                </article>
-
+                </div>
+                {{-- The room: one light for each of the 150 tickets, in rows that run the width of the
+                     window and stand back from it, 142 of them coming on as the band arrives. Which
+                     eight stay dark, and the order the rest come on in, are fixed sums, not chance:
+                     the page is cached. --}}
+                <div class="hp-room" data-reveal aria-hidden="true">
+                    <p class="hp-room-cap"><b data-count-to="142">142</b> of 150 through the door</p>
+                    <div class="hp-crowd">
+                        @for ($row = 0; $row < 5; $row++)
+                            <span>
+                                @for ($seat = $row * 30; $seat < $row * 30 + 30; $seat++)
+                                    <i @class(['is-in' => ! in_array($seat, [7, 23, 41, 58, 76, 97, 118, 139], true)]) style="--i: {{ ($seat * 37) % 150 }};"></i>
+                                @endfor
+                            </span>
+                        @endfor
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -3275,7 +3548,7 @@
             repeats it, the visitor's poster on the wall (and the large one in the finale) takes
             it, and so do the mock-ups that say whose schedule this is (data-cast="venue" and its
             address). Cleared, they go back to the cast that is showing.
-         2b. The switch above the week re-casts the mock-ups (data-cast) from the list the server
+         2b. The switch above the three acts re-casts the mock-ups (data-cast) from the list the server
             printed: a jazz club, a comedy night, a yoga studio, a street festival. Names, times
             and the poster's picture only.
          3. The two sliders above the fee calculator write into the calculator's own number
@@ -3385,7 +3658,7 @@
                     }
                 });
                 if (castLabel) {
-                    castLabel.textContent = typed ? 'Follow ' + title + ' for a week as' : 'Follow the week of';
+                    castLabel.textContent = typed ? 'See ' + title + ' as' : 'See it as';
                 }
                 if (castImg) {
                     var plainPoster = !cast.img;

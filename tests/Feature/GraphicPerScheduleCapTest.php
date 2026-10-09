@@ -315,10 +315,11 @@ class GraphicPerScheduleCapTest extends TestCase
         $this->assertStringContainsString('Marlow Trio', $capped->json('text'));
     }
 
-    public function test_graphic_page_renders_both_copies_of_the_control(): void
+    public function test_graphic_page_renders_the_control_once(): void
     {
-        // The settings panel is duplicated for desktop and mobile and kept in sync by
-        // hand, so a control that only lands in one copy silently stops working there.
+        // The settings used to be written twice, for a desktop and for a phone, and kept in
+        // step by hand, so this asserted both copies. The page is one form at every width now:
+        // a second copy coming back is the thing to catch.
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'curator');
 
@@ -326,9 +327,9 @@ class GraphicPerScheduleCapTest extends TestCase
             ->get(route('event.generate_graphic', ['subdomain' => $role->subdomain]));
 
         $response->assertOk();
-        $response->assertSee('id="max_per_schedule"', false);
-        $response->assertSee('id="max_per_schedule_mobile"', false);
-        $response->assertSee(__('messages.max_per_schedule'), false);
+        $this->assertSame(1, substr_count($response->getContent(), 'id="max_per_schedule"'));
+        $response->assertDontSee('_mobile"', false);
+        $response->assertSee(__('messages.graphic_per_schedule'), false);
     }
 
     public function test_saved_settings_accept_and_persist_the_cap(): void

@@ -151,6 +151,17 @@ class ApiAuthController extends Controller
                 ], 422);
             }
 
+            // As on the sign-up page: off hosted nothing has shown that the caller reads this
+            // address, so a waiting account is mailed its set-password link and not handed over.
+            if (! config('app.hosted')) {
+                \App\Utils\StubAccountUtils::send($existingUser);
+
+                return response()->json([
+                    'error' => 'Validation failed',
+                    'errors' => ['email' => ['This address already has an account waiting. A link to set its password has been emailed to it.']],
+                ], 422);
+            }
+
             // Upgrade stub user (keep its original acquisition context if set)
             $existingUser->update([
                 'name' => $request->name,

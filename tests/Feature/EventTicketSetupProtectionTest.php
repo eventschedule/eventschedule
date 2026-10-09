@@ -130,7 +130,9 @@ class EventTicketSetupProtectionTest extends TestCase
             'curators' => [UrlUtils::encodeId($curator->id)],
         ])->assertRedirect()->assertSessionHasNoErrors();
 
-        $this->assertSame('Renamed', Event::find($event->id)->name, 'the save itself went through');
+        // Since 2026-10 a curator that only lists an event saves nothing of it (EventListingRightsTest),
+        // so the setup is safe twice over: the save is refused before the guard below is reached.
+        $this->assertNotSame('Renamed', Event::find($event->id)->name);
         $this->assertSame($before, $this->ticketSetup($event));
     }
 
@@ -158,7 +160,9 @@ class EventTicketSetupProtectionTest extends TestCase
             'promo_codes' => [['code' => 'CURATORCODE', 'type' => 'percentage', 'value' => 100, 'is_active' => 1]],
         ])->assertRedirect()->assertSessionHasNoErrors();
 
-        $this->assertSame('Renamed', Event::find($event->id)->name, 'the save itself went through');
+        // Since 2026-10 a curator that only lists an event saves nothing of it (EventListingRightsTest),
+        // so the setup is safe twice over: the save is refused before the guard below is reached.
+        $this->assertNotSame('Renamed', Event::find($event->id)->name);
         $this->assertSame($before, $this->ticketSetup($event));
     }
 
@@ -237,14 +241,13 @@ class EventTicketSetupProtectionTest extends TestCase
     {
         [, , $event, , $curatorUser, $curator] = $this->listedEvent();
 
-        $html = $this->editPage($curatorUser, $curator, $event);
+        // Since 2026-10 a curator that only lists an event is not given its form at all.
+        $response = $this->actingAs($curatorUser)->get(route('event.edit', ['subdomain' => $curator->subdomain, 'hash' => UrlUtils::encodeId($event->id)]));
 
-        $this->assertStringNotContainsString('id="section-tickets"', $html, 'sanity check: this user is refused the panel');
+        $response->assertRedirect();
         foreach (self::SECRETS as $secret) {
-            $this->assertStringNotContainsString($secret, $html);
+            $this->assertStringNotContainsString($secret, (string) $response->getContent());
         }
-        // The page still builds its ticket list, just an empty one, so the form's script runs.
-        $this->assertMatchesRegularExpression('/tickets: \[\]\.map\(/', $html);
     }
 
     /** Control: the owner's page still carries all of it. */

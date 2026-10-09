@@ -9,7 +9,9 @@ use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
- * The marketing homepage, as rebuilt in 2026-10 ("one show, start to finish").
+ * The marketing homepage, as rebuilt in 2026-10 ("one show, start to finish"). Its features were
+ * the days of that show's week at first; they are the three verbs of the headline and of the film
+ * (plan, promote, sell) since later the same month.
  *
  * The page is one Blade view whose moving parts are wired together by names: a claim box and the
  * links that carry its name, a switch and the mock-up strings it re-casts, two sliders and the
@@ -100,11 +102,11 @@ class HomepageTest extends TestCase
         $x = $this->xpath($html);
         $followers = $x->query('//a[@data-claim-link]');
 
-        // Wednesday's and Friday's buttons and the line under the events band. (The rail's last
-        // card is a fourth, on an install that has events to show.)
+        // The buttons under "Share your link" and "Ticketing" and the line under the events band.
+        // (The rail's last card is a fourth, on an install that has events to show.)
         $this->assertGreaterThanOrEqual(3, $followers->length);
-        $this->assertSame(2, $x->query('//article['.$this->has('hp-day').']//a[@data-claim-link]')->length,
-            'the week has a sign-up button on Wednesday and one on Friday, and both carry the name');
+        $this->assertSame(2, $x->query('//article['.$this->has('hp-beat').']//a[@data-claim-link]')->length,
+            'Promote has a sign-up button and Sell has one, and both carry the name');
         foreach ($followers as $link) {
             $this->assertStringContainsString('/sign_up', $link->getAttribute('href'));
         }
@@ -146,63 +148,219 @@ class HomepageTest extends TestCase
             'a mock address bar is back on a hardcoded domain');
     }
 
-    // ------------------------------------------------------------- the week
+    // ------------------------------------------------------------- the three acts
 
     /**
-     * The week is always the week after next, worked out from today. Today's page before the
-     * redesign printed "Tue Jul 15" and "Sat Jul 18", which are two different years.
+     * The features are the three verbs of the headline and of the film, in the film's order, two
+     * features to an act. The card an act opens on, its tile in the margin and the links on the
+     * card are three copies of the same facts, written by hand, so each is read back here.
      */
-    public function test_the_week_is_one_real_week_whatever_today_is(): void
+    public function test_the_features_are_three_acts_in_the_order_of_the_film(): void
     {
-        foreach (['2026-10-08', '2026-12-21', '2026-12-28', '2027-01-18', '2027-04-19'] as $today) {
+        $x = $this->xpath($this->html());
+        $acts = $x->query('//section[@id="features"]/div['.$this->has('hp-verb').']');
+
+        $this->assertSame(3, $acts->length, 'plan, promote and sell');
+
+        $expected = [
+            'plan' => ['Plan', ['how-it-works', 'appointments']],
+            'promote' => ['Promote', ['share', 'grow']],
+            'sell' => ['Sell', ['tickets', 'doors']],
+        ];
+        $n = 0;
+        foreach ($expected as $id => [$word, $features]) {
+            $act = $acts->item($n++);
+            $this->assertSame($id, $act->getAttribute('id'), "act {$n} is not {$id}");
+
+            $cards = $x->query('.//header['.$this->has('hp-vcard').']', $act);
+            $this->assertSame(1, $cards->length, "{$id} does not open on one card");
+            $card = $cards->item(0);
+            $this->assertSame("Part {$n} of 3: {$word}.", $this->text($x->query('.//h3', $card)->item(0)));
+            // The verb and the list start hidden where motion is allowed, and it is this
+            // attribute that has the shared script show them.
+            $this->assertTrue($card->hasAttribute('data-reveal'), "nothing would ever reveal the {$id} card's verb");
+            $this->assertSame(1, $x->query('.//h3/span['.$this->has('sr-only').']', $card)->length);
+            $index = $x->query('.//p['.$this->has('hp-vcard-ix').']', $card)->item(0);
+            $this->assertSame("0{$n} / 03", $this->text($index));
+            $this->assertSame('true', $index->getAttribute('aria-hidden'), 'the count is read out twice: the heading already says "Part n of 3"');
+            $this->assertSame('true', $x->query('./span['.$this->has('hp-vbars').']', $card)->item(0)->getAttribute('aria-hidden'));
+            $this->assertBarsReach($x, $card, $n, "the {$id} card");
+
+            $ids = [];
+            foreach ($x->query('.//article['.$this->has('hp-beat').']', $act) as $feature) {
+                $ids[] = $feature->getAttribute('id');
+                $this->assertSame(1, $x->query('.//h4['.$this->has('hp-h3').']', $feature)->length,
+                    'a feature is titled one level under its act');
+            }
+            $this->assertSame($features, $ids, "{$id} does not hold its two features in order");
+
+            // The card's running order: each link leads to one of the act's features, and is
+            // called what that feature calls itself.
+            $links = [];
+            foreach ($x->query('.//a[@href]', $card) as $link) {
+                $to = ltrim($link->getAttribute('href'), '#');
+                $links[] = $to;
+                $kicker = $this->text($x->query('//article[@id="'.$to.'"]//h4/span['.$this->has('hp-kicker').']')->item(0));
+                $this->assertStringContainsString($this->text($link), $kicker, "the {$id} card calls #{$to} something its own heading does not");
+            }
+            $this->assertSame($features, $links, "the {$id} card's links do not lead to its own features");
+
+            // One tile to each piece of the act (Sell has two pieces: the second is the night),
+            // and it is the card again: the same bars, the same count, the same verb.
+            $runs = $x->query('.//div['.$this->has('hp-run').']', $act);
+            $this->assertSame($id === 'sell' ? 2 : 1, $runs->length);
+            foreach ($runs as $run) {
+                $tiles = $x->query('./div['.$this->has('hp-step').']', $run);
+                $this->assertSame(1, $tiles->length, "a piece of {$id} has no tile of its own, or two");
+                $tile = $tiles->item(0);
+                $this->assertSame('true', $tile->getAttribute('aria-hidden'));
+                $this->assertSame("0{$n} / 03", $this->text($x->query('./b', $tile)->item(0)));
+                $this->assertSame($word, $this->text($x->query('./i', $tile)->item(0)));
+                $this->assertBarsReach($x, $tile, $n, "a {$id} tile");
+            }
+            $this->assertSame($runs->length, $x->query('.//div['.$this->has('hp-step').']', $act)->length);
+
+            // A phone has no margin for the tile: there an act's second feature names its act in
+            // front of its own name, and its first, right under the card, does not.
+            $this->assertSame(0, $x->query('.//article[@id="'.$features[0].'"]//*['.$this->has('hp-kicker-act').']')->length);
+            $named = $x->query('.//article[@id="'.$features[1].'"]//h4//span['.$this->has('hp-kicker').']/span['.$this->has('hp-kicker-act').']');
+            $this->assertSame(1, $named->length, "on a phone #{$features[1]} no longer says which act it is in");
+            $this->assertSame($word, $this->text($named->item(0)));
+            $this->assertSame('true', $named->item(0)->getAttribute('aria-hidden'));
+        }
+
+        // Sell ends on the night of the show, and the section ends with it: the band dawns into
+        // the ground of the section underneath, which only holds while nothing stands between.
+        $night = $x->query('//section[@id="features"]//div['.$this->has('hp-night').']');
+        $this->assertSame(1, $night->length);
+        $this->assertSame(1, $x->query('.//article[@id="doors"]', $night->item(0))->length, 'the door is no longer in the night');
+        $this->assertSame(0, $x->query('following-sibling::*', $night->item(0))->length, 'something follows the night inside Sell');
+        $this->assertSame(0, $x->query('//section[@id="features"]/div[@id="sell"]/following-sibling::*')->length,
+            'something follows Sell inside the section');
+        // The band's dawn is painted in the ground of an .hp-alt section (--hp-dawn), so that is
+        // what has to come next, with nothing of any kind in between.
+        $next = $x->query('//section[@id="features"]/following-sibling::*[1]')->item(0);
+        $this->assertSame('section', $next->nodeName);
+        $this->assertSame('open-source', $next->getAttribute('id'));
+        $this->assertStringContainsString('hp-alt', $next->getAttribute('class'));
+    }
+
+    /** Three bars: the acts before this one are done, this one's is lit, the rest wait. */
+    private function assertBarsReach(\DOMXPath $x, \DOMNode $in, int $act, string $where): void
+    {
+        $bars = $x->query('.//span['.$this->has('hp-vbars').']/i', $in);
+        $this->assertSame(3, $bars->length, "{$where} does not have three bars");
+        foreach ($bars as $at => $bar) {
+            $this->assertSame($at < $act - 1 ? 'is-done' : ($at === $act - 1 ? 'is-now' : ''), $bar->getAttribute('class'),
+                "bar {$at} of {$where}");
+        }
+    }
+
+    /**
+     * The card's bars, its verb and the tile that follows it move on their own account, and the
+     * reduced-motion block at the foot of the stylesheet does not name them: what stills them is
+     * that every one of those rules sits behind the motion gate (html.es-anim is only set where
+     * motion is allowed, and never without JavaScript). A rule written without the gate would
+     * also leave the verb hidden for a visitor with scripts off. The one thing left outside the
+     * gate is the tile's on-and-off switch, which is a single step and moves nothing.
+     */
+    public function test_the_cards_own_motion_is_behind_the_motion_gate(): void
+    {
+        $css = substr($this->source(), 0, strpos($this->source(), '</style>'));
+        $moving = 0;
+
+        foreach (preg_split('/\R/', $css) as $line) {
+            $rule = trim($line);
+            $aboutTheCard = str_contains($rule, '.hp-vcard') || str_contains($rule, '.hp-vband') || str_contains($rule, '.hp-step');
+            $moves = preg_match('/\btransition\b|:not\(\.is-revealed\)|scaleX\(0\)|animation-name:|animation: (?!hp-step-on steps\(1, end\))/', $rule) === 1;
+            if (! $aboutTheCard || ! $moves || str_starts_with($rule, '.hp-vcard-has')) {
+                continue;
+            }
+            $moving++;
+            $this->assertStringStartsWith('html.es-anim', $rule, 'a rule that moves or hides part of an act card is not behind the motion gate');
+        }
+        $this->assertGreaterThanOrEqual(7, $moving, 'the rules this test reads have been renamed away from it');
+
+        $this->assertStringContainsString('html.es-anim .hp-night .hp-run > .hp-step { animation-name: hp-step-in;', $css);
+        $this->assertSame(1, preg_match('/@keyframes hp-step-on \{(.*?)\}\s*@keyframes/s', $css, $step));
+        $this->assertStringNotContainsString('transform', $step[1], 'the switch a reduced-motion visitor gets has started to move');
+    }
+
+    /** The week is gone, and a day's name in a title would bring half of it back. */
+    public function test_no_title_in_the_three_acts_names_a_day(): void
+    {
+        $html = $this->html();
+        $x = $this->xpath($html);
+        $titles = $x->query('//section[@id="features"]//*[self::h2 or self::h3 or self::h4]');
+
+        $this->assertSame(10, $titles->length, 'the section, its three acts and their six features');
+        foreach ($titles as $title) {
+            $this->assertDoesNotMatchRegularExpression('/\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day\b/', $this->text($title));
+        }
+
+        // The switch's label is written twice: by the server, and by the script that puts it back
+        // when a typed name is cleared.
+        $label = $this->text($x->query('//*[@data-cast-label]')->item(0));
+        $this->assertSame(1, preg_match("/castLabel\\.textContent = typed \\? .+? : '([^']+)';/", $html, $match));
+        $this->assertSame($label, $match[1]);
+        $this->assertStringNotContainsStringIgnoringCase('week', $label);
+    }
+
+    /**
+     * The show is always on the Saturday of the week after next and the appointment on the
+     * Tuesday before it, worked out from today. The page before the 2026-10 redesign printed
+     * "Tue Jul 15" and "Sat Jul 18", which are two different years.
+     */
+    public function test_the_show_and_the_booking_share_one_real_week_whatever_today_is(): void
+    {
+        // The fourth is a week whose Tuesday and Saturday fall in different months.
+        foreach (['2026-10-08', '2026-12-21', '2026-12-28', '2027-03-15', '2027-04-19'] as $today) {
             $this->travelTo(Carbon::parse($today.' 10:00:00'));
 
             $x = $this->xpath($this->html());
-            $tiles = $x->query('//div['.$this->has('hp-date').']');
-            $this->assertSame(6, $tiles->length, "on {$today}: six days, Monday to Sunday without Thursday");
 
-            $dates = [];
-            foreach ($tiles as $tile) {
-                $shown = $this->text($x->query('./b', $tile)->item(0)).' '.$this->text($x->query('./i', $tile)->item(0)).' '.$this->text($x->query('./span', $tile)->item(0));
-                $found = null;
-                for ($day = 0; $day <= 28; $day++) {
-                    $candidate = Carbon::now()->startOfDay()->addDays($day);
-                    if ($candidate->format('D j M') === $shown) {
-                        $found = $candidate;
-                        break;
-                    }
+            // The ticket is for the show: "Sat, Oct 24 · 8:00 PM".
+            $ticket = $this->text($x->query('//div['.$this->has('hp-ticket-head').']/span')->item(0));
+            $show = null;
+            for ($day = 0; $day <= 28; $day++) {
+                $candidate = Carbon::now()->startOfDay()->addDays($day);
+                if (str_starts_with($ticket, $candidate->format('D, M j').' ')) {
+                    $show = $candidate;
+                    break;
                 }
-                $this->assertNotNull($found, "on {$today}: \"{$shown}\" is not a real day in the next four weeks");
-                $dates[] = $found;
             }
+            $this->assertNotNull($show, "on {$today}: \"{$ticket}\" is not a real day in the next four weeks");
+            $this->assertTrue($show->isSaturday(), "on {$today}: the show is not on a Saturday");
+            $this->assertTrue($show->copy()->startOfWeek(Carbon::MONDAY)->gt(Carbon::now()), "on {$today}: the show's week has already begun");
 
-            $this->assertTrue($dates[0]->isMonday(), "on {$today}: the week does not start on a Monday");
-            $this->assertTrue($dates[0]->gt(Carbon::now()), "on {$today}: the week has already begun");
-            foreach ([0, 1, 2, 4, 5, 6] as $index => $offset) {
-                $this->assertTrue($dates[$index]->isSameDay($dates[0]->copy()->addDays($offset)),
-                    "on {$today}: tile {$index} is not day {$offset} of the same week");
-            }
+            // The poster and the event read off it say the same day.
+            $this->assertSame($show->format('D j M'), $this->text($x->query('//div['.$this->has('hp-poster-top').']/span[2]')->item(0)));
+            $this->assertStringStartsWith($show->format('D, M j').' ', $this->text($x->query('//div['.$this->has('hp-fields').']/div[1]')->item(0)));
 
-            // The booking page mock-up: whole weeks, and the one day picked is the week's Tuesday.
+            // The booking page mock-up: whole weeks, and the one day picked is that week's Tuesday.
+            $booked = $show->copy()->subDays(4);
+            $this->assertSame($booked->format('D, M j'), $this->text($x->query('//div['.$this->has('hp-slots').']/small')->item(0)));
+            $this->assertSame($booked->format('F'), $this->text($x->query('//div['.$this->has('hp-month-head').']/strong')->item(0)));
             $cells = $x->query('//div['.$this->has('hp-month').']/span');
             $this->assertGreaterThan(0, $cells->length);
             $this->assertSame(0, $cells->length % 7, "on {$today}: the booking month is not whole weeks");
             $picked = $x->query('//div['.$this->has('hp-month').']/span['.$this->has('is-pick').']');
             $this->assertSame(1, $picked->length, "on {$today}: exactly one day is picked");
-            $this->assertSame((string) $dates[1]->day, $this->text($picked->item(0)));
+            $this->assertSame((string) $booked->day, $this->text($picked->item(0)));
         }
     }
 
-    public function test_the_anchors_exist_and_friday_leads_to_the_calculator(): void
+    public function test_the_anchors_exist_and_ticketing_leads_to_the_calculator(): void
     {
         $x = $this->xpath($this->html());
 
-        foreach (['top', 'showcase', 'features', 'how-it-works', 'appointments', 'open-source', 'fees', 'more-features', 'discover', 'integrations', 'claim'] as $id) {
+        foreach (['top', 'showcase', 'features', 'plan', 'how-it-works', 'appointments', 'promote', 'share', 'grow', 'sell', 'tickets', 'doors', 'open-source', 'fees', 'more-features', 'discover', 'integrations', 'claim'] as $id) {
             $this->assertSame(1, $x->query('//*[@id="'.$id.'"]')->length, "#{$id} is gone or doubled");
         }
 
-        $this->assertSame(1, $x->query('//article['.$this->has('hp-day').']//a[@href="#fees"]')->length,
-            'the week no longer has its link down to the fee calculator');
+        $this->assertSame(1, $x->query('//article[@id="tickets"]//a[@href="#fees"]')->length,
+            'ticketing no longer has its link down to the fee calculator');
+        $this->assertSame(1, $x->query('//article['.$this->has('hp-beat').']//a[@href="#fees"]')->length);
         $this->assertSame(1, $x->query('//section[@id="top"]//a[@href="#showcase"][@data-video-open]')->length,
             'the hero no longer has its link to the film');
     }
@@ -475,7 +633,7 @@ class HomepageTest extends TestCase
     }
 
     /** Structured data may only describe what a visitor can read on the page. */
-    public function test_the_how_to_steps_are_days_of_the_week(): void
+    public function test_the_how_to_steps_are_features_a_visitor_can_read(): void
     {
         $html = $this->html();
         $steps = [];

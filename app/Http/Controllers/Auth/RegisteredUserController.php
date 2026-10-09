@@ -591,6 +591,19 @@ class RegisteredUserController extends Controller
                 ]);
             }
 
+            // Off hosted there is no code step, so nothing here has shown that this person reads
+            // the address. An account that is waiting for its owner (an invited team member,
+            // somebody who bought a ticket) is not handed to whoever types its address: the
+            // address is mailed its set-password link, as the login page does for it.
+            if (! config('app.hosted')) {
+                throw ValidationException::withMessages([
+                    'email' => [match (\App\Utils\StubAccountUtils::send($existingUser)) {
+                        \App\Utils\StubAccountUtils::THROTTLED => __('messages.login_password_link_already_sent'),
+                        default => __('messages.login_no_password_yet'),
+                    }],
+                ]);
+            }
+
             $existingUser->update([
                 'name' => $request->name,
                 'password' => Hash::make($request->password),

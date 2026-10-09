@@ -1152,6 +1152,7 @@ Console, then Deploy, as in [Every deploy](#every-deploy).
 - The new pages answer 200:
   - `/ticket-fee-calculator`
   - `/features/booking-requests`
+  - `/features/lineup`
   - `/event-landing-page`
   - `/ticketleap-alternative`
   - `/songkick-alternative`

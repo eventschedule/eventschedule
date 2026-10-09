@@ -2929,7 +2929,18 @@
 
     function clearVideos(url) {
       if (confirm(@json(__("messages.are_you_sure_clear_videos")))) {
-        window.location.href = url;
+        // Posted with the page's token: this removes something, so it is not an address to open.
+        var form = document.createElement('form');
+        var token = document.querySelector('meta[name="csrf-token"]');
+        var field = document.createElement('input');
+        form.method = 'POST';
+        form.action = url;
+        field.type = 'hidden';
+        field.name = '_token';
+        field.value = token ? token.getAttribute('content') : '';
+        form.appendChild(field);
+        document.body.appendChild(form);
+        form.submit();
       }
     }
 

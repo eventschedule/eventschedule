@@ -1105,6 +1105,26 @@
                     <p class="es-reel-muted text-sm">The REST API returns comments, photos and videos as one list, filtered by event, night or type. Approved rows by default, or the pending queue if you ask for it.</p>
                 </div>
             </div>
+
+            {{-- Not fan content: the organizer's own gallery, which the six above never mention.
+                 It stands under them because it is where an approved fan photo can end up. --}}
+            <div id="gallery" class="es-reel-card mt-4 scroll-mt-24 p-6 sm:p-8" data-reveal="panel">
+                <div class="grid gap-6 lg:grid-cols-2 lg:gap-12">
+                    <div>
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <h3 class="es-reel-ink text-xl font-bold">And a gallery that is yours</h3>
+                            <span class="es-reel-plan es-reel-plan-pro">Pro</span>
+                        </div>
+                        <p class="es-reel-muted">An event shows one flyer. The Gallery tab adds your own photos beside it, up to {{ \App\Utils\GalleryUtils::maxImages() }} of them: past editions, the room, the lineup. Guests swipe through them on the event page and open any one full screen.</p>
+                    </div>
+                    <ul class="es-reel-muted space-y-3 text-sm">
+                        <li>Drag the photos into order, and give each a caption and a photographer credit. The first one leads and is shown largest.</li>
+                        <li>Add from fan photos copies the approved ones you pick into the gallery, credited to whoever took them.</li>
+                        <li>The location a phone stores in a photo is removed before it is published.</li>
+                        <li>With no flyer, the gallery takes the flyer's place at the top of the event page.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 

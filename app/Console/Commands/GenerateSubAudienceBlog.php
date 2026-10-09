@@ -2,14 +2,17 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\PreviewsBlogPosts;
 use App\Models\BlogPost;
-use App\Utils\GeminiUtils;
+use App\Services\Blog\BlogWriter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class GenerateSubAudienceBlog extends Command
 {
+    use PreviewsBlogPosts;
+
     /**
      * The name and signature of the console command.
      *
@@ -19,6 +22,7 @@ class GenerateSubAudienceBlog extends Command
                             {--audience= : Generate for specific audience only (e.g., musicians, bars)}
                             {--sub-audience= : Generate for specific sub-audience key only (e.g., solo-artists)}
                             {--dry-run : Show what would be generated without creating}
+                            {--preview : Write the next post now, print each stage and save nothing}
                             {--all : Generate all missing posts (not just one)}';
 
     /**
@@ -31,7 +35,7 @@ class GenerateSubAudienceBlog extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(BlogWriter $writer)
     {
         // The blog is the marketing site's, so it exists on the nexus only (see routes/web.php).
         if (! config('app.is_nexus')) {
@@ -92,6 +96,7 @@ class GenerateSubAudienceBlog extends Command
                         'slug' => $slug,
                         'topic' => $subAudience['blog_topic'],
                         'features' => $subAudience['features'] ?? [],
+                        'page' => $audience['page'],
                     ];
                 }
             }
@@ -119,9 +124,25 @@ class GenerateSubAudienceBlog extends Command
             return 0;
         }
 
+        if ($this->option('preview')) {
+            shuffle($missing);
+            $item = $missing[0];
+            $this->info("Previewing: {$item['name']} ({$item['slug']})");
+
+            return $this->preview($writer->write(['topic' => $item['topic'], 'audience' => $this->audience($item)]));
+        }
+
         // Only generate posts ~70% of the time for a more natural posting pattern
         if (! $generateAll && rand(1, 100) > 70) {
             $this->info('Skipping generation this run (random cooldown for natural posting pattern).');
+
+            return 0;
+        }
+
+        // A post takes three model calls and a minute or two, so the other generator (or an
+        // admin) may be part-way through one whose row does not exist yet.
+        if (! BlogWriter::claim()) {
+            $this->info('Another blog post is being written. Skipping.');
 
             return 0;
         }
@@ -132,59 +153,47 @@ class GenerateSubAudienceBlog extends Command
         // Generate posts (one by default, all if --all flag is set)
         $toGenerate = $generateAll ? $missing : [array_shift($missing)];
 
-        foreach ($toGenerate as $item) {
-            $this->info("Generating blog post for: {$item['name']}");
-            $this->line("  Topic: {$item['topic']}");
+        try {
+            foreach ($toGenerate as $item) {
+                $this->info("Generating blog post for: {$item['name']}");
+                $this->line("  Topic: {$item['topic']}");
 
-            try {
-                // Get the parent page from config for internal linking
-                $parentPage = $config[$item['audience']]['page'];
-                $parentTitle = $config[$item['audience']]['title'];
+                try {
+                    $written = $writer->write(['topic' => $item['topic'], 'audience' => $this->audience($item)]);
 
-                // Generate the blog post content using Gemini
-                $result = GeminiUtils::generateBlogPost($item['topic'], $parentPage, $parentTitle, $item['features']);
+                    if ($written['post'] === null) {
+                        Log::warning("Sub-audience blog post for {$item['slug']}: nothing was written (".$written['error'].').');
+                        $this->error("  Nothing was written for {$item['name']}: ".$written['error'].'.');
 
-                if (empty($result) || empty($result['content'])) {
-                    $this->error("  Failed to generate content for {$item['name']}");
+                        continue;
+                    }
+
+                    // The configured slug, not one made from the title: the audience's card on
+                    // its marketing page links to it by this slug.
+                    $post = $writer->store($written, BlogWriter::SOURCE_AUDIENCE, $item['slug']);
+
+                    // Clear the cache for this slug so the "Learn More" link appears
+                    Cache::forget('sub_audience_blog_'.$item['slug']);
+
+                    if (! $post->is_published) {
+                        Log::warning("Sub-audience blog post for {$item['slug']} held as a draft: ".$post->held_reason, ['id' => $post->id]);
+                        $this->warn("  Held as a draft (ID: {$post->id}): ".str_replace("\n", '; ', (string) $post->held_reason));
+
+                        continue;
+                    }
+
+                    $this->info("  Created blog post: {$post->title} (ID: {$post->id})");
+
+                    $generated++;
+                } catch (\Exception $e) {
+                    report($e);
+                    $this->error("  Could not write the post for {$item['name']}.");
 
                     continue;
                 }
-
-                $rejection = BlogPost::qualityGateFailure($result);
-
-                if ($rejection !== null) {
-                    Log::warning("Sub-audience blog post for {$item['slug']} rejected by the quality gate: ".$rejection, ['title' => $result['title'] ?? null]);
-                    $this->warn('  Rejected by the quality gate: '.$rejection);
-
-                    continue;
-                }
-
-                // Create the blog post with the configured slug (not auto-generated)
-                $post = BlogPost::create([
-                    'title' => $result['title'],
-                    'slug' => $item['slug'], // Use the configured slug
-                    'content' => $result['content'],
-                    'excerpt' => $result['excerpt'] ?? null,
-                    'tags' => $result['tags'] ?? ['events', 'scheduling'],
-                    'meta_title' => $result['meta_title'] ?? $result['title'],
-                    'meta_description' => $result['meta_description'] ?? ($result['excerpt'] ?? null),
-                    'featured_image' => $result['featured_image'] ?? null,
-                    'author_name' => 'Event Schedule Team',
-                    'is_published' => true,
-                    'published_at' => now()->subSeconds(rand(0, 6 * 60 * 60)),
-                ]);
-
-                // Clear the cache for this slug so the "Learn More" link appears
-                Cache::forget('sub_audience_blog_'.$item['slug']);
-
-                $this->info("  Created blog post: {$post->title} (ID: {$post->id})");
-
-                $generated++;
-            } catch (\Exception $e) {
-                $this->error("  Error generating post for {$item['name']}: ".$e->getMessage());
-
-                continue;
             }
+        } finally {
+            BlogWriter::release();
         }
 
         $this->newLine();
@@ -195,5 +204,22 @@ class GenerateSubAudienceBlog extends Command
         }
 
         return 0;
+    }
+
+    /**
+     * What the writer needs to know about the audience a post is for.
+     *
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>
+     */
+    private function audience(array $item): array
+    {
+        return [
+            'slug' => $item['slug'],
+            'name' => $item['name'],
+            'page' => $item['page'],
+            'title' => $item['audience_title'],
+            'features' => $item['features'],
+        ];
     }
 }

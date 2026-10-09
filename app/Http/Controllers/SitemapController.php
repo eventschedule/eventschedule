@@ -483,6 +483,19 @@ class SitemapController extends Controller
             return;
         }
 
+        // The blog's section pages, once: on the page whose lower edge is open, which is exactly
+        // one of them (pageRanges()). A section is a page of its own from SECTION_MIN_POSTS
+        // posts; blog/index keeps a thinner one out of the index, so it is not listed here either.
+        if ($range['min'] === null && Route::has('blog.category')) {
+            $perSection = BlogPost::published()->selectRaw('category, count(*) as posts')->groupBy('category')->pluck('posts', 'category');
+
+            foreach (array_keys(BlogPost::CATEGORIES) as $section) {
+                if (($perSection[$section] ?? 0) >= BlogPost::SECTION_MIN_POSTS) {
+                    $write($this->urlNode(route('blog.category', $section)));
+                }
+            }
+        }
+
         $this->applyRange($this->blogQuery(), $range)
             ->orderBy('id')
             ->chunkById(self::HYDRATE_CHUNK, function ($posts) use ($write) {

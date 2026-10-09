@@ -343,10 +343,6 @@
                                class="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
                                 View on GitHub
                             </a>
-                            <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" rel="noopener noreferrer"
-                               class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/20">
-                                Discussions
-                            </a>
                             <a href="https://github.com/eventschedule/eventschedule/issues" target="_blank" rel="noopener noreferrer"
                                class="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-gray-300 transition-colors hover:text-white">
                                 Report an issue

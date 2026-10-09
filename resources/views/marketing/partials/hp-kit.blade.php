@@ -228,7 +228,7 @@
 
     {{-- ---- the feature-banner component ----
        The words on one side, and what they are about standing on a stage on the other, as the
-       days of the homepage's week do. The stage is the wide column; the object keeps the
+       features of the homepage's three acts do. The stage is the wide column; the object keeps the
        width it was drawn at and stands in the middle of it. --}}
     #hp .es-banner { background: transparent; }
     #hp .es-banner-row { align-items: stretch; }

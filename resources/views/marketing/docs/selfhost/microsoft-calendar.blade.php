@@ -470,7 +470,7 @@
                         <td>Re-run consent to obtain a refresh token</td>
                     </tr>
                     <tr>
-                        <td><code class="doc-inline-code">GET /microsoft-calendar/disconnect</code></td>
+                        <td><code class="doc-inline-code">POST /microsoft-calendar/disconnect</code></td>
                         <td>Signed in</td>
                         <td>Disconnect Outlook Calendar. Deletes the Graph subscriptions on the schedules you own, clears their sync direction and calendar selection, drops the stored event mappings, and clears the tokens</td>
                     </tr>

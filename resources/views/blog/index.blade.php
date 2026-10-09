@@ -1,41 +1,57 @@
 <x-marketing-layout :hp="true">
     @php
-        // Page 1 keeps the clean URL. Page 2+ self-canonicalizes, and the URL has to be byte-identical
-        // to the hrefs the paginator emits for rel=prev/next and its own links, so it is built by the
-        // paginator rather than hand-concatenated (today that form is "<base>?page=N", no slash).
-        // A canonical that pointed at page 1 while the page said noindex was a contradictory pair, and
-        // it hid 177 of 187 posts from indexable HTML.
-        //
-        // Filtered views (?tag=, month archives) stay noindex, and keep the query-stripped canonical:
-        // the paginator does not carry the filter into its links, so its URL would be the wrong page.
-        $isFiltered = $monthLabel || request('tag');
-        $blogCanonical = (! $isFiltered && $posts->currentPage() > 1)
-            ? $posts->url($posts->currentPage())
-            : url()->current();
-
-        // A page past the last one renders nothing; there is no point inviting a crawl of it.
-        $blogNoindex = $isFiltered || ($posts->currentPage() > 1 && $posts->isEmpty());
-
-        // Now that page 2+ is indexable, all 19 pages would otherwise ship the same title and the
-        // same description. Name the page in both so they are not 19 duplicates of each other.
+        // What this page is: the front page, a section, or a filtered list (a tag, a search, a
+        // month). The first two are pages in their own right; a filtered list is not.
+        $isFiltered = $tag !== null || $search !== '' || $monthLabel !== null;
+        $sectionName = $category ? $categories[$category]['name'] : null;
         $blogPage = $posts->currentPage();
+
+        // Page 1 keeps the clean URL; page 2+ names itself with the paginator's own URL, which is
+        // byte-identical to the hrefs it emits. A filtered list is noindex and names itself too:
+        // it used to be noindex AND canonical to the front page, two signals that disagree.
+        $blogBase = $category ? route('blog.category', $category) : route('blog.index');
+        $blogCanonical = $isFiltered ? url()->full() : ($blogPage > 1 ? $posts->url($blogPage) : $blogBase);
+
         $blogTitleSuffix = $blogPage > 1 ? ' - Page '.$blogPage : '';
         $blogDescSuffix = $blogPage > 1 ? ' Page '.$blogPage.'.' : '';
+
+        if ($search !== '') {
+            $blogHeading = 'Posts about “'.$search.'”';
+            $blogTitle = 'Search: '.$search.' - Blog';
+            $blogDescription = 'Posts on the Event Schedule blog that mention '.$search.'.';
+            $blogLine = null;
+        } elseif ($tag !== null) {
+            $blogHeading = 'Posts tagged '.$tag;
+            $blogTitle = $tag.' - Blog';
+            $blogDescription = 'Articles about '.$tag.' on the Event Schedule blog.';
+            $blogLine = null;
+        } elseif ($monthLabel) {
+            $blogHeading = 'Posts from '.$monthLabel;
+            $blogTitle = $monthLabel.' - Blog';
+            $blogDescription = 'Event Schedule blog posts from '.$monthLabel.'.';
+            $blogLine = null;
+        } elseif ($category) {
+            $blogHeading = $sectionName;
+            $blogTitle = $sectionName.' - Blog';
+            $blogLine = $categories[$category]['line'];
+            $blogDescription = $blogLine.' From the Event Schedule blog.';
+        } else {
+            $blogHeading = 'The Event Schedule blog';
+            $blogTitle = 'Blog';
+            $blogLine = 'Practical notes on running events: selling tickets, filling the room and keeping your calendar in step.';
+            $blogDescription = 'Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.';
+        }
+
+        // A section with a post or two is not yet a page worth a chip of its own.
+        $chipFloor = \App\Models\BlogPost::SECTION_MIN_POSTS;
     @endphp
-    @if(request('tag'))
-        <x-slot name="title">{{ request('tag') }} - Blog{{ $blogTitleSuffix }} | Event Schedule</x-slot>
-        <x-slot name="description">Articles about {{ request('tag') }} on the Event Schedule blog.{{ $blogDescSuffix }}</x-slot>
-    @elseif($monthLabel)
-        <x-slot name="title">{{ $monthLabel }} - Blog{{ $blogTitleSuffix }} | Event Schedule</x-slot>
-        <x-slot name="description">Event Schedule blog posts from {{ $monthLabel }}.{{ $blogDescSuffix }}</x-slot>
-    @else
-        <x-slot name="title">Blog{{ $blogTitleSuffix }} | Event Schedule</x-slot>
-        <x-slot name="description">Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.{{ $blogDescSuffix }}</x-slot>
-    @endif
-    <x-slot name="breadcrumbTitle">Blog</x-slot>
+    <x-slot name="title">{{ $blogTitle }}{{ $blogTitleSuffix }} | Event Schedule</x-slot>
+    <x-slot name="description">{{ $blogDescription }}{{ $blogDescSuffix }}</x-slot>
+    <x-slot name="breadcrumbTitle">{{ $sectionName ?? 'Blog' }}</x-slot>
     <x-slot name="canonical">{{ $blogCanonical }}</x-slot>
 
-    @if($blogNoindex)
+    {{-- Out of the index: a filtered list, a section too thin to be a page yet, and a page past the last one. --}}
+    @if($isFiltered || ($category && ($counts[$category] ?? 0) < $chipFloor) || ($blogPage > 1 && $posts->isEmpty()))
         <x-slot name="robots">noindex, follow</x-slot>
     @endif
 
@@ -48,36 +64,20 @@
     @endif
     </x-slot>
 
-    <style {!! nonce_attr() !!}>
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-    </style>
-
     <x-slot name="structuredData">
-    <!-- Blog ItemList Structured Data -->
     @php
         // Built as an array and emitted with SeoUtils::jsonLd: a Blade echo tag HTML-escapes but does
         // NOT JSON-escape, so a double quote in a post title used to invalidate the whole block.
         $blogPayload = [
             '@context' => 'https://schema.org',
             '@type' => 'Blog',
-            '@id' => route('blog.index').'#blog',
+            '@id' => blog_url().'#blog',
             'name' => 'Event Schedule Blog',
             'description' => 'Read the latest news, tips, and insights about event scheduling and ticketing from the Event Schedule team.',
             // The blog entity always lives at page 1; mainEntityOfPage is what ties it to the
             // page actually being served, so it has to follow the canonical.
             'url' => route('blog.index'),
+            'inLanguage' => 'en',
             'mainEntityOfPage' => [
                 '@type' => 'CollectionPage',
                 '@id' => $blogCanonical,
@@ -85,22 +85,27 @@
             'publisher' => \App\Utils\SeoUtils::organization(),
         ];
 
-        // Not $post: @php shares the view scope, and $post is the card loop's variable below.
-        foreach ($posts as $listed) {
-            $blogPayload['blogPost'][] = [
+        // Not $post: @php shares the view scope, and the card loop below has its own variable.
+        foreach (collect($lead ? [$lead] : [])->concat($posts->items()) as $listed) {
+            $entry = [
                 '@type' => 'BlogPosting',
                 'headline' => $listed->title,
-                'description' => $listed->excerpt,
                 'url' => route('blog.show', $listed->slug),
                 'mainEntityOfPage' => [
                     '@type' => 'WebPage',
                     '@id' => route('blog.show', $listed->slug),
                 ],
-                'image' => $listed->socialImageUrl() ?: config('app.url').'/images/social/home.jpg',
-                'datePublished' => $listed->published_at?->toISOString() ?: '',
-                'dateModified' => ($listed->updated_at ?: $listed->published_at)?->toISOString() ?: '',
+                'image' => $listed->socialImageUrl() ?: config('app.url').'/images/social/blog.jpg',
                 'author' => \App\Utils\SeoUtils::organizationRef(),
             ];
+            if ($listed->excerpt) {
+                $entry['description'] = $listed->excerpt;
+            }
+            if ($listed->published_at) {
+                $entry['datePublished'] = $listed->published_at->toISOString();
+                $entry['dateModified'] = ($listed->updated_at ?: $listed->published_at)->toISOString();
+            }
+            $blogPayload['blogPost'][] = $entry;
         }
     @endphp
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -108,204 +113,100 @@
     </script>
     </x-slot>
 
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-[#0a0a0f]">
-        <!-- Animated gradient orbs - larger and more prominent -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-blue-600/30 via-sky-600/20 to-transparent rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-r from-sky-600/25 to-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s;"></div>
-            <div class="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-gradient-to-l from-blue-600/20 to-cyan-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
-        </div>
+    @include('blog.partials.styles')
 
-        <!-- Grid pattern overlay -->
-        <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+    <section class="blog-top">
+        <div class="hp-hero-sky" aria-hidden="true"></div>
+        <div class="blog-wrap">
+            <div class="blog-top-row">
+                <div>
+                    @if($category || $isFiltered)
+                        <nav class="blog-crumbs" aria-label="Breadcrumb">
+                            <a href="{{ route('blog.index') }}">{{ __('messages.blog') }}</a>
+                            <span aria-hidden="true">/</span>
+                        </nav>
+                    @else
+                        <span class="hp-kicker">{{ __('messages.news_tips_insights') }}</span>
+                    @endif
 
-        <div class="relative z-10 py-24 sm:py-32 lg:py-40">
-            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-                <!-- Badge -->
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
-                    <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                    </svg>
-                    <span class="text-sm text-gray-300">{{ __('messages.news_tips_insights') }}</span>
+                    <h1>{{ $blogHeading }}@if($blogPage > 1)<span class="sr-only">, page {{ $blogPage }}</span>@endif</h1>
+                    @if($blogLine)
+                        <p class="hp-lead">{{ $blogLine }}</p>
+                    @endif
                 </div>
 
-                <!-- Main headline -->
-                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-                    <span class="text-white">The Event Schedule</span><br>
-                    <span class="text-gradient">{{ __('messages.blog') }}</span>
-                </h1>
-
-                <!-- Subheadline -->
-                <p class="text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto mb-10">
-                    {{ __('messages.blog_hero_subtitle') }}
-                </p>
-
-                <!-- Stats or social proof -->
-                <div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                        </svg>
-                        <span class="text-gray-400">{{ $posts->total() }} {{ Str::plural('article', $posts->total()) }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-sky-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="text-gray-400">{{ $allTags->count() }} {{ __('messages.topics') }}</span>
-                    </div>
-                </div>
+                {{-- A GET that changes nothing and stores nothing, so it carries no honeypot. --}}
+                <form class="blog-search" method="get" action="{{ route('blog.index') }}" role="search">
+                    <label for="blog-q" class="sr-only">Search the blog</label>
+                    <input id="blog-q" type="search" name="q" value="{{ $search }}" maxlength="80" placeholder="Search {{ $total }} posts" autocomplete="off">
+                    <button type="submit" class="hp-btn hp-btn-ghost is-small is-still">Search</button>
+                </form>
             </div>
-        </div>
 
-        <!-- Bottom fade -->
-        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
+            <nav class="blog-chips" aria-label="Sections">
+                <a href="{{ route('blog.index') }}" class="blog-chip {{ ! $category && ! $isFiltered ? 'is-on' : '' }}" @if(! $category && ! $isFiltered) aria-current="page" @endif>All</a>
+                {{-- One order in the markup. Where the row scrolls sideways (a phone) the stylesheet
+                     moves the chip that is on to stand right after "All", so it is never off screen. --}}
+                @foreach($categories as $key => $section)
+                    @if(($counts[$key] ?? 0) >= $chipFloor || $category === $key)
+                        <a href="{{ route('blog.category', $key) }}" class="blog-chip {{ $category === $key ? 'is-on' : '' }}" @if($category === $key) aria-current="page" @endif>{{ $section['name'] }}</a>
+                    @endif
+                @endforeach
+            </nav>
+        </div>
     </section>
 
-    <div class="bg-gray-50 dark:bg-gray-900 min-h-screen">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-            <!-- Selected Tag Display -->
-            @if(request('tag'))
-                <div class="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.filtered_by') }}</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-                                #{{ request('tag') }}
-                            </span>
-                        </div>
-                        <a href="{{ route('blog.index') }}"
-                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            {{ __('messages.clear_filter') }}
-                        </a>
-                    </div>
-                </div>
+    <section class="blog-list">
+        <div class="blog-wrap">
+            @if($isFiltered && $posts->total() > 0)
+                <p class="blog-note">
+                    <span>{{ $posts->total() }} {{ Str::plural('post', $posts->total()) }}</span>
+                    <a href="{{ $blogBase }}" class="hp-inline">{{ $search !== '' ? 'Clear search' : __('messages.clear_filter') }}</a>
+                </p>
+            @elseif($blogPage > 1 && $posts->count() > 0)
+                <p class="blog-note"><span>Page {{ $blogPage }} of {{ $posts->lastPage() }}</span></p>
             @endif
 
-            <div class="mx-auto mt-0 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                <!-- Main content -->
-                <div class="lg:col-span-2 space-y-6">
-                    @if($posts->count() > 0)
-                        @foreach($posts as $post)
-                            <a href="{{ route('blog.show', $post->slug) }}" class="block group">
-                                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100/50 dark:hover:shadow-blue-900/20 hover:-translate-y-1 hover:border-blue-200 dark:hover:border-blue-700 cursor-pointer">
-                                    @if($post->featured_image_url)
-                                        <div class="mb-4 overflow-hidden rounded-xl">
-                                            <picture>
-                                                <source srcset="{{ webp_path($post->featured_image_url) }}" type="image/webp">
-                                                <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" width="672" height="192" loading="lazy" decoding="async" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
-                                            </picture>
-                                        </div>
-                                    @endif
-                                    <div class="flex flex-col sm:flex-row sm:items-center gap-x-4 text-xs mb-3">
-                                        <div class="flex items-center gap-x-4">
-                                            @if($post->published_at)
-                                                <time datetime="{{ $post->published_at->toISOString() }}" class="text-gray-500 dark:text-gray-400">
-                                                    {{ $post->formatted_published_at }}
-                                                </time>
-                                            @endif
-                                            <span class="text-gray-500 dark:text-gray-400">{{ $post->reading_time }}</span>
-                                        </div>
-                                        @if($post->tags)
-                                            <div class="flex gap-2 mt-1 sm:mt-0">
-                                                @foreach(array_slice($post->tags, 0, 3) as $tag)
-                                                    <span class="text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 transition-colors duration-200">
-                                                        #{{ $tag }}
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="relative">
-                                        <h3 class="text-lg font-semibold leading-6 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 mb-3">
-                                            {{ $post->title }}
-                                        </h3>
-                                        <p class="line-clamp-3 text-sm leading-6 text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
-                                            {{ $post->excerpt }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                        <!-- Pagination -->
-                        <div class="mt-8">
-                            {{ $posts->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('messages.no_posts_found') }}</h3>
-                            <p class="text-gray-600 dark:text-gray-400">{{ __('messages.check_back_soon') }}</p>
-                        </div>
-                    @endif
-                </div>
-                <!-- Sidebar -->
-                <div class="space-y-6">
-                    @if($allTags->count() > 0)
-                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.tags') }}</h3>
-                            <div class="flex flex-wrap gap-2" id="tags-container">
-                                @foreach($allTags->take(20) as $tag)
-                                    <a href="{{ route('blog.index', ['tag' => $tag]) }}"
-                                       class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-300 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200' : '' }}">
-                                        #{{ $tag }}
-                                    </a>
+            @if($directory)
+                <div class="blog-directory">
+                    @foreach($directory as $group)
+                        <section>
+                            <h2>{{ $group['title'] }}</h2>
+                            <ul>
+                                @foreach($group['posts'] as $entry)
+                                    <li><a href="{{ route('blog.show', $entry['slug']) }}">{{ $entry['name'] }}</a></li>
                                 @endforeach
-                                @if($allTags->count() > 20)
-                                    <div id="hidden-tags" class="hidden flex flex-wrap gap-2">
-                                        @foreach($allTags->slice(20) as $tag)
-                                            <a href="{{ route('blog.index', ['tag' => $tag]) }}"
-                                               class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-300 transition-colors {{ request('tag') == $tag ? 'bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200' : '' }}">
-                                                #{{ $tag }}
-                                            </a>
-                                        @endforeach
-                                    </div>
-                                    <button id="show-more-tags"
-                                            class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors mt-2">
-                                        {{ __('messages.show_more_tags') }}
-                                    </button>
-                                    <button id="show-less-tags"
-                                            class="hidden inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors mt-2">
-                                        {{ __('messages.show_less') }}
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-                    <!-- About -->
-                    <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 border border-blue-200 dark:border-blue-800 rounded-2xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">{{ __('messages.about_our_blog') }}</h3>
-                        <p class="text-sm text-blue-800 dark:text-blue-200">
-                            {{ __('messages.about_our_blog_description') }}
-                        </p>
-                    </div>
+                            </ul>
+                        </section>
+                    @endforeach
                 </div>
-            </div>
+            @elseif($posts->count() > 0)
+                @if($lead)
+                    @include('blog.partials.card', ['card' => $lead, 'cardLead' => true, 'cardHeading' => 'h2'])
+                @endif
+
+                <div class="blog-grid">
+                    @foreach($posts as $listedPost)
+                        @include('blog.partials.card', ['card' => $listedPost, 'cardLead' => false, 'cardHeading' => 'h2', 'cardSection' => $category === null])
+                    @endforeach
+                </div>
+
+                <div class="blog-pages">
+                    {{ $posts->onEachSide(1)->links('blog.partials.pagination') }}
+                </div>
+            @else
+                <div class="blog-empty">
+                    <h2>{{ __('messages.no_posts_found') }}</h2>
+                    <p>{{ $isFiltered ? 'Try another word, or pick a section above.' : __('messages.check_back_soon') }}</p>
+                    @if($isFiltered)
+                        <p><a href="{{ $blogBase }}" class="hp-inline">{{ $search !== '' ? 'Clear search' : __('messages.clear_filter') }}</a></p>
+                    @endif
+                </div>
+            @endif
         </div>
-    </div>
+    </section>
 
-    <script {!! nonce_attr() !!}>
-        document.addEventListener('DOMContentLoaded', function() {
-            const showMoreBtn = document.getElementById('show-more-tags');
-            const showLessBtn = document.getElementById('show-less-tags');
-            const hiddenTags = document.getElementById('hidden-tags');
-
-            if (showMoreBtn && showLessBtn && hiddenTags) {
-                showMoreBtn.addEventListener('click', function() {
-                    hiddenTags.classList.remove('hidden');
-                    showMoreBtn.classList.add('hidden');
-                    showLessBtn.classList.remove('hidden');
-                });
-
-                showLessBtn.addEventListener('click', function() {
-                    hiddenTags.classList.add('hidden');
-                    showLessBtn.classList.add('hidden');
-                    showMoreBtn.classList.remove('hidden');
-                });
-            }
-        });
-    </script>
+    <x-marketing.hp-finale lead="A page for your events, free registration, and tickets with no platform fee.">
+        Put your next event on a page of its own
+    </x-marketing.hp-finale>
 </x-marketing-layout>

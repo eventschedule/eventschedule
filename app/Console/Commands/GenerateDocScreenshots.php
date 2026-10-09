@@ -392,7 +392,9 @@ class GenerateDocScreenshots extends Command
             ],
             'event-graphics' => [
                 ['id' => 'event-graphics--graphic-page', 'route' => '/simpsons/events-graphic', 'pause' => 3000],
-                ['id' => 'event-graphics--settings', 'route' => '/simpsons/events-graphic', 'pause' => 3000, 'script' => "document.querySelectorAll('nav[aria-label=\"Settings Tabs\"] button')[1].click()"],
+                // The second one is the Caption row open (the page's rows carry aria-controls,
+                // which is also what the Help link follows).
+                ['id' => 'event-graphics--settings', 'route' => '/simpsons/events-graphic', 'pause' => 3000, 'script' => "document.querySelector('[aria-controls=\"graphic-pane-caption\"]').click()"],
             ],
             'newsletters' => [
                 ['id' => 'newsletters--list', 'route' => '/newsletters?role_id='.$encodedRoleId],
