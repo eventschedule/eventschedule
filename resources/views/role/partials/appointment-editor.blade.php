@@ -11,14 +11,16 @@
     $curPaymentMethod = old('payment_method', $editing->payment_method ?? 'cash');
 
     // Cash, Stripe and the payment URL are always offered, as they always were; any other gateway
-    // the owner has connected joins them. Whether it can take this type's currency and price is
+    // the owner has connected joins them, if it takes bookings at all (supportsAppointments()). Whether it can take this type's currency and price is
     // decided at booking time (AppointmentType::paymentMethodAvailable()) and flagged on the types
     // list, as for an event. The saved method stays listed even once its gateway is disconnected,
     // so the editor never renders with nothing checked and quietly saves a different method.
     $gatewayManager = app(\App\Services\Payments\PaymentGatewayManager::class);
     $paymentOptions = ['cash' => __('messages.cash'), 'stripe' => 'Stripe', 'payment_url' => __('messages.payment_url')];
     foreach ($gatewayManager->configuredFor($role->user) as $gatewayKey => $gateway) {
-        $paymentOptions[$gatewayKey] ??= $gateway->label($role->user);
+        if ($gateway->supportsAppointments()) {
+            $paymentOptions[$gatewayKey] ??= $gateway->label($role->user);
+        }
     }
     if (! isset($paymentOptions[$curPaymentMethod]) && ($storedGateway = $gatewayManager->get($curPaymentMethod))) {
         $paymentOptions[$curPaymentMethod] = $storedGateway->label($role->user).' - '.__('messages.payment_method_unavailable');

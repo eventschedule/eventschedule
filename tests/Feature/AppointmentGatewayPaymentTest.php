@@ -92,6 +92,16 @@ class AppointmentGatewayPaymentTest extends TestCase
         return Sale::where('email', 'jane@gmail.com')->firstOrFail();
     }
 
+    private function connectPayfast(): void
+    {
+        $this->owner->forceFill([
+            'payfast_merchant_id' => '10000100',
+            'payfast_merchant_key' => '46f0cd694581a',
+            'payfast_passphrase' => 'test-passphrase',
+            'payfast_sandbox' => true,
+        ])->save();
+    }
+
     /** @return array<string, string> */
     private function bookingParams(Sale $sale): array
     {
@@ -207,12 +217,7 @@ class AppointmentGatewayPaymentTest extends TestCase
 
     public function test_the_pay_step_renders_a_gateway_that_answers_with_a_page(): void
     {
-        $this->owner->forceFill([
-            'payfast_merchant_id' => '10000100',
-            'payfast_merchant_key' => '46f0cd694581a',
-            'payfast_passphrase' => 'test-passphrase',
-            'payfast_sandbox' => true,
-        ])->save();
+        $this->connectPayfast();
         $type = $this->paidType(['payment_method' => 'payfast', 'currency_code' => 'ZAR', 'price' => 150]);
 
         $this->book($type)->assertOk();
@@ -267,6 +272,88 @@ class AppointmentGatewayPaymentTest extends TestCase
         $this->get(route('appointments.manage', $this->bookingParams($sale)))
             ->assertOk()
             ->assertSee(__('messages.appointments_awaiting_payment'))
+            ->assertSee(route('appointments.pay', $this->bookingParams($sale)), false);
+    }
+
+    // ------------------------------------------------- per-gateway behaviour
+
+    public function test_invoice_ninja_is_not_offered_for_appointments(): void
+    {
+        $this->owner->forceFill(['invoiceninja_api_key' => 'test-token', 'invoiceninja_company_name' => 'Acme'])->save();
+
+        $this->assertNotContains('invoiceninja', app(\App\Services\Payments\PaymentGatewayManager::class)->appointmentKeys());
+        $this->assertContains('paypal', app(\App\Services\Payments\PaymentGatewayManager::class)->appointmentKeys());
+
+        $this->actingAs($this->owner)
+            ->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'appointments', 'new' => 1]))
+            ->assertOk()
+            ->assertSee('value="paypal"', false)
+            ->assertDontSee('value="invoiceninja"', false);
+
+        $type = $this->paidType(['payment_method' => 'cash']);
+        $this->actingAs($this->owner)->put(route('appointments.update', ['subdomain' => $this->role->subdomain, 'hash' => $type->hashedId()]), [
+            'name' => 'Consultation', 'duration_minutes' => 30, 'location_type' => 'in_person',
+            'price' => 50, 'currency_code' => 'USD', 'payment_method' => 'invoiceninja',
+            'weekly_windows' => $type->weekly_windows, 'is_active' => 1,
+        ])->assertSessionHasErrors('payment_method');
+
+        // A type already stored on it (through the API, or before this rule) does not take bookings.
+        $this->assertFalse($this->paidType(['payment_method' => 'invoiceninja'])->isBookable());
+    }
+
+    public function test_the_hold_comes_from_the_gateway(): void
+    {
+        $hours = fn (string $method) => $this->paidType(['payment_method' => $method])->expireHours();
+
+        $this->assertSame(1, $hours('stripe'));
+        $this->assertSame(24, $hours('payment_url'));
+        $this->assertSame(1, $hours('paypal'));
+        // An Instant EFT can clear hours later; a payment after the release would lose the booking.
+        $this->assertSame(24, $hours('payfast'));
+        $this->assertSame(0, $hours('cash'));
+
+        $this->connectPayfast();
+        $this->book($this->paidType(['payment_method' => 'payfast', 'currency_code' => 'ZAR', 'price' => 150]))->assertOk();
+        $this->assertSame(24, (int) $this->sale()->event->expire_unpaid_tickets);
+    }
+
+    public function test_a_guest_back_from_paying_is_not_asked_to_pay_again(): void
+    {
+        $this->connectPayfast();
+        $this->book($this->paidType(['payment_method' => 'payfast', 'currency_code' => 'ZAR', 'price' => 150]));
+        $sale = $this->sale();
+        $manage = route('appointments.manage', $this->bookingParams($sale));
+        $pay = route('appointments.pay', $this->bookingParams($sale));
+
+        // Payfast sends the buyer back before its ITN arrives.
+        $this->get(route('payments.return', [
+            'gateway' => 'payfast',
+            'sale_id' => UrlUtils::encodeId($sale->id),
+            'secret' => $sale->secret,
+        ]))->assertRedirect($manage.'?new=1');
+
+        $this->get($manage)->assertOk()
+            ->assertSee(__('messages.ticket_confirming_payment'))
+            ->assertSee(route('ticket.status', $this->bookingParams($sale), false), false)
+            ->assertDontSee($pay, false)
+            ->assertDontSee(__('messages.appointments_complete_payment'));
+
+        // Once the window closes with nothing from Payfast, the page says what is true again.
+        $this->travel(\App\Services\Payments\PaymentGatewayDriver::LANDED_SECONDS + 1)->seconds();
+
+        $this->get($manage)->assertOk()
+            ->assertSee(__('messages.appointments_awaiting_payment'))
+            ->assertSee($pay, false);
+    }
+
+    public function test_a_guest_who_never_went_to_pay_still_gets_the_pay_button(): void
+    {
+        $this->connectPayfast();
+        $this->book($this->paidType(['payment_method' => 'payfast', 'currency_code' => 'ZAR', 'price' => 150]));
+        $sale = $this->sale();
+
+        $this->get(route('appointments.manage', $this->bookingParams($sale)))->assertOk()
+            ->assertDontSee(__('messages.ticket_confirming_payment'))
             ->assertSee(route('appointments.pay', $this->bookingParams($sale)), false);
     }
 }

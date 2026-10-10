@@ -81,6 +81,20 @@ class PaymentGatewayManager
     }
 
     /**
+     * The keys an owner may choose for a paid appointment type: selectable, and able to take a
+     * booking (PaymentGatewayDriver::supportsAppointments()).
+     *
+     * @return list<string>
+     */
+    public function appointmentKeys(): array
+    {
+        return array_keys(array_filter(
+            $this->all(),
+            fn (PaymentGatewayDriver $driver) => $driver->isSelectableForEvents() && $driver->supportsAppointments(),
+        ));
+    }
+
+    /**
      * Everything this owner may offer on an event, cash included.
      *
      * @return array<string, PaymentGatewayDriver>

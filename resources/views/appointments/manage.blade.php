@@ -89,6 +89,16 @@
                                 style="background-color: var(--es-accent); color: var(--es-accent-text); --tw-ring-color: var(--es-accent)">{{ __('messages.appointments_complete_payment') }}</button>
                     </form>
                     @break
+                @case('confirming')
+                    {{-- No pay button while the provider's confirmation is on its way: the guest has
+                         just paid. ticket/partials/confirming-script asks ticket.status (any sale, by
+                         event and secret) and reloads once the answer changes or the window closes. --}}
+                    <div data-confirming="{{ \App\Services\Payments\PaymentGatewayDriver::landedSecondsLeft($sale) }}"
+                         data-status-url="{{ route('ticket.status', $manageParams, false) }}">
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.ticket_confirming_payment') }}</h1>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.ticket_confirming_payment_hint') }}</p>
+                    </div>
+                    @break
                 @case('cancelled')
                     <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_cancelled') }}</h1>
                     @break
@@ -193,4 +203,7 @@
             <p class="mt-6 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_manage_link_hint') }}</p>
         </div>
     </div>
+    @if ($state === 'confirming')
+        @include('ticket.partials.confirming-script')
+    @endif
 </x-app-guest-layout>

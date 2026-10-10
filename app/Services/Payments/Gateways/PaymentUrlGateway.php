@@ -23,6 +23,15 @@ class PaymentUrlGateway extends PaymentGatewayDriver
         return 'payment_url';
     }
 
+    /**
+     * The guest pays on the merchant's own page and the owner marks the booking paid by hand, which
+     * can take a while.
+     */
+    public function appointmentHoldHours(): int
+    {
+        return 24;
+    }
+
     public function label(?User $owner): string
     {
         if ($owner?->payment_url) {

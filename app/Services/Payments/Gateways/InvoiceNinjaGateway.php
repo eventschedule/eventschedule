@@ -25,6 +25,16 @@ class InvoiceNinjaGateway extends PaymentGatewayDriver
         return 'invoiceninja';
     }
 
+    /**
+     * Not for appointments: in payment-link mode the driver creates a product and a subscription
+     * per event, and every booking is its own event, so each booking would leave a subscription in
+     * the owner's Invoice Ninja account.
+     */
+    public function supportsAppointments(): bool
+    {
+        return false;
+    }
+
     public function label(?User $owner): string
     {
         if ($owner?->invoiceninja_company_name) {

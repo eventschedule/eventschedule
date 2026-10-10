@@ -184,25 +184,21 @@ class AppointmentType extends Model
     }
 
     /**
-     * Hours an unpaid hold survives before app:release-tickets frees the slot.
-     * Cash/free never auto-expire (ReleaseTickets has no cash exclusion). Stripe and the payment
-     * URL keep their own figures; any other gateway that expires unpaid sales gets Stripe's hour.
+     * Hours an unpaid hold survives before app:release-tickets frees the slot, as the gateway
+     * decides (PaymentGatewayDriver::appointmentHoldHours()): an hour for Stripe, a day for the
+     * payment URL and Payfast, never for cash/free (ReleaseTickets has no cash exclusion).
      */
     public function expireHours(): int
     {
-        return match ($this->payment_method) {
-            'stripe' => 1,
-            'payment_url' => 24,
-            null, 'cash' => 0,
-            default => app(PaymentGatewayManager::class)->get($this->payment_method)?->expiresUnpaidSales() ? 1 : 0,
-        };
+        return app(PaymentGatewayManager::class)->get($this->payment_method)?->appointmentHoldHours() ?? 0;
     }
 
     /**
      * Whether the configured paid method is usable by the owner. Stripe and the payment URL keep
      * their appointment-specific checks (the URL also needs its secret, for the success callback);
-     * any other gateway must be connected and able to take this currency and price, which is the
-     * same test the event Payment dropdown applies (PaymentGatewayManager::availableFor()).
+     * any other gateway must take bookings at all, and be connected and able to take this currency
+     * and price, which is the same test the event Payment dropdown applies
+     * (PaymentGatewayManager::availableFor()).
      */
     public function paymentMethodAvailable(): bool
     {
@@ -215,10 +211,11 @@ class AppointmentType extends Model
             'stripe' => $user->canAcceptStripePayments(),
             'payment_url' => (bool) ($user->payment_url && $user->payment_secret),
             null, 'cash' => true,
-            default => array_key_exists(
-                $this->payment_method,
-                app(PaymentGatewayManager::class)->availableFor($user, $this->currency_code, (float) $this->price),
-            ),
+            default => app(PaymentGatewayManager::class)->get($this->payment_method)?->supportsAppointments()
+                && array_key_exists(
+                    $this->payment_method,
+                    app(PaymentGatewayManager::class)->availableFor($user, $this->currency_code, (float) $this->price),
+                ),
         };
     }
 

@@ -360,7 +360,7 @@ class AppointmentTypeController extends Controller
             'location_phone' => 'nullable|string|max:50',
             'price' => 'nullable|numeric|min:0',
             'currency_code' => 'nullable|string|size:3',
-            'payment_method' => ['nullable', Rule::in(app(PaymentGatewayManager::class)->selectableKeys())],
+            'payment_method' => ['nullable', Rule::in(app(PaymentGatewayManager::class)->appointmentKeys())],
             'weekly_windows' => 'required',
             'date_overrides' => 'nullable',
         ];

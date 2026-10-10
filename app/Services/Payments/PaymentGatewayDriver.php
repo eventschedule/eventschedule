@@ -267,6 +267,30 @@ abstract class PaymentGatewayDriver
     }
 
     /**
+     * May an owner pick this gateway for a paid appointment type?
+     *
+     * Every booking is an event of its own, so a gateway that sets something up per event leaves
+     * one behind for every booking. False where that is so.
+     */
+    public function supportsAppointments(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Hours an unpaid appointment booking holds its slot before app:release-tickets frees it
+     * (copied to events.expire_unpaid_tickets when the booking is made). Zero never releases.
+     *
+     * A payment that arrives after the release does not bring the booking back - the slot may
+     * already be someone else's - so a gateway whose confirmation can come late must hold at least
+     * that long. The default suits a gateway that confirms within the checkout or soon after it.
+     */
+    public function appointmentHoldHours(): int
+    {
+        return $this->expiresUnpaidSales() ? 1 : 0;
+    }
+
+    /**
      * When refund() is given a null amount, does this gateway send back what is LEFT of the
      * capture, or the WHOLE original capture?
      *

@@ -83,6 +83,16 @@ class PayfastGateway extends PaymentGatewayDriver
     }
 
     /**
+     * An Instant EFT can clear hours after the buyer leaves (see handleWebhook()), and a payment
+     * that lands after the slot was released does not restore the booking. The same day the payment
+     * URL gives its guests.
+     */
+    public function appointmentHoldHours(): int
+    {
+        return 24;
+    }
+
+    /**
      * All three of merchant id, merchant key and passphrase are required before Payfast is offered as
      * a payment method - from the owner's own account, or from the installation's.
      *

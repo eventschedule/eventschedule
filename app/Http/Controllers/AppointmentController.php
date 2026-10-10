@@ -12,6 +12,7 @@ use App\Models\Sale;
 use App\Services\AppointmentService;
 use App\Services\AuditService;
 use App\Services\Payments\CheckoutContext;
+use App\Services\Payments\PaymentGatewayDriver;
 use App\Services\Payments\PaymentGatewayManager;
 use App\Services\WebhookService;
 use App\Traits\ReschedulesAppointments;
@@ -310,6 +311,14 @@ class AppointmentController extends Controller
         }
 
         if ($sale->status !== 'paid' && AppointmentType::paysOnline($event->payment_method)) {
+            // Back from the provider before its confirmation reached us (Stripe's webhook, Payfast's
+            // ITN). The guest has just paid, so offering "Complete payment" would start a second
+            // payment. Same rule and same window as the ticket page (ticket/view).
+            if (app(PaymentGatewayManager::class)->awaitsConfirmation($sale->payment_method, $sale)
+                && PaymentGatewayDriver::landedSecondsLeft($sale) > 0) {
+                return 'confirming';
+            }
+
             return 'awaiting_payment';
         }
 
@@ -452,6 +461,9 @@ class AppointmentController extends Controller
         // this sale - the encoded sale_id in the success_url is deliberately NOT secret. A direct or
         // unverified hit bounces to the schedule; the guest still gets the manage link by email.
         if ($verified) {
+            // Opens the manage page's "Confirming your payment" window until the webhook lands.
+            PaymentGatewayDriver::markLanded($sale);
+
             return redirect($this->manageUrl($sale).'?new=1');
         }
 
