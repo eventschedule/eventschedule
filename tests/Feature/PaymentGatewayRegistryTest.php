@@ -121,7 +121,7 @@ class PaymentGatewayRegistryTest extends TestCase
     {
         $keys = $this->manager()->selectableKeys();
 
-        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal'], $keys);
+        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal', 'razorpay'], $keys);
         $this->assertNotContains('rsvp', $keys);
         $this->assertNotContains('import', $keys);
     }
@@ -130,7 +130,7 @@ class PaymentGatewayRegistryTest extends TestCase
     {
         // The event dropdown renders in registry order, so the config array is the single place that
         // decides it. Cash first matches what the hand-written option list used to do.
-        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal'], $this->manager()->keys());
+        $this->assertSame(['cash', 'stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal', 'razorpay'], $this->manager()->keys());
     }
 
     public function test_amount_limits_carry_the_stripe_minimum_charge(): void
