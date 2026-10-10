@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\AppointmentType;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\Payments\PaymentGatewayManager;
 use App\Traits\ReschedulesAppointments;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -358,7 +360,7 @@ class AppointmentTypeController extends Controller
             'location_phone' => 'nullable|string|max:50',
             'price' => 'nullable|numeric|min:0',
             'currency_code' => 'nullable|string|size:3',
-            'payment_method' => 'nullable|in:stripe,payment_url,cash',
+            'payment_method' => ['nullable', Rule::in(app(PaymentGatewayManager::class)->selectableKeys())],
             'weekly_windows' => 'required',
             'date_overrides' => 'nullable',
         ];

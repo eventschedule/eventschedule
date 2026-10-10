@@ -366,7 +366,7 @@ class EmailService
                 // Paid but awaiting approval: send "request received", not a confirmation - but only
                 // when the payment itself is the trigger (online methods). Cash/free pending mails
                 // already went out at booking time; a later mark-paid must not repeat them.
-                if (in_array($sale->payment_method, ['stripe', 'payment_url'], true)) {
+                if (\App\Models\AppointmentType::paysOnline($sale->payment_method)) {
                     $this->sendAppointmentPendingEmails($sale);
                 }
             } else {

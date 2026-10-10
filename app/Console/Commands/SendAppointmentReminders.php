@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\AppointmentReminder;
+use App\Models\AppointmentType;
 use App\Models\Sale;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class SendAppointmentReminders extends Command
             if (! $pivot || is_null($pivot->is_accepted)) {
                 continue;
             }
-            if ($sale->status !== 'paid' && in_array($event->payment_method, ['stripe', 'payment_url'], true)) {
+            if ($sale->status !== 'paid' && AppointmentType::paysOnline($event->payment_method)) {
                 continue;
             }
 

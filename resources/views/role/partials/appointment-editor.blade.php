@@ -9,6 +9,20 @@
     $curInterval = old('slot_interval_minutes', $editing->slot_interval_minutes ?? '');
     $curLocationType = old('location_type', $editing->location_type ?? 'in_person');
     $curPaymentMethod = old('payment_method', $editing->payment_method ?? 'cash');
+
+    // Cash, Stripe and the payment URL are always offered, as they always were; any other gateway
+    // the owner has connected joins them. Whether it can take this type's currency and price is
+    // decided at booking time (AppointmentType::paymentMethodAvailable()) and flagged on the types
+    // list, as for an event. The saved method stays listed even once its gateway is disconnected,
+    // so the editor never renders with nothing checked and quietly saves a different method.
+    $gatewayManager = app(\App\Services\Payments\PaymentGatewayManager::class);
+    $paymentOptions = ['cash' => __('messages.cash'), 'stripe' => 'Stripe', 'payment_url' => __('messages.payment_url')];
+    foreach ($gatewayManager->configuredFor($role->user) as $gatewayKey => $gateway) {
+        $paymentOptions[$gatewayKey] ??= $gateway->label($role->user);
+    }
+    if (! isset($paymentOptions[$curPaymentMethod]) && ($storedGateway = $gatewayManager->get($curPaymentMethod))) {
+        $paymentOptions[$curPaymentMethod] = $storedGateway->label($role->user).' - '.__('messages.payment_method_unavailable');
+    }
     $curPrice = old('price', $editing->price ?? 0);
     $curCurrency = old('currency_code', $editing->currency_code
         ?? \App\Utils\MoneyUtils::getCurrencyForCountry($role->country_code));
@@ -400,10 +414,13 @@
         <div id="payment-methods" class="mt-4">
             <x-input-label class="mb-1" :value="__('messages.payment_method')" />
             <div class="{{ $segShell }}" role="radiogroup" aria-label="{{ __('messages.payment_method') }}">
-                @foreach (['cash' => __('messages.cash'), 'stripe' => 'Stripe', 'payment_url' => __('messages.payment_url')] as $pm => $pmLabel)
+                {{-- v-pre on the label: a gateway's can carry owner-typed text (a Payfast merchant id, an
+                     API-sourced company name), and this form renders inside the Vue mount. Same guard as
+                     the event form's Payment select. --}}
+                @foreach ($paymentOptions as $pm => $pmLabel)
                     <label>
                         <input type="radio" name="payment_method" value="{{ $pm }}" {{ $curPaymentMethod === $pm ? 'checked' : '' }} class="sr-only peer">
-                        <span class="{{ $segRadio }}">{{ $pmLabel }}</span>
+                        <span v-pre class="{{ $segRadio }}">{{ $pmLabel }}</span>
                     </label>
                 @endforeach
             </div>

@@ -923,6 +923,13 @@
 
                         return await this.post(fd);
                     },
+                    postTo(url) {
+                        var f = document.createElement('form');
+                        f.method = 'POST'; f.action = url;
+                        var t = document.createElement('input');
+                        t.type = 'hidden'; t.name = '_token'; t.value = this.csrf;
+                        f.appendChild(t); document.body.appendChild(f); f.submit();
+                    },
                     async post(fd) {
                         try {
                             var res = await fetch(this.bookUrl, { method: 'POST', headers: { 'X-CSRF-TOKEN': this.csrf, 'Accept': 'application/json' }, body: fd });
@@ -930,6 +937,10 @@
                             var j;
                             try { j = await res.json(); } catch (pe) { this.error = this.t.sessionExpired; this.submitting = false; return; }
                             if (res.ok && j.redirect_url) { window.location = j.redirect_url; return; }
+                            // A gateway other than Stripe or the payment URL is started by the pay
+                            // step as a real form post, so its driver may answer with a page of its
+                            // own rather than a redirect a fetch could hand back.
+                            if (res.ok && j.pay_url) { this.postTo(j.pay_url); return; }
                             if (j.error === undefined && j.errors) {
                                 this.fieldErrors = {};
                                 var leftovers = [];

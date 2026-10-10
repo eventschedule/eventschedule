@@ -1208,7 +1208,7 @@ class EventController extends Controller
             $sale = Sale::where('event_id', $event->id)
                 ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                 ->first();
-            if ($sale && ($sale->status === 'paid' || ! in_array($sale->payment_method, ['stripe', 'payment_url'], true))) {
+            if ($sale && ($sale->status === 'paid' || ! \App\Models\AppointmentType::paysOnline($sale->payment_method))) {
                 app(\App\Services\AppointmentService::class)->confirm($sale);
             }
         }
@@ -1507,7 +1507,7 @@ class EventController extends Controller
                         ->where('is_deleted', false)
                         ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                         ->first();
-                    if ($sale && ($sale->status === 'paid' || ! in_array($sale->payment_method, ['stripe', 'payment_url'], true))) {
+                    if ($sale && ($sale->status === 'paid' || ! \App\Models\AppointmentType::paysOnline($sale->payment_method))) {
                         app(\App\Services\AppointmentService::class)->confirm($sale);
                     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Payments\PaymentGatewayManager;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -169,21 +170,39 @@ class AppointmentType extends Model
     }
 
     /**
+     * Whether a booking on this method waits for an online payment: unconfirmed, not remindable
+     * and not reschedulable until paid, and released if the hold lapses. True for every registered
+     * gateway except cash, which is settled by hand and confirms at booking time.
+     *
+     * Takes the stored method rather than a type because callers hold an event or a sale, whose
+     * payment_method was copied from the type when the booking was made.
+     */
+    public static function paysOnline(?string $method): bool
+    {
+        return $method !== null && $method !== 'cash'
+            && app(PaymentGatewayManager::class)->get($method) !== null;
+    }
+
+    /**
      * Hours an unpaid hold survives before app:release-tickets frees the slot.
-     * Cash/free never auto-expire (ReleaseTickets has no cash exclusion).
+     * Cash/free never auto-expire (ReleaseTickets has no cash exclusion). Stripe and the payment
+     * URL keep their own figures; any other gateway that expires unpaid sales gets Stripe's hour.
      */
     public function expireHours(): int
     {
         return match ($this->payment_method) {
             'stripe' => 1,
             'payment_url' => 24,
-            default => 0,
+            null, 'cash' => 0,
+            default => app(PaymentGatewayManager::class)->get($this->payment_method)?->expiresUnpaidSales() ? 1 : 0,
         };
     }
 
     /**
-     * Whether the configured paid method is usable by the owner. Mirrors
-     * Role::giftCardPaymentMethodAvailable(); appointments support stripe / payment_url / cash.
+     * Whether the configured paid method is usable by the owner. Stripe and the payment URL keep
+     * their appointment-specific checks (the URL also needs its secret, for the success callback);
+     * any other gateway must be connected and able to take this currency and price, which is the
+     * same test the event Payment dropdown applies (PaymentGatewayManager::availableFor()).
      */
     public function paymentMethodAvailable(): bool
     {
@@ -195,7 +214,11 @@ class AppointmentType extends Model
         return match ($this->payment_method) {
             'stripe' => $user->canAcceptStripePayments(),
             'payment_url' => (bool) ($user->payment_url && $user->payment_secret),
-            default => true, // cash
+            null, 'cash' => true,
+            default => array_key_exists(
+                $this->payment_method,
+                app(PaymentGatewayManager::class)->availableFor($user, $this->currency_code, (float) $this->price),
+            ),
         };
     }
 
