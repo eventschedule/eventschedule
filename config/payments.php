@@ -29,6 +29,7 @@ return [
         'payment_url' => App\Services\Payments\Gateways\PaymentUrlGateway::class,
         'payfast' => App\Services\Payments\Gateways\PayfastGateway::class,
         'paypal' => App\Services\Payments\Gateways\PayPalGateway::class,
+        'razorpay' => App\Services\Payments\Gateways\RazorpayGateway::class,
     ],
 
     'payfast' => [
@@ -119,6 +120,21 @@ return [
             'THB', 'USD',
         ],
 
+    ],
+
+    'razorpay' => [
+
+        /*
+         * Installation-wide credentials, read by RazorpayGateway::platformCredentials().
+         *
+         * Selfhost only, and a DEFAULT rather than an override, as for PayPal. The webhook secret is
+         * optional for the same reason PayPal's webhook id is: both the buyer's return and the
+         * webhook re-fetch the Payment Link from Razorpay before settling, so a missing secret costs
+         * only the late-settlement path.
+         */
+        'key_id' => env('RAZORPAY_KEY_ID'),
+        'key_secret' => env('RAZORPAY_KEY_SECRET'),
+        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
     ],
 
     /*

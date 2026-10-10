@@ -106,6 +106,9 @@
         <env name="PAYPAL_CLIENT_ID" value="" force="true"/>
         <env name="PAYPAL_CLIENT_SECRET" value="" force="true"/>
         <env name="PAYPAL_WEBHOOK_ID" value="" force="true"/>
+        <env name="RAZORPAY_KEY_ID" value="" force="true"/>
+        <env name="RAZORPAY_KEY_SECRET" value="" force="true"/>
+        <env name="RAZORPAY_WEBHOOK_SECRET" value="" force="true"/>
         <env name="DEFAULT_PAYMENT_METHOD" value="" force="true"/>
         <!-- The homepage poster wall renders straight from the database under test. The `array`
              cache store survives RefreshDatabase within a process, so a cached wall would

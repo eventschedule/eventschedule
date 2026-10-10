@@ -156,6 +156,7 @@ class HelpUtils
                 'payment-tab-payment-url' => '/docs/account-settings#payment-url',
                 'payment-tab-payfast' => '/docs/account-settings#payfast',
                 'payment-tab-paypal' => '/docs/account-settings#paypal',
+                'payment-tab-razorpay' => '/docs/account-settings#razorpay',
                 // A tab that holds several sections opens the guide at the first of them; pressing
                 // inside one of its sections moves Help to that section (layouts/navigation).
                 'section-security' => '/docs/account-settings#password',

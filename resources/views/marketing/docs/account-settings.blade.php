@@ -17,6 +17,7 @@
             <x-doc-nav-link href="#payment-url">Payment Link</x-doc-nav-link>
             <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
             <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
+            <x-doc-nav-link href="#razorpay">Razorpay</x-doc-nav-link>
         </x-doc-nav-group>
         {{-- The four entries below hold several sections each on the settings page, so each is
              a group here, named as the page's sidebar names it. --}}
@@ -76,7 +77,7 @@
                     </tr>
                     <tr>
                         <td><a href="#payments" class="doc-link">Payment Methods</a></td>
-                        <td>One row per method: Stripe, Invoice Ninja, Payment Link, Payfast and PayPal</td>
+                        <td>One row per method: Stripe, Invoice Ninja, Payment Link, Payfast, PayPal and Razorpay</td>
                     </tr>
                     <tr>
                         <td>Security</td>
@@ -240,7 +241,7 @@
             Payment Methods
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Cash needs nothing set up. To take payment any other way, connect a method here. There are five, each a row that opens in place and says beside its name whether it is connected, or what the method is while it is not: Stripe, Invoice Ninja, Payment Link, Payfast and PayPal. The line under Payment Methods in the list of entries names the ones that are. While nothing is connected the first row opens by itself, and a row's button reads <strong class="text-gray-900 dark:text-white">Connect</strong> until there is something to save over.
+            Cash needs nothing set up. To take payment any other way, connect a method here. There are six, each a row that opens in place and says beside its name whether it is connected, or what the method is while it is not: Stripe, Invoice Ninja, Payment Link, Payfast, PayPal and Razorpay. The line under Payment Methods in the list of entries names the ones that are. While nothing is connected the first row opens by itself, and a row's button reads <strong class="text-gray-900 dark:text-white">Connect</strong> until there is something to save over.
         </p>
 
         <x-doc-screenshot id="account-settings--payment-methods" alt="The Payment Methods tab of Settings: five rows, Stripe, Invoice Ninja, Payment Link, Payfast and PayPal, each with a line beside its name" />
@@ -373,10 +374,33 @@
             PayPal settles Australian, Canadian, Hong Kong, New Zealand, Singapore and US dollars, the euro, sterling, the Swiss franc, the Czech koruna, the Danish, Norwegian and Swedish krone, the Brazilian real, the Chinese yuan, the Israeli shekel, the Malaysian ringgit, the Mexican peso, the Philippine peso, the Polish zloty, the Russian rouble and the Thai baht. For the full walkthrough see <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">Connecting PayPal</a>.
         </p>
 
+        <h3 id="razorpay" class="doc-subheading">Razorpay</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <x-link href="https://razorpay.com" target="_blank">Razorpay</x-link> takes payment in Indian rupees by card, UPI, netbanking and wallets, and releases the ticket on its own once the buyer has paid. Buyers pay on a Razorpay payment page and come straight back. It settles rupees only - if your event is priced in anything else, Razorpay does not appear as an option.
+        </p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">What to enter</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your <strong class="text-gray-900 dark:text-white">Key ID</strong> and <strong class="text-gray-900 dark:text-white">Key Secret</strong>, from the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; API Keys</strong>. The Key ID starts with <code>rzp_live_</code>, or <code>rzp_test_</code> for test mode.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Webhook (optional)</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A payment is confirmed when the buyer returns from Razorpay. To also confirm it when a buyer pays and closes the tab, add a webhook in the Razorpay Dashboard for the <code>payment_link.paid</code> event, pointing at the address shown on the Razorpay row, and enter its secret here. Either way, we check every payment with Razorpay itself before marking a sale paid.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Use your Test Mode keys and nothing is really charged. While they are in use, the payment method reads <strong class="text-gray-900 dark:text-white">Razorpay (Test mode)</strong> wherever you pick it. Switch to your live keys before you sell real tickets.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one Razorpay account for everyone, exactly as with Payfast and PayPal. Enter your own keys to be paid into your own account instead.</p>
+            </div>
+        </div>
+
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Which method to choose</div>
-            <p>One payment method is enough. Stripe, PayPal and Payfast all confirm payment and deliver the ticket without any manual step, so pick whichever of them works where you are. Invoice Ninja marks the sale paid once the invoice is paid, through the webhook it registers when you connect. With a payment link, you mark each sale paid yourself.</p>
-            <p class="mt-3">Refunds differ too. A Stripe or PayPal sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. For every other method, <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> records a refund you have made yourself. See <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing Sales</a>.</p>
+            <p>One payment method is enough. Stripe, PayPal, Payfast and Razorpay all confirm payment and deliver the ticket without any manual step, so pick whichever of them works where you are. Invoice Ninja marks the sale paid once the invoice is paid, through the webhook it registers when you connect. With a payment link, you mark each sale paid yourself.</p>
+            <p class="mt-3">Refunds differ too. A Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page, and the money goes back through the provider. For every other method, <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> records a refund you have made yourself. See <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing Sales</a>.</p>
         </div>
     </section>
 

@@ -182,7 +182,7 @@ class PaymentGatewayRoutesTest extends TestCase
         $keys = array_keys(app(PaymentGatewayManager::class)->withSettings());
 
         // Cash has nothing to configure, so it must not produce an empty tab.
-        $this->assertSame(['stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal'], $keys);
+        $this->assertSame(['stripe', 'invoiceninja', 'payment_url', 'payfast', 'paypal', 'razorpay'], $keys);
     }
 
     public function test_the_payment_settings_section_renders(): void

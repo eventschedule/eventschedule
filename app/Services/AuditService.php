@@ -317,6 +317,8 @@ class AuditService
         'payfast_passphrase',
         // The client id and the webhook id are identifiers, not secrets, so they stay readable.
         'paypal_client_secret',
+        'razorpay_key_secret',
+        'razorpay_webhook_secret',
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];
