@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\AppointmentType;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
@@ -52,7 +53,7 @@ class AppointmentRescheduleGate
         // An unpaid card hold expires on its CREATION clock (ReleaseTickets keys off sales.created_at),
         // so moving it would hand the guest a slot that silently dies. They pay first. Note cash
         // bookings are 'unpaid' too but never expire, so they are intentionally not caught here.
-        if ($sale->status !== 'paid' && in_array($event->payment_method, ['stripe', 'payment_url'], true)) {
+        if ($sale->status !== 'paid' && AppointmentType::paysOnline($event->payment_method)) {
             return __('messages.appointments_reschedule_blocked_payment');
         }
 

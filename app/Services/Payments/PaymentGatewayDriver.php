@@ -681,6 +681,12 @@ abstract class PaymentGatewayDriver
 
         $event = $sale->event;
 
+        // A booking's slot was released with the sale. Its manage page says so and offers to book
+        // again; the backing event's guest page is not where a guest booked, so it is no way back.
+        if ($event?->appointment_type_id) {
+            return redirect($this->appointmentManageUrl($sale));
+        }
+
         // Unconditional: the ticket surfaces handle a closed gate themselves. The embed renders
         // its "not available" state, and the guest page falls through to Add to Calendar. Dropping
         // the param instead would land an embedded buyer on the whole schedule grid inside the
@@ -774,11 +780,25 @@ abstract class PaymentGatewayDriver
      */
     protected function purchaseLandingUrl(Sale $sale, Event $event, bool $isEmbed = false): string
     {
+        // An appointment booking has no ticket to show. Its page is the secret manage URL, which
+        // reads the sale as it now stands: confirmed, pending approval, or still awaiting payment.
+        if ($event->appointment_type_id) {
+            return $this->appointmentManageUrl($sale).'?new=1';
+        }
+
         $url = $sale->isOrderPrimary()
             ? route('ticket.order', ['order_id' => UrlUtils::encodeId($sale->id), 'secret' => $sale->secret])
             : route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
 
         return $isEmbed ? $url.'?embed=true' : $url;
+    }
+
+    private function appointmentManageUrl(Sale $sale): string
+    {
+        return route('appointments.manage', [
+            'event_id' => UrlUtils::encodeId($sale->event_id),
+            'secret' => $sale->secret,
+        ]);
     }
 
     /**

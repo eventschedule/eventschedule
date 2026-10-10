@@ -11,6 +11,8 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Services\AppointmentService;
 use App\Services\AuditService;
+use App\Services\Payments\CheckoutContext;
+use App\Services\Payments\PaymentGatewayManager;
 use App\Services\WebhookService;
 use App\Traits\ReschedulesAppointments;
 use App\Utils\HoneypotUtils;
@@ -307,7 +309,7 @@ class AppointmentController extends Controller
             return 'pending';
         }
 
-        if ($sale->status !== 'paid' && in_array($event->payment_method, ['stripe', 'payment_url'], true)) {
+        if ($sale->status !== 'paid' && AppointmentType::paysOnline($event->payment_method)) {
             return 'awaiting_payment';
         }
 
@@ -364,7 +366,7 @@ class AppointmentController extends Controller
      */
     protected function fanOut(Request $request, AppointmentType $type, Role $role, Sale $sale)
     {
-        if (! $type->isFree() && in_array($type->payment_method, ['stripe', 'payment_url'])) {
+        if (! $type->isFree() && AppointmentType::paysOnline($type->payment_method)) {
             return $this->initiatePayment($request, $type, $role, $sale);
         }
 
@@ -383,19 +385,31 @@ class AppointmentController extends Controller
         return response()->json(['redirect_url' => $this->manageUrl($sale).'?new=1']);
     }
 
-    /** Paid checkout: hand the guest a Stripe session or the merchant payment URL (as JSON). */
+    /**
+     * Paid checkout, answered as JSON because the booking form posts over fetch: a Stripe session,
+     * the merchant payment URL, or - for any other gateway - the pay step, which the form submits as
+     * an ordinary navigation so the driver can answer with a redirect or a page of its own (Payfast
+     * hands the buyer on with an auto-submitting form, which a fetch cannot follow).
+     */
     protected function initiatePayment(Request $request, AppointmentType $type, Role $role, Sale $sale)
     {
         if ($type->payment_method === 'stripe') {
             return response()->json(['redirect_url' => $this->stripeCheckoutUrl($sale, $type, $role)]);
         }
 
-        // payment_url: the guest leaves for the merchant's hosted page and there is no callback,
-        // so email them the manage link + "complete your payment" note NOW - it is their only
-        // artifact until the owner marks the sale paid (which then sends the confirmation).
-        app(\App\Services\EmailService::class)->sendAppointmentPaymentDueEmail($sale);
+        if ($type->payment_method === 'payment_url') {
+            // The guest leaves for the merchant's hosted page and there is no callback, so email
+            // them the manage link + "complete your payment" note NOW - it is their only artifact
+            // until the owner marks the sale paid (which then sends the confirmation).
+            app(\App\Services\EmailService::class)->sendAppointmentPaymentDueEmail($sale);
 
-        return response()->json(['redirect_url' => $role->user->payment_url]);
+            return response()->json(['redirect_url' => $role->user->payment_url]);
+        }
+
+        return response()->json(['pay_url' => route('appointments.pay', [
+            'event_id' => UrlUtils::encodeId($sale->event_id),
+            'secret' => $sale->secret,
+        ])]);
     }
 
     /** GET /appointment/checkout/success/{sale_id} - Stripe redirect target; the webhook marks paid. */
@@ -464,6 +478,16 @@ class AppointmentController extends Controller
         }
         if ($type && $type->payment_method === 'payment_url' && $role->user->payment_url) {
             return redirect($role->user->payment_url);
+        }
+
+        // Any other gateway goes through its driver, keyed on the SALE's method: that is what the
+        // generic return and webhook routes check, and it cannot drift if the type is edited later.
+        // The driver's return lands the guest back on the manage page
+        // (PaymentGatewayDriver::purchaseLandingUrl()).
+        if (AppointmentType::paysOnline($sale->payment_method)
+            && ! in_array($sale->payment_method, ['stripe', 'payment_url'], true)) {
+            return app(PaymentGatewayManager::class)->get($sale->payment_method)
+                ->startCheckout(new CheckoutContext($sale, $event, $role->subdomain));
         }
 
         return redirect($this->manageUrl($sale));
