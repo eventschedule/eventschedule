@@ -2304,6 +2304,14 @@ class RoleController extends Controller
                 }
             }
 
+            // The lookups above ask for the schedule's link in one query and load the event's
+            // schedules in the next. A link removed in between (the hourly demo reset deletes and
+            // rebuilds them) leaves an event with no row for this schedule, and the page reads
+            // that row's pivot: it answers as an event that is not there.
+            if ($event && ! $event->roles->contains('id', $role->id)) {
+                $event = null;
+            }
+
             if ($event) {
                 // Block direct URL access to draft events and appointment bookings for non-members:
                 // they answer as an event that is not there. See Event::isMembersOnly().
