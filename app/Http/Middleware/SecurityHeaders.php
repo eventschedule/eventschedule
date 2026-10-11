@@ -148,8 +148,13 @@ class SecurityHeaders
                 ['*.googleapis.com', '*.gstatic.com', '*.bootstrapcdn.com', 'cdn.jsdelivr.net'],
             ),
 
+            // blob: is for a picture a page builds in memory and shows by a short address: the
+            // events graphic (graphic/show) does, and without it the browser refuses the picture
+            // and the page reports that it could not be made. 'self' does not cover blob:, and
+            // only a script already running on the page can make one, so it opens less than the
+            // data: beside it.
             'img-src' => array_merge(
-                ["'self'", 'data:', 'https:'],
+                ["'self'", 'data:', 'blob:', 'https:'],
                 $isLocal ? ["{$host}:*"] : [],
                 ['*.googleapis.com', '*.gstatic.com', '*.googletagmanager.com', '*.stripe.com',
                     '*.ytimg.com', 'eventschedule.nyc3.cdn.digitaloceanspaces.com',
