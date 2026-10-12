@@ -487,6 +487,61 @@ class EventFormJourneyTest extends DuskTestCase
         $this->assertSame(['findmehall'], $event->roles()->where('roles.type', 'venue')->pluck('subdomain')->all());
     }
 
+    /**
+     * A person who picks from a dropdown makes the browser fire `input` and then `change`, and
+     * between the two the page has room to redraw. The form wrote its unsaved-changes note on
+     * that `input`, Vue redrew, and the redraw put the dropdown back on the value its model still
+     * held, so `change` read "Please select". From 1.0.135 nothing could be picked from a list on
+     * this form: not a venue (on a new event, a duplicate or one being edited), nor a frequency,
+     * a payment method or a performer.
+     *
+     * select() cannot see it. It sets the option from a script and fires `change` alone, which is
+     * why the journey above passed the whole time. Here the choice is typed into the dropdown,
+     * which the browser answers with its own two events.
+     */
+    public function test_a_dropdown_keeps_what_is_picked_from_it_by_hand(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->openNew($browser);
+
+            // The first thing done on the page, and the events the browser itself fired for it.
+            $browser->waitFor('#selected_venue', 5);
+            $browser->script('
+                window._picked = [];
+                var list = document.getElementById("selected_venue");
+                ["input", "change"].forEach(function (type) {
+                    list.addEventListener(type, function () { window._picked.push(type + ":" + list.selectedIndex); });
+                });
+            ');
+            $browser->keys('#selected_venue', 'B')->pause(400);
+
+            $this->assertSame(['input:1', 'change:1'], $browser->script('return window._picked;')[0], 'the browser fires both, and the choice is still there for the second');
+            $this->assertStringContainsString('Blue Note, 131 W 3rd St, New York', $browser->script('return document.querySelector("#event-location .event-picked").innerText;')[0]);
+            $this->assertSame(UrlUtils::encodeId($this->venue->id), $browser->script('return document.querySelector("#edit-form input[name=venue_id]").value;')[0]);
+            // The choice still counts as a change to the page, now that only `change` says so.
+            $this->assertTrue($browser->script('return window.vueApp.isDirty && window.vueApp.sectionDirty["section-details"] === true;')[0]);
+
+            $this->fillBasics($browser, 'Picked By Hand');
+            $this->save($browser);
+        });
+
+        $event = Event::where('name', 'Picked By Hand')->firstOrFail();
+        $this->assertSame(['journeyvenue'], $event->roles()->where('roles.type', 'venue')->pluck('subdomain')->all());
+
+        // A dropdown that already holds a value: it used to go back to that one.
+        $this->browse(function (Browser $browser) {
+            $this->openNew($browser);
+            $browser->script('document.getElementById("recurring").click();');
+            $browser->waitFor('select[name="recurring_frequency"]', 5);
+            $this->assertSame('weekly', $browser->script('return window.vueApp.event.recurring_frequency;')[0]);
+
+            $browser->keys('select[name="recurring_frequency"]', 'Y')->pause(400);
+
+            $this->assertSame('yearly', $browser->script('return window.vueApp.event.recurring_frequency;')[0]);
+            $this->assertSame('yearly', $browser->script('return document.querySelector("select[name=recurring_frequency]").value;')[0]);
+        });
+    }
+
     public function test_an_event_that_exists_opens_on_its_fields_and_says_what_a_change_will_do(): void
     {
         $event = $this->makeEvent();

@@ -109,6 +109,40 @@ class EventFormStructureTest extends TestCase
         $this->assertSame([], array_values(array_diff(array_unique($buttons[1]), $forms[1])));
     }
 
+    /**
+     * A browser fires `input` and then `change` when a person picks from a dropdown, and Vue
+     * redraws between the two if the page's data was written to on the first. The redraw puts a
+     * dropdown back on the value its model still holds, so `change` reads the old value: from
+     * 1.0.135 the form's unsaved-changes listener did exactly that, and no venue, frequency,
+     * payment method or performer could be picked from a list. A checkbox bound to a list (the
+     * ticket types a promo code covers) was unticked again the same way.
+     *
+     * tests/Browser/EventFormJourneyTest.php picks from a list by hand, which is the real check.
+     * This reads the same rule off the page, where a run without a browser can see it.
+     */
+    public function test_the_forms_own_listener_leaves_a_dropdown_to_its_change_event(): void
+    {
+        [$owner, $venue, $event] = $this->eventWithCarpool();
+
+        $html = $this->actingAs($owner)->get($this->editUrl($venue, $event))->assertOk()->getContent();
+
+        $this->assertSame(1, preg_match("/dirtyForm\.addEventListener\('input', \(e\) => \{(.*?)\}\);/s", $html, $listener), 'the form hears every input in one place');
+        $guard = strpos($listener[1], 'if (this.saysItWithChange(e.target))');
+        $this->assertNotFalse($guard, 'a control that says its value with change is not acted on at its input');
+
+        foreach (['this.markDirty(', 'this.readPlainFields('] as $write) {
+            $at = strpos($listener[1], $write);
+            $this->assertNotFalse($at, 'sanity check: this is the listener that writes to the page');
+            $this->assertLessThan($at, $guard, $write.' runs only after the guard has let the event through');
+        }
+
+        $this->assertSame(1, preg_match('/saysItWithChange\(el\) \{(.*?)\n      \},/s', $html, $helper));
+        foreach (["el.tagName === 'SELECT'", "el.type === 'checkbox'", "el.type === 'radio'"] as $kind) {
+            $this->assertStringContainsString($kind, $helper[1]);
+        }
+        $this->assertSame(1, preg_match("/dirtyForm\.addEventListener\('change', \(e\) => \{[^\n]*this\.markDirty\(e\.target\)/", $html), 'and the change that follows still counts');
+    }
+
     public function test_removing_a_carpool_offer_still_works_and_comes_back_to_its_tab(): void
     {
         [$owner, $venue, $event, $offer, $report] = $this->eventWithCarpool();

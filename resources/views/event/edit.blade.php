@@ -6965,6 +6965,13 @@
       acceptVenueAddress(event) {
         acceptAddress(event);
       },
+      // A control whose `input` is followed at once by the `change` that carries its value.
+      saysItWithChange(el) {
+        if (! el || ! el.tagName) {
+          return false;
+        }
+        return el.tagName === 'SELECT' || (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio'));
+      },
       // A change anywhere in the form: remember which tab it was on.
       markDirty(el) {
         var section = el && el.closest ? el.closest('.section-content') : null;
@@ -9860,7 +9867,22 @@
       // Unsaved changes warning
       var dirtyForm = document.querySelector('form[enctype]');
       if (dirtyForm) {
-          dirtyForm.addEventListener('input', (e) => { this.markDirty(e.target); this.readPlainFields(); });
+          // A dropdown, a checkbox and a radio say what was chosen with `change`, and a browser
+          // fires `input` first, with room between the two for Vue to redraw. Anything written
+          // to the page's data on that `input` is a redraw, and a redraw puts a dropdown back on
+          // the value its model still holds: `change` then read "Please select", and no venue,
+          // performer, frequency or payment method could be chosen from a list. A checkbox
+          // bound to a list (the ticket types a promo code covers, the events a pass covers)
+          // was unticked again the same way. So those three are heard on `change` alone. A
+          // scripted change event (a WebDriver click on an option) is not preceded by an
+          // `input` at all, which is why the browser tests pick with the keyboard.
+          dirtyForm.addEventListener('input', (e) => {
+            if (this.saysItWithChange(e.target)) {
+              return;
+            }
+            this.markDirty(e.target);
+            this.readPlainFields();
+          });
           dirtyForm.addEventListener('change', (e) => { this.markDirty(e.target); this.readPlainFields(); });
       }
       this.readPlainFields();
