@@ -16,7 +16,7 @@ use Tests\TestCase;
  * now, from the schedule's next public events, and the link to the whole schedule is simply
  * there. (For a few days it was three rows across the foot of the page; the column is where it
  * belongs, and it carries on down it as it did.) It looks as the schedule's own list does on a
- * phone: a panel for each day, a row for each event, and what a row there says about tickets.
+ * phone: each day under its date, a card for each event, and what a card there says about tickets.
  *
  * The test that matters for privacy is still here: a draft, cancelled, unlisted or
  * password-protected event must never be one of the rows.
@@ -74,7 +74,7 @@ class GuestEventSidebarLinkTest extends TestCase
         }
         $this->assertStringNotContainsString('Night Number 21.', $more);
         $this->assertStringNotContainsString('Tonight', $more, 'the event the visitor is already on');
-        // A panel for each day, its date said once as a heading over the events of that day:
+        // Each day, its date said once as a heading over the events of that day:
         // the schedule's own phone list (.gk-day, .gk-row), not a second kind of card.
         $this->assertSame(10, substr_count($more, 'data-up-day="'));
         $this->assertSame(10, substr_count($more, '<h3 class="gk-dayhead-title">'));
@@ -83,7 +83,7 @@ class GuestEventSidebarLinkTest extends TestCase
         // A phone and a tablet get the first five and the way to the rest: three days (two
         // events each, the third day's second event is the sixth), then nothing.
         $this->assertSame(15, substr_count($more, '<li class="gk-row-item gk-up-late">'));
-        $this->assertSame(7, preg_match_all('/class="gk-panel gk-panel-flush gk-day [^"]*gk-up-late"/', $more), 'a day whose events are all past the fifth is put away whole');
+        $this->assertSame(7, preg_match_all('/class="gk-day [^"]*gk-up-late"/', $more), 'a day whose events are all past the fifth is put away whole');
 
         // In the LEFT column, after the flyer, the performers and the venue, and not at the
         // foot of the page.
@@ -117,6 +117,31 @@ class GuestEventSidebarLinkTest extends TestCase
      * the price, Free entry, Sold out, Few left. From ONE query for the whole list's tickets:
      * read lazily it was a query a row.
      */
+    /**
+     * A card's picture runs down its end at the flyer's own shape, so the card is its final height
+     * before the picture arrives, and a screen that needs more than the 480 derivative gets the
+     * 960. A flyer whose size was never recorded is drawn square until it loads.
+     */
+    public function test_a_flyer_down_the_column_is_drawn_in_its_own_shape(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
+        $tall = $this->createEvent($role, ['name' => 'Tall Poster', 'starts_at' => $this->at(2), 'creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_tall.png']);
+        $tall->recordImageVariants(['w480' => 'flyer_tall_w480.webp', 'w960' => 'flyer_tall_w960.webp', 'src' => ['w' => 1600, 'h' => 2133]]);
+        $this->createEvent($role, ['name' => 'Old Poster', 'starts_at' => $this->at(3), 'creator_role_id' => $role->id, 'flyer_image_url' => 'flyer_old.png']);
+
+        $more = $this->more($this->get($this->guestEventUrl($role, $event))->assertOk()->getContent());
+
+        $this->assertSame(1, preg_match('#<img class="gk-row-img" src="[^"]*flyer_tall_w480\.webp"[^>]*>#', $more, $tallImg));
+        $this->assertStringContainsString('width="1600" height="2133"', $tallImg[0]);
+        $this->assertStringContainsString('flyer_tall_w960.webp 960w', $tallImg[0]);
+        $this->assertStringContainsString('sizes="15rem"', $tallImg[0]);
+
+        $this->assertSame(1, preg_match('#<img class="gk-row-img" src="[^"]*flyer_old\.png"[^>]*>#', $more, $oldImg));
+        $this->assertStringContainsString('width="160" height="160"', $oldImg[0]);
+        $this->assertStringNotContainsString('srcset=', $oldImg[0]);
+    }
+
     public function test_a_row_says_what_it_costs_from_one_query_for_the_list(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');

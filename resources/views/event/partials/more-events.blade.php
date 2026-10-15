@@ -1,8 +1,8 @@
 {{-- The schedule's other upcoming events, down the left column of an event page under the
      flyer, the performers and the venue. They look as the schedule's own list does on a phone:
-     a panel for each day under its date, a row for each event with its time, its name, what it
-     costs and whether any are left, and its picture where it has one. Where the page is one
-     column (a phone, a tablet) the list comes after everything but the free tier's "create
+     each day under its date, a card for each event with its time, its name, what it costs and
+     whether any are left, and its picture down the card's end where it has one. Where the page
+     is one column (a phone, a tablet) the list comes after everything but the free tier's "create
      your own", and stops after five.
 
      The column is where this list always was. For a few days in October 2026 it was three rows
@@ -42,8 +42,8 @@
           : ($upDay === $upToday->copy()->addDay()->format('Y-m-d') ? __('messages.tomorrow') : null);
       $upAllLate = collect($upRows)->every(fn ($entry) => $entry['late']);
     @endphp
-    <div class="gk-panel gk-panel-flush gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $upAllLate ? 'gk-up-late' : '' }}" data-up-day="{{ $upDay }}">
-      <div class="gk-dayhead">
+    <div class="gk-day {{ $upAllLate ? 'gk-up-late' : '' }}" data-up-day="{{ $upDay }}">
+      <div class="gk-panel gk-dayhead">
         @if ($upWord)<span class="gk-dayhead-word">{{ $upWord }}</span>@endif
         <h3 class="gk-dayhead-title"><time datetime="{{ $upDay }}">{{ \App\Utils\DateUtils::dayLabel($upFirst) }}</time></h3>
       </div>
@@ -58,10 +58,17 @@
             // The place, unless this IS the place's own schedule: every row would say it.
             $rowWhere = ($rowEvent->venue && $rowEvent->venue->id === $role->id) ? '' : $rowEvent->getVenueDisplayName(true, $displayLang);
             $rowImage = $rowEvent->flyer_image_url ? $rowEvent->getImageUrl(480) : null;
+            // The flyer's own shape, so the card is its final height before the picture loads,
+            // and its 960 derivative for a screen that needs it.
+            $rowSize = $rowImage ? $rowEvent->imageSourceDimensions() : null;
+            $rowSrcset = $rowImage ? $rowEvent->imageSrcset() : null;
             // When it starts; an event over several days says which days.
             $rowTime = $rowEvent->is_multi_day
                 ? $rowStart->translatedFormat('M j').' - '.$rowEvent->getEndDateTime($rowDate, true, $rowEvent->scheduleTimezone())->translatedFormat('M j')
                 : $rowStart->format($upUse24 ? 'H:i' : 'g:i A');
+            // In the owner's own words where the schedule has chosen that (Settings, Advanced,
+            // "Event list wording"; App\Utils\ListWording); null is the standard card.
+            $rowWording = \App\Utils\ListWording::card($rowEvent, $role, $displayLang);
             // The filter the visitor arrived with rides along, as it did on the list this replaces.
             $rowUrl = $rowEvent->getGuestUrl($role->subdomain, $rowEvent->days_of_week ? $rowDate : null);
             $rowUrl .= empty($filterQuery) ? '' : (str_contains($rowUrl, '?') ? '&' : '?').http_build_query($filterQuery);
@@ -70,6 +77,12 @@
             <a class="gk-row gk-row-stack {{ $rowImage ? '' : 'gk-row-stack-bare' }}" href="{{ $rowUrl }}">
               <span class="gk-row-time"><bdi dir="ltr">{{ $rowTime }}</bdi></span>
               <span class="gk-row-body">
+                @if ($rowWording)
+                  <span class="gk-row-title gk-row-name gk-w-title" dir="{{ $rowWording['dir'] }}">{!! \App\Utils\ListWording::html($rowWording['name']) !!}</span>
+                  @foreach ($rowWording['body'] as $rowLine)
+                    <span class="gk-row-desc gk-w-line" dir="{{ $rowWording['dir'] }}">{!! \App\Utils\ListWording::html($rowLine['p']) !!}</span>
+                  @endforeach
+                @else
                 <span class="gk-row-title gk-row-name" dir="{{ content_dir_for_language($rowName, $displayLang) }}">{{ $rowName }}</span>
                 @if ($rowAbout)
                   <span class="gk-row-desc" dir="{{ content_dir_for_language($rowAbout, $displayLang) }}">{{ $rowAbout }}</span>
@@ -77,10 +90,11 @@
                 @if ($rowWhere)
                   <span class="gk-row-where">{{ $rowWhere }}</span>
                 @endif
+                @endif
                 @include('partials.guest-ticket-chips', ['chipEvent' => $rowEvent, 'chipDate' => $rowDate, 'chipRole' => $role])
               </span>
               @if ($rowImage)
-                <span class="gk-row-media"><img class="gk-row-img" src="{{ $rowImage }}" alt="" width="76" height="76" loading="lazy" decoding="async"></span>
+                <span class="gk-row-media"><img class="gk-row-img" src="{{ $rowImage }}" @if ($rowSrcset) srcset="{{ $rowSrcset }}" sizes="15rem" @endif alt="" width="{{ $rowSize[0] ?? 160 }}" height="{{ $rowSize[1] ?? 160 }}" loading="lazy" decoding="async"></span>
               @endif
             </a>
           </li>

@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Utils\DateUtils;
 use App\Utils\ImageUtils;
+use App\Utils\ListWording;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -153,6 +154,9 @@ trait CalendarDataTrait
             'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
             // Read only against the schedule being viewed - see publicCustomFieldValuesFor().
             'custom_field_values' => $event->publicCustomFieldValuesFor($role),
+            // The card in the owner's own words, where the schedule has chosen that (Settings,
+            // Advanced, "Event list wording"; ListWording); null is the standard card.
+            'wording' => $guestView && $role ? ListWording::card($event, $role, $displayLang) : null,
             'fan_comments_enabled' => $event->isFanCommentsEnabled(),
             'fan_photos_enabled' => $event->isFanPhotosEnabled(),
             'fan_videos_enabled' => $event->isFanVideosEnabled(),
@@ -179,6 +183,7 @@ trait CalendarDataTrait
             $data['polls'] = [];
             $data['parts'] = [];
             $data['custom_field_values'] = [];
+            $data['wording'] = null;
         }
 
         return $data;

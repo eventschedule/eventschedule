@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Utils\MoneyUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -32,6 +33,7 @@ class GuestListRowsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Http::preventStrayRequests();
         $this->role = $this->createRole($this->createOwner());
     }
 
@@ -689,5 +691,46 @@ class GuestListRowsTest extends TestCase
         $admin = $this->actingAs($owner)->get('/'.$role->subdomain.'/schedule')->assertOk()->getContent();
         $this->assertStringNotContainsString('class="gk-past"', $admin, 'the kit is not on the portal\'s pages');
         $this->assertStringContainsString('class="flex-1 h-px bg-gray-300 dark:bg-gray-600"', $admin);
+    }
+
+    /**
+     * The flyer is what a visitor scans a phone's list by. In October 2026 the cards became rows
+     * in one white panel per day with a 76px picture, and the people who use the list said it
+     * read like a chat full of text: the flyers had lost their room, and the owner's colours no
+     * longer showed between the events. Each event is its own card again, on the page's own
+     * background, with its picture down the card's end from edge to edge.
+     */
+    public function test_a_phones_list_gives_the_flyer_its_room(): void
+    {
+        $guest = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
+        // A day is not a panel: the owner's background shows between its cards, and only the
+        // day's name stands on a panel of its own.
+        $this->assertSame(2, substr_count($guest, 'class="gk-day"'), 'the list and the days under a phone\'s month');
+        $this->assertDoesNotMatchRegularExpression('~gk-panel gk-day[" ]~', $guest);
+        $this->assertSame(2, substr_count($guest, 'class="gk-panel gk-dayhead"'));
+        // Each card has an edge of its own, or a white card on a white page has none.
+        $this->assertMatchesRegularExpression('~\.gk-row-item \{[^}]*border: 1px solid var\(--gk-line\);[^}]*background: var\(--gk-solid\);[^}]*box-shadow: var\(--gk-shadow\);~', $guest);
+        $this->assertMatchesRegularExpression('~\.gk-rows \{[^}]*gap: \.75rem;~', $guest);
+        // The day's name is a small panel centred over its cards.
+        $this->assertMatchesRegularExpression('~\.gk-dayhead \{[^}]*width: fit-content;[^}]*margin: 0 auto \.75rem;~', $guest);
+        // The picture runs the card's height, out through the row's padding to the card's edges,
+        // and its column is a share of the card, not a thumbnail.
+        $this->assertMatchesRegularExpression('~\.gk-row-media \{[^}]*align-self: stretch;[^}]*min-height: 8\.5rem;[^}]*margin-block: -\.875rem;~', $guest);
+        $this->assertMatchesRegularExpression('~\.gk-row \{[^}]*grid-template-columns: minmax\(0, 1fr\) min\(10rem, 42%\);[^}]*padding-block: \.875rem; padding-inline: 1rem 0;~', $guest);
+        $this->assertDoesNotMatchRegularExpression('~\.gk-row-media \{[^}]*width: 4\.75rem~', $guest);
+        // One layout at every phone width: a column of its own for the time left the name 218px
+        // wide at 640px beside a picture this size.
+        $this->assertStringNotContainsString('grid-template-columns: 9.5rem', $guest);
+        // A chip wraps inside the text column instead of running under the picture.
+        $this->assertStringContainsString(':where(.gk-row-chips) .gk-chip { max-width: 100%; white-space: normal; }', $guest);
+        // A screen that needs more than the 480 derivative of a bigger picture gets the 960.
+        $this->assertStringContainsString(':srcset="event.image_srcset || null" sizes="15rem"', $guest);
+        // A flyer is shown whole at the column's width, and its card is that height before the
+        // picture has loaded: the <img> is told the flyer's own shape.
+        $this->assertStringContainsString(':width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160"', $guest);
+        // For an owner, Edit sits in the text column, so the picture still runs the card's height.
+        $this->assertStringContainsString(':class="{ \'gk-row-editable\': event.can_edit }"', $guest);
+        $this->assertMatchesRegularExpression('~\.gk-row-edit \{[^}]*position: absolute;[^}]*max-width: calc\(100% - min\(10rem, 42%\) - 2rem\);~', $guest);
+        $this->assertStringContainsString(':where(.gk-row-editable) .gk-row-body { padding-bottom: 1.75rem; }', $guest);
     }
 }

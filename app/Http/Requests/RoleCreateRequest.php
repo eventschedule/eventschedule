@@ -77,6 +77,8 @@ class RoleCreateRequest extends FormRequest
             'show_venues_map' => ['sometimes', 'boolean'],
             'venues_map_open' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],
+            'list_wording' => ['nullable', 'in:standard,caption,custom'],
+            'list_template' => ['nullable', 'string', 'max:2000'],
         ];
     }
 }

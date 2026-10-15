@@ -58,6 +58,7 @@ use App\Utils\GeminiUtils;
 use App\Utils\GuestFunnel;
 use App\Utils\HoneypotUtils;
 use App\Utils\ImageUtils;
+use App\Utils\ListWording;
 use App\Utils\OpenAIUtils;
 use App\Utils\PhoneUtils;
 use App\Utils\QrCodeUtils;
@@ -3308,10 +3309,13 @@ class RoleController extends Controller
             'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'uniqueKey' => UrlUtils::encodeId($event->id),
             'is_password_protected' => $event->isPasswordProtected(),
+            // As the month payload says it (CalendarDataTrait::calendarEventToVueArray()).
+            'wording' => $role ? ListWording::card($event, $role, $displayLang) : null,
         ];
 
         if ($event->isPasswordProtected()) {
             $data = array_merge($data, array_fill_keys(array_keys($imageFields), null));
+            $data['wording'] = null;
             $data['venue_name'] = null;
             $data['venue_dir'] = null;
             $data['talent'] = [];
@@ -4861,6 +4865,7 @@ class RoleController extends Controller
         // held, below, to the ones the picker offered the person making the schedule.
         // A custom domain is set on the schedule's own form, where the plan and the address are checked.
         $role->fill($request->except([...self::SERVER_OWNED_FIELDS, 'sponsor_logos', 'default_curator_ids', 'custom_domain', 'custom_domain_mode']));
+        $this->applyListWording($role, $request);
         // sync_direction is fillable: hold it to what the person's Google connection may do.
         $role->sync_direction = self::googleDirectionFor($request->user(), $request->input('sync_direction'));
 
@@ -5401,6 +5406,26 @@ class RoleController extends Controller
         'graphic_settings',
     ];
 
+    /**
+     * "Event list wording" (Settings, Advanced; App\Utils\ListWording): how the schedule's list
+     * words each event. Kept in graphic_settings, which no fill reaches (SERVER_OWNED_FIELDS), so it
+     * is written here, by key, and only from a save whose form carried the field: absent is not
+     * "standard". A wording of the list's own is kept when another choice is made, so choosing it
+     * again brings it back.
+     */
+    private function applyListWording(Role $role, Request $request): void
+    {
+        if (! $request->boolean('list_wording_submitted')) {
+            return;
+        }
+
+        $mode = $request->input('list_wording');
+        $settings = $role->graphic_settings ?? [];
+        $settings['list_wording'] = in_array($mode, ListWording::MODES, true) ? $mode : 'standard';
+        $settings['list_template'] = mb_substr(str_replace("\r\n", "\n", (string) $request->input('list_template', '')), 0, 2000);
+        $role->graphic_settings = $settings;
+    }
+
     public function update(RoleUpdateRequest $request, $subdomain): RedirectResponse
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -5628,6 +5653,7 @@ class RoleController extends Controller
         // Not the columns only the server writes (SERVER_OWNED_FIELDS), and not the type: what kind
         // of schedule this is was decided when it was made.
         $role->fill($request->except([...self::SERVER_OWNED_FIELDS, 'type']));
+        $this->applyListWording($role, $request);
 
         // sync_direction is fillable, so undo it when the Google controls were not submitted,
         // and hold it to what the connection may do when they were.

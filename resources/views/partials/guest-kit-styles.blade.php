@@ -142,30 +142,40 @@
          this weighs what every other rule here weighs, one class. --}}
     :where([data-buybar-floating]) .gk-buybar { border-radius: 0; box-shadow: 0 -.5rem 1.125rem -.75rem rgb(0 0 0 / .28); }
 
-    {{-- A list of events as rows, on a phone: when, what, where, and a small picture. --}}
-    .gk-dayhead { display: flex; align-items: baseline; gap: .5rem; padding: .75rem 1rem; border-bottom: 1px solid var(--gk-line); }
-    .gk-dayhead h2 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
-    .gk-dayhead-link { margin-inline-start: auto; font-size: .875rem; }
-    .gk-rows { margin: 0; padding: 0; list-style: none; }
-    .gk-rows li + li { border-top: 1px solid var(--gk-line); }
-    .gk-row { display: grid; grid-template-columns: minmax(0, 1fr) 4.75rem; grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; column-gap: .75rem; row-gap: .125rem; padding: .75rem 1rem; color: var(--gk-ink); text-decoration: none; transition: background-color var(--gk-swap); }
+    {{-- A list of events, on a phone: a card for each event, when, what and where beside its
+         picture, under the day's name. Each card stands on its own with the page's background
+         between them, and the picture fills the card's end from edge to edge, as the phone's
+         cards always did: in October 2026 they became rows in one panel with a 76px picture,
+         and the people who use the list said it had become text, with the colour and the
+         flyers gone.
+
+         The picture is as tall as the flyer is, at the column's width, when the flyer is taller
+         than the card's text, as it was then too: a portrait flyer is shown whole, not cut to a
+         strip. Where the flyer's size was recorded the <img> carries it, so the card is already
+         its final height before the picture has loaded; a flyer with no recorded size settles
+         when it arrives.
+
+         One layout at every phone width. From 40rem the time used to have a column of its own,
+         which beside a picture this wide left the name 218px at 640px, narrower than on a 430px
+         phone, and floated a short card's text in the middle of a tall flyer. --}}
+    {{-- The day's name: a small panel (.gk-panel on the markup) centred over its cards. --}}
+    .gk-dayhead { display: flex; align-items: baseline; gap: .5rem; width: fit-content; max-width: 100%; margin: 0 auto .75rem; padding: .5rem 1.125rem; }
+    .gk-rows { display: grid; gap: .75rem; margin: 0; padding: 0; list-style: none; }
+    .gk-row { display: grid; grid-template-columns: minmax(0, 1fr) min(10rem, 42%); grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; column-gap: 1rem; row-gap: .125rem; padding-block: .875rem; padding-inline: 1rem 0; color: var(--gk-ink); text-decoration: none; transition: background-color var(--gk-swap); }
     .gk-row-bare { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b"; }
+    .gk-row-bare, .gk-row-stack-bare { padding-inline-end: 1rem; }
+    .gk-row { border-radius: inherit; }
     .gk-row:hover { background: var(--gk-well); }
     .gk-row:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: -2px; }
     .gk-row-time { grid-area: t; font-size: .84375rem; font-weight: 700; color: var(--gk-ink-2); font-variant-numeric: tabular-nums; }
-    .gk-row-time span { margin-inline-start: .375rem; font-weight: 500; color: var(--gk-ink-3); }
+    .gk-row-time span { margin-inline-start: .375rem; font-weight: 500; color: var(--gk-ink-3); white-space: nowrap; }
     .gk-row-body { grid-area: b; display: flex; flex-direction: column; gap: .1875rem; min-width: 0; }
     .gk-row-title { font-size: 1.03125rem; font-weight: 700; line-height: 1.25; }
     .gk-row-where { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0; font-size: .875rem; color: var(--gk-ink-3); }
     .gk-row-img { display: block; width: 100%; height: 100%; object-fit: cover; }
-    {{-- On a wide phone (40rem to 48rem, where the cards take over) the time has a column of
-         its own, so a day reads down its left edge. --}}
-    @media (min-width: 40rem) {
-        .gk-row { grid-template-columns: 9.5rem minmax(0, 1fr) 4.75rem; grid-template-areas: "t b i"; grid-template-rows: auto; align-items: center; column-gap: 1rem; padding: .875rem 1.25rem; }
-        .gk-row-bare { grid-template-columns: 9.5rem minmax(0, 1fr); grid-template-areas: "t b"; }
-        .gk-row-time span { display: block; margin-inline-start: 0; }
-        .gk-dayhead { padding: .75rem 1.25rem; }
-    }
+    {{-- A performer's or the venue's picture standing in for a flyer is shown square, before it
+         loads and after: width and height attributes only say a shape until the file arrives. --}}
+    .gk-row-img-square { aspect-ratio: 1; }
 
     {{-- The schedule's next event, above its month (role/show-guest). One link: a picture in a
          box of its own shape, then when, what and where. --}}
@@ -218,13 +228,10 @@
     .gk-pill:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     .gk-pill-on { border-color: var(--es-accent-edge, transparent); background: var(--es-accent); color: var(--es-accent-text); }
 
-    {{-- The schedule's list on a phone, and the days under a phone's month: one column of day
-         panels, a row for each event (role/partials/calendar, guest route). --}}
+    {{-- The schedule's list on a phone, and the days under a phone's month: one column of days,
+         a card for each event (role/partials/calendar, guest route). --}}
     .gk-list { max-width: 46rem; margin-inline: auto; }
-    .gk-days { display: grid; gap: .875rem; }
-    {{-- Rounded (the list sits inside the page's own gutters), and clipped, so a
-         row's hover tint keeps to the panel's corners. --}}
-    .gk-day { overflow: hidden; }
+    .gk-days { display: grid; gap: 1.25rem; }
     .gk-dayhead-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
     .gk-month-none { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; color: var(--gk-ink-2); }
     .gk-row-where a { color: inherit; text-decoration: underline; text-decoration-color: var(--gk-line); text-underline-offset: 2px; }
@@ -240,19 +247,48 @@
     {{-- Spaced letters pull an Arabic word apart. --}}
     :where([dir="rtl"]) .gk-past-label, :where(.rtl) .gk-past-label { letter-spacing: 0; }
     .gk-past-label svg { flex: none; width: .9375rem; height: .9375rem; }
-    .gk-row-item { position: relative; }
+    {{-- The card. Clipped, so the picture keeps to its corners, and edged with a hairline as the
+         phone's cards were, or a white card on a white page (a narrow embed, a schedule with a
+         plain white background) has no edge at all. --}}
+    .gk-row-item { position: relative; overflow: hidden; border: 1px solid var(--gk-line); border-radius: .875rem; background: var(--gk-solid); box-shadow: var(--gk-shadow); }
     {{-- A row of the schedule's list is a card pressed as a whole; its name is the link. --}}
     .gk-row-press { cursor: pointer; }
     .gk-row-title h3 { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin: 0; font: inherit; overflow-wrap: anywhere; }
     .gk-row-title a { color: inherit; text-decoration: none; }
     .gk-row-title a:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; border-radius: .25rem; }
+    {{-- The name's three-line clamp clips its own focus ring, so the card wears it instead. --}}
+    @supports selector(:has(a)) {
+        .gk-row-title a:focus-visible { outline: none; }
+        :where(.gk-row-item:has(.gk-row-title a:focus-visible)) { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    }
     .gk-row-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 0; font-size: .875rem; color: var(--gk-ink-2); }
-    .gk-row-media { grid-area: i; align-self: center; overflow: hidden; width: 4.75rem; height: 4.75rem; border-radius: .625rem; }
+    {{-- The picture runs the card's full height (out through the row's own padding) and is at
+         least 8.5rem tall, so a short card still shows a flyer and not a strip of one. --}}
+    .gk-row-media { grid-area: i; align-self: stretch; overflow: hidden; min-height: 8.5rem; margin-block: -.875rem; }
     .gk-row-media a { display: block; width: 100%; height: 100%; }
     .gk-row-dot { display: inline-block; width: .5rem; height: .5rem; margin-inline-end: .375rem; border-radius: 999px; vertical-align: .0625rem; }
     .gk-row-lock { display: inline-block; width: 1rem; height: 1rem; margin-inline-end: .375rem; vertical-align: -.125rem; color: var(--gk-ink-3); }
     .gk-row-chips { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .125rem; }
-    .gk-row-edit { display: inline-block; margin: -.25rem 1rem .625rem; font-size: .8125rem; color: var(--gk-ink-3); text-decoration: underline; text-underline-offset: 3px; }
+    {{-- A chip on a card wraps inside the text column: a coupon chip is wider than the column
+         beside a picture, and unwrapped its end went under the flyer. --}}
+    :where(.gk-row-chips) .gk-chip { max-width: 100%; white-space: normal; }
+    {{-- Edit, for whoever may: at the foot of the text column, in room the row keeps for it, so
+         the picture still runs the card's full height and an owner sees the card visitors see.
+         It is a sibling of the row (which is pressed as a whole), never inside it, and it keeps
+         to the text column ("Veranstaltung bearbeiten" is wider than that column at 320px). --}}
+    .gk-row-edit { position: absolute; bottom: .75rem; inset-inline-start: 1rem; overflow: hidden; max-width: calc(100% - min(10rem, 42%) - 2rem); font-size: .8125rem; color: var(--gk-ink-3); text-decoration: underline; text-underline-offset: 3px; text-overflow: ellipsis; white-space: nowrap; }
+    :where(.gk-row-item:has(> .gk-row-bare)) .gk-row-edit { max-width: calc(100% - 2rem); }
+    :where(.gk-row-editable) .gk-row-body { padding-bottom: 1.75rem; }
+    {{-- A card in the owner's own words (App\Utils\ListWording, role/partials/wording-part):
+         the wording's own bold, italic and strike-through; a heading balanced so its last word,
+         or a 🔥 the wording puts after it, is not left alone on a line; the venue a link as the
+         standard card's is. --}}
+    .gk-w-b { font-weight: 700; }
+    .gk-w-i { font-style: italic; }
+    .gk-w-s { text-decoration: line-through; }
+    .gk-w-title { text-wrap: balance; }
+    .gk-w-line { text-wrap: pretty; }
+    .gk-w-venue { color: inherit; text-decoration: underline; text-decoration-color: var(--gk-line); text-underline-offset: 2px; }
     {{-- A day that is over is quieter, and its pictures lose their colour, as they always did. --}}
     :where(.gk-day-past) .gk-row-img { filter: grayscale(1); }
     :where(.gk-day-past) .gk-row-title { color: var(--gk-ink-2); }
@@ -278,21 +314,23 @@
     .gk-o8 { order: 8; }
     .gk-o10 { order: 10; }
     {{-- The schedule's other upcoming events, down the event page's left column (event/partials/
-         more-events): the day panels and rows of the schedule's own phone list (.gk-day, .gk-row),
+         more-events): the days and cards of the schedule's own phone list (.gk-day, .gk-row),
          under a slim panel that names them and leads to the whole schedule. --}}
-    .gk-up { display: grid; gap: .875rem; }
+    .gk-up { display: grid; gap: 1.25rem; }
     .gk-up-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .25rem .75rem; padding: .75rem 1rem; }
     .gk-up-title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--gk-ink); }
     .gk-up-all { font-size: .875rem; }
     @media (min-width: 40rem) { .gk-up-head { padding: .75rem 1.25rem; } }
-    {{-- Its rows stay stacked at every width (the time over the name, the picture beside them),
-         where the schedule's own rows give the time a column from 40rem: from 64rem this list is
-         in a column 23.75rem wide, and below that it is a short list at the end of the page.
-         Declared after that rule, which it undoes. A name is cut at three lines, as a row's
+    {{-- Its rows are the schedule list's cards, stacked at every width (the time over the name,
+         the picture beside them): from 64rem this list is in a column 23.75rem wide, and below
+         that it is a short list at the end of the page. A name is cut at three lines, as a row's
          heading is, and a word too long for the column breaks rather than running under the
          picture. --}}
-    .gk-row-stack { grid-template-columns: minmax(0, 1fr) 4.75rem; grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; align-items: start; column-gap: .75rem; }
+    .gk-row-stack { grid-template-columns: minmax(0, 1fr) min(10rem, 42%); grid-template-areas: "t i" "b i"; grid-template-rows: auto 1fr; align-items: start; }
     .gk-row-stack-bare { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b"; }
+    {{-- On a phone the event page's panels run to the screen's edges; its cards keep the
+         schedule list's gutter, so they stand on the page as they do there. --}}
+    @media (max-width: 39.99rem) { :where(.gk-up) .gk-day { padding-inline: 1rem; } }
     .gk-row-name { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow-wrap: anywhere; }
     {{-- Wherever the page is ONE column (below 64rem, see .gk-event) the list is at its end, and
          stops after five. Cut below 48rem only, a tablet got all twenty there. --}}
@@ -465,6 +503,7 @@
         {{-- .dark as well: a panel that kept its dark:bg- utility would outrank the single class
              and print black text on a dark ground. --}}
         .gk-panel, .dark .gk-panel { background: #ffffff; color: #000000; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #d1d5db; }
+        .gk-row-item, .dark .gk-row-item { --gk-ink: #000000; --gk-ink-2: #374151; --gk-ink-3: #4b5563; background: #ffffff; box-shadow: none; border-color: #d1d5db; }
         .gk-btn { display: none; }
         .gk-headbar { display: none; }
         .gk-note { background: #ffffff; color: #000000; border-color: #9ca3af; }

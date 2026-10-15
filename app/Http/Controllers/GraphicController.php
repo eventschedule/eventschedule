@@ -9,6 +9,7 @@ use App\Services\GraphicEmailService;
 use App\Services\UsageTrackingService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
+use App\Utils\ListWording;
 use App\Utils\OpenAIUtils;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
@@ -555,6 +556,55 @@ class GraphicController extends Controller
         }
 
         return response()->json($response);
+    }
+
+    /**
+     * The schedule form's preview of "Event list wording" (App\Utils\ListWording): the next three
+     * events of the schedule's list, with the time and picture the list gives them, in the wording
+     * being chosen ('wording', null when that wording names no event) and as the standard card
+     * says them ('name', 'about', 'where'). Nothing is saved: the form posts the choice on Save.
+     *
+     * The caption's wording is the one stored on the Events graphic page; a wording of the list's
+     * own is the one being typed. The language is the one the wording is written in, which is the
+     * only one whose visitors see it.
+     */
+    public function listWordingPreview(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $validated = $request->validate([
+            'mode' => 'required|in:caption,custom',
+            'template' => 'nullable|string|max:2000',
+        ]);
+
+        $settings = $role->graphic_settings ?? [];
+        $template = $validated['mode'] === 'custom'
+            ? (string) ($validated['template'] ?? '')
+            : (($settings['text_template'] ?? '') ?: EventTextGenerator::getDefaultTemplate());
+        $english = $validated['mode'] === 'caption' && $role->canForceEnglish() && ! empty($settings['force_english']);
+        $lang = $english ? 'en' : ($role->language_code ?: 'en');
+        $format = get_use_24_hour_time($role) ? 'H:i' : 'g:i A';
+
+        $rows = app(\App\Repos\EventRepo::class)->upcomingForGuest($role, null, 3);
+
+        return response()->json(['cards' => $rows->map(function (array $row) use ($role, $template, $lang, $format) {
+            $event = $row['event'];
+            $where = ($event->venue && (int) $event->venue->id === (int) $role->id) ? '' : $event->getVenueDisplayName(true, $lang);
+
+            return [
+                'time' => $event->getStartDateTime($row['date'], true, $event->scheduleTimezone())->format($format),
+                'image' => $event->flyer_image_url ? ($event->getImageUrl(480) ?: null) : null,
+                'name' => $event->nameInLanguage($lang, $role),
+                'about' => (string) $event->shortDescriptionInLanguage($lang, $role),
+                'where' => (string) $where,
+                'dir' => content_dir_for_language(null, $lang),
+                'wording' => ListWording::render($template, $event, $role, $lang),
+            ];
+        })->values()->all()]);
     }
 
     public function processGraphicAIText(Request $request, $subdomain)

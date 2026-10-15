@@ -606,6 +606,8 @@
         // The direction the schedule's own text reads in: its image, its caption and the fields
         // that hold its words follow it, whatever language the person's interface is in.
         $contentDir = content_dir($role);
+        // The schedule's list is worded with this caption (App\Utils\ListWording).
+        $listFollows = \App\Utils\ListWording::mode($role) === 'caption';
         $iconCopy = 'M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75';
         $iconDone = 'M4.5 12.75l6 6 9-13.5';
         $iconShare = 'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z';
@@ -623,6 +625,11 @@
             'hosted' => $hosted,
             'userEmail' => auth()->user()->email,
             'file' => $role->subdomain.'-upcoming-events.png',
+            // The schedule's list, read in the language its wording is written in: the one in
+            // which its cards use the caption's words.
+            'listUrl' => $role->getGuestUrl(),
+            'lang' => \App\Utils\ListWording::language($role),
+            'listFollows' => $listFollows,
             'dir' => content_dir($role),
             'days' => $days,
             'hours' => $hours,
@@ -671,6 +678,10 @@
                 'headline' => __('messages.graphic_sum_headline'),
                 'signoff' => __('messages.graphic_sum_signoff'),
                 'default' => __('messages.graphic_sum_default'),
+                'on_list' => __('messages.graphic_sum_on_list'),
+                'unsaved_plain' => __('messages.graphic_unsaved_help'),
+                'unsaved_email' => __('messages.graphic_unsaved_help_email'),
+                'unsaved_list' => __('messages.graphic_unsaved_help_list'),
                 'own' => __('messages.graphic_sum_own'),
                 'all_events' => __('messages.graphic_sum_all_events'),
                 'english' => __('messages.graphic_sum_english'),
@@ -930,6 +941,12 @@
                                 <template v-if="s.text_template !== defaultTemplate"> &middot; <button type="button" @click="s.text_template = defaultTemplate">{{ __('messages.graphic_template_reset') }}</button></template>
                             </p>
                         </div>
+                        {{-- Where the owner chose, in the schedule form (Settings, Advanced, "Event list
+                             wording"), to word the schedule's list with this caption, say so here, where the
+                             wording is changed: a save here changes the list too. --}}
+                        @if ($listFollows)
+                        <p class="gfx-hint gfx-follows">{{ __('messages.list_wording_follows') }} <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#settings-tab-advanced">{{ __('messages.list_wording_change') }}</a></p>
+                        @endif
                         <div class="gfx-field gfx-switch">
                             <x-toggle name="text_show_all" :label="__('messages.graphic_all_events')" v-model="s.text_show_all" v-bind:disabled="s.number_events" />
                         </div>
@@ -1219,7 +1236,7 @@
                 <div class="event-save-status" aria-live="polite">
                     <span v-if="asking">{{ __('messages.discard_unsaved_changes') }}</span>
                     <span v-else-if="saveState.error" class="event-save-strong" v-text="saveState.error"></span>
-                    <span v-else-if="saveState.done && ! dirty" class="event-save-quiet" v-text="s.enabled && enterprise ? @js(__('messages.graphic_saved_email')) : @js(__('messages.saved'))"></span>
+                    <span v-else-if="saveState.done && ! dirty" class="event-save-quiet"><span v-text="saveState.list ? @js(__('messages.graphic_saved_list')) : (s.enabled && enterprise ? @js(__('messages.graphic_saved_email')) : @js(__('messages.saved')))"></span><template v-if="saveState.list"> <a class="event-link" :href="listUrl" target="_blank" rel="noopener">{{ __('messages.graphic_see_list') }}</a></template></span>
                     <span v-else>
                         <span class="event-save-pair">
                             <span>{{ __('messages.graphic_unsaved') }}:</span>
@@ -1229,7 +1246,7 @@
                             </template>
                         </span>
                     </span>
-                    <small v-if="dirty && ! saveState.error && ! asking" v-text="s.enabled && enterprise ? @js(__('messages.graphic_unsaved_help_email')) : @js(__('messages.graphic_unsaved_help'))"></small>
+                    <small v-if="dirty && ! saveState.error && ! asking" v-text="barHelp"></small>
                 </div>
                 <div class="event-save-actions" v-if="dirty && ! asking">
                     <button type="button" class="event-bar-text" @click="asking = true">{{ __('messages.graphic_discard') }}</button>
@@ -1311,7 +1328,7 @@
                     cap: { state: 'loading', text: '', message: '', note: '', open: false, long: false, busy: false, height: 0 },
                     ai: { state: 'off', message: '' },
                     busy: false,
-                    saveState: { busy: false, done: false, error: '', fields: {} },
+                    saveState: { busy: false, done: false, error: '', fields: {}, list: false },
                     copied: '',
                     note: { text: '', bad: false },
                     canShare: false,
@@ -1376,6 +1393,18 @@
                     return out;
                 },
                 dirty: function () { return this.dirtyGroups.length > 0; },
+                // A save that changes what the schedule's list says: the caption, where the list is worded with it.
+                listChanged: function () {
+                    return boot.listFollows && this.dirtyGroups.some(function (group) { return group.id === 'caption'; });
+                },
+                barHelp: function () {
+                    var email = this.s.enabled && this.enterprise;
+                    if (this.listChanged) { return (email ? words.unsaved_email + ' ' : '') + words.unsaved_list; }
+                    return email ? words.unsaved_email : words.unsaved_plain;
+                },
+                listUrl: function () {
+                    return boot.listUrl + (boot.listUrl.indexOf('?') === -1 ? '?' : '&') + 'lang=' + boot.lang;
+                },
                 barOn: function () { return this.canEdit && (this.dirty || this.saveState.done || !! this.saveState.error); },
                 tip: function () { return boot.tips[this.s.layout]; },
                 perRowLine: function () {
@@ -1412,6 +1441,7 @@
                     var caption = [s.text_template === this.defaultTemplate ? words.default : words.own];
                     if (s.text_show_all && ! s.number_events) { caption.push(words.all_events); }
                     if (s.force_english) { caption.push(words.english); }
+                    if (boot.listFollows) { caption.push(words.on_list); }
                     if (this.enterprise && s.ai_prompt.trim()) { caption.push(words.ai); }
                     var email = this.enterprise ? (s.enabled ? this.emailLine : words.off) : (s.enabled ? words.paused : words.locked_email);
                     return {
@@ -1726,12 +1756,15 @@
                     // What was sent is what was saved: a change made while the save was on its
                     // way is still unsaved when the answer comes.
                     var sent = clone(this.s);
+                    var list = this.listChanged;
                     return ask(boot.urls.save, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.payload()) }).then(function (result) {
                         self.saveState.busy = false;
                         if (result.ok && result.body.success) {
                             self.saved = sent;
                             self.saveState.done = true;
-                            setTimeout(function () { self.saveState.done = false; }, 2600);
+                            // "Your list uses this wording now", with the way to see it, stays long enough to be pressed.
+                            self.saveState.list = list;
+                            setTimeout(function () { self.saveState.done = false; self.saveState.list = false; }, list ? 9000 : 2600);
                             return true;
                         }
                         self.saveState.error = reason(result, words.save_failed);
@@ -1859,6 +1892,10 @@
             },
             mounted: function () {
                 var self = this;
+                // A link that names a row's pane opens that row (the schedule form's Style tab links
+                // to the caption's, where the list's wording is switched on).
+                var hashRow = (location.hash || '').replace(/^#graphic-pane-/, '');
+                if (hashRow && groups[hashRow]) { this.open = hashRow; }
                 try {
                     var probe = new File([new Blob(['x'], { type: 'image/png' })], 'x.png', { type: 'image/png' });
                     this.canShare = !! (navigator.canShare && navigator.canShare({ files: [probe] }));

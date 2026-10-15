@@ -394,6 +394,11 @@ example.com/summer-concert</code></pre>
         </div>
 
         <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">The same words on your schedule's list</div>
+            <p>Your schedule's list can word each event the way this caption does, so the website says what you post. Choose <strong>Same as the Events graphic caption</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#list-wording" class="doc-link">Event list wording</a> in the schedule's Advanced settings, or write a wording for the list alone there. While the list follows the caption, the Caption row says so and a save here changes the list too.</p>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">An invitation at the end</div>
             <p>If your schedule accepts <a href="{{ route('marketing.docs.managing_schedules') }}#requests" class="doc-link">event requests</a>, a short "want to see your event here?" line and a link to your request page are appended after the last event. Turn off event requests on the schedule to remove it.</p>
         </div>

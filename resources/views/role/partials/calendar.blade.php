@@ -845,8 +845,8 @@
             <button v-if="phoneHasEarlierDays && !phoneShowPast" type="button" class="gk-month-earlier" @click="phoneShowPast = true">{{ $label('show_past_events') }}</button>
             @endif
             <div v-if="phoneGroups.length" class="gk-days" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}">
-                <section v-for="group in phoneGroups" :key="'pm-' + group.date" :id="'gk-day-' + group.date" class="gk-panel gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" :class="{ 'gk-day-past': group.past }">
-                    <div class="gk-dayhead">
+                <section v-for="group in phoneGroups" :key="'pm-' + group.date" :id="'gk-day-' + group.date" class="gk-day" :class="{ 'gk-day-past': group.past }">
+                    <div class="gk-panel gk-dayhead">
                         <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
                         <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}></h2>
                     </div>
@@ -1053,13 +1053,23 @@
                                         {{-- Event Title --}}
                                         <div data-reveal-title class="flex items-start gap-2">
                                             <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
-                                            <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :dir="event.dir || 'auto'">
-                                                <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
+                                            <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :class="{ 'gk-w-title': event.wording }" :dir="event.wording ? event.wording.dir : (event.dir || 'auto')">
+                                                <template v-if="event.wording"><template v-for="(part, pi) in event.wording.name" :key="pi">
+                                                    @include('role/partials/wording-part')
+                                                </template></template>
+                                                <a v-else :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
                                                 <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                                 <span v-if="event.is_internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-2 align-middle">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-2 align-middle">{{ __('messages.draft') }}</span>
                                             </h2>
                                         </div>
-                                        <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.description_dir || event.dir || 'auto'" v-text="event.short_description"></p>
+                                        {{-- The wording's lines under the name, together; not one that only says where, which the
+                                             venue tile below says. --}}
+                                        <div v-if="event.wording && event.wording.body.some(l => !l.loc)" class="flex flex-col gap-1 mt-2">
+                                            <p v-for="(line, li) in event.wording.body.filter(l => !l.loc)" :key="'w' + li" class="text-gray-600 dark:text-gray-400 gk-w-line" :dir="event.wording.dir"><template v-for="(part, pi) in line.p" :key="pi">
+                                                @include('role/partials/wording-part')
+                                            </template></p>
+                                        </div>
+                                        <p v-if="!event.wording && event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.description_dir || event.dir || 'auto'" v-text="event.short_description"></p>
 
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -1418,13 +1428,23 @@
                                     {{-- Event Title --}}
                                     <div data-reveal-title class="flex items-start gap-2">
                                         <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
-                                        <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :dir="event.dir || 'auto'">
-                                            <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
+                                        <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" :class="{ 'gk-w-title': event.wording }" :dir="event.wording ? event.wording.dir : (event.dir || 'auto')">
+                                            <template v-if="event.wording"><template v-for="(part, pi) in event.wording.name" :key="pi">
+                                                @include('role/partials/wording-part')
+                                            </template></template>
+                                            <a v-else :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-html="commaBreak(event.name)"></a>
                                             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                             <span v-if="event.is_internal" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 ms-2 align-middle">{{ __('messages.internal') }}</span><span v-else-if="event.is_draft" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-2 align-middle">{{ __('messages.draft') }}</span>
                                         </h2>
                                     </div>
-                                    <p v-if="event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.description_dir || event.dir || 'auto'" v-text="event.short_description"></p>
+                                    {{-- The wording's lines under the name, together; not one that only says where, which the
+                                         venue tile below says. --}}
+                                    <div v-if="event.wording && event.wording.body.some(l => !l.loc)" class="flex flex-col gap-1 mt-2">
+                                        <p v-for="(line, li) in event.wording.body.filter(l => !l.loc)" :key="'w' + li" class="text-gray-600 dark:text-gray-400 gk-w-line" :dir="event.wording.dir"><template v-for="(part, pi) in line.p" :key="pi">
+                                            @include('role/partials/wording-part')
+                                        </template></p>
+                                    </div>
+                                    <p v-if="!event.wording && event.short_description && !event.is_password_protected" class="text-gray-600 dark:text-gray-400 mt-2" :dir="event.description_dir || event.dir || 'auto'" v-text="event.short_description"></p>
 
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
@@ -1852,7 +1872,7 @@
              not in the page at all (the cards above are the list from a tablet up). --}}
         <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             @if ($guestRows)
-            {{-- The guest list on a phone: a panel for each day, a row for each event
+            {{-- The guest list on a phone: each day under its date, a card for each event
                  (partials/guest-kit-styles: .gk-day, .gk-row).
 
                  A row says when, what and where, and nothing that needs a second request or a
@@ -1869,9 +1889,9 @@
                     <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))" class="gk-past" role="heading" aria-level="2">
                         <span class="gk-past-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4h4"/><path d="M12 7.5V12l3 2"/></svg><span>{{ $label('past_events') }}</span></span>
                     </div>
-                    <section v-if="group.events.some(e => isEventVisible(e))" class="gk-panel gk-day bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" :class="{ 'gk-day-past': group.events.every(e => e._isPast) }">
+                    <section v-if="group.events.some(e => isEventVisible(e))" class="gk-day" :class="{ 'gk-day-past': group.events.every(e => e._isPast) }">
                         {{-- The dateless group has no heading, so it never says "Invalid Date". --}}
-                        <div v-if="group.date && group.date !== 'no-date'" class="gk-dayhead">
+                        <div v-if="group.date && group.date !== 'no-date'" class="gk-panel gk-dayhead">
                             {{-- "Today" and "Tomorrow" by the schedule's clock, not the visitor's:
                                  a day is a day because of where it happens. --}}
                             <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>

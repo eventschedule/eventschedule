@@ -871,6 +871,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::delete('/{subdomain}/delete-event-image', [EventController::class, 'deleteImage'])->name('event.delete_image');
     Route::get('/{subdomain}/events-graphic', [GraphicController::class, 'generateGraphic'])->name('event.generate_graphic');
     Route::get('/{subdomain}/events-graphic/data', [GraphicController::class, 'generateGraphicData'])->name('event.generate_graphic_data');
+    Route::get('/{subdomain}/events-graphic/list-preview', [GraphicController::class, 'listWordingPreview'])->name('event.graphic_list_preview');
     Route::get('/{subdomain}/events-graphic/download', [GraphicController::class, 'downloadGraphic'])->name('event.download_graphic');
     Route::get('/{subdomain}/events-graphic/settings', [GraphicController::class, 'getSettings'])->name('event.graphic_settings');
     Route::post('/{subdomain}/events-graphic/settings', [GraphicController::class, 'saveSettings'])->name('event.save_graphic_settings');
