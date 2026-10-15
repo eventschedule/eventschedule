@@ -59,6 +59,11 @@ class RazorpayGatewayTest extends TestCase
     /** Key ids whose GET /payments/{id}/refunds answers 400, as Razorpay does for another account's payment. */
     private array $refundsUnknownTo = [];
 
+    /** What GET /payments/{id}/refunds and POST /payments/{id}/refund answer otherwise. */
+    private int $refundsListStatus = 200;
+
+    private int $refundStatus = 200;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -87,13 +92,15 @@ class RazorpayGatewayTest extends TestCase
             if ($request->method() === 'GET' && str_contains($url, '/refunds')) {
                 $keyId = explode(':', base64_decode(substr($request->header('Authorization')[0] ?? '', 6)))[0];
 
-                return in_array($keyId, $this->refundsUnknownTo, true)
-                    ? Http::response(['error' => ['description' => 'The id provided does not exist']], 400)
-                    : Http::response(['items' => $this->existingRefunds]);
+                if (in_array($keyId, $this->refundsUnknownTo, true)) {
+                    return Http::response(['error' => ['description' => 'The id provided does not exist']], 400);
+                }
+
+                return Http::response(['items' => $this->existingRefunds], $this->refundsListStatus);
             }
 
             if ($request->method() === 'POST' && str_ends_with($url, '/refund')) {
-                return Http::response(['id' => 'rfnd_TestRefund00001', 'status' => 'processed']);
+                return Http::response(['id' => 'rfnd_TestRefund00001', 'status' => 'processed'], $this->refundStatus);
             }
 
             return Http::response([], 404);
@@ -582,12 +589,12 @@ class RazorpayGatewayTest extends TestCase
         Exceptions::fake();
         $this->checkout(2);
         $sale = $this->sale();
-        $sale->forceFill(['status' => 'paid', 'transaction_reference' => 'pay_FirstPaymnt0001'])->save();
+        $sale->forceFill(['status' => 'paid', 'transaction_reference' => 'pay_FirstPaymnt001'])->save();
         $this->link = $this->paidLink($sale);
 
         $this->returnFromRazorpay($sale)->assertRedirect();
 
-        $this->assertSame('pay_FirstPaymnt0001', $sale->fresh()->transaction_reference);
+        $this->assertSame('pay_FirstPaymnt001', $sale->fresh()->transaction_reference);
         Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'already paid'));
     }
 
@@ -692,5 +699,150 @@ class RazorpayGatewayTest extends TestCase
 
         $this->owner->forceFill(['razorpay_key_id' => 'rzp_live_AbCdEf123456'])->save();
         $edit()->assertDontSee(__('messages.razorpay_test_mode_warning'), false);
+    }
+
+    // ------------------------------------------------------- what the review found
+
+    private const OPEN_URL = 'https://rzp.io/rzp/stillopen';
+
+    /** The sale's link as Razorpay answers while it can still be paid. */
+    private function openLink(Sale $sale, int $expiresAt): array
+    {
+        return $this->paidLink($sale, [
+            'status' => 'created', 'payments' => [], 'amount_paid' => 0,
+            'short_url' => self::OPEN_URL, 'expire_by' => $expiresAt,
+        ]);
+    }
+
+    public function test_pressing_pay_again_goes_back_to_the_open_link(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+        $this->link = $this->openLink($sale, now()->addMinutes(25)->getTimestamp());
+
+        // Two open links for one booking could each be paid.
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::OPEN_URL);
+        $this->assertSame(1, $this->linkCreations());
+    }
+
+    public function test_late_in_the_hold_an_open_link_is_used_and_the_booking_kept(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->travel(29)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+        $this->link = $this->openLink($sale, $this->linkRequestBody()['expire_by']);
+
+        // Released now, the booking would be gone while that link could still be paid.
+        $this->travel(15)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::OPEN_URL);
+
+        $this->assertSame('unpaid', $sale->fresh()->status);
+        $this->assertSame(1, $this->linkCreations());
+    }
+
+    public function test_a_return_razorpay_cannot_confirm_is_reported_when_no_webhook_will(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = null;
+
+        $this->owner->forceFill(['razorpay_webhook_secret' => null])->save();
+        $this->returnFromRazorpay($sale)->assertRedirect();
+
+        $this->assertSame('unpaid', $sale->fresh()->status);
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'could not be confirmed'));
+    }
+
+    public function test_a_return_razorpay_cannot_confirm_waits_for_the_webhook_when_there_is_one(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = null;
+
+        $this->returnFromRazorpay($sale)->assertRedirect();
+
+        Exceptions::assertNothingReported();
+    }
+
+    public function test_a_payment_for_a_sale_marked_paid_by_hand_asks_for_a_check_not_a_refund(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $sale->forceFill(['status' => 'paid', 'transaction_reference' => __('messages.manual_payment')])->save();
+        $this->link = $this->paidLink($sale);
+
+        $this->webhook($sale)->assertNoContent();
+
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'marked paid by hand'));
+        Exceptions::assertNotReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'refund it'));
+    }
+
+    public function test_another_payment_for_a_sale_awaiting_review_is_reported(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $sale->forceFill(['status' => 'amount_mismatch', 'transaction_reference' => 'pay_FirstPaymnt001'])->save();
+        $this->link = $this->paidLink($sale);
+
+        $this->webhook($sale)->assertNoContent();
+
+        $this->assertSame('amount_mismatch', $sale->fresh()->status);
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'awaiting review'));
+    }
+
+    public function test_a_payment_for_an_event_no_longer_in_rupees_is_reported(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->event->forceFill(['ticket_currency_code' => 'USD'])->save();
+        $this->link = $this->paidLink($sale);
+
+        $this->returnFromRazorpay($sale)->assertRedirect();
+
+        $this->assertSame('unpaid', $sale->fresh()->status);
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'no longer priced in INR'));
+    }
+
+    public function test_a_refund_that_could_not_read_the_earlier_ones_fails_and_frees_its_amount(): void
+    {
+        $sale = $this->paidSale();
+        $this->refundsListStatus = 500;
+
+        app(SaleRefundService::class)->refund($sale, 100.0, $this->owner->id, null, null, 'req-list-500');
+
+        // Only a GET left this machine, so nothing moved: the claim fails rather than parks.
+        $this->assertSame('failed', SaleRefund::where('sale_id', $sale->id)->firstOrFail()->status);
+        $this->assertFalse(collect(Http::recorded())->contains(fn ($p) => $p[0]->method() === 'POST' && str_ends_with($p[0]->url(), '/refund')));
+    }
+
+    public function test_a_refund_razorpay_answered_with_a_server_error_is_parked(): void
+    {
+        $sale = $this->paidSale();
+        $this->refundStatus = 502;
+
+        app(SaleRefundService::class)->refund($sale, 100.0, $this->owner->id, null, null, 'req-post-502');
+
+        // The request may have arrived; a retry could refund twice.
+        $this->assertSame('awaiting_reconciliation', SaleRefund::where('sale_id', $sale->id)->firstOrFail()->status);
+    }
+
+    public function test_an_expired_link_leaves_a_settled_or_parked_sale_alone(): void
+    {
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = $this->paidLink($sale, ['status' => 'expired', 'payments' => []]);
+
+        foreach (['paid', 'amount_mismatch'] as $status) {
+            $sale->forceFill(['status' => $status])->save();
+
+            $this->webhook($sale, null, 'payment_link.expired')->assertNoContent();
+
+            $this->assertSame($status, $sale->fresh()->status);
+        }
     }
 }

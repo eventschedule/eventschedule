@@ -86,14 +86,6 @@ class RazorpayClient
     }
 
     /**
-     * @return array<string, mixed>|null
-     */
-    public function getPayment(string $id): ?array
-    {
-        return $this->getJson('/payments/'.rawurlencode($id));
-    }
-
-    /**
      * Refunds already issued against a payment. Throws, like refund(), because a caller using this
      * to avoid a duplicate must not mistake "could not ask" for "there are none".
      *

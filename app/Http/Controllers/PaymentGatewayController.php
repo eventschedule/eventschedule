@@ -85,7 +85,7 @@ class PaymentGatewayController extends Controller
         // A save that went through with a caveat (the credentials were stored but could not be
         // checked) has flashed a warning. The layout shows a message ahead of a warning, so
         // "Settings saved" on top of it would be the only thing the owner ever saw.
-        if (session()->has('warning')) {
+        if (in_array('warning', (array) session('_flash.new', []), true)) {
             return Redirect::to(route('profile.edit').'#section-payment-methods');
         }
 

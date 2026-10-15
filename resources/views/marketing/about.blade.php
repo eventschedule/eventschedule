@@ -584,7 +584,7 @@
             [
                 // SaleRefundService moves money only where the driver says supportsRefunds(); the
                 // others get "Mark as Refunded". TicketController's refund action mails no ticket buyer.
-                'Refunds move money on Stripe and PayPal only.',
+                'Refunds move money on Stripe, PayPal and Razorpay only.',
                 'From the Sales page a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider before the status changes. Payfast, Invoice Ninja, a payment link and cash can only be marked as refunded, which records it without moving anything. Either way the ticket buyer gets no email about it from us, so that message is yours to send.',
             ],
             [

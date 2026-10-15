@@ -1191,7 +1191,7 @@
             },
             {
                 "question": "Does Event Schedule have gift cards, passes, payment plans and seating?",
-                "answer": "Yes, each on the plan named. Gift cards, passes (festival, season, visit and membership) and installment payments, which split a ticket into monthly charges on Stripe, are on Pro. Allocated seating, where buyers pick seats from a map of the room, is on Enterprise for venue schedules. Refunds, full or partial, through Stripe or PayPal, come with paid ticketing on Pro."
+                "answer": "Yes, each on the plan named. Gift cards, passes (festival, season, visit and membership) and installment payments, which split a ticket into monthly charges on Stripe, are on Pro. Allocated seating, where buyers pick seats from a map of the room, is on Enterprise for venue schedules. Refunds, full or partial, through Stripe, PayPal or Razorpay, come with paid ticketing on Pro."
             }
         ]
     },

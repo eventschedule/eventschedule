@@ -17,6 +17,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -355,7 +356,8 @@ class RazorpayGateway extends PaymentGatewayDriver
         if ($previousKeyId !== '' && $keyId !== ''
             && RazorpayClient::isTestKey($previousKeyId) !== RazorpayClient::isTestKey($keyId)
             && ! $newWebhookSecret) {
-            $owner->forceFill(['razorpay_webhook_secret' => null])->saveQuietly();
+            // parent::saveCredentials() skips a blank secret, so this null is what its save stores.
+            $owner->razorpay_webhook_secret = null;
         }
 
         parent::saveCredentials($owner, $input);
@@ -428,6 +430,16 @@ class RazorpayGateway extends PaymentGatewayDriver
             ]));
         }
 
+        $client = new RazorpayClient($credentials);
+
+        // A link already made for this sale and still open is where the buyer goes. A booking's pay
+        // step can be pressed again (the guest backs out and comes back), and a second link would
+        // leave two that can each be paid - and, late in the hold, one still open after the booking
+        // was released for want of time.
+        if ($open = $this->openLinkFor($sale, $client, $amountMinor)) {
+            return redirect($open);
+        }
+
         $expireBy = $this->linkExpiresAt($sale);
 
         if ($expireBy === null) {
@@ -448,7 +460,7 @@ class RazorpayGateway extends PaymentGatewayDriver
             $callbackParams['embed'] = 'true';
         }
 
-        $link = (new RazorpayClient($credentials))->createPaymentLink([
+        $link = $client->createPaymentLink([
             'amount' => $amountMinor,
             'currency' => 'INR',
             'accept_partial' => false,
@@ -481,7 +493,65 @@ class RazorpayGateway extends PaymentGatewayDriver
             return $this->refuseCheckout($sale, 'razorpay_link_failed', __('messages.razorpay_link_failed'));
         }
 
+        $this->rememberLink($sale, (string) ($link['id'] ?? ''), $amountMinor, $expireBy);
+
         return redirect($url);
+    }
+
+    private function linkCacheKey(Sale $sale): string
+    {
+        return 'razorpay:link:'.$sale->id;
+    }
+
+    /**
+     * Remember the link made for this sale until it expires, so a second press of the pay step goes
+     * back to it (openLinkFor()). Only the id and the amount: the link itself is re-read from
+     * Razorpay, which is the only answer to whether it can still be paid.
+     */
+    private function rememberLink(Sale $sale, string $linkId, int $amountMinor, int $expireBy): void
+    {
+        if ($linkId === '') {
+            return;
+        }
+
+        try {
+            Cache::put($this->linkCacheKey($sale), ['id' => $linkId, 'amount' => $amountMinor], Carbon::createFromTimestamp($expireBy));
+        } catch (\Throwable $e) {
+            // Without it the next press makes a new link, which is how it worked before.
+            report($e);
+        }
+    }
+
+    /**
+     * The short URL of this sale's link while Razorpay still says it can be paid ("created", not
+     * yet past its expiry) for the amount now owed, or null. Asked before any new link is made, and
+     * so before a booking is released for having too little time left: with a link still open, the
+     * guest is sent to it, and nothing is released that the guest could still pay.
+     */
+    private function openLinkFor(Sale $sale, RazorpayClient $client, int $amountMinor): ?string
+    {
+        try {
+            $remembered = Cache::get($this->linkCacheKey($sale));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+
+        if (! is_array($remembered) || ($remembered['amount'] ?? null) !== $amountMinor || empty($remembered['id'])) {
+            return null;
+        }
+
+        $link = $client->getPaymentLink((string) $remembered['id']);
+
+        if (! $link || ($link['status'] ?? null) !== 'created' || ! $this->linkBelongsTo($sale, $link)
+            || (int) ($link['expire_by'] ?? 0) <= Carbon::now()->getTimestamp()) {
+            return null;
+        }
+
+        $url = (string) ($link['short_url'] ?? '');
+
+        return $url !== '' ? $url : null;
     }
 
     /**
@@ -524,7 +594,8 @@ class RazorpayGateway extends PaymentGatewayDriver
      * Unlike every other refusal, this one never passes: the booking can only get closer to its
      * release. Keeping the hold, as refuseCheckout() does, would leave Complete payment on the
      * booking's page and refuse it on every press until the hour ran out. So the booking is released
-     * now, and its page says so and offers to book again.
+     * now, and its page says so and offers to book again. startCheckout() has already sent the guest
+     * to any link of theirs that is still open, so nothing released here can still be paid.
      */
     private function refuseTooLate(Sale $sale): Response
     {
@@ -573,11 +644,20 @@ class RazorpayGateway extends PaymentGatewayDriver
                 continue;
             }
 
-            $link = $client->getPaymentLink($linkId);
+            // Once more before giving up: Razorpay sends the buyer here only after a payment, so a
+            // link that cannot be read is money taken and not yet recorded.
+            $link = $client->getPaymentLink($linkId) ?? $client->getPaymentLink($linkId);
 
             if (! $link) {
-                // Signed by this account but Razorpay is unreachable. The webhook will settle it.
                 Log::warning('Razorpay return verified but the link could not be fetched', ['sale_id' => $sale->id]);
+
+                // With a webhook the payment is settled when its notice arrives. Without one nothing
+                // else will ever settle it, so a person has to.
+                if (($credentials['razorpay_webhook_secret'] ?? '') === '') {
+                    report(new \RuntimeException(
+                        'Razorpay took a payment for sale '.$sale->id.' that could not be confirmed, and no webhook is set up to confirm it later'
+                    ));
+                }
 
                 return $landing();
             }
@@ -679,7 +759,10 @@ class RazorpayGateway extends PaymentGatewayDriver
 
         if (strtoupper((string) ($link['currency'] ?? '')) !== 'INR'
             || strtoupper((string) ($sale->event?->ticket_currency_code ?: '')) !== 'INR') {
-            Log::warning('Razorpay link currency did not match the event', ['sale_id' => $sale->id]);
+            // The event's currency was changed while the buyer was on Razorpay's page (it locks only
+            // once money has settled). Razorpay holds the money, so a person has to deal with it.
+            Log::error('Razorpay link currency did not match the event', ['sale_id' => $sale->id]);
+            report(new \RuntimeException('Razorpay payment for sale '.$sale->id.' is in INR, but the event is no longer priced in INR - not settled'));
 
             return;
         }
@@ -819,6 +902,22 @@ class RazorpayGateway extends PaymentGatewayDriver
                     return;
                 }
 
+                // Marked paid by hand (the stored reference is the manual_payment text, not a pay_
+                // id), perhaps for this very payment when its confirmation was slow. Not necessarily
+                // money twice, so say what to check rather than what to refund.
+                if (! preg_match(self::PAYMENT_ID_PATTERN, $stored)) {
+                    Log::warning('Razorpay payment arrived for a sale marked paid by hand', [
+                        'sale_id' => $sale->id,
+                        'payment_id' => $paymentId,
+                    ]);
+
+                    report(new \RuntimeException(
+                        'Razorpay payment '.$paymentId.' arrived for sale '.$sale->id.', which had been marked paid by hand - check whether it was paid twice'
+                    ));
+
+                    return;
+                }
+
                 Log::error('Razorpay took a second payment for a sale that was already paid', [
                     'sale_id' => $sale->id,
                     'payment_id' => $paymentId,
@@ -833,10 +932,18 @@ class RazorpayGateway extends PaymentGatewayDriver
                 'sale_id' => $sale->id,
             ]),
 
-            // Parked earlier (amount_mismatch) and waiting for a person; nothing new to say.
-            'not_settleable' => Log::warning('Razorpay payment for a sale awaiting review - left as it is', [
-                'sale_id' => $sale->id,
-            ]),
+            // The sale is parked for review (amount_mismatch). settleLink() has already passed over
+            // the payment that parked it, so this is a DIFFERENT one: more money a person has to see.
+            'not_settleable' => (function () use ($sale, $paymentId) {
+                Log::error('Razorpay took another payment for a sale awaiting review', [
+                    'sale_id' => $sale->id,
+                    'payment_id' => $paymentId,
+                ]);
+
+                report(new \RuntimeException(
+                    'Razorpay payment '.$paymentId.' arrived for sale '.$sale->id.', which is awaiting review for an earlier payment'
+                ));
+            })(),
 
             'paid' => Log::info('Razorpay payment settled', [
                 'sale_id' => $sale->id,

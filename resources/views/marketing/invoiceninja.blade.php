@@ -607,7 +607,7 @@
             ],
             [
                 'q' => 'Can I refund an Invoice Ninja sale from Event Schedule?',
-                'a' => 'You can record the refund, not send it. An Invoice Ninja sale shows Mark as Refunded on the Sales page, which marks the sale refunded here and puts its seats back on sale, but moves no money and changes nothing in Invoice Ninja, so return the payment there yourself. Stripe and PayPal are the only methods where a refund from the Sales page sends the money back for you.',
+                'a' => 'You can record the refund, not send it. An Invoice Ninja sale shows Mark as Refunded on the Sales page, which marks the sale refunded here and puts its seats back on sale, but moves no money and changes nothing in Invoice Ninja, so return the payment there yourself. Stripe, PayPal and Razorpay are the only methods where a refund from the Sales page sends the money back for you.',
             ],
             [
                 'q' => 'Can one invoice cover tickets to several events?',

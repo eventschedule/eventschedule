@@ -1137,7 +1137,7 @@
                 </p>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="100">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="100">
                 @foreach ([
                     ['Stripe', 'Opens in the parent window', 'Your own connected account. The buyer leaves the frame for the payment page and lands on their ticket when it is done.'],
                     ['PayPal', 'Opens in the parent window', 'Your own connected account. The buyer approves on PayPal and lands on their ticket, issued the moment they return.'],

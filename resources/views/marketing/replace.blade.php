@@ -545,7 +545,7 @@
                 ['Free']],
             ['L05', 'Google Sheets', 'marketing.replace_google_sheets', 'Scheduling and tracking',
                 'The attendee list and the takings',
-                'An attendee list per event, a Sales page that refunds Stripe and PayPal payments in full or in part, built-in analytics, and a CSV export when you do want a spreadsheet.',
+                'An attendee list per event, a Sales page that refunds Stripe, PayPal and Razorpay payments in full or in part, built-in analytics, and a CSV export when you do want a spreadsheet.',
                 ['Free', 'Pro']],
             ['L06', 'Calendly', 'marketing.replace_calendly', 'Scheduling and tracking',
                 'One-to-one bookings',

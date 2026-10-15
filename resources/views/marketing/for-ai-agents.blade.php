@@ -814,7 +814,7 @@
                 ['GET', '/api/sales', 'Filter by event, subdomain, status, buyer email or occurrence date.'],
                 ['GET', '/api/sales/{id}', 'One sale with its ticket lines.'],
                 ['POST', '/api/sales', 'Book a sale by hand. Created unpaid; free tickets are marked paid straight away.'],
-                ['PUT', '/api/sales/{id}', 'mark_paid, cancel or refund. A refund sends Stripe or PayPal money back, in full or an amount you name; an idempotency_key makes a retry safe.'],
+                ['PUT', '/api/sales/{id}', 'mark_paid, cancel or refund. A refund sends Stripe, PayPal or Razorpay money back, in full or an amount you name; an idempotency_key makes a retry safe.'],
                 ['DELETE', '/api/sales/{id}', 'Soft delete. It stops appearing in listings.'],
             ]],
             ['Feeds', 'Read-only, for pulling audience content onto a site you already run.', [

@@ -376,7 +376,7 @@
 
         <h3 id="razorpay" class="doc-subheading">Razorpay</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <x-link href="https://razorpay.com" target="_blank">Razorpay</x-link> takes payment in Indian rupees by UPI, card, netbanking and wallets, and releases the ticket on its own once the buyer has paid. Buyers pay on a Razorpay payment page and come straight back, and we check every payment with Razorpay itself before marking a sale paid. It settles in Indian rupees (INR) only - if your event is priced in anything else, Razorpay does not appear as an option.
+            <x-link href="https://razorpay.com" target="_blank">Razorpay</x-link> takes payment in Indian rupees by UPI, card, netbanking and wallets, and releases the ticket on its own once the buyer has paid. Buyers pay on a Razorpay payment page and come straight back, and we check every payment with Razorpay itself before marking a sale paid. It settles in INR only - if your event is priced in anything else, Razorpay does not appear as an option.
         </p>
         <div class="doc-fields">
             <div class="doc-field">

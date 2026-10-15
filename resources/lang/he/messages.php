@@ -5286,7 +5286,7 @@ return [
     'razorpay_no_webhook' => 'אין webhook',
     'razorpay_checkout_unavailable' => 'Razorpay אינו יכול לעבד תשלום זה. נא לפנות למארגן האירוע.',
     'razorpay_link_failed' => 'Razorpay לא הצליח להתחיל את התשלום הזה. נסה שוב בעוד רגע.',
-    'razorpay_too_late_to_pay' => 'נותר מעט מדי זמן בהזמנה הזו כדי לשלם דרך Razorpay, ולכן המועד שוחרר. הזמן אותו שוב ושלם מיד.',
+    'razorpay_too_late_to_pay' => 'נותר מעט מדי זמן בהזמנה הזו כדי לשלם דרך Razorpay, ולכן המועד שוחרר. קבע אותו שוב ושלם מיד.',
     'razorpay_credentials_rejected' => 'Razorpay לא קיבל את המפתחות האלה. בדוק את ה-Key ID ואת ה-Key Secret, ושהשניים מאותו מצב, Test או Live.',
     'razorpay_credentials_unverified' => 'מפתחות Razorpay נשמרו, אך לא הצלחנו ליצור קשר עם Razorpay כדי לבדוק אותם. בצע תשלום בדיקה לפני מכירת כרטיסים.',
     'razorpay_test_mode_warning' => 'Razorpay משתמש במפתחות Test Mode. הקונים לא מחויבים והכרטיסים שהם מקבלים אינם אמיתיים. הזן את מפתחות ה-live שלך (rzp_live_) בהגדרות לפני שאתה מוכר.',

@@ -660,7 +660,7 @@
             ],
             [
                 'Razorpay', 'out then in', 'Free',
-                'Indian rupees (INR) only, so it is offered on INR events and nowhere else. The buyer pays on a Razorpay payment link by UPI, card, netbanking or wallet, and the sale is confirmed on their return, or by a webhook if they never come back. A Razorpay event CAN join the multi-event cart, a refund, full or partial, goes back through Razorpay, and installments are not supported. A selfhost operator can supply one account for the whole install, which an owner who connected their own keeps overriding.',
+                'Indian rupees (INR) only, so it is offered on INR events and nowhere else. The buyer pays on a Razorpay payment link by UPI, card, netbanking or wallet, and the sale is confirmed on their return, or by a webhook if they never come back. A Razorpay event CAN join the multi-event cart, and a refund, full or partial, goes back through Razorpay. Installments are not supported. A selfhost operator can supply one account for the whole install, which an owner who connected their own keeps overriding.',
             ],
             [
                 'Webhooks', 'out', 'Pro',
@@ -890,7 +890,7 @@
                             <span class="es-wire-dir">in</span>
                         </div>
                         <h3 class="mb-2 text-lg font-bold es-wire-onband">Data arrives here</h3>
-                        <p class="text-sm es-wire-onband-muted">Google and Microsoft tell us when something changed; Stripe, Invoice Ninja, Payfast, Razorpay and Twilio report the same way. Where a service cannot tell us, we ask: CalDAV on a timer, Eventbrite when you press import. PayPal is asked on purpose, because the payment is taken by our own call when the buyer comes back. The REST API is inbound too, with your code doing the calling.</p>
+                        <p class="text-sm es-wire-onband-muted">Google and Microsoft tell us when something changed; Stripe, Invoice Ninja, Payfast and Twilio report the same way. Where a service cannot tell us, we ask: CalDAV on a timer, Eventbrite when you press import. PayPal and Razorpay are asked on purpose, because the payment is confirmed by our own call when the buyer comes back. The REST API is inbound too, with your code doing the calling.</p>
                     </div>
                     <div class="es-wire-card p-6" data-reveal="panel">
                         <div class="mb-4 flex items-center gap-3">

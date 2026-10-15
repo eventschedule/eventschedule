@@ -627,7 +627,7 @@
             <pre><code><span class="code-variable">DEFAULT_PAYMENT_METHOD</span>=<span class="code-string">payfast</span></code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code>, <code class="doc-inline-code">payfast</code> or <code class="doc-inline-code">paypal</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's own saved ticket defaults take priority over it; the API has never read those, so there it applies whenever <code class="doc-inline-code">payment_method</code> is omitted.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Accepts any gateway key - <code class="doc-inline-code">cash</code>, <code class="doc-inline-code">stripe</code>, <code class="doc-inline-code">invoiceninja</code>, <code class="doc-inline-code">payment_url</code>, <code class="doc-inline-code">payfast</code>, <code class="doc-inline-code">paypal</code> or <code class="doc-inline-code">razorpay</code> - and applies to events created through the API as well as the form. It only takes effect where the gateway can actually be used: an owner who has not connected it, or an event in a currency it cannot settle, still starts on Cash. On the event form a schedule's own saved ticket defaults take priority over it; the API has never read those, so there it applies whenever <code class="doc-inline-code">payment_method</code> is omitted.</p>
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Your install must be publicly reachable</div>
@@ -654,7 +654,7 @@
         <div class="doc-fields doc-fields--2 mb-6">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">One account for the whole install</h4>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">Put your API keys in <code class="doc-inline-code">.env</code>. Every schedule can then sell in rupees straight away with no setup of their own, and all the money reaches your account.</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Put your API keys in <code class="doc-inline-code">.env</code>. Every schedule can then sell in Indian rupees straight away with no setup of their own, and all the money reaches your account.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Each user brings their own</h4>
@@ -688,7 +688,7 @@
         </div>
 
         <h3 id="razorpay-webhook" class="doc-subheading">A webhook for the install-wide account</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Razorpay has no way for the app to register a webhook for you, so add it in the dashboard, for the install-wide account here and by each user for their own:</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Razorpay has no API for registering a webhook, so add it yourself in the Razorpay Dashboard. Do it for the install-wide account; each user who connects their own account adds their own the same way:</p>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>In the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; Webhooks</strong>, add a webhook pointing at <code class="doc-inline-code">https://your-site/payments/razorpay/webhook</code></li>
             <li>Tick <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code></li>
@@ -723,7 +723,7 @@
 
         <div class="doc-callout doc-callout-warning mb-6">
             <div class="doc-callout-title">Refunds made in the Stripe, PayPal or Razorpay dashboard are not reported back</div>
-            <p>The app only listens for completed payments: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal, <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code> from Razorpay. A refund issued in any of those dashboards therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
+            <p>The app only listens for payments and expired payment links, never for refunds: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal, <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code> from Razorpay. A refund issued in any of those dashboards therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A refund needs no webhook of its own, because the app calls the provider directly. The app sends no refund email, so tell the buyer yourself. The one message a refund can set off is for a paid appointment booking: refunding it in full cancels the booking, and the guest gets the usual cancellation email.</p>

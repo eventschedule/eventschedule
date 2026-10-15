@@ -30,7 +30,7 @@ return [
     'what' => ['tier' => 'about', 'says' => 'Event Schedule is an open-source event calendar and ticketing platform. An organizer makes a "schedule": a public page of their events at its own address (name.eventschedule.com). Events and schedules are unlimited on every plan.', 'url' => '/features'],
     'types' => ['tier' => 'about', 'says' => 'There are three kinds of schedule: Talent (a performer or teacher), Venue (a place) and Curator (a listing of other people\'s events).'],
     'plans' => ['tier' => 'about', 'says' => 'Plans: Free (:free). Pro (:pro_monthly a month or :pro_yearly a year). Enterprise (:enterprise_monthly a month or :enterprise_yearly a year). Selfhosted installs have every feature.', 'url' => '/pricing'],
-    'fees' => ['tier' => 'about', 'says' => 'Event Schedule takes no platform fee or per-ticket fee on any plan. The payment processor (Stripe, PayPal, Razorpay) still charges its own card fee.', 'url' => '/ticket-fee-calculator'],
+    'fees' => ['tier' => 'about', 'says' => 'Event Schedule takes no platform fee or per-ticket fee on any plan. The payment processor (Stripe, PayPal, Payfast or Razorpay) still charges its own processing fee.', 'url' => '/ticket-fee-calculator'],
 
     // On every plan (Free included)
     'recurring' => ['tier' => 'free', 'says' => 'Recurring events: daily, weekly on chosen days, every N weeks, monthly by date or by weekday (the 2nd Tuesday), yearly, with single dates added or skipped.', 'url' => '/features/recurring-events', 'guide' => 'creating-events', 'match' => ['recurring', 'repeat', 'every']],
