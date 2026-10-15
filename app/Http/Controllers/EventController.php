@@ -730,7 +730,38 @@ class EventController extends Controller
             abort(403);
         }
 
-        return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
+        return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash] + $this->monthOnScreen($request)));
+    }
+
+    /**
+     * The calendar month an Edit link was pressed on, as the link carries it (the calendar's
+     * editUrl()), for passing on through a redirect. Empty for anything that is not a month.
+     */
+    private function monthOnScreen(Request $request): array
+    {
+        $year = filter_var($request->query('year'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1900, 'max_range' => 2199]]);
+        $month = filter_var($request->query('month'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 12]]);
+
+        return $year !== false && $month !== false ? ['year' => $year, 'month' => $month] : [];
+    }
+
+    /**
+     * The month the calendar showed when Edit was pressed, while the event as saved still falls
+     * in it. A series is edited from whichever of its months the owner was looking at, and the
+     * save used to send them to the month it began in. An event moved out of that month is
+     * followed to its own, as before.
+     */
+    private function monthEditedFrom(Request $request, Event $event): ?Carbon
+    {
+        $value = $request->input('return_month');
+
+        if (! is_string($value) || ! preg_match('/^(19|2[01])\d{2}-(0[1-9]|1[0-2])$/', $value)) {
+            return null;
+        }
+
+        $first = Carbon::createFromFormat('Y-m-d', $value.'-01')->startOfDay();
+
+        return $event->nextOccurrenceFrom($first->format('Y-m-d'), $first->daysInMonth - 1) ? $first : null;
     }
 
     /**
@@ -788,7 +819,7 @@ class EventController extends Controller
             $event = Event::findOrFail(UrlUtils::decodeId($hash));
 
             if ($editableSubdomain = $this->resolveEditableSubdomain($user, $event)) {
-                return redirect(route('event.edit', ['subdomain' => $editableSubdomain, 'hash' => $hash]));
+                return redirect(route('event.edit', ['subdomain' => $editableSubdomain, 'hash' => $hash] + $this->monthOnScreen($request)));
             }
 
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -869,9 +900,13 @@ class EventController extends Controller
         // keeps the stored value.
         $currencyLocked = $event->exists && $event->hasSettledMoney();
 
+        $onScreen = $this->monthOnScreen($request);
+
         return view('event/edit', [
             'interestCount' => $interestCount,
             'currencyLocked' => $currencyLocked,
+            // Posted back as return_month, for update() to come back to (monthEditedFrom()).
+            'returnMonth' => $onScreen ? sprintf('%04d-%02d', $onScreen['year'], $onScreen['month']) : null,
             'role' => $role,
             'effectiveRole' => $effectiveRole,
             'user' => $user,
@@ -1069,7 +1104,9 @@ class EventController extends Controller
             $role->save();
         }
 
-        if ($event->starts_at) {
+        if ($from = $this->monthEditedFrom($request, $event)) {
+            $date = $from;
+        } elseif ($event->starts_at) {
             // Schedule-local date so the redirect opens the calendar month the event appears in.
             $date = Carbon::parse($event->saleEventDateFromStartsAt());
         } else {

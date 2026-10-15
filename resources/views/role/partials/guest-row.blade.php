@@ -60,5 +60,5 @@
             </a>
         </div>
     </div>
-    <a v-if="event.can_edit" :href="event.edit_url" class="gk-row-edit" @click.stop>{{ __('messages.edit_event') }}</a>
+    <a v-if="event.can_edit" :href="editUrl(event)" class="gk-row-edit" @click.stop>{{ __('messages.edit_event') }}</a>
 </li>

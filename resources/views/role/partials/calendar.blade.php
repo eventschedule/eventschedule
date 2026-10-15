@@ -1385,7 +1385,7 @@
                                             </div>
                                         </form>
 
-                                        <a v-if="event.can_edit" :href="event.edit_url"
+                                        <a v-if="event.can_edit" :href="editUrl(event)"
                                            class="text-sm {{ $route == 'admin' ? 'font-medium text-[var(--brand-blue)] hover:underline' : 'text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200' }}"
                                            @click.stop>
                                             {{ __('messages.edit_event') }}
@@ -1747,7 +1747,7 @@
                                         </div>
                                     </form>
 
-                                    <a v-if="event.can_edit" :href="event.edit_url"
+                                    <a v-if="event.can_edit" :href="editUrl(event)"
                                        class="text-sm {{ $route == 'admin' ? 'font-medium text-[var(--brand-blue)] hover:underline' : 'text-gray-500 dark:text-gray-400 hover:underline hover:text-gray-700 dark:hover:text-gray-200' }}"
                                        @click.stop>
                                         {{ __('messages.edit_event') }}
@@ -4242,6 +4242,15 @@ const calendarApp = createApp({
         rowSoldElsewhere(event) {
             return !!(event.registration_url && event.ticket_price != null && !event.is_password_protected
                 && !event.ticket_free && !event.rsvp_enabled && !event.ticket_from);
+        },
+        // Edit, carrying the month on screen so the save comes back to it
+        // (EventController::update()): a series was sent to the month it began in.
+        editUrl(event) {
+            if (!event.edit_url) return null;
+            const url = new URL(event.edit_url, window.location.href);
+            url.searchParams.set('year', this.pageYear);
+            url.searchParams.set('month', this.pageMonth);
+            return url.toString();
         },
         getEventUrl(event, occurrenceDate = null) {
             let url = event.guest_url;  // Already has /{subdomain}/{slug}/{id}

@@ -591,7 +591,7 @@ return {
             const withParam = (p) => url + (url.includes('?') ? '&' : '?') + p;
             const view = { label: L.view_event, href: url, kind: 'secondary', plain: true };
             // On the admin's pages the month is the owner's: edit what may be edited.
-            if (!CAN.guest) return e.can_edit ? { label: L.edit_event, href: e.edit_url || url, kind: 'primary', plain: true, edit: true } : view;
+            if (!CAN.guest) return e.can_edit ? { label: L.edit_event, href: this.editUrl(e) || url, kind: 'primary', plain: true, edit: true } : view;
             if (!url || f.locked || f.past || f.cancelled || f.soldOut) return view;
             if (e.rsvp_enabled) return { label: L.register, href: withParam('rsvp=true'), kind: 'primary', price: L.free };
             if (f.price || (f.freeTicket && !f.over)) return { label: f.freeTicket ? L.get_tickets : L.buy_tickets, href: withParam('tickets=true'), kind: 'primary', price: f.freeTicket ? L.free : f.price };
@@ -701,7 +701,7 @@ return {
                 also, alsoMore: Math.max(0, others.length - 4), chips,
                 go, details: go.plain ? null : url,
                 view: !CAN.guest && e.can_edit ? url : null,
-                edit: CAN.guest && e.can_edit ? e.edit_url : null,
+                edit: CAN.guest && e.can_edit ? this.editUrl(e) : null,
                 links, share: CAN.share && !f.draft && !f.internal && !!e.guest_url, page: this.monthPage(e, f.first), menu: false, copied: false,
                 step: sibs.length > 1 ? {
                     label: day(date).toLocaleDateString(lang, short) + ' · ' + say(L.n_of, { a: at + 1, b: sibs.length }),

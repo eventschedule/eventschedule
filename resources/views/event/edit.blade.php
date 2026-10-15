@@ -2123,6 +2123,11 @@
 
         @if ($event->exists)
         @method('put')
+        @if (! empty($returnMonth))
+        {{-- The calendar month Edit was pressed on: the save comes back to it (EventController::update()).
+             A refused save returns to this page's own address, which still carries it. --}}
+        <input type="hidden" name="return_month" value="{{ $returnMonth }}">
+        @endif
         @endif
 
 
