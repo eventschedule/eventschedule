@@ -165,11 +165,15 @@ return [
         ['title' => 'Google Calendar Alternative', 'path' => '/google-calendar-alternative', 'blurb' => 'When a Google Calendar link is not enough.'],
     ],
 
+    // Six since the 2026-10-15 SEO crawl: the Songkick comparison and the lineup page had two
+    // inbound links and one, and a band's tour dates are what both are about.
     'for-musicians' => [
         ['title' => 'For DJs', 'path' => '/for-djs', 'blurb' => 'DJ sets, residencies, and guest spots in one place.'],
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Fill the calendar at the venues you play.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
         ['title' => 'Bandsintown Alternative', 'path' => '/bandsintown-alternative', 'blurb' => 'Your own tour-date page with ticketing and calendar sync.'],
+        ['title' => 'Songkick Alternative', 'path' => '/songkick-alternative', 'blurb' => 'Tour dates on your own page, with registrations and tickets built in.'],
+        ['title' => 'Event Lineup', 'path' => '/features/lineup', 'blurb' => 'Every act on the bill is named on the event and linked to a page of its own.'],
     ],
 
     'for-djs' => [
@@ -345,11 +349,16 @@ return [
         ['title' => 'Contact Us', 'path' => '/contact', 'blurb' => 'Email support, GitHub issues, and where else to find us.'],
     ],
 
+    // Six since the 2026-10-15 SEO crawl, which found the last two linked from one marketing page
+    // and three pages respectively. Somebody browsing events is who the account page is written
+    // for, and each event on this wall opens on the page the landing-page page describes.
     'browse' => [
         ['title' => 'Examples', 'path' => '/examples', 'blurb' => 'Real schedules built by venues, artists, and organizers.'],
         ['title' => 'Use Cases', 'path' => '/use-cases', 'blurb' => 'Event scheduling for musicians, venues, restaurants and theaters.'],
         ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+        ['title' => 'Why Create an Account', 'path' => '/why-create-account', 'blurb' => 'What a free account unlocks, with no credit card required.'],
+        ['title' => 'Event Landing Page', 'path' => '/event-landing-page', 'blurb' => 'Every event gets a free page: the flyer, the date, a map and a ticket button.'],
     ],
 
     'contact' => [
@@ -573,10 +582,13 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    // The WordPress page is this page's own job on the one site builder people ask about by name,
+    // and it had two inbound links (2026-10-15 SEO crawl), so it takes the place of Calendar
+    // Sync, which nearly every feature page links.
     'features/embed-calendar' => [
         ['title' => 'Embed Tickets', 'path' => '/features/embed-tickets', 'blurb' => 'Put the ticket checkout on your own website with one iframe tag.'],
         ['title' => 'Custom CSS', 'path' => '/features/custom-css', 'blurb' => 'Write your own CSS and customize every pixel of your schedule.'],
-        ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google Calendar, Outlook and any CalDAV server.'],
+        ['title' => 'WordPress Event Calendar', 'path' => '/wordpress-event-calendar', 'blurb' => 'Put your live calendar on a WordPress page with one Custom HTML block.'],
         ['title' => 'The Events Calendar Alternative', 'path' => '/the-events-calendar-alternative', 'blurb' => 'Event pages, ticketing and calendar sync without a WordPress plugin.'],
     ],
 
@@ -671,11 +683,15 @@ return [
         ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Write to supporters yourself, within an allowance counted per recipient.'],
     ],
 
+    // Six since the 2026-10-15 SEO crawl: the page is a lineup stage by stage, and the two pages
+    // that do those jobs were not in its strip (the lineup page had one inbound link).
     'for-festivals' => [
         ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
         ['title' => 'For Food Trucks', 'path' => '/for-food-trucks-and-vendors', 'blurb' => "One link that always has today's stop."],
         ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, vendor lineups, and seasonal events.'],
         ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
+        ['title' => 'Event Lineup', 'path' => '/features/lineup', 'blurb' => 'Every act on the bill is named on the event and linked to a page of its own.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep each stage apart on one link.'],
     ],
 
     'for-sports-leagues' => [

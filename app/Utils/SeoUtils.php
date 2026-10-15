@@ -412,6 +412,43 @@ class SeoUtils
     }
 
     /**
+     * The longest opening of $title that ends where a phrase ends and fits in $max characters, or
+     * null when no such opening is at least $min long.
+     *
+     * For a title that has to be shortened: "Tribute Acts: Boost Ticket Sales & Build Fanbase with
+     * Direct Communication" becomes "Tribute Acts: Boost Ticket Sales & Build Fanbase", where a
+     * cut by words ended "...Fanbase with…" and a search result showed exactly that. $min keeps it
+     * from settling for the label before a colon ("Tribute Acts").
+     */
+    public static function cutAtPhrase(string $title, int $max = 60, int $min = 30): ?string
+    {
+        $title = trim($title);
+
+        if (mb_strlen($title) <= $max) {
+            return $title;
+        }
+
+        $best = null;
+
+        foreach ([' | ', ' - ', ': ', ', ', ' & ', ' and ', ' with ', ' via ', ' using ', ' for ', ' to ', ' in ', ' on ', ' by '] as $separator) {
+            $offset = 0;
+
+            while (($at = mb_stripos($title, $separator, $offset)) !== false) {
+                $head = rtrim(mb_substr($title, 0, $at), ' :,&-|');
+                $length = mb_strlen($head);
+
+                if ($length <= $max && $length >= $min && ($best === null || $length > mb_strlen($best))) {
+                    $best = $head;
+                }
+
+                $offset = $at + 1;
+            }
+        }
+
+        return $best;
+    }
+
+    /**
      * A social image as og:image wants it: the URL, and its pixel size when that is known.
      *
      * $dimensions is the hook for sizes recorded at upload time (Phase F stores them with the

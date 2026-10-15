@@ -548,7 +548,7 @@
             </div>
             <div class="doc-field">
                 <h4>Not the same as Availability</h4>
-                <p><a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</p>
+                <p><a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</p>
             </div>
             <div class="doc-field">
                 <h4>Not the same as a request to put an event on your schedule</h4>
@@ -572,7 +572,7 @@
         <ul class="doc-list">
             <li><a href="{{ route('marketing.docs.managing_schedules') }}#appointments" class="doc-link">Managing Schedules</a> - the Appointments tab and the Requests tab in context</li>
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Creating Schedules</a> - set your timezone, email settings, and calendar sync</li>
-            <li><a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> - mark whole days your team members are unavailable</li>
+            <li><a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> - mark whole days your team members are unavailable</li>
             <li><a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Selling Tickets</a> - the Sales page, where paid bookings are marked paid and refunded</li>
             <li><a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> - connect Stripe, PayPal, Payfast or Razorpay so paid types can take payment</li>
         </ul>

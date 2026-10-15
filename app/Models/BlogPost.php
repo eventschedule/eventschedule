@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\SeoUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -586,21 +587,36 @@ class BlogPost extends Model
     }
 
     /**
-     * The document <title>: the brand suffix only when it still fits in 60 characters.
+     * The document <title>, in 60 characters: the brand suffix only when it still fits.
      *
      * The AI generator writes a 50 to 60 character meta_title of its own, so a blanket
      * " | Event Schedule" pushed most posts to 70 to 80 characters and Google truncated them.
+     * Posts from the old generator have meta titles of up to 120 characters, and cutting those by
+     * words left 38 of them ending "...with Event…" in search results. So a title that does not fit
+     * falls back to the post's own heading, then to the longest opening of either that ends where
+     * a phrase ends, and is cut by words only when neither has one.
      */
     public function pageTitle(): string
     {
-        $title = trim((string) $this->meta_title);
         $suffix = ' | Event Schedule';
+        $titles = array_values(array_unique(array_filter([
+            trim((string) $this->meta_title),
+            trim((string) $this->title),
+        ], fn ($title) => $title !== '')));
 
-        if (mb_strlen($title.$suffix) <= 60) {
-            return $title.$suffix;
+        if ($titles === []) {
+            return 'Blog | Event Schedule';
         }
 
-        return Str::limit($title, 59, '…', true);
+        $candidates = [$titles[0].$suffix, ...$titles];
+
+        foreach ($titles as $title) {
+            $candidates[] = (string) SeoUtils::cutAtPhrase($title);
+        }
+
+        $candidates[] = Str::limit($titles[0], 59, '…', true);
+
+        return SeoUtils::fitTitle(array_values(array_filter($candidates)));
     }
 
     /**

@@ -449,6 +449,28 @@ class BlogSeoTest extends TestCase
         );
     }
 
+    public function test_a_long_title_falls_back_to_the_heading_then_ends_where_a_phrase_ends(): void
+    {
+        // Two of the 38 posts whose search titles ended "...with Event…" (2026-10 crawl).
+        $heading = $this->makePost([
+            'title' => 'Sell Out Beer Dinners: Smart Ticketing for Brewpubs',
+            'meta_title' => 'Brewpubs: Sell Out Beer Dinners with Smart Ticketing & Email Newsletters',
+        ]);
+        $phrase = $this->makePost([
+            'title' => 'Tribute Acts: Boost Ticket Sales & Build Fanbase with Direct Communication',
+            'meta_title' => 'Tribute Acts: Boost Ticket Sales & Build Fanbase with Direct Communication',
+        ]);
+
+        $this->assertSame(
+            'Sell Out Beer Dinners: Smart Ticketing for Brewpubs',
+            $this->titleOf($this->get('/blog/'.$heading->slug)->assertOk()->getContent())
+        );
+        $this->assertSame(
+            'Tribute Acts: Boost Ticket Sales & Build Fanbase',
+            $this->titleOf($this->get('/blog/'.$phrase->slug)->assertOk()->getContent())
+        );
+    }
+
     public function test_a_long_meta_description_is_cut_at_a_word_boundary_within_160_characters(): void
     {
         $post = $this->makePost(['meta_description' => str_repeat('Sell tickets online ', 10)]); // 200 characters
