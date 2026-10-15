@@ -422,6 +422,47 @@ class AppointmentGatewayPaymentTest extends TestCase
         $this->post($pay)->assertRedirect($manage);
     }
 
+    public function test_a_later_checkout_in_the_same_browser_does_not_forget_the_landing(): void
+    {
+        // markLanded() tidies the session's notes as it writes one. Tidied at the 90-second
+        // confirming window, the next checkout in the same browser - a ticket, another booking -
+        // erased this booking's note, and its page offered Complete payment and Cancel again while
+        // the Instant EFT was still clearing.
+        $this->connectPayfast();
+        $type = $this->paidType(['payment_method' => 'payfast', 'currency_code' => 'ZAR', 'price' => 150]);
+        $this->book($type);
+        $sale = $this->sale();
+        $manage = route('appointments.manage', $this->bookingParams($sale));
+        $pay = route('appointments.pay', $this->bookingParams($sale));
+        $cancel = route('appointments.manage_cancel', $this->bookingParams($sale));
+        $returnFor = fn (Sale $s) => route('payments.return', [
+            'gateway' => 'payfast',
+            'sale_id' => UrlUtils::encodeId($s->id),
+            'secret' => $s->secret,
+        ]);
+
+        $this->get($returnFor($sale))->assertRedirect($manage.'?new=1');
+        $this->travel(\App\Services\Payments\PaymentGatewayDriver::LANDED_SECONDS + 1)->seconds();
+
+        // A second booking, paid from the same browser.
+        $from = Carbon::now('America/New_York')->addDay()->format('Y-m-d');
+        $slots = app(AppointmentService::class)->availableSlots($type, $from, 1);
+        $this->postJson(route('appointments.book.store', ['subdomain' => $this->role->subdomain, 'typeSlug' => $type->slug]), [
+            'name' => 'Sam', 'email' => 'sam@gmail.com',
+            'slot' => $slots['days'][array_key_first($slots['days'])][0]['utc'], 'guest_timezone' => 'America/New_York',
+        ])->assertOk();
+        $this->get($returnFor(Sale::where('email', 'sam@gmail.com')->firstOrFail()))->assertRedirect();
+
+        $this->get($manage)->assertOk()
+            ->assertSee(__('messages.appointments_payment_in_review', ['schedule' => $this->role->name]))
+            ->assertDontSee($pay, false)
+            ->assertDontSee($cancel, false);
+
+        $this->post($pay)->assertRedirect($manage);
+        $this->post($cancel)->assertRedirect($manage);
+        $this->assertSame('unpaid', $sale->fresh()->status, 'the booking is still waiting on its payment');
+    }
+
     public function test_a_guest_who_never_went_to_pay_still_gets_the_pay_button(): void
     {
         $this->connectPayfast();

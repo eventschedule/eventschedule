@@ -630,7 +630,7 @@ abstract class PaymentGatewayDriver
     /**
      * The buyer has just been sent back from a payment page to these sales' tickets.
      *
-     * Kept in the session for a minute and a half, not flashed for one request: the ticket says
+     * Read from the session for a minute and a half, not flashed for one request: the ticket says
      * "Confirming your payment" while a confirmation is on its way (awaitsConfirmation()), and a
      * flash was gone on the first reload and never reached a ticket opened from the order page of
      * a several-event checkout. Both showed NOT PAID across a code that had just been paid for.
@@ -639,13 +639,21 @@ abstract class PaymentGatewayDriver
 
     public const LANDED_SECONDS = 90;
 
+    /**
+     * How long a landing stays noted, which is longer than it says "Confirming": a booking reads the
+     * note (hasLanded()) for as long as its payment may still arrive, and the longest hold is a day
+     * (Payfast, the payment URL). Tidied at LANDED_SECONDS instead, the next checkout in the same
+     * browser erased the note and offered a second payment for a booking whose EFT was clearing.
+     */
+    public const LANDED_KEEP_SECONDS = 86400;
+
     public static function markLanded(Sale $sale): void
     {
         // now(), not time(): a test moves the clock to see the seconds run out.
         $now = now()->getTimestamp();
         $landed = array_filter(
             (array) session(self::LANDED_SESSION, []),
-            fn ($at) => is_int($at) && $now - $at < self::LANDED_SECONDS
+            fn ($at) => is_int($at) && $now - $at < self::LANDED_KEEP_SECONDS
         );
 
         foreach ($sale->orderLegs() as $leg) {
@@ -671,8 +679,8 @@ abstract class PaymentGatewayDriver
      * ago. A booking's manage page reads it once the confirming window has closed: a guest who came
      * back from paying is not asked to pay again while the confirmation is still on its way.
      *
-     * As long as the session's note of the landing lasts, which is until markLanded() writes the
-     * next one (it drops entries older than LANDED_SECONDS as it does).
+     * As long as the session's note of the landing lasts: a day (LANDED_KEEP_SECONDS), or the
+     * session itself if that ends first.
      */
     public static function hasLanded(Sale $sale): bool
     {
