@@ -1202,7 +1202,7 @@ class EventController extends Controller
         }
 
         // Appointment bookings confirm on acceptance: calendar sync + guest AppointmentConfirmed.
-        // Unpaid online payments (stripe/payment_url) defer confirmation to the payment webhook so
+        // Unpaid online payments (AppointmentType::paysOnline()) defer confirmation to the payment so
         // the guest never gets "Confirmed" for a booking that can still expire unpaid.
         if ($event->appointment_type_id) {
             $sale = Sale::where('event_id', $event->id)

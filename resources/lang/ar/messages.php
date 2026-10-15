@@ -3706,7 +3706,6 @@ return [
     'download_all_photos' => 'تحميل جميع الصور',
     'no_photos_to_download' => 'لا توجد صور للتحميل.',
 
-
     'photo_gallery' => 'معرض الصور',
     'photo_count' => '{0} لا توجد صور|{1} صورة واحدة|[2,*] :count صور',
     'no_photos_yet' => 'لا توجد صور بعد',
@@ -4655,6 +4654,9 @@ return [
     'appointments_pending_note' => 'سيتم تأكيد موعدك عبر البريد الإلكتروني من قِبل :schedule. لن يتم تثبيت أي حجز حتى ذلك الحين.',
     'appointments_awaiting_payment' => 'أكمل عملية الدفع',
     'appointments_complete_payment' => 'إكمال الدفع',
+    'appointments_payment_in_review' => 'لا يزال التحقق من دفعتك جارياً، وقد يستغرق ذلك بعض الوقت. لا داعي للدفع مرة أخرى. إذا لم يتغير ذلك، فتواصل مع :schedule.',
+    'appointments_held_until' => 'هذا الوقت محجوز لك حتى :time.',
+    'appointments_payment_unavailable' => 'لا يمكن دفع ثمن هذا الحجز عبر الإنترنت الآن. يرجى التواصل مع :schedule.',
     'appointments_booking_expired' => 'انتهت صلاحية هذا الحجز. يُرجى حجز موعد جديد.',
     'appointments_edit_redirect' => 'يمكنك إدارة هذا الحجز من تبويب «المواعيد».',
     'upgrade_required' => 'تتطلب هذه الميزة ترقية الاشتراك.',
@@ -5262,6 +5264,8 @@ return [
     'payfast_checkout_unavailable' => 'يتعذر على Payfast معالجة هذه الدفعة. يرجى التواصل مع منظم الفعالية.',
     'payfast_test_mode_notice' => 'وضع الاختبار مفعّل. ستذهب هذه الدفعة إلى بيئة اختبار Payfast ولن يتم تحصيل أي أموال حقيقية.',
     'payment_method_unavailable' => 'لم يعد متاحاً',
+    'payment_method_currency_unsupported' => 'لا يمكن لـ :method قبول الدفعات بعملة :currency. اختر عملة أو طريقة دفع أخرى.',
+    'payment_method_amount_below_minimum' => 'لا يمكن لـ :method قبول دفعات أقل من :amount.',
     'paypal_help' => 'أنشئ تطبيقا في لوحة مطوري PayPal ضمن Apps & Credentials، والصق هنا معرف العميل Client ID والمفتاح السري Secret.',
     'paypal_client_id' => 'معرف العميل',
     'paypal_client_id_help' => 'من تطبيق PayPal الخاص بك ضمن Apps & Credentials. تأكد من أنك في تبويب Live ما لم تكن تختبر.',

@@ -1126,7 +1126,7 @@
             },
             {
                 "title": "Appointment Booking",
-                "description": "Publish bookable hours and let people pick a slot in their own timezone, free with one booking type on any plan. On Pro a slot can take payment by Stripe, a payment link or cash, and nothing can be booked over an event already on your schedule, synced calendar entries included.",
+                "description": "Publish bookable hours and let people pick a slot in their own timezone, free with one booking type on any plan. On Pro a slot can take payment by Stripe, PayPal, Payfast, a payment link or cash, and nothing can be booked over an event already on your schedule, synced calendar entries included.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1177,7 +1177,7 @@
             },
             {
                 "title": "Set your bookable hours",
-                "description": "Add one appointment type free: weekly hours and slot length. Pro adds more types, payment by Stripe, a payment link or cash, and the scheduling rules - buffers, minimum notice and an approval step."
+                "description": "Add one appointment type free: weekly hours and slot length. Pro adds more types, payment by Stripe, PayPal, Payfast, a payment link or cash, and the scheduling rules - buffers, minimum notice and an approval step."
             },
             {
                 "title": "Sell tickets and grow",
@@ -1207,7 +1207,7 @@
             },
             {
                 "question": "Can people still book a slot with me one to one?",
-                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, and people pick a time in their own timezone from a public booking page. Nothing can be booked over something already on your schedule, synced calendar entries included. Pro adds more appointment types, the scheduling rules (buffers either side, a minimum notice period, how far ahead the calendar opens, date overrides and an approval step), and the ability to charge for a slot through Stripe, a payment link or cash (PayPal and Payfast are for tickets, not bookings)."
+                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, and people pick a time in their own timezone from a public booking page. Nothing can be booked over something already on your schedule, synced calendar entries included. Pro adds more appointment types, the scheduling rules (buffers either side, a minimum notice period, how far ahead the calendar opens, date overrides and an approval step), and the ability to charge for a slot through Stripe, PayPal, Payfast, a payment link or cash."
             },
             {
                 "question": "What happens if somebody needs to move their booking?",
@@ -1215,7 +1215,7 @@
             },
             {
                 "question": "Can I refund a booking?",
-                "answer": "Yes, from the Sales page, where bookings sit with your other sales. A booking paid through Stripe can be refunded in full or in part, and the money goes back through Stripe; one paid by a payment link or in cash is marked as refunded instead, which records it without moving money."
+                "answer": "Yes, from the Sales page, where bookings sit with your other sales. A booking paid through Stripe or PayPal can be refunded in full or in part, and the money goes back the way it came; one paid through Payfast, a payment link or in cash is marked as refunded instead, which records it without moving money."
             }
         ],
         "cross_links": [

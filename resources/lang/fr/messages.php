@@ -3645,7 +3645,6 @@ return [
     'download_all_photos' => 'Télécharger toutes les photos',
     'no_photos_to_download' => 'Aucune photo à télécharger.',
 
-
     'photo_gallery' => 'Galerie photos',
     'photo_count' => '{0} Aucune photo|{1} :count photo|[2,*] :count photos',
     'no_photos_yet' => 'Aucune photo pour le moment',
@@ -4660,6 +4659,9 @@ return [
     'appointments_pending_note' => ':schedule confirmera votre rendez-vous par e-mail. Rien n\'est réservé avant cette confirmation.',
     'appointments_awaiting_payment' => 'Finalisez votre paiement',
     'appointments_complete_payment' => 'Finaliser le paiement',
+    'appointments_payment_in_review' => 'Votre paiement est encore en cours de vérification, ce qui peut prendre un moment. Inutile de payer à nouveau. Si rien ne change, contactez :schedule.',
+    'appointments_held_until' => 'Ce créneau vous est réservé jusqu\'à :time.',
+    'appointments_payment_unavailable' => 'Cette réservation ne peut pas être payée en ligne pour le moment. Veuillez contacter :schedule.',
     'appointments_booking_expired' => 'Cette réservation a expiré. Veuillez réserver un nouveau créneau.',
     'appointments_edit_redirect' => 'Gérez cette réservation depuis l\'onglet Rendez-vous.',
     'upgrade_required' => 'Cette fonctionnalité nécessite une mise à niveau.',
@@ -5267,6 +5269,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast ne peut pas traiter ce paiement. Veuillez contacter l organisateur de l evenement.',
     'payfast_test_mode_notice' => 'Le mode test est active. Ce paiement part vers le bac a sable Payfast et aucun argent reel ne sera preleve.',
     'payment_method_unavailable' => 'plus disponible',
+    'payment_method_currency_unsupported' => ':method ne peut pas accepter de paiements en :currency. Choisissez une autre devise ou un autre moyen de paiement.',
+    'payment_method_amount_below_minimum' => ':method ne peut pas accepter de paiements inférieurs à :amount.',
     'paypal_help' => 'Creez une application dans votre tableau de bord developpeur PayPal, sous Apps & Credentials, et collez ici son Client ID et son Secret.',
     'paypal_client_id' => 'ID client',
     'paypal_client_id_help' => 'Depuis votre application PayPal, sous Apps & Credentials. Verifiez que vous etes sur l onglet Live, sauf si vous testez.',

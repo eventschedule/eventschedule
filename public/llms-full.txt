@@ -2036,12 +2036,12 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 ### PayPal
 
 - Each schedule owner connects their own PayPal account; the credentials are verified with PayPal before they are saved. A selfhosted install can also supply one account for everyone in `.env`.
-- Works with the multi-event cart (one order, one capture). Not available for installments, gift cards or appointments.
+- Works with the multi-event cart (one order, one capture) and with paid appointments. Not available for installments or gift cards.
 - Full or partial refunds go back through PayPal.
 
 ### Payfast
 
-- For events priced in South African rand (ZAR) only. Cannot join the multi-event cart, use installments, sell gift cards or take appointment payments.
+- For events and appointments priced in South African rand (ZAR) only. Cannot join the multi-event cart, use installments or sell gift cards.
 - Refunds are recorded in Event Schedule; return the money in Payfast.
 
 ### Invoice Ninja

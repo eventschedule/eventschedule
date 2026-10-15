@@ -172,15 +172,18 @@ class AppointmentType extends Model
     /**
      * Whether a booking on this method waits for an online payment: unconfirmed, not remindable
      * and not reschedulable until paid, and released if the hold lapses. True for every registered
-     * gateway except cash, which is settled by hand and confirms at booking time.
+     * gateway except one paid by the owner's own instructions (cash today), which is settled by hand
+     * and confirms at booking time. Asked of the driver rather than of a name, as
+     * PaymentGatewayManager asks every capability.
      *
      * Takes the stored method rather than a type because callers hold an event or a sale, whose
      * payment_method was copied from the type when the booking was made.
      */
     public static function paysOnline(?string $method): bool
     {
-        return $method !== null && $method !== 'cash'
-            && app(PaymentGatewayManager::class)->get($method) !== null;
+        $driver = app(PaymentGatewayManager::class)->get($method);
+
+        return $driver !== null && ! $driver->usesPaymentInstructions();
     }
 
     /**
@@ -208,7 +211,9 @@ class AppointmentType extends Model
         }
 
         return match ($this->payment_method) {
-            'stripe' => $user->canAcceptStripePayments(),
+            // Stripe's floor as well: below it the session cannot be created, and the booking
+            // would hold its slot and fail at checkout.
+            'stripe' => $user->canAcceptStripePayments() && $this->clearsFloorOf('stripe'),
             'payment_url' => (bool) ($user->payment_url && $user->payment_secret),
             null, 'cash' => true,
             default => app(PaymentGatewayManager::class)->get($this->payment_method)?->supportsAppointments()
@@ -217,6 +222,14 @@ class AppointmentType extends Model
                     app(PaymentGatewayManager::class)->availableFor($user, $this->currency_code, (float) $this->price),
                 ),
         };
+    }
+
+    /** Whether the price is at least the gateway's own minimum in this currency, if it has one. */
+    private function clearsFloorOf(string $gateway): bool
+    {
+        [$minimum] = app(PaymentGatewayManager::class)->get($gateway)?->amountLimits(strtoupper((string) ($this->currency_code ?: 'USD'))) ?? [null];
+
+        return $minimum === null || (float) $this->price >= $minimum;
     }
 
     /**

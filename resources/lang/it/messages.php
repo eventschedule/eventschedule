@@ -3643,7 +3643,6 @@ return [
     'download_all_photos' => 'Scarica tutte le foto',
     'no_photos_to_download' => 'Nessuna foto da scaricare.',
 
-
     'photo_gallery' => 'Galleria Fotografica',
     'photo_count' => '{0} Nessuna foto|{1} :count foto|[2,*] :count foto',
     'no_photos_yet' => 'Ancora nessuna foto',
@@ -4654,6 +4653,9 @@ return [
     'appointments_pending_note' => ':schedule confermerà il tuo appuntamento via email. Non è prenotato nulla fino ad allora.',
     'appointments_awaiting_payment' => 'Completa il tuo pagamento',
     'appointments_complete_payment' => 'Completa pagamento',
+    'appointments_payment_in_review' => 'Il tuo pagamento è ancora in verifica e potrebbe volerci un po\'. Non serve pagare di nuovo. Se la situazione non cambia, contatta :schedule.',
+    'appointments_held_until' => 'Questo orario è riservato per te fino a :time.',
+    'appointments_payment_unavailable' => 'Al momento questa prenotazione non può essere pagata online. Contatta :schedule.',
     'appointments_booking_expired' => 'Questa prenotazione è scaduta. Prenota un nuovo orario.',
     'appointments_edit_redirect' => 'Gestisci questa prenotazione dalla scheda Appuntamenti.',
     'upgrade_required' => 'Questa funzione richiede un upgrade.',
@@ -5261,6 +5263,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast non puo elaborare questo pagamento. Contatta l organizzatore dell evento.',
     'payfast_test_mode_notice' => 'La modalita test e attiva. Questo pagamento va alla sandbox di Payfast e non verra addebitato denaro reale.',
     'payment_method_unavailable' => 'non piu disponibile',
+    'payment_method_currency_unsupported' => ':method non può accettare pagamenti in :currency. Scegli un\'altra valuta o un altro metodo di pagamento.',
+    'payment_method_amount_below_minimum' => ':method non può accettare pagamenti inferiori a :amount.',
     'paypal_help' => 'Crea un app nella tua dashboard sviluppatori PayPal, in Apps & Credentials, e incolla qui il suo Client ID e il suo Secret.',
     'paypal_client_id' => 'ID client',
     'paypal_client_id_help' => 'Dalla tua app PayPal, in Apps & Credentials. Assicurati di essere nella scheda Live, a meno che tu non stia facendo prove.',

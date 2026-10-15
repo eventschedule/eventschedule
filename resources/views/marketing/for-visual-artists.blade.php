@@ -1822,8 +1822,8 @@
                             <p>
                                 Publish bookable slots instead of a fixed date. Set your weekly hours, how
                                 far apart slots start, a buffer between them, and per-date overrides for the
-                                days you are away or installing. Charge by Stripe, a payment link or cash,
-                                or keep it free. One bookable type is free; Pro adds more.
+                                days you are away or installing. Charge by Stripe, PayPal, Payfast, a
+                                payment link or cash, or keep it free. One bookable type is free; Pro adds more.
                             </p>
                             <div class="va-pan-fig" aria-hidden="true">
                                 <div>

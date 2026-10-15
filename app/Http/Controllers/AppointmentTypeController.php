@@ -372,6 +372,34 @@ class AppointmentTypeController extends Controller
             throw ValidationException::withMessages(['currency_code' => __('messages.appointments_currency_required')]);
         }
 
+        // ...and a gateway that settles it. Payfast takes rand only and PayPal a list of its own, so
+        // a type saved on either in another currency would be held back from guests while the types
+        // list said only that payments were not set up, about a gateway that is connected. The
+        // radios are not filtered by currency instead: a connected PayPal vanishing from the list
+        // whenever the currency is INR reads as a broken connection.
+        if ((float) ($validated['price'] ?? 0) > 0 && ! empty($validated['payment_method'])) {
+            $gateway = app(PaymentGatewayManager::class)->get($validated['payment_method']);
+            $currency = strtoupper($validated['currency_code']);
+
+            if ($gateway && ! $gateway->supportsCurrency($currency)) {
+                throw ValidationException::withMessages(['payment_method' => __('messages.payment_method_currency_unsupported', [
+                    'method' => $gateway->label(null),
+                    'currency' => $currency,
+                ])]);
+            }
+
+            // The gateway's floor too (Payfast will not take under R5, Stripe under 50 cents), which
+            // AppointmentType::paymentMethodAvailable() applies at booking time: saved, such a type
+            // was held back with the same "not set up" line.
+            [$minimum] = $gateway ? $gateway->amountLimits($currency) : [null];
+            if ($minimum !== null && (float) $validated['price'] < $minimum) {
+                throw ValidationException::withMessages(['price' => __('messages.payment_method_amount_below_minimum', [
+                    'method' => $gateway->label(null),
+                    'amount' => \App\Utils\MoneyUtils::format($minimum, $currency),
+                ])]);
+            }
+        }
+
         $validated['weekly_windows'] = $this->parseWindows($request->input('weekly_windows'), 'weekly_windows');
         $validated['date_overrides'] = $request->filled('date_overrides')
             ? $this->parseOverrides($request->input('date_overrides'))

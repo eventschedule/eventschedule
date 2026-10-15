@@ -308,7 +308,7 @@
                                 @if (! $type->isFree() && ! $type->paymentMethodAvailable())
                                     <div class="{{ $warnClass }} mt-2">
                                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                                        <span>{{ __('messages.appointments_payment_not_set') }}</span>
+                                        <span>{{ __('messages.appointments_payment_not_set') }}@if (auth()->id() === $role->user_id) <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">{{ __('messages.manage_payment_methods') }}</x-link>@endif</span>
                                     </div>
                                 @endif
                                 {{-- Independent of the one above: a type can be both unpayable by

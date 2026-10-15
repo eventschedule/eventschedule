@@ -335,15 +335,14 @@ class PayfastGateway extends PaymentGatewayDriver
                 'total' => $total,
             ]);
 
-            // Release the seats before bailing. The Sale rows are already committed by this point
+            // Release the seats before bailing (refuseCheckout() does, for a ticket sale; a booking
+            // keeps its hold, which ReleaseTickets sweeps). The Sale rows are already committed by this point
             // and SaleTicket::created has already incremented `sold`, so simply returning would hold
             // inventory FOREVER: events.expire_unpaid_tickets defaults to 0 and ReleaseTickets only
             // sweeps events that opted in, so nothing would ever reclaim it. And because back()
             // re-renders the form with the buyer's quantities restored, the obvious retry would burn
             // another seat - a misconfigured event would quietly sell itself out.
-            $this->releaseAbandonedSale($sale, 'payfast_refused');
-
-            return back()->withInput()->with('error', __('messages.payfast_checkout_unavailable'));
+            return $this->refuseCheckout($sale, 'payfast_refused', __('messages.payfast_checkout_unavailable'));
         }
 
         $encodedSaleId = UrlUtils::encodeId($sale->id);

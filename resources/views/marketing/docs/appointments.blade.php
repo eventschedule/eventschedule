@@ -1,7 +1,7 @@
 <x-docs-page
     key="appointments"
     title="How to Set Up Appointment Types and Hours - Event Schedule"
-    description="Set up Calendly-style appointment booking: types with weekly hours and buffers, payment by Stripe, payment link or cash, and refunds from the Sales page."
+    description="Set up Calendly-style appointment booking: types with weekly hours and buffers, payment by Stripe, PayPal, Payfast, a link or cash, and refunds from the Sales page."
     lede="Let guests book time with you on a public page, Calendly-style. You set the hours you are open, they pick an open slot, and everyone gets a confirmation."
     article-description="How to offer appointment booking: create appointment types with weekly hours, buffers, and optional payment, and let guests book a time on your public page."
 >
@@ -273,7 +273,7 @@
             </svg>
             Payments
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The editor's <strong class="text-gray-900 dark:text-white">Price</strong> card opens on <strong class="text-gray-900 dark:text-white">Free</strong>. Choose <strong class="text-gray-900 dark:text-white">Paid</strong> and three fields appear: <strong class="text-gray-900 dark:text-white">Amount</strong>, <strong class="text-gray-900 dark:text-white">Currency</strong> and <strong class="text-gray-900 dark:text-white">Payment Method</strong>, which is <strong class="text-gray-900 dark:text-white">Cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong> or <strong class="text-gray-900 dark:text-white">Payment Link</strong>. Those three only: PayPal, Payfast and Invoice Ninja cannot be used for appointments even when they are connected, so a schedule whose only payment method is one of those needs another before a paid type can be booked. A currency is required once there is a price, and switching back to Free sets the amount to zero.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The editor's <strong class="text-gray-900 dark:text-white">Price</strong> card opens on <strong class="text-gray-900 dark:text-white">Free</strong>. Choose <strong class="text-gray-900 dark:text-white">Paid</strong> and three fields appear: <strong class="text-gray-900 dark:text-white">Amount</strong>, <strong class="text-gray-900 dark:text-white">Currency</strong> and <strong class="text-gray-900 dark:text-white">Payment Method</strong>, which is <strong class="text-gray-900 dark:text-white">Cash</strong>, <strong class="text-gray-900 dark:text-white">Stripe</strong> or <strong class="text-gray-900 dark:text-white">Payment Link</strong>, plus <strong class="text-gray-900 dark:text-white">PayPal</strong> and <strong class="text-gray-900 dark:text-white">Payfast</strong> once you have connected them. Invoice Ninja is the one payment method appointments do not offer, because it would set up a product and a subscription in your Invoice Ninja account for every booking. A currency is required once there is a price, and the payment method has to take it: Payfast takes South African rand only and PayPal does not take every currency, so saving a type in a currency its method cannot take says so and asks for another. Switching back to Free sets the amount to zero. If you own the schedule, <strong class="text-gray-900 dark:text-white">Manage payment methods</strong>, under the row, opens the settings where they are connected.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Taking payment for a booking needs Pro <x-doc-badge plan="pro" />. On the Free plan, choosing Paid shows the notice <strong class="text-gray-900 dark:text-white">Charging for a booking is a Pro feature</strong>: the price is saved, but the type stays off your booking page until you upgrade.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
@@ -301,6 +301,16 @@
                         <td>1 hour, then the slot is released</td>
                     </tr>
                     <tr>
+                        <td>PayPal</td>
+                        <td>Goes to PayPal to approve the payment. The booking confirms as they come back, when PayPal takes the payment. If PayPal holds the payment for review, the booking waits for it, and the guest is not asked to pay again.</td>
+                        <td>1 hour, then the slot is released</td>
+                    </tr>
+                    <tr>
+                        <td>Payfast</td>
+                        <td>Goes to Payfast to pay, in South African rand. The booking confirms when Payfast reports the payment, usually seconds after they come back; an Instant EFT can take longer.</td>
+                        <td>24 hours, then the slot is released</td>
+                    </tr>
+                    <tr>
                         <td>Payment link</td>
                         <td>Leaves for your own payment page, and gets an email with a "complete your payment" note and their manage link. You mark the sale paid on the Sales page, which sends the confirmation.</td>
                         <td>24 hours, then the slot is released and the guest is told</td>
@@ -308,20 +318,21 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Stripe payments are created directly on your own connected Stripe account with no platform fee, exactly as ticket sales are.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Payments go straight to your own connected Stripe, PayPal or Payfast account with no platform fee, exactly as ticket sales do.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A guest who backs out on the payment page keeps their time: their booking page says the payment was cancelled and nothing was charged, says how long the time is held, and offers <strong class="text-gray-900 dark:text-white">Complete payment</strong> and <strong class="text-gray-900 dark:text-white">Cancel appointment</strong>. A guest who comes back from paying sees <strong class="text-gray-900 dark:text-white">Confirming your payment</strong> while the payment is on its way, and is not asked to pay again in that browser; a payment PayPal is reviewing is never asked for again, wherever the booking is opened.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Paid types need a payment method</div>
-            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect Stripe or add a payment link under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Settings &rarr; Payment Methods</a> to make the type bookable. PayPal, Payfast and Invoice Ninja do not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
+            <p>A paid type stays hidden from guests until a payment method it can use is connected, and the Appointments tab marks the type that is being held back. Connect the method the type uses under <a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Settings &rarr; Payment Methods</a>, or switch the type to one you have connected, to make it bookable. Invoice Ninja does not count here, so a type can stay held back even though your Payment Methods tab shows a connected account.</p>
         </div>
         <h3 id="refunds" class="doc-subheading">Refunds</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Cancelling a paid booking does not move any money on its own. Money goes back from the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>: find the booking's sale, open the three-dot menu at the end of its row and choose <strong class="text-gray-900 dark:text-white">Refund</strong>. What happens next depends on how the guest paid:</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Stripe</strong> - the money goes back through Stripe first, and only then does the sale change. Refund the whole amount and the booking is cancelled: its time is freed and the guest is emailed that the appointment was cancelled. Enter less in <strong class="text-gray-900 dark:text-white">Refund Amount</strong> (the dialog shows what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>) and it is a partial refund: the booking stays confirmed, nobody is emailed, and the sale shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>.</li>
-            <li><strong class="text-gray-900 dark:text-white">A payment link, or cash you have marked paid</strong> - the menu says <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. It cancels the booking the same way, freeing the time and emailing the guest, but it moves no money, so return it through whatever took the payment.</li>
+            <li><strong class="text-gray-900 dark:text-white">Stripe or PayPal</strong> - the money goes back through Stripe or PayPal first, and only then does the sale change. Refund the whole amount and the booking is cancelled: its time is freed and the guest is emailed that the appointment was cancelled. Enter less in <strong class="text-gray-900 dark:text-white">Refund Amount</strong> (the dialog shows what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>) and it is a partial refund: the booking stays confirmed, nobody is emailed, and the sale shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Payfast, a payment link, or cash you have marked paid</strong> - the menu says <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. It cancels the booking the same way, freeing the time and emailing the guest, but it moves no money, so return it through whatever took the payment.</li>
         </ul>
         <div class="doc-callout doc-callout-warning mb-2">
             <div class="doc-callout-title">Refund first, then cancel</div>
-            <p>Refund is only offered while the sale is paid. Cancel a paid booking first and the money has to go back in Stripe or your payment provider's own dashboard; the email you get about the cancellation shows the amount and payment reference so you can find it. A refund made in Stripe's own dashboard is not reported back, though: the booking stays confirmed and its time stays blocked. Refund from the Sales page whenever you can.</p>
+            <p>Refund is only offered while the sale is paid. Cancel a paid booking first and the money has to go back in your payment provider's own dashboard; the email you get about the cancellation shows the amount and payment reference so you can find it. A refund made in Stripe's or PayPal's own dashboard is not reported back, though: the booking stays confirmed and its time stays blocked. Refund from the Sales page whenever you can.</p>
         </div>
     </section>
 
@@ -357,7 +368,7 @@
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Accepting sends the guest their confirmation and calendar invite and syncs the booking to your connected calendars. Declining tells them they are welcome to book another time and releases the slot.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The slot stays blocked while a request is open, so you cannot double-book yourself while you decide. A request whose time has already passed can no longer be approved.</p>
-        <p class="text-gray-600 dark:text-gray-300">On a paid type that takes Stripe or payment link payments, accepting does not confirm on its own: the guest is confirmed once the payment goes through.</p>
+        <p class="text-gray-600 dark:text-gray-300">On a paid type that takes payment online (any method but cash), the request is on your Requests tab from the moment the guest books, marked Paid or Unpaid, and its email reaches you once they have paid. Accepting does not confirm on its own: the guest is confirmed once the payment goes through.</p>
     </section>
 
     <!-- Managing bookings -->
@@ -389,7 +400,7 @@
                     </tr>
                     <tr>
                         <td>Complete your payment</td>
-                        <td>Booked but not yet paid: a cash booking with the balance due, or a card or link hold still waiting to clear.</td>
+                        <td>Booked but not yet paid: a cash booking with the balance due, or an online payment still waiting to clear.</td>
                     </tr>
                     <tr>
                         <td>This appointment was cancelled</td>
@@ -439,7 +450,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">A booking cannot be moved when:</p>
         <ul class="doc-list mb-6">
             <li>It has already started, or has been cancelled, fully refunded or expired. A partial refund does not stop a move.</li>
-            <li>It is a Stripe or payment link booking still waiting on payment. Those holds expire on their own clock, so the guest pays first and can then move it freely.</li>
+            <li>It is a booking paid online (Stripe, PayPal, Payfast or a payment link) still waiting on payment. Those holds expire on their own clock, so the guest pays first and can then move it freely.</li>
             <li>Its appointment type has been turned off or deleted, since a move commits a brand new slot.</li>
             <li>It was moved within the last three minutes. That pause is the only limit: a booking can be moved as soon as it is made, and there is no cap on how many times.</li>
         </ul>
@@ -481,7 +492,7 @@
             </div>
             <div class="doc-field">
                 <h4>Reminders only go to confirmed bookings</h4>
-                <p>A request still waiting on you, or a card booking still waiting on payment, does not get one.</p>
+                <p>A request still waiting on you, or a booking still waiting on an online payment, does not get one.</p>
             </div>
             <div class="doc-field">
                 <h4>The same guest cannot double-book</h4>
@@ -531,7 +542,7 @@
             <li><a href="{{ route('marketing.docs.creating_schedules') }}#details-localization" class="doc-link">Creating Schedules</a> - set your timezone, email settings, and calendar sync</li>
             <li><a href="{{ route('marketing.docs.availability') }}" class="doc-link">Availability</a> - mark whole days your team members are unavailable</li>
             <li><a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Selling Tickets</a> - the Sales page, where paid bookings are marked paid and refunded</li>
-            <li><a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> - connect Stripe so paid types can take payment</li>
+            <li><a href="{{ route('marketing.docs.account_settings') }}#payments" class="doc-link">Account Settings</a> - connect Stripe, PayPal or Payfast so paid types can take payment</li>
         </ul>
     </section>
 </x-docs-page>

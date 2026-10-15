@@ -30,7 +30,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket payments in Event Schedule run through <strong class="text-gray-900 dark:text-white">Stripe Checkout</strong>: the buyer pays on Stripe's own hosted page, Stripe calls a webhook back, and the sale is marked paid. What you have to configure depends on who collects the money - one account for the whole install, or a separate account per event owner.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases, paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> and <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plans</a>, so you only set this up once. <a href="#paypal" class="doc-link">PayPal</a> and <a href="#payfast" class="doc-link">Payfast</a>, further down, take ticket orders only.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases, paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> and <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plans</a>, so you only set this up once. <a href="#paypal" class="doc-link">PayPal</a> and <a href="#payfast" class="doc-link">Payfast</a>, further down, take ticket orders and paid appointments.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">There are no platform fees.</strong> Event Schedule never takes a cut of a ticket sale. The Checkout Session is created without an application fee or a transfer, so the full amount lands in the account that took the payment: the one named in your <code class="doc-inline-code">.env</code> on a selfhosted install, or the seller's own connected account under Connect. Stripe's own processing fee is the only deduction.</p>
 
@@ -499,7 +499,7 @@
             </svg>
             PayPal (Alternative Payment Method)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://www.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">PayPal</a> is useful where Stripe is not available, and where buyers would rather pay from a PayPal balance than enter a card. It takes ticket orders, including a checkout that spans several events, but not gift cards, appointment bookings or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://www.paypal.com" target="_blank" rel="noopener noreferrer" class="doc-link">PayPal</a> is useful where Stripe is not available, and where buyers would rather pay from a PayPal balance than enter a card. It takes ticket orders, including a checkout that spans several events, and paid appointments, but not gift cards or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#paypal" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
 
         <h3 class="doc-subheading">Two ways to set it up</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">The same two as Payfast, and you can mix them on one install:</p>
@@ -568,7 +568,7 @@
             </svg>
             Payfast (Alternative Payment Method)
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://payfast.io" target="_blank" rel="noopener noreferrer" class="doc-link">Payfast</a> is a South African gateway, useful where Stripe is not available. It settles in South African rand only, and like PayPal it takes ticket orders but not gift cards, appointment bookings or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://payfast.io" target="_blank" rel="noopener noreferrer" class="doc-link">Payfast</a> is a South African gateway, useful where Stripe is not available. It settles in South African rand only, and like PayPal it takes ticket orders and paid appointments but not gift cards or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#payfast" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
 
         <h3 class="doc-subheading">Two ways to set it up</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Payfast works either way round, and you can mix the two on one install:</p>

@@ -4166,7 +4166,6 @@ return [
     'download_all_photos' => 'Download all photos',
     'no_photos_to_download' => 'No photos to download.',
 
-
     'photo_gallery' => 'Photo Gallery',
     'photo_count' => '{0} No photos|{1} :count photo|[2,*] :count photos',
     'no_photos_yet' => 'No photos yet',
@@ -5049,6 +5048,9 @@ return [
     'appointments_pending_note' => ':schedule will confirm your appointment by email. Nothing is booked until then.',
     'appointments_awaiting_payment' => 'Complete your payment',
     'appointments_complete_payment' => 'Complete payment',
+    'appointments_payment_in_review' => 'Your payment is still being checked, which can take a while. There is no need to pay again. If this does not change, contact :schedule.',
+    'appointments_held_until' => 'This time is held for you until :time.',
+    'appointments_payment_unavailable' => 'This booking cannot be paid online right now. Please contact :schedule.',
     'appointments_booking_expired' => 'This booking has expired. Please book a new time.',
     'appointments_edit_redirect' => 'Manage this booking from the Appointments tab.',
     'upgrade_required' => 'This feature requires an upgrade.',
@@ -5606,6 +5608,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast cannot process this payment. Please contact the event organizer.',
     'payfast_test_mode_notice' => 'Test mode is on. This payment goes to the Payfast sandbox and no real money will be charged.',
     'payment_method_unavailable' => 'no longer available',
+    'payment_method_currency_unsupported' => ':method cannot take payments in :currency. Choose another currency or payment method.',
+    'payment_method_amount_below_minimum' => ':method cannot take payments below :amount.',
     'paypal_help' => 'Create an app in your PayPal developer dashboard, under Apps & Credentials, and paste its Client ID and Secret here.',
     'paypal_client_id' => 'Client ID',
     'paypal_client_id_help' => 'From your PayPal app, under Apps & Credentials. Make sure you are on the Live tab unless you are testing.',

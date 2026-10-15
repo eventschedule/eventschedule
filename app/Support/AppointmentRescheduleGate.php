@@ -24,9 +24,10 @@ class AppointmentRescheduleGate
     /**
      * Null when the move is allowed, otherwise the translated message to show.
      *
-     * Deliberately NOT expressed in terms of AppointmentController::bookingState(): that checks the pivot
-     * before payment, so a requires_approval + stripe booking is pivot-null AND unpaid and reports
-     * 'pending', which would slip straight through a state allow-list.
+     * Deliberately NOT expressed in terms of AppointmentController::bookingState(): that is the guest
+     * page's wording, which folds several facts into one word (an unpaid booking whose time has gone
+     * reads 'passed', one whose payment is on its way 'in_review'), and a state allow-list built on it
+     * would let through whichever fact the word happened to hide.
      *
      * There is no plan check here. It used to carry one, plus a $planIsCurrent parameter so a 50-row
      * page did not fan out to a subscription lookup per row. Appointments are now on every plan, so
@@ -57,8 +58,8 @@ class AppointmentRescheduleGate
             return __('messages.appointments_reschedule_blocked_payment');
         }
 
-        // Load-bearing on its own: bookingState() checks the pivot first, so a pending booking never
-        // reports 'passed'.
+        // Load-bearing on its own: bookingState() names one fact per booking (a pending booking never
+        // reports 'passed', nor does one whose payment is on its way).
         if ($event->getStartDateTime()->isPast()) {
             return $unavailable();
         }

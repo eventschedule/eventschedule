@@ -1018,7 +1018,7 @@
             ],
             [
                 'q' => 'Can students book a one-to-one with me?',
-                'a' => 'Yes, and one appointment type is free. Appointment types are separate from classes: give one a length, a start-time interval, the hours you are open each week, buffers before and after, how much notice you need and how far ahead people may book, then students pick a slot on your public booking page. Each type says whether it happens in the studio, online or by phone, can require your approval before it is confirmed, and can be free or paid by Stripe, a payment link or cash. Pro lifts the one-type limit, so a private session, an assessment and a beginners consultation can sit side by side. Your classes already count as busy time, so nobody books a session on top of one.',
+                'a' => 'Yes, and one appointment type is free. Appointment types are separate from classes: give one a length, a start-time interval, the hours you are open each week, buffers before and after, how much notice you need and how far ahead people may book, then students pick a slot on your public booking page. Each type says whether it happens in the studio, online or by phone, can require your approval before it is confirmed, and can be free or paid by Stripe, PayPal, Payfast, a payment link or cash. Pro lifts the one-type limit, so a private session, an assessment and a beginners consultation can sit side by side. Your classes already count as busy time, so nobody books a session on top of one.',
             ],
             [
                 'q' => 'Can my other teachers log in?',

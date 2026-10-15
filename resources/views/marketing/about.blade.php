@@ -588,10 +588,10 @@
                 'From the Sales page a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the status changes. Payfast, Invoice Ninja, a payment link and cash can only be marked as refunded, which records it without moving anything. Either way the ticket buyer gets no email about it from us, so that message is yours to send.',
             ],
             [
-                // InstallmentService refuses any event not on Stripe; GiftCardController and
-                // AppointmentController have no PayPal branch.
-                'PayPal takes ticket orders, not every payment.',
-                'Installment plans are Stripe only, and gift cards and paid appointment bookings cannot be paid through PayPal either. A ticket order can, including a multi-event cart, which PayPal charges as one payment.',
+                // InstallmentService refuses any event not on Stripe; GiftCardController has no
+                // PayPal branch. Appointments take any connected gateway but Invoice Ninja.
+                'PayPal takes ticket orders and bookings, not every payment.',
+                'Installment plans are Stripe only, and gift cards cannot be paid through PayPal either. A ticket order can, including a multi-event cart, which PayPal charges as one payment, and so can a paid appointment.',
             ],
             [
                 'Only subscribers get the automatic digest.',

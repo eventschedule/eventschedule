@@ -549,7 +549,7 @@
                 ['Free', 'Pro']],
             ['L06', 'Calendly', 'marketing.replace_calendly', 'Scheduling and tracking',
                 'One-to-one bookings',
-                'One appointment type free and more on Pro, each with weekly hours, per-date overrides, buffers and optional payment by Stripe, a payment link or cash, booked on a public page.',
+                'One appointment type free and more on Pro, each with weekly hours, per-date overrides, buffers and optional payment by Stripe, PayPal, Payfast, a payment link or cash, booked on a public page.',
                 ['Free', 'Pro']],
             ['L07', 'SurveyMonkey', 'marketing.replace_surveymonkey', 'Registration and forms',
                 'A survey doing registration duty',

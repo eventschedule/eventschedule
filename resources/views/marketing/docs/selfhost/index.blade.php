@@ -43,7 +43,7 @@
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Add a way to take payment</h4>
-                <p>Needed only if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal and Payfast (South African rand only) take ticket orders, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.</p>
+                <p>Needed only if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal and Payfast (South African rand only) take ticket orders and paid appointments, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.</p>
                 <p><a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal and Payfast</a></p>
             </li>
             <li class="doc-step">

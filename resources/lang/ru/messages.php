@@ -3704,7 +3704,6 @@ return [
     'download_all_photos' => 'Скачать все фотографии',
     'no_photos_to_download' => 'Нет фотографий для скачивания.',
 
-
     'photo_gallery' => 'Фотогалерея',
     'photo_count' => '{0} Нет фотографий|{1} :count фотография|[2,*] :count фотографий',
     'no_photos_yet' => 'Пока нет фотографий',
@@ -4657,6 +4656,9 @@ return [
     'appointments_pending_note' => ':schedule подтвердит вашу запись по электронной почте. До этого запись не считается оформленной.',
     'appointments_awaiting_payment' => 'Завершите оплату',
     'appointments_complete_payment' => 'Завершить оплату',
+    'appointments_payment_in_review' => 'Ваш платёж ещё проверяется, это может занять некоторое время. Платить повторно не нужно. Если ничего не изменится, свяжитесь с :schedule.',
+    'appointments_held_until' => 'Это время закреплено за вами до :time.',
+    'appointments_payment_unavailable' => 'Эту запись сейчас нельзя оплатить онлайн. Пожалуйста, свяжитесь с :schedule.',
     'appointments_booking_expired' => 'Срок этой записи истёк. Выберите новое время.',
     'appointments_edit_redirect' => 'Управляйте этой записью на вкладке «Записи».',
     'upgrade_required' => 'Для этой функции требуется обновление тарифа.',
@@ -5264,6 +5266,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast не может обработать этот платеж. Свяжитесь с организатором мероприятия.',
     'payfast_test_mode_notice' => 'Включен тестовый режим. Этот платеж уходит в песочницу Payfast, реальные деньги списаны не будут.',
     'payment_method_unavailable' => 'больше недоступен',
+    'payment_method_currency_unsupported' => ':method не принимает платежи в :currency. Выберите другую валюту или другой способ оплаты.',
+    'payment_method_amount_below_minimum' => ':method не принимает платежи меньше :amount.',
     'paypal_help' => 'Создайте приложение в панели разработчика PayPal, в разделе Apps & Credentials, и вставьте сюда его Client ID и Secret.',
     'paypal_client_id' => 'Client ID',
     'paypal_client_id_help' => 'Из вашего приложения PayPal, в разделе Apps & Credentials. Убедитесь, что вы на вкладке Live, если только не тестируете.',

@@ -3664,7 +3664,6 @@ return [
     'download_all_photos' => 'Descărcați toate fotografiile',
     'no_photos_to_download' => 'Nu sunt fotografii de descărcat.',
 
-
     'photo_gallery' => 'Galerie Foto',
     'photo_count' => '{0} Nicio fotografie|{1} :count fotografie|[2,*] :count fotografii',
     'no_photos_yet' => 'Nicio fotografie deocamdată',
@@ -4675,6 +4674,9 @@ return [
     'appointments_pending_note' => ':schedule vă va confirma programarea prin e-mail. Nimic nu este rezervat până atunci.',
     'appointments_awaiting_payment' => 'Finalizați plata',
     'appointments_complete_payment' => 'Finalizați plata',
+    'appointments_payment_in_review' => 'Plata dvs. este încă în curs de verificare, ceea ce poate dura ceva timp. Nu este nevoie să plătiți din nou. Dacă situația nu se schimbă, contactați :schedule.',
+    'appointments_held_until' => 'Acest interval vă este rezervat până la :time.',
+    'appointments_payment_unavailable' => 'Această rezervare nu poate fi plătită online acum. Vă rugăm să contactați :schedule.',
     'appointments_booking_expired' => 'Această rezervare a expirat. Vă rugăm să rezervați un interval nou.',
     'appointments_edit_redirect' => 'Gestionați această rezervare din fila Programări.',
     'upgrade_required' => 'Această funcție necesită un upgrade.',
@@ -5282,6 +5284,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast nu poate procesa aceasta plata. Contacteaza organizatorul evenimentului.',
     'payfast_test_mode_notice' => 'Modul de testare este activ. Aceasta plata merge catre sandbox-ul Payfast si nu se vor incasa bani reali.',
     'payment_method_unavailable' => 'nu mai este disponibil',
+    'payment_method_currency_unsupported' => ':method nu poate accepta plăți în :currency. Alegeți altă monedă sau altă metodă de plată.',
+    'payment_method_amount_below_minimum' => ':method nu poate accepta plăți sub :amount.',
     'paypal_help' => 'Creeaza o aplicatie in panoul tau de dezvoltator PayPal, la Apps & Credentials, si lipeste aici Client ID si Secret.',
     'paypal_client_id' => 'ID client',
     'paypal_client_id_help' => 'Din aplicatia ta PayPal, la Apps & Credentials. Asigura-te ca esti pe fila Live, daca nu testezi.',

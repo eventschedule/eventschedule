@@ -291,7 +291,7 @@
                         ['Included, not an add-on', 'PayPal comes with paid ticketing on Pro, at no extra cost, and the same on Enterprise or a selfhosted install. What you pay for is the plan that lets a ticket carry a price; Event Schedule still adds no fee of its own on top of what you charge.'],
                         ['Refunds move real money', 'From the Sales page, a full or partial refund is issued against the capture PayPal actually took, and the sale only changes once the money has gone back. A partial refund leaves the sale paid and its tickets valid.'],
                         ['One order, one capture', 'A multi-event cart pays as a single amount, so a buyer taking tickets for three of your nights approves once and is charged once.'],
-                        ['What it does not do', 'Installment plans are Stripe-only, and gift cards and appointment bookings cannot be paid through PayPal either. HUF, JPY and TWD are excluded deliberately, because PayPal rejects a decimal amount in all three and our pricing path can produce one.'],
+                        ['What it does not do', 'Installment plans are Stripe-only, and gift cards cannot be paid through PayPal either. HUF, JPY and TWD are excluded deliberately, because PayPal rejects a decimal amount in all three and our pricing path can produce one.'],
                     ];
                 @endphp
                 <div class="grid gap-4 sm:grid-cols-2" data-reveal-group="80">

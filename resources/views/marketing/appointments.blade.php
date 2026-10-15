@@ -132,7 +132,7 @@
 
         $steps = [
             ['Write the hours in', 'Open the Appointments tab, add a type, and set its duration, its start-time interval, and the hours you keep on each day. Buffers, minimum notice and how far ahead guests may book live on the same form.'],
-            ['Say where, and what it costs', 'In person with an address, online with a meeting link, or by phone with a number. Leave the price at zero, or set a price and take it by Stripe, a payment link, or cash.'],
+            ['Say where, and what it costs', 'In person with an address, online with a meeting link, or by phone with a number. Leave the price at zero, or set a price and take it by Stripe, PayPal, Payfast, a payment link, or cash.'],
             ['Share one link', 'Your booking page sits at /book on your schedule, and every type has its own address under it. A Book a Time button appears on your public page as well.'],
             ['They pick a line', 'A guest books an open time in their own timezone. You are emailed, the time is held, and the booking joins your calendar without joining your public page.'],
         ];
@@ -190,8 +190,8 @@
                 'v' => 'Leave the price at zero. The line is written in the moment a guest books, or lands as a request if the type asks for your approval.',
             ],
             [
-                'k' => 'Card or payment link',
-                'v' => 'Stripe Checkout, or your own payment link. The line is held while they pay and lets go if they never do: an hour for Stripe, a day for a payment link.',
+                'k' => 'Paid online',
+                'v' => 'Stripe, PayPal, Payfast or your own payment link. The line is held while they pay and lets go if they never do: an hour for Stripe and PayPal, a day for Payfast and a payment link.',
             ],
             [
                 'k' => 'Cash',
@@ -205,7 +205,7 @@
             ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, with more types, payment and advanced scheduling on Pro.'],
             ['Turn a type off, do not delete it', 'Untick Active and the type leaves your booking page. Bookings already on it keep their time, their emails and their reminders, though nothing can be moved onto a type that is switched off.'],
             ['One guest, one time', 'The same email address cannot hold two bookings at the same moment on your schedule.'],
-            ['Reminders chase confirmed bookings only', 'A request still waiting on you, or a card booking still waiting on payment, does not get one.'],
+            ['Reminders chase confirmed bookings only', 'A request still waiting on you, or a booking still waiting on an online payment, does not get one.'],
         ];
 
         $faqs = [
@@ -223,11 +223,11 @@
             ],
             [
                 'q' => 'Can I charge for appointments?',
-                'a' => 'Yes, on the Pro plan. A type can be free or priced; every plan carries a free type, and putting a price on one is the Pro line, the same line that applies to tickets. Paid types take payment by Stripe, a payment link, or cash. PayPal, Payfast and Invoice Ninja are not offered for appointments, even when they are connected. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
+                'a' => 'Yes, on the Pro plan. A type can be free or priced; every plan carries a free type, and putting a price on one is the Pro line, the same line that applies to tickets. Paid types take payment by Stripe, PayPal, Payfast, a payment link, or cash, whichever you have connected. Invoice Ninja is not offered for appointments, because it would set up a product and a subscription for every booking. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
             ],
             [
                 'q' => 'How do I refund a paid booking?',
-                'a' => 'Refund it on the Sales page rather than cancelling it. A Stripe booking goes back through Stripe, in full or in part: a partial refund leaves the booking in place, and a full one cancels it, puts the time back on offer and tells the guest it is cancelled. A payment-link or cash booking is marked refunded instead, which cancels it the same way but moves no money. Refund only appears while the sale is paid, so if you cancel first, return the money in Stripe or your provider using the amount and reference in your cancellation email.',
+                'a' => 'Refund it on the Sales page rather than cancelling it. A Stripe or PayPal booking goes back through Stripe or PayPal, in full or in part: a partial refund leaves the booking in place, and a full one cancels it, puts the time back on offer and tells the guest it is cancelled. A Payfast, payment-link or cash booking is marked refunded instead, which cancels it the same way but moves no money. Refund only appears while the sale is paid, so if you cancel first, return the money with your provider using the amount and reference in your cancellation email.',
             ],
             [
                 'q' => 'Can I approve bookings before they are confirmed?',
@@ -1354,7 +1354,7 @@
                     <p class="es-book-muted text-sm">
                         With approval on, bookings arrive on your Requests tab next to submitted events.
                         Accept and the guest gets their confirmation and invite; decline and they are
-                        told they are welcome to pick another time. On a card or link type, accepting
+                        told they are welcome to pick another time. On a type paid online, accepting
                         does not confirm on its own: the payment does that.
                     </p>
                 </div>
@@ -1371,9 +1371,10 @@
                     <h3 class="es-book-ink mb-2 text-base font-bold">Cancel releases the line</h3>
                     <p class="es-book-muted text-sm">
                         Cancel a booking and the guest is emailed and the time goes back on offer, but
-                        no money moves. To send a card payment back, refund it on the Sales page
+                        no money moves. To send a payment back, refund it on the Sales page
                         instead: a full refund cancels the booking for you. Cancel first and the email
-                        to you carries the amount and the reference, so you can return it in Stripe.
+                        to you carries the amount and the reference, so you can return it with your
+                        provider.
                     </p>
                 </div>
             </div>
@@ -1459,8 +1460,8 @@
                         <h3 class="es-book-ink mb-2 text-base font-bold">A reminder about a day out</h3>
                         <p class="es-book-muted text-sm">
                             Confirmed bookings get a reminder roughly 24 hours before they start. A
-                            request still waiting on you does not get one, and neither does a card
-                            booking that has not been paid.
+                            request still waiting on you does not get one, and neither does a booking
+                            still waiting on an online payment.
                         </p>
                     </div>
                     <div class="es-book-card es-book-hover p-6" data-reveal>
@@ -1468,8 +1469,8 @@
                         <p class="es-book-muted text-sm">
                             The same link offers the times anyone else would see. Their old line is
                             released the moment they take a new one, and they are told that before they
-                            commit. On a type that needs approval, a guest move comes back to you. A card
-                            booking they have not paid for yet has to be paid before it can be moved,
+                            commit. On a type that needs approval, a guest move comes back to you. A
+                            booking still waiting on an online payment has to be paid before it can be moved,
                             because the hold it is sitting on runs out on its own clock.
                         </p>
                     </div>
@@ -1517,8 +1518,8 @@
                         <p class="es-book-muted text-sm">
                             Priced types stay off your booking page until a working payment method is
                             connected, and the Appointments tab tells you which one is being held back.
-                            Connect Stripe or add a payment link under Account Settings and it appears.
-                            PayPal, Payfast and Invoice Ninja do not count here, even when connected.
+                            Connect the method the type uses under Account Settings, or switch the type
+                            to one you have connected, and it appears. Invoice Ninja does not count here.
                         </p>
                     </div>
                     <div>
@@ -1526,9 +1527,9 @@
                         <p class="es-book-muted text-sm">
                             Cancelling a paid booking never moves money. Refunding it on the
                             <x-link href="{{ route('marketing.docs.tickets') }}#managing-sales">Sales page</x-link>
-                            does: a Stripe booking goes back through Stripe, in full or in part, and only a
-                            full refund cancels it. A payment-link or cash booking is marked refunded
-                            instead, which cancels it without moving any money. Either way, it happens
+                            does: a Stripe or PayPal booking goes back through the provider, in full or in
+                            part, and only a full refund cancels it. A Payfast, payment-link or cash booking
+                            is marked refunded instead, which cancels it without moving any money. Either way, it happens
                             because you said so.
                         </p>
                     </div>

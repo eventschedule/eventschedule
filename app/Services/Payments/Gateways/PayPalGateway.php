@@ -551,9 +551,8 @@ class PayPalGateway extends PaymentGatewayDriver
                 'sale_id' => $sale->id,
                 'currency' => $currency,
             ]);
-            $this->releaseAbandonedSale($sale, 'paypal_refused');
 
-            return back()->withInput()->with('error', __('messages.paypal_checkout_unavailable'));
+            return $this->refuseCheckout($sale, 'paypal_refused', __('messages.paypal_checkout_unavailable'));
         }
 
         $encodedSaleId = UrlUtils::encodeId($sale->id);
@@ -606,9 +605,8 @@ class PayPalGateway extends PaymentGatewayDriver
             // This arm stands in for the amount floor Payfast has to model: PayPal refuses an amount
             // it will not take here, server-side, before the buyer has gone anywhere.
             Log::warning('PayPal order could not be created', ['sale_id' => $sale->id]);
-            $this->releaseAbandonedSale($sale, 'paypal_order_failed');
 
-            return back()->withInput()->with('error', __('messages.paypal_checkout_unavailable'));
+            return $this->refuseCheckout($sale, 'paypal_order_failed', __('messages.paypal_checkout_unavailable'));
         }
 
         $sale->forceFill(['paypal_order_id' => (string) $order['id']])->saveQuietly();
@@ -916,7 +914,9 @@ class PayPalGateway extends PaymentGatewayDriver
             // matches nothing extra.
             $this->markOrderPending($sale, $status === 'PENDING' ? now() : null);
 
-            if ($status === 'PENDING' && $isReturn) {
+            // Not for a booking: the line promises a ticket, and the booking's own page says the
+            // payment is being checked in its in-review state (AppointmentController::bookingState()).
+            if ($status === 'PENDING' && $isReturn && ! $sale->event?->appointment_type_id) {
                 // Only on the buyer's own request. handleWebhook() shares this method and has no
                 // reader for a flash - the webhook route is in the web group so this does not throw,
                 // it just writes a message nobody will ever see.

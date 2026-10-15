@@ -3701,7 +3701,6 @@ return [
     'download_all_photos' => 'הורד את כל התמונות',
     'no_photos_to_download' => 'אין תמונות להורדה.',
 
-
     'photo_gallery' => 'גלריית תמונות',
     'photo_count' => '{0} אין תמונות|{1} תמונה :count|[2,*] :count תמונות',
     'no_photos_yet' => 'אין תמונות עדיין',
@@ -4654,6 +4653,9 @@ return [
     'appointments_pending_note' => 'הפגישה שלך תאושר על ידי :schedule באימייל. עד אז שום דבר אינו נקבע.',
     'appointments_awaiting_payment' => 'השלימו את התשלום',
     'appointments_complete_payment' => 'השלמת התשלום',
+    'appointments_payment_in_review' => 'התשלום שלכם עדיין בבדיקה, וזה עשוי לקחת זמן מה. אין צורך לשלם שוב. אם המצב לא משתנה, פנו אל :schedule.',
+    'appointments_held_until' => 'המועד הזה שמור עבורכם עד :time.',
+    'appointments_payment_unavailable' => 'לא ניתן לשלם על ההזמנה הזו באופן מקוון כרגע. נא לפנות אל :schedule.',
     'appointments_booking_expired' => 'תוקף ההזמנה פג. יש לקבוע מועד חדש.',
     'appointments_edit_redirect' => 'ניתן לנהל את ההזמנה הזו מלשונית הפגישות.',
     'upgrade_required' => 'התכונה הזו דורשת שדרוג.',
@@ -5261,6 +5263,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast אינו יכול לעבד תשלום זה. נא לפנות למארגן האירוע.',
     'payfast_test_mode_notice' => 'מצב בדיקה פעיל. תשלום זה עובר לסביבת הבדיקות של Payfast ולא ייגבה כסף אמיתי.',
     'payment_method_unavailable' => 'לא זמין עוד',
+    'payment_method_currency_unsupported' => ':method לא יכול לקבל תשלומים ב-:currency. בחרו מטבע או אמצעי תשלום אחר.',
+    'payment_method_amount_below_minimum' => ':method לא יכול לקבל תשלומים של פחות מ-:amount.',
     'paypal_help' => 'צור אפליקציה בלוח המפתחים של PayPal תחת Apps & Credentials, והדבק כאן את ה-Client ID וה-Secret שלה.',
     'paypal_client_id' => 'מזהה לקוח (Client ID)',
     'paypal_client_id_help' => 'מתוך אפליקציית PayPal שלך, תחת Apps & Credentials. ודא שאתה בלשונית Live אלא אם אתה בודק.',

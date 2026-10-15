@@ -257,8 +257,8 @@ class AppointmentService
             $sale->guest_timezone = $data['guest_timezone'] ?? null;
             $sale->payment_method = $type->isFree() ? 'cash' : $type->payment_method;
             $sale->payment_amount = $type->isFree() ? 0 : $type->price;
-            // Free bookings are paid immediately; cash is unpaid-with-balance-due; stripe/payment_url
-            // stay unpaid until payment clears.
+            // Free bookings are paid immediately; cash is unpaid-with-balance-due; a type paid online
+            // (AppointmentType::paysOnline()) stays unpaid until the payment clears.
             $sale->status = $type->isFree() ? 'paid' : 'unpaid';
             $this->applyCustomValues($sale, $type, $data['custom_values'] ?? []);
             $sale->save();

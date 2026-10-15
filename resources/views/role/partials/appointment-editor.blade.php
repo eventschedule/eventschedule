@@ -11,10 +11,12 @@
     $curPaymentMethod = old('payment_method', $editing->payment_method ?? 'cash');
 
     // Cash, Stripe and the payment URL are always offered, as they always were; any other gateway
-    // the owner has connected joins them, if it takes bookings at all (supportsAppointments()). Whether it can take this type's currency and price is
-    // decided at booking time (AppointmentType::paymentMethodAvailable()) and flagged on the types
-    // list, as for an event. The saved method stays listed even once its gateway is disconnected,
-    // so the editor never renders with nothing checked and quietly saves a different method.
+    // the owner has connected joins them, if it takes bookings at all (supportsAppointments()). A
+    // currency the gateway cannot settle is refused on save (AppointmentTypeController::validated());
+    // whether the connection still works is decided at booking time
+    // (AppointmentType::paymentMethodAvailable()) and flagged on the types list. The saved method
+    // stays listed even once its gateway is disconnected, so the editor never renders with nothing
+    // checked and quietly saves a different method.
     $gatewayManager = app(\App\Services\Payments\PaymentGatewayManager::class);
     $paymentOptions = ['cash' => __('messages.cash'), 'stripe' => 'Stripe', 'payment_url' => __('messages.payment_url')];
     foreach ($gatewayManager->configuredFor($role->user) as $gatewayKey => $gateway) {
@@ -22,8 +24,10 @@
             $paymentOptions[$gatewayKey] ??= $gateway->label($role->user);
         }
     }
-    if (! isset($paymentOptions[$curPaymentMethod]) && ($storedGateway = $gatewayManager->get($curPaymentMethod))) {
-        $paymentOptions[$curPaymentMethod] = $storedGateway->label($role->user).' - '.__('messages.payment_method_unavailable');
+    // A method no driver knows any more (a backup from an install that had one) is listed under its
+    // key: left out, nothing was checked and an unchanged save quietly made the type cash.
+    if ($curPaymentMethod && ! isset($paymentOptions[$curPaymentMethod])) {
+        $paymentOptions[$curPaymentMethod] = ($gatewayManager->get($curPaymentMethod)?->label($role->user) ?? $curPaymentMethod).' - '.__('messages.payment_method_unavailable');
     }
     $curPrice = old('price', $editing->price ?? 0);
     $curCurrency = old('currency_code', $editing->currency_code
@@ -415,18 +419,28 @@
 
         <div id="payment-methods" class="mt-4">
             <x-input-label class="mb-1" :value="__('messages.payment_method')" />
-            <div class="{{ $segShell }}" role="radiogroup" aria-label="{{ __('messages.payment_method') }}">
-                {{-- v-pre on the label: a gateway's can carry owner-typed text (a Payfast merchant id, an
-                     API-sourced company name), and this form renders inside the Vue mount. Same guard as
-                     the event form's Payment select. --}}
+            {{-- Three methods sit on one line as they always have. More than that wraps in this
+                 column, and a wrapped segmented row left a grey tail after its first line, so the
+                 shell takes the full width and each chip grows to fill its line. --}}
+            @php $methodsWrap = count($paymentOptions) > 3; @endphp
+            <div class="{{ $methodsWrap ? str_replace('inline-flex', 'flex', $segShell) : $segShell }}" role="radiogroup" aria-label="{{ __('messages.payment_method') }}">
                 @foreach ($paymentOptions as $pm => $pmLabel)
-                    <label>
+                    <label @class(['grow' => $methodsWrap])>
                         <input type="radio" name="payment_method" value="{{ $pm }}" {{ $curPaymentMethod === $pm ? 'checked' : '' }} class="sr-only peer">
-                        <span v-pre class="{{ $segRadio }}">{{ $pmLabel }}</span>
+                        <span class="{{ $segRadio }}{{ $methodsWrap ? ' text-center' : '' }}">{{ $pmLabel }}</span>
                     </label>
                 @endforeach
             </div>
             <x-input-error :messages="$errors->get('payment_method')" class="mt-1" />
+            {{-- Where PayPal, Payfast and the rest are connected, so an owner who has not yet is told
+                 there is more than this row shows. A new tab: this form guards unsaved changes. --}}
+            @if (auth()->id() === $role->user_id)
+                {{-- The owner's only: the gateways are the owner's, and the link opens the settings of
+                     whoever is signed in. --}}
+                <div class="text-xs pt-1">
+                    <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">{{ __('messages.manage_payment_methods') }}</x-link>
+                </div>
+            @endif
         </div>
     </div>
 

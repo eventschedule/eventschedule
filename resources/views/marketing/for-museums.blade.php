@@ -779,7 +779,7 @@
                     <ul class="space-y-3">
                         @foreach ([
                             'As many appointment types as you offer, each with its own hours and length.',
-                            'A price on a type, paid by Stripe, a payment link or cash, with no platform fee.',
+                            'A price on a type, paid by Stripe, PayPal, Payfast, a payment link or cash, with no platform fee.',
                             'Buffers to reset a room between groups, minimum notice, a booking window and an approval step before a slot is confirmed.',
                         ] as $point)
                             <li class="flex items-start gap-3">

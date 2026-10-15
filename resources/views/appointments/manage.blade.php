@@ -24,6 +24,20 @@
         $inSchedule = ($guestTz && $guestTz !== $scheduleTz)
             ? \App\Utils\AppointmentTimeUtils::render($event, $scheduleTz, $use24)
             : null;
+
+        // How long an unpaid online booking keeps its time, in the zone the booking is shown in.
+        // The sale's age against the hold stamped on the event at booking, which is what
+        // app:release-tickets compares; it runs hourly, so this is the earliest the time can go, not
+        // the moment it does. Left out once that moment has passed and the sweep has not yet run.
+        $heldUntil = null;
+        if ($state === 'awaiting_payment' && (int) $event->expire_unpaid_tickets > 0 && $sale->created_at) {
+            $heldAt = $sale->created_at->copy()->addHours((int) $event->expire_unpaid_tickets)->setTimezone($shown['tz']);
+            if ($heldAt->isFuture()) {
+                // Isolated left to right: inside a Hebrew or Arabic sentence "5:23 PM" drew as "PM 5:23".
+                $clock = "\u{2066}".$heldAt->format($use24 ? 'H:i' : 'g:i A')."\u{2069}";
+                $heldUntil = $heldAt->isSameDay(now($shown['tz'])) ? $clock : $heldAt->translatedFormat('D, M j').', '.$clock;
+            }
+        }
     @endphp
 
     <style {!! nonce_attr() !!}>
@@ -82,12 +96,36 @@
                     <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.appointments_pending_note', ['schedule' => $role?->name ?? '']) }}</p>
                     @break
                 @case('awaiting_payment')
+                    {{-- Back from the payment page without paying (PaymentGatewayDriver::handleCancel(),
+                         and Stripe's cancel_url). Presentation only, like ?new=1, and only in this
+                         state, so reopening the address after paying says nothing. Same words as the
+                         ticket page's (event/partials/payment-cancelled). --}}
+                    @if (request()->query('payment') === 'cancelled')
+                        <div role="status" class="mb-4 flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-3">
+                            <svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                            </svg>
+                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.payment_cancelled_not_charged') }}</span>
+                        </div>
+                    @endif
                     <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_awaiting_payment') }}</h1>
+                    @if ($heldUntil)
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.appointments_held_until', ['time' => $heldUntil]) }}</p>
+                    @endif
                     <form method="POST" action="{{ route('appointments.pay', $manageParams) }}" class="mt-3">
                         @csrf
                         <button type="submit" class="px-4 py-3 text-base rounded-lg font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-800"
                                 style="background-color: var(--es-accent); color: var(--es-accent-text); --tw-ring-color: var(--es-accent)">{{ __('messages.appointments_complete_payment') }}</button>
                     </form>
+                    @break
+                @case('in_review')
+                    {{-- The provider has the payment and has not confirmed it: PayPal is reviewing it,
+                         or the guest came back from paying and the confirmation is later than the
+                         confirming window (an Instant EFT can clear hours later). No pay button, which
+                         would start a second payment, and no Cancel, which would leave the money with
+                         no booking. No polling either, so nothing here says the page updates itself. --}}
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.ticket_confirming_payment') }}</h1>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.appointments_payment_in_review', ['schedule' => $role?->name ?? '']) }}</p>
                     @break
                 @case('confirming')
                     {{-- No pay button while the provider's confirmation is on its way: the guest has
@@ -100,7 +138,9 @@
                     </div>
                     @break
                 @case('cancelled')
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_cancelled') }}</h1>
+                    {{-- A hold that lapsed unpaid is not a booking somebody cancelled: read as one, the
+                         guest says "it was cancelled" and the owner thinks they did it. --}}
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $sale->status === 'expired' ? __('messages.this_reservation_has_expired') : __('messages.appointments_cancelled') }}</h1>
                     @break
                 @case('passed')
                     <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_passed') }}</h1>
@@ -120,9 +160,10 @@
                     </div>
                     <div>
                         <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.time') }}</dt>
-                        <dd>{{ $shown['time'] }} ({{ $shown['tz'] }})</dd>
+                        {{-- Left to right inside a right-to-left page: "9:00 AM - 9:30 AM" drew as "AM - 9:30 AM 9:00". --}}
+                        <dd><bdi dir="ltr">{{ $shown['time'] }} ({{ $shown['tz'] }})</bdi></dd>
                         @if ($inSchedule)
-                            <dd class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_schedule_in') }} {{ $inSchedule['tz'] }} ({{ $inSchedule['time'] }})</dd>
+                            <dd class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_schedule_in') }} <bdi dir="ltr">{{ $inSchedule['tz'] }} ({{ $inSchedule['time'] }})</bdi></dd>
                         @endif
                     </div>
                     {{-- Labelled, and covering the phone case the confirmation email has always had.

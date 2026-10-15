@@ -660,10 +660,11 @@
                     ],
                     [
                         // No isPro() anywhere under app/Services/Payments/. PayPalGateway::saveCredentials()
-                        // verifies before storing, supportsCart() is true, and InstallmentService,
-                        // GiftCardController and AppointmentController offer no PayPal branch.
+                        // verifies before storing, supportsCart() is true, InstallmentService and
+                        // GiftCardController offer no PayPal branch, and appointments take any
+                        // connected gateway but Invoice Ninja (PaymentGatewayManager::appointmentKeys()).
                         'q' => 'Can I take payment with PayPal?',
-                        'a' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Installment plans need Stripe, and gift cards and paid appointments do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Invoice Ninja, a payment link of your own, and cash.',
+                        'a' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Paid appointments can take PayPal too. Installment plans need Stripe, and gift cards do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Invoice Ninja, a payment link of your own, and cash.',
                         'links' => [['PayPal checkout', marketing_url('/paypal')]],
                     ],
                     [

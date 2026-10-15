@@ -3644,7 +3644,6 @@ return [
     'download_all_photos' => 'Alle foto\'s downloaden',
     'no_photos_to_download' => 'Geen foto\'s om te downloaden.',
 
-
     'photo_gallery' => 'Fotogalerij',
     'photo_count' => '{0} Geen foto\'s|{1} :count foto|[2,*] :count foto\'s',
     'no_photos_yet' => 'Nog geen foto\'s',
@@ -4657,6 +4656,9 @@ return [
     'appointments_pending_note' => ':schedule bevestigt je afspraak per e-mail. Er is nog niets geboekt tot dan.',
     'appointments_awaiting_payment' => 'Rond je betaling af',
     'appointments_complete_payment' => 'Betaling afronden',
+    'appointments_payment_in_review' => 'Je betaling wordt nog gecontroleerd, dat kan even duren. Je hoeft niet opnieuw te betalen. Verandert dit niet, neem dan contact op met :schedule.',
+    'appointments_held_until' => 'Dit tijdstip blijft voor je gereserveerd tot :time.',
+    'appointments_payment_unavailable' => 'Deze boeking kan nu niet online worden betaald. Neem contact op met :schedule.',
     'appointments_booking_expired' => 'Deze boeking is verlopen. Boek een nieuw tijdstip.',
     'appointments_edit_redirect' => 'Beheer deze boeking via het tabblad Afspraken.',
     'upgrade_required' => 'Voor deze functie is een upgrade vereist.',
@@ -5264,6 +5266,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast kan deze betaling niet verwerken. Neem contact op met de organisator van het evenement.',
     'payfast_test_mode_notice' => 'Testmodus staat aan. Deze betaling gaat naar de Payfast-sandbox en er wordt geen echt geld afgeschreven.',
     'payment_method_unavailable' => 'niet meer beschikbaar',
+    'payment_method_currency_unsupported' => ':method kan geen betalingen in :currency aannemen. Kies een andere valuta of betaalmethode.',
+    'payment_method_amount_below_minimum' => ':method kan geen betalingen onder :amount aannemen.',
     'paypal_help' => 'Maak een app aan in je PayPal-ontwikkelaarsdashboard, onder Apps & Credentials, en plak hier de Client ID en het Secret.',
     'paypal_client_id' => 'Client ID',
     'paypal_client_id_help' => 'Uit je PayPal-app, onder Apps & Credentials. Zorg dat je op het tabblad Live zit, tenzij je aan het testen bent.',

@@ -305,21 +305,50 @@ class AppointmentController extends Controller
             return 'cancelled';
         }
 
-        $pivot = $event->roles()->where('roles.id', $event->creator_role_id)->first()?->pivot;
-        if ($pivot && is_null($pivot->is_accepted)) {
-            return 'pending';
-        }
-
+        // Payment before approval. fanOut() sends a priced booking to checkout before the approval
+        // step, so an approval type paid online is unpaid AND pending at once, and the payment is
+        // what the guest has to act on. Checked the other way round, a guest who backed out of the
+        // payment page read "Request sent" with no way to pay, and one whose payment was under
+        // review was offered Cancel, which would leave the money with no booking.
         if ($sale->status !== 'paid' && AppointmentType::paysOnline($event->payment_method)) {
-            // Back from the provider before its confirmation reached us (Stripe's webhook, Payfast's
-            // ITN). The guest has just paid, so offering "Complete payment" would start a second
-            // payment. Same rule and same window as the ticket page (ticket/view).
-            if (app(PaymentGatewayManager::class)->awaitsConfirmation($sale->payment_method, $sale)
-                && PaymentGatewayDriver::landedSecondsLeft($sale) > 0) {
-                return 'confirming';
+            $gateways = app(PaymentGatewayManager::class);
+
+            // Money arrived and did not match (SaleSettlementService parks the sale as
+            // amount_mismatch for a person to look at). Asking for it again would charge again, and
+            // Cancel would read the sale as unpaid and tell the owner nothing about the money.
+            if ($sale->status !== 'unpaid') {
+                return 'in_review';
+            }
+
+            if ($gateways->awaitsConfirmation($sale->payment_method, $sale)) {
+                // Back from the provider before its confirmation reached us (Stripe's webhook,
+                // Payfast's ITN). The guest has just paid, so offering "Complete payment" would
+                // start a second payment. Same rule and same window as the ticket page (ticket/view).
+                if (PaymentGatewayDriver::landedSecondsLeft($sale) > 0) {
+                    return 'confirming';
+                }
+
+                // Still nothing once the window has closed. An Instant EFT can clear hours later,
+                // and a second Payfast payment settles as already_paid with nobody told; PayPal says
+                // outright that it is reviewing one. Either way the guest is not asked to pay again.
+                if (! $gateways->canResumePayment($sale->payment_method, $sale)
+                    || PaymentGatewayDriver::hasLanded($sale)) {
+                    return 'in_review';
+                }
+            }
+
+            // Nothing is taken for a time that has gone. A day's hold (Payfast, a payment link) can
+            // outlast an appointment booked for the next morning.
+            if ($event->getStartDateTime()->isPast()) {
+                return 'passed';
             }
 
             return 'awaiting_payment';
+        }
+
+        $pivot = $event->roles()->where('roles.id', $event->creator_role_id)->first()?->pivot;
+        if ($pivot && is_null($pivot->is_accepted)) {
+            return 'pending';
         }
 
         // getStartDateTime() returns UTC here and tolerates a date-only starts_at; a bare
@@ -345,6 +374,13 @@ class AppointmentController extends Controller
         if ($event->getStartDateTime()->isPast()) {
             return redirect()->route('appointments.manage', $manageParams)
                 ->with('error', __('messages.appointments_cannot_cancel_past'));
+        }
+
+        // Not while a payment is on its way or waiting on a person (the page offers no Cancel then,
+        // and a stale tab or a hand-made post must not either): the sale reads unpaid, so the owner
+        // would be told nothing about money that has been taken or is about to be.
+        if (in_array($this->bookingState($event, $sale), ['confirming', 'in_review'], true)) {
+            return redirect()->route('appointments.manage', $manageParams);
         }
 
         $wasPaid = $sale->status === 'paid';
@@ -391,7 +427,10 @@ class AppointmentController extends Controller
             app(\App\Services\EmailService::class)->sendAppointmentPendingEmails($sale);
         }
 
-        return response()->json(['redirect_url' => $this->manageUrl($sale).'?new=1']);
+        return response()->json([
+            'redirect_url' => $this->manageUrl($sale).'?new=1',
+            'manage_url' => $this->managePath($sale),
+        ]);
     }
 
     /**
@@ -399,11 +438,21 @@ class AppointmentController extends Controller
      * the merchant payment URL, or - for any other gateway - the pay step, which the form submits as
      * an ordinary navigation so the driver can answer with a redirect or a page of its own (Payfast
      * hands the buyer on with an auto-submitting form, which a fetch cannot follow).
+     *
+     * Every answer also carries the booking's own page. The guest is about to leave for a payment
+     * page, and a browser that brings the booking form back from its cache (the Back button) shows
+     * it as it was left: the button still busy, and the slot already held by this booking. The form
+     * sends them to manage_url instead (appointments/book-type).
      */
     protected function initiatePayment(Request $request, AppointmentType $type, Role $role, Sale $sale)
     {
+        $managePath = $this->managePath($sale);
+
         if ($type->payment_method === 'stripe') {
-            return response()->json(['redirect_url' => $this->stripeCheckoutUrl($sale, $type, $role)]);
+            return response()->json([
+                'redirect_url' => $this->stripeCheckoutUrl($sale, $sale->event, $role),
+                'manage_url' => $managePath,
+            ]);
         }
 
         if ($type->payment_method === 'payment_url') {
@@ -412,13 +461,15 @@ class AppointmentController extends Controller
             // until the owner marks the sale paid (which then sends the confirmation).
             app(\App\Services\EmailService::class)->sendAppointmentPaymentDueEmail($sale);
 
-            return response()->json(['redirect_url' => $role->user->payment_url]);
+            return response()->json(['redirect_url' => $role->user->payment_url, 'manage_url' => $managePath]);
         }
 
-        return response()->json(['pay_url' => route('appointments.pay', [
-            'event_id' => UrlUtils::encodeId($sale->event_id),
-            'secret' => $sale->secret,
-        ])]);
+        // Path-relative, like the form's own bookUrl: the form posts it from whichever host the
+        // booking page was served on, a schedule's custom domain included.
+        return response()->json([
+            'pay_url' => route('appointments.pay', $this->manageParams($sale), false),
+            'manage_url' => $managePath,
+        ]);
     }
 
     /** GET /appointment/checkout/success/{sale_id} - Stripe redirect target; the webhook marks paid. */
@@ -482,40 +533,68 @@ class AppointmentController extends Controller
             return redirect($this->manageUrl($sale))->with('error', __('messages.appointments_booking_expired'));
         }
 
-        $type = $event->appointmentType;
+        // Only a booking that is waiting for its guest to pay. One whose payment is on its way
+        // (confirming, or under review) must not start a second one, and a cash booking has
+        // nothing to pay online. The manage page offers the button on the same answer.
+        if ($this->bookingState($event, $sale) !== 'awaiting_payment') {
+            return redirect($this->manageUrl($sale));
+        }
+
         $role = $event->creatorRole;
 
-        if ($type && $type->payment_method === 'stripe') {
-            return redirect($this->stripeCheckoutUrl($sale, $type, $role));
+        // Keyed on the SALE's method, not the type's: that is what the booking was made on, what the
+        // generic return and webhook routes check, and it cannot drift if the owner edits the type
+        // later.
+        if ($sale->payment_method === 'stripe') {
+            // The owner may have unlinked Stripe since the booking was made. Asked here, of the same
+            // account stripeCheckoutUrl() charges, because it falls back to the platform's own key
+            // when that account is not connected, which on hosted would take the guest's money into
+            // Event Schedule's.
+            if (! $role?->user?->canAcceptStripePayments()) {
+                return redirect($this->manageUrl($sale))->with('error', __('messages.appointments_payment_unavailable', ['schedule' => $role?->name ?? '']));
+            }
+
+            return redirect($this->stripeCheckoutUrl($sale, $event, $role));
         }
-        if ($type && $type->payment_method === 'payment_url' && $role->user->payment_url) {
-            return redirect($role->user->payment_url);
+        if ($sale->payment_method === 'payment_url') {
+            return redirect($role->user->payment_url ?: $this->manageUrl($sale));
         }
 
-        // Any other gateway goes through its driver, keyed on the SALE's method: that is what the
-        // generic return and webhook routes check, and it cannot drift if the type is edited later.
-        // The driver's return lands the guest back on the manage page
-        // (PaymentGatewayDriver::purchaseLandingUrl()).
-        if (AppointmentType::paysOnline($sale->payment_method)
-            && ! in_array($sale->payment_method, ['stripe', 'payment_url'], true)) {
-            return app(PaymentGatewayManager::class)->get($sale->payment_method)
-                ->startCheckout(new CheckoutContext($sale, $event, $role->subdomain));
+        // Any other gateway goes through its driver, whose return lands the guest back on the manage
+        // page (PaymentGatewayDriver::redirectToPurchaseLanding()). Asked first whether it can still
+        // take this booking (connected, this currency, this amount: the test the booking page applied),
+        // because a driver that cannot start gives a ticket's seats back, and a booking kept by a guest
+        // who backed out must not be cancelled because the owner disconnected the gateway since.
+        $gateways = app(PaymentGatewayManager::class);
+        $available = $gateways->availableFor($event->user, $event->ticket_currency_code, (float) $sale->payment_amount);
+
+        if (! isset($available[$sale->payment_method])) {
+            return redirect($this->manageUrl($sale))->with('error', __('messages.appointments_payment_unavailable', ['schedule' => $role?->name ?? '']));
         }
 
-        return redirect($this->manageUrl($sale));
+        return $available[$sale->payment_method]
+            ->startCheckout(new CheckoutContext($sale, $event, $sale->subdomain ?: $role->subdomain));
     }
 
-    /** Create a Stripe Checkout session for the booking and return its URL (Connect or platform). */
-    protected function stripeCheckoutUrl(Sale $sale, AppointmentType $type, Role $role): string
+    /**
+     * Create a Stripe Checkout session for the booking and return its URL (Connect or platform).
+     *
+     * Charges what the booking was made for (the sale's amount, in the currency stamped on its
+     * event), never the type's current price: the webhook settles against payment_amount, so a type
+     * repriced after the booking would park the sale as amount_mismatch, and one made free would ask
+     * Stripe for a zero-amount session.
+     */
+    protected function stripeCheckoutUrl(Sale $sale, Event $event, Role $role): string
     {
-        $unitAmountCents = (int) round($type->price * MoneyUtils::getSmallestUnitMultiplier($type->currency_code));
+        $currency = $event->ticket_currency_code ?: ($event->appointmentType?->currency_code ?? 'USD');
+        $unitAmountCents = (int) round((float) $sale->payment_amount * MoneyUtils::getSmallestUnitMultiplier($currency));
         $successParams = ['sale_id' => UrlUtils::encodeId($sale->id)];
 
         $sessionData = [
             'line_items' => [[
                 'price_data' => [
-                    'currency' => $type->currency_code,
-                    'product_data' => ['name' => $type->name.' - '.$role->name],
+                    'currency' => $currency,
+                    'product_data' => ['name' => ($event->appointmentType?->name ?? $event->name).' - '.$role->name],
                     'unit_amount' => $unitAmountCents,
                 ],
                 'quantity' => 1,
@@ -524,7 +603,9 @@ class AppointmentController extends Controller
             'customer_email' => $sale->email,
             'metadata' => ['sale_id' => UrlUtils::encodeId($sale->id)],
             'payment_intent_data' => ['metadata' => ['sale_id' => UrlUtils::encodeId($sale->id)]],
-            'cancel_url' => $this->manageUrl($sale),
+            // The manage page says the payment was cancelled and nothing was charged, and keeps the
+            // hold (appointments/manage).
+            'cancel_url' => $this->manageUrl($sale).'?payment=cancelled',
         ];
 
         // Stripe Connect (hosted, owner has a connected account) vs the platform key (selfhosted).
@@ -618,10 +699,19 @@ class AppointmentController extends Controller
 
     protected function manageUrl(Sale $sale): string
     {
-        return route('appointments.manage', [
-            'event_id' => UrlUtils::encodeId($sale->event_id),
-            'secret' => $sale->secret,
-        ]);
+        return route('appointments.manage', $this->manageParams($sale));
+    }
+
+    /** The manage page as a path, for the booking form to navigate to from whatever host it is on. */
+    protected function managePath(Sale $sale): string
+    {
+        return route('appointments.manage', $this->manageParams($sale), false);
+    }
+
+    /** @return array{event_id: string, secret: string} */
+    protected function manageParams(Sale $sale): array
+    {
+        return ['event_id' => UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret];
     }
 
     /**

@@ -3644,7 +3644,6 @@ return [
     'download_all_photos' => 'Descargar todas las fotos',
     'no_photos_to_download' => 'No hay fotos para descargar.',
 
-
     'photo_gallery' => 'Galería de fotos',
     'photo_count' => '{0} Sin fotos|{1} :count foto|[2,*] :count fotos',
     'no_photos_yet' => 'Aún no hay fotos',
@@ -4655,6 +4654,9 @@ return [
     'appointments_pending_note' => ':schedule confirmará tu cita por correo electrónico. No hay nada reservado hasta entonces.',
     'appointments_awaiting_payment' => 'Completa tu pago',
     'appointments_complete_payment' => 'Completar pago',
+    'appointments_payment_in_review' => 'Tu pago aún se está verificando, lo que puede tardar un poco. No hace falta que vuelvas a pagar. Si esto no cambia, contacta con :schedule.',
+    'appointments_held_until' => 'Este horario queda reservado para ti hasta :time.',
+    'appointments_payment_unavailable' => 'Esta reserva no se puede pagar en línea en este momento. Contacta con :schedule.',
     'appointments_booking_expired' => 'Esta reserva ha caducado. Reserva un nuevo horario.',
     'appointments_edit_redirect' => 'Gestiona esta reserva desde la pestaña Citas.',
     'upgrade_required' => 'Esta función requiere una mejora de plan.',
@@ -5262,6 +5264,8 @@ return [
     'payfast_checkout_unavailable' => 'Payfast no puede procesar este pago. Ponte en contacto con el organizador del evento.',
     'payfast_test_mode_notice' => 'El modo de prueba esta activado. Este pago va al entorno de pruebas de Payfast y no se cobrara dinero real.',
     'payment_method_unavailable' => 'ya no disponible',
+    'payment_method_currency_unsupported' => ':method no puede aceptar pagos en :currency. Elige otra moneda u otro método de pago.',
+    'payment_method_amount_below_minimum' => ':method no puede aceptar pagos inferiores a :amount.',
     'paypal_help' => 'Crea una aplicacion en tu panel de desarrollador de PayPal, en Apps & Credentials, y pega aqui su Client ID y su Secret.',
     'paypal_client_id' => 'Client ID',
     'paypal_client_id_help' => 'De tu aplicacion de PayPal, en Apps & Credentials. Asegurate de estar en la pestana Live salvo que estes haciendo pruebas.',

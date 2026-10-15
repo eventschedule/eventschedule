@@ -200,7 +200,7 @@
             ],
             [
                 'q' => 'Can people book our function room or studio time?',
-                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe, a payment link or cash if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
+                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe, PayPal, Payfast, a payment link or cash if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
             ],
             [
                 'q' => 'Can we use our own domain and remove Event Schedule branding?',
@@ -486,7 +486,7 @@
         badge="Private hire"
         heading="Let people book the room"
         lede="The function room, the studio, the back bar, a venue tour. Publish the hours each space is free and let people pick a time themselves, with the price paid up front if you want it."
-        :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Stripe, payment link or cash', 'Approval required', 'Reschedule links']"
+        :chips="['Bookable spaces', 'Weekly hours', 'Holiday overrides', 'Paid online or in cash', 'Approval required', 'Reschedule links']"
         :flip="true"
         frame="panel"
         ground="gray">
