@@ -783,6 +783,14 @@ class Role extends Model implements MustVerifyEmail
                 ->get();
 
             foreach ($activeCampaigns as $campaign) {
+                // A partner boost is stopped, never deleted at Meta and never refunded: the platform
+                // holds none of its money, and its spend must stay readable for the statement.
+                if ($campaign->isPartner()) {
+                    \App\Services\BoostPartnerService::stopInCascade($campaign);
+
+                    continue;
+                }
+
                 try {
                     if ($campaign->meta_campaign_id && \App\Services\MetaAdsService::isBoostConfigured()) {
                         $metaService = app()->make(\App\Services\MetaAdsService::class);

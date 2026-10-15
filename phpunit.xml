@@ -142,6 +142,17 @@
              Http::fake(), as CustomDomainProvisioningTest does. -->
         <env name="DO_API_TOKEN" value="" force="true"/>
         <env name="DO_APP_ID" value="" force="true"/>
+        <!-- The same for Meta. The deploying machine's .env holds the platform's real Meta token, ad
+             account and Page: unpinned, a boost test that missed the fake would have created a
+             real campaign on the platform's card, and a boost partner's partner share runs with
+             that same token. A test that needs the real service sets its own values together
+             with Http::fake(); MetaAdsService falls back to MetaAdsServiceFake without a token. -->
+        <env name="META_ACCESS_TOKEN" value="" force="true"/>
+        <env name="META_AD_ACCOUNT_ID" value="" force="true"/>
+        <env name="META_PAGE_ID" value="" force="true"/>
+        <env name="META_BUSINESS_ID" value="" force="true"/>
+        <env name="META_SYSTEM_USER_ID" value="" force="true"/>
+        <env name="META_LOGIN_CONFIG_ID" value="" force="true"/>
         <!-- The same for the AI key. With a developer's real GEMINI_API_KEY in .env, every page
              that offers AI import drew its form here and not on CI, so a test could pass on one
              and fail on the other for that alone (CustomFieldEventPageTest did), and a test one

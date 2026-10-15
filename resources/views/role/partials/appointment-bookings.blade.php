@@ -1,11 +1,21 @@
 @php
+    use App\Utils\UrlUtils;
+
     $filter = request('filter', 'upcoming');
-    $filterUrl = fn ($f) => route('role.view_admin', [
-        'subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => $f,
-    ]);
+    // The host filter rides along with the other filters, so moving between Upcoming and Past keeps
+    // one host's bookings in view (the owner is sent here when a host leaves the team).
+    $hostParam = request('host');
+    $filterUrl = fn ($f) => route('role.view_admin', array_filter([
+        'subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => $f, 'host' => $hostParam,
+    ]));
     $use24 = get_use_24_hour_time($role);
 
-    // Per-row presentation, computed once and shared by the desktop table and the mobile cards.
+    // Everybody who hosts or hosted a type here, by id. The column and the filter only appear once
+    // there is somebody to name.
+    $hostNames = $appointmentHosts['names'] ?? [];
+    $showHosts = ! empty($hostNames);
+
+    // Per-row presentation, computed once.
     $rows = collect($bookings->all())->map(function ($s) use ($use24, $role) {
         $e = $s->event;
         $cancelled = $e->is_cancelled || in_array($s->status, ['cancelled', 'refunded', 'expired']);
@@ -23,20 +33,25 @@
             // Asked, not re-derived. These rows used to compute their own predicates and drifted from the
             // endpoints in both directions: offering Reschedule on an unpaid card hold or a deactivated
             // type (where the POST bounces straight back with an error), and hiding it on pending rows
-            // where it is allowed and the guest page offers it as "Change time".
-            'rescheduleBlocked' => \App\Support\AppointmentRescheduleGate::blockedReason($e, $s, $role),
+            // where it is allowed and the guest page offers it as "Change time". Owner mode, as the
+            // endpoint behind the link asks it: a type switched off because its host left the team
+            // still has bookings to move.
+            'rescheduleBlocked' => \App\Support\AppointmentRescheduleGate::blockedReason($e, $s, $role, true, true),
             // Nothing else bumps ical_sequence on a live appointment, so > 0 means "this was moved".
             'moved' => ! $cancelled && (int) $e->ical_sequence > 0,
             'shown' => \App\Utils\AppointmentTimeUtils::render($e, null, $use24),
             'label' => $cancelled ? __('messages.appointments_cancelled')
                 : ($pending ? __('messages.appointments_request_sent')
                 : ($confirmed ? __('messages.appointments_confirmed_label') : __('messages.appointments_awaiting_payment'))),
-            'badge' => $cancelled ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                : ($confirmed ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'),
+            // The kit's status mark (form-kit-styles): green when settled, amber while it waits on
+            // somebody, plain grey once it is off.
+            'status' => $cancelled ? '' : ($confirmed ? 'is-on' : 'is-warn'),
             'amount' => (float) $s->payment_amount > 0
                 ? \App\Utils\MoneyUtils::format((float) $s->payment_amount, $e->ticket_currency_code)
                 : __('messages.free'),
+            // Made by an agent over the API (a voice agent, most often): a name or an address may
+            // have been misheard, so the owner is told where it came from.
+            'viaApi' => $s->utm_source === 'api',
             // The guest's notes are stored on the event description behind a prefix; strip it.
             'notes' => $e->description
                 ? trim(preg_replace(
@@ -47,86 +62,111 @@
     });
 @endphp
 
-<div class="flex flex-wrap items-center justify-between gap-3">
-    {{-- Same segmented control as the sub-view switcher, with the pending count where the owner
-         actually needs it. Scrolls sideways rather than wrapping, the way the AP tab nav does: four
-         pills plus a badge do not fit a phone, and a wrapped segmented control reads as two. --}}
-    <div class="max-w-full overflow-x-auto scrollbar-hide">
-        <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
-            @foreach (['upcoming', 'pending', 'past', 'cancelled'] as $f)
-                <a href="{{ $filterUrl($f) }}"
-                   @if ($filter === $f) aria-current="page" style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif
-                   class="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $filter === $f ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
-                    {{ __('messages.appointments_filter_'.$f) }}
-                    @if ($f === 'pending' && $pendingBookingCount > 0)
-                        <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $pendingBookingCount }}</span>
-                    @endif
-                </a>
-            @endforeach
-        </div>
-    </div>
-
-    <form method="GET" action="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}" class="flex w-full items-center gap-2 sm:w-auto">
-        <input type="hidden" name="view" value="bookings">
-        <input type="hidden" name="filter" value="{{ $filter }}">
-        <label for="booking-search" class="sr-only">{{ __('messages.search') }}</label>
-        {{-- Fills the row on a phone instead of sitting at a fixed 11rem next to empty space. --}}
-        <input type="search" id="booking-search" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.name') }} / {{ __('messages.email') }}"
-               class="min-w-0 flex-1 text-sm px-3 py-1.5 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:w-56 sm:flex-none">
-        <x-brand-button type="submit" class="!px-3 !py-1.5 !text-sm">{{ __('messages.search') }}</x-brand-button>
-        @if (request('search'))
-            <a href="{{ $filterUrl($filter) }}" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">{{ __('messages.clear') }}</a>
-        @endif
-    </form>
+{{-- Which bookings: four filters that are links, the one in force pressed in. --}}
+<div class="flex flex-wrap items-center gap-2" role="group" aria-label="{{ __('messages.bookings') }}">
+    @foreach (['upcoming', 'pending', 'past', 'cancelled'] as $f)
+        <a href="{{ $filterUrl($f) }}" class="page-pill" @if ($filter === $f) aria-current="true" @endif>
+            {{ __('messages.appointments_filter_'.$f) }}
+            @if ($f === 'pending' && $pendingBookingCount > 0)
+                <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $pendingBookingCount }}</span>
+            @endif
+        </a>
+    @endforeach
 </div>
 
+<form method="GET" action="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}" class="page-filters">
+    <input type="hidden" name="view" value="bookings">
+    <input type="hidden" name="filter" value="{{ $filter }}">
+    @if ($showHosts)
+        <div class="page-filter">
+            <label for="booking-host">{{ __('messages.appointments_host') }}</label>
+            <select id="booking-host" name="host" data-auto-submit>
+                <option value="">{{ __('messages.appointments_all_hosts') }}</option>
+                @foreach ($hostNames as $hostId => $hostName)
+                    <option value="{{ UrlUtils::encodeId($hostId) }}" @selected((int) ($appointmentHosts['filter'] ?? 0) === (int) $hostId)>{{ $hostName ?: __('messages.appointments_host_former') }}</option>
+                @endforeach
+            </select>
+        </div>
+    @elseif ($hostParam)
+        <input type="hidden" name="host" value="{{ $hostParam }}">
+    @endif
+    <div class="page-filter is-grow">
+        <label for="booking-search">{{ __('messages.search') }}</label>
+        <input type="search" id="booking-search" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.name') }} / {{ __('messages.email') }}">
+    </div>
+    <div class="is-end">
+        <x-brand-button type="submit">{{ __('messages.search') }}</x-brand-button>
+        @if (request('search') || $hostParam)
+            <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => $filter]) }}" class="event-link">{{ __('messages.clear') }}</a>
+        @endif
+    </div>
+</form>
+
 @if ($bookings->isEmpty())
-    <div class="ap-card rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">{{ __('messages.appointments_no_bookings') }}</div>
+    <div class="ap-card rounded-xl">
+        <x-page-empty :title="__('messages.appointments_no_bookings')" />
+    </div>
 @else
-    {{-- Desktop table --}}
-    <div class="ap-card rounded-xl hidden md:block">
-        <table class="w-full text-sm text-gray-900 dark:text-gray-100">
-            <thead class="bg-gray-50 dark:bg-gray-800 text-left text-gray-500 dark:text-gray-400">
-                <tr>
-                    <th class="p-3 font-medium">{{ __('messages.date') }}</th>
-                    <th class="p-3 font-medium">{{ __('messages.appointment_types') }}</th>
-                    <th class="p-3 font-medium">{{ __('messages.name') }}</th>
-                    <th class="p-3 font-medium">{{ __('messages.amount') }}</th>
-                    <th class="p-3 font-medium">{{ __('messages.status') }}</th>
-                    <th class="p-3"></th>
+    {{-- One list, a table from a tablet up and a stack of rows on a phone (partials/admin-page-styles).
+         It used to be a table plus a second copy of every row as phone cards. --}}
+    <div class="ap-card rounded-xl overflow-hidden">
+        <table role="table" class="page-table">
+            <thead role="rowgroup">
+                <tr role="row">
+                    <th scope="col" role="columnheader">{{ __('messages.date') }}</th>
+                    <th scope="col" role="columnheader">{{ __('messages.appointment_types') }}</th>
+                    @if ($showHosts)
+                        <th scope="col" role="columnheader">{{ __('messages.appointments_host') }}</th>
+                    @endif
+                    <th scope="col" role="columnheader">{{ __('messages.name') }}</th>
+                    <th scope="col" role="columnheader" class="c-num">{{ __('messages.amount') }}</th>
+                    <th scope="col" role="columnheader">{{ __('messages.status') }}</th>
+                    <th scope="col" role="columnheader"><span class="sr-only">{{ __('messages.actions') }}</span></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup">
                 @foreach ($rows as $row)
-                    @php $s = $row['sale']; $e = $row['event']; @endphp
-                    {{-- align-top: one row carrying a long note used to vertically centre every other
-                         cell in that row against it. --}}
-                    <tr class="border-t border-gray-100 dark:border-gray-700 align-top">
-                        <td class="p-3 whitespace-nowrap">
+                    @php
+                        $s = $row['sale'];
+                        $e = $row['event'];
+                        $rowHostId = (int) $e->appointment_host_user_id;
+                        $rowHost = $rowHostId ? ($hostNames[$rowHostId] ?? null) : null;
+                    @endphp
+                    <tr role="row">
+                        <td role="cell" class="c-date">
                             {{ $row['shown']['date'] }}
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $row['shown']['time'] }}</div>
+                            <span class="c-sub"><bdi dir="ltr">{{ $row['shown']['time'] }}</bdi></span>
                         </td>
-                        <td class="p-3">{{ $e->appointmentType?->name }}</td>
-                        <td class="p-3">
-                            {{ $s->name }}
-                            {{-- The phone was already a tel: link; the email was plain text. --}}
-                            <div class="text-xs"><a href="mailto:{{ $s->email }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->email }}</a></div>
-                            @if ($s->phone)
-                                <div class="text-xs"><a href="tel:{{ $s->phone }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->phone }}</a></div>
-                            @endif
-                            @if ($row['notes'])
-                                {{-- Capped, so a long note cannot push the actions column off-screen. --}}
-                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-xs"><span class="font-medium">{{ __('messages.notes') }}:</span> {{ $row['notes'] }}</div>
-                            @endif
+                        <td role="cell" data-label="{{ __('messages.appointment_types') }}"><bdi v-pre>{{ $e->appointmentType?->name }}</bdi></td>
+                        @if ($showHosts)
+                            <td role="cell" data-label="{{ __('messages.appointments_host') }}">@if ($rowHostId)<bdi v-pre>{{ $rowHost ?: __('messages.appointments_host_former') }}</bdi>@endif</td>
+                        @endif
+                        <td role="cell" class="c-main">
+                            <div class="page-person-text">
+                                <div class="event-list-name">
+                                    <bdi v-pre>{{ $s->name }}</bdi>
+                                    @if ($row['viaApi'])
+                                        <span class="event-chip" title="{{ __('messages.appointments_booked_via_api_note') }}">{{ __('messages.appointments_booked_via_api') }}</span>
+                                    @endif
+                                </div>
+                                <span class="c-sub"><a href="mailto:{{ $s->email }}" class="hover:underline" dir="ltr" v-pre>{{ $s->email }}</a></span>
+                                @if ($s->phone)
+                                    <span class="c-sub"><a href="tel:{{ $s->phone }}" class="hover:underline" dir="ltr" v-pre>{{ $s->phone }}</a></span>
+                                @endif
+                                @if ($row['notes'])
+                                    {{-- Capped, so a long note cannot push the actions off the row. --}}
+                                    <span class="c-sub max-w-xs"><span class="font-medium">{{ __('messages.notes') }}:</span> <bdi v-pre>{{ $row['notes'] }}</bdi></span>
+                                @endif
+                            </div>
                         </td>
-                        <td class="p-3 whitespace-nowrap">{{ $row['amount'] }}</td>
-                        <td class="p-3">
-                            <span class="inline-block px-2 py-1 rounded-full text-xs {{ $row['badge'] }}">{{ $row['label'] }}</span>
+                        <td role="cell" class="c-num" data-label="{{ __('messages.amount') }}">{{ $row['amount'] }}</td>
+                        <td role="cell">
+                            <span class="event-status {{ $row['status'] }}">{{ $row['label'] }}</span>
                             @if ($row['moved'])
-                                <span class="ms-1 inline-block px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400">{{ __('messages.appointments_moved_badge') }}</span>
+                                <span class="event-chip">{{ __('messages.appointments_moved_badge') }}</span>
                             @endif
                         </td>
-                        <td class="p-3 text-end whitespace-nowrap">
+                        <td role="cell" class="c-actions">
                             @include('role.partials.appointment-booking-actions', ['row' => $row])
                         </td>
                     </tr>
@@ -135,48 +175,8 @@
         </table>
     </div>
 
-    {{-- Mobile cards: every other AP list ships this instead of a horizontally scrolling table. --}}
-    <div class="md:hidden space-y-4">
-        @foreach ($rows as $row)
-            @php $s = $row['sale']; $e = $row['event']; @endphp
-            {{-- The type name and the amount moved up into the header row, which takes two lines out
-                 of the sub-panel and off the height of every card in the list. --}}
-            <div class="ap-card rounded-xl p-4">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $row['shown']['date'] }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $row['shown']['time'] }}</div>
-                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $e->appointmentType?->name }}</div>
-                    </div>
-                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                        <span class="inline-block px-2 py-1 rounded-full text-xs {{ $row['badge'] }}">{{ $row['label'] }}</span>
-                        @if ($row['moved'])
-                            <span class="inline-block px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400">{{ __('messages.appointments_moved_badge') }}</span>
-                        @endif
-                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $row['amount'] }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-3 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 space-y-1 text-sm">
-                    <div class="text-gray-700 dark:text-gray-300">{{ $s->name }}</div>
-                    <div class="text-xs"><a href="mailto:{{ $s->email }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->email }}</a></div>
-                    @if ($s->phone)
-                        <div class="text-xs"><a href="tel:{{ $s->phone }}" class="text-[var(--brand-blue)] hover:underline">{{ $s->phone }}</a></div>
-                    @endif
-                    @if ($row['notes'])
-                        <div class="text-xs text-gray-600 dark:text-gray-400 pt-1"><span class="font-medium">{{ __('messages.notes') }}:</span> {{ $row['notes'] }}</div>
-                    @endif
-                </div>
-
-                <div class="mt-3 flex flex-wrap items-center gap-2">
-                    @include('role.partials.appointment-booking-actions', ['row' => $row])
-                </div>
-            </div>
-        @endforeach
-    </div>
-
     @if ($bookings instanceof \Illuminate\Contracts\Pagination\Paginator && $bookings->hasPages())
-        <div class="mt-4">
+        <div class="page-pager">
             {{ $bookings->links() }}
         </div>
     @endif

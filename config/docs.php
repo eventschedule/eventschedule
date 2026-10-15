@@ -344,7 +344,7 @@ return [
             'shot' => 'appointments--types',
             'shot_alt' => 'The Appointments tab, listing appointment types',
             'published' => '2026-07-26',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-15',
         ],
 
         'sharing' => [
@@ -405,7 +405,7 @@ return [
             'shot' => 'boost--page',
             'shot_alt' => 'The Boost Event page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-15',
         ],
 
         'managing-schedules' => [
@@ -449,7 +449,7 @@ return [
             'shot' => 'account-settings--settings',
             'shot_alt' => 'The Settings page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-15',
         ],
 
         'referral-program' => [
@@ -706,7 +706,7 @@ return [
             'blurb' => 'Programmatically manage schedules and events over REST.',
             'icon' => 'code',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-15',
         ],
 
         'developer/webhooks' => [

@@ -37,12 +37,21 @@
 <x-email.callout tone="warning">{{ $shortNotice }}</x-email.callout>
 @endif
 
+@if (($sale->utm_source ?? null) === 'api')
+{{-- Booked by a caller's agent (most often a voice agent), so a name or an address may have been
+     misheard. Said before the details it is about. --}}
+<x-email.callout tone="info">{{ __('messages.appointments_booked_via_api_note') }}</x-email.callout>
+@endif
+
 @if ($showRefund)
 <x-email.callout tone="warning">{{ __('messages.appointment_owner_refund_note', ['amount' => strtoupper($event->ticket_currency_code).' '.number_format((float) $sale->payment_amount, 2), 'reference' => $sale->transaction_reference ?: '-']) }}</x-email.callout>
 @endif
 
 <x-email.details panel>
 <x-email.item :label="__('messages.date')" wide :caption="$ownerGuestLine">{{ $ownerShown['date'] }} &middot; <bdi dir="ltr">{{ $ownerShown['time'] }} ({{ $ownerShown['tz'] }})</bdi></x-email.item>
+@if ($hostName = $event->appointmentHostName())
+<x-email.item :label="__('messages.appointments_host')" wide>{{ $hostName }}</x-email.item>
+@endif
 <x-email.item :label="__('messages.name')">{{ $sale->name }}</x-email.item>
 @if ($sale->phone)
 <x-email.item :label="__('messages.phone')" ltr>{{ $sale->phone }}</x-email.item>

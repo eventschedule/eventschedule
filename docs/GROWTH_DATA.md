@@ -335,7 +335,10 @@ credits, legacy `plan_expires` rows and trials, which is most paid-tier schedule
 - `boost`:
   - `net_markup[]` (`{month, currency, net_markup}`) is our revenue from paid promotions, net of
     refunds;
-  - `campaigns[]` is `{month, campaigns, schedules}`.
+  - `campaigns[]` is `{month, campaigns, schedules}`, every channel, partner boosts included;
+  - `partner_fees[]` (`{month, currency, fee}`) is the 20% fee boost partners paid on the actual
+    spend of their own ad accounts, by the month the spend was in (a statement's period), paid
+    statements only.
 - `referrals`: `by_status`, `created_by_month`.
 - `federation`: the selfhost installs that registered for federation, which is only a floor on
   selfhost installs. Fields: `by_status`, `active_30d`, `by_version`, `registered_by_month`.
@@ -564,6 +567,10 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **20** (2026-10-15)
+  - **`boost.partner_fees`**: the monthly fee boost partners pay on actual spend in their own
+    ad accounts. Their campaigns are also counted in `boost.campaigns`, and never in
+    `net_markup` (they carry no markup). Nothing else changed shape.
 - **19** (2026-10-15)
   - **`gateways` can hold `razorpay`**, for an owner who has connected Razorpay keys. Nothing else
     changed shape.

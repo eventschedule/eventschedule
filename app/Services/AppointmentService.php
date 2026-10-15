@@ -80,15 +80,46 @@ class AppointmentService
 
         $result = ['schedule_timezone' => $tz, 'days' => [], 'next_available_date' => null];
 
+        // Whose time this is, decided once: every chunk of the lookahead below asks the same.
+        $hostId = $this->hostFor($type, $excludeEventId);
+
         if ($endDay->gte($startDay)) {
-            $result['days'] = $this->computeDays($type, $startDay, $endDay, $earliest, $excludeEventId);
+            $result['days'] = $this->computeDays($type, $startDay, $endDay, $earliest, $excludeEventId, $hostId);
         }
 
         if ($withNextAvailable && empty($result['days'])) {
-            $result['next_available_date'] = $this->nextAvailableDate($type, $endDay->copy()->addDay(), $now, $earliest, $lastDay, $excludeEventId);
+            $result['next_available_date'] = $this->nextAvailableDate($type, $endDay->copy()->addDay(), $now, $earliest, $lastDay, $excludeEventId, $hostId);
         }
 
         return $result;
+    }
+
+    /**
+     * The team member whose time a slot is taken from, or null for the schedule's own.
+     *
+     * A new booking takes the type's host. A booking being moved ($excludeEventId, which is always
+     * server-derived from the resolved sale) keeps the host it was made with: a new host applies
+     * to new bookings only, and the time was agreed with the person stamped on it.
+     */
+    protected function hostFor(AppointmentType $type, ?int $excludeEventId): ?int
+    {
+        if ($excludeEventId) {
+            $stamped = Event::whereKey($excludeEventId)->value('appointment_host_user_id');
+            if (! $stamped) {
+                return null;
+            }
+
+            // A host who has gone left this booking to the schedule: move it against the
+            // schedule's own time (busyIntervals() already counts such bookings as the
+            // schedule's), or every slot reads free and the owner can stack them.
+            if (! AppointmentHostService::isEligible((int) $type->role_id, (int) $stamped)) {
+                return null;
+            }
+
+            return (int) $stamped;
+        }
+
+        return $type->host_user_id ? (int) $type->host_user_id : null;
     }
 
     /**
@@ -170,11 +201,29 @@ class AppointmentService
         $slotUtc = $data['slot'];
         $tz = $type->timezone();
         $start = Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $slotUtc, 'UTC');
+        // Read before the transaction, so nothing is read between its locks.
+        $hostId = $type->host_user_id ? (int) $type->host_user_id : null;
 
-        return DB::transaction(function () use ($type, $role, $data, $user, $slotUtc, $tz, $start) {
+        return DB::transaction(function () use ($type, $role, $data, $user, $slotUtc, $tz, $start, $hostId) {
+            // A host's time spans schedules, so two schedules booking the same person must queue
+            // on that person as well. The user row is taken FIRST and the schedule second: the
+            // order User::claimRolesByPhone() takes them in (users, then roles; see User.php and
+            // ScheduleTransferService), so a booking and a claim never wait on each other in a
+            // cycle. reschedule() takes them in the same order.
+            if ($hostId) {
+                User::whereKey($hostId)->lockForUpdate()->first();
+            }
+
             // Serialize every booking on this schedule: overlap conflicts span types, so no unique
             // index can express them (PassBookingService locks similarly).
             Role::whereKey($role->id)->lockForUpdate()->first();
+
+            // Again at booking, not only on save: the host can leave between the page and the post,
+            // and a booking with somebody who no longer runs the schedule would mail them and block
+            // their time.
+            if ($hostId && ! AppointmentHostService::isEligible((int) $role->id, $hostId)) {
+                throw new BusinessException(__('messages.appointments_not_available'));
+            }
 
             // Defence in depth. The booking path is already closed by isBookable(), which
             // Role::bookableAppointmentTypes() filters on, so a guest cannot reach here with a
@@ -184,8 +233,10 @@ class AppointmentService
                 throw new BusinessException(__('messages.appointments_not_available'));
             }
 
+            // SlotUnavailableException is a BusinessException, so the booking form's handler is
+            // unchanged; the API tells it apart to offer the nearest open times instead.
             if (! $this->isSlotAvailable($type, $slotUtc)) {
-                throw new BusinessException(__('messages.appointments_slot_taken'));
+                throw new SlotUnavailableException(__('messages.appointments_slot_taken'));
             }
 
             // Duplicate guard: same guest email already holds this exact slot on this schedule.
@@ -199,7 +250,8 @@ class AppointmentService
                 })
                 ->exists();
             if ($duplicate) {
-                throw new BusinessException(__('messages.appointments_already_booked'));
+                // Code 409 marks the duplicate for the API, which answers it as a conflict.
+                throw new BusinessException(__('messages.appointments_already_booked'), self::ALREADY_BOOKED);
             }
 
             $localDate = $start->copy()->setTimezone($tz)->format('Y-m-d');
@@ -215,6 +267,8 @@ class AppointmentService
             $event->creator_role_id = $role->id;
             $event->user_id = $role->user_id;
             $event->appointment_type_id = $type->id;
+            // Not fillable: assigned, never filled. Kept when the type's host changes later.
+            $event->appointment_host_user_id = $hostId;
             // Random-suffixed slug: the page is unlisted-by-link and shows the guest name/notes.
             // Romanized first, so a non-Latin type name gives the guest a readable link rather
             // than a bare leading hyphen.
@@ -260,6 +314,12 @@ class AppointmentService
             // Free bookings are paid immediately; cash is unpaid-with-balance-due; a type paid online
             // (AppointmentType::paysOnline()) stays unpaid until the payment clears.
             $sale->status = $type->isFree() ? 'paid' : 'unpaid';
+            // 'api' for a booking made through the API (a voice agent, most often), which the
+            // Bookings list and the owner's mail point out, so a misheard name or address is
+            // checked. The column is the sale's attribution source, which this is.
+            if (($data['source'] ?? null) === 'api') {
+                $sale->utm_source = 'api';
+            }
             $this->applyCustomValues($sale, $type, $data['custom_values'] ?? []);
             $sale->save();
 
@@ -277,6 +337,9 @@ class AppointmentService
 
     /** Minutes a booking must rest between moves. Bounds the per-move mail + calendar fan-out. */
     public const RESCHEDULE_COOLDOWN_MINUTES = 3;
+
+    /** The BusinessException code book() gives a guest who already holds this exact slot. */
+    public const ALREADY_BOOKED = 409;
 
     /**
      * Move an existing booking to a new slot, in place.
@@ -318,12 +381,20 @@ class AppointmentService
         }
 
         $newStartsAt = $start->format('Y-m-d H:i:s');
+        // The person the booking was made with. Stamped by book() and never changed after it, so
+        // the loaded event is the answer and nothing is read before the locks below.
+        $stampedHostId = $event->appointment_host_user_id ? (int) $event->appointment_host_user_id : null;
 
-        return DB::transaction(function () use ($sale, $event, $type, $role, $start, $newStartsAt, $initiator, $fromSlotUtc, $guestTimezone, $ownerMode) {
-            // Same schedule-wide lock as book(), because overlap conflicts span types and no unique
-            // index can express them. Then the Sale: a reschedule mutates it, and every transition that
-            // races us locks the Sale (guest cancel, the Stripe webhook, ReleaseTickets, the reminder
-            // claim). Role -> Sale is a safe order; nothing in the codebase takes Sale -> Role.
+        return DB::transaction(function () use ($sale, $event, $type, $role, $start, $newStartsAt, $initiator, $fromSlotUtc, $guestTimezone, $ownerMode, $stampedHostId) {
+            // Users first, then roles, as book() takes them (and User::claimRolesByPhone()): the
+            // host's time spans schedules. Then the same schedule-wide lock as book(), because
+            // overlap conflicts span types and no unique index can express them. Then the Sale: a
+            // reschedule mutates it, and every transition that races us locks the Sale (guest
+            // cancel, the Stripe webhook, ReleaseTickets, the reminder claim). User -> Role -> Sale
+            // follows the codebase's users-before-roles order, and nothing takes Sale -> Role.
+            if ($stampedHostId) {
+                User::whereKey($stampedHostId)->lockForUpdate()->first();
+            }
             Role::whereKey($role->id)->lockForUpdate()->first();
             $lockedSale = Sale::whereKey($sale->id)->lockForUpdate()->first();
             $lockedEvent = Event::whereKey($event->id)->first();
@@ -542,10 +613,12 @@ class AppointmentService
      *
      * @return array<string,array<int,array{utc:string,date:string,label:string}>>
      */
-    protected function computeDays(AppointmentType $type, Carbon $startDay, Carbon $endDay, Carbon $earliest, ?int $excludeEventId = null): array
+    protected function computeDays(AppointmentType $type, Carbon $startDay, Carbon $endDay, Carbon $earliest, ?int $excludeEventId = null, ?int $hostId = null): array
     {
         $tz = $type->timezone();
-        $busy = $this->busyIntervals($type->role, $startDay, $endDay, $tz, $excludeEventId);
+        $busy = $hostId
+            ? $this->hostBusyIntervals($hostId, $type->role, $startDay, $endDay, $tz, $excludeEventId)
+            : $this->busyIntervals($type->role, $startDay, $endDay, $tz, $excludeEventId);
 
         $duration = (int) $type->duration_minutes;
         $step = max(1, $type->stepMinutes());
@@ -600,7 +673,7 @@ class AppointmentService
      * First schedule-local date (from $fromDay, capped at max_advance) that has at least one open
      * slot, or null. Scans forward in 31-day chunks so far-off availability stays bounded.
      */
-    protected function nextAvailableDate(AppointmentType $type, Carbon $fromDay, Carbon $now, Carbon $earliest, Carbon $lastDay, ?int $excludeEventId = null): ?string
+    protected function nextAvailableDate(AppointmentType $type, Carbon $fromDay, Carbon $now, Carbon $earliest, Carbon $lastDay, ?int $excludeEventId = null, ?int $hostId = null): ?string
     {
         $cursor = $fromDay->copy()->startOfDay();
         if ($cursor->lt($now->copy()->startOfDay())) {
@@ -615,7 +688,7 @@ class AppointmentService
                 $chunkEnd = $lastDay->copy();
             }
 
-            $days = $this->computeDays($type, $cursor->copy(), $chunkEnd, $earliest, $excludeEventId);
+            $days = $this->computeDays($type, $cursor->copy(), $chunkEnd, $earliest, $excludeEventId, $hostId);
             if (! empty($days)) {
                 return array_key_first($days);
             }
@@ -627,9 +700,105 @@ class AppointmentService
     }
 
     /**
+     * Busy intervals for a type booked with a team member: that person's live appointments on
+     * every schedule they still run (events stamped with them, pending ones included, declined
+     * and cancelled ones not) and their days away on this schedule (role_user.dates_unavailable,
+     * whole days in the schedule's zone). The schedule's own events and anything synced in from a
+     * calendar do not block a host's time: they are the schedule's, not the host's. The one
+     * exception is a host who owns this schedule, whose unhosted bookings here are theirs too.
+     *
+     * @return array<int,array{0:Carbon,1:Carbon}>
+     */
+    protected function hostBusyIntervals(int $hostId, Role $role, Carbon $startDay, Carbon $endDay, string $tz, ?int $excludeEventId = null): array
+    {
+        $padStart = $startDay->copy()->setTimezone('UTC')->subDay();
+        $padEnd = $endDay->copy()->endOfDay()->setTimezone('UTC')->addDay();
+
+        $hostOwnsThisSchedule = (int) $role->user_id === $hostId;
+
+        $bookings = Event::query()
+            ->whereNotNull('appointment_type_id')
+            ->where('is_cancelled', false)
+            ->where(function ($q) use ($hostId, $hostOwnsThisSchedule, $role) {
+                // The host's own bookings, on every schedule they STILL run. A booking left on a
+                // schedule they have left is that schedule's to move (releaseHost()), not their
+                // time any more.
+                $q->where(fn ($mine) => $mine->where('appointment_host_user_id', $hostId)
+                    ->whereExists(fn ($member) => $member->selectRaw('1')
+                        ->from('role_user')
+                        ->whereColumn('role_user.role_id', 'events.creator_role_id')
+                        ->where('role_user.user_id', $hostId)
+                        ->whereIn('role_user.level', AppointmentHostService::LEVELS)));
+
+                // A host who owns this schedule: its bookings made with nobody are theirs too, so
+                // the owner is not booked twice at once (busyIntervals() is the other direction).
+                if ($hostOwnsThisSchedule) {
+                    $q->orWhere(fn ($own) => $own->whereNull('appointment_host_user_id')
+                        ->where('creator_role_id', $role->id));
+                }
+            })
+            // Live on the schedule that owns it: accepted or still waiting for an answer.
+            ->whereExists(fn ($q) => $q->selectRaw('1')
+                ->from('event_role')
+                ->whereColumn('event_role.event_id', 'events.id')
+                ->whereColumn('event_role.role_id', 'events.creator_role_id')
+                ->where(fn ($q2) => $q2->whereNull('event_role.is_accepted')->orWhere('event_role.is_accepted', true)))
+            ->when($excludeEventId, fn ($q) => $q->where('events.id', '!=', $excludeEventId))
+            ->whereNotNull('starts_at')
+            ->where('starts_at', '<=', $padEnd->format('Y-m-d H:i:s'))
+            ->whereRaw('DATE_ADD(starts_at, INTERVAL GREATEST(COALESCE(duration, 0), 2) HOUR) >= ?', [$padStart->format('Y-m-d H:i:s')])
+            ->with('appointmentType')
+            ->get();
+
+        $intervals = [];
+
+        foreach ($bookings as $e) {
+            if (strlen((string) $e->starts_at) === 10) {
+                continue;
+            }
+            $s = Carbon::createFromFormat('Y-m-d H:i:s', $e->starts_at, 'UTC');
+            $len = $e->duration > 0 ? $e->durationInMinutes() : self::DEFAULT_BUSY_MINUTES;
+            [$b0, $b1] = $this->eventBuffers($e);
+            $intervals[] = [$s->copy()->subMinutes($b0), $s->copy()->addMinutes($len + $b1)];
+        }
+
+        // Days away, set by the host on this schedule's Availability tab. A JSON list of Y-m-d.
+        $away = \App\Models\RoleUser::where('role_id', $role->id)
+            ->where('user_id', $hostId)
+            ->value('dates_unavailable');
+        $awayDates = is_string($away) ? json_decode($away, true) : $away;
+
+        if (is_array($awayDates)) {
+            $first = $startDay->copy()->subDay()->format('Y-m-d');
+            $last = $endDay->copy()->addDay()->format('Y-m-d');
+
+            foreach ($awayDates as $date) {
+                if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $date < $first || $date > $last) {
+                    continue;
+                }
+
+                try {
+                    $dayStart = Carbon::createFromFormat('Y-m-d', $date, $tz)->startOfDay();
+                } catch (\Throwable $e) {
+                    continue;
+                }
+
+                $intervals[] = [$dayStart->copy()->setTimezone('UTC'), $dayStart->copy()->addDay()->setTimezone('UTC')];
+            }
+        }
+
+        return $intervals;
+    }
+
+    /**
      * Busy intervals (as [startUtc, endUtc] pairs) held by the schedule's events across the window.
      * Busy = pivot is_accepted TRUE or NULL (pending holds time; declined does not) and not
      * cancelled. Inbound-synced external events are ordinary events, so they are covered here too.
+     *
+     * A booking made with a team member is left out: it is that person's time, not the schedule's
+     * (hostBusyIntervals()), so an unhosted type on the same schedule may book beside it. Except
+     * one made with the schedule's OWNER, whose hosted bookings here and unhosted ones are the
+     * same person's time.
      *
      * @return array<int,array{0:Carbon,1:Carbon}>
      */
@@ -651,6 +820,15 @@ class AppointmentService
             // this set includes inbound-synced private events, so a request-supplied id would turn the
             // slots endpoint into an oracle for the owner's personal calendar.
             ->when($excludeEventId, fn ($q) => $q->where('events.id', '!=', $excludeEventId))
+            // A hosted booking is its host's time, not the schedule's, while that host still works
+            // here; the owner's own, and those left behind by a host who has gone, are the
+            // schedule's and block its unhosted types.
+            ->where(fn ($q) => $q->whereNull('events.appointment_host_user_id')
+                ->when($role->user_id, fn ($owner) => $owner->orWhere('events.appointment_host_user_id', $role->user_id))
+                ->orWhereNotExists(fn ($still) => $still->selectRaw('1')->from('role_user')
+                    ->where('role_user.role_id', $role->id)
+                    ->whereColumn('role_user.user_id', 'events.appointment_host_user_id')
+                    ->whereIn('role_user.level', ['owner', 'admin'])))
             ->where('is_cancelled', false);
 
         $intervals = [];

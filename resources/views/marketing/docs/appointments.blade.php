@@ -8,6 +8,7 @@
     <x-slot:toc>
         <x-doc-nav-link href="#overview">How booking works</x-doc-nav-link>
         <x-doc-nav-link href="#appointment-types">Appointment types</x-doc-nav-link>
+        <x-doc-nav-link href="#hosts">Hosts</x-doc-nav-link>
         <x-doc-nav-link href="#weekly-hours">Weekly hours</x-doc-nav-link>
         <x-doc-nav-link href="#date-overrides">Date overrides</x-doc-nav-link>
         <x-doc-nav-link href="#buffers-and-notice">Scheduling rules</x-doc-nav-link>
@@ -148,6 +149,31 @@
         <p class="text-gray-600 dark:text-gray-300">Create as many types as your plan allows. A free intro call and a paid consultation can sit side by side with different hours, prices, and rules.</p>
     </section>
 
+    <!-- Hosts -->
+    <section id="hosts" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+            Hosts
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On the Enterprise plan an appointment type can be booked with one person on your team. The <strong class="text-gray-900 dark:text-white">Host</strong> field sits in the editor's Details card, under the duration, and lists the schedule's owner and its admins. A viewer cannot host, because the Appointments tab is closed to viewers and they could never see the bookings made with them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choosing a host changes whose time the type is:</p>
+        <ul class="doc-list mb-6">
+            <li>The <a href="#weekly-hours" class="doc-link">weekly hours</a> become the host's hours, and the card's heading says so ("Sam's hours").</li>
+            <li>The host's other bookings block these times, on this schedule and on any other schedule where they host a type. Their days away block whole days: each team member marks those on the schedule's <a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> tab.</li>
+            <li>This schedule's own events, and events synced in from a calendar, do not block a host's times. They still block the types that have no host. A booking on a schedule the host has since left no longer counts as their time.</li>
+            <li>When the host is the schedule's owner, the bookings of its types with no host are the owner's time too, and the other way round, so the owner is never booked twice at once.</li>
+            <li>A type with no host is unchanged, except that bookings made with a host no longer block it, so two people on the same schedule can be booked at the same time.</li>
+            <li>The host gets the booking emails, as well as everyone whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for them.</li>
+            <li>Guests see the name: "with Sam" on the booking page, the confirmation, the emails and the calendar invite. Never the host's email address.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">With two or more hosts, the public booking page groups the types under each host's name. Changing a type's host applies to new bookings only: a booking keeps the person it was made with, and moving it later checks that person's time.</p>
+        <h3 id="hosts-leaving" class="doc-subheading">When a host leaves the team</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">If a host is removed, leaves, is made a viewer, deletes their account, or was the owner and is not kept on after a <a href="{{ route('marketing.docs.managing_schedules') }}#transfer-ownership" class="doc-link">transfer</a>, every type they hosted on the schedule is switched off and the owner is emailed. The types list marks each one <strong class="text-gray-900 dark:text-white">Off: host left the team</strong>, with <strong class="text-gray-900 dark:text-white">Choose a host</strong> to pick someone else (or nobody) and a link to the bookings still made with them. Those bookings are kept, and you can move or cancel each one from <a href="#bookings" class="doc-link">Bookings</a>, filtered by that host, even though the type is off.</p>
+        <p class="text-gray-600 dark:text-gray-300">If the schedule moves off Enterprise, its hosted types keep taking bookings with the same host. Only the Host field is hidden, so no new host can be chosen; a type that has one can still be cleared.</p>
+    </section>
+
     <!-- Weekly hours -->
     <section id="weekly-hours" class="doc-section">
         <h2 class="doc-heading">
@@ -175,6 +201,7 @@
             <li>Bookings for your other appointment types, plus their buffers.</li>
             <li>Requests still waiting on your approval. A pending request holds its time until you accept or decline it.</li>
         </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A type booked with a <a href="#hosts" class="doc-link">host</a> follows the host's time instead: their bookings on any schedule and their days away, not your schedule's events.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">An event with no duration set blocks two hours, which errs on the side of not double-booking you. An all-day event with no start time does not block any slot, so use a timed event when you want a slot closed.</p>
         <p class="text-gray-600 dark:text-gray-300">If a type has no weekly hours at all, the Appointments tab flags it: guests would reach the booking page and find no times to pick.</p>
     </section>
@@ -385,7 +412,7 @@
             Managing bookings
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Switch the Appointments tab from <strong class="text-gray-900 dark:text-white">Appointment types</strong> to <strong class="text-gray-900 dark:text-white">Bookings</strong> to see what has been booked, filtered by <strong class="text-gray-900 dark:text-white">Upcoming</strong>, <strong class="text-gray-900 dark:text-white">Pending</strong>, <strong class="text-gray-900 dark:text-white">Past</strong>, or <strong class="text-gray-900 dark:text-white">Cancelled</strong>. Anything waiting on your approval lives under Pending only, so it never gets buried among the settled bookings in Upcoming. There is also a search box for a guest's name or email address.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Each row already carries the whole booking: the date and time, the appointment type, the guest's name, email and phone number (both are links, to write or call), their notes, the amount, and a status. On a phone each booking is a card with the same details and the same actions.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Each row already carries the whole booking: the date and time, the appointment type, the guest's name, email and phone number (both are links, to write or call), their notes, the amount, and a status. On a phone each row stacks into a block with the same details and the same actions. Once a type has a <a href="#hosts" class="doc-link">host</a>, a <strong class="text-gray-900 dark:text-white">Host</strong> column and a host filter appear, and a booking made through the <a href="{{ route('marketing.docs.developer.api') }}#create-appointment-booking" class="doc-link">API</a> (by a voice agent, for example) is marked <strong class="text-gray-900 dark:text-white">Booked through the API</strong>, so you can check a name or address that may have been misheard.</p>
         <div class="doc-table-wrap mb-6">
             <table class="doc-table">
                 <thead>
@@ -424,10 +451,10 @@
             <li><strong class="text-gray-900 dark:text-white">Reschedule</strong> moves a booking to another time without cancelling it. See <a href="#rescheduling" class="doc-link">Rescheduling</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Cancel appointment</strong> asks you to confirm, then emails the guest and releases the slot. It is not offered on a booking that has already happened, and it moves no money, so <a href="#refunds" class="doc-link">refund</a> a paid booking first.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A team member with view-only access sees the list but none of these actions.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Bookings carry guests' names and contact details, so the Appointments tab is for the schedule's owner and admins. A team member with view-only access does not see it.</p>
         <h3 id="bookings-elsewhere" class="doc-subheading">Where else a booking shows up</h3>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">In your inbox.</strong> New bookings email you, whether they are confirmed or waiting for your approval. The notice goes to every team member whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for it.</li>
+            <li><strong class="text-gray-900 dark:text-white">In your inbox.</strong> New bookings email you, whether they are confirmed or waiting for your approval. The notice goes to every team member whose <a href="{{ route('marketing.docs.creating_schedules') }}#settings-notifications" class="doc-link">notification settings</a> ask for it, and to the booking's <a href="#hosts" class="doc-link">host</a> while they are still on the team.</li>
             <li><strong class="text-gray-900 dark:text-white">On the Sales page.</strong> Paid bookings appear there, where you mark them paid, <a href="#refunds" class="doc-link">refund them</a>, and see the revenue with the rest of your sales. They count on the Revenue tab of <a href="{{ route('marketing.docs.analytics') }}#revenue" class="doc-link">Analytics</a> too.</li>
         </ul>
     </section>

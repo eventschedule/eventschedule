@@ -53,7 +53,8 @@ Key facts:
 
 - **Authentication**: API key via `X-API-Key` header, obtained through registration or login
 - **Plans**: Most of the API is on the Pro plan: schedule, event, sub-schedule and sale endpoints return only Pro schedules' data, or a 403. Creating or deleting a schedule, the category list, fan content and recording a sale (`POST /api/sales`, free ticket tiers only unless the schedule is Pro) have no Pro check.
-- **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min, counted per IP address
+- **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min, counted per account (requests with no key or a wrong one are counted per IP address)
+- **Appointments**: list a schedule's bookable types (`GET /api/schedules/{subdomain}/appointment-types`), their open times with a readable label each (`GET /api/appointment-types/{id}/slots`), and book one (`POST /api/appointment-types/{id}/bookings`, with an `Idempotency-Key` header for safe retries). Written for a voice agent that books on a guest's behalf
 - **Getting started**: register (`POST /api/register`; hosted mode requires email verification via `POST /api/register/send-code` first), create a schedule (`POST /api/schedules` with a name and type: venue, talent or curator), then create events (`POST /api/events/{subdomain}`)
 - [llms-full.txt](https://eventschedule.com/llms-full.txt): Complete self-contained documentation for LLMs (no link-following needed)
 - [API Reference](https://eventschedule.com/docs/developer/api): Full API documentation with examples for all endpoints

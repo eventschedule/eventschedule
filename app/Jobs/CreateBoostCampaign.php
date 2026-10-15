@@ -50,6 +50,12 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
         // Network promotions are served by this platform and must never reach the Meta API.
         // PromotionController does not dispatch this job, but the stale-payment recovery in
         // SyncBoostCampaigns can reach any campaign, so guard at the entry point too.
+        // A partner boost is launched by LaunchPartnerBoost, from its approved version and under
+        // the partner's own ad account; this job only ever runs on the platform's.
+        if ($campaign->isPartner()) {
+            return;
+        }
+
         if ($campaign->isNetwork()) {
             return;
         }
@@ -149,6 +155,10 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
     {
         $campaign = $this->campaign;
         $campaign->refresh();
+
+        if ($campaign->isPartner()) {
+            return;
+        }
         $campaign->loadMissing(['user']);
 
         // Don't overwrite if already handled (cancelled, failed with error, etc.)

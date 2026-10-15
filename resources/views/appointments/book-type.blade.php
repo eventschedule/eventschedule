@@ -117,6 +117,11 @@
             'initial' => $initialSlots,
             'scheduleTz' => $initialSlots['schedule_timezone'] ?? config('app.timezone'),
             'scheduleName' => $role->name,
+            // "with Sam": the team member the booking is made with, by name only. A booking being
+            // moved keeps the host it was made with, so its own stamp wins over the type's.
+            'hostLine' => ($hostName = ($isReschedule && $event) ? $event->appointmentHostName() : $type->hostName())
+                ? __('messages.appointments_with_host', ['name' => $hostName])
+                : '',
             'typeName' => $type->name,
             'typeDescription' => $type->description,
             'duration' => $type->duration_minutes,
@@ -273,6 +278,7 @@
                 <a :href="backUrl" class="text-xs text-gray-500 dark:text-gray-400 hover:underline"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ mode === 'reschedule' ? t.rescheduleKeep : t.back }}</a>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 mt-2">@{{ typeName }}</h1>
                 <p class="text-sm text-gray-600 dark:text-gray-400">@{{ scheduleName }}</p>
+                <p v-if="hostLine" class="text-sm text-gray-600 dark:text-gray-400">@{{ hostLine }}</p>
                 {{-- One wrapped row of facts rather than four stacked lines. Below md the rail sits
                      above the calendar, so every line here is a line the picker starts further down.
                      Where the appointment happens is part of it: the guest could not see that at all

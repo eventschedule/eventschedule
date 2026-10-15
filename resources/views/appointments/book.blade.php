@@ -39,20 +39,38 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $role->customLabel('book_a_time') }}</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.appointments_with', ['schedule' => $role->name]) }}</p>
 
+            @php
+                // With two or more team members hosting types here, the cards are grouped under each
+                // one's name ("with Sam"), and the schedule's own types under the schedule's name.
+                // With one, or none, it is one list and a hosted card says who it is with.
+                $byHost = $types->groupBy(fn ($type) => (int) $type->host_user_id);
+                $grouped = $byHost->keys()->filter()->count() >= 2;
+                $groups = $grouped ? $byHost->sortKeys() : collect([0 => $types]);
+                $cardHeading = $grouped ? 'h3' : 'h2';
+            @endphp
+
+            @foreach ($groups as $groupHostId => $groupTypes)
+                @if ($grouped)
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 {{ $loop->first ? '' : 'mt-8' }}" dir="auto">{{ $groupHostId ? __('messages.appointments_with_host', ['name' => $groupTypes->first()->hostName() ?? '']) : $role->name }}</h2>
+                @endif
             <div class="grid gap-4 sm:grid-cols-2">
-                @foreach ($types as $type)
+                @foreach ($groupTypes as $type)
                     @php
                         $priceLabel = $type->isFree()
                             ? __('messages.free')
                             : \App\Utils\MoneyUtils::format((float) $type->price, $type->currency_code);
+                        $typeHost = $type->hostName();
                         // Self-describing out of context: a screen reader reading the link list alone
                         // would otherwise only hear the type name.
-                        $ariaLabel = trim($type->name.' - '.$type->duration_minutes.' '.__('messages.minutes').' - '.$priceLabel);
+                        $ariaLabel = trim($type->name.($typeHost ? ' - '.__('messages.appointments_with_host', ['name' => $typeHost]) : '').' - '.$type->duration_minutes.' '.__('messages.minutes').' - '.$priceLabel);
                     @endphp
                     <a href="{{ route('appointments.book_type', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug]) }}"
                        aria-label="{{ $ariaLabel }}"
                        class="es-type-card flex flex-col p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-md transition-all duration-200">
-                        <h2 class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $type->name }}</h2>
+                        <{{ $cardHeading }} class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $type->name }}</{{ $cardHeading }}>
+                        @if ($typeHost && ! $grouped)
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.appointments_with_host', ['name' => $typeHost]) }}</p>
+                        @endif
                         @if ($type->description)
                             <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $type->description }}</p>
                         @endif
@@ -71,6 +89,7 @@
                     </a>
                 @endforeach
             </div>
+            @endforeach
         </div>
     </div>
 </x-app-guest-layout>

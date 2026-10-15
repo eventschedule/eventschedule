@@ -263,7 +263,7 @@ class AppController extends Controller
                     report($e);
                 }
 
-                if (\App\Services\MetaAdsService::isBoostConfigured()) {
+                if (\App\Services\MetaAdsService::shouldSync()) {
                     try {
                         \Artisan::call('boost:sync');
                     } catch (\Throwable $e) {
@@ -578,6 +578,15 @@ class AppController extends Controller
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:recheck-video-embeds failed: '.$e->getMessage());
                     report($e);
+                }
+                // The boost partners' monthly fee. Keep in sync with routes/console.php.
+                if (config('app.hosted')) {
+                    try {
+                        \Artisan::call('boost:charge-statements');
+                    } catch (\Throwable $e) {
+                        \Log::error('Scheduled command boost:charge-statements failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
 
                 // The blog is the marketing site's, so it is written on the nexus only: a

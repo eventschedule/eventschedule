@@ -1818,15 +1818,38 @@
         @php
             $boostStaticDisabled = null;
             $activeBoost = null;
-            if (!config('services.meta.app_id')) {
+            // An event a boost partner covers is boosted as a request to that partner, which runs
+            // on the partner's own Page whether or not this site's Meta app is set up. Its open
+            // request (or one sent back for changes) is what the button shows and leads to.
+            $boostPartnerRequest = null;
+            $boostCoveredByPartner = \App\Models\BoostPartner::forEvent($event) !== null;
+            if ($boostCoveredByPartner) {
+                $boostPartnerRequest = \App\Models\BoostCampaign::viaPartner()->where('event_id', $event->id)
+                    ->whereIn('status', array_merge(\App\Models\BoostCampaign::PARTNER_OPEN_STATUSES, ['declined', 'rejected']))
+                    ->latest('id')->first();
+            }
+            if ($boostPartnerRequest) {
+                // Shown below as its state.
+            } elseif (! $boostCoveredByPartner && !config('services.meta.app_id')) {
                 $boostStaticDisabled = __('messages.boost_not_configured');
             } elseif (!$role->isPro()) {
                 $boostStaticDisabled = 'upgrade';
-            } else {
+            } elseif (! $boostCoveredByPartner) {
                 $activeBoost = $event->boostCampaigns()->whereIn('status', ['active', 'paused'])->first();
             }
+            $boostPartnerLabel = $boostPartnerRequest
+                ? __('messages.boost_partner_event_button', ['status' => __('messages.boost_partner_status_'.$boostPartnerRequest->status)])
+                : null;
         @endphp
-        @if ($activeBoost)
+        @if ($boostPartnerRequest)
+        <a href="{{ route('boost.show', ['hash' => $boostPartnerRequest->hashedId()]) }}"
+           class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <svg class="me-2 h-5 w-5 {{ in_array($boostPartnerRequest->status, ['declined', 'rejected'], true) ? 'text-amber-500' : ($boostPartnerRequest->status === 'active' ? 'text-green-500' : 'text-gray-400') }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+            </svg>
+            {{ $boostPartnerLabel }}
+        </a>
+        @elseif ($activeBoost)
         <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}"
            class="inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
             <svg class="me-2 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -1945,7 +1968,14 @@
         </button>
         <div id="mobile-header-event-actions-pop-up-menu" class="ap-dropdown pop-up-menu hidden absolute {{ is_rtl() ? 'start-0' : 'end-0' }} z-10 mt-2 w-64 {{ is_rtl() ? 'origin-top-left' : 'origin-top-right' }} divide-y divide-gray-100 dark:divide-white/[0.06] rounded-lg ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="mobile-header-event-actions-menu-button" tabindex="-1">
             <div class="py-2" role="none" id="mobile-header-event-actions-pop-up-menu-items" data-popup-target="mobile-header-event-actions-pop-up-menu">
-                @if ($activeBoost)
+                @if ($boostPartnerRequest)
+                <a href="{{ route('boost.show', ['hash' => $boostPartnerRequest->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 {{ in_array($boostPartnerRequest->status, ['declined', 'rejected'], true) ? 'text-amber-500' : ($boostPartnerRequest->status === 'active' ? 'text-green-500' : 'text-gray-400') }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
+                    </svg>
+                    <div>{{ $boostPartnerLabel }}</div>
+                </a>
+                @elseif ($activeBoost)
                 <a href="{{ route('boost.show', ['hash' => $activeBoost->hashedId()]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-green-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>

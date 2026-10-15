@@ -1273,7 +1273,7 @@
                             <span class="es-wire-spec-k">Auth</span>
                             <span class="es-wire-spec-v es-wire-onband-muted">A key in an <span class="es-wire-mono">X-API-Key</span> header. Only a hash of it is stored, and you can give the key an expiry date.</span>
                             <span class="es-wire-spec-k">Rate</span>
-                            <span class="es-wire-spec-v es-wire-onband-muted">Three hundred reads and thirty writes a minute, counted per address.</span>
+                            <span class="es-wire-spec-v es-wire-onband-muted">Three hundred reads and thirty writes a minute, counted per account.</span>
                             <span class="es-wire-spec-k">Shape</span>
                             <span class="es-wire-spec-v es-wire-onband-muted">JSON in, JSON out, with the same encoded identifiers the app's own URLs use.</span>
                             <span class="es-wire-spec-k">Pairs with</span>

@@ -90,6 +90,8 @@ class AppointmentType extends Model
         'custom_fields' => 'array',
         'price' => 'decimal:2',
         'paid_grandfathered_at' => 'datetime',
+        'host_released_at' => 'datetime',
+        'host_user_id' => 'integer',
         'duration_minutes' => 'integer',
         'slot_interval_minutes' => 'integer',
         'buffer_before_minutes' => 'integer',
@@ -112,6 +114,50 @@ class AppointmentType extends Model
     public function events()
     {
         return $this->hasMany(Event::class);
+    }
+
+    /**
+     * The team member this type is booked with, or none (AppointmentHostService). Not fillable:
+     * set only by AppointmentTypeController, which checks the person is an owner or admin here.
+     */
+    public function host()
+    {
+        return $this->belongsTo(User::class, 'host_user_id');
+    }
+
+    /**
+     * Per-instance answers to hostIsCurrent(), keyed by the host they were asked about: a list
+     * page asks it of every type more than once, and a save may change the host in between.
+     *
+     * @var array<int, bool>
+     */
+    protected array $hostIsCurrentCache = [];
+
+    /**
+     * Whether the type's host may still host it: an owner or admin of this schedule. True for a
+     * type with no host. Asked again at booking (AppointmentService::book()), because a host can
+     * leave between the page and the post.
+     */
+    public function hostIsCurrent(): bool
+    {
+        $hostId = (int) $this->host_user_id;
+        if (! $hostId) {
+            return true;
+        }
+
+        return $this->hostIsCurrentCache[$hostId] ??= \App\Services\AppointmentHostService::isEligible((int) $this->role_id, $hostId);
+    }
+
+    /** The host's name as a guest sees it ("with Sam"), or null. Never their address. */
+    public function hostName(): ?string
+    {
+        if (! $this->host_user_id) {
+            return null;
+        }
+
+        $name = trim((string) $this->host?->name);
+
+        return $name !== '' ? $name : null;
     }
 
     public function scopeActive($query)
@@ -245,6 +291,13 @@ class AppointmentType extends Model
     public function isBookable(): bool
     {
         if (! $this->is_active || $this->is_deleted) {
+            return false;
+        }
+
+        // A host who has left the team: releaseHost() switches such a type off, so this only
+        // matters in the moment between the two. No plan check here: a schedule that dropped
+        // from Enterprise keeps its host types bookable, because a booking is not team access.
+        if (! $this->hostIsCurrent()) {
             return false;
         }
 

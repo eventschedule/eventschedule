@@ -33,7 +33,7 @@ class GrowthExportService
      * pulls knows whether they compare. Every bump is described in docs/GROWTH_DATA.md's changelog,
      * which GrowthDataDictionaryTest holds to this number.
      */
-    public const SCHEMA_VERSION = 19;
+    public const SCHEMA_VERSION = 20;
 
     /** The month the schedule.claim audit action shipped; nothing before it can be counted. */
     private const CLAIMS_TRACKED_FROM = '2026-09';
@@ -3287,7 +3287,15 @@ class GrowthExportService
             ->map(fn ($r) => ['month' => $r->ym, 'campaigns' => (int) $r->campaigns, 'schedules' => (int) $r->schedules])
             ->all();
 
-        return ['net_markup' => $markup, 'campaigns' => $campaigns];
+        // The fee boost partners pay on their own ad accounts' actual spend, by the month it is
+        // FOR (a statement's period), counted once paid.
+        $partnerFees = DB::table('boost_statements')->where('status', 'paid')->where('period', '>=', $from->format('Y-m'))
+            ->selectRaw('period as ym, currency, SUM(charged_amount) as fee')
+            ->groupBy('period', 'currency')->orderBy('period')->get()
+            ->map(fn ($r) => ['month' => $r->ym, 'currency' => $r->currency, 'fee' => round((float) $r->fee, 2)])
+            ->all();
+
+        return ['net_markup' => $markup, 'campaigns' => $campaigns, 'partner_fees' => $partnerFees];
     }
 
     /** The referral programme: where referrals stand, and how many start each month. */

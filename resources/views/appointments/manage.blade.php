@@ -153,6 +153,10 @@
                  pair naturally, and the whole block loses a third of its height. --}}
             <div class="mt-4 text-gray-700 dark:text-gray-300">
                 <div class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $type?->name ?? $event->name }}</div>
+                {{-- The team member the booking was made with, by name only. --}}
+                @if ($hostName = $event->appointmentHostName())
+                    <div class="text-sm text-gray-600 dark:text-gray-400" v-pre>{{ __('messages.appointments_with_host', ['name' => $hostName]) }}</div>
+                @endif
                 <dl class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
                     <div>
                         <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.date') }}</dt>

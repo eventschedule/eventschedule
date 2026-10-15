@@ -47,6 +47,12 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
         $campaign->refresh();
         $campaign->loadMissing(['event', 'user', 'ads']);
 
+        // A partner boost holds no money of the platform's to settle, and its budget limit is
+        // the partner's business, not the schedule's trust ladder.
+        if ($campaign->isPartner()) {
+            return;
+        }
+
         if ($campaign->billing_status === 'refunded' || $campaign->billing_status === 'partially_refunded') {
             return;
         }

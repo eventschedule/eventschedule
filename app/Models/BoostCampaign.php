@@ -80,6 +80,16 @@ class BoostCampaign extends Model
         'analytics_synced_at' => 'datetime',
         'meta_synced_at' => 'datetime',
         'budget_alert_sent_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'declined_at' => 'datetime',
+        'payment_confirmed_at' => 'datetime',
+        'payment_amount' => 'decimal:2',
+        'paid_budget' => 'decimal:2',
+        'stopped_at' => 'datetime',
+        'pause_pending_at' => 'datetime',
+        'submitted_at' => 'datetime',
+        'launched_at' => 'datetime',
+        'spend_final_at' => 'datetime',
     ];
 
     public function event()
@@ -107,9 +117,144 @@ class BoostCampaign extends Model
         return $this->hasMany(BoostBillingRecord::class);
     }
 
+    public function partner()
+    {
+        return $this->belongsTo(BoostPartner::class, 'boost_partner_id');
+    }
+
+    public function versions()
+    {
+        return $this->hasMany(BoostAdVersion::class)->orderBy('version');
+    }
+
+    public function spendDays()
+    {
+        return $this->hasMany(BoostSpendDay::class);
+    }
+
     public function hashedId()
     {
         return UrlUtils::encodeId($this->id);
+    }
+
+    /**
+     * Statuses a partner boost moves through. They are also the API's status values.
+     */
+    public const PARTNER_STATUSES = [
+        'pending_approval', 'awaiting_payment', 'ready', 'in_review', 'active',
+        'completed', 'declined', 'rejected', 'stopped',
+    ];
+
+    /** A partner boost that can still launch, run or spend. */
+    public const PARTNER_OPEN_STATUSES = ['pending_approval', 'awaiting_payment', 'ready', 'in_review', 'active'];
+
+    /** A partner boost that is at Meta or may be, so a Stop must reach Meta. */
+    public const PARTNER_LIVE_STATUSES = ['in_review', 'active'];
+
+    /**
+     * A boost that runs through a boost partner's own Page and ad account. Nothing about it is
+     * prepaid to the platform: every refund, credit and payment-intent path must skip it.
+     */
+    public function isPartner(): bool
+    {
+        return $this->boost_partner_id !== null;
+    }
+
+    public function scopeViaPartner($query)
+    {
+        return $query->whereNotNull('boost_partner_id');
+    }
+
+    public function scopePartnerOpen($query)
+    {
+        return $query->whereNotNull('boost_partner_id')->whereIn('status', self::PARTNER_OPEN_STATUSES);
+    }
+
+    /**
+     * A partner boost as the API answers it (GET /api/boosts). Money is a decimal string with a
+     * currency, times are ISO 8601 in UTC, ids are encoded.
+     */
+    public function toPartnerApiData(): array
+    {
+        // From the loaded versions when the caller eager-loaded them (a page of up to 500).
+        $version = $this->relationLoaded('versions')
+            ? $this->versions->firstWhere('version', (int) $this->version)
+            : $this->currentVersion();
+        $money = fn ($v) => number_format((float) $v, 2, '.', '');
+        $iso = fn ($t) => $t?->copy()->utc()->format('Y-m-d\TH:i:s\Z');
+
+        return [
+            'id' => $this->hashedId(),
+            'schedule' => $this->role?->subdomain ?? $this->schedule_subdomain,
+            'event' => [
+                'id' => $this->event ? UrlUtils::encodeId($this->event->id) : null,
+                'name' => $this->event?->translatedName() ?? $this->event_name,
+                'url' => $this->event?->getGuestUrl(false, null, true),
+            ],
+            'status' => $this->status,
+            'version' => (int) $this->version,
+            'ad' => [
+                'headline' => $version?->headline,
+                'text' => $version?->primary_text,
+                'description' => $version?->description,
+                'call_to_action' => $version?->call_to_action,
+                'image_url' => $version?->imageUrl(),
+                'destination_url' => $version?->destination_url,
+            ],
+            'audience' => ['summary' => \App\Utils\BoostAudience::summary($this->targeting, $this->event)],
+            'budget' => ['amount' => $money($this->user_budget), 'currency' => $this->currency_code],
+            'starts_at' => $iso($this->scheduled_start),
+            'ends_at' => $iso($this->scheduled_end),
+            'approval' => [
+                'approved_version' => $this->approved_version !== null ? (int) $this->approved_version : null,
+                'decided_at' => $iso($this->approved_at ?? $this->declined_at),
+                'note' => $this->approval_note,
+                'decline_reason' => $this->status === 'declined' ? $this->decline_reason : null,
+            ],
+            'payment' => [
+                'confirmed' => $this->isPaidCurrent(),
+                'reference' => $this->payment_reference,
+                'amount' => $this->payment_amount !== null ? $money($this->payment_amount) : null,
+                'currency' => $this->payment_currency,
+                'confirmed_at' => $iso($this->payment_confirmed_at),
+            ],
+            'spend' => [
+                'amount' => $money($this->actual_spend ?? 0),
+                'currency' => $this->currency_code,
+                'as_of' => $iso($this->analytics_synced_at),
+                'final' => $this->spend_final_at !== null,
+            ],
+            'meta_review' => $this->status === 'rejected' ? $this->meta_rejection_reason : null,
+            'stopped_at' => $iso($this->stopped_at),
+            'stop_reason' => $this->stopped_at ? ($this->stop_reason ?: $this->stop_code) : null,
+            'stop_code' => $this->stop_code,
+            'submitted_at' => $iso($this->submitted_at),
+            'updated_at' => $iso($this->updated_at),
+        ];
+    }
+
+    public function currentVersion(): ?BoostAdVersion
+    {
+        return $this->versions()->where('version', $this->version)->first();
+    }
+
+    public function approvedVersion(): ?BoostAdVersion
+    {
+        return $this->approved_version
+            ? $this->versions()->where('version', $this->approved_version)->first()
+            : null;
+    }
+
+    public function isApprovedCurrent(): bool
+    {
+        return $this->approved_version !== null && (int) $this->approved_version === (int) $this->version;
+    }
+
+    public function isPaidCurrent(): bool
+    {
+        return $this->payment_confirmed_at !== null
+            && $this->paid_budget !== null
+            && round((float) $this->paid_budget, 2) === round((float) $this->user_budget, 2);
     }
 
     /**
@@ -216,7 +361,11 @@ class BoostCampaign extends Model
     public function scopeUnsettled($query)
     {
         return $query
-            ->whereIn('status', ['active', 'paused', 'pending_payment', 'pending_review', 'completed'])
+            // The partner statuses are here so the deletion and cancellation cascades reach a
+            // partner boost too; each cascade hands those to BoostPartnerService::stop(), which
+            // pauses at Meta and refunds nothing (the platform holds none of that money).
+            ->whereIn('status', ['active', 'paused', 'pending_payment', 'pending_review', 'completed',
+                'pending_approval', 'awaiting_payment', 'ready', 'in_review'])
             ->where(function ($q) {
                 $q->whereNotIn('billing_status', ['refunded', 'partially_refunded'])
                     ->orWhereNull('billing_status');
@@ -247,6 +396,10 @@ class BoostCampaign extends Model
      */
     public function canBeCancelled()
     {
+        if ($this->isPartner()) {
+            return in_array($this->status, self::PARTNER_OPEN_STATUSES, true);
+        }
+
         return in_array($this->status, ['active', 'paused', 'pending_payment', 'pending_review']);
     }
 

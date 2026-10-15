@@ -19,6 +19,9 @@
         <x-doc-nav-link href="#spending-limits">Spending Limits</x-doc-nav-link>
         <x-doc-nav-link href="#analytics">Analytics</x-doc-nav-link>
         <x-doc-nav-link href="#billing">Billing &amp; Refunds</x-doc-nav-link>
+        <x-doc-nav-link href="#partners">Boosting Under Your Own Page</x-doc-nav-link>
+        <x-doc-nav-link href="#partners-requests" sub>Every Boost Is a Request</x-doc-nav-link>
+        <x-doc-nav-link href="#partners-campaigns" sub>Campaigns and Statements</x-doc-nav-link>
         <x-doc-nav-link href="#tips">Tips</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
     </x-slot:toc>
@@ -708,6 +711,55 @@
             <li><strong>Ad rejected</strong> - sent with the rejection reason and confirmation of the refund</li>
             <li><strong>Campaign completed</strong> - final stats summary with impressions, reach, clicks, and any refund details</li>
         </ul>
+    </section>
+
+    <!-- Boosting under a network's own Page -->
+    <section id="partners" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+            Boosting Under Your Own Page
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A network that runs many businesses' schedules from one account can run every boost on those schedules under <strong class="text-gray-900 dark:text-white">its own Facebook Page and Meta ad account</strong>, approving each ad before it goes out. It is switched on per account on eventschedule.com; contact support to have it set up. From then on, a boost on any schedule the account owns runs only under that Page and ad account, never under eventschedule.com's.
+        </p>
+
+        <h3 class="doc-subheading" id="partners-setup">Setting up</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Open <strong class="text-gray-900 dark:text-white">Settings &gt; Boosts</strong> with the account that owns the schedules. There are two ways to connect your Page and ad account:
+        </p>
+        <ul class="doc-list mb-4">
+            <li><strong>Share with our Business.</strong> In Meta Business Settings, add our Business ID (shown on the page) as a partner on your ad account with "Manage campaigns" and on your Page with "Ads" access (create and manage ads). Both need to be in a Meta Business portfolio: an ad account that is only in a personal Facebook profile cannot be shared. Then enter the two IDs and press Save and check. Each check is shown with its result. We confirm the IDs once, and you are emailed when it is done.</li>
+            <li><strong>Sign in with Facebook.</strong> Where offered, approve the access on Facebook's own screen and choose the Page and ad account from your own.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            On the same tab, write how your businesses pay you (a link or a contact, shown to them once you approve), and add the card our monthly fee is charged to.
+        </p>
+
+        <h3 class="doc-subheading" id="partners-requests">Every boost is a request</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            A business opens an event on its schedule and presses Boost. It builds the ad (headline, text, picture, button, budget, end date and ages) and sends it for approval. Nothing goes to Facebook yet. The network reviews it on <strong class="text-gray-900 dark:text-white">Boost &gt; Requests</strong>, which shows the exact ad, and either approves it or sends it back with a note. Payment is between the network and the business, at the network's own price: when it is in, press <strong class="text-gray-900 dark:text-white">Payment received</strong> and enter your payment reference and the amount. The ad is sent to Facebook as soon as it is both approved and paid, in either order. Facebook then reviews it, as it does every ad, and charges your ad account for what it spends.
+        </p>
+        <ul class="doc-list mb-4">
+            <li><strong>Changing an ad.</strong> A change to the headline, text, description, button, picture or link pauses a running ad and sends it back for approval. A new budget needs paying again. A new end date or audience is applied at once.</li>
+            <li><strong>Stopping.</strong> The network or the business can stop a boost at any time. The ad is paused at Facebook and the boost ends; to run again, the business sends a new request. Before it starts, the business can withdraw it instead.</li>
+            <li><strong>One request per event.</strong> Pressing Boost on an event that already has an open request opens that request.</li>
+        </ul>
+
+        <h3 class="doc-subheading" id="partners-campaigns">Campaigns and statements</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            <strong class="text-gray-900 dark:text-white">Boost &gt; Campaigns</strong> lists every boost that went out, with its schedule, budget, what was paid and under which reference, what it actually spent, and whether that figure is final (it settles a few days after a boost ends). Export it as a spreadsheet to reconcile with your businesses under your own terms.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Our fee is 20% of the previous month's actual ad spend, as Facebook reports it in your ad account's timezone. Early in each month we charge your card and email an itemized statement: each campaign's spend, the fee, and any correction Facebook made to an earlier month. A boost that stops early simply shows less spend. Statements are on <strong class="text-gray-900 dark:text-white">Boost &gt; Statements</strong>, where a payment your bank asks you to confirm can be completed with Pay now.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            If Facebook stops answering for your Page or ad account (for example, the access was withdrawn), boosts cannot start and you are emailed. If it stays that way for three days, running boosts are stopped here. Ads already running in your own ad account can keep running at Facebook, so check them there too.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Every step is also in the <x-link href="{{ route('marketing.docs.developer.api') }}#boosts">API</x-link>, with the account's own key, so your checkout can confirm payments automatically.
+        </p>
     </section>
 
     <!-- Tips -->

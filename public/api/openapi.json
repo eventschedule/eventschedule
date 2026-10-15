@@ -2679,6 +2679,1083 @@
           }
         }
       }
+    },
+    "/schedules/{subdomain}/appointment-types": {
+      "get": {
+        "operationId": "list_appointment_types",
+        "tags": ["Appointments"],
+        "summary": "List bookable appointment types",
+        "description": "The appointment types a guest can book on this schedule right now, the list its /book page shows. On the hosted service, types with a price or an approval step are left out until the schedule has its own email settings, because a guest booked through the API is sent a way to pay, or told the schedule's answer, only by email. The key's account must be an owner or admin of the schedule, and the schedule must be on a Pro plan.",
+        "parameters": [
+          {
+            "name": "subdomain",
+            "in": "path",
+            "required": true,
+            "description": "The schedule's subdomain",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookable appointment types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AppointmentType"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "schedule": {
+                          "type": "string"
+                        },
+                        "timezone": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an owner or admin of the schedule, or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appointment-types/{id}/slots": {
+      "get": {
+        "operationId": "list_appointment_slots",
+        "tags": ["Appointments"],
+        "summary": "List open times",
+        "description": "The times still open for an appointment type. Each slot carries its start as a UTC instant, to send back when booking, and a label in the schedule's timezone and language, such as \"Tuesday, October 20 at 2:30 PM EDT\". When the range has nothing open, meta.next_available is the first open time after it.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the appointment type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "First day to look at (Y-m-d, in the schedule's timezone). Defaults to today.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "description": "How many days to cover. Defaults to 7.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 31
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Open times",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AppointmentSlot"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "appointment_type_id": {
+                          "type": "string"
+                        },
+                        "timezone": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "days": {
+                          "type": "integer"
+                        },
+                        "next_available": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AppointmentSlot"
+                            }
+                          ],
+                          "nullable": true,
+                          "description": "Set only when this range has nothing open"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an owner or admin of the schedule, or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Appointment type not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error, or the type is not taking bookings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appointment-types/{id}/bookings": {
+      "post": {
+        "operationId": "create_appointment_booking",
+        "tags": ["Appointments"],
+        "summary": "Book an appointment",
+        "description": "Book a time for a guest. The booking is the guest's: the caller does not become its buyer, and the owner's Bookings list and booking email say it was booked through the API. A booking paid online is held until pay_by, and the guest is emailed a link to pay at once. Send an Idempotency-Key header to make a retry safe: a repeat of the same request with the same key in the next 24 hours answers with the booking the first one made.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the appointment type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Up to 64 letters, digits, dots, colons, dashes or underscores",
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["slot", "name", "email"],
+                "properties": {
+                  "slot": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "A slot's starts_at, exactly as the slots endpoint gave it (UTC, e.g. 2026-10-20T18:30:00Z)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "The guest's name"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255,
+                    "description": "The guest's email, where the confirmation or the payment link goes"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "description": "Required when the type's requires_phone is true; ignored when it does not ask"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "description": "A note for the schedule"
+                  },
+                  "guest_timezone": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "description": "The guest's IANA timezone, for their emails"
+                  },
+                  "answers": {
+                    "type": "object",
+                    "description": "Answers to the type's questions, keyed by question key. Each is text or a number, or a list of them, each up to 1000 characters.",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 1000
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AppointmentBooking"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an owner or admin of the schedule, or not a Pro account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Appointment type not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The time was just taken (error slot_taken, with the three nearest open times in alternatives), the same guest already holds it (already_booked, with that booking), or a request with the same Idempotency-Key is still being handled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": ["slot_taken", "already_booked", "idempotency_key_in_use"]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "alternatives": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AppointmentSlot"
+                      }
+                    },
+                    "booking": {
+                      "$ref": "#/components/schemas/AppointmentBooking"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error per field, the type is not taking bookings, the daily cap on new bookings, or an Idempotency-Key reused for a different request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/boosts": {
+      "get": {
+        "operationId": "list_boosts",
+        "tags": ["Boosts"],
+        "summary": "List boosts",
+        "description": "Every boost request on the boost partner's schedules, oldest change first. Only the key of the account that is the boost partner can read these. updated_since returns every boost changed at or after that time (timestamps are whole seconds, so keep the last updated_at you saw and drop duplicates).",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "A schedule's subdomain"
+          },
+          {
+            "name": "updated_since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "maximum": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of boosts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Boost"
+                      }
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not a boost partner's key"
+          },
+          "422": {
+            "description": "Validation failed"
+          }
+        }
+      }
+    },
+    "/boosts/{id}": {
+      "get": {
+        "operationId": "get_boost",
+        "tags": ["Boosts"],
+        "summary": "Get a boost",
+        "description": "One boost request with the exact ad, its approval, its payment and its spend.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the boost",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The boost as it now stands",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Boost"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not the boost partner's own key, or not its boost"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Wrong state, or an out-of-date version (code: stale_version)"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many requests; see Retry-After"
+          }
+        }
+      }
+    },
+    "/boosts/{id}/approve": {
+      "post": {
+        "operationId": "approve_boost",
+        "tags": ["Boosts"],
+        "summary": "Approve a version",
+        "description": "Approve the version you reviewed. A version that is not the current one answers 409, so an approval of earlier wording can never launch later wording. Approved and paid launches the boost. Repeating the same approval answers the boost as it stands.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the boost",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["version"],
+                "properties": {
+                  "version": {
+                    "type": "integer"
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The boost as it now stands",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Boost"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not the boost partner's own key, or not its boost"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Wrong state, or an out-of-date version (code: stale_version)"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many requests; see Retry-After"
+          }
+        }
+      }
+    },
+    "/boosts/{id}/decline": {
+      "post": {
+        "operationId": "decline_boost",
+        "tags": ["Boosts"],
+        "summary": "Decline a boost",
+        "description": "Send the request back with a note the business sees; it can edit and send it again.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the boost",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["note"],
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The boost as it now stands",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Boost"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not the boost partner's own key, or not its boost"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Wrong state, or an out-of-date version (code: stale_version)"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many requests; see Retry-After"
+          }
+        }
+      }
+    },
+    "/boosts/{id}/confirm-payment": {
+      "post": {
+        "operationId": "confirm_boost_payment",
+        "tags": ["Boosts"],
+        "summary": "Confirm payment",
+        "description": "Record that the business paid you for this budget: your own reference and amount, which are stored and returned on the boost and the statement. The amount is not compared with the budget. A changed budget clears the confirmation.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the boost",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["reference", "amount"],
+                "properties": {
+                  "reference": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "amount": {
+                    "type": "string",
+                    "example": "60.00"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The boost as it now stands",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Boost"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not the boost partner's own key, or not its boost"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Wrong state, or an out-of-date version (code: stale_version)"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many requests; see Retry-After"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "withdraw_boost_payment",
+        "tags": ["Boosts"],
+        "summary": "Withdraw a payment confirmation",
+        "description": "Before launch only, for a refund or a dispute.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the boost",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The boost as it now stands",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Boost"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not the boost partner's own key, or not its boost"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Wrong state, or an out-of-date version (code: stale_version)"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many requests; see Retry-After"
+          }
+        }
+      }
+    },
+    "/boosts/{id}/stop": {
+      "post": {
+        "operationId": "stop_boost",
+        "tags": ["Boosts"],
+        "summary": "Stop a boost",
+        "description": "Pause the campaign at Meta at once and end it. A stopped boost does not restart.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The encoded ID of the boost",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The boost as it now stands",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Boost"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid key"
+          },
+          "403": {
+            "description": "Not the boost partner's own key, or not its boost"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Wrong state, or an out-of-date version (code: stale_version)"
+          },
+          "422": {
+            "description": "Validation failed"
+          },
+          "429": {
+            "description": "Too many requests; see Retry-After"
+          }
+        }
+      }
+    },
+    "/boost-statements": {
+      "get": {
+        "operationId": "list_boost_statements",
+        "tags": ["Boosts"],
+        "summary": "List statements",
+        "description": "The monthly statements of the fee on actual ad spend, newest first.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The statements",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "period": {
+                            "type": "string",
+                            "example": "2026-11"
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "totals": {
+                            "type": "object",
+                            "properties": {
+                              "spend": {
+                                "type": "string"
+                              },
+                              "fee": {
+                                "type": "string"
+                              },
+                              "adjustments": {
+                                "type": "string"
+                              },
+                              "carried_in": {
+                                "type": "string"
+                              },
+                              "charged": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "charge": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": ["pending", "paid", "failed", "action_required", "carried"]
+                              },
+                              "charged_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a boost partner's key"
+          }
+        }
+      }
+    },
+    "/boost-statements/{period}": {
+      "get": {
+        "operationId": "get_boost_statement",
+        "tags": ["Boosts"],
+        "summary": "Get a statement",
+        "description": "One month: each campaign's spend that month, the fee, and any adjustment for spend Meta corrected in an earlier month.",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}$"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "description": "Picks one when the month has statements in two currencies",
+            "schema": { "type": "string", "minLength": 3, "maxLength": 3 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The statement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "period": {
+                          "type": "string",
+                          "example": "2026-11"
+                        },
+                        "currency": {
+                          "type": "string"
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "spend": {
+                              "type": "string"
+                            },
+                            "fee": {
+                              "type": "string"
+                            },
+                            "adjustments": {
+                              "type": "string"
+                            },
+                            "carried_in": {
+                              "type": "string"
+                            },
+                            "charged": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "charge": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": ["pending", "paid", "failed", "action_required", "carried"]
+                            },
+                            "charged_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "nullable": true
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "boost": {
+                                "type": "string"
+                              },
+                              "schedule": {
+                                "type": "string"
+                              },
+                              "event": {
+                                "type": "string"
+                              },
+                              "payment_reference": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "budget": {
+                                "type": "string"
+                              },
+                              "month": {
+                                "type": "string",
+                                "description": "The month the spend was in; an adjustment names an earlier one"
+                              },
+                              "spend": {
+                                "type": "string"
+                              },
+                              "fee": {
+                                "type": "string"
+                              },
+                              "adjustment": {
+                                "type": "string"
+                              },
+                              "note": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a boost partner's key"
+          },
+          "404": {
+            "description": "No statement for that month"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3580,6 +4657,384 @@
           }
         },
         "required": ["error"]
+      },
+      "AppointmentSlot": {
+        "type": "object",
+        "properties": {
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start, in UTC"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The day, in the schedule's timezone"
+          },
+          "label": {
+            "type": "string",
+            "description": "A sentence to read to the guest, in the schedule's timezone and language"
+          }
+        }
+      },
+      "AppointmentType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded type ID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "duration_minutes": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "payment": {
+            "type": "string",
+            "enum": ["free", "cash", "online"],
+            "description": "cash is paid at the appointment; online is paid from a link the guest is emailed"
+          },
+          "location_type": {
+            "type": "string",
+            "enum": ["in_person", "online", "phone"]
+          },
+          "location": {
+            "type": "string",
+            "nullable": true,
+            "description": "The address or phone number. A meeting link is sent with the confirmation."
+          },
+          "host_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The team member the appointment is with"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "requires_approval": {
+            "type": "boolean"
+          },
+          "asks_phone": {
+            "type": "boolean"
+          },
+          "requires_phone": {
+            "type": "boolean"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "next_available": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentSlot"
+              }
+            ],
+            "nullable": true
+          },
+          "booking_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "AppointmentBooking": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Encoded sale ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["confirmed", "pending_approval", "awaiting_payment"]
+          },
+          "appointment_type_id": {
+            "type": "string"
+          },
+          "appointment_type": {
+            "type": "string"
+          },
+          "host_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "label": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "pay_by": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When an unpaid hold is released (awaiting_payment only)"
+          },
+          "emails_sent": {
+            "type": "boolean",
+            "description": "Whether the guest was emailed"
+          },
+          "manage_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The guest's page for the booking, where they pay, change the time or cancel"
+          },
+          "summary": {
+            "type": "string",
+            "description": "A sentence for an agent to read back to the guest"
+          }
+        }
+      },
+      "Boost": {
+        "type": "object",
+        "description": "A boost request on one of a boost partner's schedules. It launches under the partner's own Facebook Page and ad account only when the current version is approved AND the current budget is paid.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schedule": {
+            "type": "string",
+            "description": "The schedule's subdomain"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "nullable": true
+              },
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending_approval", "awaiting_payment", "ready", "in_review", "active", "completed", "declined", "rejected", "stopped"],
+            "description": "ready: approved and paid, waiting only for the partner's account to be confirmed"
+          },
+          "version": {
+            "type": "integer",
+            "description": "Raised by every change to what the ad says or shows"
+          },
+          "ad": {
+            "type": "object",
+            "properties": {
+              "headline": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "call_to_action": {
+                "type": "string"
+              },
+              "image_url": {
+                "type": "string",
+                "nullable": true
+              },
+              "destination_url": {
+                "type": "string"
+              }
+            }
+          },
+          "audience": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
+              }
+            }
+          },
+          "budget": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "example": "50.00"
+              },
+              "currency": {
+                "type": "string",
+                "example": "USD"
+              }
+            }
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "approval": {
+            "type": "object",
+            "properties": {
+              "approved_version": {
+                "type": "integer",
+                "nullable": true
+              },
+              "decided_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "note": {
+                "type": "string",
+                "nullable": true
+              },
+              "decline_reason": {
+                "type": "string",
+                "nullable": true,
+                "enum": ["partner", "ownership_changed", "end_passed", null]
+              }
+            }
+          },
+          "payment": {
+            "type": "object",
+            "properties": {
+              "confirmed": {
+                "type": "boolean",
+                "description": "True only when the confirmed payment is for the current budget"
+              },
+              "reference": {
+                "type": "string",
+                "nullable": true
+              },
+              "amount": {
+                "type": "string",
+                "nullable": true
+              },
+              "currency": {
+                "type": "string",
+                "nullable": true
+              },
+              "confirmed_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            }
+          },
+          "spend": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "string"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "as_of": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "final": {
+                "type": "boolean",
+                "description": "True once Meta's figures for an ended boost have stopped moving"
+              }
+            }
+          },
+          "meta_review": {
+            "type": "string",
+            "nullable": true,
+            "description": "Meta's reason, when it refused the ad"
+          },
+          "stopped_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stop_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "The note given, or a code: partner, business, withdrawn, access_withdrawn, event_removed"
+          },
+          "stop_code": {
+            "type": "string",
+            "nullable": true
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   },
@@ -3611,6 +5066,14 @@
     {
       "name": "Feedback",
       "description": "Read post-event ratings and fan submissions (comments, photos, videos) for your own schedules. Feedback requires a Pro plan; fan content is available on all plans."
+    },
+    {
+      "name": "Appointments",
+      "description": "List an appointment type's open times and book them, for an agent that talks to the guest (a voice agent on a phone line, for example). Requires a Pro plan."
+    },
+    {
+      "name": "Boosts",
+      "description": "For a boost partner: a network whose schedules boost under its own Facebook Page and Meta ad account. Approve or decline each version, record payment, stop campaigns, and read the monthly statements. Only the partner account's own key can use these."
     }
   ]
 }

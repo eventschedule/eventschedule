@@ -328,6 +328,23 @@ class ScheduleTransferService
 
         if (! $keptPrevious && $previousOwner) {
             $this->releaseCalendarWebhooks($role, $previousOwner, $webhooks);
+
+            // The previous owner is off the team now, so the appointment types they hosted here
+            // are switched off and the new owner is told (releaseHost() never throws). Not when
+            // they were kept on as an admin: an admin may host.
+            app(AppointmentHostService::class)->releaseHost($role, $previousOwner);
+        }
+
+        // A schedule that moved into or out of a boost partner's account leaves its open boost
+        // requests with nobody to approve them; they are declined with a reason the Business
+        // can read. A campaign already running keeps the partner it launched under.
+        try {
+            $wasPartner = $previousOwner && \App\Models\BoostPartner::forUser($previousOwner);
+            if ($wasPartner || \App\Models\BoostPartner::forUser($newOwner)) {
+                app(\App\Services\BoostPartnerService::class)->declineOpenRequestsForRole($role);
+            }
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         // Cosmetic, and deliberately out of the transaction: writing `users` while holding

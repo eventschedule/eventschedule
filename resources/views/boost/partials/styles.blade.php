@@ -351,4 +351,392 @@
       position: relative;
       height: 16rem;
     }
+
+    /* ------------------------------------------------------------------------------------------
+       Boosts that run through a boost partner's own Page (boost/partner-*): a request card with
+       the ad and its words side by side, what changed since the last version, the two checks
+       (approval and payment) each on a row of its own, and the dialogs that answer them. */
+    .bp-request {
+      scroll-margin-top: 1.5rem;
+    }
+    .bp-request:focus {
+      outline: none;
+    }
+    .bp-request.is-focused {
+      box-shadow: 0 0 0 2px var(--brand-blue);
+    }
+    .bp-request-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem 1rem;
+      padding: 1.25rem 1.25rem 0;
+    }
+    .bp-request-title {
+      margin: 0;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+      overflow-wrap: anywhere;
+    }
+    .bp-request-title a {
+      color: inherit;
+    }
+    .bp-request-title a:hover {
+      color: var(--brand-blue);
+    }
+    .bp-request-meta {
+      margin: 0.25rem 0 0;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+      overflow-wrap: anywhere;
+    }
+    .bp-request-meta.is-quiet {
+      color: rgb(var(--ap-ink-3));
+    }
+    /* The ad as it will look, and beside it every word of it in full: the preview cuts the
+       headline and the link to one line. On a phone the words go under the preview. */
+    .bp-ad {
+      display: grid;
+      gap: 1.25rem;
+      padding: 1.25rem;
+    }
+    @media (min-width: 768px) {
+      .bp-ad {
+        grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+        align-items: start;
+      }
+    }
+    .bp-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+      gap: 0.875rem 1.25rem;
+      margin: 0;
+    }
+    .bp-fields > div.is-wide {
+      grid-column: 1 / -1;
+    }
+    .bp-fields dt {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-fields dd {
+      margin: 0.125rem 0 0;
+      font-size: 0.9375rem;
+      color: rgb(var(--ap-ink));
+      overflow-wrap: anywhere;
+    }
+    .bp-fields dd.is-link {
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-2));
+      word-break: break-all;
+    }
+    .bp-fields dd.is-empty {
+      color: rgb(var(--ap-ink-4));
+    }
+    /* What changed since the version before: Before and Now side by side, one under the other
+       on a phone, with the note that asked for the change. */
+    .bp-changes {
+      margin: 0 1.25rem 1.25rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+      padding: 1rem;
+      background: var(--ap-tint-1);
+    }
+    .bp-changes-title {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .bp-diff {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .bp-diff-row {
+      display: grid;
+      gap: 0.5rem;
+    }
+    @media (min-width: 640px) {
+      .bp-diff-row {
+        grid-template-columns: 8rem minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
+      }
+    }
+    .bp-diff-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink-2));
+    }
+    .bp-diff-cell {
+      min-width: 0;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.625rem;
+      background: rgb(var(--ap-surface));
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink));
+      overflow-wrap: anywhere;
+    }
+    .bp-diff-cell.is-now {
+      border-color: var(--brand-blue);
+    }
+    .bp-diff-tag {
+      display: block;
+      margin-bottom: 0.125rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-diff-cell img {
+      display: block;
+      max-width: 9rem;
+      border-radius: 0.375rem;
+    }
+    /* A note somebody wrote, quoted: a tinted panel with a full border, never a stripe down one
+       side. */
+    .bp-note {
+      margin: 0.75rem 0 0;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.5rem;
+      padding: 0.625rem 0.75rem;
+      background: rgb(var(--ap-surface));
+    }
+    .bp-note figcaption {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-note blockquote {
+      margin: 0.125rem 0 0;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink));
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+    /* The two checks, approval and payment: a row each, what it says, and its buttons at the end
+       (the one that goes on last). The buttons take a line of their own on a phone. */
+    .bp-checks {
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    .ap-card > .bp-checks:first-child {
+      border-top: 0;
+    }
+    .bp-check {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      padding: 0.875rem 1.25rem;
+    }
+    .bp-check + .bp-check {
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    .bp-check-name {
+      flex: none;
+      min-width: 6rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .bp-check-state {
+      flex: 1 1 14rem;
+      min-width: 0;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+      overflow-wrap: anywhere;
+    }
+    .bp-check-state .event-status {
+      margin-inline-end: 0.375rem;
+    }
+    .bp-check-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      margin-inline-start: auto;
+    }
+    .bp-check-actions form {
+      display: inline-flex;
+    }
+    @media (max-width: 639.98px) {
+      .bp-check-actions {
+        flex: 1 1 100%;
+      }
+      .bp-check-actions > button,
+      .bp-check-actions > a {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+    }
+    /* The dialogs that answer a request: approve, ask for changes, record a payment. */
+    .bp-dialog {
+      width: calc(100% - 2rem);
+      max-width: 30rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+      padding: 0;
+      background: rgb(var(--ap-surface));
+      color: rgb(var(--ap-ink));
+      box-shadow: var(--ap-shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.2));
+    }
+    .bp-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .bp-dialog form {
+      display: grid;
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+    .bp-dialog-title {
+      margin: 0;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .bp-dialog-lead {
+      margin: -0.625rem 0 0;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-3));
+      overflow-wrap: anywhere;
+    }
+    .bp-dialog-text {
+      margin: 0;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    .bp-dialog-part {
+      display: grid;
+      gap: 0.875rem;
+      border-radius: 0.5rem;
+      padding: 0.875rem;
+      background: var(--ap-tint-1);
+    }
+    .bp-dialog-part[hidden] {
+      display: none;
+    }
+    .bp-dialog .page-form-actions {
+      margin-top: 0.25rem;
+    }
+    /* The three steps a first request goes through, said before it is sent. */
+    .bp-steps {
+      margin: 0.25rem 0 0;
+      padding-inline-start: 1.25rem;
+      list-style: decimal;
+    }
+    .bp-steps li + li {
+      margin-top: 0.125rem;
+    }
+    /* A hint under a field of the edit form: what changing it does to a running ad. */
+    .bp-hint {
+      margin: 0.25rem 0 0;
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-picture {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .bp-picture > img {
+      flex: none;
+      width: 6rem;
+      border-radius: 0.5rem;
+      object-fit: contain;
+    }
+    .bp-picture > div {
+      flex: 1 1 14rem;
+      min-width: 0;
+    }
+    /* The filters of the Campaigns list that are switches, side by side. */
+    .bp-filter-checks {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      min-height: 2.25rem;
+    }
+    /* A partner's first visit: what to do, in order, each done or not. */
+    .bp-setup {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .bp-setup li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.875rem 1.25rem;
+    }
+    .bp-setup li + li {
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    .bp-setup-mark {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-setup-text {
+      min-width: 0;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    .bp-setup-text strong {
+      display: block;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .bp-setup li.is-done .bp-setup-text strong {
+      color: rgb(var(--ap-ink-3));
+    }
+    /* A request's history, oldest first: what happened, who did it, when. */
+    .bp-history {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .bp-history li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.25rem 0.75rem;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.875rem;
+    }
+    .bp-history li + li {
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    .bp-history-what {
+      font-weight: 500;
+      color: rgb(var(--ap-ink));
+    }
+    .bp-history-who {
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-history time {
+      margin-inline-start: auto;
+      font-size: 0.8125rem;
+      font-variant-numeric: tabular-nums;
+      color: rgb(var(--ap-ink-3));
+    }
+    .bp-text-block {
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
 </style>

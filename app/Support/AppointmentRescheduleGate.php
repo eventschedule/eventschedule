@@ -37,7 +37,8 @@ class AppointmentRescheduleGate
         Event $event,
         Sale $sale,
         ?Role $role = null,
-        bool $checkCooldown = true
+        bool $checkCooldown = true,
+        bool $ownerMode = false
     ): ?string {
         $role = $role ?: $event->creatorRole;
         $type = $event->appointmentType;
@@ -68,7 +69,11 @@ class AppointmentRescheduleGate
         // exist and be active. Pointedly NOT the full isBookable() check - that also requires
         // paymentMethodAvailable(), which would freeze an already-paid booking the moment the owner
         // disconnected Stripe.
-        if (! $type || $type->is_deleted || ! $type->is_active) {
+        //
+        // Except for the schedule's own people ($ownerMode): a type switched off because its host
+        // left the team (AppointmentHostService::releaseHost()) still has bookings somebody has
+        // to move, and the owner is sent to the Bookings list to do exactly that.
+        if (! $type || $type->is_deleted || (! $type->is_active && ! $ownerMode)) {
             return $unavailable();
         }
 

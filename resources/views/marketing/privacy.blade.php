@@ -845,7 +845,7 @@
                 ? ['Meta (Facebook Login)', 'Sign-in, and only when you choose Continue with Facebook. Facebook tells us your name, email address and Facebook account ID; we keep the name and email on your account and store the ID to recognize you next time. We never receive your password and never store a Facebook access token. You can disconnect Facebook in Settings at any time, and deleting your account removes all of it']
                 : null,
             config('services.meta.access_token') || config('services.meta.pixel_id')
-                ? ['Meta (Boost)', 'Advertising for events whose organizer buys a Boost. On those event pages, the Meta Pixel; and when someone buys a ticket to one, the purchase with a one-way hash of the buyer\'s email address, which Meta matches to a Meta account if there is one, so the organizer can see what the campaign sold. Both only for visitors and buyers who allowed marketing cookies.']
+                ? ['Meta (Boost)', 'Advertising for events whose organizer buys a Boost. On those event pages, the Meta Pixel; and when someone buys a ticket to one, the purchase with a one-way hash of the buyer\'s email address, which Meta matches to a Meta account if there is one, so the organizer can see what the campaign sold. Both only for visitors and buyers who allowed marketing cookies. And for a network that runs boosts under its own Facebook Page and ad account, the access Facebook grants us to them, stored encrypted and removed when the network disconnects or deletes its account.']
                 : null,
             config('ads.enabled') && config('ads.adsense_enabled')
                 ? ['Google AdSense', 'Ads on the pages of free schedules, loaded only if you allow marketing cookies.']

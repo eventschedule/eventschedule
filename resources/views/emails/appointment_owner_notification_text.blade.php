@@ -9,6 +9,12 @@
 {{ $heading }}
 
 {{ $type?->name ?? $event->name }}
+@if (($sale->utm_source ?? null) === 'api')
+{{ __('messages.appointments_booked_via_api_note') }}
+@endif
+@if ($hostName = $event->appointmentHostName())
+{{ __('messages.appointments_host') }}: {{ $hostName }}
+@endif
 {{ __('messages.name') }}: {{ $sale->name }}
 {{ __('messages.email') }}: {{ $sale->email }}
 @if ($sale->phone)

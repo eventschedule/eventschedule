@@ -313,6 +313,14 @@ class RoleController extends Controller
             ->get();
 
         foreach ($activeCampaigns as $campaign) {
+            // A partner boost is stopped, never deleted at Meta and never refunded: the platform
+            // holds none of its money, and its spend must stay readable for the statement.
+            if ($campaign->isPartner()) {
+                \App\Services\BoostPartnerService::stopInCascade($campaign);
+
+                continue;
+            }
+
             try {
                 $cancelled = \DB::transaction(function () use ($campaign) {
                     $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
@@ -3658,6 +3666,7 @@ class RoleController extends Controller
         $appointmentEditing = null;
         $appointmentBookings = collect();
         $appointmentBookingCounts = [];
+        $appointmentHosts = null;
         $currencies = [];
 
         // sales + appointmentType are read by the appointment branch of show-admin-requests;
@@ -3850,6 +3859,7 @@ class RoleController extends Controller
                 $appointmentBookings,
                 $appointmentBookingCounts,
                 $currencies,
+                $appointmentHosts,
             ] = $this->appointmentsTabData($role);
         }
 
@@ -3956,6 +3966,7 @@ class RoleController extends Controller
             'appointmentEditing',
             'appointmentBookings',
             'appointmentBookingCounts',
+            'appointmentHosts',
             'pendingBookingCount',
             'currencies',
             'openTransfer',
@@ -3966,7 +3977,7 @@ class RoleController extends Controller
      * Data for the Appointments tab. Lifted out of show-admin-appointments.blade.php, which was
      * building a paginated query inside a @php block.
      *
-     * @return array{0: \Illuminate\Support\Collection, 1: ?\App\Models\AppointmentType, 2: mixed, 3: array<int,int>, 4: array}
+     * @return array{0: \Illuminate\Support\Collection, 1: ?\App\Models\AppointmentType, 2: mixed, 3: array<int,int>, 4: array, 5: array{offered: bool, candidates: \Illuminate\Support\Collection, names: array<int,string>, filter: ?int}}
      */
     protected function appointmentsTabData(Role $role): array
     {
@@ -4027,7 +4038,14 @@ class RoleController extends Controller
         // hide older bookings once a schedule passes the cap - Past and Cancelled grow forever.
         $filter = request('filter', 'upcoming');
         // The join means an unqualified select would collide `events.id` onto `sales.id`.
-        $bookingQuery = $base()->select('sales.*')->with(['event.appointmentType', 'event.roles']);
+        $bookingQuery = $base()->select('sales.*')->with(['event.appointmentType', 'event.roles', 'event.appointmentHost']);
+
+        // One host's bookings (AppointmentHostService): what the owner is sent to when somebody who
+        // hosted here leaves the team, to move or cancel what is still booked with them.
+        $hostFilter = request('host') ? (int) UrlUtils::decodeId((string) request('host')) : null;
+        if ($hostFilter) {
+            $bookingQuery->where('events.appointment_host_user_id', $hostFilter);
+        }
 
         // Name/email search, mirroring the Sales page's own filter param.
         if ($search = trim((string) request('search'))) {
@@ -4073,7 +4091,26 @@ class RoleController extends Controller
             ->pluck(DB::raw('count(*)'), 'events.appointment_type_id')
             ->all();
 
-        return [$types, $editing, $bookings, $counts, $currencies];
+        // Who may host a type here, and the name of everybody who does or did (a host who has left
+        // is still named on their bookings and on the type they left).
+        $types->load('host');
+        $hostIds = $types->pluck('host_user_id')->filter()
+            ->merge(Event::where('creator_role_id', $role->id)
+                ->whereNotNull('appointment_type_id')
+                ->whereNotNull('appointment_host_user_id')
+                ->distinct()
+                ->pluck('appointment_host_user_id'))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+        $hosts = [
+            'offered' => \App\Services\AppointmentHostService::offered($role),
+            'candidates' => app(\App\Services\AppointmentHostService::class)->candidates($role),
+            'names' => $hostIds->isEmpty() ? [] : User::whereIn('id', $hostIds)->pluck('name', 'id')->all(),
+            'filter' => $hostFilter,
+        ];
+
+        return [$types, $editing, $bookings, $counts, $currencies, $hosts];
     }
 
     public function createMember(Request $request, $subdomain)
@@ -4294,6 +4331,9 @@ class RoleController extends Controller
         // The events they made here pass to the owner (not one that has taken money).
         app(\App\Services\ScheduleTransferService::class)->handOverEventsOf((int) $userId, $role);
 
+        // Appointment types they hosted here are switched off and the owner is told.
+        app(\App\Services\AppointmentHostService::class)->releaseHost($role, (int) $userId);
+
         // A feed this member added goes on reading an address only they chose. It waits until
         // somebody still on the team looks at it.
         \App\Models\EventFeed::pauseWhere(
@@ -4342,6 +4382,10 @@ class RoleController extends Controller
         // A viewer runs nothing here any more: as for somebody who leaves.
         if ($roleUser->level === 'viewer') {
             app(\App\Services\ScheduleTransferService::class)->handOverEventsOf((int) $userId, $role);
+
+            // Nor hosts appointments, whose bookings a viewer could not see. Its own call, not
+            // part of handOverEventsOf(), which other paths run for other reasons.
+            app(\App\Services\AppointmentHostService::class)->releaseHost($role, (int) $userId);
         }
 
         return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))

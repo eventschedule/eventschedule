@@ -47,6 +47,11 @@ class PromotionController extends Controller
             abort(403);
         }
 
+        // An event a boost partner covers is boosted through the partner, never bought here.
+        if ($partner = \App\Models\BoostPartner::forEvent($event)) {
+            return redirect()->back()->with('error', __('messages.boost_partner_promotion_refused', ['page' => $partner->displayName()]));
+        }
+
         // Promoting an event nobody can open would just burn the advertiser's money.
         if ($event->is_draft || $event->is_private) {
             return redirect()->route('boost.index')->with('error', __('messages.promotion_event_not_public'));
@@ -113,6 +118,10 @@ class PromotionController extends Controller
 
         if (! auth()->user()->canEditEvent($event)) {
             abort(403);
+        }
+
+        if ($partner = \App\Models\BoostPartner::forEvent($event)) {
+            return response()->json(['error' => __('messages.boost_partner_promotion_refused', ['page' => $partner->displayName()])], 422);
         }
 
         $role = $this->resolveAdvertiserRole($request, $event);
@@ -216,6 +225,12 @@ class PromotionController extends Controller
         if (! auth()->user()->canEditEvent($event)) {
             $this->abandonIntent($request);
             abort(403);
+        }
+
+        if ($partner = \App\Models\BoostPartner::forEvent($event)) {
+            $this->abandonIntent($request);
+
+            return back()->with('error', __('messages.boost_partner_promotion_refused', ['page' => $partner->displayName()]));
         }
 
         if ($event->is_draft || $event->is_private) {

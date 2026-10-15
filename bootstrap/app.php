@@ -92,6 +92,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'audience/embed',
             '*/audience/embed',
             'webhooks/meta',
+            'webhooks/meta/deauthorize',
+            'webhooks/meta/data-deletion',
             'api/whatsapp/webhook',
         ]);
 

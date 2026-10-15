@@ -29,7 +29,7 @@ class AppointmentTypeController extends Controller
     {
         $role = $this->gate($request, $subdomain);
         $this->planLimit($role);
-        $data = $this->validated($request);
+        $data = $this->validated($request, $role);
 
         $type = new AppointmentType;
         $type->role_id = $role->id;
@@ -44,7 +44,7 @@ class AppointmentTypeController extends Controller
     {
         $role = $this->gate($request, $subdomain);
         $type = $this->resolveType($role, $hash);
-        $data = $this->validated($request);
+        $data = $this->validated($request, $role, $type);
 
         $this->fill($type, $data, $role);
         $type->save();
@@ -83,6 +83,17 @@ class AppointmentTypeController extends Controller
         // rather than a refusal, so re-saving the list cannot lock an owner out of their own row.
         if ($active && ! $type->is_active) {
             $this->planLimit($role);
+
+            // A type whose host has left the team stays off until somebody is chosen in their
+            // place (or none): turned back on as it is, it would be booked with a person who no
+            // longer runs this schedule.
+            if (! $type->hostIsCurrent()) {
+                return redirect()->route('role.view_admin', [
+                    'subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId(),
+                ])->with('error', __('messages.appointments_host_choose_first'));
+            }
+
+            $type->host_released_at = null;
         }
 
         $type->is_active = $active;
@@ -107,8 +118,15 @@ class AppointmentTypeController extends Controller
         // Excluding the grandfather stamp is load-bearing, not hygiene: replicate() copies every
         // attribute and does not consult $fillable, so without this a free schedule with one
         // grandfathered paid type could press Clone and mint a second, then a third, forever.
-        $copy = $type->replicate(['paid_grandfathered_at']);
+        $copy = $type->replicate(['paid_grandfathered_at', 'host_released_at']);
         $copy->name = $type->name.' ('.__('messages.copy').')';
+        // The host travels with the copy only while they still run this schedule (a copy of a type
+        // whose host left would name somebody who can no longer host it), and only on a plan that
+        // offers hosts: off Enterprise a type may keep its host but never gain one, and a copy is
+        // a new type.
+        if (! $type->hostIsCurrent() || ! \App\Services\AppointmentHostService::offered($role)) {
+            $copy->host_user_id = null;
+        }
         $copy->slug = AppointmentType::uniqueSlug($role, $copy->name);
         $copy->is_active = false;
 
@@ -145,7 +163,9 @@ class AppointmentTypeController extends Controller
         $event = $sale->event;
         $type = $event->appointmentType;
 
-        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role)) {
+        // ownerMode: the owner may move a booking whose type is off, which is what a type
+        // switched off by a departing host leaves behind (AppointmentRescheduleGate).
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role, ownerMode: true)) {
             return $this->backToBookings($role, $blocked, true);
         }
 
@@ -182,7 +202,7 @@ class AppointmentTypeController extends Controller
         $event = $sale->event;
         $type = $event->appointmentType;
 
-        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role)) {
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role, ownerMode: true)) {
             return response()->json(['error' => $blocked], 422);
         }
 
@@ -205,7 +225,7 @@ class AppointmentTypeController extends Controller
         $sale = $this->resolveOwnedBooking($role, $saleHash);
         $event = $sale->event;
 
-        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role, checkCooldown: false)) {
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role, checkCooldown: false, ownerMode: true)) {
             return response()->json(['error' => $blocked], 422);
         }
 
@@ -343,8 +363,11 @@ class AppointmentTypeController extends Controller
         return $type;
     }
 
-    protected function validated(Request $request): array
+    protected function validated(Request $request, ?Role $role = null, ?AppointmentType $type = null): array
     {
+        // The host is checked before the rest so its message sits beside its own field.
+        $hostId = $role ? $this->validatedHost($request, $role, $type) : false;
+
         $rules = [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
@@ -405,7 +428,45 @@ class AppointmentTypeController extends Controller
             ? $this->parseOverrides($request->input('date_overrides'))
             : null;
 
+        // false: the form did not carry the Host select, so the stored host stays as it is.
+        if ($hostId !== false) {
+            $validated['host_user_id'] = $hostId;
+        }
+
         return $validated;
+    }
+
+    /**
+     * The host the form chose: a user id, null for none, or false when the form did not carry the
+     * select (host_submitted), in which case the stored host is left alone.
+     *
+     * A host must be an owner or admin of this schedule (AppointmentHostService). Choosing one is
+     * Enterprise; a schedule without it may keep the host a type already has, or clear it, and
+     * may not name a new one, the same rule clampAdvanced() applies to advanced scheduling.
+     */
+    protected function validatedHost(Request $request, Role $role, ?AppointmentType $type): int|null|false
+    {
+        if (! $request->boolean('host_submitted')) {
+            return false;
+        }
+
+        $raw = $request->input('host_user_id');
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+
+        $hostId = is_string($raw) ? (int) UrlUtils::decodeId($raw) : 0;
+        $stored = $type?->host_user_id ? (int) $type->host_user_id : null;
+
+        $allowed = $hostId > 0
+            && \App\Services\AppointmentHostService::isEligible((int) $role->id, $hostId)
+            && (\App\Services\AppointmentHostService::offered($role) || $hostId === $stored);
+
+        if (! $allowed) {
+            throw ValidationException::withMessages(['host_user_id' => __('messages.appointments_host_invalid')]);
+        }
+
+        return $hostId;
     }
 
     /** Decode + validate a weekly-windows structure: keys "0".."6" -> array of {start,end} ranges. */
@@ -609,6 +670,20 @@ class AppointmentTypeController extends Controller
         // contradiction.
         $type->require_phone = $type->ask_phone && request()->boolean('require_phone');
         $type->is_active = request()->boolean('is_active');
+
+        // Only when the form carried the Host select (validatedHost()). Bookings already made keep
+        // the host stamped on them; a new host applies to new bookings only. Choosing again, a
+        // person or nobody, is the answer to "host left the team", so the mark goes with it.
+        if (array_key_exists('host_user_id', $data)) {
+            $type->host_user_id = $data['host_user_id'];
+            $type->host_released_at = null;
+        }
+
+        // Switched on with a host who has left (the select could not offer them, so this is a
+        // save that did not carry it): it stays off until a host is chosen.
+        if ($type->is_active && ! $type->hostIsCurrent()) {
+            $type->is_active = false;
+        }
     }
 
     protected function back(Role $role, string $message)

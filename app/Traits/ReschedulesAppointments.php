@@ -39,9 +39,10 @@ trait ReschedulesAppointments
         Event $event,
         Sale $sale,
         ?Role $role = null,
-        bool $checkCooldown = true
+        bool $checkCooldown = true,
+        bool $ownerMode = false
     ): ?string {
-        return AppointmentRescheduleGate::blockedReason($event, $sale, $role, $checkCooldown);
+        return AppointmentRescheduleGate::blockedReason($event, $sale, $role, $checkCooldown, $ownerMode);
     }
 
     /**

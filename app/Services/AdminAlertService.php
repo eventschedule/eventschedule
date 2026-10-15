@@ -81,6 +81,11 @@ class AdminAlertService
         'refunds_unconfirmed',
         'boosts_mismatch',
         'promos_pending',
+        // Boost partners: a partner share waiting for the one-time confirmation, a partner boost
+        // that has sat approved and paid without reaching Meta, and a monthly fee that failed.
+        'boost_partners_waiting',
+        'boost_partner_launches_stuck',
+        'boost_statements_failed',
         'federation_flagged',
         'federation',
         'translation_suggestions',
@@ -345,6 +350,14 @@ class AdminAlertService
 
             'blog_posts_held' => fn () => $isNexus ? \App\Models\BlogPost::heldForReview()->count() : 0,
 
+            'boost_partners_waiting' => fn () => $isHosted
+                ? \App\Models\BoostPartner::whereNotNull('enabled_at')->where('connection_method', 'partner_share')
+                    ->whereNotNull('ad_account_id')->whereNull('confirmed_at')->whereNull('connection_error')->count()
+                : 0,
+            'boost_partner_launches_stuck' => fn () => BoostCampaign::whereNotNull('boost_partner_id')->where('status', 'in_review')
+                ->whereNull('meta_campaign_id')->where('updated_at', '<=', now()->subMinutes(30))->count(),
+            'boost_statements_failed' => fn () => \App\Models\BoostStatement::whereIn('status', ['failed', 'action_required'])->count(),
+
             'support_unread' => fn () => $isHosted
                 ? SupportMessage::where('is_from_admin', false)->whereNull('read_at')->count()
                 : 0,
@@ -553,6 +566,9 @@ class AdminAlertService
             // no new Route::has failure mode and the badge lands where the operator already
             // manages campaigns.
             'promos_pending' => ['manage', 'boost', 'admin.boost', [], '#promo-queue', 'amber', 'Boost'],
+            'boost_partners_waiting' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'amber', 'Boost'],
+            'boost_partner_launches_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'red', 'Boost'],
+            'boost_statements_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-partners', 'red', 'Boost'],
             // ?status=flagged, not approved: the filter behind it repeats this row's own
             // count query, so the link lands on exactly the instances it counted rather
             // than on every approved install with those merely sorted to the top.

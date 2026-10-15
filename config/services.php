@@ -183,6 +183,13 @@ return [
         'webhook_verify_token' => env('META_WEBHOOK_VERIFY_TOKEN'),
         'max_concurrent_boosts' => env('META_MAX_CONCURRENT_BOOSTS', 3),
         'page_id' => env('META_PAGE_ID'),
+        // Boost partners. The platform's Meta Business (a partner shares its ad account and Page
+        // with it), the system user whose token is META_ACCESS_TOKEN, and the Facebook Login for
+        // Business configuration a partner can connect with instead (hidden until it is set).
+        'business_id' => env('META_BUSINESS_ID'),
+        'system_user_id' => env('META_SYSTEM_USER_ID'),
+        'login_config_id' => env('META_LOGIN_CONFIG_ID'),
+        'partners_enabled' => env('BOOST_PARTNERS_ENABLED', false),
     ],
 
 ];

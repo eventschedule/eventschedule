@@ -45,6 +45,9 @@ class ScheduleNamedInMailTest extends TestCase
         'notification_email_confirm_intro', 'notification_email_footer',
         'new_requests_notification_subject', 'new_requests_caption', 'new_requests_line',
         'new_poll_options_notification_subject', 'new_poll_options_caption', 'new_poll_options_line',
+        'appointment_host_released_subject', 'appointment_host_released_intro',
+        'boost_partner_mail_request_received_subject', 'boost_partner_mail_request_received_body',
+        'boost_partner_mail_request_resent_subject', 'boost_partner_mail_request_resent_body',
     ];
 
     public function test_a_deleted_schedule_is_named_as_a_schedule_and_not_by_its_type(): void

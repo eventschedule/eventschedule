@@ -281,8 +281,16 @@ Schedule::call(function () {
     Artisan::call('app:recheck-video-embeds');
 })->daily()->name('recheck-video-embeds')->withoutOverlapping(120)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// The boost partners' monthly fee on actual ad spend. Daily, so a month closes in every ad
+// account's timezone and a declined card is retried. Keep in sync with AppController::translateData().
 Schedule::call(function () {
-    if (\App\Services\MetaAdsService::isBoostConfigured()) {
+    if (config('app.hosted')) {
+        Artisan::call('boost:charge-statements');
+    }
+})->daily()->name('boost-charge-statements')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    if (\App\Services\MetaAdsService::shouldSync()) {
         Artisan::call('boost:sync');
     }
 })->everyFifteenMinutes()->name('boost-sync')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));

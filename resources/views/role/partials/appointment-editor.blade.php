@@ -74,6 +74,21 @@
     // Mirrors AppointmentTypeController::fill()'s $advancedAllowed, demo arm included - otherwise
     // the demo renders two Pro upsell banners for settings it is allowed to change.
     $advancedNeedsPro = config('app.hosted') && ! is_demo_role($role) && ! $role->isPro();
+
+    // The team member the type is booked with (AppointmentHostService). Choosing one is
+    // Enterprise; a schedule without it keeps the select only while the type has a host, and may
+    // keep that host or clear it (AppointmentTypeController::validatedHost()).
+    $hostOffered = (bool) ($hosts['offered'] ?? false);
+    $hostCandidates = $hosts['candidates'] ?? collect();
+    $storedHostId = (int) ($editing->host_user_id ?? 0);
+    $hostChoices = $hostOffered ? $hostCandidates : $hostCandidates->where('id', $storedHostId)->values();
+    $showHostField = $hostOffered || $storedHostId;
+    // A host who has left is not among the choices, so the select starts on "No host" and says why.
+    $hostGone = $storedHostId && ! $hostChoices->contains('id', $storedHostId);
+    $curHostHash = (string) old('host_user_id', $storedHostId && ! $hostGone ? \App\Utils\UrlUtils::encodeId($storedHostId) : '');
+    $curHost = $hostChoices->first(fn ($u) => \App\Utils\UrlUtils::encodeId($u->id) === $curHostHash);
+    $curHostName = $curHost ? (string) $curHost->name : '';
+    $hostPlaceholder = '__HOST__';
 @endphp
 <form method="POST"
       action="{{ $editing ? route('appointments.update', ['subdomain' => $role->subdomain, 'hash' => $editing->hashedId()]) : route('appointments.store', ['subdomain' => $role->subdomain]) }}"
@@ -153,11 +168,46 @@
                 </div>
                 <x-input-error :messages="$errors->get('duration_minutes')" class="mt-1" />
             </div>
+
+            @if ($showHostField)
+                {{-- Whose time this is. The help line and the Weekly hours heading follow the choice
+                     (the script below); every name reaches the page as text. --}}
+                <div id="appt-host-field">
+                    <input type="hidden" name="host_submitted" value="1">
+                    <x-input-label class="mb-1" for="host_user_id" :value="__('messages.appointments_host')" />
+                    @if ($hostGone)
+                        <div class="mb-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                            <p class="text-sm text-amber-800 dark:text-amber-200" v-pre>{{ __('messages.appointments_host_left_notice', ['name' => $editing->host?->name ?: __('messages.appointments_host_former')]) }}</p>
+                        </div>
+                    @endif
+                    <select name="host_user_id" id="host_user_id" class="{{ $selectClass }} block w-full sm:w-80">
+                        <option value="" data-host-name="">{{ __('messages.appointments_host_none') }}</option>
+                        @foreach ($hostChoices as $candidate)
+                            @php $candidateHash = \App\Utils\UrlUtils::encodeId($candidate->id); @endphp
+                            <option value="{{ $candidateHash }}" data-host-name="{{ $candidate->name }}" @selected($curHostHash === $candidateHash)>{{ $candidate->name }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('host_user_id')" class="mt-1" />
+                    <p id="appt-host-help" class="text-xs text-gray-500 dark:text-gray-400 mt-2" v-pre
+                       data-template="{{ __('messages.appointments_host_help', ['name' => $hostPlaceholder]) }}"
+                       data-none="{{ __('messages.appointments_host_help_none') }}">{{ $curHostName !== '' ? __('messages.appointments_host_help', ['name' => $curHostName]) : __('messages.appointments_host_help_none') }}</p>
+                    <div id="appt-host-more" class="mt-1 space-y-1 {{ $curHostName !== '' ? '' : 'hidden' }}">
+                        @if ($hostOffered)
+                            <p class="text-xs"><x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'availability']) }}" target="_blank">{{ __('messages.appointments_host_days_away') }}</x-link></p>
+                        @endif
+                        <p id="appt-host-guests" class="text-xs text-gray-500 dark:text-gray-400" v-pre
+                           data-template="{{ __('messages.appointments_host_guests_see', ['text' => __('messages.appointments_with_host', ['name' => $hostPlaceholder])]) }}">{{ $curHostName !== '' ? __('messages.appointments_host_guests_see', ['text' => __('messages.appointments_with_host', ['name' => $curHostName])]) : '' }}</p>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
     <div class="{{ $sectionClass }}">
-        <h3 class="{{ $headingClass }}">{{ __('messages.appointments_weekly_hours') }}</h3>
+        <h3 class="{{ $headingClass }}" id="appt-hours-heading" v-pre
+            data-default="{{ __('messages.appointments_weekly_hours') }}"
+            data-template="{{ __('messages.appointments_host_hours', ['name' => $hostPlaceholder]) }}">{{ $curHostName !== '' ? __('messages.appointments_host_hours', ['name' => $curHostName]) : __('messages.appointments_weekly_hours') }}</h3>
         <x-input-error :messages="$errors->get('weekly_windows')" class="mb-3" />
         <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.appointments_times_in', ['tz' => $role->timezone ?: config('app.timezone')]) }}</div>
         {{-- Two tabs in this app are about "when am I free"; say which one this is. --}}
@@ -640,6 +690,31 @@
             syncDurationChips();
         });
         durationInput.addEventListener('input', syncDurationChips);
+
+        // The host select drives three lines of text: the help under it, what guests see, and the
+        // Weekly hours heading ("Sam's hours"). Names are put in as text, never as markup.
+        var hostSelect = document.getElementById('host_user_id');
+        if (hostSelect) {
+            var hostPlaceholder = @json($hostPlaceholder);
+            var fill = function (el, name) {
+                if (!el) return;
+                if (name) {
+                    el.textContent = (el.dataset.template || '').split(hostPlaceholder).join(name);
+                } else {
+                    el.textContent = el.dataset.none !== undefined ? el.dataset.none : (el.dataset.default || '');
+                }
+            };
+            var syncHost = function () {
+                var option = hostSelect.options[hostSelect.selectedIndex];
+                var name = option ? (option.dataset.hostName || '') : '';
+                fill(document.getElementById('appt-host-help'), name);
+                fill(document.getElementById('appt-host-guests'), name);
+                fill(document.getElementById('appt-hours-heading'), name);
+                var more = document.getElementById('appt-host-more');
+                if (more) more.classList.toggle('hidden', !name);
+            };
+            hostSelect.addEventListener('change', syncHost);
+        }
 
         // "Require a phone number" only applies while the field is asked for at all. x-toggle uses
         // the field name as the element id.

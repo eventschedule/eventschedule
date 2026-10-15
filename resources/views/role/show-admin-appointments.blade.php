@@ -172,7 +172,7 @@
         @if ($view === 'bookings')
             @include('role.partials.appointment-bookings', ['bookings' => $bookings])
         @elseif ($editorOpen)
-            @include('role.partials.appointment-editor', ['editing' => $editing, 'windows' => $windows, 'overrides' => $overrides, 'timeOptions' => $timeOptions, 'days' => $days])
+            @include('role.partials.appointment-editor', ['editing' => $editing, 'windows' => $windows, 'overrides' => $overrides, 'timeOptions' => $timeOptions, 'days' => $days, 'hosts' => $appointmentHosts ?? null])
         @else
             {{-- Share toolbar. Sharing the link is the whole point of the page, so it stays visible -
                  but as one row rather than a titled panel of its own. --}}
@@ -265,6 +265,10 @@
                             $week = $weekSummary($type);
                             $hasHours = collect($week['open'])->contains(true);
                             $openDayNames = collect($days)->filter(fn ($l, $n) => $week['open'][$n])->values()->implode(', ');
+                            // The team member it is booked with, and whether they have since left (the
+                            // type was switched off by AppointmentHostService::releaseHost()).
+                            $typeHostName = $type->host_user_id ? ($type->host?->name ?: __('messages.appointments_host_former')) : null;
+                            $hostLeft = $type->host_user_id && $type->host_released_at && ! $type->is_active;
                         @endphp
                         {{-- Three zones once there is room: identity, availability at a glance, actions;
                              below lg they stack. No opacity dimming for an inactive type - it pushed the
@@ -280,11 +284,17 @@
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="font-semibold {{ $type->is_active ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400' }}">{{ $type->name }}</span>
-                                    @if (! $type->is_active)
+                                    @if ($hostLeft)
+                                        {{-- Says why it is off, which "Inactive" would not: the owner did not switch it off. --}}
+                                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">{{ __('messages.appointments_host_left') }}</span>
+                                    @elseif (! $type->is_active)
                                         <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ __('messages.inactive') }}</span>
                                     @endif
                                 </div>
                                 <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                    @if ($typeHostName && ! $hostLeft)
+                                        <span class="{{ $chipClass }}"><bdi v-pre>{{ __('messages.appointments_with_host', ['name' => $typeHostName]) }}</bdi></span>
+                                    @endif
                                     <span class="{{ $chipClass }}">{{ $type->duration_minutes }} {{ __('messages.minutes') }}</span>
                                     <span class="{{ $chipClass }}">{{ $type->isFree() ? __('messages.free') : \App\Utils\MoneyUtils::format((float) $type->price, $type->currency_code) }}</span>
                                     @if ($type->requires_approval)
@@ -299,6 +309,29 @@
                                      parent's gap twice on every row that had nothing to say.
                                      Independent checks: a paid type with no payment method can ALSO
                                      have no hours, and an @elseif hid whichever came second. --}}
+                                @if ($hostLeft && ! $isViewer)
+                                    @php
+                                        // Two counts, each the length of the list its link opens: Upcoming
+                                        // leaves out what still waits for approval, which is under Pending.
+                                        $hostBookings = \App\Services\AppointmentHostService::futureBookingCount($role, (int) $type->host_user_id);
+                                        $hostPending = \App\Services\AppointmentHostService::futureBookingCount($role, (int) $type->host_user_id, pending: true);
+                                    @endphp
+                                    <div class="{{ $warnClass }} mt-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                                        <span>
+                                            <bdi v-pre>{{ __('messages.appointments_host_left_notice', ['name' => $typeHostName]) }}</bdi>
+                                            <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId()]) }}">{{ __('messages.appointments_choose_host') }}</x-link>
+                                            @if ($hostBookings > 0)
+                                                &middot;
+                                                <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'host' => \App\Utils\UrlUtils::encodeId($type->host_user_id)]) }}">{{ trans_choice('messages.appointments_booking_count', $hostBookings, ['count' => $hostBookings]) }}</x-link>
+                                            @endif
+                                            @if ($hostPending > 0)
+                                                &middot;
+                                                <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => 'pending', 'host' => \App\Utils\UrlUtils::encodeId($type->host_user_id)]) }}">{{ __('messages.appointments_filter_pending') }} ({{ $hostPending }})</x-link>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endif
                                 @if (! $hasHours)
                                     <div class="{{ $warnClass }} mt-2">
                                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>

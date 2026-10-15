@@ -128,6 +128,19 @@ class TestEnvironmentTest extends TestCase
     }
 
     /**
+     * The platform's real Meta token, ad account and Page live in the deploying machine's .env.
+     * Pinned empty, every boost test runs on MetaAdsServiceFake unless it sets its own values
+     * with Http::fake(); a boost partner's partner share runs on that same token.
+     */
+    public function test_no_test_can_reach_the_platforms_meta_ad_account(): void
+    {
+        foreach (['access_token', 'ad_account_id', 'page_id', 'business_id', 'system_user_id', 'login_config_id'] as $key) {
+            $this->assertSame('', (string) config('services.meta.'.$key), 'phpunit.xml must pin META_'.strtoupper($key).' empty.');
+        }
+        $this->assertFalse(\App\Services\MetaAdsService::isBoostConfigured());
+    }
+
+    /**
      * No test runs with the developer's real AI key.
      *
      * The suite loads the developer's .env, where GEMINI_API_KEY is a real, billed key, and CI

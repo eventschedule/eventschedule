@@ -41,6 +41,10 @@ class IcsUtils
         $uid = 'appointment-'.$event->id.'@'.$domain;
 
         $title = $event->name;
+        // The person the guest is meeting, by name only (never their address).
+        if ($event->appointment_type_id && ($hostName = $event->appointmentHostName())) {
+            $title .= ' ('.__('messages.appointments_with_host', ['name' => $hostName]).')';
+        }
         $description = $event->description ? strip_tags($event->description) : '';
         $location = self::resolveLocation($event, $sale);
         $duration = $event->duration > 0 ? $event->duration : 2;

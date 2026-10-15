@@ -10,7 +10,7 @@
     $oldStart = \App\Utils\AppointmentTimeUtils::parseUtcInstant($oldStartsAt)?->setTimezone($oldTz);
 @endphp
 <x-email.layout :theme="$theme" :title="__('messages.appointment_rescheduled_heading')" :preheader="$intro">
-<x-email.heading :eyebrow="__('messages.appointment_rescheduled_heading')" :tone="! empty($pending) ? 'warning' : null" auto>{{ $type?->name ?? $event->name }}</x-email.heading>
+<x-email.heading :eyebrow="__('messages.appointment_rescheduled_heading')" :tone="! empty($pending) ? 'warning' : null" :subtitle="($apptHost = $event->appointmentHostName()) ? __('messages.appointments_with_host', ['name' => $apptHost]) : null" auto>{{ $type?->name ?? $event->name }}</x-email.heading>
 
 <x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
 <x-email.text>{{ $intro }}</x-email.text>

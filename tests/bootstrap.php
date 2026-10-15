@@ -33,6 +33,12 @@ foreach ([
     'BACKEND_GOOGLE_KEY',
     'DO_API_TOKEN',
     'DO_APP_ID',
+    'META_ACCESS_TOKEN',
+    'META_AD_ACCOUNT_ID',
+    'META_PAGE_ID',
+    'META_BUSINESS_ID',
+    'META_SYSTEM_USER_ID',
+    'META_LOGIN_CONFIG_ID',
     'GEMINI_API_KEY',
     'ADMIN_REQUIRE_2FA',
 ] as $pinned) {

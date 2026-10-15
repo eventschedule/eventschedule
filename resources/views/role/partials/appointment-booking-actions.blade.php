@@ -1,6 +1,6 @@
 {{--
-    Row actions for one booking, shared by the desktop table and the mobile cards.
-    Expects: $row (from appointment-bookings.blade.php), $role, $isViewer.
+    Row actions for one booking in the Bookings list (role/partials/appointment-bookings).
+    Expects: $row (from that partial), $role, $isViewer.
 --}}
 @php
     use App\Utils\UrlUtils;
@@ -28,9 +28,9 @@
     {{-- Proposing a different time is the third real answer to a pending request, and the endpoint has
          always allowed it - the guest's own page offers it as "Change time". Rendered after the decision
          buttons so the row still leads with Decline/Accept. --}}
-    @if (! $isViewer && $row['rescheduleBlocked'] === null)
+    @if ($row['rescheduleBlocked'] === null)
         <a href="{{ route('appointments.booking_reschedule', ['subdomain' => $role->subdomain, 'saleHash' => UrlUtils::encodeId($s->id)]) }}"
-           class="ms-3 text-xs text-[var(--brand-blue)] hover:underline">{{ __('messages.appointments_change_time') }}</a>
+           class="event-link">{{ __('messages.appointments_change_time') }}</a>
     @endif
 @else
     {{-- Only offered once a decision has been made. On a pending row this link leads to the GUEST
@@ -41,22 +41,21 @@
          actions this partial withholds from viewers everywhere else. --}}
     @if (! $isViewer)
         <a href="{{ route('appointments.manage', ['event_id' => $eventHash, 'secret' => $s->secret]) }}"
-           target="_blank" rel="noopener"
-           class="text-xs text-[var(--brand-blue)] hover:underline me-3">{{ __('messages.preview') }}</a>
+           target="_blank" rel="noopener" class="event-link">{{ __('messages.preview') }}</a>
     @endif
     {{-- Preview and Reschedule are both "look at / change this booking"; Cancel is destructive and stays
          last. Deliberately absent from the pending branch above: that row asks one clear question. --}}
     @if (! $isViewer && $row['rescheduleBlocked'] === null)
         <a href="{{ route('appointments.booking_reschedule', ['subdomain' => $role->subdomain, 'saleHash' => UrlUtils::encodeId($s->id)]) }}"
-           class="text-xs text-[var(--brand-blue)] hover:underline me-3">{{ __('messages.appointments_reschedule') }}</a>
+           class="event-link">{{ __('messages.appointments_reschedule') }}</a>
     @endif
     {{-- bookingCancel() rejects a past booking, so offering Cancel here only produced a confirm prompt
-         followed by an error. Note line 37 above already checked this - the two had drifted apart. --}}
+         followed by an error. --}}
     @if (! $isViewer && ! $row['cancelled'] && ! $row['past'])
         <form method="POST" action="{{ route('appointments.booking_cancel', ['subdomain' => $role->subdomain, 'saleHash' => UrlUtils::encodeId($s->id)]) }}"
-              class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
+              data-confirm="{{ __('messages.are_you_sure') }}">
             @csrf
-            <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ __('messages.appointments_cancel_booking') }}</button>
+            <button type="submit" class="event-link is-danger">{{ __('messages.appointments_cancel_booking') }}</button>
         </form>
     @endif
 @endif

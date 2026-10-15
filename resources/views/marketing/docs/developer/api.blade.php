@@ -3,7 +3,7 @@
     title="API Reference: Schedules, Events, Sales - Event Schedule"
     description="Manage schedules, events, sales and refunds with the Event Schedule REST API: authentication, rate limits, pagination and every endpoint, with examples."
     plan="pro"
-    lede="A JSON REST API for your schedules, events, sales, refunds and fan content. API access is a Pro feature: on the hosted service the schedules you read and write have to be on a Pro or Enterprise plan, apart from the few endpoints listed under Authentication. A selfhosted install counts as Enterprise, so nothing here is held back by plan."
+    lede="A JSON REST API for your schedules, events, sales, refunds, appointments and fan content. API access is a Pro feature: on the hosted service the schedules you read and write have to be on a Pro or Enterprise plan, apart from the few endpoints listed under Authentication. A selfhosted install counts as Enterprise, so nothing here is held back by plan."
 >
     <x-slot:toc>
         <x-doc-nav-group label="Getting Started" expanded>
@@ -50,6 +50,20 @@
         <x-doc-nav-group label="Feedback">
             <x-doc-nav-link href="#list-feedback" search="list feedback ratings reviews get /api/feedback stars comments"><span class="api-method-dot api-method-get"></span>List Feedback</x-doc-nav-link>
             <x-doc-nav-link href="#list-fan-content" search="list fan content get /api/fan-content comments photos videos approved"><span class="api-method-dot api-method-get"></span>List Fan Content</x-doc-nav-link>
+        </x-doc-nav-group>
+        <x-doc-nav-group label="Appointments">
+            <x-doc-nav-link href="#list-appointment-types" search="appointment types get /api/schedules/appointment-types bookable host questions voice agent"><span class="api-method-dot api-method-get"></span>List Appointment Types</x-doc-nav-link>
+            <x-doc-nav-link href="#list-appointment-slots" search="appointment slots open times get /api/appointment-types/slots label timezone"><span class="api-method-dot api-method-get"></span>List Open Times</x-doc-nav-link>
+            <x-doc-nav-link href="#create-appointment-booking" search="book appointment post /api/appointment-types/bookings slot_taken alternatives idempotency-key awaiting_payment voice agent"><span class="api-method-dot api-method-post"></span>Book an Appointment</x-doc-nav-link>
+        </x-doc-nav-group>
+        <x-doc-nav-group label="Boosts">
+            <x-doc-nav-link href="#boosts" search="boosts list get /api/boosts partner network updated_since"><span class="api-method-dot api-method-get"></span>List Boosts</x-doc-nav-link>
+            <x-doc-nav-link href="#get-boost" search="boost get /api/boosts version ad approval payment spend"><span class="api-method-dot api-method-get"></span>Get a Boost</x-doc-nav-link>
+            <x-doc-nav-link href="#approve-boost" search="approve boost post version stale 409"><span class="api-method-dot api-method-post"></span>Approve a Boost</x-doc-nav-link>
+            <x-doc-nav-link href="#decline-boost" search="decline boost post note"><span class="api-method-dot api-method-post"></span>Decline a Boost</x-doc-nav-link>
+            <x-doc-nav-link href="#confirm-boost-payment" search="confirm payment boost reference amount delete withdraw"><span class="api-method-dot api-method-post"></span>Confirm a Payment</x-doc-nav-link>
+            <x-doc-nav-link href="#stop-boost" search="stop boost pause meta"><span class="api-method-dot api-method-post"></span>Stop a Boost</x-doc-nav-link>
+            <x-doc-nav-link href="#boost-statements" search="boost statements fee monthly spend adjustment charge"><span class="api-method-dot api-method-get"></span>Boost Statements</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Reference">
             <x-doc-nav-link href="#error-handling" search="error handling status codes 401 403 404 422 429 500">Error Handling</x-doc-nav-link>
@@ -147,7 +161,7 @@
                             </svg>
                             Rate Limits
                         </h2>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Authenticated requests are counted per IP address, in separate read and write buckets. Every key calling from the same address shares the same two buckets, and a request that fails authentication is not counted:</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Authenticated requests are counted per account, in separate read and write buckets. Each key has budgets of its own, so callers that share an address (a voice-agent platform, an office network) do not share them, and a request that fails authentication is not counted there:</p>
                         <div class="doc-table-wrap">
                             <table class="doc-table">
                                 <thead><tr><th>Operation Type</th><th>Limit</th><th>HTTP Methods</th></tr></thead>
@@ -158,7 +172,8 @@
                             </table>
                         </div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Each bucket counts in a fixed one-minute window that opens with its first counted request. When that minute is up the count starts again from zero, so a client that makes no more than 300 reads and 30 writes in any one window is never refused, however long it runs.</p>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#create-event" class="doc-link">Create Event</a> carries a second throttle of 30 requests per minute on top of the write bucket. It is counted per account and per schedule rather than per address, so a bulk import should pace itself well below that.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Requests that prove no key, with no <code class="doc-inline-code">X-API-Key</code> header or a wrong one, are counted per IP address instead (the visitor's own, not a proxy's): after 30 in a minute that address is answered <code class="doc-inline-code">429</code> until the minute is up, except for a key it has already used successfully in the last day.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="#create-event" class="doc-link">Create Event</a> carries a second throttle of 30 requests per minute on top of the write bucket. It is counted per account and per schedule, so a bulk import should pace itself well below that.</p>
                         <h3 class="doc-subheading">Unauthenticated endpoints</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">The auth endpoints are limited separately, because they run before any key exists:</p>
                         <div class="doc-table-wrap">
@@ -1316,7 +1331,7 @@
                             <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
                             <code class="doc-inline-code">/api/events/{id}/cancel</code>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Call an event off without deleting it. The event keeps its page, which now says it is cancelled, and it keeps every sale and registration. It leaves the schedule's public calendar, stops selling, and is removed from any connected Google Calendar, Outlook calendar and CalDAV calendar. Any running boost campaign is stopped and refunded, and installment plans stop charging. Requires a Pro or Enterprise plan, and to be the event's own: the user who created it, or an owner or admin of the schedule that owns it. A schedule that only lists the event answers <code class="doc-inline-code">403</code>, and can take the event off its own list instead.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Call an event off without deleting it. The event keeps its page, which now says it is cancelled, and it keeps every sale and registration. It leaves the schedule's public calendar, stops selling, and is removed from any connected Google Calendar, Outlook calendar and CalDAV calendar. Any running boost campaign is stopped and refunded (one that runs in a boost partner's own ad account is stopped; it was never prepaid here), and installment plans stop charging. Requires a Pro or Enterprise plan, and to be the event's own: the user who created it, or an owner or admin of the schedule that owns it. A schedule that only lists the event answers <code class="doc-inline-code">403</code>, and can take the event off its own list instead.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">This is the way to stop an event that has sales, which <a href="#delete-event" class="doc-link">Delete Event</a> refuses. Sales are not refunded by this call: refund each one through <a href="#update-sale" class="doc-link">Update Sale</a> or in the admin panel.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Send <code class="doc-inline-code">notify_attendees</code> as <code class="doc-inline-code">true</code> to email the people who bought, registered or asked to be told, with an optional <code class="doc-inline-code">message</code> of up to 280 characters under it. Buyers are emailed only when the schedule sends from its own address. Nobody is emailed about a draft, and nobody is emailed unless you ask.</p>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">Unless the event is a draft, an <code class="doc-inline-code">event.cancelled</code> <a href="{{ route('marketing.docs.developer.webhooks') }}" class="doc-link">webhook</a> is sent. Cancelling an event that is already cancelled changes nothing and answers <code class="doc-inline-code">200</code>. An appointment booking is cancelled through its sale, which frees the slot and emails the guest. The reply is the event object.</p>
@@ -1906,6 +1921,442 @@
                 </div>
             </section>
     
+            <!-- Appointments: List Appointment Types -->
+            <section id="list-appointment-types" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            List Appointment Types
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
+                            <code class="doc-inline-code">/api/schedules/{subdomain}/appointment-types</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment types</a> a guest can book on this schedule right now, the same list its <code class="doc-inline-code">/book</code> page shows. The three appointment endpoints are written for an agent that talks to the guest, such as a voice agent answering the phone: every time comes with a sentence it can read out. The key's account must be an owner or admin of the schedule, and the schedule must be on Pro or Enterprise.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">On the hosted service a schedule needs its own email settings to send appointment mail, and a guest booked through the API is told about the booking, or sent a way to pay, only by email. Until those settings are in place, types with a price or an approval step are left out of this list, because the guest hears about payment, or the schedule's answer, only by email.</p>
+                        <h3 class="doc-subheading" id="appointment-type-object">The appointment type object</h3>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Field</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">id</code></td><td>Encoded type ID, used by the slots and bookings endpoints</td></tr>
+                                    <tr><td><code class="doc-inline-code">name</code>, <code class="doc-inline-code">description</code></td><td>What the guest is booking</td></tr>
+                                    <tr><td><code class="doc-inline-code">duration_minutes</code></td><td>Length of the appointment</td></tr>
+                                    <tr><td><code class="doc-inline-code">price</code>, <code class="doc-inline-code">currency</code></td><td>The price, and its currency (<code class="doc-inline-code">null</code> when free)</td></tr>
+                                    <tr><td><code class="doc-inline-code">payment</code></td><td><code class="doc-inline-code">free</code>, <code class="doc-inline-code">cash</code> (paid at the appointment, so the booking confirms at once) or <code class="doc-inline-code">online</code> (the guest is emailed a link to pay, and the time is held until then)</td></tr>
+                                    <tr><td><code class="doc-inline-code">location_type</code>, <code class="doc-inline-code">location</code></td><td><code class="doc-inline-code">in_person</code> with its address, <code class="doc-inline-code">phone</code> with its number, or <code class="doc-inline-code">online</code>. A meeting link is sent with the confirmation, not here.</td></tr>
+                                    <tr><td><code class="doc-inline-code">host_name</code></td><td>The team member the appointment is with, or <code class="doc-inline-code">null</code> (see <a href="{{ route('marketing.docs.appointments') }}#hosts" class="doc-link">Hosts</a>)</td></tr>
+                                    <tr><td><code class="doc-inline-code">timezone</code></td><td>The schedule's timezone, which every <code class="doc-inline-code">label</code> is written in</td></tr>
+                                    <tr><td><code class="doc-inline-code">requires_approval</code></td><td>Whether the schedule confirms each booking by hand</td></tr>
+                                    <tr><td><code class="doc-inline-code">asks_phone</code>, <code class="doc-inline-code">requires_phone</code></td><td>Whether a phone number is asked for, and whether it is required</td></tr>
+                                    <tr><td><code class="doc-inline-code">questions</code></td><td>The type's own questions: <code class="doc-inline-code">key</code>, <code class="doc-inline-code">label</code>, <code class="doc-inline-code">type</code>, <code class="doc-inline-code">required</code> and <code class="doc-inline-code">options</code>. Answers are sent as <code class="doc-inline-code">answers</code>, keyed by <code class="doc-inline-code">key</code>.</td></tr>
+                                    <tr><td><code class="doc-inline-code">next_available</code></td><td>The first open time, as a slot (<code class="doc-inline-code">starts_at</code>, <code class="doc-inline-code">date</code>, <code class="doc-inline-code">label</code>), or <code class="doc-inline-code">null</code></td></tr>
+                                    <tr><td><code class="doc-inline-code">booking_url</code></td><td>The type's public booking page</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> <span class="code-string">"{{ config('app.url') }}/api/schedules/sunset-clinic/appointment-types"</span> \
+         -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"data"</span>: [{
+            <span class="code-string">"id"</span>: <span class="code-string">"dGhpcyBpcw"</span>,
+            <span class="code-string">"name"</span>: <span class="code-string">"First consultation"</span>,
+            <span class="code-string">"duration_minutes"</span>: <span class="code-value">30</span>,
+            <span class="code-string">"price"</span>: <span class="code-value">0</span>,
+            <span class="code-string">"currency"</span>: <span class="code-value">null</span>,
+            <span class="code-string">"payment"</span>: <span class="code-string">"free"</span>,
+            <span class="code-string">"location_type"</span>: <span class="code-string">"in_person"</span>,
+            <span class="code-string">"host_name"</span>: <span class="code-string">"Sam Jones"</span>,
+            <span class="code-string">"timezone"</span>: <span class="code-string">"America/New_York"</span>,
+            <span class="code-string">"requires_approval"</span>: <span class="code-value">false</span>,
+            <span class="code-string">"questions"</span>: [],
+            <span class="code-string">"next_available"</span>: {
+                <span class="code-string">"starts_at"</span>: <span class="code-string">"2026-10-20T18:30:00Z"</span>,
+                <span class="code-string">"label"</span>: <span class="code-string">"Tuesday, October 20 at 2:30 PM EDT"</span>
+            }
+        }]
+    }</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Appointments: List Open Times -->
+            <section id="list-appointment-slots" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            List Open Times
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
+                            <code class="doc-inline-code">/api/appointment-types/{id}/slots</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">The times still open for a type, from the same rules the booking page uses: the weekly hours, date overrides, buffers, minimum notice, the booking window and what is already booked. Each slot carries its start as a UTC instant, to send back when booking, and a <code class="doc-inline-code">label</code> in the schedule's timezone and language to read to the guest.</p>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">from</code></td><td>No</td><td>First day to look at (Y-m-d, in the schedule's timezone). Defaults to today.</td></tr>
+                                    <tr><td><code class="doc-inline-code">days</code></td><td>No</td><td>How many days to cover, 1 to 31. Defaults to 7.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">When the range has nothing open, <code class="doc-inline-code">meta.next_available</code> is the first open time after it, so the agent can offer that rather than say there is nothing.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"data"</span>: [
+            {
+                <span class="code-string">"starts_at"</span>: <span class="code-string">"2026-10-20T18:30:00Z"</span>,
+                <span class="code-string">"date"</span>: <span class="code-string">"2026-10-20"</span>,
+                <span class="code-string">"label"</span>: <span class="code-string">"Tuesday, October 20 at 2:30 PM EDT"</span>
+            }
+        ],
+        <span class="code-string">"meta"</span>: {
+            <span class="code-string">"timezone"</span>: <span class="code-string">"America/New_York"</span>,
+            <span class="code-string">"from"</span>: <span class="code-string">"2026-10-20"</span>,
+            <span class="code-string">"days"</span>: <span class="code-value">7</span>,
+            <span class="code-string">"next_available"</span>: <span class="code-value">null</span>
+        }
+    }</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Appointments: Book -->
+            <section id="create-appointment-booking" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Book an Appointment
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/appointment-types/{id}/bookings</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Book a time for a guest. The booking is the guest's: your account does not become its buyer, and the owner's Bookings list and booking email say it was booked through the API, so a misheard name or address is checked.</p>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">slot</code></td><td>Yes</td><td>A slot's <code class="doc-inline-code">starts_at</code>, exactly as <a href="#list-appointment-slots" class="doc-link">List Open Times</a> gave it</td></tr>
+                                    <tr><td><code class="doc-inline-code">name</code></td><td>Yes</td><td>The guest's name (max 255 characters)</td></tr>
+                                    <tr><td><code class="doc-inline-code">email</code></td><td>Yes</td><td>The guest's email, where the confirmation or the payment link goes</td></tr>
+                                    <tr><td><code class="doc-inline-code">phone</code></td><td>When the type requires it</td><td>The guest's phone number. Ignored when the type does not ask for one.</td></tr>
+                                    <tr><td><code class="doc-inline-code">notes</code></td><td>No</td><td>A note for the schedule (max 5000 characters)</td></tr>
+                                    <tr><td><code class="doc-inline-code">guest_timezone</code></td><td>No</td><td>The guest's timezone (IANA name), for their emails</td></tr>
+                                    <tr><td><code class="doc-inline-code">answers</code></td><td>When a question is required</td><td>Object of answers to the type's <code class="doc-inline-code">questions</code>, keyed by <code class="doc-inline-code">key</code>. Each answer is text or a number, or a list of them.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h3 class="doc-subheading" id="appointment-booking-status">What comes back</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">201</code> with the booking. Its <code class="doc-inline-code">status</code> is one of:</p>
+                        <ul class="doc-list mb-6">
+                            <li><code class="doc-inline-code">confirmed</code>: booked. The guest is emailed a confirmation with a calendar invite.</li>
+                            <li><code class="doc-inline-code">pending_approval</code>: the schedule confirms bookings by hand. The time is held, and the guest is emailed when it is confirmed or declined.</li>
+                            <li><code class="doc-inline-code">awaiting_payment</code>: the type is paid online. The guest is emailed a link at once, and the time is held until <code class="doc-inline-code">pay_by</code>; unpaid by then, it is released.</li>
+                        </ul>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">manage_url</code> is the guest's own page for the booking, absolute, where they pay, change the time or cancel. <code class="doc-inline-code">emails_sent</code> says whether the guest was emailed, and <code class="doc-inline-code">summary</code> is a sentence for the agent to read back, such as "I've emailed a payment link to j…@gmail.com; your time is held until Tuesday, October 20 at 3:30 PM EDT."</p>
+                        <h3 class="doc-subheading" id="appointment-slot-taken">A taken time</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">If the time went in the meantime the answer is <code class="doc-inline-code">409</code> with <code class="doc-inline-code">"error": "slot_taken"</code> and <code class="doc-inline-code">alternatives</code>: the three open times nearest the one asked for, each a slot with its <code class="doc-inline-code">label</code>. The same guest already holding that exact time is <code class="doc-inline-code">409</code> with <code class="doc-inline-code">"error": "already_booked"</code>, with that <code class="doc-inline-code">booking</code>, so a retry whose first answer was lost can read it back. A <code class="doc-inline-code">422</code> lists what is wrong per field.</p>
+                        <h3 class="doc-subheading" id="appointment-idempotency">Retrying safely</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Send an <code class="doc-inline-code">Idempotency-Key</code> header (up to 64 letters, digits, dots, colons, dashes or underscores) and a repeat of the same request with the same key in the next 24 hours answers with the booking the first one made, marked <code class="doc-inline-code">Idempotent-Replayed: true</code>, instead of booking the guest twice. The same key on a different request is a <code class="doc-inline-code">422</code>. Only a booking is remembered, so a request that was refused can be retried with its key.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/appointment-types/dGhpcyBpcw/bookings"</span> \
+         -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+         -H <span class="code-string">"Idempotency-Key: call-8812-booking"</span> \
+         -H <span class="code-string">"Content-Type: application/json"</span> \
+         -d <span class="code-string">'{
+             "slot": "2026-10-20T18:30:00Z",
+             "name": "Jane Doe",
+             "email": "jane@example.com"
+         }'</span></code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response (201)</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"data"</span>: {
+            <span class="code-string">"id"</span>: <span class="code-string">"c2FsZTEy"</span>,
+            <span class="code-string">"status"</span>: <span class="code-string">"confirmed"</span>,
+            <span class="code-string">"starts_at"</span>: <span class="code-string">"2026-10-20T18:30:00Z"</span>,
+            <span class="code-string">"label"</span>: <span class="code-string">"Tuesday, October 20 at 2:30 PM EDT"</span>,
+            <span class="code-string">"host_name"</span>: <span class="code-string">"Sam Jones"</span>,
+            <span class="code-string">"pay_by"</span>: <span class="code-value">null</span>,
+            <span class="code-string">"emails_sent"</span>: <span class="code-value">true</span>,
+            <span class="code-string">"manage_url"</span>: <span class="code-string">"{{ config('app.url') }}/appointment/view/..."</span>,
+            <span class="code-string">"summary"</span>: <span class="code-string">"You're booked for First consultation with Sam Jones on Tuesday, October 20 at 2:30 PM EDT. A confirmation has been emailed to j…@example.com."</span>
+        }
+    }</code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response (409)</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+        <span class="code-string">"error"</span>: <span class="code-string">"slot_taken"</span>,
+        <span class="code-string">"alternatives"</span>: [
+            { <span class="code-string">"starts_at"</span>: <span class="code-string">"2026-10-20T18:00:00Z"</span>, <span class="code-string">"label"</span>: <span class="code-string">"Tuesday, October 20 at 2:00 PM EDT"</span> },
+            { <span class="code-string">"starts_at"</span>: <span class="code-string">"2026-10-20T19:00:00Z"</span>, <span class="code-string">"label"</span>: <span class="code-string">"Tuesday, October 20 at 3:00 PM EDT"</span> },
+            { <span class="code-string">"starts_at"</span>: <span class="code-string">"2026-10-20T19:30:00Z"</span>, <span class="code-string">"label"</span>: <span class="code-string">"Tuesday, October 20 at 3:30 PM EDT"</span> }
+        ]
+    }</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Boosts: List Boosts -->
+            <section id="boosts" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            List Boosts
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
+                            <code class="doc-inline-code">/api/boosts</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">For a network that runs the boosts on its schedules under <a href="{{ route('marketing.docs.boost') }}#partners" class="doc-link">its own Facebook Page and Meta ad account</a>. These endpoints answer only the key of the account that is the boost partner; any other key, a team member's included, gets <code class="doc-inline-code">403</code>. A boost launches when its current version is approved and its current budget is paid, in either order. Repeating an approval, a decline, a payment confirmation or a stop answers the boost as it stands, so a retry after a timeout is safe; a different decision on a boost that has moved on answers <code class="doc-inline-code">409</code>.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">updated_since</code> returns every boost changed at or after that time. Timestamps are whole seconds, so keep the last <code class="doc-inline-code">updated_at</code> you saw and drop the duplicates.</p>
+                        <h3 class="doc-subheading" id="boost-object">The boost object</h3>
+                        <div class="doc-table-wrap">
+                            <table class="doc-table">
+                                <thead><tr><th>Field</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code class="doc-inline-code">id</code></td><td>Encoded boost ID</td></tr>
+                                    <tr><td><code class="doc-inline-code">schedule</code></td><td>The schedule's subdomain</td></tr>
+                                    <tr><td><code class="doc-inline-code">event</code></td><td>id, name and url of the event</td></tr>
+                                    <tr><td><code class="doc-inline-code">status</code></td><td><code class="doc-inline-code">pending_approval</code> <code class="doc-inline-code">awaiting_payment</code> <code class="doc-inline-code">ready</code> <code class="doc-inline-code">in_review</code> <code class="doc-inline-code">active</code> <code class="doc-inline-code">completed</code> <code class="doc-inline-code">declined</code> <code class="doc-inline-code">rejected</code> <code class="doc-inline-code">stopped</code>. <code class="doc-inline-code">ready</code> is approved and paid, waiting only for your account to be confirmed.</td></tr>
+                                    <tr><td><code class="doc-inline-code">version</code></td><td>Raised by every change to the headline, text, description, button, picture or link</td></tr>
+                                    <tr><td><code class="doc-inline-code">ad</code></td><td>headline, text, description, call_to_action, image_url, destination_url</td></tr>
+                                    <tr><td><code class="doc-inline-code">audience.summary</code></td><td>Who sees it, in words</td></tr>
+                                    <tr><td><code class="doc-inline-code">budget</code></td><td>amount (a decimal string) and currency</td></tr>
+                                    <tr><td><code class="doc-inline-code">starts_at, ends_at</code></td><td>ISO 8601, UTC</td></tr>
+                                    <tr><td><code class="doc-inline-code">approval</code></td><td>approved_version, decided_at, note, and decline_reason (<code class="doc-inline-code">partner</code>, <code class="doc-inline-code">ownership_changed</code> or <code class="doc-inline-code">end_passed</code>)</td></tr>
+                                    <tr><td><code class="doc-inline-code">payment</code></td><td>confirmed (only for the current budget), reference, amount, currency, confirmed_at</td></tr>
+                                    <tr><td><code class="doc-inline-code">spend</code></td><td>amount, currency, as_of, and final (true once Meta's figures for an ended boost stop moving)</td></tr>
+                                    <tr><td><code class="doc-inline-code">meta_review</code></td><td>Meta's reason when it refused the ad</td></tr>
+                                    <tr><td><code class="doc-inline-code">stopped_at, stop_reason</code></td><td>When it stopped, and the note given, or its code when no note was written</td></tr>
+                                    <tr><td><code class="doc-inline-code">stop_code</code></td><td>Who or what stopped it, whether or not a note was written: <code class="doc-inline-code">partner</code>, <code class="doc-inline-code">business</code>, <code class="doc-inline-code">withdrawn</code> (taken back before launch), <code class="doc-inline-code">access_withdrawn</code> or <code class="doc-inline-code">event_removed</code></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Filters: <code class="doc-inline-code">status</code>, <code class="doc-inline-code">schedule</code> (a subdomain), <code class="doc-inline-code">updated_since</code>, and <code class="doc-inline-code">page</code> / <code class="doc-inline-code">per_page</code> (up to 500).</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> <span class="code-string">"{{ config('app.url') }}/api/boosts?updated_since=2026-10-20T16:00:00Z"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                        </div>
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>Response</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code>{
+    <span class="code-string">"data"</span>: [{
+        <span class="code-string">"id"</span>: <span class="code-string">"b8Kq2Zx"</span>,
+        <span class="code-string">"schedule"</span>: <span class="code-string">"harbor-cafe"</span>,
+        <span class="code-string">"status"</span>: <span class="code-string">"pending_approval"</span>,
+        <span class="code-string">"version"</span>: <span class="code-value">2</span>,
+        <span class="code-string">"budget"</span>: { <span class="code-string">"amount"</span>: <span class="code-string">"50.00"</span>, <span class="code-string">"currency"</span>: <span class="code-string">"USD"</span> },
+        <span class="code-string">"payment"</span>: { <span class="code-string">"confirmed"</span>: <span class="code-value">false</span> }
+    }],
+    <span class="code-string">"meta"</span>: { <span class="code-string">"current_page"</span>: <span class="code-value">1</span>, <span class="code-string">"total"</span>: <span class="code-value">1</span> }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boosts: Get a Boost -->
+            <section id="get-boost" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            Get a Boost
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
+                            <code class="doc-inline-code">/api/boosts/{id}</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">One boost with its exact ad, its approval, its payment and its spend.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> <span class="code-string">"{{ config('app.url') }}/api/boosts/b8Kq2Zx"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boosts: Approve a Boost -->
+            <section id="approve-boost" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            Approve a Boost
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/boosts/{id}/approve</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Approve the <code class="doc-inline-code">version</code> you reviewed, with an optional <code class="doc-inline-code">note</code>. A version that is not the current one answers <code class="doc-inline-code">409</code> with the code <code class="doc-inline-code">stale_version</code>, so an approval of earlier wording can never launch later wording.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/boosts/b8Kq2Zx/approve"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+     -H <span class="code-string">"Content-Type: application/json"</span> \
+     -d <span class="code-string">'{"version": 2, "note": "Approved by the desk"}'</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boosts: Decline a Boost -->
+            <section id="decline-boost" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            Decline a Boost
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/boosts/{id}/decline</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Send it back with a <code class="doc-inline-code">note</code> (required). The business sees the note and can edit and send it again.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/boosts/b8Kq2Zx/decline"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+     -H <span class="code-string">"Content-Type: application/json"</span> \
+     -d <span class="code-string">'{"note": "Please use a photo of the venue"}'</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boosts: Confirm a Payment -->
+            <section id="confirm-boost-payment" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            Confirm a Payment
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/boosts/{id}/confirm-payment</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Record that the business paid you for this budget: your own <code class="doc-inline-code">reference</code> and <code class="doc-inline-code">amount</code> (and optionally <code class="doc-inline-code">currency</code>), returned on the boost and on the statement. The amount is not compared with the budget. A changed budget clears the confirmation.</p>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">DELETE /api/boosts/{id}/confirm-payment</code> withdraws the confirmation before the boost launches, for a refund or a dispute.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/boosts/b8Kq2Zx/confirm-payment"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+     -H <span class="code-string">"Content-Type: application/json"</span> \
+     -d <span class="code-string">'{"reference": "pi_3Qx", "amount": "60.00", "currency": "USD"}'</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boosts: Stop a Boost -->
+            <section id="stop-boost" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            Stop a Boost
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-post px-2 py-1 rounded text-sm font-medium">POST</span>
+                            <code class="doc-inline-code">/api/boosts/{id}/stop</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">Pause the campaign at Meta at once and end it, with an optional <code class="doc-inline-code">reason</code>. A stopped boost does not restart.</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> -X POST <span class="code-string">"{{ config('app.url') }}/api/boosts/b8Kq2Zx/stop"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span> \
+     -H <span class="code-string">"Content-Type: application/json"</span> \
+     -d <span class="code-string">'{"reason": "Event cancelled"}'</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boosts: Boost Statements -->
+            <section id="boost-statements" class="doc-section api-endpoint-section">
+                <div class="api-endpoint-row">
+                    <div class="api-endpoint-desc">
+                        <h2 class="doc-heading">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                            </svg>
+                            Boost Statements
+                        </h2>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="api-method-pill api-method-pill-get px-2 py-1 rounded text-sm font-medium">GET</span>
+                            <code class="doc-inline-code">/api/boost-statements/{period}</code>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6"><code class="doc-inline-code">GET /api/boost-statements</code> lists the monthly statements, newest first. <code class="doc-inline-code">GET /api/boost-statements/2026-11</code> answers one month: a line per campaign with its spend that month, the fee (20% of it) and any adjustment for spend Meta corrected in an earlier month (that line's <code class="doc-inline-code">month</code> names it), with the totals and the charge to your card (<code class="doc-inline-code">pending</code>, <code class="doc-inline-code">paid</code>, <code class="doc-inline-code">failed</code>, <code class="doc-inline-code">action_required</code> or <code class="doc-inline-code">carried</code>, when the amount is too small to charge and moves to the next month).</p>
+                    </div>
+                    <div class="api-endpoint-code">
+                        <div class="doc-code-block">
+                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                            <pre><code><span class="code-keyword">curl</span> <span class="code-string">"{{ config('app.url') }}/api/boost-statements/2026-11"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Error Handling -->
             <section id="error-handling" class="doc-section api-endpoint-section">
                 <div class="api-endpoint-row">
@@ -1922,12 +2373,12 @@
                                 <thead><tr><th>Code</th><th>When you see it</th></tr></thead>
                                 <tbody>
                                     <tr><td><span class="text-green-700 dark:text-green-400 font-semibold">200</span></td><td>Success</td></tr>
-                                    <tr><td><span class="text-green-700 dark:text-green-400 font-semibold">201</span></td><td>Created, returned by Register, Create Schedule, Create Sub-Schedule, Create Event and Create Sale</td></tr>
+                                    <tr><td><span class="text-green-700 dark:text-green-400 font-semibold">201</span></td><td>Created, returned by Register, Create Schedule, Create Sub-Schedule, Create Event, Create Sale and Book an Appointment</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">400</span></td><td>Verification codes requested on a selfhosted install, where they do not apply</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">401</span></td><td>API key missing, invalid, or past its one-year expiry. Also a wrong email or password on Login.</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">403</span></td><td>You are not an owner or admin of the record, the schedule is not on a Pro or Enterprise plan, the sale row is a named guest's rather than its group's primary, the account uses two-factor authentication, or selfhosted registration is closed</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">404</span></td><td>The record does not exist or has been deleted. A schedule your key cannot reach also answers <code class="doc-inline-code">404</code>, where an event or a sale answers <code class="doc-inline-code">403</code>.</td></tr>
-                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">409</span></td><td>Login when the account already has an unexpired API key, or a refund whose outcome could not be confirmed or is still in progress</td></tr>
+                                    <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">409</span></td><td>Login when the account already has an unexpired API key, a refund whose outcome could not be confirmed or is still in progress, an appointment time that was just taken (with <code class="doc-inline-code">alternatives</code>), or a booking still being made under the same <code class="doc-inline-code">Idempotency-Key</code></td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">422</span></td><td>Validation error, with field-level detail in <code class="doc-inline-code">errors</code>. Also business refusals such as an unmatched venue, a sold-out ticket, a past event, deleting an event that has sales, or the daily cap on new events.</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">423</span></td><td>The API key is blocked for 15 minutes after 10 consecutive failed attempts</td></tr>
                                     <tr><td><span class="text-red-700 dark:text-red-400 font-semibold">429</span></td><td>Rate limit exceeded, see <a href="#rate-limits" class="doc-link">Rate Limits</a></td></tr>

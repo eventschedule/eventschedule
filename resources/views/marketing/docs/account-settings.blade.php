@@ -30,6 +30,11 @@
             <x-doc-nav-link href="#microsoft">Outlook Calendar</x-doc-nav-link>
             <x-doc-nav-link href="#facebook">Facebook Settings</x-doc-nav-link>
         </x-doc-nav-group>
+        <x-doc-nav-group label="Boosts">
+            <x-doc-nav-link href="#boosts">Boosts</x-doc-nav-link>
+            <x-doc-nav-link href="#boosts-account" sub>Page and Ad Account</x-doc-nav-link>
+            <x-doc-nav-link href="#boosts-card" sub>Fee Card</x-doc-nav-link>
+        </x-doc-nav-group>
         <x-doc-nav-group label="Developers">
             <x-doc-nav-link href="#api">API Settings</x-doc-nav-link>
             <x-doc-nav-link href="#webhooks">Webhooks</x-doc-nav-link>
@@ -556,6 +561,30 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Setting it up</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Facebook login needs a Facebook app configured by whoever runs the installation. Without it there is no Facebook button or settings section. See <x-link href="{{ route('marketing.docs.saas.facebook_login') }}">Facebook login setup</x-link>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Boosts (boost partners only) -->
+    <section id="boosts" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535" />
+            </svg>
+            Boosts
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Shown only to an account set up as a boost partner: a network whose schedules boost under its own Facebook Page and Meta ad account. It is separate from the Facebook sign-in under Integrations. How the boosts themselves work is in <x-link href="{{ route('marketing.docs.boost') }}#partners">Boosting under your own Page</x-link>.
+        </p>
+
+        <div class="doc-fields">
+            <div class="doc-field" id="boosts-account">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Page and ad account</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Follow the numbered steps to share your ad account and Page with our Meta Business, enter the two IDs (a number, <code class="doc-inline-code">act_</code> followed by the number, or the address copied from Facebook), and press <strong class="text-gray-900 dark:text-white">Save and check</strong>. Each check is listed with its result, with the fix when one fails, and <strong class="text-gray-900 dark:text-white">Check again</strong> runs them again once you have fixed something on Facebook. The status reads Waiting for confirmation until we confirm the IDs once, and you are emailed when that is done; requests approved and paid in the meantime start then. Where it is offered, you can sign in with Facebook instead and pick the Page and ad account from your own. <strong class="text-gray-900 dark:text-white">Disconnect</strong> stops your running boosts first, then removes the connection. The same block holds <strong class="text-gray-900 dark:text-white">How businesses pay you</strong>: a link or a contact shown to a business once you approve its boost.</p>
+            </div>
+            <div class="doc-field" id="boosts-card">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Fee card</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The card our monthly fee is charged to: 20% of the previous month's actual ad spend. When a charge is declined we try the card again automatically for 7 days. A payment your bank asks you to confirm is not tried again on its own: open the statement and press <strong class="text-gray-900 dark:text-white">Pay now</strong> to confirm it. After you update the card, a declined statement is tried on the new card at the next daily charge.</p>
             </div>
         </div>
     </section>

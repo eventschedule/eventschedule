@@ -347,6 +347,14 @@ class ApiScheduleController extends Controller
             ->get();
 
         foreach ($activeCampaigns as $campaign) {
+            // A partner boost is stopped, never deleted at Meta and never refunded: the platform
+            // holds none of its money, and its spend must stay readable for the statement.
+            if ($campaign->isPartner()) {
+                \App\Services\BoostPartnerService::stopInCascade($campaign);
+
+                continue;
+            }
+
             try {
                 $cancelled = \DB::transaction(function () use ($campaign) {
                     $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);

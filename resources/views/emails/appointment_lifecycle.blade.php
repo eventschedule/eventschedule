@@ -3,7 +3,7 @@
      state as $tone so the eyebrow says it at a glance. No add-to-calendar here: none of these is a
      confirmed booking. --}}
 <x-email.layout :theme="$theme" :title="$heading" :preheader="$intro">
-<x-email.heading :eyebrow="$heading" :tone="$tone ?? null" auto>{{ $type?->name ?? $event->name }}</x-email.heading>
+<x-email.heading :eyebrow="$heading" :tone="$tone ?? null" :subtitle="($apptHost = $event->appointmentHostName()) ? __('messages.appointments_with_host', ['name' => $apptHost]) : null" auto>{{ $type?->name ?? $event->name }}</x-email.heading>
 
 <x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
 <x-email.text>{{ $intro }}</x-email.text>

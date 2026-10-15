@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BoostAd;
 use App\Models\BoostCampaign;
+use App\Models\BoostPartner;
 use App\Models\Event;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Facades\Http;
@@ -19,7 +20,14 @@ class MetaAdsService
 
     protected string $apiVersion;
 
-    public function __construct()
+    protected string $pageId;
+
+    /**
+     * With no arguments the platform's own token, ad account and Page from .env. A boost
+     * partner's campaign is sent with its partner's account instead: build it with
+     * forCampaign() or forPartner(), never with `new`.
+     */
+    public function __construct(?string $accessToken = null, ?string $adAccountId = null, ?string $pageId = null)
     {
         // META_ACCESS_TOKEN and META_AD_ACCOUNT_ID have no env() default, so an install that
         // never set them holds the key with a null value and config()'s fallback never applies.
@@ -27,13 +35,101 @@ class MetaAdsService
         // MetaAdsServiceFake, which inherits this constructor) from fataling on construction.
         $this->apiVersion = (string) config('services.meta.api_version', 'v21.0');
         $this->baseUrl = "https://graph.facebook.com/{$this->apiVersion}";
-        $this->accessToken = (string) config('services.meta.access_token');
-        $this->adAccountId = (string) config('services.meta.ad_account_id');
+        $this->accessToken = (string) ($accessToken ?? config('services.meta.access_token'));
+        $this->adAccountId = self::bareAccountId((string) ($adAccountId ?? config('services.meta.ad_account_id')));
+        $this->pageId = (string) ($pageId ?? config('services.meta.page_id'));
+    }
+
+    /**
+     * The service a campaign must be sent with: its partner's token and the ad account and Page
+     * it was submitted under (a snapshot, so a partner that reconnects to another account does
+     * not move a running campaign), or the platform's own for every other campaign.
+     */
+    public static function forCampaign(BoostCampaign $campaign): self
+    {
+        if (! $campaign->isPartner()) {
+            return static::make();
+        }
+
+        $partner = $campaign->partner;
+
+        return static::make(static::partnerToken($partner), $campaign->meta_ad_account_id ?: $partner?->ad_account_id, $campaign->meta_page_id ?: $partner?->page_id);
+    }
+
+    public static function forPartner(BoostPartner $partner): self
+    {
+        return static::make(static::partnerToken($partner), $partner->ad_account_id, $partner->page_id);
+    }
+
+    /**
+     * A login partner whose token Meta withdrew (or never gave) has no access: answer as Meta
+     * would (190), so every caller takes its "access lost" path. Never fall through to the fake
+     * or to the platform's token.
+     */
+    protected static function partnerToken(?BoostPartner $partner): ?string
+    {
+        $token = $partner?->accessToken();
+
+        if ($partner && $partner->connection_method === BoostPartner::METHOD_LOGIN && (string) $token === '') {
+            throw new \App\Exceptions\MetaApiException('The partner has no Meta token', 190);
+        }
+
+        return $token;
+    }
+
+    /**
+     * The fake stands in whenever the platform has no token of its own (tests, local dev),
+     * exactly as BoostController::getMetaService() always chose it; it records the account and
+     * Page it was handed so a test can assert where a campaign would have gone.
+     */
+    protected static function make(?string $token = null, ?string $adAccountId = null, ?string $pageId = null): self
+    {
+        // The fake only when no token was handed in (the platform's own is meant) and the
+        // platform has none (tests, local dev). A login partner's own token always gets the real
+        // service, and a missing one never reaches here (partnerToken()).
+        if ($token === null && (string) config('services.meta.access_token') === '') {
+            return new MetaAdsServiceFake($token, $adAccountId, $pageId);
+        }
+
+        return new static($token, $adAccountId, $pageId);
+    }
+
+    public static function bareAccountId(string $id): string
+    {
+        return str_starts_with($id, 'act_') ? substr($id, 4) : $id;
+    }
+
+    public function adAccountId(): string
+    {
+        return $this->adAccountId;
+    }
+
+    public function pageId(): string
+    {
+        return $this->pageId;
     }
 
     public static function isBoostConfigured(): bool
     {
         return ! empty(config('services.meta.access_token'));
+    }
+
+    /**
+     * Whether boost:sync has anything to follow: the platform's own Meta setup, or a boost
+     * partner (whose campaigns run in the partner's ad account, with the partner's token after a
+     * login). Both cron rails gate boost:sync on this.
+     */
+    public static function shouldSync(): bool
+    {
+        if (static::isBoostConfigured()) {
+            return true;
+        }
+
+        try {
+            return BoostPartner::whereNotNull('enabled_at')->exists();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public function isConfigured(): bool
@@ -158,7 +254,7 @@ class MetaAdsService
         $creativeData = [
             'name' => $ad->headline.' - Creative',
             'object_story_spec' => json_encode([
-                'page_id' => config('services.meta.page_id'),
+                'page_id' => $this->pageId,
                 'link_data' => [
                     'message' => $ad->primary_text,
                     'link' => $ad->destination_url,
@@ -866,12 +962,7 @@ class MetaAdsService
     {
         $response = Http::withToken($this->accessToken)->timeout(30)->get("{$this->baseUrl}/{$endpoint}", $params);
 
-        if (! $response->successful()) {
-            $error = $response->json('error.message', 'Unknown error');
-            throw new \Exception("Meta API error: {$error}");
-        }
-
-        return $response->json();
+        return $this->decode($response);
     }
 
     /**
@@ -881,12 +972,7 @@ class MetaAdsService
     {
         $response = Http::withToken($this->accessToken)->timeout(30)->post("{$this->baseUrl}/{$endpoint}", $data);
 
-        if (! $response->successful()) {
-            $error = $response->json('error.message', 'Unknown error');
-            throw new \Exception("Meta API error: {$error}");
-        }
-
-        return $response->json();
+        return $this->decode($response);
     }
 
     /**
@@ -896,11 +982,292 @@ class MetaAdsService
     {
         $response = Http::withToken($this->accessToken)->timeout(30)->delete("{$this->baseUrl}/{$endpoint}");
 
+        return $this->decode($response);
+    }
+
+    /**
+     * A failure throws MetaApiException, which extends \Exception, so every existing catch
+     * still catches it; the partner paths read its code to tell withdrawn access from a hiccup.
+     */
+    protected function decode(\Illuminate\Http\Client\Response $response): array
+    {
         if (! $response->successful()) {
             $error = $response->json('error.message', 'Unknown error');
-            throw new \Exception("Meta API error: {$error}");
+
+            throw new \App\Exceptions\MetaApiException(
+                "Meta API error: {$error}",
+                $response->json('error.code') !== null ? (int) $response->json('error.code') : null,
+                $response->json('error.error_subcode') !== null ? (int) $response->json('error.error_subcode') : null,
+                $response->status(),
+                $response->json('error.error_user_msg'),
+            );
         }
 
-        return $response->json();
+        return $response->json() ?? [];
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Boost partners. These throw MetaApiException rather than answering false or null: a
+    // partner's campaign is in someone else's ad account, and "we could not reach it" must
+    // never read as "it is paused" or "it spent nothing".
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * Create the campaign, ad set and ad for a partner boost from its approved version. The
+     * Meta campaign id is handed to $onCampaignCreated straight after the first call, so a
+     * retried job after a killed worker resumes from it instead of creating a second live
+     * campaign in the partner's account.
+     */
+    public function createPartnerCampaign(BoostCampaign $campaign, \App\Models\BoostAdVersion $version, ?callable $onCampaignCreated = null): array
+    {
+        $metaCampaignId = $campaign->meta_campaign_id;
+
+        if (! $metaCampaignId) {
+            $response = $this->apiPost("act_{$this->adAccountId}/campaigns", [
+                'name' => $campaign->name,
+                'objective' => $campaign->objective,
+                'status' => 'PAUSED',
+                'special_ad_categories' => [],
+            ]);
+            $metaCampaignId = $response['id'];
+            if ($onCampaignCreated) {
+                $onCampaignCreated($metaCampaignId);
+            }
+        }
+
+        $metaAdSetId = $campaign->meta_adset_id;
+        if (! $metaAdSetId) {
+            $targeting = $version->targeting ?? $campaign->targeting ?? $this->getDefaultTargeting();
+            if ($campaign->placements) {
+                $targeting['publisher_platforms'] = $campaign->placements;
+            }
+
+            $adSetData = [
+                'name' => $campaign->name.' - Ad Set',
+                'campaign_id' => $metaCampaignId,
+                'billing_event' => 'IMPRESSIONS',
+                'optimization_goal' => $this->getOptimizationGoal($campaign->objective),
+                'targeting' => json_encode($targeting),
+                'lifetime_budget' => static::minorUnits((float) $version->budget, $campaign->currency_code),
+                'status' => 'PAUSED',
+            ];
+            if ($campaign->scheduled_start) {
+                $adSetData['start_time'] = $campaign->scheduled_start->toIso8601String();
+            }
+            if ($version->end_date ?? $campaign->scheduled_end) {
+                $adSetData['end_time'] = ($version->end_date ?? $campaign->scheduled_end)->toIso8601String();
+            }
+
+            $metaAdSetId = $this->apiPost("act_{$this->adAccountId}/adsets", $adSetData)['id'];
+            $campaign->forceFill(['meta_adset_id' => $metaAdSetId])->save();
+        }
+
+        $ad = $campaign->ads()->first();
+        if ($ad && ! $ad->meta_ad_id) {
+            $this->createAd($ad, $metaAdSetId);
+        }
+
+        $this->apiPost($metaCampaignId, ['status' => 'ACTIVE']);
+        $this->apiPost($metaAdSetId, ['status' => 'ACTIVE']);
+
+        return ['meta_campaign_id' => $metaCampaignId, 'meta_adset_id' => $metaAdSetId];
+    }
+
+    /**
+     * Swap a running ad to a newly approved creative. Meta cannot edit a creative in place: a
+     * new one is created and the ad is pointed at it, and Meta reviews the ad again.
+     */
+    public function updateCreative(BoostAd $ad): void
+    {
+        $imageHash = $ad->image_hash;
+        if (! $imageHash && $ad->image_url) {
+            $imageHash = $this->uploadImage($ad->image_url);
+            if (! $imageHash) {
+                throw new \App\Exceptions\MetaApiException('Failed to upload ad image');
+            }
+        }
+
+        $creativeId = $this->apiPost("act_{$this->adAccountId}/adcreatives", [
+            'name' => $ad->headline.' - Creative',
+            'object_story_spec' => json_encode([
+                'page_id' => $this->pageId,
+                'link_data' => [
+                    'message' => $ad->primary_text,
+                    'link' => $ad->destination_url,
+                    'name' => $ad->headline,
+                    'description' => $ad->description,
+                    'call_to_action' => ['type' => $ad->call_to_action],
+                    'image_hash' => $imageHash,
+                ],
+            ]),
+        ])['id'];
+
+        $this->apiPost($ad->meta_ad_id, ['creative' => json_encode(['creative_id' => $creativeId])]);
+
+        $ad->update(['image_hash' => $imageHash, 'meta_creative_id' => $creativeId]);
+    }
+
+    /**
+     * Change a running ad set's lifetime budget, end time or audience.
+     */
+    public function updateAdSet(string $adSetId, ?float $lifetimeBudget = null, ?\Carbon\CarbonInterface $endTime = null, ?array $targeting = null, ?string $currency = null): void
+    {
+        $data = [];
+        if ($lifetimeBudget !== null) {
+            $data['lifetime_budget'] = static::minorUnits($lifetimeBudget, $currency);
+        }
+        if ($endTime !== null) {
+            $data['end_time'] = $endTime->toIso8601String();
+        }
+        if ($targeting !== null) {
+            $data['targeting'] = json_encode($targeting);
+        }
+
+        if ($data) {
+            $this->apiPost($adSetId, $data);
+        }
+    }
+
+    /**
+     * A budget in the units Meta's API counts in for that currency: hundredths for most, whole
+     * units for those Meta lists with an offset of 1 (its own currency table, not Stripe's).
+     * A partner's ad account can be in any of them; the platform's own was always USD.
+     */
+    public static function minorUnits(float $amount, ?string $currency): int
+    {
+        $wholeUnits = ['CLP', 'COP', 'CRC', 'HUF', 'ISK', 'IDR', 'JPY', 'KRW', 'PYG', 'TWD', 'VND'];
+
+        return in_array(strtoupper((string) $currency), $wholeUnits, true)
+            ? (int) round($amount)
+            : (int) round($amount * 100);
+    }
+
+    public function setStatus(string $objectId, string $status): void
+    {
+        $this->apiPost($objectId, ['status' => $status]);
+    }
+
+    /**
+     * The ad's effective_status and Meta's review feedback, throwing on failure.
+     */
+    public function adState(string $metaAdId): array
+    {
+        $response = $this->apiGet($metaAdId, ['fields' => 'status,effective_status,ad_review_feedback']);
+
+        return [
+            'status' => $response['effective_status'] ?? $response['status'] ?? null,
+            'rejection_reason' => $response['ad_review_feedback']['global']['review_feedback']
+                ?? (is_array($response['ad_review_feedback']['global'] ?? null) ? implode(' ', $response['ad_review_feedback']['global']) : null),
+        ];
+    }
+
+    /**
+     * Lifetime totals for a campaign, throwing on failure.
+     */
+    public function campaignTotals(BoostCampaign $campaign): ?array
+    {
+        $response = $this->apiGet("{$campaign->meta_campaign_id}/insights", [
+            'fields' => 'impressions,reach,clicks,ctr,cpc,cpm,spend,actions',
+            'date_preset' => 'maximum',
+        ]);
+
+        return $response['data'][0] ?? null;
+    }
+
+    /**
+     * Spend per day, in the ad account's timezone (Meta's insights are always reported in it).
+     *
+     * @return array<string, float> Y-m-d => spend
+     */
+    public function dailySpend(BoostCampaign $campaign, \Carbon\CarbonInterface $since, \Carbon\CarbonInterface $until): array
+    {
+        $days = [];
+        $params = [
+            'fields' => 'spend',
+            'time_increment' => 1,
+            'time_range' => json_encode(['since' => $since->format('Y-m-d'), 'until' => $until->format('Y-m-d')]),
+            'limit' => 100,
+        ];
+
+        $endpoint = "{$campaign->meta_campaign_id}/insights";
+        for ($page = 0; $page < 20 && $endpoint; $page++) {
+            $response = $this->apiGet($endpoint, $params);
+            foreach ($response['data'] ?? [] as $row) {
+                if (! empty($row['date_start'])) {
+                    $days[$row['date_start']] = round((float) ($row['spend'] ?? 0), 2);
+                }
+            }
+            $after = $response['paging']['cursors']['after'] ?? null;
+            if (! $after || empty($response['paging']['next'])) {
+                break;
+            }
+            $params['after'] = $after;
+        }
+
+        return $days;
+    }
+
+    /**
+     * Read the partner's ad account: name, currency, timezone, status and owning Business.
+     */
+    public function adAccountDetails(): array
+    {
+        return $this->apiGet("act_{$this->adAccountId}", [
+            'fields' => 'name,currency,timezone_name,account_status,disable_reason,business{name},spend_cap,amount_spent',
+        ]);
+    }
+
+    public function pageDetails(): array
+    {
+        return $this->apiGet($this->pageId, ['fields' => 'name']);
+    }
+
+    /**
+     * For a partner share: give our system user the tasks it needs on the assets the partner
+     * shared with our Business. Meta answers an error when the share has not been made.
+     */
+    public function assignSharedAssets(string $businessId, string $systemUserId): void
+    {
+        $this->apiPost("act_{$this->adAccountId}/assigned_users", [
+            'user' => $systemUserId,
+            'tasks' => json_encode(['MANAGE', 'ADVERTISE', 'ANALYZE']),
+            'business' => $businessId,
+        ]);
+
+        $this->apiPost("{$this->pageId}/assigned_users", [
+            'user' => $systemUserId,
+            'tasks' => json_encode(['ADVERTISE', 'ANALYZE']),
+            'business' => $businessId,
+        ]);
+    }
+
+    /**
+     * Whether our Business holds the shared ad account and Page with the tasks a boost needs.
+     *
+     * @return array{ad_account: ?array, page: ?array}
+     */
+    public function sharedAssetTasks(string $businessId): array
+    {
+        $accounts = $this->apiGet("{$businessId}/client_ad_accounts", ['fields' => 'id,name,permitted_tasks', 'limit' => 200]);
+        $pages = $this->apiGet("{$businessId}/client_pages", ['fields' => 'id,name,permitted_tasks', 'limit' => 200]);
+
+        $account = collect($accounts['data'] ?? [])->first(fn ($a) => self::bareAccountId((string) ($a['id'] ?? '')) === $this->adAccountId);
+        $page = collect($pages['data'] ?? [])->first(fn ($p) => (string) ($p['id'] ?? '') === $this->pageId);
+
+        return ['ad_account' => $account, 'page' => $page];
+    }
+
+    /**
+     * After Facebook Login for Business: the Pages and ad accounts the person can choose from.
+     */
+    public function listOwnAssets(): array
+    {
+        $pages = $this->apiGet('me/accounts', ['fields' => 'id,name,tasks', 'limit' => 200]);
+        $accounts = $this->apiGet('me/adaccounts', ['fields' => 'id,name,currency,timezone_name,account_status', 'limit' => 200]);
+
+        return [
+            'pages' => $pages['data'] ?? [],
+            'ad_accounts' => $accounts['data'] ?? [],
+        ];
     }
 }

@@ -55,6 +55,15 @@ class AccountDeletionService
 
     public function prepare(User $user): void
     {
+        // Appointment types this person hosts on schedules somebody else owns are switched off,
+        // and each owner told, before the account goes (AppointmentHostService).
+        $this->attempt(fn () => app(AppointmentHostService::class)->releaseEverywhere($user));
+
+        // A boost partner: its running boosts are stopped while its access still works, its
+        // Stripe customer (the fee card) is deleted at Stripe, and the row with the Meta token
+        // goes with the account (boost_partners.user_id cascades).
+        $this->attempt(fn () => $this->forgetBoostPartner($user));
+
         $ownedRoleIds = Role::where('user_id', $user->id)->pluck('id')->all();
 
         // What the cascades are about to take: the events still keyed to this user after the
@@ -101,6 +110,25 @@ class AccountDeletionService
     }
 
     /** Runs one step; a failure is reported and the deletion goes on. */
+    private function forgetBoostPartner(User $user): void
+    {
+        $partner = \App\Models\BoostPartner::where('user_id', $user->id)->first();
+        if (! $partner) {
+            return;
+        }
+
+        $service = app(\App\Services\BoostPartnerService::class);
+        $partner->campaigns()->whereIn('status', \App\Models\BoostCampaign::PARTNER_OPEN_STATUSES)->each(
+            fn ($campaign) => $this->attempt(fn () => $service->stop($campaign, null, \App\Services\BoostPartnerService::STOP_BY_PARTNER))
+        );
+
+        if ($partner->stripe_customer_id && config('services.stripe_platform.secret')) {
+            (new \Stripe\StripeClient(config('services.stripe_platform.secret')))->customers->delete($partner->stripe_customer_id);
+        }
+
+        $partner->forceFill(['meta_token' => null, 'stripe_customer_id' => null, 'stripe_payment_method_id' => null])->save();
+    }
+
     private function attempt(\Closure $step): mixed
     {
         try {

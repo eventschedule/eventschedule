@@ -699,6 +699,14 @@ class Event extends Model
                 ->get();
 
             foreach ($activeCampaigns as $campaign) {
+                // A partner boost is stopped, never deleted at Meta and never refunded: the platform
+                // holds none of its money, and its spend must stay readable for the statement.
+                if ($campaign->isPartner()) {
+                    \App\Services\BoostPartnerService::stopInCascade($campaign);
+
+                    continue;
+                }
+
                 try {
                     if ($campaign->meta_campaign_id && \App\Services\MetaAdsService::isBoostConfigured()) {
                         $metaService = app()->make(\App\Services\MetaAdsService::class);
@@ -1228,6 +1236,27 @@ class Event extends Model
     public function appointmentType()
     {
         return $this->belongsTo(AppointmentType::class);
+    }
+
+    /**
+     * The team member a booking was made with (events.appointment_host_user_id, stamped by
+     * AppointmentService::book() and kept when the type's host changes). Not fillable.
+     */
+    public function appointmentHost()
+    {
+        return $this->belongsTo(User::class, 'appointment_host_user_id');
+    }
+
+    /** The booking's host as a guest sees it ("with Sam"): the name only, never the address. */
+    public function appointmentHostName(): ?string
+    {
+        if (! $this->appointment_host_user_id) {
+            return null;
+        }
+
+        $name = trim((string) $this->appointmentHost?->name);
+
+        return $name !== '' ? $name : null;
     }
 
     /** Whether this event is a Calendly-style appointment booking (vs a regular event). */

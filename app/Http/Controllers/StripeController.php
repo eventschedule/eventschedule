@@ -127,6 +127,17 @@ class StripeController extends Controller
                 // Stripe Connect payments (hosted mode)
                 $paymentIntent = $event->data->object;
 
+                // A boost partner's monthly fee, on the platform account: recorded here too, so a
+                // charge that succeeded while our call timed out is never charged again.
+                if (! $verifiedViaConnect && isset($paymentIntent->metadata->boost_statement_id)) {
+                    $statement = \App\Models\BoostStatement::find((int) $paymentIntent->metadata->boost_statement_id);
+                    if ($statement && $statement->status !== 'paid') {
+                        app(\App\Services\BoostStatementService::class)->markPaid($statement, $paymentIntent->id);
+                    }
+
+                    return response()->json(['status' => 'success']);
+                }
+
                 // Installments branch FIRST, before the sale lookup below.
                 //
                 // Not merely before the amount reconciliation: TicketController::success() stamps

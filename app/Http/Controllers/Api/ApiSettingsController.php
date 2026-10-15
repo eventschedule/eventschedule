@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\ApiAuthentication;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -51,6 +52,12 @@ class ApiSettingsController extends Controller
         }
 
         $user->save();
+
+        // A key that was disabled or replaced is no longer remembered as proven
+        // (ApiAuthentication), so it gets no way past the per-address bucket.
+        if ($showNewKey || $disabled) {
+            ApiAuthentication::forgetProvenKey($user);
+        }
 
         if ($enableApi && $showNewKey) {
             AuditService::log(AuditService::API_KEY_GENERATED, $user->id);

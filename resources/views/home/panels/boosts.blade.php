@@ -7,9 +7,7 @@
         <div class="px-5 py-3">
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $campaign->name }}</span>
-                <span class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded-full flex-shrink-0 {{ $campaign->status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }}">
-                    {{ ucfirst($campaign->status) }}
-                </span>
+                <span class="flex-shrink-0">@include('boost.partials.status', ['status' => $campaign->status, 'partner' => $campaign->isPartner()])</span>
             </div>
             <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                 <span>{{ number_format($campaign->impressions ?? 0) }} {{ mb_strtolower(__('messages.impressions')) }}</span>

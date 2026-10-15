@@ -8,7 +8,9 @@
     @php
         // A campaign can only be started where a channel exists to carry it. With neither set up
         // the button used to open a dialog that had an event picker and no way on.
-        $boostCanStart = \App\Services\MetaAdsService::isBoostConfigured() || \App\Services\PromotionService::isEnabled();
+        // An event a boost partner covers runs on the partner's own Page, set up or not here.
+        $boostHasPartnerEvents = $eventsData->contains(fn ($e) => ! empty($e['partner']));
+        $boostCanStart = \App\Services\MetaAdsService::isBoostConfigured() || \App\Services\PromotionService::isEnabled() || $boostHasPartnerEvents;
         // Boost is part of the Pro plan. The schedule the gate speaks about is the one picked,
         // or, with none picked, the first of somebody whose schedules are all on the free plan:
         // they used to get an empty list and a dialog saying they had no upcoming events.
@@ -211,16 +213,21 @@
                     <x-event-selector />
                 </div>
                 {{-- Where the campaign runs is the step that goes on, so each channel is a button:
-                     the one that leaves this site last. --}}
+                     the one that leaves this site last. An event a boost partner covers is a
+                     request to that partner, so it is offered no promotion on this site. --}}
                 <div class="page-form-actions boost-dialog-foot">
                     @if (\App\Services\PromotionService::isEnabled())
-                    <button type="button" @click="boostEvent('network')" :disabled="!selectedEvent"
+                    <button type="button" v-if="!selectedEvent || !selectedEvent.partner" @click="boostEvent('network')" :disabled="!selectedEvent"
                         class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ __('messages.promotion_channel_network') }}
                     </button>
                     @endif
                     @if (\App\Services\MetaAdsService::isBoostConfigured())
                     <x-brand-button @click="boostEvent('meta')" ::disabled="!selectedEvent">
+                        {{ __('messages.promotion_channel_meta') }}
+                    </x-brand-button>
+                    @elseif ($boostHasPartnerEvents)
+                    <x-brand-button v-if="selectedEvent && selectedEvent.partner" @click="boostEvent('meta')">
                         {{ __('messages.promotion_channel_meta') }}
                     </x-brand-button>
                     @endif

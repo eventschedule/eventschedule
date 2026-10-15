@@ -31,6 +31,7 @@ class SyncBoostCampaigns extends Command
         // campaigns Meta has never heard of. Network promotions have their own promo:sync.
         $campaigns = BoostCampaign::meta()
             ->whereIn('status', ['active', 'paused'])
+            ->whereNull('boost_partner_id')
             ->whereNotNull('meta_campaign_id')
             ->with(['ads', 'user'])
             ->get();
@@ -55,6 +56,13 @@ class SyncBoostCampaigns extends Command
 
         $this->checkCompletedCampaigns();
         $this->recoverStalePendingPayments();
+
+        // Boosts that run through a partner's own Page and ad account.
+        try {
+            app(\App\Services\BoostPartnerSync::class)->run();
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         $this->info('Sync complete.');
     }

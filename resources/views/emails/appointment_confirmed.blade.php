@@ -4,7 +4,7 @@
     $apptWhen = \App\Utils\AppointmentTimeUtils::render($event, $sale->guestTimezone(), (bool) ($role->use_24_hour_time ?? false));
 @endphp
 <x-email.layout :theme="$theme" :title="__('messages.appointment_confirmed_heading')" :preheader="$apptName.' · '.$apptWhen['date']">
-<x-email.heading :eyebrow="__('messages.appointment_confirmed_heading')" auto>{{ $apptName }}</x-email.heading>
+<x-email.heading :eyebrow="__('messages.appointment_confirmed_heading')" :subtitle="($apptHost = $event->appointmentHostName()) ? __('messages.appointments_with_host', ['name' => $apptHost]) : null" auto>{{ $apptName }}</x-email.heading>
 
 <x-email.text>{{ __('messages.hello') }} {{ $sale->name }},</x-email.text>
 <x-email.text>{{ __('messages.appointment_confirmed_intro', ['schedule' => $role?->name ?? '']) }}</x-email.text>

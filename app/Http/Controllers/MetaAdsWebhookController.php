@@ -101,7 +101,9 @@ class MetaAdsWebhookController extends Controller
         }
 
         $campaign = BoostCampaign::where('meta_campaign_id', $metaCampaignId)->first();
-        if (! $campaign) {
+        if (! $campaign || $campaign->isPartner()) {
+            // A partner boost is followed by the sync (its ad account is not subscribed here),
+            // and settles nothing with the platform.
             return;
         }
 
@@ -135,7 +137,7 @@ class MetaAdsWebhookController extends Controller
         }
 
         $campaign = $ad->campaign;
-        if (! $campaign) {
+        if (! $campaign || $campaign->isPartner()) {
             return;
         }
 

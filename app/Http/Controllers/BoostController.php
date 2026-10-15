@@ -6,6 +6,7 @@ use App\Jobs\CreateBoostCampaign;
 use App\Models\BoostAd;
 use App\Models\BoostBillingRecord;
 use App\Models\BoostCampaign;
+use App\Models\BoostPartner;
 use App\Models\Event;
 use App\Models\Role;
 use App\Services\AuditService;
@@ -54,11 +55,22 @@ class BoostController extends Controller
      */
     public function index(Request $request)
     {
+        // A partner reviews and follows its schedules' boosts on its own pages.
+        if (BoostPartner::forUser(auth()->user())) {
+            return redirect()->route('boost.partner.requests');
+        }
+
         $roles = $this->getRoles();
         $role = $this->getRole($request);
 
-        $query = BoostCampaign::with(['event', 'role'])
-            ->where('user_id', auth()->id());
+        // Your own campaigns, and on a partner's schedule every request of the schedules you
+        // edit, so colleagues see one another's open requests instead of starting a second.
+        $editableRoleIds = auth()->user()->roles()->wherePivotIn('level', ['owner', 'admin'])->pluck('roles.id');
+        $query = BoostCampaign::with(['event', 'role', 'user'])
+            ->where(function ($q) use ($editableRoleIds) {
+                $q->where('user_id', auth()->id())
+                    ->orWhere(fn ($q) => $q->whereNotNull('boost_partner_id')->whereIn('role_id', $editableRoleIds));
+            });
 
         if ($role) {
             $query->where('role_id', $role->id);
@@ -71,6 +83,14 @@ class BoostController extends Controller
         if ($role) {
             $proRoleIds = $proRoleIds->intersect([$role->id]);
         }
+
+        // An event a boost partner covers is boosted as a request to that partner, so the dialog
+        // offers it no "On this site" promotion (which would charge the Business's card and skip
+        // the partner). forEvent() is the rule; the list of partner accounts only spares asking
+        // it for events none of whose schedules a partner owns.
+        $partnerUserIds = config('app.hosted')
+            ? BoostPartner::whereNotNull('enabled_at')->pluck('user_id')
+            : collect();
 
         $eventsData = collect();
         if ($proRoleIds->isNotEmpty()) {
@@ -89,6 +109,9 @@ class BoostController extends Controller
                     'starts_at' => $event->getShortDateRangeDisplay('D, M j, Y'),
                     'image_url' => $event->getImageUrl(),
                     'role_id' => UrlUtils::encodeId($event->roles->firstWhere(fn ($r) => $proRoleIds->contains($r->id))?->id),
+                    'partner' => $partnerUserIds->isNotEmpty()
+                        && ($event->creatorRole ? $partnerUserIds->contains($event->creatorRole->user_id) : $event->roles->contains(fn ($r) => $partnerUserIds->contains($r->user_id)))
+                        && BoostPartner::forEvent($event) !== null,
                 ]);
         }
 
@@ -114,6 +137,12 @@ class BoostController extends Controller
 
         if ($event->is_draft) {
             abort(403);
+        }
+
+        // An event owned by a partner's schedule is boosted as a request to that partner,
+        // whichever of the event's schedules the boost was started from.
+        if ($partner = BoostPartner::forEvent($event)) {
+            return app(BoostPartnerController::class)->create($event, $partner);
         }
 
         // Get the role for this boost
@@ -163,27 +192,8 @@ class BoostController extends Controller
         $metaService = $this->getMetaService();
         $defaults = $metaService->generateQuickBoostDefaults($event);
 
-        // Build human-readable geo description
-        $geoLocations = $defaults['targeting']['geo_locations'] ?? [];
-        $geoDescription = '';
-
-        if (! empty($geoLocations['custom_locations'])) {
-            $loc = $geoLocations['custom_locations'][0];
-            $venue = $event->venue;
-            $locationName = $venue ? ($venue->shortAddress() ?: $venue->translatedName()) : '';
-            $radius = $loc['radius'] ?? 25;
-            $unit = $loc['distance_unit'] ?? 'mile';
-            $unitLabel = $unit === 'mile' ? __('messages.miles') : __('messages.kilometers');
-            $geoDescription = __('messages.geo_radius_description', [
-                'radius' => $radius,
-                'unit' => $unitLabel,
-                'location' => $locationName,
-            ]);
-        } elseif (! empty($geoLocations['countries'])) {
-            $geoDescription = collect($geoLocations['countries'])
-                ->map(fn ($code) => self::countryName($code))
-                ->implode(', ');
-        }
+        // Build human-readable geo description (shared with partner requests and the API).
+        $geoDescription = \App\Utils\BoostAudience::geo($defaults['targeting'] ?? [], $event);
 
         $isAdvanced = $request->boolean('advanced');
         $isFirstTime = ! BoostCampaign::where('user_id', auth()->id())->exists();
@@ -225,6 +235,11 @@ class BoostController extends Controller
     public function store(Request $request)
     {
         $isAjax = $request->ajax() || $request->wantsJson();
+
+        $partnerEvent = $request->event_id ? Event::find(UrlUtils::decodeId($request->event_id)) : null;
+        if ($partnerEvent && ($partner = BoostPartner::forEvent($partnerEvent))) {
+            return app(BoostPartnerController::class)->store($request, $partnerEvent, $partner);
+        }
 
         $request->validate([
             'event_id' => 'required|string',
@@ -553,6 +568,12 @@ class BoostController extends Controller
         $campaign = BoostCampaign::with(['event', 'role', 'ads', 'billingRecords'])
             ->findOrFail($id);
 
+        // A partner boost has its own rules (the partner reaches it whatever became of the event
+        // or its schedule; a Business only while it can still edit the event).
+        if ($campaign->isPartner()) {
+            return app(BoostPartnerController::class)->showCampaign($campaign);
+        }
+
         if ($campaign->user_id !== auth()->id()) {
             if (! $campaign->event || ! auth()->user()->canEditEvent($campaign->event)) {
                 abort(403);
@@ -595,6 +616,11 @@ class BoostController extends Controller
         // A network promotion is served by this platform, so pausing is purely local -
         // there is nothing to tell Meta, and no meta_campaign_id will ever exist. Without
         // this branch the guard below would reject every pause/resume on the channel.
+        // A partner boost has no pause: an edit pauses it for approval, and Stop ends it.
+        if ($campaign->isPartner()) {
+            return back()->with('error', __('messages.boost_partner_use_stop'));
+        }
+
         if ($campaign->isNetwork()) {
             return $this->toggleNetworkPause($campaign);
         }
@@ -691,6 +717,12 @@ class BoostController extends Controller
             if (! $campaign->event || ! auth()->user()->canEditEvent($campaign->event)) {
                 abort(403);
             }
+        }
+
+        // Cancelling DELETES the campaign at Meta and refunds through the platform; a partner
+        // boost is withdrawn or stopped instead (BoostPartnerController), which keeps its spend.
+        if ($campaign->isPartner()) {
+            return back()->with('error', __('messages.boost_partner_use_stop'));
         }
 
         if (! $campaign->canBeCancelled()) {

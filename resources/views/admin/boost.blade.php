@@ -89,6 +89,114 @@
              listed by layouts/app-admin, above the page. --}}
         <x-page-flash :keys="['success' => 'success']" />
 
+        {{-- Boost partners: accounts whose schedules boost under their own Facebook Page and ad
+             account. A share of those two with our Business is confirmed here once, after
+             checking the Business that owns the ad account (Meta does not say which of our
+             accounts shared it); Confirm is the last thing on its row. Enabling one waits on
+             BOOST_PARTNERS_ENABLED. --}}
+        @php
+            $bpAdminEnable = $hosted && config('services.meta.partners_enabled');
+            $bpAdminPartners = $hosted
+                // Enabled partners, and any partner with a fee left unpaid (the boost_statements_failed
+                // alert lands here), a disabled one included.
+                ? \App\Models\BoostPartner::with('user:id,name,email')
+                    ->withCount(['statements as unpaid_statements_count' => fn ($q) => $q->whereIn('status', ['failed', 'action_required'])])
+                    ->where(fn ($q) => $q->whereNotNull('enabled_at')
+                        ->orWhereHas('statements', fn ($s) => $s->whereIn('status', ['failed', 'action_required'])))
+                    ->orderByDesc('enabled_at')->get()
+                : collect();
+            $bpAdminTones = ['connected' => 'is-on', 'waiting' => 'is-warn', 'needs_attention' => 'is-bad'];
+        @endphp
+        @if ($bpAdminEnable || $bpAdminPartners->isNotEmpty())
+        <x-page-card id="boost-partners" class="scroll-mt-4" :title="__('messages.boost_partners_admin_title')" :lead="__('messages.boost_partners_admin_lead')" flush>
+            @if ($bpAdminEnable)
+            <form method="POST" action="{{ route('admin.boost.partners.enable') }}" class="page-filters px-5" style="margin-bottom: 1rem">
+                @csrf
+                <div class="page-filter is-grow">
+                    <label for="bp-admin-email">{{ __('messages.boost_partners_admin_email') }}</label>
+                    <input type="email" id="bp-admin-email" name="email" required dir="ltr" autocomplete="off" class="block w-full {{ $field }}">
+                </div>
+                <div class="is-end">
+                    <x-brand-button type="submit">{{ __('messages.boost_partners_admin_enable') }}</x-brand-button>
+                </div>
+            </form>
+            @endif
+
+            @if ($bpAdminPartners->isNotEmpty())
+            <div class="page-scroll">
+                <table class="page-table is-dense">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ __('messages.boost_partners_admin_account') }}</th>
+                            <th scope="col">{{ __('messages.status') }}</th>
+                            <th scope="col">{{ __('messages.boost_partner_account_title') }}</th>
+                            <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($bpAdminPartners as $bpAdminPartner)
+                        @php
+                            $bpAdminState = $bpAdminPartner->connectionState();
+                            $bpAdminCanConfirm = $bpAdminPartner->connection_method === \App\Models\BoostPartner::METHOD_PARTNER_SHARE
+                                && $bpAdminPartner->hasAssets() && ! $bpAdminPartner->confirmed_at;
+                        @endphp
+                        <tr>
+                            <td class="c-main c-strong">
+                                <bdi>{{ $bpAdminPartner->user?->name ?? __('messages.deleted') }}</bdi>
+                                @if ($bpAdminPartner->user?->email)
+                                <span class="c-sub" dir="ltr">{{ $bpAdminPartner->user->email }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="event-status {{ $bpAdminTones[$bpAdminState] ?? '' }}">{{ __('messages.boost_partner_state_'.$bpAdminState) }}</span>
+                                @if ($bpAdminPartner->connection_method)
+                                <span class="c-sub">{{ __('messages.boost_partners_admin_method_'.$bpAdminPartner->connection_method) }}</span>
+                                @endif
+                                @if ($bpAdminPartner->unpaid_statements_count > 0)
+                                <span class="c-sub">{{ trans_choice('messages.admin_alert_boost_statements_failed', $bpAdminPartner->unpaid_statements_count, ['count' => $bpAdminPartner->unpaid_statements_count]) }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($bpAdminPartner->hasAssets())
+                                <span class="c-wrap"><bdi>{{ $bpAdminPartner->page_name ?: $bpAdminPartner->page_id }}</bdi> <span class="c-quiet" dir="ltr">({{ $bpAdminPartner->page_id }})</span></span>
+                                <span class="c-sub">
+                                    <bdi>{{ $bpAdminPartner->ad_account_name ?: $bpAdminPartner->ad_account_id }}</bdi>
+                                    <span dir="ltr">(act_{{ $bpAdminPartner->ad_account_id }}{{ $bpAdminPartner->ad_account_currency ? ', '.$bpAdminPartner->ad_account_currency : '' }})</span>
+                                </span>
+                                <span class="c-sub">{{ __('messages.boost_partners_admin_owned_by') }} <bdi class="font-semibold">{{ $bpAdminPartner->ad_account_business_name ?: __('messages.boost_partners_admin_owner_unknown') }}</bdi></span>
+                                @if ($bpAdminPartner->connection_error)
+                                <span class="c-sub"><bdi>{{ $bpAdminPartner->connection_error }}</bdi></span>
+                                @endif
+                                @else
+                                <span class="c-quiet">{{ __('messages.boost_partner_state_not_connected') }}</span>
+                                @endif
+                            </td>
+                            <td class="c-actions">
+                                @if ($bpAdminPartner->enabled_at)
+                                <form method="POST" action="{{ route('admin.boost.partners.disable', ['partner' => $bpAdminPartner->id]) }}"
+                                    data-confirm="{{ __('messages.boost_partners_admin_disable_confirm') }}">
+                                    @csrf
+                                    <button type="submit" class="page-tool is-danger">{{ __('messages.boost_partners_admin_disable') }}</button>
+                                </form>
+                                @endif
+                                @if ($bpAdminCanConfirm)
+                                <form method="POST" action="{{ route('admin.boost.partners.confirm', ['partner' => $bpAdminPartner->id]) }}">
+                                    @csrf
+                                    <x-brand-button type="submit" size="sm">{{ __('messages.boost_partners_admin_confirm') }}</x-brand-button>
+                                </form>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <x-page-empty compact :title="__('messages.boost_partners_admin_none')" />
+            @endif
+        </x-page-card>
+        @endif
+
         {{-- Campaigns and money, then the rates: two strips where there were nine boxes. --}}
         <div class="ap-card rounded-xl page-stats is-auto">
             <div class="page-stat">

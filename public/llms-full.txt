@@ -1237,7 +1237,7 @@ curl -X DELETE https://eventschedule.com/api/events/vN4wR8 \
 
 #### POST /events/{id}/cancel
 
-Call an event off without deleting it. The event keeps its page, which now says it is cancelled, and it keeps every sale and registration. It leaves the schedule's public calendar and any connected Google, Outlook or CalDAV calendar, and stops selling. Running boost campaigns are stopped and refunded, and installment plans stop charging. Sales are not refunded by this call.
+Call an event off without deleting it. The event keeps its page, which now says it is cancelled, and it keeps every sale and registration. It leaves the schedule's public calendar and any connected Google, Outlook or CalDAV calendar, and stops selling. Running boost campaigns are stopped and refunded (one in a boost partner's own ad account is stopped; it was never prepaid here), and installment plans stop charging. Sales are not refunded by this call.
 
 Unless the event is a draft, an `event.cancelled` webhook is sent. Cancelling an event that is already cancelled changes nothing and answers 200. An appointment booking is cancelled through its sale, which frees the slot and emails the guest.
 
@@ -1605,9 +1605,57 @@ Fan comments, photos and videos submitted on events for schedules you own or adm
 
 **Query parameters**: `type` (comment, photo or video), `event_id`, `subdomain`, `event_date` (Y-m-d), `is_approved`, `per_page` (1-500).
 
+### Appointment Endpoints
+
+For an agent that books on a guest's behalf, a voice agent answering a phone line most often. The key's account must be an owner or admin of the schedule, and the schedule must be on the Pro plan. Every time comes with a `label` written in the schedule's timezone and language, to read to the guest.
+
+#### GET /schedules/{subdomain}/appointment-types
+
+The appointment types a guest can book on the schedule right now, the list its /book page shows. On the hosted service, types with a price or an approval step are left out until the schedule has its own email settings: a guest booked through the API is sent a way to pay, or told the schedule's answer, only by email.
+
+**Authentication**: Required
+
+**Plan**: Pro required
+
+Each type: `id`, `name`, `description`, `duration_minutes`, `price`, `currency` (null when free), `payment` (`free`, `cash` paid at the appointment, or `online` paid from a link the guest is emailed), `location_type` (`in_person`, `online`, `phone`) and `location` (the address or number; a meeting link is sent with the confirmation), `host_name` (the team member the appointment is with, or null), `timezone`, `requires_approval`, `asks_phone`, `requires_phone`, `questions` (each with `key`, `label`, `type`, `required`, `options`), `next_available` (a slot, or null) and `booking_url`.
+
+#### GET /appointment-types/{id}/slots
+
+The open times for a type, from the same rules as its booking page: weekly hours, date overrides, buffers, minimum notice, the booking window, and what is already booked.
+
+**Query parameters**: `from` (Y-m-d in the schedule's timezone, default today), `days` (1-31, default 7).
+
+Each slot: `starts_at` (UTC, send it back as `slot` when booking), `date` (in the schedule's timezone) and `label`, such as "Tuesday, October 20 at 2:30 PM EDT". When the range has nothing open, `meta.next_available` is the first open time after it.
+
+#### POST /appointment-types/{id}/bookings
+
+Book a time for a guest. The booking belongs to the guest, never to the API caller, and the schedule's Bookings list and booking email say it came through the API.
+
+**Body**: `slot` (required, a slot's `starts_at`), `name` (required), `email` (required), `phone` (required when the type's `requires_phone` is true), `notes`, `guest_timezone` (IANA name), `answers` (object keyed by question `key`, each answer text or a number, or a list of them; required questions must be answered).
+
+**Header**: `Idempotency-Key` (optional, up to 64 letters, digits, dots, colons, dashes or underscores). A repeat of the same request with the same key within 24 hours answers with the booking the first one made, with an `Idempotent-Replayed: true` header. The same key on a different request is a 422.
+
+**Response 201**: `id`, `status` (`confirmed`, `pending_approval` or `awaiting_payment`), `appointment_type_id`, `appointment_type`, `host_name`, `starts_at`, `ends_at`, `label`, `timezone`, `name`, `email`, `phone`, `price`, `currency`, `pay_by` (when an unpaid hold is released; awaiting_payment only), `emails_sent`, `manage_url` (absolute; where the guest pays, changes the time or cancels) and `summary`, a sentence to read back, such as "I've emailed a payment link to j…@gmail.com; your time is held until Tuesday, October 20 at 3:30 PM EDT."
+
+**409**: `{"error": "slot_taken", "alternatives": [three nearest open slots]}` when the time was just taken; `already_booked`, with that `booking`, when the same guest already holds it (a retry whose first answer was lost); `idempotency_key_in_use` while a request with the same key is still being handled.
+
+**422**: field errors in `errors`, or the type is not taking bookings, or the daily cap on new bookings is reached.
+
 ---
 
 ## Data Models
+
+### Boost Partner Endpoints
+
+For a boost partner: a network whose schedules boost under its own Facebook Page and Meta ad account. Only the key of the account that is the partner can use these; any other key gets 403. A boost launches when its current version is approved AND its current budget is paid, in either order. Repeating an approve, decline, confirm-payment or stop answers the boost as it stands.
+
+- `GET /api/boosts`: the partner's boosts, oldest change first. Filters: `status` (pending_approval, awaiting_payment, ready, in_review, active, completed, declined, rejected, stopped), `schedule` (a subdomain), `updated_since` (ISO 8601; returns changes at or after it, so drop duplicates), `page`, `per_page` (up to 500).
+- `GET /api/boosts/{id}`: one boost: `ad` (headline, text, description, call_to_action, image_url, destination_url), `version`, `audience.summary`, `budget`, `approval` (approved_version, decided_at, note, decline_reason), `payment` (confirmed, reference, amount, currency, confirmed_at), `spend` (amount, currency, as_of, final), `meta_review`, `stopped_at`, `stop_reason`, `stop_code`.
+- `POST /api/boosts/{id}/approve` with `{"version": 2, "note": "..."}`. A version that is not the current one answers 409 (`code: stale_version`).
+- `POST /api/boosts/{id}/decline` with `{"note": "..."}` (required).
+- `POST /api/boosts/{id}/confirm-payment` with `{"reference": "pi_...", "amount": "60.00", "currency": "USD"}`; `DELETE` the same path to withdraw it before launch.
+- `POST /api/boosts/{id}/stop` with an optional `{"reason": "..."}`. Pauses the campaign at Meta and ends it.
+- `GET /api/boost-statements`, `GET /api/boost-statements/{yyyy-mm}` (`?currency=` when a month has two): the monthly fee of 20% on actual spend, line by line.
 
 ### Schedule Object
 
@@ -1764,8 +1812,9 @@ Included in `meta` for paginated responses.
 
 | Endpoint Type | Limit | Window |
 |--------------|-------|--------|
-| GET requests | 300 requests | Per minute, per IP address |
-| POST/PUT/DELETE requests | 30 requests | Per minute, per IP address |
+| GET requests | 300 requests | Per minute, per account |
+| POST/PUT/DELETE requests | 30 requests | Per minute, per account |
+| Requests with no key or a wrong one | 30 requests | Per minute, per IP address |
 | Registration (POST /register) | 3 attempts | Per IP per hour |
 | Login (POST /login) | 5 attempts | Per IP per 15 minutes |
 | Verification codes (POST /register/send-code) | 5 codes | Per email per hour |
@@ -1807,7 +1856,7 @@ All errors follow a consistent format:
 | 401 | Missing or invalid API key |
 | 403 | Forbidden (insufficient permissions, not Pro, 2FA restriction) |
 | 404 | Resource not found |
-| 409 | Conflict (e.g., API key already exists) |
+| 409 | Conflict (e.g., API key already exists, an appointment time just taken) |
 | 422 | Validation error |
 | 429 | Rate limit exceeded |
 | 500 | Server error |
@@ -1932,6 +1981,15 @@ List, view, update, or delete schedules.
 2. `show_schedule` - View details of a specific schedule
 3. `update_schedule` - Update schedule fields
 4. `delete_schedule` - Permanently delete a schedule (owner only)
+
+### book_appointment
+
+Book an appointment for a guest, as a voice agent on a phone line would.
+
+**Steps**:
+1. `list_appointment_types` - List the bookable types on the schedule
+2. `list_appointment_slots` - List open times for the chosen type, reading each slot's `label` to the guest
+3. `create_appointment_booking` - Book the chosen time with an `Idempotency-Key`, then read the booking's `summary` back. On a 409 `slot_taken`, offer the `alternatives`.
 
 ---
 

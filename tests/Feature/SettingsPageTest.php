@@ -507,6 +507,9 @@ class SettingsPageTest extends TestCase
             if ($id === 'section-app') {
                 continue; // only where the install can update itself: SelfUpdateVisibilityTest
             }
+            if (str_starts_with($id, 'section-boost')) {
+                continue; // only on a boost partner's page: BoostPartnerPagesTest
+            }
             $this->assertStringContainsString('id="'.$id.'"', $html, "the Help map names {$id}, which is not on the page");
         }
 

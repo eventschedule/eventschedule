@@ -6,6 +6,20 @@
     $singleScheduleActive = $singleSchedule
         && (request()->is($singleSchedule->subdomain) || request()->is($singleSchedule->subdomain . '/*'));
     $hasScheduleSections = $allNavSchedules->count() > 1;
+
+    // A boost partner answers its schedules' boost requests, so for it the Boost entry leads to
+    // Requests, says how many wait, and stands above the schedule lists (a partner owns one
+    // schedule per Business, and the entry was at the foot of a long list). It is there whether
+    // or not this site's own Meta account is set up: the partner's boosts run on its own.
+    // The navigation is drawn twice per page (the drawer and the rail), so it is asked once.
+    if (! request()->attributes->has('navBoostPartner')) {
+        $navBoostPartnerRow = auth()->user() ? \App\Models\BoostPartner::forUser(auth()->user()) : null;
+        request()->attributes->set('navBoostPartner', [
+            'partner' => $navBoostPartnerRow,
+            'waiting' => $navBoostPartnerRow ? $navBoostPartnerRow->pendingRequestCount() : 0,
+        ]);
+    }
+    $navBoostPartner = request()->attributes->get('navBoostPartner');
 @endphp
 <a href="{{ marketing_url() }}">
     <div class="flex h-16 pt-2 shrink-0 items-center">
@@ -32,6 +46,23 @@
                 </li>
 
                 @include('partials.setup-guide-nav')
+
+                @if ($navBoostPartner['partner'])
+                <li>
+                    <a href="{{ route('boost.partner.requests') }}"
+                        class="dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white {{ request()->is('boost*') ? 'dark-nav-active text-white' : '' }}">
+                        <svg class="h-8 w-8 shrink-0" viewBox="0 0 24 24"
+                            fill="{{ request()->is('boost*') ? '#ccc' : '#666' }}" aria-hidden="true">
+                            <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4M19.22 2C19.06 2 18.88 2 18.7 2.04C16.56 2.11 13.5 3.31 10.77 6.04C8.95 7.87 7.57 10.04 6.63 12.46C6.37 13.1 6.55 13.85 7.07 14.33L9.65 16.91C10.13 17.42 10.87 17.61 11.53 17.35C13.95 16.42 16.12 15.04 17.95 13.22C20.67 10.5 21.88 7.44 21.95 5.3C22.04 3.5 20.87 2 19.22 2M14.54 9.46C13.76 8.68 13.76 7.41 14.54 6.63S16.59 5.85 17.37 6.63C18.14 7.41 18.15 8.68 17.37 9.46C16.59 10.24 15.32 10.24 14.54 9.46Z"/>
+                        </svg>
+                        <span class="flex-1 truncate">{{ __('messages.boost') }}</span>
+                        @if ($navBoostPartner['waiting'] > 0)
+                        <span class="rounded-full bg-[var(--brand-button-bg)] px-2 py-0.5 text-xs font-semibold leading-5 text-white" aria-hidden="true">{{ number_format($navBoostPartner['waiting']) }}</span>
+                        <span class="sr-only">{{ trans_choice('messages.boost_partner_nav_waiting', $navBoostPartner['waiting'], ['count' => number_format($navBoostPartner['waiting'])]) }}</span>
+                        @endif
+                    </a>
+                </li>
+                @endif
 
                 @if ($singleSchedule)
                 <li>
@@ -255,7 +286,7 @@
                 {{-- Either channel is enough to make the section reachable. Gating on Meta
                      alone hid the whole feature from an operator who had enabled only the
                      on-network promotions engine. --}}
-                @if (\App\Services\MetaAdsService::isBoostConfigured() || \App\Services\PromotionService::isEnabled())
+                @if (! $navBoostPartner['partner'] && (\App\Services\MetaAdsService::isBoostConfigured() || \App\Services\PromotionService::isEnabled()))
                 <li>
                     <a href="{{ route('boost.index') }}"
                         class="dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white {{ request()->is('boost*') ? 'dark-nav-active text-white' : '' }}">

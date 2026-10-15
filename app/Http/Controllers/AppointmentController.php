@@ -9,6 +9,7 @@ use App\Models\AppointmentType;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\AppointmentBookingFlow;
 use App\Services\AppointmentService;
 use App\Services\AuditService;
 use App\Services\Payments\CheckoutContext;
@@ -18,7 +19,6 @@ use App\Services\WebhookService;
 use App\Traits\ReschedulesAppointments;
 use App\Utils\HoneypotUtils;
 use App\Utils\IcsUtils;
-use App\Utils\MoneyUtils;
 use App\Utils\TurnstileUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -52,6 +52,9 @@ class AppointmentController extends Controller
                 'typeSlug' => $types->first()->slug,
             ]);
         }
+
+        // The chooser names each type's host, and groups the cards by host when there are two.
+        $types->loadMissing('host');
 
         return view('appointments.book', compact('role', 'types'));
     }
@@ -176,7 +179,7 @@ class AppointmentController extends Controller
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'appointment:event_id:'.$sale->event_id);
         WebhookService::dispatch('sale.created', $sale);
 
-        return $this->fanOut($request, $type, $role, $sale);
+        return $this->flow()->webResponse($type, $role, $sale);
     }
 
     /** GET /appointment/view/{event_id}/{secret} - the guest manage/confirmation page. */
@@ -305,7 +308,7 @@ class AppointmentController extends Controller
             return 'cancelled';
         }
 
-        // Payment before approval. fanOut() sends a priced booking to checkout before the approval
+        // Payment before approval. The booking flow sends a priced booking to checkout before the approval
         // step, so an approval type paid online is unpaid AND pending at once, and the payment is
         // what the guest has to act on. Checked the other way round, a guest who backed out of the
         // payment page read "Request sent" with no way to pay, and one whose payment was under
@@ -405,73 +408,6 @@ class AppointmentController extends Controller
             ->with('message', __('messages.appointments_cancelled_message'));
     }
 
-    /**
-     * Route a freshly-created booking to its next step. Free/cash confirm (or wait for approval)
-     * and land on the manage page; paid types head to checkout (wired in Phase 4).
-     */
-    protected function fanOut(Request $request, AppointmentType $type, Role $role, Sale $sale)
-    {
-        if (! $type->isFree() && AppointmentType::paysOnline($type->payment_method)) {
-            return $this->initiatePayment($request, $type, $role, $sale);
-        }
-
-        // Free bookings realize a $0 sale immediately; cash increments on mark-paid.
-        if ($type->isFree()) {
-            AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-        }
-
-        if (! $type->requires_approval) {
-            $this->appointments->confirm($sale);
-        } else {
-            // Pending: "request received" to the guest + a new-request notice to the owner.
-            app(\App\Services\EmailService::class)->sendAppointmentPendingEmails($sale);
-        }
-
-        return response()->json([
-            'redirect_url' => $this->manageUrl($sale).'?new=1',
-            'manage_url' => $this->managePath($sale),
-        ]);
-    }
-
-    /**
-     * Paid checkout, answered as JSON because the booking form posts over fetch: a Stripe session,
-     * the merchant payment URL, or - for any other gateway - the pay step, which the form submits as
-     * an ordinary navigation so the driver can answer with a redirect or a page of its own (Payfast
-     * hands the buyer on with an auto-submitting form, which a fetch cannot follow).
-     *
-     * Every answer also carries the booking's own page. The guest is about to leave for a payment
-     * page, and a browser that brings the booking form back from its cache (the Back button) shows
-     * it as it was left: the button still busy, and the slot already held by this booking. The form
-     * sends them to manage_url instead (appointments/book-type).
-     */
-    protected function initiatePayment(Request $request, AppointmentType $type, Role $role, Sale $sale)
-    {
-        $managePath = $this->managePath($sale);
-
-        if ($type->payment_method === 'stripe') {
-            return response()->json([
-                'redirect_url' => $this->stripeCheckoutUrl($sale, $sale->event, $role),
-                'manage_url' => $managePath,
-            ]);
-        }
-
-        if ($type->payment_method === 'payment_url') {
-            // The guest leaves for the merchant's hosted page and there is no callback, so email
-            // them the manage link + "complete your payment" note NOW - it is their only artifact
-            // until the owner marks the sale paid (which then sends the confirmation).
-            app(\App\Services\EmailService::class)->sendAppointmentPaymentDueEmail($sale);
-
-            return response()->json(['redirect_url' => $role->user->payment_url, 'manage_url' => $managePath]);
-        }
-
-        // Path-relative, like the form's own bookUrl: the form posts it from whichever host the
-        // booking page was served on, a schedule's custom domain included.
-        return response()->json([
-            'pay_url' => route('appointments.pay', $this->manageParams($sale), false),
-            'manage_url' => $managePath,
-        ]);
-    }
-
     /** GET /appointment/checkout/success/{sale_id} - Stripe redirect target; the webhook marks paid. */
     public function checkoutSuccess(Request $request, $saleId)
     {
@@ -554,7 +490,7 @@ class AppointmentController extends Controller
                 return redirect($this->manageUrl($sale))->with('error', __('messages.appointments_payment_unavailable', ['schedule' => $role?->name ?? '']));
             }
 
-            return redirect($this->stripeCheckoutUrl($sale, $event, $role));
+            return redirect($this->flow()->stripeCheckoutUrl($sale, $event, $role));
         }
         if ($sale->payment_method === 'payment_url') {
             return redirect($role->user->payment_url ?: $this->manageUrl($sale));
@@ -574,52 +510,6 @@ class AppointmentController extends Controller
 
         return $available[$sale->payment_method]
             ->startCheckout(new CheckoutContext($sale, $event, $sale->subdomain ?: $role->subdomain));
-    }
-
-    /**
-     * Create a Stripe Checkout session for the booking and return its URL (Connect or platform).
-     *
-     * Charges what the booking was made for (the sale's amount, in the currency stamped on its
-     * event), never the type's current price: the webhook settles against payment_amount, so a type
-     * repriced after the booking would park the sale as amount_mismatch, and one made free would ask
-     * Stripe for a zero-amount session.
-     */
-    protected function stripeCheckoutUrl(Sale $sale, Event $event, Role $role): string
-    {
-        $currency = $event->ticket_currency_code ?: ($event->appointmentType?->currency_code ?? 'USD');
-        $unitAmountCents = (int) round((float) $sale->payment_amount * MoneyUtils::getSmallestUnitMultiplier($currency));
-        $successParams = ['sale_id' => UrlUtils::encodeId($sale->id)];
-
-        $sessionData = [
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => $currency,
-                    'product_data' => ['name' => ($event->appointmentType?->name ?? $event->name).' - '.$role->name],
-                    'unit_amount' => $unitAmountCents,
-                ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-            'customer_email' => $sale->email,
-            'metadata' => ['sale_id' => UrlUtils::encodeId($sale->id)],
-            'payment_intent_data' => ['metadata' => ['sale_id' => UrlUtils::encodeId($sale->id)]],
-            // The manage page says the payment was cancelled and nothing was charged, and keeps the
-            // hold (appointments/manage).
-            'cancel_url' => $this->manageUrl($sale).'?payment=cancelled',
-        ];
-
-        // Stripe Connect (hosted, owner has a connected account) vs the platform key (selfhosted).
-        if (config('app.hosted') && $role->user->stripe_account_id) {
-            $stripe = new StripeClient(config('services.stripe.key'));
-            $sessionData['success_url'] = custom_domain_url(route('appointments.checkout_success', $successParams).'?session_id={CHECKOUT_SESSION_ID}');
-            $session = $stripe->checkout->sessions->create($sessionData, ['stripe_account' => $role->user->stripe_account_id]);
-        } else {
-            $stripe = new StripeClient(config('services.stripe_platform.secret'));
-            $sessionData['success_url'] = custom_domain_url(route('appointments.checkout_success', $successParams).'?session_id={CHECKOUT_SESSION_ID}&direct=1');
-            $session = $stripe->checkout->sessions->create($sessionData);
-        }
-
-        return $session->url;
     }
 
     /**
@@ -699,19 +589,13 @@ class AppointmentController extends Controller
 
     protected function manageUrl(Sale $sale): string
     {
-        return route('appointments.manage', $this->manageParams($sale));
+        return $this->flow()->manageUrl($sale);
     }
 
-    /** The manage page as a path, for the booking form to navigate to from whatever host it is on. */
-    protected function managePath(Sale $sale): string
+    /** What follows book(), shared with the API (AppointmentBookingFlow). */
+    protected function flow(): AppointmentBookingFlow
     {
-        return route('appointments.manage', $this->manageParams($sale), false);
-    }
-
-    /** @return array{event_id: string, secret: string} */
-    protected function manageParams(Sale $sale): array
-    {
-        return ['event_id' => UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret];
+        return app(AppointmentBookingFlow::class);
     }
 
     /**

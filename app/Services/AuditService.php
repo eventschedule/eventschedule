@@ -260,6 +260,31 @@ class AuditService
 
     const BOOST_CANCEL = 'boost.cancel';
 
+    // Boost partner actions (a partner's own Page and ad account; BoostPartnerService)
+    const BOOST_PARTNER_SUBMIT = 'boost.partner.submit';
+
+    const BOOST_PARTNER_EDIT = 'boost.partner.edit';
+
+    const BOOST_PARTNER_APPROVE = 'boost.partner.approve';
+
+    const BOOST_PARTNER_DECLINE = 'boost.partner.decline';
+
+    const BOOST_PARTNER_PAYMENT = 'boost.partner.payment';
+
+    const BOOST_PARTNER_PAYMENT_WITHDRAWN = 'boost.partner.payment_withdrawn';
+
+    const BOOST_PARTNER_STOP = 'boost.partner.stop';
+
+    const BOOST_PARTNER_LAUNCH = 'boost.partner.launch';
+
+    const BOOST_PARTNER_ENABLE = 'boost.partner.enable';
+
+    const BOOST_PARTNER_CONNECT = 'boost.partner.connect';
+
+    const BOOST_PARTNER_CONFIRM = 'boost.partner.confirm';
+
+    const BOOST_PARTNER_DISCONNECT = 'boost.partner.disconnect';
+
     // On-network promotion actions
     const PROMO_CREATE = 'promo.create';
 

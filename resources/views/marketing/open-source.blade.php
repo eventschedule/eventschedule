@@ -1008,6 +1008,18 @@
             ['GET', '/api/fan-content', 'Feedback', 'Fan photos, video and comments'],
             ['GET', '/api/categories', 'Categories', 'The system category list'],
             ['GET', '/api/categories/{subdomain}', 'Categories', 'The effective list for one schedule'],
+            ['GET', '/api/schedules/{subdomain}/appointment-types', 'Appointments', 'The types a guest can book'],
+            ['GET', '/api/appointment-types/{id}/slots', 'Appointments', 'Open times, each with a sentence to read out'],
+            ['POST', '/api/appointment-types/{id}/bookings', 'Appointments', 'Book one, with the nearest times if it was taken'],
+            ['GET', '/api/boosts', 'Boosts', 'A network\'s boost requests, changed since a time'],
+            ['GET', '/api/boosts/{id}', 'Boosts', 'One request: the exact ad, its approval and payment'],
+            ['POST', '/api/boosts/{id}/approve', 'Boosts', 'Approve the version you reviewed'],
+            ['POST', '/api/boosts/{id}/decline', 'Boosts', 'Send it back with a note'],
+            ['POST', '/api/boosts/{id}/confirm-payment', 'Boosts', 'Record your own payment reference'],
+            ['DELETE', '/api/boosts/{id}/confirm-payment', 'Boosts', 'Withdraw it before launch'],
+            ['POST', '/api/boosts/{id}/stop', 'Boosts', 'Pause it at Meta and end it'],
+            ['GET', '/api/boost-statements', 'Boosts', 'The monthly fee statements'],
+            ['GET', '/api/boost-statements/{period}', 'Boosts', 'One month, line by line'],
         ];
         $resources = collect($endpoints)->groupBy(fn ($row) => $row[2]);
         $verbCounts = collect($endpoints)->countBy(fn ($row) => $row[0]);
@@ -1029,10 +1041,10 @@
 
         // Published surfaces, all served as static files out of public/.
         $specFiles = [
-            ['/api/openapi.json', 'OpenAPI 3.0.3', 'Eighteen paths, twenty-eight operations, request and response schemas.'],
+            ['/api/openapi.json', 'OpenAPI 3.0.3', 'Twenty-nine paths, forty operations, request and response schemas.'],
             ['/llms.txt', 'Short brief', 'The product in one page: schedule types, auth, plans, rate limits.'],
             ['/llms-full.txt', 'Long brief', 'The same, expanded, for a model with room to read.'],
-            ['/.well-known/agents.json', 'Agent flows', 'Four named flows with their steps written out: register and set up, create an event with tickets, sell tickets, manage a schedule.'],
+            ['/.well-known/agents.json', 'Agent flows', 'Five named flows with their steps written out: register and set up, create an event with tickets, sell tickets, manage a schedule, book an appointment.'],
         ];
 
         $requirements = ['PHP 8.2 or newer', 'MySQL 5.7+ or MariaDB 10.3+', 'Apache or Nginx', 'HTTPS', 'One cron entry'];
@@ -1075,7 +1087,7 @@
             ],
             [
                 'q' => 'What are the API rate limits?',
-                'a' => 'Three hundred reads a minute per IP and thirty writes a minute per IP, counted in ApiAuthentication; a write is a POST, PUT or DELETE and everything else is a read. Ten failed attempts with the same key value block that key for fifteen minutes, and a key expires a year after it is made. Creating an event has its own throttle of thirty a minute.',
+                'a' => 'Three hundred reads a minute and thirty writes a minute for each account, counted in ApiAuthentication; a write is a POST, PUT or DELETE and everything else is a read. Requests with no key or a wrong one are counted per IP, thirty a minute. Ten failed attempts with the same key value block that key for fifteen minutes, and a key expires a year after it is made. Creating an event has its own throttle of thirty a minute.',
             ],
             [
                 'q' => 'How do I install it on my own server?',
@@ -1431,15 +1443,15 @@
             <div class="hp-head is-center">
                 <span class="hp-kicker" data-reveal>04 / The API</span>
                 <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">
-                    Twenty-six endpoints, <span class="hp-ink-grad">one header.</span>
+                    Thirty-eight endpoints, <span class="hp-ink-grad">one header.</span>
                 </h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.14s;">
-                    Send an <span class="os-inline">X-API-Key</span> header, get JSON back: schedules, sub-schedules, events, categories, sales and refunds, and read access to attendee feedback. Here is the whole surface, transcribed from the route file rather than described.
+                    Send an <span class="os-inline">X-API-Key</span> header, get JSON back: schedules, sub-schedules, events, categories, sales and refunds, appointment booking, boost requests and their monthly statements, and read access to attendee feedback. Here is the whole surface, transcribed from the route file rather than described.
                 </p>
             </div>
 
             <div class="os-api-bar" data-reveal>
-                <h3 class="os-api-count">Twenty-six authenticated endpoints, six resources</h3>
+                <h3 class="os-api-count">Thirty-eight authenticated endpoints, eight resources</h3>
                 {{-- Shown by the script that makes them work. --}}
                 <div class="os-api-tools" data-os-api-tools hidden>
                     <div class="os-verbs" role="group" aria-label="Show by method" data-os-verbs>
@@ -1502,12 +1514,12 @@
                     <div class="hp-fig">
                         <div class="hp-num"><span data-count-to="300">300</span></div>
                         <strong>Reads a minute</strong>
-                        <p>Per IP. Everything that is not a write.</p>
+                        <p>Per account. Everything that is not a write.</p>
                     </div>
                     <div class="hp-fig">
                         <div class="hp-num"><span data-count-to="30">30</span></div>
                         <strong>Writes a minute</strong>
-                        <p>Per IP. Creating an event has its own throttle of thirty a minute.</p>
+                        <p>Per account. Creating an event has its own throttle of thirty a minute.</p>
                     </div>
                     <div class="hp-fig">
                         <div class="hp-num"><span data-count-to="10">10</span></div>

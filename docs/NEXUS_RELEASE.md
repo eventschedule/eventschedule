@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-boost-partners-appointment-hosts-and-the-appointment-api-2026-10-15) | not yet | Confirm the Meta token is a system user's, add `META_BUSINESS_ID` and `META_SYSTEM_USER_ID`, check the Stripe platform webhook; after: the scheduler entry, then the pilot partner's setup |
 | [v1.0.134](#v10134) | not yet (partly live since 2026-09-30) | A last `/admin/growth` download, a Stripe portal setting, an `audit_logs` size check, a `cache` table purge, a privacy-notice decision, then `GROWTH_DATA_TOKEN`; [GDPR](#gdpr-2026-10-04): 2FA on every admin first, then the policy-change notice |
 | [v1.0.133](#v10133) | 2026-09-25 | Four read-only queries, the image backfill, a sitemap cache key, a Cloudflare purge |
 | [v1.0.132](#v10132) | 2026-09-23 | The ticket amnesty migration by hand, a `SESSION_LIFETIME` decision, a MySQL check, the federation welcome order |
@@ -93,6 +94,137 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: boost partners, appointment hosts and the appointment API (2026-10-15)
+
+Everything on `main` from 2026-10-15 for one partner network (its name stays out of this repo),
+built as one piece of work. Nothing changes for any existing account until a platform admin
+enables a boost partner, or an owner gives an appointment type a host.
+
+**What ships:**
+- **Boost partners.**
+  - An account that owns many schedules runs every boost on them under ITS OWN Facebook Page and
+    Meta ad account.
+  - A boost is a request. It launches when the partner has approved its current version AND
+    recorded payment for its current budget.
+  - Meta bills the partner's ad account. We charge the partner 20% of actual monthly spend, by
+    card, with an emailed statement.
+  - The partner works from three pages (`/boost/requests`, `/boost/campaigns`,
+    `/boost/statements`), a Boosts tab in Settings, and nine `/api/boosts` endpoints usable with
+    the partner account's own key.
+  - Enabled per account at `/admin/boost` (the Boost partners card), and only while
+    `BOOST_PARTNERS_ENABLED` is set.
+  - `docs/FEATURES.md` ("Boost partners") has the rules.
+- **Appointment hosts.** An appointment type can be hosted by an owner or admin of its schedule.
+  Conflicts are then checked per host, across every schedule they host on.
+- **Appointment API.** `GET /api/schedules/{subdomain}/appointment-types`,
+  `GET /api/appointment-types/{id}/slots` and `POST /api/appointment-types/{id}/bookings`, for a
+  voice agent booking on a guest's behalf. Pro, like the rest of the API.
+- **API rate limits.** These now count per account for a key that works, and per visitor address
+  (`Blocklist::address()`, not the proxy's) for a missing or wrong key. Every client gets the same
+  or more room; nothing is tighter for anyone.
+- **Growth data.** The payload is now `schema_version` 20: `boost.partner_fees` is new. Nothing
+  else changed shape.
+
+### Before the deploy
+
+1. The [every-deploy](#every-deploy) checks.
+2. **Confirm `META_ACCESS_TOKEN` is a system user's token, not a person's.** A partner who shares
+   its ad account and Page with our Meta Business (the pilot's method) is run with this token, so
+   a personal token stops working the day its person leaves or logs out.
+   - Check it in Meta Business Settings > Users > System users; the token belongs to one of them.
+   - **And that the token was generated with `business_management`**, not only
+     `ads_management`. The partner-share check reads what partners shared with our Business
+     (`client_ad_accounts`, `client_pages`) and assigns it to the system user, which needs that
+     permission: without it every partner's Save and check fails and Confirm is refused.
+     Regenerate the token with both if in doubt.
+   - If it is not a system user's, create an Admin system user there with `ads_management` and
+     `business_management`, generate a token that never expires, and replace `META_ACCESS_TOKEN`
+     with it (encrypted, app-level). Test the platform's own Boost once after.
+3. **Add, as app-level variables** (absent, never blank, until you have the values):
+   - `META_BUSINESS_ID`: our Meta Business ID, the number in Business Settings > Business info.
+     The Boosts tab shows it to the partner, who adds it as a partner on their ad account and
+     Page.
+   - `META_SYSTEM_USER_ID`: that system user's ID. The app gives it the tasks it needs on what a
+     partner shared.
+   - `BOOST_PARTNERS_ENABLED=true`, when you are ready for the pilot. Until it is set, the Enable
+     form on `/admin/boost` is hidden.
+   - **Not yet: `META_LOGIN_CONFIG_ID`.** Facebook Login for Business needs Meta App Review
+     (Advanced Access for `ads_management`, `pages_show_list`, `pages_read_engagement`,
+     `pages_manage_ads`, `business_management`). Unset, the login option is hidden and partners
+     use the share. When it is set later, the Meta app also needs, in its Facebook Login for
+     Business settings: the redirect URI `https://eventschedule.com/settings/boost-partner/callback`,
+     the deauthorize callback `https://eventschedule.com/webhooks/meta/deauthorize`, and the data
+     deletion request URL `https://eventschedule.com/webhooks/meta/data-deletion`. Choose a
+     configuration whose token type is a system-user token, which does not expire.
+4. **Stripe: check that the PLATFORM account sends `payment_intent.succeeded` to
+   `https://eventschedule.com/stripe/webhook`**, signed with `STRIPE_PLATFORM_WEBHOOK_SECRET`.
+   - The monthly fee is charged on the platform account. That event is how a charge that went
+     through while our call timed out is recorded, rather than charged again the next day.
+   - If the platform account has no endpoint for that address, add one with that event, and put
+     its signing secret in `STRIPE_PLATFORM_WEBHOOK_SECRET`.
+5. **Production's `META_API_VERSION`.** The default is `v21.0`. Meta retires a version about two
+   years after release, and a newer one wants `is_adset_budget_sharing_enabled` and
+   `targeting_automation.advantage_audience` on an ad set.
+   - Before the pilot's first real boost, launch one test boost through a test ad account shared
+     the same way. Its ad set must be created without an error.
+
+### Migrations
+
+Five. None irreversible; all are new tables or nullable columns.
+
+| Migration | What it does |
+|---|---|
+| `2026_10_15_100000_create_boost_partners_table` | New table: one row per partner account (the Meta connection, the fee card's Stripe ids, the carry) |
+| `2026_10_15_100001_add_partner_columns_to_boost_campaigns_table` | About thirty nullable columns and one index on `boost_campaigns`, a small table. Every add is guarded |
+| `2026_10_15_100002_create_boost_partner_ledger_tables` | New tables: `boost_ad_versions`, `boost_spend_days`, `boost_statements` (one per partner, month and currency), `boost_statement_lines` |
+| `2026_10_15_200000_add_host_to_appointment_types_table` | Two nullable columns on `appointment_types` |
+| `2026_10_15_200001_add_appointment_host_user_id_to_events_table` | One nullable column and an index on `events (appointment_host_user_id, starts_at)`. The index build reads all of `events` once. It waits at most 10 seconds for its lock; if the deploy fails there, re-run `php artisan migrate --force` from the console. Guarded, so a second run adds only what is missing |
+
+### Scheduled entries
+
+- **New: `boost-charge-statements`, daily, both rails, hosted only.** It bills last month once
+  that month has closed in the partner's ad account's timezone (from the 3rd), and retries a
+  declined card for a week. It does nothing until a partner has spend, so the first real charge
+  is on 2026-11-03 at the earliest.
+- **Changed: `boost-sync`.** It now also runs when a partner exists and the platform has no Meta
+  token of its own, and it follows partner boosts (review, running, spend per day, completion).
+
+### After the deploy
+
+1. **Check the platform pages:**
+   - `/admin/queue`: the Scheduler card lists `boost-charge-statements`.
+   - `/admin/boost`: the Boost partners card shows. With the variable set, it has the Enable
+     form.
+2. **Set up the pilot partner,** in this order:
+   1. On `/admin/boost`, enable the partner's account by its email address.
+   2. The partner opens Settings > Boosts, follows the steps to share its ad account and Page
+      with our Business, enters the two IDs, and presses Save and check. Every check should pass.
+   3. Back on `/admin/boost`, check that the owning Business named beside the account is the
+      partner's own, then press Confirm. The partner is emailed. Confirm is refused while a check
+      fails: a partner could otherwise enter another client's IDs, which our token can reach.
+   4. The partner adds the fee card in the same tab, and writes how its businesses pay it.
+   5. A Business on one of the partner's schedules opens an event and presses Boost. The
+      partner's Requests page gets the request and the partner gets a mail.
+3. **Appointment mail on hosted needs the schedule's own email settings.** Check each pilot
+   Business's schedule. Without them, the API leaves out the types with a price or an approval
+   step, because the guest could never hear back.
+4. **Tell support:**
+   - A partner's ads run in its own ad account. Removing our access there does NOT stop an ad
+     that is already running: the partner pauses it in Ads Manager too.
+   - A Business can no longer start an on-site promotion for an event a partner covers.
+
+**Watch for** three new rows on `/admin`:
+- `boost_partners_waiting`: a partner share that needs your Confirm.
+- `boost_partner_launches_stuck`: approved and paid for 30 minutes, with nothing at Meta.
+- `boost_statements_failed`: a fee that was declined, needs the partner to confirm with the bank,
+  or has no card.
+
+**Undo:** a console rollback restores the code; the migrations are additive and can stay.
+- While a partner boost is running, stop it first (its page, or `/boost/campaigns`). The old code
+  does not follow partner boosts, so one left running keeps spending in the partner's ad account
+  unwatched.
+- A statement made before the rollback is not charged until the code is back.
 
 ## v1.0.134
 

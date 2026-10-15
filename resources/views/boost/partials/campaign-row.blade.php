@@ -5,11 +5,14 @@
         <a href="{{ route('boost.show', ['hash' => $campaign->hashedId()]) }}" class="event-link"><bdi>{{ $campaign->event?->translatedName() ?? __('messages.deleted_event') }}</bdi></a>
         <span class="c-sub">
             <bdi>{{ $campaign->role?->name ?? __('messages.deleted') }}</bdi>
+            @if ($campaign->isPartner() && $campaign->user && (int) $campaign->user_id !== (int) auth()->id())
+            &middot; <bdi>{{ $campaign->user->name }}</bdi>
+            @endif
             &middot; {{ $campaign->isNetwork() ? __('messages.promotion_channel_network') : __('messages.promotion_channel_meta') }}
             &middot; {{ $campaign->created_at->translatedFormat('M j, Y') }}
         </span>
     </td>
-    <td>@include('boost.partials.status', ['status' => $campaign->status])</td>
+    <td>@include('boost.partials.status', ['status' => $campaign->status, 'partner' => $campaign->isPartner()])</td>
     <td class="c-num" data-label="{{ __('messages.impressions') }}">{{ number_format($campaign->impressions) }}</td>
     <td class="c-num" data-label="{{ __('messages.clicks') }}">{{ number_format($campaign->clicks) }}</td>
     <td class="c-num" data-label="{{ __('messages.spend') }}">

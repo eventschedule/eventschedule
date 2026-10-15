@@ -152,7 +152,10 @@ class MarketingCountedClaimsTest extends TestCase
         $behindTheKey = substr($routes, strpos($routes, $marker));
         $authenticated = preg_match_all('/Route::(get|post|put|patch|delete)/', $behindTheKey);
 
-        $words = [22 => 'Twenty-two', 23 => 'Twenty-three', 24 => 'Twenty-four', 25 => 'Twenty-five', 26 => 'Twenty-six'];
+        $words = [22 => 'Twenty-two', 23 => 'Twenty-three', 24 => 'Twenty-four', 25 => 'Twenty-five', 26 => 'Twenty-six',
+            27 => 'Twenty-seven', 28 => 'Twenty-eight', 29 => 'Twenty-nine', 30 => 'Thirty', 31 => 'Thirty-one',
+            32 => 'Thirty-two', 33 => 'Thirty-three', 34 => 'Thirty-four', 35 => 'Thirty-five', 36 => 'Thirty-six',
+            37 => 'Thirty-seven', 38 => 'Thirty-eight', 39 => 'Thirty-nine', 40 => 'Forty'];
         $this->assertArrayHasKey($authenticated, $words, 'add the new number word to this test');
 
         $this->assertStringContainsString(
@@ -160,19 +163,25 @@ class MarketingCountedClaimsTest extends TestCase
             $this->page('open-source'),
             "/open-source states the authenticated endpoint count; routes/api.php now has {$authenticated}"
         );
+        // The section's heading says the same number again, in words.
+        $this->assertMatchesRegularExpression(
+            '/'.$words[$authenticated].' endpoints,\s*<span[^>]*>one header\.<\/span>/',
+            $this->page('open-source'),
+            "the API heading on /open-source states the authenticated endpoint count; routes/api.php now has {$authenticated}"
+        );
     }
 
     /**
-     * /for-ai-agents prints the API as a ledger of 29 rows and states that number
+     * /for-ai-agents prints the API as a ledger of 41 rows and states that number
      * in its own meta description. The count is the easy half: what actually
      * matters is that each printed row is a route that exists, because a reader
      * of that page is an agent about to call it.
      *
-     * 29, not 35: the page documents the three auth routes plus the 26 behind the
-     * key, and leaves out the four machine-to-machine ones (translation
-     * suggestions, federation), the /admin/realtime browser beacon and the
-     * operator's growth data pull (/api/internal/growth), none of which anything
-     * on that page would ever call.
+     * 41: the page documents the three auth routes plus the 38 behind the key,
+     * and leaves out the four machine-to-machine ones (translation suggestions,
+     * federation), the /admin/realtime browser beacon and the operator's growth
+     * data pull (/api/internal/growth), none of which anything on that page would
+     * ever call.
      */
     public function test_the_ai_agent_ledger_matches_the_routes(): void
     {
@@ -223,11 +232,11 @@ class MarketingCountedClaimsTest extends TestCase
 
         $source = $this->page('open-source');
         $this->assertMatchesRegularExpression(
-            '/Eighteen paths, twenty-eight operations/i',
+            '/Twenty-nine paths, forty operations/i',
             $source,
             "/open-source states the OpenAPI shape; public/api/openapi.json now has {$paths} paths and {$operations} operations"
         );
-        $this->assertSame(18, $paths);
-        $this->assertSame(28, $operations);
+        $this->assertSame(29, $paths);
+        $this->assertSame(40, $operations);
     }
 }

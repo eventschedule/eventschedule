@@ -555,7 +555,7 @@ class EmailService
                 return;
             }
             $role = $event->getRoleWithEmailSettings() ?: $event->creatorRole;
-            if ($this->isTestEmail($sale->email) || is_demo_role($role) || ! $this->appointmentCanSend($role)) {
+            if (! $this->appointmentGuestMailGoesOut($sale)) {
                 return;
             }
 
@@ -601,6 +601,12 @@ class EmailService
             if ($isMove) {
                 $editors = $editors->concat($role->getEditorsWantingNotification('new_sale'))->unique('id');
             }
+            $sharedAddressEditors = $editors;
+
+            // The person the booking was made with hears about it whatever their preferences say
+            // ("Sam gets the booking emails"): it is their own time. Added, nobody removed, and
+            // asked here, at send time, so a host who has since left the team is not mailed.
+            $editors = $editors->concat($this->appointmentHostRecipient($event, $editors))->values();
 
             foreach ($editors as $editor) {
                 if ($this->isTestEmail($editor->email)) {
@@ -624,14 +630,55 @@ class EmailService
                 $role,
                 $isMove ? [$preference, 'new_sale'] : $preference,
                 new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind, $wasPaid, $oldStartsAt),
-                $editors
+                $sharedAddressEditors
             );
         } catch (\Exception $e) {
             Log::error('Failed to send appointment owner notification: '.$e->getMessage(), ['sale_id' => $sale->id]);
         }
     }
 
-    protected function appointmentCanSend(?Role $role): bool
+    /**
+     * The booking's host, as a one-item list, when they are still an owner or admin of the
+     * schedule the booking is on and not already among $editors. Empty otherwise.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\User>
+     */
+    protected function appointmentHostRecipient(\App\Models\Event $event, \Illuminate\Support\Collection $editors): \Illuminate\Support\Collection
+    {
+        $hostId = (int) $event->appointment_host_user_id;
+
+        if (! $hostId || ! $event->creator_role_id || $editors->contains('id', $hostId)
+            || ! AppointmentHostService::isEligible((int) $event->creator_role_id, $hostId)) {
+            return collect();
+        }
+
+        $host = \App\Models\User::find($hostId);
+
+        return $host ? collect([$host]) : collect();
+    }
+
+    /**
+     * Whether the guest of this booking is mailed at all: not a reserved test address, not the demo
+     * schedule, and a schedule that can send appointment mail. The one test the guest mails apply,
+     * public so the appointment API can say truthfully whether the guest was emailed.
+     */
+    public function appointmentGuestMailGoesOut(Sale $sale): bool
+    {
+        $event = $sale->event;
+        $role = $event ? ($event->getRoleWithEmailSettings() ?: $event->creatorRole) : null;
+
+        return $event
+            && ! $this->isTestEmail((string) $sale->email)
+            && ! is_demo_role($role)
+            && $this->appointmentCanSend($role);
+    }
+
+    /**
+     * Whether appointment mail can go out for this schedule: on hosted it needs the schedule's own
+     * email settings. Public because the appointment API leaves out the paid types a guest could
+     * not be sent a payment link for.
+     */
+    public function appointmentCanSend(?Role $role): bool
     {
         return config('app.hosted')
             ? ($role && $role->hasEmailSettings())

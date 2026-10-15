@@ -25,6 +25,12 @@ class BoostBillingService
      */
     public function refundOnCancellation(BoostCampaign $campaign): bool
     {
+        // A partner boost is paid to the partner and billed by Meta to the partner's ad
+        // account; the platform holds none of its money, so there is nothing to refund here.
+        if ($campaign->isPartner()) {
+            return false;
+        }
+
         $this->syncNetworkSpend($campaign);
 
         // Credit-funded campaigns settle locally - refundUnspent()/refundFull() both bail
@@ -71,6 +77,12 @@ class BoostBillingService
      */
     public function refundCreditRemainder(BoostCampaign $campaign): bool
     {
+        // A partner boost is paid to the partner and billed by Meta to the partner's ad
+        // account; the platform holds none of its money, so there is nothing to refund here.
+        if ($campaign->isPartner()) {
+            return false;
+        }
+
         return DB::transaction(function () use ($campaign) {
             $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
 
@@ -163,6 +175,12 @@ class BoostBillingService
      */
     public function confirmPayment(BoostCampaign $campaign, string $paymentIntentId): bool
     {
+        // A partner boost is paid to the partner and billed by Meta to the partner's ad
+        // account; the platform holds none of its money, so there is nothing to refund here.
+        if ($campaign->isPartner()) {
+            return false;
+        }
+
         try {
             $stripe = new \Stripe\StripeClient(config('services.stripe_platform.secret'));
             $paymentIntent = $stripe->paymentIntents->retrieve($paymentIntentId);
@@ -264,6 +282,12 @@ class BoostBillingService
      */
     public function refundFull(BoostCampaign $campaign): bool
     {
+        // A partner boost is paid to the partner and billed by Meta to the partner's ad
+        // account; the platform holds none of its money, so there is nothing to refund here.
+        if ($campaign->isPartner()) {
+            return false;
+        }
+
         return DB::transaction(function () use ($campaign) {
             $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
 
@@ -324,6 +348,12 @@ class BoostBillingService
      */
     public function cancelPaymentIntent(BoostCampaign $campaign): bool
     {
+        // A partner boost is paid to the partner and billed by Meta to the partner's ad
+        // account; the platform holds none of its money, so there is nothing to refund here.
+        if ($campaign->isPartner()) {
+            return false;
+        }
+
         if (! $campaign->stripe_payment_intent_id) {
             return false;
         }
@@ -358,6 +388,12 @@ class BoostBillingService
      */
     public function refundUnspent(BoostCampaign $campaign): bool
     {
+        // A partner boost is paid to the partner and billed by Meta to the partner's ad
+        // account; the platform holds none of its money, so there is nothing to refund here.
+        if ($campaign->isPartner()) {
+            return false;
+        }
+
         return DB::transaction(function () use ($campaign) {
             $campaign = BoostCampaign::lockForUpdate()->find($campaign->id);
 

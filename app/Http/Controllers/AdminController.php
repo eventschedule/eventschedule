@@ -2630,7 +2630,10 @@ class AdminController extends Controller
         // promotion buys inventory on this instance, so its delivery is revenue the operator
         // KEPT, not a cost. Summing both channels counted the same money as spend and as
         // revenue, and disagreed with the SUM(meta_spend) chart rendered beside it.
+        // A boost partner's campaigns spend in the partner's own ad account, not the platform's,
+        // so they are left out here; the platform earns its fee on them through boost statements.
         $totalAdSpend = BoostCampaign::meta()
+            ->whereNull('boost_partner_id')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('actual_spend');
 

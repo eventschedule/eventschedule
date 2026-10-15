@@ -15,6 +15,9 @@
 @endif
 
 {{ $type?->name ?? $event->name }}
+@if ($apptHost = $event->appointmentHostName())
+{{ __('messages.appointments_with_host', ['name' => $apptHost]) }}
+@endif
 
 {{ __('messages.event_changed_whats_changed') }}
 @if ($oldStart)

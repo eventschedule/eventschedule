@@ -5,7 +5,7 @@
     @endphp
 
     <x-slot name="title">REST API for AI Agents & Developers - Event Schedule</x-slot>
-    <x-slot name="description">29 REST endpoints, an OpenAPI 3.0 spec, llms.txt and agents.json. One POST creates an event with its tickets; one PUT refunds a sale.</x-slot>
+    <x-slot name="description">41 REST endpoints, an OpenAPI 3.0 spec, llms.txt and agents.json. One POST creates an event with its tickets; one PUT refunds a sale.</x-slot>
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
     <x-slot name="structuredData">
@@ -821,6 +821,22 @@
                 ['GET', '/api/feedback', 'Post-event star ratings and comments. Filter by minimum rating and date range.'],
                 ['GET', '/api/fan-content', 'Approved comments, photos and videos. Submitter email addresses are never included.'],
             ]],
+            ['Appointments', 'For an agent that books on a guest\'s behalf, a voice agent on the phone line most often.', [
+                ['GET', '/api/schedules/{subdomain}/appointment-types', 'The types a guest can book, with price, host, questions and the next open time.'],
+                ['GET', '/api/appointment-types/{id}/slots', 'Open times as UTC instants, each with a sentence in the schedule\'s timezone to read out.'],
+                ['POST', '/api/appointment-types/{id}/bookings', 'Book one. A taken time answers 409 with the three nearest; an Idempotency-Key makes a retry safe.'],
+            ]],
+            ['Boosts', 'For a network that runs its schedules\' boosts under its own Facebook Page and ad account, with the account\'s own key.', [
+                ['GET', '/api/boosts', 'Every request on the network\'s schedules. updated_since keeps a checkout in step without polling each one.'],
+                ['GET', '/api/boosts/{id}', 'One request: the exact ad and its version, the approval, the payment, the spend.'],
+                ['POST', '/api/boosts/{id}/approve', 'Approve a named version. A stale version answers 409, so earlier wording can never launch later wording.'],
+                ['POST', '/api/boosts/{id}/decline', 'Send it back with a note the business reads.'],
+                ['POST', '/api/boosts/{id}/confirm-payment', 'Record your own Stripe reference and amount. Approved and paid launches it.'],
+                ['DELETE', '/api/boosts/{id}/confirm-payment', 'Withdraw a payment confirmation before launch.'],
+                ['POST', '/api/boosts/{id}/stop', 'Pause it at Meta and end it.'],
+                ['GET', '/api/boost-statements', 'The monthly statements of the fee on actual spend.'],
+                ['GET', '/api/boost-statements/{period}', 'One month: each campaign\'s spend, fee and adjustment.'],
+            ]],
         ];
 
         $endpointCount = collect($ledger)->sum(fn ($g) => count($g[2]));
@@ -847,8 +863,8 @@
                 'The whole reference in one file, so an agent never has to follow a link to finish a task. Every endpoint, every parameter, every error shape.',
             ],
             [
-                '/.well-known/agents.json', '/.well-known/agents.json', '4 flows',
-                'Named multi-step flows: register_and_setup, create_event_with_tickets, sell_tickets and manage_schedule. Each one lists its calls in order, so a plan is data rather than prompt engineering.',
+                '/.well-known/agents.json', '/.well-known/agents.json', '5 flows',
+                'Named multi-step flows: register_and_setup, create_event_with_tickets, sell_tickets, manage_schedule and book_appointment. Each one lists its calls in order, so a plan is data rather than prompt engineering.',
             ],
             [
                 '/api/openapi.json', '/api/openapi.json', 'OpenAPI 3.0',
@@ -901,7 +917,7 @@
             ],
             [
                 'q' => 'What can I actually do with it?',
-                'a' => $endpointCount.' endpoints across registration, schedules, sub-schedules, events, categories and sales, plus two read-only feeds for post-event feedback and fan-submitted content. Schedules, sub-schedules, events and sales have full create, read, update and delete; categories are read-only lookups. A single create call can carry ticket types, agenda parts, performing members, a venue and a recurrence pattern, so publishing a run of shows is one request rather than six.',
+                'a' => $endpointCount.' endpoints across registration, schedules, sub-schedules, events, categories, sales, appointment booking and boost requests, plus two read-only feeds for post-event feedback and fan-submitted content. A network that boosts its schedules under its own Facebook Page approves, declines, records payment for and stops those boosts, and reads its monthly fee statements, with its own key. Schedules, sub-schedules, events and sales have full create, read, update and delete; categories are read-only lookups. A single create call can carry ticket types, agenda parts, performing members, a venue and a recurrence pattern, so publishing a run of shows is one request rather than six.',
             ],
             [
                 'q' => 'Can the API refund a sale?',
@@ -913,7 +929,7 @@
             ],
             [
                 'q' => 'What are the rate limits?',
-                'a' => '300 GET requests a minute and 30 POST, PUT or DELETE requests a minute, counted per IP address. Creating an event carries its own 30-per-minute throttle on top of that, and the auth endpoints have their own tighter limits. Going over returns 429 with an error body.',
+                'a' => '300 GET requests a minute and 30 POST, PUT or DELETE requests a minute, counted per account, so callers that share an address do not share a budget. Requests with no key or a wrong one are counted per IP address. Creating an event carries its own 30-per-minute throttle on top of that, and the auth endpoints have their own tighter limits. Going over returns 429 with an error body.',
             ],
             [
                 'q' => 'Are there webhooks, or do I have to poll?',
@@ -1127,7 +1143,7 @@ HTML,
                     <div class="ax-hero-desc">
                         <span class="ax-name" aria-hidden="true">DESCRIPTION</span>
                         <p class="ax-prose es-fade-up es-d-2">
-                            {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then twenty-six behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, feedback and fan content. JSON in, JSON out, one header.
+                            {{ $endpointCount }} REST endpoints over the whole product: three to get a key, then thirty-eight behind it covering schedules, sub-schedules, events, recurrences, ticket types, sales and refunds, appointment booking, boost requests, feedback and fan content. JSON in, JSON out, one header.
                         </p>
                         <p class="ax-prose es-fade-up es-d-2">
                             An OpenAPI 3.0 spec, <span class="ax-k">llms.txt</span> and <span class="ax-k">agents.json</span> ship with it, so an agent can discover this API and drive it without a human reading the docs first.
@@ -1195,7 +1211,7 @@ HTML,
                             <dt>300 / 30</dt>
                             <dd>
                                 <strong>Requests a minute</strong>
-                                <p>300 reads and 30 writes a minute, per IP. Over the line you get a 429, not a silent drop.</p>
+                                <p>300 reads and 30 writes a minute, per account. Over the line you get a 429, not a silent drop.</p>
                             </dd>
                         </div>
                         <div class="ax-fact" data-reveal>

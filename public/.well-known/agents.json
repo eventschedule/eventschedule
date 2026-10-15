@@ -178,6 +178,63 @@
           }
         }
       ]
+    },
+    {
+      "name": "book_appointment",
+      "description": "Book an appointment for a guest, as a voice agent on a phone line would: list the bookable types, find an open time, then book it. A taken time answers 409 with the three nearest open times; send an Idempotency-Key so a retry never books twice. Requires a key whose account is an owner or admin of a Pro schedule.",
+      "steps": [
+        {
+          "operationId": "list_appointment_types",
+          "description": "List the appointment types a guest can book on the schedule",
+          "parameters": {
+            "path": {
+              "subdomain": "$user.subdomain"
+            }
+          },
+          "outputs": {
+            "appointment_type_id": "data[0].id"
+          }
+        },
+        {
+          "operationId": "list_appointment_slots",
+          "description": "List the open times for the chosen type; read each slot's label to the guest",
+          "parameters": {
+            "path": {
+              "id": "$steps.list_appointment_types.outputs.appointment_type_id"
+            },
+            "query": {
+              "from": "$user.date",
+              "days": 7
+            }
+          },
+          "outputs": {
+            "slot": "data[0].starts_at"
+          }
+        },
+        {
+          "operationId": "create_appointment_booking",
+          "description": "Book the time the guest chose, then read the booking's summary back to them",
+          "parameters": {
+            "headers": {
+              "Idempotency-Key": "$user.call_id"
+            },
+            "path": {
+              "id": "$steps.list_appointment_types.outputs.appointment_type_id"
+            },
+            "body": {
+              "slot": "$steps.list_appointment_slots.outputs.slot",
+              "name": "$user.guest_name",
+              "email": "$user.guest_email",
+              "phone": "$user.guest_phone"
+            }
+          },
+          "outputs": {
+            "status": "data.status",
+            "summary": "data.summary",
+            "manage_url": "data.manage_url"
+          }
+        }
+      ]
     }
   ]
 }
