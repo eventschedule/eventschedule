@@ -66,6 +66,10 @@
                         </component>
                     </p>
                 </div>
+                {{-- The sentence opens the schedule in the admin; the arrow at the row's end, the
+                     event's or the schedule's guest page (components/public-page-link). After the
+                     last word it wrapped to a line of its own whenever the sentence filled one. --}}
+                <x-public-page-link v-if="item.public_url" v-bind:href="item.public_url" v-bind:aria-label="fill(msg.openPublicPage, item.public_label)" v-bind:title="fill(msg.openPublicPage, item.public_label)" />
             </li>
         </ul>
 

@@ -1428,4 +1428,11 @@
     .page-card .page-form-actions {
       margin-top: 1.25rem;
     }
+    /* The arrow inside a name on the overview pages that opens its guest page
+       (components/public-page-icon): it turns brand blue as the name is underlined. The arrow that
+       stands on its own (components/public-page-link) does the same with its own hover. */
+    .public-page-name:hover .public-page-icon,
+    .public-page-name:focus-visible .public-page-icon {
+      color: var(--brand-blue);
+    }
 </style>

@@ -1,5 +1,7 @@
 {{-- The four breakdown cards share one anatomy, so they are one template over `cards`. Every row is a
-     filter toggle; the only other way to filter is removing a chip. --}}
+     filter toggle; the only other way to filter is removing a chip. A top page that has an address
+     carries the arrow that opens it beside the toggle, never inside it (a link in a button is not
+     a link), and a page without one keeps the space, so the bars of one card share a scale. --}}
 <section v-for="card in cards" :key="card.id" class="ap-card rounded-xl flex flex-col" :aria-labelledby="'realtime-card-' + card.id">
     <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex items-baseline justify-between gap-2">
         <h2 :id="'realtime-card-' + card.id" class="text-base font-semibold text-gray-900 dark:text-white">@{{ card.title }}</h2>
@@ -9,13 +11,13 @@
     <p v-if="!card.rows.length" class="px-5 pb-5 text-sm text-gray-500 dark:text-gray-400">@{{ msg.nothingYet }}</p>
 
     <ul v-else class="px-2 pb-2 max-h-80 overflow-y-auto">
-        <li v-for="row in (expandedCards[card.id] ? card.rows : card.rows.slice(0, 8))" :key="row.key">
+        <li v-for="row in (expandedCards[card.id] ? card.rows : card.rows.slice(0, 8))" :key="row.key" class="flex items-center">
             <component :is="row.filterable ? 'button' : 'div'"
                        :type="row.filterable ? 'button' : undefined"
                        @click="row.filterable && toggleFilter(card.filter, row.key)"
                        :aria-pressed="row.filterable ? (isActive(card.filter, row.key) ? 'true' : 'false') : undefined"
                        :aria-label="row.filterable ? fill(isActive(card.filter, row.key) ? msg.removeFilter : msg.showOnly, rowLabel(card, row)) : undefined"
-                       class="group relative w-full flex items-center gap-3 px-3 py-2 text-sm text-start rounded-md transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]"
+                       class="group relative flex-1 min-w-0 flex items-center gap-3 px-3 py-2 text-sm text-start rounded-md transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]"
                        :class="row.filterable ? 'cursor-pointer' : 'cursor-default text-gray-500 dark:text-gray-400'">
                 <span aria-hidden="true" class="absolute inset-y-0.5 start-0 rounded-md transition-all duration-200"
                       :class="isActive(card.filter, row.key) ? 'bg-[var(--brand-blue-a20)]' : (row.filterable ? 'bg-[var(--brand-blue-a10)] group-hover:bg-[var(--brand-blue-a20)]' : 'bg-gray-100 dark:bg-white/[0.04]')"
@@ -41,6 +43,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" :d="icons.funnel" />
                 </svg>
             </component>
+            <template v-if="card.id === 'pages'">
+                <x-public-page-link v-if="row.url" v-bind:href="row.url" v-bind:aria-label="fill(msg.openPublicPage, rowLabel(card, row))" v-bind:title="fill(msg.openPublicPage, rowLabel(card, row))" class="ms-1" />
+                <span v-else class="w-6 h-6 ms-1 shrink-0" aria-hidden="true"></span>
+            </template>
         </li>
     </ul>
 

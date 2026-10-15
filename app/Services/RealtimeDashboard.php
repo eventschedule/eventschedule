@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Models\SupportConversation;
 use App\Models\User;
+use App\Utils\PublicPageUrl;
 use App\Utils\RealtimeRows;
 use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
@@ -41,6 +42,12 @@ use Throwable;
  *    person can exist beside them: every lookup tries the exact id before an alias.
  *  - Filters match page views. A person is "right now" when their CURRENT page view matches and in
  *    "last 30 minutes" when any of theirs does. Timelines and Activity ignore filters.
+ *  - A blocked account's own page views, and every view of its schedules' and events' pages, are
+ *    left out of the read itself (BlockedAccounts::withoutTheirHits()), so no figure counts what
+ *    no list shows. Its browsing while not signed in, before or after, stays as anonymous, and an
+ *    anonymous row on a key it signed in on joins nobody (BlockedAccounts::visitorKeys()): with
+ *    its signed-in rows gone the key could look as though it had one user, and hand that
+ *    browsing to an honest person on the same network and browser.
  *
  * Nothing here is cached: the file and database cache stores only delete expired keys when they are
  * read, so per-filter payloads would leave names and emails on disk past the one-hour promise.
@@ -58,6 +65,11 @@ class RealtimeDashboard
     private const BREAKDOWN_LIMIT = 50;
 
     private const STUCK_MINUTES = 10;
+
+    /** The Right now board: pages listed per area, and faces per page, before "+N". */
+    private const BOARD_PAGES = 6;
+
+    private const BOARD_FACES = 3;
 
     private const COLUMNS = [
         'id', 'hit_key', 'visitor_key', 'consented', 'user_id', 'is_admin', 'is_demo', 'surface', 'path',
@@ -80,6 +92,8 @@ class RealtimeDashboard
     /** @var array<int, object> */
     private array $events = [];
 
+    private BlockedAccounts $blocked;
+
     public function __construct(
         public readonly array $filters = [],
         public readonly string $who = 'all',
@@ -90,6 +104,7 @@ class RealtimeDashboard
     ) {
         $this->now = RealtimeTracker::now();
         $this->nowTs = $this->now->getTimestamp();
+        $this->blocked = new BlockedAccounts;
     }
 
     /**
@@ -169,7 +184,7 @@ class RealtimeDashboard
         $state = $people->isEmpty() && $pageRows->isEmpty() && $this->justEnabled() ? 'waiting' : 'ok';
 
         // Built first: the per-minute chart marks the sign-ups it reports.
-        $activity = (new RealtimeActivity)->build($this->admins, $this->presenceByUser($people), $this->feed);
+        $activity = (new RealtimeActivity($this->blocked))->build($this->admins, $this->presenceByUser($people), $this->feed);
         $marks = $activity['signups']['marks'];
         unset($activity['signups']['marks']);
 
@@ -189,6 +204,7 @@ class RealtimeDashboard
                 'now_signed_in' => $nowPeople->where('kind', 'user')->count(),
                 'now_anon' => $nowPeople->where('kind', 'anon')->count(),
                 'now_by_surface' => $this->nowBySurface($people),
+                'now_board' => $this->nowBoard($people),
                 'win_visitors' => $counts['all'],
                 'win_views' => $consentedViews,
                 'unidentified_views' => $unidentifiedViews,
@@ -227,7 +243,7 @@ class RealtimeDashboard
 
             // The last_seen_at bound is what lets the index do the work (started_at has none);
             // it never drops a row, because last_seen_at is never earlier than started_at.
-            return DB::table('realtime_hits')
+            return (new BlockedAccounts)->withoutTheirHits(DB::table('realtime_hits'))
                 ->where('last_seen_at', '>=', $since)
                 ->where('started_at', '>=', $since)
                 ->whereNotNull('engaged_at')
@@ -241,7 +257,7 @@ class RealtimeDashboard
 
     private function fetchRows(): Collection
     {
-        return DB::table('realtime_hits')
+        return $this->blocked->withoutTheirHits(DB::table('realtime_hits'))
             ->where('last_seen_at', '>=', RealtimeTracker::ts($this->now->subMinutes(self::WINDOW_MINUTES)))
             ->whereNotNull('engaged_at')
             ->orderByDesc('last_seen_at')
@@ -399,6 +415,7 @@ class RealtimeDashboard
 
         // visitor key => user id => the start of that user's latest signed-in page view on the key.
         $keyUsers = [];
+        $blockedKeys = $this->blocked->visitorKeys(RealtimeTracker::ts($this->now->subMinutes(RealtimeTracker::RETENTION_MINUTES)));
         foreach ($rows as $row) {
             if ($row->user_id && ! $row->is_demo && $row->visitor_key) {
                 $keyUsers[$row->visitor_key][$row->user_id] = max($keyUsers[$row->visitor_key][$row->user_id] ?? 0, $row->started);
@@ -410,7 +427,7 @@ class RealtimeDashboard
             if ($row->user_id && ! $row->is_demo) {
                 $id = 'u:'.UrlUtils::encodeId($row->user_id);
             } else {
-                $owner = self::keyOwner($keyUsers[$row->visitor_key] ?? [], $row->started, $this->users);
+                $owner = isset($blockedKeys[$row->visitor_key]) ? null : self::keyOwner($keyUsers[$row->visitor_key] ?? [], $row->started, $this->users);
                 $id = $owner ? 'u:'.UrlUtils::encodeId($owner) : 'v:'.$row->visitor_key;
             }
 
@@ -554,14 +571,21 @@ class RealtimeDashboard
         ];
     }
 
+    /**
+     * The guest page a row was a view of, on the schedule it was viewed on, for the arrow beside
+     * a top page and the links of a timeline. None once the schedule is deleted or no longer
+     * claimed, or for a draft, whose page answers nobody but its members.
+     */
     private function guestUrl(?object $role, ?object $event): ?string
     {
         try {
-            if ($event && $role) {
-                return $event->getGuestUrl($role->subdomain) ?: null;
+            $home = PublicPageUrl::schedule($role);
+
+            if ($home === null || ! $event) {
+                return $home;
             }
 
-            return $role ? ($role->getGuestUrl() ?: null) : null;
+            return $event->is_draft ? null : ($event->getGuestUrl($role->subdomain) ?: null);
         } catch (Throwable) {
             return null;
         }
@@ -867,6 +891,59 @@ class RealtimeDashboard
         ], $surfaces);
     }
 
+    /**
+     * The Right now board: for each area nowBySurface() lists, the pages that have somebody on them
+     * right now, busiest first, and who is on each, signed-in people first. Every filter but the
+     * surface one applies, as in nowBySurface(), so the area being filtered to stays beside the
+     * others. A page's key is the one the page filter takes; its address is the one Top pages opens.
+     *
+     * @return array<string, array{pages: list<array>, more_pages: int, more_text: ?string}>
+     */
+    private function nowBoard(Collection $people): array
+    {
+        $present = $people->filter(fn ($person) => $person['now'] && $person['matches_now_any_surface'])->values();
+        $this->ensureNames($present->pluck('current'));
+
+        $board = [];
+
+        foreach ($present->groupBy(fn ($person) => $person['current']->surface) as $surface => $inArea) {
+            $pages = $inArea->groupBy(fn ($person) => $person['current']->page_key)
+                ->map(function (Collection $group, string $key) {
+                    $page = $this->pageLabel($group->first()['current']);
+                    $faces = $group->sortBy([
+                        fn ($a, $b) => ($b['kind'] === 'user') <=> ($a['kind'] === 'user'),
+                        fn ($a, $b) => $b['sort_at'] <=> $a['sort_at'],
+                    ])->take(self::BOARD_FACES);
+
+                    return [
+                        'key' => $key,
+                        'label' => $page['label'],
+                        'url' => $page['url'],
+                        'count' => $group->count(),
+                        'people' => $faces->map(fn ($person) => [
+                            'id' => $person['id'],
+                            'kind' => $person['kind'],
+                            'initials' => $person['initials'],
+                            'name' => $person['kind'] === 'user' ? ($person['name'] ?: $person['email']) : null,
+                            'country' => $person['country'],
+                        ])->values()->all(),
+                        'more' => max(0, $group->count() - self::BOARD_FACES),
+                    ];
+                })
+                ->sortBy([['count', 'desc'], ['label', 'asc']])
+                ->values();
+
+            $more = max(0, $pages->count() - self::BOARD_PAGES);
+            $board[$surface] = [
+                'pages' => $pages->take(self::BOARD_PAGES)->all(),
+                'more_pages' => $more,
+                'more_text' => $more > 0 ? trans_choice('messages.realtime_more_pages', $more, ['count' => number_format($more)]) : null,
+            ];
+        }
+
+        return $board;
+    }
+
     private function currentRow(array $person): object
     {
         $rows = $person['rows'];
@@ -897,7 +974,7 @@ class RealtimeDashboard
 
     private function lastSeenAgo(): ?int
     {
-        $query = DB::table('realtime_hits')->whereNotNull('engaged_at')->where('surface', '!=', 'embed');
+        $query = $this->blocked->withoutTheirHits(DB::table('realtime_hits'))->whereNotNull('engaged_at')->where('surface', '!=', 'embed');
         if (! $this->admins) {
             $query->where('is_admin', false);
         }
@@ -944,10 +1021,14 @@ class RealtimeDashboard
         // hour rather than the 30-minute window: a user's timeline takes only the ones that belong to
         // them, and an anonymous person's takes only the ones that belong to no one. Otherwise the
         // anonymous timeline would repeat the user's pre-sign-in pages and link the two.
+        //
+        // Both reads leave a blocked account out as the list does, so its timeline is empty, and
+        // the anonymous browsing on a key it signed in on belongs to nobody here either.
         $keyUsers = [];
         $known = [];
+        $blockedKeys = $this->blocked->visitorKeys($since);
         if ($keys) {
-            $owners = DB::table('realtime_hits')
+            $owners = $this->blocked->withoutTheirHits(DB::table('realtime_hits'))
                 ->whereIn('visitor_key', $keys)
                 ->where('last_seen_at', '>=', $since)
                 ->whereNotNull('user_id')
@@ -966,7 +1047,7 @@ class RealtimeDashboard
             }
         }
 
-        $rows = DB::table('realtime_hits')
+        $rows = $this->blocked->withoutTheirHits(DB::table('realtime_hits'))
             ->where('consented', true)
             ->where('last_seen_at', '>=', $since)
             ->where(function ($query) use ($userId, $keys) {
@@ -988,12 +1069,12 @@ class RealtimeDashboard
 
                 return $row;
             })
-            ->filter(function ($row) use ($userId, $keyUsers, $known) {
+            ->filter(function ($row) use ($userId, $keyUsers, $known, $blockedKeys) {
                 if ($row->user_id) {
                     return true;
                 }
 
-                $owner = self::keyOwner($keyUsers[$row->visitor_key] ?? [], $row->started, $known);
+                $owner = isset($blockedKeys[$row->visitor_key]) ? null : self::keyOwner($keyUsers[$row->visitor_key] ?? [], $row->started, $known);
 
                 return $userId ? $owner === (int) $userId : $owner === null;
             })
@@ -1047,6 +1128,7 @@ class RealtimeDashboard
                     'name' => $role->name,
                     'plan' => config('app.hosted') ? __('messages.'.$role->actualPlanTier()) : null,
                     'admin_url' => route('admin.schedules.edit', ['role' => UrlUtils::encodeId($role->id)]),
+                    'public_url' => PublicPageUrl::schedule($role),
                 ])->all();
 
             if (Route::has('admin.support')) {

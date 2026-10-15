@@ -43,7 +43,9 @@
                     <div class="min-w-0 flex-1">
                         <p class="flex items-center gap-2 min-w-0">
                             @if ($row['url'])
-                                <a href="{{ $row['url'] }}" target="_blank" rel="noopener noreferrer" class="truncate text-sm font-medium text-gray-900 dark:text-white hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"><bdi>{{ $row['name'] }}</bdi></a>
+                                {{-- The guest page, in a new tab: the arrow says so (components/public-page-link). --}}
+                                <a href="{{ $row['url'] }}" target="_blank" rel="noopener noreferrer" title="{{ __('messages.admin_open_public_page', ['label' => $row['name']]) }}"
+                                   class="public-page-name group inline-flex items-center gap-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"><span class="truncate group-hover:underline"><bdi>{{ $row['name'] }}</bdi></span><x-public-page-icon class="public-page-icon text-gray-500 dark:text-gray-400 transition-all duration-200" /></a>
                             @else
                                 <span class="truncate text-sm font-medium text-gray-900 dark:text-white"><bdi>{{ $row['name'] }}</bdi></span>
                             @endif

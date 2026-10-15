@@ -6,6 +6,7 @@ use App\Models\RealtimeHit;
 use App\Models\Setting;
 use App\Services\AuditService;
 use App\Services\RealtimeDashboard;
+use App\Services\RealtimeTrends;
 use App\Utils\RealtimeTracker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -33,6 +34,9 @@ class AdminRealtimeController extends Controller
 
         return view('admin.realtime', [
             'payload' => RealtimeDashboard::fromRequest($request)->payload(),
+            // In the page, so the card does not open empty; null while tracking is off, when the
+            // page shows how to turn it on instead.
+            'trends' => RealtimeTracker::enabled() ? (new RealtimeTrends(RealtimeTrends::range($request->query('trend'))))->cached() : null,
         ]);
     }
 
@@ -43,6 +47,17 @@ class AdminRealtimeController extends Controller
         RealtimeTracker::pruneIfDue();
 
         return response()->json(RealtimeDashboard::fromRequest($request)->payload());
+    }
+
+    /**
+     * The Trends card, for the range it asks (24h, 7d or 30d). Its own address, not part of the
+     * poll: it changes by the hour, and the poll runs every ten seconds.
+     */
+    public function trends(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+
+        return response()->json((new RealtimeTrends(RealtimeTrends::range($request->query('range'))))->cached());
     }
 
     /**

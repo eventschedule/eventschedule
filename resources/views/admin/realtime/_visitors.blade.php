@@ -133,8 +133,9 @@
                         <div v-if="details && details.schedules.length" class="pt-3">
                             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">@{{ msg.schedules }}</p>
                             <ul class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
-                                <li v-for="schedule in details.schedules" :key="schedule.admin_url" class="text-sm">
+                                <li v-for="schedule in details.schedules" :key="schedule.admin_url" class="text-sm inline-flex items-center gap-0.5">
                                     <x-link v-bind:href="schedule.admin_url"><bdi>@{{ schedule.name }}</bdi></x-link>
+                                    <x-public-page-link v-if="schedule.public_url" v-bind:href="schedule.public_url" v-bind:aria-label="fill(msg.openPublicPage, schedule.name)" v-bind:title="fill(msg.openPublicPage, schedule.name)" class="-my-1" />
                                     <span v-if="schedule.plan" class="ms-1 text-xs text-gray-500 dark:text-gray-400">@{{ schedule.plan }}</span>
                                 </li>
                             </ul>

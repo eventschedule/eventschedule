@@ -13,16 +13,53 @@
     @keyframes realtime-bump { 0% { transform: scale(1); } 35% { transform: scale(1.04); } 100% { transform: scale(1); } }
     .realtime-bump { animation: realtime-bump 0.5s ease-out 1; }
     @media (prefers-reduced-motion: reduce) { .realtime-bump { animation: none; } }
+
+    /* The Right now board (_now): a recessed column per part of the site, pressed while it is the
+       Surface filter, and a row per page, tinted while it is the Page filter. */
+    .realtime-area { background: var(--ap-tint-sunken); }
+    .realtime-area-on { background: var(--brand-blue-a10); box-shadow: var(--ap-inset-pressed); }
+    .realtime-area-head:hover { background: var(--ap-tint-2); }
+    .realtime-area-on .realtime-area-head:hover { background: transparent; }
+    .realtime-board-row { transition: background-color 0.2s; }
+    .realtime-board-row:hover { background: var(--ap-tint-2); }
+    .realtime-board-row-on, .realtime-board-row-on:hover { background: var(--brand-blue-a10); }
+    /* Who is on a page: overlapping faces, each ringed in the card's colour so the overlap reads.
+       Solid, never a translucent tint, or the face beneath shows through. */
+    .realtime-face {
+        display: inline-flex; align-items: center; justify-content: center; flex: none;
+        width: 1.5rem; height: 1.5rem; border-radius: 9999px; overflow: hidden;
+        font-size: 0.625rem; font-weight: 600; line-height: 1;
+        color: rgb(var(--ap-ink-3)); background: rgb(var(--ap-surface));
+        box-shadow: 0 0 0 2px rgb(var(--ap-surface));
+    }
+    .realtime-face + .realtime-face { margin-inline-start: -0.375rem; }
+    .realtime-face-user { color: var(--brand-blue); background: linear-gradient(var(--brand-blue-a10), var(--brand-blue-a10)), rgb(var(--ap-surface)); }
+    button.realtime-face { cursor: pointer; transition: box-shadow 0.2s; }
+    button.realtime-face:hover, button.realtime-face:focus-visible { position: relative; z-index: 1; outline: none; box-shadow: 0 0 0 2px var(--brand-blue); }
+    /* The board's columns, and the Trends tiles: one line of them only where each still has room
+       for a page's name or a figure and its change (at 1280 four columns cut every name short). */
+    .realtime-board { grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 640px) { .realtime-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 1024px) { .realtime-board.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 1440px) { .realtime-board.is-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    .realtime-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 640px) { .realtime-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 1440px) { .realtime-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+    /* A legend swatch takes the colour of its part of the site from surfaceTone()'s text class. */
+    .realtime-swatch { background: currentColor; }
 </style>
 <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function () {
         var MSG = @json($realtimeMsg);
         var CONFIG = @json($realtimeConfig);
         var INITIAL = @json($payload);
+        var TRENDS = @json($trends);
         var BASE_TITLE = document.title;
         var LOCALE = CONFIG.locale;
 
         var numberFormat = new Intl.NumberFormat(LOCALE + '-u-nu-latn');
+        var percentFormat = null;
+        try { percentFormat = new Intl.NumberFormat(LOCALE + '-u-nu-latn', { style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero' }); } catch (e) {}
         var relative = null, regionNames = null, clockFormat = null;
         var relativeExact = null;
         try { relative = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto', style: 'short' }); } catch (e) {}
@@ -96,6 +133,11 @@
                     debounce: null,
                     titleDot: false,
                     seenCursor: INITIAL.activity ? INITIAL.activity.cursor : null,
+                    trends: TRENDS,
+                    trendRange: (TRENDS && TRENDS.range) || '24h',
+                    trendMetric: 'views',
+                    trendsLoading: false,
+                    trendTries: 0,
                 };
             },
 
@@ -108,7 +150,7 @@
                 },
                 // Derived from the state, not location.href, so it is reactive and carries the filters.
                 pageHref: function () {
-                    var query = this.params().toString();
+                    var query = this.urlParams().toString();
                     return CONFIG.pageUrl + (query ? '?' + query : '');
                 },
                 whoOptions: function () {
@@ -209,6 +251,34 @@
                         };
                     });
                 },
+                rangeOptions: function () {
+                    var self = this;
+                    return ['24h', '7d', '30d'].map(function (value) { return { value: value, label: self.msg.range[value] }; });
+                },
+                // One tile per figure, each against the same span before it. A comparison the hourly
+                // counts cannot make yet (they began inside that span) says so instead of a number.
+                trendTiles: function () {
+                    var t = this.trends, self = this;
+                    if (!t) return [];
+                    var labels = { views: this.msg.views, visits: this.msg.visits, signup: this.msg.tileSignups, schedule: this.msg.tileSchedules, events: this.msg.tileEvents, order: this.msg.tileOrders };
+                    return ['views', 'visits', 'signup', 'schedule', 'events', 'order'].map(function (key) {
+                        var before = t.previous[key];
+                        return {
+                            key: key,
+                            label: labels[key],
+                            value: t.totals[key],
+                            change: t.change[key],
+                            before: before === null ? self.msg.noComparison : self.msg.before[t.range].replace(':count', self.fmt(before)),
+                        };
+                    });
+                },
+                trendIsTraffic: function () {
+                    return this.trendMetric === 'views' || this.trendMetric === 'visits';
+                },
+                trendChartLabel: function () {
+                    var metric = this.trendMetric, tile = this.trendTiles.find(function (t) { return t.key === metric; });
+                    return (tile ? tile.label : '') + ', ' + (this.msg.range[this.trendRange] || '');
+                },
                 chartSummary: function () {
                     var total = (this.p.minutes || []).reduce(function (sum, m) { return sum + m.consented + m.unidentified; }, 0);
                     return this.msg.viewsPerMinute + ': ' + this.fmt(total);
@@ -269,6 +339,21 @@
                         gp: { bg: 'bg-pink-50 dark:bg-pink-500/10', text: 'text-pink-700 dark:text-pink-600' },
                         ap: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-500' },
                     }[surface] || { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-500 dark:text-gray-400' };
+                },
+                // The Right now board: the pages of one part of the site, and the "N more pages" line.
+                boardPages: function (surface) {
+                    var board = this.p.overview && this.p.overview.now_board;
+                    return (board && board[surface] && board[surface].pages) || [];
+                },
+                boardMore: function (surface) {
+                    var board = this.p.overview && this.p.overview.now_board;
+                    return (board && board[surface] && board[surface].more_text) || '';
+                },
+                faceTitle: function (face) {
+                    return face.kind === 'user' ? (face.name || '') : (this.countryName(face.country) || this.msg.anonymous);
+                },
+                pct: function (n) {
+                    return percentFormat ? percentFormat.format(n / 100) : (n > 0 ? '+' : '') + n + '%';
                 },
                 rowLabel: function (card, row) {
                     return card.id === 'countries' ? this.countryName(row.key) : row.label;
@@ -346,8 +431,14 @@
                     if (this.feed) params.set('feed', this.feed);
                     return params;
                 },
+                // The page's own address also keeps the Trends range, which the poll does not need.
+                urlParams: function () {
+                    var params = this.params();
+                    if (this.trendRange !== '24h') params.set('trend', this.trendRange);
+                    return params;
+                },
                 syncUrl: function () {
-                    var query = this.params().toString();
+                    var query = this.urlParams().toString();
                     try { history.replaceState(null, '', CONFIG.pageUrl + (query ? '?' + query : '')); } catch (e) {}
                 },
 
@@ -543,6 +634,7 @@
                     clearTimeout(this.freshTimer);
                     this.freshTimer = setTimeout(function () { self.fresh = {}; }, 2100);
                     this.$nextTick(function () {
+                        if (self.$refs.trendChart && (!self.trendChart || self.trendChart.canvas !== self.$refs.trendChart)) self.initTrendChart();
                         // The canvas exists only while tracking is on: build the chart the first time
                         // it appears, and again if switching off and on replaced the element.
                         var canvas = self.$refs.chart;
@@ -558,6 +650,145 @@
                         }
                     });
                     this.updateTitle();
+                },
+                setRange: function (range) {
+                    if (range === this.trendRange) return;
+                    this.trendRange = range;
+                    this.syncUrl();
+                    this.fetchTrends();
+                },
+                setMetric: function (metric) {
+                    this.trendMetric = metric;
+                    this.updateTrendChart();
+                },
+                // Its own address and its own pace: the figures move by the hour, so a range change
+                // asks at once and otherwise the card is refreshed every five minutes.
+                fetchTrends: function (quietly) {
+                    var self = this, range = this.trendRange;
+                    if (!CONFIG.trendsUrl) return;
+                    if (!quietly) this.trendsLoading = true;
+                    fetch(CONFIG.trendsUrl + '?range=' + encodeURIComponent(range), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                    }).then(function (r) {
+                        if (!r.ok) throw r;
+                        return r.json();
+                    }).then(function (data) {
+                        if (!data || data.range !== self.trendRange) return;
+                        self.trends = data;
+                        self.$nextTick(function () { self.initTrendChart(); });
+                    }).catch(function () {
+                        // The card keeps what it has; the poll's own status line says when the page
+                        // has lost its connection.
+                    }).finally(function () {
+                        if (range === self.trendRange) self.trendsLoading = false;
+                    });
+                },
+                trendColors: function () {
+                    var self = this, colors = { blue: chartColors().blue };
+                    ['wp', 'gp', 'ap', 'auth'].forEach(function (surface) {
+                        colors[surface] = surface === 'auth' ? probe('text-gray-400 dark:text-gray-500', 'color') : probe(self.surfaceTone(surface).text, 'color');
+                    });
+                    return colors;
+                },
+                initTrendChart: function () {
+                    var self = this, canvas = this.$refs.trendChart;
+                    if (!this.trends) return;
+                    if (typeof Chart === 'undefined' || !canvas) {
+                        if (this.trendTries++ < 100) setTimeout(this.initTrendChart, 50);
+                        return;
+                    }
+                    if (this.trendChart && this.trendChart.canvas === canvas) { this.updateTrendChart(); return; }
+                    if (this.trendChart) { try { this.trendChart.destroy(); } catch (e) {} }
+                    var colors = chartColors();
+                    this.trendChart = new Chart(canvas, {
+                        type: 'bar',
+                        data: { labels: [], datasets: [] },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: false,
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    filter: function (item) { return item.raw !== null && item.raw !== undefined; },
+                                    callbacks: {
+                                        title: function (items) {
+                                            var bucket = self.trends && self.trends.buckets[items[0].dataIndex];
+                                            return bucket ? bucket.title : '';
+                                        },
+                                        label: function (item) {
+                                            return (item.dataset.label ? item.dataset.label + ': ' : '') + numberFormat.format(item.raw || 0);
+                                        },
+                                    },
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    reverse: CONFIG.rtl,
+                                    grid: { display: false },
+                                    border: { display: false },
+                                    ticks: { color: colors.ink, font: { size: 11 }, maxRotation: 0, autoSkip: true, autoSkipPadding: 14 },
+                                },
+                                y: {
+                                    stacked: true,
+                                    beginAtZero: true,
+                                    suggestedMax: 5,
+                                    position: CONFIG.rtl ? 'right' : 'left',
+                                    grid: { color: colors.grid },
+                                    border: { display: false },
+                                    ticks: { color: colors.ink, font: { size: 11 }, precision: 0, maxTicksLimit: 4 },
+                                },
+                            },
+                        },
+                    });
+                    this.updateTrendChart();
+                },
+                // Page views and visits are stacked by part of the site, the rest is one bar. The
+                // bar still filling (this hour, today) is drawn lighter, so it is not read as a drop.
+                updateTrendChart: function () {
+                    var chart = this.trendChart, t = this.trends, self = this;
+                    if (!chart || !t) return;
+                    var colors = this.trendColors(), metric = this.trendMetric;
+                    var last = t.buckets.length - 1;
+                    // The brand blue arrives as hex, the area colours as rgb().
+                    var fade = function (color) {
+                        var value = (color || '').trim(), match = /^rgba?\(([^)]+)\)$/.exec(value);
+                        if (match) return 'rgba(' + match[1].split(',').slice(0, 3).join(',') + ', 0.45)';
+                        var hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value);
+                        if (!hex) return value;
+                        var digits = hex[1].length === 3 ? hex[1].replace(/./g, '$&$&') : hex[1];
+                        var rgb = [0, 2, 4].map(function (at) { return parseInt(digits.substr(at, 2), 16); });
+                        return 'rgba(' + rgb.join(',') + ', 0.45)';
+                    };
+                    var shade = function (color) {
+                        return t.buckets.map(function (bucket, index) { return index === last && bucket.current ? fade(color) : color; });
+                    };
+                    var bar = { borderRadius: 3, borderSkipped: 'start', barPercentage: 0.85, categoryPercentage: 0.9, maxBarThickness: 28 };
+                    chart.data.labels = t.buckets.map(function (bucket) { return bucket.label; });
+                    if (metric === 'views' || metric === 'visits') {
+                        chart.data.datasets = t.surfaces.map(function (surface) {
+                            return Object.assign({
+                                label: self.msg.surface[surface],
+                                backgroundColor: shade(colors[surface]),
+                                data: t.buckets.map(function (bucket) { return bucket[metric] ? bucket[metric][surface] : null; }),
+                            }, bar);
+                        });
+                    } else {
+                        var tile = this.trendTiles.find(function (one) { return one.key === metric; });
+                        chart.data.datasets = [Object.assign({
+                            label: tile ? tile.label : '',
+                            backgroundColor: shade(colors.blue),
+                            data: t.buckets.map(function (bucket) { return bucket[metric]; }),
+                        }, bar)];
+                    }
+                    var ink = chartColors();
+                    chart.options.scales.x.ticks.color = ink.ink;
+                    chart.options.scales.y.ticks.color = ink.ink;
+                    chart.options.scales.y.grid.color = ink.grid;
+                    chart.update();
                 },
                 updateTitle: function () {
                     // A stopped page shows no count: it is no longer live, and returning to the tab
@@ -692,16 +923,21 @@
                     // Not update('none'): in that mode Chart.js keeps each bar's shared options, so
                     // the new colours never reached the bars and they stayed in the old palette.
                     this.chart.update();
+                    this.updateTrendChart();
                 },
             },
 
             mounted: function () {
                 var self = this;
                 this.initChart();
+                this.initTrendChart();
                 this.updateTitle();
                 this.schedule();
 
                 setInterval(function () { self.nowMs = Date.now(); }, 5000);
+                setInterval(function () {
+                    if (!document.hidden && self.status === 'live' && self.trends) self.fetchTrends(true);
+                }, 300000);
 
                 document.addEventListener('visibilitychange', function () {
                     if (!document.hidden) {

@@ -71,7 +71,7 @@ class AdminDashboardSample
                     'initials' => RealtimeDashboard::initials($row[0]),
                     'source' => $row[1] ? ['primary' => $row[1], 'secondary' => $row[2], 'channel' => 'other'] : null,
                     'stage' => $row[3],
-                    'schedule' => $row[4] ? ['name' => $row[4], 'url' => '#'] : null,
+                    'schedule' => $row[4] ? ['name' => $row[4], 'url' => '#', 'public_url' => '#'] : null,
                     'created_at' => Carbon::instance($now->subMinutes($row[5])),
                 ], [
                     ['Tomas Aguilar', 'chatgpt.com', '/features/embed-calendar', 0, null, 35],
@@ -252,7 +252,7 @@ class AdminDashboardSample
 
         return array_map(fn ($row) => [
             'name' => $row[0], 'schedule' => $row[1], 'series' => $row[2] === null, 'when' => $row[2], 'mode' => $row[3],
-            'flag' => $row[5], 'more' => $row[6], 'url' => '#', 'image' => $image($row[7]),
+            'flag' => $row[5], 'more' => $row[6], 'url' => '#', 'public' => $row[5] !== 'draft', 'image' => $image($row[7]),
             'created_at' => Carbon::instance($now->subMinutes($row[4])),
         ], [
             ['Thursday Jazz Jam', 'Marta Soler Trio', 'Thu, Oct 9 · 8:30 PM', 'in_person', 40, null, 0, 'flyer_jazz'],

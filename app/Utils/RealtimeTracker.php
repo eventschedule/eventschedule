@@ -688,9 +688,19 @@ class RealtimeTracker
     /**
      * Delete rows past retention, in primary-key batches so a large backlog never takes one long
      * range lock on the table every beacon writes to.
+     *
+     * The hourly totals behind the Trends card are counted first (RealtimeRollup), on every path
+     * that prunes, so no row leaves before it is counted. A failure there is reported and the prune
+     * goes ahead: the hour the privacy policy promises comes before a gap in a chart.
      */
     public static function prune(?int $minutes = null, ?int $maxBatches = null): int
     {
+        try {
+            \App\Services\RealtimeRollup::run();
+        } catch (Throwable $e) {
+            self::reportOnce($e);
+        }
+
         $cutoff = self::ts(self::now()->subMinutes($minutes ?? self::RETENTION_MINUTES));
         $deleted = 0;
         $batches = 0;

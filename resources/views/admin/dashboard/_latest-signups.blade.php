@@ -47,9 +47,13 @@
                         <p class="flex items-center gap-2">
                             @include('admin.dashboard._stage', ['stage' => $person['stage'], 'label' => $stages[$person['stage']]])
                         </p>
-                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {{-- The name opens the schedule in the admin, the arrow its guest page. --}}
+                        <p class="mt-0.5 flex items-center gap-0.5 min-w-0 text-xs text-gray-500 dark:text-gray-400">
                             @if ($person['schedule'])
-                                <x-link :href="$person['schedule']['url']" class="text-gray-500 dark:text-gray-400"><bdi>{{ $person['schedule']['name'] }}</bdi></x-link>
+                                <x-link :href="$person['schedule']['url']" class="block truncate min-w-0 text-gray-500 dark:text-gray-400"><bdi>{{ $person['schedule']['name'] }}</bdi></x-link>
+                                @if ($person['schedule']['public_url'])
+                                    <x-public-page-link :href="$person['schedule']['public_url']" :label="$person['schedule']['name']" class="-my-1" />
+                                @endif
                             @else
                                 &nbsp;
                             @endif

@@ -101,7 +101,11 @@
                             </span>
                             <span v-if="!row.stuck_text" class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">@{{ row.status_text }}</span>
                         </div>
-                        <x-link v-if="row.schedule" v-bind:href="row.schedule.url" class="block truncate mt-1 text-sm"><bdi>@{{ row.schedule.name }}</bdi></x-link>
+                        {{-- The name opens the schedule in the admin, the arrow its guest page. --}}
+                        <div v-if="row.schedule" class="mt-1 flex items-center gap-0.5 min-w-0">
+                            <x-link v-bind:href="row.schedule.url" class="block truncate min-w-0 text-sm"><bdi>@{{ row.schedule.name }}</bdi></x-link>
+                            <x-public-page-link v-if="row.schedule.public_url" v-bind:href="row.schedule.public_url" v-bind:aria-label="fill(msg.openPublicPage, row.schedule.name)" v-bind:title="fill(msg.openPublicPage, row.schedule.name)" class="-my-1" />
+                        </div>
                         <p v-if="row.stuck_text" class="mt-1 inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">@{{ row.stuck_text }}</p>
                     </template>
                 </div>

@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Utils\CountryUtils;
 use App\Utils\ImageUtils;
+use App\Utils\PublicPageUrl;
 use App\Utils\SignupSource;
 use App\Utils\UrlUtils;
 use Carbon\CarbonImmutable;
@@ -43,6 +44,12 @@ use Throwable;
  * - How people attend is Event::getSchemaAttendanceMode(): a join link is online, a venue is in
  *   person, both is hybrid.
  * - Active users are ActiveDays; recurring revenue is RecurringRevenue. Neither is restated here.
+ * - A blocked account is left out with what is its (BlockedAccounts): its sign-up, the schedules
+ *   it owns, and the events it made or they own, which can still be up on another schedule.
+ *   Not filtered: active users, which is history stored a day at a time (today's figure alone
+ *   would dip); revenue, which is billing (the block cancels it, and a schedule Stripe would not
+ *   let go of is still billed); the federation figures, which say what is really being shared;
+ *   and the custom domain count, which is work for the operator.
  *
  * build() isolates each card: this is the page an admin lands on, and one failing query should
  * cost one card, not the page. It also times each one (timings()), which the page sends as a
@@ -97,10 +104,13 @@ class AdminDashboard
     /** @var array<int, int>|null */
     private ?array $demoRoleIds = null;
 
+    private BlockedAccounts $blocked;
+
     public function __construct(?CarbonImmutable $now = null)
     {
         $this->now = $now ?? now()->toImmutable();
         $this->start = $this->now->startOfDay()->subDays(29);
+        $this->blocked = new BlockedAccounts;
     }
 
     /**
@@ -211,6 +221,7 @@ class AdminDashboard
         $rows = DB::table('users')
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereNotIn('id', $this->blocked->userIds())
             ->where('created_at', '>=', $this->start)
             ->where('created_at', '<=', $this->now)
             ->orderByDesc('created_at')
@@ -231,6 +242,7 @@ class AdminDashboard
 
         $previous = app(GrowthExportService::class)
             ->cohort(Carbon::instance($this->start->subDays(30)), Carbon::instance($this->now->subDays(30)))
+            ->whereNotIn('id', $this->blocked->userIds())
             ->count();
 
         $days = [];
@@ -326,8 +338,9 @@ class AdminDashboard
 
         $ids = $rows->pluck('id')->all();
 
-        $schedules = DB::table('roles')->whereIn('user_id', $ids)->orderBy('id')
-            ->get(['id', 'user_id', 'name', 'is_deleted'])->groupBy('user_id');
+        // Models, for the guest page's address; every column PublicPageUrl::schedule() reads.
+        $schedules = Role::whereIn('user_id', $ids)->orderBy('id')
+            ->get(['id', 'user_id', 'name', 'subdomain', 'is_deleted', 'email_verified_at', 'phone_verified_at'])->groupBy('user_id');
         $events = DB::table('events')->whereIn('user_id', $ids)->where('is_guest_submission', false)
             ->distinct()->pluck('user_id')->flip();
         $tickets = DB::table('events')->join('tickets', 'tickets.event_id', '=', 'events.id')
@@ -358,6 +371,7 @@ class AdminDashboard
                 'schedule' => $schedule ? [
                     'name' => $schedule->name,
                     'url' => route('admin.schedules.edit', ['role' => UrlUtils::encodeId($schedule->id)]),
+                    'public_url' => PublicPageUrl::schedule($schedule),
                 ] : null,
                 'created_at' => Carbon::parse($row->created_at),
             ];
@@ -478,14 +492,14 @@ class AdminDashboard
         // column but the id and appointment_type_id, which that column's index holds between
         // them; the two windows are bounded by created_at, so they read sixty days of events.
         // As one query it read every event ever made to tell which were from this month.
-        $allTime = (int) DB::table('events')
+        $allTime = (int) $this->blocked->withoutTheirEvents(DB::table('events'))
             ->whereNull('events.appointment_type_id')
             ->whereNotIn('events.id', $this->demoEventIds())
             ->whereIn('events.id', self::liveEventIds())
             ->selectRaw(self::EVENTS_FIRST.' COUNT(*) as total')
             ->first()->total;
 
-        $added = DB::table('events')
+        $added = $this->blocked->withoutTheirEvents(DB::table('events'))
             ->whereNull('events.appointment_type_id')
             ->whereNotIn('events.id', $this->demoEventIds())
             ->whereExists(self::onLiveSchedule())
@@ -525,7 +539,7 @@ class AdminDashboard
     /** The population every upcoming-event figure is drawn from. */
     private function upcoming()
     {
-        return Event::query()
+        return $this->blocked->withoutTheirEvents(Event::query())
             ->hasUpcomingOccurrence(Carbon::instance($this->now->utc()))
             ->where('events.is_cancelled', false)
             ->where('events.is_draft', false)
@@ -596,16 +610,18 @@ class AdminDashboard
     }
 
     /**
-     * The newest schedules that are real: claimed, live, and not demo content. No per-row queries:
-     * the owner and (on hosted, where a plan means something) the subscriptions are eager-loaded,
-     * and the image variant is read off the row.
+     * The newest schedules that are real: claimed, live, not demo content and not a blocked
+     * account's. No per-row queries: the owner and (on hosted, where a plan means something) the
+     * subscriptions are eager-loaded, and the image variant is read off the row.
      */
     public function recentSchedules(): array
     {
         $base = fn () => Role::query()
             ->claimed()
             ->where('is_deleted', false)
-            ->whereNotIn('roles.id', $this->demoRoleIds());
+            ->whereNotIn('roles.id', $this->demoRoleIds())
+            // A block takes them down; one that Stripe would not let go of is still up.
+            ->whereNotIn('roles.user_id', $this->blocked->userIds());
 
         $hosted = (bool) config('app.hosted');
 
@@ -641,7 +657,8 @@ class AdminDashboard
                     'events' => (int) ($eventCounts[$role->id] ?? 0),
                     // A plan is only a fact on hosted: a selfhost schedule reads "enterprise".
                     'plan' => $tier === 'free' ? null : ($role->isOnTrial() ? 'trial' : $tier),
-                    'url' => $role->getGuestUrl(),
+                    // The guest page: the name links there, with the arrow that says so.
+                    'url' => PublicPageUrl::schedule($role),
                     'image' => $role->getProfileImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
                     'created_at' => $role->created_at,
                 ];
@@ -651,9 +668,10 @@ class AdminDashboard
 
     /**
      * The newest events anyone can be shown: not unlisted, not an appointment booking (which is
-     * named after a guest), not demo content, and on a schedule that still exists. A draft, a
-     * guest submission and an import are listed and flagged - they are the first sign of a new
-     * organizer, the likeliest spam, and the reason twelve events appeared at once.
+     * named after a guest), not demo content or a blocked account's, and on a schedule that still
+     * exists. A draft, a guest submission and an import are listed and flagged - they are the
+     * first sign of a new organizer, the likeliest spam, and the reason twelve events appeared at
+     * once.
      *
      * A burst from one schedule is one row: its newest event, and how many came with it. The
      * newest EVENT_SCAN events are looked at, so an import of a few hundred is still one row with
@@ -667,14 +685,14 @@ class AdminDashboard
      * time until the list filled, the day of an import loaded three hundred events and every
      * schedule on them to show one row.
      *
-     * The link is where the event is really shown. Event::canonicalTarget() picks a schedule that
-     * serves it - accepted, claimed, not deleted - where naming the first claimed schedule sent
-     * the admin to a 404 for a submission still waiting to be accepted. With no schedule serving
-     * it yet, the link is the admin's own edit page, as it is for a draft.
+     * The link is where the event is really shown (PublicPageUrl::event()). Event::canonicalTarget()
+     * picks a schedule that serves it - accepted, claimed, not deleted - where naming the first
+     * claimed schedule sent the admin to a 404 for a submission still waiting to be accepted. With
+     * no schedule serving it yet, the link is the admin's own edit page, as it is for a draft.
      */
     public function recentEvents(): array
     {
-        $candidates = DB::table('events')
+        $candidates = $this->blocked->withoutTheirEvents(DB::table('events'))
             ->where('events.is_private', false)
             ->whereNull('events.appointment_type_id')
             ->whereNotIn('events.id', $this->demoEventIds())
@@ -729,8 +747,9 @@ class AdminDashboard
                 continue;
             }
 
-            [$publicUrl, $home] = $event->canonicalTarget();
+            [, $home] = $event->canonicalTarget();
             $shownOn = $home ?? $event->getViewableRole();
+            $publicUrl = PublicPageUrl::event($event);
             $series = $event->days_of_week !== null;
             $start = ! $series && $event->starts_at ? $event->getStartDateTime(null, true) : null;
 
@@ -754,9 +773,9 @@ class AdminDashboard
                     default => null,
                 },
                 'more' => $pick['more'],
-                'url' => $event->is_draft || ! $home || ! $publicUrl
-                    ? route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)])
-                    : $publicUrl,
+                'url' => $publicUrl ?? route('event.edit_admin', ['hash' => UrlUtils::encodeId($event->id)]),
+                // Whether that is the guest page, which the name then shows with the arrow.
+                'public' => $publicUrl !== null,
                 'image' => $event->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
                 'created_at' => $event->created_at,
             ];
@@ -786,7 +805,8 @@ class AdminDashboard
             'jobs_waiting' => DB::table('jobs')->count(),
             'jobs_failed' => DB::table('failed_jobs')->count(),
             'domains' => $domains,
-            'accounts' => User::whereNotNull('email_verified_at')->where('email', '!=', DemoService::DEMO_EMAIL)->count(),
+            'accounts' => User::whereNotNull('email_verified_at')->where('email', '!=', DemoService::DEMO_EMAIL)
+                ->whereNotIn('id', $this->blocked->userIds())->count(),
         ];
     }
 }

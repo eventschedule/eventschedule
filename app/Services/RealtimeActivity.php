@@ -9,6 +9,7 @@ use App\Models\Sale;
 use App\Models\SupportConversation;
 use App\Models\User;
 use App\Utils\MoneyUtils;
+use App\Utils\PublicPageUrl;
 use App\Utils\SignupSource;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Carbon;
@@ -37,6 +38,9 @@ use Illuminate\Support\Facades\Route;
  *    decides. Manually marked-paid sales are not audited, so the count says "orders", not revenue.
  *  - audit_logs.created_at is written with now() in APP_TIMEZONE, so this class compares in the
  *    app's zone, not UTC like the realtime table.
+ *  - A blocked account is left out with everything that is its (BlockedAccounts): what it did,
+ *    as an admin's own actions are, and what happened to its schedules and events, whoever did
+ *    it (an order, a gift card).
  */
 class RealtimeActivity
 {
@@ -65,6 +69,16 @@ class RealtimeActivity
     /** Event creations by one person on one schedule this close together read as one item. */
     private const BURST_SECONDS = 600;
 
+    /** What a schedule is read with here: its name, and what PublicPageUrl::schedule() reads. */
+    private const SCHEDULE_COLUMNS = ['id', 'user_id', 'name', 'subdomain', 'is_deleted', 'email_verified_at', 'phone_verified_at'];
+
+    private BlockedAccounts $blocked;
+
+    public function __construct(?BlockedAccounts $blocked = null)
+    {
+        $this->blocked = $blocked ?? new BlockedAccounts;
+    }
+
     /**
      * @param  array<int, array{now: bool, ago: int, stuck: ?int, surface: string}>  $onSite  user id => presence, for the "On the site" note
      * @param  ?string  $feed  one of FEEDS, to list only that kind
@@ -87,12 +101,16 @@ class RealtimeActivity
             // the sign-ups are wanted, and the logins would otherwise spend the row budget too.
             ->where(fn ($query) => $query->whereNotIn('action', [AuditService::AUTH_GOOGLE_LOGIN, AuditService::AUTH_FACEBOOK_LOGIN])
                 ->orWhere('metadata', 'new_account'))
+            // A blocked account's own rows, for the same reason: a spammer's import of the morning
+            // spent the whole budget, and the cards read zero for everybody else's day.
+            ->when($this->blocked->any(), fn ($query) => $query->where(fn ($q) => $q->whereNull('user_id')
+                ->orWhereNotIn('user_id', $this->blocked->userIds())))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->limit(2000)
             ->get(['id', 'user_id', 'action', 'model_type', 'model_id', 'new_values', 'user_agent', 'metadata', 'created_at']);
 
-        $excludedUsers = User::where('email', DemoService::DEMO_EMAIL)->pluck('id');
+        $excludedUsers = User::where('email', DemoService::DEMO_EMAIL)->pluck('id')->merge($this->blocked->userIds());
         if (! $showAdmins) {
             $excludedUsers = $excludedUsers->merge(User::where('is_admin', true)->pluck('id'));
         }
@@ -118,7 +136,8 @@ class RealtimeActivity
             $items->push(['type' => $type, 'row' => $row, 'at' => Carbon::parse($row->created_at)]);
         }
 
-        $items = $items->merge($this->supportChats($since, $excludedUsers))
+        $items = $this->withoutBlockedThings($items)
+            ->merge($this->supportChats($since, $excludedUsers))
             ->sortByDesc(fn ($item) => $item['at']->getTimestamp())
             ->values();
 
@@ -153,6 +172,39 @@ class RealtimeActivity
             AuditService::GIFT_CARD_PAID => ($newValues['status'] ?? null) === 'active' ? 'gift_card' : null,
             default => null,
         };
+    }
+
+    /**
+     * What happened to a blocked account's schedules and events while somebody else did it: a
+     * guest's order, a gift card, a plan change made by a team member. What the account did itself
+     * has already gone with its user id.
+     *
+     * @param  Collection<int, array>  $items  the classified audit items, before the support chats
+     */
+    private function withoutBlockedThings(Collection $items): Collection
+    {
+        if (! $this->blocked->any() || $items->isEmpty()) {
+            return $items;
+        }
+
+        $ids = fn (string ...$types) => $items->whereIn('type', $types)->map(fn ($item) => $item['row']->model_id)->filter()->unique()->values()->all();
+
+        $schedules = array_flip($this->blocked->scheduleIds());
+        $saleEvents = ($saleIds = $ids('order')) ? DB::table('sales')->whereIn('id', $saleIds)->pluck('event_id', 'id') : collect();
+        $cardSchedules = ($cardIds = $ids('gift_card')) ? DB::table('gift_cards')->whereIn('id', $cardIds)->pluck('role_id', 'id') : collect();
+        $events = $this->blocked->eventsAmong(array_merge($ids('events'), $saleEvents->values()->all()));
+
+        return $items->reject(function ($item) use ($schedules, $events, $saleEvents, $cardSchedules) {
+            $id = (int) $item['row']->model_id;
+
+            return match ($item['type']) {
+                'schedule', 'upgrade', 'cancel', 'trial' => isset($schedules[$id]),
+                'events' => isset($events[$id]),
+                'order' => isset($events[(int) ($saleEvents[$id] ?? 0)]),
+                'gift_card' => isset($schedules[(int) ($cardSchedules[$id] ?? 0)]),
+                default => false,
+            };
+        })->values();
     }
 
     private function supportChats(Carbon $since, Collection $excludedUsers): Collection
@@ -242,8 +294,9 @@ class RealtimeActivity
             ->get(['id', 'name', 'email', 'signup_intent', 'utm_source', 'utm_medium', 'utm_campaign', 'referrer_url', 'landing_page', 'referred_by_user_id'])
             ->keyBy('id');
 
-        $schedules = DB::table('roles')->whereIn('user_id', $userIds)->orderBy('id')
-            ->get(['id', 'user_id', 'name', 'is_deleted'])->groupBy('user_id');
+        // Models, for the guest page's address; every column PublicPageUrl::schedule() reads.
+        $schedules = Role::whereIn('user_id', $userIds)->orderBy('id')
+            ->get(self::SCHEDULE_COLUMNS)->groupBy('user_id');
         $events = DB::table('events')->whereIn('user_id', $userIds)->where('is_guest_submission', false)
             ->selectRaw('user_id, COUNT(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
         $tickets = DB::table('events')->join('tickets', 'tickets.event_id', '=', 'events.id')
@@ -301,6 +354,7 @@ class RealtimeActivity
                 'schedule' => $schedule ? [
                     'name' => $schedule->name,
                     'url' => route('admin.schedules.edit', ['role' => UrlUtils::encodeId($schedule->id)]),
+                    'public_url' => PublicPageUrl::schedule($schedule),
                 ] : null,
                 'stage' => $stage,
                 'stage_label' => $labels[$stage],
@@ -424,19 +478,28 @@ class RealtimeActivity
             ->merge($sales->map(fn ($sale) => $sale->event?->creator_role_id))
             ->merge($giftCards->pluck('role_id'))
             ->filter()->unique();
-        $roles = Role::whereIn('id', $roleIds)->get(['id', 'name', 'user_id'])->keyBy('id');
+        $roles = Role::whereIn('id', $roleIds)->get(self::SCHEDULE_COLUMNS)->keyBy('id');
 
         // A sign-up links to the person's first schedule, if they made one: there is no per-user admin page.
         $firstSchedules = Role::whereIn('user_id', $items->where('type', 'signup')->map(fn ($item) => $item['row']->user_id)->filter())
             ->where('is_deleted', false)
             ->orderBy('id')
-            ->get(['id', 'user_id'])
+            ->get(self::SCHEDULE_COLUMNS)
             ->unique('user_id')
             ->keyBy('user_id');
 
+        // The events an item opens on the guest portal: the one event added (a burst opens its
+        // schedule), and the event an order was for. Whole, with their schedules, which is what
+        // PublicPageUrl::event() reads.
+        $publicEventIds = $items->filter(fn ($item) => $item['type'] === 'events' && ($item['count'] ?? 1) === 1)
+            ->map(fn ($item) => $item['row']->model_id)
+            ->merge($sales->pluck('event_id'))
+            ->filter()->unique()->values();
+        $events = $publicEventIds->isEmpty() ? collect() : Event::with('roles')->whereIn('id', $publicEventIds)->get()->keyBy('id');
+
         $nowTs = now()->getTimestamp();
 
-        return $items->map(function ($item) use ($users, $roles, $sales, $giftCards, $firstSchedules, $onSite, $nowTs) {
+        return $items->map(function ($item) use ($users, $roles, $sales, $giftCards, $firstSchedules, $events, $onSite, $nowTs) {
             $row = $item['row'];
             $user = $row->user_id ? $users->get($row->user_id) : null;
             $name = $user?->name ?: __('messages.realtime_someone');
@@ -475,12 +538,33 @@ class RealtimeActivity
             $ago = max(0, $nowTs - $item['at']->getTimestamp());
             $presence = $row->user_id ? ($onSite[$row->user_id] ?? null) : null;
 
+            // What the item is about, on the guest portal: the event when it names one that has a
+            // page there, otherwise the schedule the sentence names (a draft added to a schedule
+            // opens the schedule).
+            $event = match ($item['type']) {
+                'events' => ($item['count'] ?? 1) === 1 ? $events->get($row->model_id) : null,
+                'order' => $events->get($sales->get($row->model_id)?->event_id),
+                default => null,
+            };
+            $schedule = match ($item['type']) {
+                'signup' => $firstSchedules->get($row->user_id),
+                'support', 'order' => null,
+                default => $roleId ? $roles->get($roleId) : null,
+            };
+            $publicUrl = PublicPageUrl::event($event);
+            $publicLabel = $event?->name;
+            if ($publicUrl === null && ($publicUrl = PublicPageUrl::schedule($schedule)) !== null) {
+                $publicLabel = $schedule->name;
+            }
+
             return [
                 'key' => $item['type'].':'.$row->id,
                 'type' => $item['type'],
                 'ago' => $ago,
                 'text' => $text,
                 'url' => $url,
+                'public_url' => $publicUrl,
+                'public_label' => $publicUrl ? $publicLabel : null,
                 'recent' => $ago <= 1800,
                 'person_id' => $presence ? 'u:'.UrlUtils::encodeId($row->user_id) : null,
                 'on_site' => $presence ? ($presence['now'] ? 'now' : 'recent') : null,

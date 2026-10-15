@@ -57,6 +57,21 @@
                 'badgeEnterprise' => __('messages.realtime_badge_enterprise'),
                 'email' => __('messages.realtime_email'),
                 'openChat' => __('messages.realtime_open_chat'),
+                'openPublicPage' => __('messages.admin_open_public_page'),
+                'nobodyHere' => __('messages.realtime_nobody_here'),
+                'trends' => __('messages.realtime_trends'),
+                'byHour' => __('messages.realtime_by_hour'),
+                'byDay' => __('messages.realtime_by_day'),
+                'range' => ['24h' => __('messages.realtime_range_24h'), '7d' => __('messages.realtime_range_7d'), '30d' => __('messages.realtime_range_30d')],
+                'before' => ['24h' => __('messages.realtime_trend_before_24h'), '7d' => __('messages.realtime_trend_before_7d'), '30d' => __('messages.realtime_trend_before_30d')],
+                'noComparison' => __('messages.realtime_trend_no_comparison'),
+                'trendSince' => __('messages.realtime_trend_since'),
+                'trendCollecting' => __('messages.realtime_trend_collecting'),
+                'tileSignups' => __('messages.realtime_signups'),
+                'tileSchedules' => __('messages.schedules'),
+                'tileEvents' => __('messages.events'),
+                'tileOrders' => __('messages.realtime_orders'),
+                'surface' => collect(\App\Services\RealtimeRollup::SURFACES)->mapWithKeys(fn ($surface) => [$surface => __('messages.realtime_surface_'.$surface)])->all(),
                 'activity' => __('messages.realtime_activity'),
                 'last24h' => __('messages.realtime_last_24_hours'),
                 'activityEmpty' => __('messages.realtime_activity_empty'),
@@ -104,6 +119,7 @@
             ];
             $realtimeConfig = [
                 'url' => route('admin.realtime.data'),
+                'trendsUrl' => route('admin.realtime.trends'),
                 'pageUrl' => route('admin.realtime'),
                 'settingsUrl' => route('admin.settings').'#realtime',
                 'legalUrl' => Route::has('admin.legal') ? route('admin.legal') : null,
@@ -119,6 +135,10 @@
 
             <template v-if="p.state !== 'off'">
                 @include('admin.realtime._toolbar')
+
+                {{-- Who is here and where first, then how the last day, week or month went. --}}
+                @include('admin.realtime._now')
+                @include('admin.realtime._trends')
 
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                     {{-- In this order for the single column below xl: the day's numbers come
