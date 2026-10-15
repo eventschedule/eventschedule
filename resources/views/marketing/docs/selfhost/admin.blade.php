@@ -309,6 +309,11 @@
                         <td>When the promotions network is enabled</td>
                     </tr>
                     <tr>
+                        <td>Accounts may be spam</td>
+                        <td>An account with one of your watched words, such as <code class="doc-inline-code">paypal</code> or <code class="doc-inline-code">bitcoin</code>, in a schedule it owns or an event it made, or in its own name or email address once it owns a schedule. It clears as you block each one or mark it not spam. Links to <a href="#blocked-spam" class="doc-link">Blocked</a>.</td>
+                        <td>Every install</td>
+                    </tr>
+                    <tr>
                         <td>Approved instances changed their address</td>
                         <td>A federated instance whose site address no longer matches what was approved.</td>
                         <td>eventschedule.com only</td>
@@ -830,11 +835,21 @@
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">The Blocked page, at <code class="doc-inline-code">/admin/blocked</code>, is where you shut out an account that abuses the service, and where you keep the list of what new accounts are refused for. It is there on every install. Deleting a spam schedule on the <a href="#manage-plans" class="doc-link">Schedules</a> page leaves its owner free to make another one; blocking the account does not.</p>
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Three totals</strong> - blocked accounts, entries on the list, and how many sign-ups the list has refused</li>
+            <li><strong class="text-gray-900 dark:text-white">Four totals</strong> - accounts that may be spam, blocked accounts, entries on the list, and how many sign-ups the list has refused</li>
+            <li><strong class="text-gray-900 dark:text-white">May be spam</strong> - accounts a watched word turned up for, waiting for you to look at them. See <a href="#blocked-spam" class="doc-link">Accounts that may be spam</a></li>
             <li><strong class="text-gray-900 dark:text-white">Find an account</strong> - by name, email address or a schedule it owns. The owner card on a schedule's admin page and the names under Recent sign-ups on the <a href="#insights-users" class="doc-link">Users</a> page lead to the same place</li>
             <li><strong class="text-gray-900 dark:text-white">Blocked accounts</strong> - who is blocked, how many schedules the block took down, when and by whom, and your note</li>
             <li><strong class="text-gray-900 dark:text-white">Refused at sign-up</strong> - the list itself, with how often each entry has refused someone</li>
         </ul>
+
+        <h3 id="blocked-spam" class="doc-subheading">Accounts that may be spam</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">An account is listed under <strong class="text-gray-900 dark:text-white">May be spam</strong> when one of your watched words is in the name or subdomain of a live schedule it owns, or in the name of an event it made. Its own name and email address count too once it owns a live schedule, so a ticket buyer or a follower is never listed for theirs. Nothing is done to it: the list is a reason to look, and each row says where the word was found. The same accounts are counted in <a href="#needs-attention" class="doc-link">Needs attention</a> and on the Manage tab, so you see them without opening the page. A new match usually appears within ten minutes; when the admin pages have not been opened for a while, it appears one page load later.</p>
+        <ul class="doc-list mb-4">
+            <li><strong class="text-gray-900 dark:text-white">Review</strong> opens the account's own page, where the words found are listed first and you can block it</li>
+            <li><strong class="text-gray-900 dark:text-white">Not spam</strong> takes it off the list for good, for example an account that runs a bitcoin meetup. Its page then says who marked it and when, with <strong class="text-gray-900 dark:text-white">Flag again</strong> to undo that. Unblocking an account marks it not spam as well</li>
+            <li>A blocked account and an administrator are never listed</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Words to watch for</strong>, under the list, holds the words, separated by commas. A word is found anywhere in the text, in capitals or not, so a word that sits inside ordinary names will find those too. In a subdomain a space is read as a hyphen, so <code class="doc-inline-code">cash app</code> also finds <code class="doc-inline-code">cash-app-help</code>. Each word needs 3 to 50 characters, and the list holds up to 50. Out of the box it holds common payment, crypto and support-line words: paypal, bitcoin, crypto, coinbase, binance, metamask, cash app, cashapp, venmo, quickbooks, customer service, customer care, helpline and toll free. Leave the field empty to stop watching. Marking an account not spam and changing the words are recorded in the <a href="#system-audit-log" class="doc-link">Audit Log</a>.</p>
 
         <h3 id="blocked-account" class="doc-subheading">Blocking an account</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A block is decided on the account's own page, which shows what you need first: the schedules it owns, how it signs in, the network address it signed up from, and the other accounts that were made from that same address, each one press away. Press <strong class="text-gray-900 dark:text-white">Block account</strong> and:</p>
@@ -848,7 +863,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">An administrator cannot be blocked, and you cannot block yourself. Schedules the account is only a member of are not touched.</p>
 
         <h3 id="blocked-unblock" class="doc-subheading">Unblocking</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Unblock account</strong>, on the same page, undoes what the block did and nothing else. The account can sign in again, the schedules this block took down come back, and the entries it added leave the list. A schedule that was already deleted before the block stays deleted, a cancelled plan stays cancelled, and a subdomain somebody has taken in the meantime stays theirs: the schedule then comes back under its released name.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">Unblock account</strong>, on the same page, undoes what the block did and nothing else. The account can sign in again, the schedules this block took down come back, and the entries it added leave the list. A schedule that was already deleted before the block stays deleted, a cancelled plan stays cancelled, and a subdomain somebody has taken in the meantime stays theirs: the schedule then comes back under its released name. If a watched word turns up for the account, Unblock also marks it <a href="#blocked-spam" class="doc-link">not spam</a>, so it does not go straight back on that list.</p>
 
         <h3 id="blocked-list" class="doc-subheading">The list</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">A new account is refused when it matches an entry, whichever way it is being made: the sign-up form, Google or Facebook, the API, or the account a guest form offers. Accounts that already exist are never affected by the list, so adding a domain does not lock anyone out. An entry is one of:</p>

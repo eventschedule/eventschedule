@@ -1187,6 +1187,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         Route::get('/admin/blocked/account/{hash}', [AdminBlockController::class, 'account'])->name('admin.blocked.account');
         Route::post('/admin/blocked/account/{hash}/block', [AdminBlockController::class, 'block'])->name('admin.blocked.block');
         Route::post('/admin/blocked/account/{hash}/unblock', [AdminBlockController::class, 'unblock'])->name('admin.blocked.unblock');
+        Route::post('/admin/blocked/account/{hash}/not-spam', [AdminBlockController::class, 'notSpam'])->name('admin.blocked.not_spam');
+        Route::post('/admin/blocked/account/{hash}/flag-again', [AdminBlockController::class, 'flagAgain'])->name('admin.blocked.flag_again');
+        Route::post('/admin/blocked/words', [AdminBlockController::class, 'saveWords'])->name('admin.blocked.words');
         Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
         Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
         Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');

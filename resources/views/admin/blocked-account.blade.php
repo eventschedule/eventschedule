@@ -1,8 +1,8 @@
 <x-app-admin-layout>
     @include('admin.partials._navigation', ['active' => 'blocked'])
 
-    {{-- One account, as the operator needs it before blocking: who it is, what it owns, where it
-         was made from and who else shares that. The decision is the last card, after the
+    {{-- One account, as the operator needs it before blocking: why it may be spam, who it is,
+         what it owns, where it was made from and who else shares that. The decision is the last card, after the
          evidence, and the two optional list entries stand beside the number of other accounts
          each would also refuse.
 
@@ -52,6 +52,53 @@
 
         <div class="page-stack">
             <x-page-flash :keys="['success' => 'success', 'warning' => 'warn', 'error' => 'error']" />
+
+            {{-- Why the account is among those that may be spam (SpamWatch): each thing a watched
+                 word is in, first, because it is the reason the operator came. Then Not spam, or,
+                 once it is marked, the way back. $spam is null for an account the list never
+                 holds (blocked, an administrator, the demo). Not spam is a bordered button: the
+                 action that goes on, on this page, is the block below. --}}
+            @if ($spam && $spam['total'] > 0)
+            <x-page-card beside :title="$spamClearance ? __('messages.spam_watch_cleared_title') : __('messages.spam_watch_title')" :lead="__('messages.spam_watch_account_lead')">
+                <dl class="page-kv block-facts">
+                    @foreach ($spam['items'] as $match)
+                    <div>
+                        <dt>{{ \App\Services\SpamWatch::kindName($match['kind']) }}</dt>
+                        <dd><bdi>{{ \App\Services\SpamWatch::highlight($match['text'], $match['word']) }}</bdi></dd>
+                    </div>
+                    @endforeach
+                </dl>
+                @if ($spam['total'] > count($spam['items']))
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.spam_watch_more', ['count' => number_format($spam['total'] - count($spam['items']))]) }}</p>
+                @endif
+
+                <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 mt-4">
+                    @if ($spamClearance)
+                    <p class="min-w-[240px] flex-1 text-sm text-gray-600 dark:text-gray-400">
+                        @if ($spamClearance->clearer)
+                        {{ __('messages.spam_watch_cleared_by', ['date' => $when($spamClearance->created_at), 'name' => $spamClearance->clearer->name]) }}
+                        @else
+                        {{ __('messages.spam_watch_cleared', ['date' => $when($spamClearance->created_at)]) }}
+                        @endif
+                    </p>
+                    <form method="POST" action="{{ route('admin.blocked.flag_again', ['hash' => $hash]) }}">
+                        @csrf
+                        <button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                            @lang('messages.spam_watch_flag_again')
+                        </button>
+                    </form>
+                    @else
+                    <p class="min-w-[240px] flex-1 text-sm text-gray-600 dark:text-gray-400">@lang('messages.spam_watch_not_spam_note')</p>
+                    <form method="POST" action="{{ route('admin.blocked.not_spam', ['hash' => $hash]) }}">
+                        @csrf
+                        <button type="submit" class="ap-secondary-btn inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                            @lang('messages.spam_watch_not_spam')
+                        </button>
+                    </form>
+                    @endif
+                </div>
+            </x-page-card>
+            @endif
 
             {{-- Who it is. --}}
             <x-page-card beside :title="__('messages.account')">

@@ -232,6 +232,11 @@ class AuditService
 
     const ADMIN_BLOCKLIST_REMOVE = 'admin.blocklist_remove';
 
+    // An account a watched word turned up for, marked not spam and flagged again (SpamWatch).
+    const ADMIN_SPAM_CLEAR = 'admin.spam_clear';
+
+    const ADMIN_SPAM_UNCLEAR = 'admin.spam_unclear';
+
     const ADMIN_GRANT = 'admin.grant';
 
     const ADMIN_REVOKE = 'admin.revoke';

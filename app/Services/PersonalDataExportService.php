@@ -40,6 +40,7 @@ class PersonalDataExportService
     public const NOT_EXPORTED = [
         'account_blocks' => 'An operator\'s record of a blocked account. A blocked account cannot sign in to ask for this file, and the row is deleted when the block is lifted; the fact and its date are in account.blocked_at.',
         'backup_jobs' => 'Job bookkeeping; the archives are the user\'s own downloads.',
+        'spam_clearances' => 'An operator\'s decision that an account a watched word turned up for is not spam (SpamWatch). It is about the account, not something the person gave, and it is deleted with the account.',
         'calendar_syncs' => 'Which event maps to which calendar entry; covered by the calendar_connections summary.',
         'microsoft_calendar_syncs' => 'Same, for Outlook.',
         'dismissed_next_steps' => 'Interface state.',

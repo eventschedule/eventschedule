@@ -10,6 +10,7 @@ use App\Services\AccountBlockService;
 use App\Services\AuditService;
 use App\Services\Blocklist;
 use App\Services\DemoService;
+use App\Services\SpamWatch;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +18,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * /admin/blocked: shutting an account out, and the list of what new accounts are refused for.
  *
- * Two pages. The list page finds an account, shows the ones that are blocked and holds the list
- * (Blocklist). The account page is where a block is decided: it shows what the operator needs to
+ * Two pages. The list page shows the accounts that may be spam (SpamWatch), finds an account,
+ * shows the ones that are blocked and holds the list (Blocklist). The account page is where a block is decided: it shows what the operator needs to
  * see first, which is what the account owns, where it signed up from and who else shares that
  * address or its email domain. The last two are the price of the two optional entries, so the
  * numbers stand beside the switches that add them.
@@ -59,7 +60,21 @@ class AdminBlockController extends Controller
 
         $type = in_array($request->input('type'), Blocklist::TYPES, true) ? $request->input('type') : null;
 
+        $suspects = SpamWatch::suspects()
+            ->withCount(['createdRoles as schedules_count' => fn ($role) => $role->owned()->where('is_deleted', false)])
+            ->orderByDesc('users.id')
+            ->paginate(20, ['users.*'], 'suspects')
+            ->withQueryString();
+
+        // Not spam on the last row of the last page comes back to a page that no longer exists.
+        if ($suspects->isEmpty() && $suspects->currentPage() > 1) {
+            return redirect()->to($suspects->url($suspects->lastPage()).'#suspects');
+        }
+
         return view('admin.blocked', [
+            'suspects' => $suspects,
+            'spamMatches' => SpamWatch::matches($suspects->getCollection()),
+            'spamWords' => SpamWatch::words(),
             'search' => $search,
             'found' => $found,
             'blocked' => AccountBlock::with(['user', 'blocker'])
@@ -116,6 +131,10 @@ class AdminBlockController extends Controller
             'range' => $range,
             'sameAddress' => $sameAddress,
             'sameAddressCount' => $user->signup_ip ? User::where('signup_ip', $user->signup_ip)->where('id', '!=', $user->id)->count() : 0,
+            // Only for an account the list could hold, so the card and its Not spam are never
+            // offered for an administrator, the demo or a blocked account.
+            'spam' => SpamWatch::canBeFlagged($user) ? (SpamWatch::matches(collect([$user]), 10)[$user->id] ?? null) : null,
+            'spamClearance' => SpamWatch::clearance($user),
         ]);
     }
 
@@ -168,6 +187,12 @@ class AdminBlockController extends Controller
 
         $result = $this->blocks->unblock($user, $request->user());
 
+        // Letting an account back in says it is not spam, so a watched word in its name does
+        // not put it straight back on the list the block took it off.
+        if ((SpamWatch::matches(collect([$user]), 1)[$user->id]['total'] ?? 0) > 0) {
+            SpamWatch::clear($user, $request->user());
+        }
+
         $back = redirect()->route('admin.blocked.account', ['hash' => $hash])
             ->with('success', __('messages.unblock_done', ['name' => $user->name ?: $user->email])
                 .($result['restored']->isNotEmpty() ? ' '.__('messages.unblock_done_schedules', ['count' => number_format($result['restored']->count())]) : ''));
@@ -175,6 +200,75 @@ class AdminBlockController extends Controller
         return $result['renamed']->isEmpty()
             ? $back
             : $back->with('warning', __('messages.unblock_names_taken', ['schedules' => $result['renamed']->pluck('name')->implode(', ')]));
+    }
+
+    /** Not spam: a watched word is in its name or in something it made, and that is all right. */
+    public function notSpam(Request $request, string $hash)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $user = User::findOrFail(UrlUtils::decodeId($hash));
+        SpamWatch::clear($user, $request->user());
+
+        $done = __('messages.spam_watch_not_spam_done', ['name' => $user->name ?: $user->email]);
+
+        // From the list, back to the list where it was (the layout toasts `message`); from the
+        // account's page, back to it.
+        return $request->input('from') === 'list'
+            ? redirect()->to($this->suspectsUrl())->with('message', $done)
+            : redirect()->route('admin.blocked.account', ['hash' => $hash])->with('success', $done);
+    }
+
+    public function flagAgain(Request $request, string $hash)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $user = User::findOrFail(UrlUtils::decodeId($hash));
+        SpamWatch::unclear($user, $request->user());
+
+        return redirect()->route('admin.blocked.account', ['hash' => $hash])
+            ->with('success', __('messages.spam_watch_flag_again_done', ['name' => $user->name ?: $user->email]));
+    }
+
+    public function saveWords(Request $request)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Room for MAX_WORDS words of MAX_LENGTH characters with their commas; acceptable() is the
+        // limit that is meant.
+        $request->validate(['words' => ['nullable', 'string', 'max:3000']]);
+
+        $words = SpamWatch::parse((string) $request->input('words'));
+
+        if (! SpamWatch::acceptable($words)) {
+            return redirect()->to(route('admin.blocked').'#suspects')
+                ->withInput()
+                ->withErrors(['words' => __('messages.spam_watch_words_invalid', [
+                    'min' => SpamWatch::MIN_LENGTH,
+                    'max' => SpamWatch::MAX_LENGTH,
+                    'count' => SpamWatch::MAX_WORDS,
+                ])]);
+        }
+
+        SpamWatch::saveWords($words, $request->user());
+
+        return redirect()->to(route('admin.blocked').'#suspects')
+            ->with('message', $words === [] ? __('messages.spam_watch_words_off') : __('messages.spam_watch_words_saved'));
+    }
+
+    /** The list page as it was (its search, its page of each list), at the accounts that may be spam. */
+    private function suspectsUrl(): string
+    {
+        $list = route('admin.blocked');
+        $previous = explode('#', url()->previous())[0];
+
+        return ($previous === $list || str_starts_with($previous, $list.'?') ? $previous : $list).'#suspects';
     }
 
     public function storeEntry(Request $request)

@@ -3,8 +3,9 @@
 
     {{-- Shutting an account out, and the list of what new accounts are refused for.
 
-         Three things under one another, in the order an operator meets them: find the account,
-         see who is blocked, and the list. A block is never decided here: the row leads to the
+         Four things under one another, in the order an operator meets them: the accounts that
+         may be spam (SpamWatch, where the admin alert lands), find an account, see who is
+         blocked, and the list. A block is never decided here: the row leads to the
          account's own page (admin.blocked-account), which shows what the account owns and who
          shares its address before anything is taken down.
 
@@ -28,6 +29,10 @@
     <div class="page-shell page-stack">
         <div class="ap-card rounded-xl page-stats is-auto">
             <div class="page-stat">
+                <div class="page-stat-value">{{ number_format($suspects->total()) }}</div>
+                <div class="page-stat-label">@lang('messages.spam_watch_title')</div>
+            </div>
+            <div class="page-stat">
                 <div class="page-stat-value">{{ number_format($blockedCount) }}</div>
                 <div class="page-stat-label">@lang('messages.blocked_accounts')</div>
             </div>
@@ -39,6 +44,89 @@
                 <div class="page-stat-value">{{ number_format($refusedCount) }}</div>
                 <div class="page-stat-label">@lang('messages.blocklist_refused')</div>
             </div>
+        </div>
+
+        {{-- ===================== May be spam ===================== --}}
+        <div class="page-subhead" id="suspects">
+            <h2>@lang('messages.spam_watch_title')</h2>
+            <p>@lang('messages.spam_watch_lead')</p>
+        </div>
+
+        <div>
+            @if ($suspects->total() > 0)
+            <div class="ap-card rounded-xl overflow-hidden">
+                <div class="page-scroll">
+                    <table class="page-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">@lang('messages.account')</th>
+                                <th scope="col">@lang('messages.spam_watch_col_matched')</th>
+                                <th scope="col" class="c-num">@lang('messages.schedules')</th>
+                                <th scope="col">@lang('messages.funnel_signed_up')</th>
+                                <th scope="col"><span class="sr-only">@lang('messages.actions')</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($suspects as $account)
+                            @php
+                                $accountHash = \App\Utils\UrlUtils::encodeId($account->id);
+                                $spamFound = $spamMatches[$account->id] ?? ['items' => [], 'total' => 0];
+                            @endphp
+                            <tr>
+                                <td class="c-main c-wrap">
+                                    <a href="{{ route('admin.blocked.account', ['hash' => $accountHash]) }}" class="c-strong"><bdi>{{ $account->name ?: $account->email }}</bdi></a>
+                                    <span class="c-sub" dir="ltr">{{ $account->email }}</span>
+                                </td>
+                                <td class="c-wrap" data-label="{{ __('messages.spam_watch_col_matched') }}">
+                                    @forelse ($spamFound['items'] as $match)
+                                    <span class="spam-match"><span class="spam-kind">{{ \App\Services\SpamWatch::kindName($match['kind']) }}</span> <bdi>{{ \App\Services\SpamWatch::highlight($match['text'], $match['word'], 80) }}</bdi></span>
+                                    @empty
+                                    {{-- Renamed since the cached scan found it: it leaves the list with the next one. --}}
+                                    <span class="spam-match c-sub">@lang('messages.none')</span>
+                                    @endforelse
+                                    @if ($spamFound['total'] > count($spamFound['items']))
+                                    <span class="spam-match c-sub">{{ __('messages.spam_watch_more', ['count' => number_format($spamFound['total'] - count($spamFound['items']))]) }}</span>
+                                    @endif
+                                </td>
+                                <td class="c-num" data-label="{{ __('messages.schedules') }}">{{ number_format($account->schedules_count) }}</td>
+                                <td class="c-date" data-label="{{ __('messages.funnel_signed_up') }}">{{ $day($account->created_at) }}</td>
+                                <td class="c-actions">
+                                    <a href="{{ route('admin.blocked.account', ['hash' => $accountHash]) }}" class="event-link">@lang('messages.review')</a>
+                                    <form method="POST" action="{{ route('admin.blocked.not_spam', ['hash' => $accountHash]) }}">
+                                        @csrf
+                                        <input type="hidden" name="from" value="list">
+                                        <button type="submit" class="event-link">@lang('messages.spam_watch_not_spam')</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @else
+            <div class="ap-card rounded-xl">
+                <x-page-empty compact :title="__('messages.spam_watch_none_title')" :text="$spamWords ? __('messages.spam_watch_none_text') : __('messages.spam_watch_off_text')" />
+            </div>
+            @endif
+
+            @if ($suspects->hasPages())
+            <div class="page-pager">{{ $suspects->links() }}</div>
+            @endif
+
+            {{-- What the list is looked for by. Under it, as the list's own setting. --}}
+            <form method="POST" action="{{ route('admin.blocked.words') }}" class="page-filters spam-words">
+                @csrf
+                <div class="page-filter is-grow">
+                    <label for="spam-words">@lang('messages.spam_watch_words')</label>
+                    <x-text-input id="spam-words" name="words" type="text" class="block w-full" :value="old('words', implode(', ', $spamWords))" autocomplete="off" dir="auto" maxlength="3000" />
+                </div>
+                <div class="is-end">
+                    <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.save')</x-brand-button>
+                </div>
+            </form>
+            <x-input-error :messages="$errors->get('words')" class="mb-3" />
+            <p class="blocklist-help">@lang('messages.spam_watch_words_help')</p>
         </div>
 
         {{-- ===================== Find an account ===================== --}}
@@ -279,8 +367,25 @@
               margin-bottom: 0.75rem;
             }
             /* A heading a link lands on clears the bar above the page. */
-            #list {
+            #list,
+            #suspects {
               scroll-margin-top: 6rem;
+            }
+            /* What a watched word was found in: one line each, what it is in the quiet ink. The
+               word itself is marked by the kit (.spam-word). */
+            .spam-match {
+              display: block;
+            }
+            .spam-match + .spam-match {
+              margin-top: 0.25rem;
+            }
+            .spam-kind {
+              color: rgb(var(--ap-ink-3));
+              font-size: 0.8125rem;
+            }
+            /* The words' row stands apart from the list above it. */
+            .spam-words {
+              margin-top: 1rem;
             }
         </style>
     </x-slot>

@@ -1435,4 +1435,16 @@
     .public-page-name:focus-visible .public-page-icon {
       color: var(--brand-blue);
     }
+    /* A watched word inside the text it was found in (SpamWatch::highlight(), on /admin/blocked
+       and an account's page), in amber, the colour of the alert that leads there. No padding:
+       inside an address it would read as a space. */
+    .spam-word {
+      background: rgb(254 243 199);
+      color: rgb(120 53 15);
+      border-radius: 0.125rem;
+    }
+    .dark .spam-word {
+      background: rgb(120 53 15 / 0.55);
+      color: rgb(253 230 138);
+    }
 </style>
