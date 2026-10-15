@@ -68,11 +68,35 @@ function initReveals() {
 
     els.forEach((el) => {
         if (inViewNow(el)) {
-            el.classList.add('is-revealed');
+            revealOnArrival(el);
         } else {
             io.observe(el);
         }
     });
+}
+
+// What is on screen when the page opens fades in 0.3s and all at once, not 0.9s on a stagger.
+// Chrome counts an element towards Largest Contentful Paint only when its fade has ENDED, so the
+// long one put LCP 0.8s after first paint wherever a revealed heading or paragraph is the largest
+// thing on a phone's first screen (/features 2.6s, /compare 2.4s on slow 4G; 1.85s and 1.75s
+// with this). Measured 2026-10-15. Below the fold keeps the long fade, where nobody is waiting.
+function revealOnArrival(el) {
+    el.style.transitionDuration = '0.3s';
+    el.style.transitionDelay = '0s';
+    el.classList.add('is-revealed');
+
+    // Hand the element its own timing back, so nothing later (a hover, a tilt) inherits these.
+    const restore = () => {
+        el.style.transitionDuration = '';
+        el.style.transitionDelay = '';
+    };
+    el.addEventListener('transitionend', function done(event) {
+        if (event.target === el && event.propertyName === 'opacity') {
+            el.removeEventListener('transitionend', done);
+            restore();
+        }
+    });
+    setTimeout(restore, 600);
 }
 
 /* ------------------------------------------------------------------ */
