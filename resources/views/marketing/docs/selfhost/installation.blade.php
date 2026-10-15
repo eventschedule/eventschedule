@@ -424,7 +424,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">Now that Event Schedule is installed, you may want to:</p>
         <ul class="doc-list">
             <li>Configure <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-link">email delivery</a>, which nothing else works properly without</li>
-            <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal or Payfast</a> for ticket sales</li>
+            <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal, Payfast or Razorpay</a> for ticket sales</li>
             <li>Add a <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-link">Gemini or OpenAI key</a> to turn on AI event import, agenda scanning and translation</li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-link">Google Calendar integration</a></li>
             <li>Set up <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-link">Outlook Calendar integration</a></li>

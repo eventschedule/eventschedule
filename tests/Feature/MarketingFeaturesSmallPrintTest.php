@@ -105,7 +105,7 @@ class MarketingFeaturesSmallPrintTest extends TestCase
         // ---- Pro
         'Remove Event Schedule branding' => [self::ABOVE, '/features/white-label'],
         'Sell paid tickets' => [self::ABOVE, '/features/ticketing'],
-        'Payment gateways (Stripe, PayPal, Payfast, Invoice Ninja, payment link, cash)' => [self::ABOVE, '/features/ticketing'],
+        'Payment gateways (Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, payment link, cash)' => [self::ABOVE, '/features/ticketing'],
         'Refunds, full or partial' => [self::ROW, 'Refunds, full or partial'],
         'Invoice Ninja integration' => [self::ABOVE, '/invoiceninja'],
         'Passes & subscriptions' => [self::ABOVE, '/features/passes'],

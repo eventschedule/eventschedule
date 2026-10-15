@@ -1651,7 +1651,7 @@
                             <span class="qa-tier qa-tier-pro">Pro</span>
                         </div>
                         <p>Connect your own Stripe or PayPal account and sell named ticket types for a paid AMA or a small-group deep dive, each with its own price, quantity and sales window. Putting a price on a ticket is the Pro plan.</p>
-                        <p>Scanning a ticket's QR code at the door is free on every plan. Pro brings the rest of the door tooling with it: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past your processor's own fee the money is yours, and a refund from the Sales page sends a Stripe or PayPal payment back, in full or in part. See all <a href="{{ marketing_url('/features/ticketing') }}" class="qa-a">ticketing features</a>.</p>
+                        <p>Scanning a ticket's QR code at the door is free on every plan. Pro brings the rest of the door tooling with it: the live check-in dashboard, discount codes for the people you want back, add-ons and a waitlist on a sold-out ticket type. Quantities count per date, the same way places do. Event Schedule takes zero platform fees on every plan, so past your processor's own fee the money is yours, and a refund from the Sales page sends a Stripe, PayPal or Razorpay payment back, in full or in part. See all <a href="{{ marketing_url('/features/ticketing') }}" class="qa-a">ticketing features</a>.</p>
                     </div>
 
                     <!-- 6 -->

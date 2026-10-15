@@ -73,7 +73,7 @@
         // id, bank, name, plan, the sentence, a note on the plan (or null), the page, find words,
         // and the key it cannot work without (or null).
         $fbKeys = [
-            ['tickets', 'sell', 'Tickets', 'pro', 'Priced ticket types, paid by Stripe, PayPal, Payfast, an Invoice Ninja invoice, a payment link or cash. The platform fee is zero.', 'A Stripe or PayPal sale can be refunded in full or in part.', '/features/ticketing', 'ticketing paid sell stripe paypal payfast cash refund checkout price', null],
+            ['tickets', 'sell', 'Tickets', 'pro', 'Priced ticket types, paid by Stripe, PayPal, Payfast, Razorpay, an Invoice Ninja invoice, a payment link or cash. The platform fee is zero.', 'A Stripe, PayPal or Razorpay sale can be refunded in full or in part.', '/features/ticketing', 'ticketing paid sell stripe paypal payfast razorpay cash refund checkout price', null],
             ['registration', 'sell', 'Free registration', 'free', 'Sign-ups with no payment step, a cap per date and a QR code for the door.', null, '/features/registration', 'rsvp sign up capacity guest list', null],
             ['promo', 'sell', 'Promo codes', 'pro', 'A percentage or a fixed amount off, with a usage limit and an expiry date.', null, '/features/promo-codes', 'discount coupon voucher code add-ons', 'tickets'],
             ['passes', 'sell', 'Passes', 'pro', 'One purchase used across several events: class packs, memberships, season and festival passes.', null, '/features/passes', 'membership subscription season class pack multi visit', 'tickets'],
@@ -1426,7 +1426,7 @@
             ['Sales windows and group rates', 'Open and close each ticket type on a date, and discount bigger orders', 'Free', '/features/ticketing#types'],
             ['PayPal checkout', 'Buyers pay into your own PayPal account, multi-event cart included', 'Pro', '/paypal'],
             ['Individual tickets', 'Every guest on an order gets their own email and their own QR code', 'Pro', '/features/ticketing#individual-tickets'],
-            ['Refunds, full or partial', 'Money goes back through Stripe or PayPal, straight from the Sales page', 'Pro', '/features/ticketing#refunds'],
+            ['Refunds, full or partial', 'Money goes back through Stripe, PayPal or Razorpay, straight from the Sales page', 'Pro', '/features/ticketing#refunds'],
             ['Interest list', 'A "tell me when tickets go on sale" option that asks only for an email', 'Free', '/features/ticketing#interest-list'],
             ['Add to Google Wallet', 'Buyers save the ticket, QR and all, once the site operator switches it on', 'Free', '/features/integrations#google-wallet'],
             ['Bulk attendee import', 'Up to 5,000 rows from a CSV, for a list you already hold', 'Pro', '/features/ticketing#attendee-import'],
@@ -1575,11 +1575,11 @@
             ],
             [
                 'q' => 'Which payment methods can I accept?',
-                'a' => 'Stripe and PayPal, each paying into your own account, plus Payfast for events priced in South African rand, an Invoice Ninja invoice, a payment link of your own, or cash. They come with Pro, because that is the plan that puts a price on a ticket, and you choose one per event. Installment plans, also on Pro, run on Stripe only.',
+                'a' => 'Stripe and PayPal, each paying into your own account, plus Payfast for events priced in South African rand, Razorpay for events priced in Indian rupees (INR), an Invoice Ninja invoice, a payment link of your own, or cash. They come with Pro, because that is the plan that puts a price on a ticket, and you choose one per event. Installment plans, also on Pro, run on Stripe only.',
             ],
             [
                 'q' => 'Can I refund a ticket?',
-                'a' => 'Yes, on Pro. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the status only changes once the money has gone back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. An installment plan is refunded in full, one payment at a time. Any other method, such as cash, a payment link, Payfast or Invoice Ninja, shows Mark as Refunded instead, which records the refund without moving money.',
+                'a' => 'Yes, on Pro. From the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the status only changes once the money has gone back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. An installment plan is refunded in full, one payment at a time. Any other method, such as cash, a payment link, Payfast or Invoice Ninja, shows Mark as Refunded instead, which records the refund without moving money.',
             ],
             [
                 'q' => 'Can visitors ask to be told when tickets go on sale?',

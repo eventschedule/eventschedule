@@ -454,7 +454,7 @@
                 'label' => 'The organizer',
                 'href' => null,
                 'external' => false,
-                'why' => 'Ticket money goes straight to the organizer\'s own account, not through us, so the refund has to come from them: they can send a Stripe or PayPal sale back in full or in part from their Sales page. They are also the ones who can answer for the event itself.',
+                'why' => 'Ticket money goes straight to the organizer\'s own account, not through us, so the refund has to come from them: they can send a Stripe, PayPal or Razorpay sale back in full or in part from their Sales page. They are also the ones who can answer for the event itself.',
             ],
             [
                 'what' => 'Something is broken',
@@ -531,7 +531,7 @@
             ],
             [
                 'q' => 'Can Event Schedule refund my ticket?',
-                'a' => 'No, because the money never passed through us. Ticket sales settle into the organizer\'s own Stripe or PayPal account, so ask the schedule you bought from: they can refund a Stripe or PayPal sale in full or in part from their Sales page, and it goes back through the same provider. A ticket paid any other way, in cash or through a payment link for example, is settled between you and them. Event Schedule does not email you when a refund goes through, so their reply is your confirmation.',
+                'a' => 'No, because the money never passed through us. Ticket sales settle into the organizer\'s own Stripe or PayPal account, so ask the schedule you bought from: they can refund a Stripe, PayPal or Razorpay sale in full or in part from their Sales page, and it goes back through the same provider. A ticket paid any other way, in cash or through a payment link for example, is settled between you and them. Event Schedule does not email you when a refund goes through, so their reply is your confirmation.',
             ],
             [
                 'q' => 'Someone made a page with my name on it. Who do I tell?',

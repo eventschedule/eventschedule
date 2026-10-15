@@ -182,7 +182,7 @@ class SeoUtils
                 'Free registration and RSVP, unlimited on every plan',
                 'Paid ticket sales with zero platform fees through Stripe or PayPal (Pro)',
                 'QR ticket scanning at the door on every plan',
-                'Full and partial refunds through Stripe and PayPal (Pro)',
+                'Full and partial refunds through Stripe, PayPal and Razorpay (Pro)',
                 "Email sign-up for when an event's tickets go on sale",
                 'Newsletters, and automatic new-event digests for confirmed subscribers',
                 'Two-way calendar sync with Google Calendar, Microsoft 365 and CalDAV',

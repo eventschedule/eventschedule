@@ -193,7 +193,7 @@ class AppointmentGatewayPaymentTest extends TestCase
 
     public function test_pays_online_covers_every_gateway_but_cash(): void
     {
-        foreach (['stripe', 'payment_url', 'paypal', 'payfast', 'invoiceninja'] as $method) {
+        foreach (['stripe', 'payment_url', 'paypal', 'payfast', 'razorpay', 'invoiceninja'] as $method) {
             $this->assertTrue(AppointmentType::paysOnline($method), $method);
         }
 
@@ -375,6 +375,8 @@ class AppointmentGatewayPaymentTest extends TestCase
         $this->assertSame(1, $hours('paypal'));
         // An Instant EFT can clear hours later; a payment after the release would lose the booking.
         $this->assertSame(24, $hours('payfast'));
+        // Confirmed on the return, like PayPal; RazorpayGateway keeps every link inside the hour.
+        $this->assertSame(1, $hours('razorpay'));
         $this->assertSame(0, $hours('cash'));
 
         $this->connectPayfast();

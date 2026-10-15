@@ -1,12 +1,12 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Event Schedule Integrations: Calendars, Stripe, PayPal, API</x-slot>
-    <x-slot name="description">Fifteen real integrations, each labelled with its direction, trigger and plan: Google Calendar, Outlook, CalDAV, Stripe, PayPal, webhooks and more.</x-slot>
+    <x-slot name="description">Sixteen real integrations, each labelled with its direction, trigger and plan: Google Calendar, Outlook, CalDAV, Stripe, PayPal, webhooks and more.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule - Integrations"
-        description="Event Schedule connects directly to the services you already run: two-way calendar sync with Google Calendar, Outlook and CalDAV, payments through your own Stripe, PayPal or Payfast account or Invoice Ninja, refunds sent back through Stripe and PayPal, signed outbound webhooks, a REST API, OneSignal web push, Google Wallet ticket passes, a nearby-accommodation map, Eventbrite import, Facebook and Instagram ad boosting, and event creation over WhatsApp." />
+        description="Event Schedule connects directly to the services you already run: two-way calendar sync with Google Calendar, Outlook and CalDAV, payments through your own Stripe, PayPal, Payfast or Razorpay account or Invoice Ninja, refunds sent back through Stripe, PayPal and Razorpay, signed outbound webhooks, a REST API, OneSignal web push, Google Wallet ticket passes, a nearby-accommodation map, Eventbrite import, Facebook and Instagram ad boosting, and event creation over WhatsApp." />
     </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
@@ -597,7 +597,7 @@
     </style>
 
     @php
-        // The fifteen ports. Direction is the first thing a reader needs, so it is
+        // The sixteen ports. Direction is the first thing a reader needs, so it is
         // screen-printed on the panel and repeated in the register below. It is
         // the direction the DATA runs, not the direction the call is made in:
         // CalDAV and Eventbrite arrive by us asking rather than them telling.
@@ -612,19 +612,21 @@
             ['05', 'Invoice Ninja',    'invoice or pay link', 'both', 'Free'],
             ['06', 'PayPal',           'orders v2 + capture', 'both', 'Free'],
             ['07', 'Payfast',          'ZAR checkout + ITN',  'both', 'Free'],
-            ['08', 'Webhooks',         'your endpoint',       'out',  'Pro'],
-            ['09', 'REST API',         'you call us',         'in',   'Pro'],
-            ['10', 'Eventbrite',       'import on demand',    'in',   'Pro'],
-            ['11', 'Web push',         'OneSignal',           'out',  'Pro'],
-            ['12', 'Accommodation',    'Stay22 map',          'out',  'Free'],
-            ['13', 'Meta ads',         'boost a campaign',    'out',  'Pro'],
-            ['14', 'WhatsApp',         'Twilio inbound',      'in',   'Ent'],
-            ['15', 'Google Wallet',    'ticket pass + QR',    'out',  'Free'],
+            ['08', 'Razorpay',         'INR link + webhook',  'both', 'Free'],
+            ['09', 'Webhooks',         'your endpoint',       'out',  'Pro'],
+            ['10', 'REST API',         'you call us',         'in',   'Pro'],
+            ['11', 'Eventbrite',       'import on demand',    'in',   'Pro'],
+            ['12', 'Web push',         'OneSignal',           'out',  'Pro'],
+            ['13', 'Accommodation',    'Stay22 map',          'out',  'Free'],
+            ['14', 'Meta ads',         'boost a campaign',    'out',  'Pro'],
+            ['15', 'WhatsApp',         'Twilio inbound',      'in',   'Ent'],
+            ['16', 'Google Wallet',    'ticket pass + QR',    'out',  'Free'],
         ];
 
         // The register. Every row is traceable to code: the calendar services,
         // StripeController / TicketController, PayPalGateway, PayfastGateway,
-        // SaleRefundService (only the Stripe and PayPal drivers can refund),
+        // RazorpayGateway, SaleRefundService (only the Stripe, PayPal and Razorpay
+        // drivers can refund),
         // WebhookService, routes/api.php, OneSignalService, Stay22Service and
         // GoogleWalletService.
         $register = [
@@ -655,6 +657,10 @@
             [
                 'Payfast', 'out then in', 'Free',
                 'South African rand only, so it is offered on ZAR events and nowhere else. The buyer pays on Payfast and the sale is confirmed by an ITN callback. A Payfast event cannot join the multi-event cart or use installments, and a refund is made in your Payfast dashboard and only recorded here. A selfhost operator can supply one merchant account for the whole install, which an owner who connected their own keeps overriding.',
+            ],
+            [
+                'Razorpay', 'out then in', 'Free',
+                'Indian rupees (INR) only, so it is offered on INR events and nowhere else. The buyer pays on a Razorpay payment link by UPI, card, netbanking or wallet, and the sale is confirmed on their return, or by a webhook if they never come back. A Razorpay event CAN join the multi-event cart, a refund, full or partial, goes back through Razorpay, and installments are not supported. A selfhost operator can supply one account for the whole install, which an owner who connected their own keeps overriding.',
             ],
             [
                 'Webhooks', 'out', 'Pro',
@@ -707,7 +713,7 @@
         $faqs = [
             [
                 'q' => 'Which integrations are free?',
-                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so are the nearby-accommodation map and Google Wallet passes, which the site operator switches on. The four money ports, Stripe, PayPal, Payfast and Invoice Ninja, come with Pro at '.plan_price($proMonthly).' a month, which is what lets a ticket or an appointment booking carry a price in the first place. There are zero platform fees on every plan either way. Pro adds webhooks, the REST API, web push, Eventbrite import and ad boosting alongside them. Creating events over WhatsApp is the one Enterprise port, at '.plan_price($entMonthly).'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
+                'a' => 'Two-way calendar sync with Google Calendar, Outlook or Microsoft 365 and any CalDAV server is free on every plan, and so are the nearby-accommodation map and Google Wallet passes, which the site operator switches on. The five money ports, Stripe, PayPal, Payfast, Razorpay and Invoice Ninja, come with Pro at '.plan_price($proMonthly).' a month, which is what lets a ticket or an appointment booking carry a price in the first place. There are zero platform fees on every plan either way. Pro adds webhooks, the REST API, web push, Eventbrite import and ad boosting alongside them. Creating events over WhatsApp is the one Enterprise port, at '.plan_price($entMonthly).'. Selfhosted installs resolve to the top tier, so every port is on from the first boot.',
             ],
             [
                 'q' => 'Is the calendar sync really two-way?',
@@ -715,11 +721,11 @@
             ],
             [
                 'q' => 'Where does the ticket money actually go?',
-                'a' => 'Into an account you own. With Stripe on the hosted platform the charge is created on your own connected account, so payouts land on your Stripe schedule and you pay Stripe its processing fee and nothing else; a selfhosted install uses your own Stripe keys directly. PayPal and Payfast pay into the account you connect, and Invoice Ninja into the gateway behind your Invoice Ninja company. Event Schedule takes zero platform fees on any of them.',
+                'a' => 'Into an account you own. With Stripe on the hosted platform the charge is created on your own connected account, so payouts land on your Stripe schedule and you pay Stripe its processing fee and nothing else; a selfhosted install uses your own Stripe keys directly. PayPal, Payfast and Razorpay pay into the account you connect, and Invoice Ninja into the gateway behind your Invoice Ninja company. Event Schedule takes zero platform fees on any of them.',
             ],
             [
                 'q' => 'Can I refund through an integration?',
-                'a' => 'Through two of them, on Pro. A Stripe or PayPal sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes; a partial refund leaves the sale paid and its tickets valid. For Payfast, Invoice Ninja, a payment link or cash, the Sales page offers Mark as Refunded instead, which records the refund without moving money, so you return it wherever it was paid.',
+                'a' => 'Through three of them, on Pro. A Stripe, PayPal or Razorpay sale is refunded from the Sales page, in full or in part, and the money goes back through the provider before the sale changes; a partial refund leaves the sale paid and its tickets valid. For Payfast, Invoice Ninja, a payment link or cash, the Sales page offers Mark as Refunded instead, which records the refund without moving money, so you return it wherever it was paid.',
             ],
             [
                 'q' => 'Can I connect a tool that is not on this page?',
@@ -770,14 +776,14 @@
                             <svg aria-hidden="true" class="es-wire-accent h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                             </svg>
-                            <span class="es-wire-muted text-sm font-medium tracking-wide">Fifteen Event Schedule integrations</span>
+                            <span class="es-wire-muted text-sm font-medium tracking-wide">Sixteen Event Schedule integrations</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">No middle layer.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line">Just <span class="es-wire-accent">wires.</span></span></span>
                     </h1>
 
                     <p class="es-fade-up es-d-2 es-wire-muted mb-8 max-w-xl text-lg sm:text-xl">
-                        Every Event Schedule integration talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe or PayPal account, your own endpoint. Fifteen ports, each labelled with which way it runs, what makes data move, and which plan it is on.
+                        Every Event Schedule integration talks straight to the services you already run: your calendar or your own CalDAV server, your own Stripe or PayPal account, your own endpoint. Sixteen ports, each labelled with which way it runs, what makes data move, and which plan it is on.
                     </p>
 
                     <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap">
@@ -804,7 +810,7 @@
 
                         <div class="mb-2 flex items-baseline justify-between gap-3 px-1">
                             <p class="es-wire-tag">Integration panel</p>
-                            <p class="es-wire-dir">15 ports</p>
+                            <p class="es-wire-dir">16 ports</p>
                         </div>
                         <div class="es-wire-bar mb-1.5" aria-hidden="true"></div>
 
@@ -837,7 +843,7 @@
                     <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
                             @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
-                                @foreach (['Google Calendar', 'Outlook', 'Microsoft 365', 'Nextcloud', 'Radicale', 'Fastmail', 'Baikal', 'Stripe', 'PayPal', 'Payfast', 'Invoice Ninja', 'Google Wallet', 'Eventbrite', 'Facebook', 'Instagram', 'WhatsApp', 'Your endpoint'] as $chip)
+                                @foreach (['Google Calendar', 'Outlook', 'Microsoft 365', 'Nextcloud', 'Radicale', 'Fastmail', 'Baikal', 'Stripe', 'PayPal', 'Payfast', 'Razorpay', 'Invoice Ninja', 'Google Wallet', 'Eventbrite', 'Facebook', 'Instagram', 'WhatsApp', 'Your endpoint'] as $chip)
                                     <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-wire-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
@@ -884,7 +890,7 @@
                             <span class="es-wire-dir">in</span>
                         </div>
                         <h3 class="mb-2 text-lg font-bold es-wire-onband">Data arrives here</h3>
-                        <p class="text-sm es-wire-onband-muted">Google and Microsoft tell us when something changed; Stripe, Invoice Ninja, Payfast and Twilio report the same way. Where a service cannot tell us, we ask: CalDAV on a timer, Eventbrite when you press import. PayPal is asked on purpose, because the payment is taken by our own call when the buyer comes back. The REST API is inbound too, with your code doing the calling.</p>
+                        <p class="text-sm es-wire-onband-muted">Google and Microsoft tell us when something changed; Stripe, Invoice Ninja, Payfast, Razorpay and Twilio report the same way. Where a service cannot tell us, we ask: CalDAV on a timer, Eventbrite when you press import. PayPal is asked on purpose, because the payment is taken by our own call when the buyer comes back. The REST API is inbound too, with your code doing the calling.</p>
                     </div>
                     <div class="es-wire-card p-6" data-reveal="panel">
                         <div class="mb-4 flex items-center gap-3">
@@ -912,7 +918,7 @@
                 <div class="es-wire-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
                 <p class="es-wire-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The register</p>
                 <h2 class="es-balance es-wire-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Fifteen ports, <span class="es-wire-accent">written down.</span>
+                    Sixteen ports, <span class="es-wire-accent">written down.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every one of them is on this page in full: the direction it runs, what makes data move along it, and the plan it is on. No marketplace, no logos we merely admire, and the gaps people hit are spelled out further down rather than left for you to find.
@@ -922,7 +928,7 @@
             <div class="es-wire-card p-5 sm:p-7" data-reveal="panel">
                 <div class="es-wire-scroll">
                     <table class="es-wire-reg" role="table">
-                        <caption class="sr-only">The fifteen Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
+                        <caption class="sr-only">The sixteen Event Schedule integration ports, with the direction each one runs, what makes data move along it, and the plan it is on</caption>
                         <thead role="rowgroup">
                             <tr class="es-wire-tag" role="row">
                                 <th scope="col" role="columnheader" class="font-bold">Port</th>
@@ -1076,7 +1082,7 @@
                     The money never <span class="es-wire-accent">lands here.</span>
                 </h2>
                 <p class="es-wire-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    All four payment ports terminate in an account you own, and all four come with Pro, which is what lets a ticket carry a price in the first place. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
+                    All five payment ports terminate in an account you own, and all five come with Pro, which is what lets a ticket carry a price in the first place. Event Schedule charges zero platform fees on ticket sales on every plan, which is only possible because it is not in the middle of the transaction.
                 </p>
             </div>
 
@@ -1145,23 +1151,26 @@
 
             <div class="es-wire-card mx-auto mt-6 max-w-4xl p-7" data-reveal="panel">
                 <div class="mb-4 flex flex-wrap items-center gap-2">
-                    {{-- Two chips, not one reading "06 · 07": .es-wire-port is a fixed 1.45rem
+                    {{-- Separate chips, not one reading "06 · 07 · 08": .es-wire-port is a fixed 1.45rem
                          circle with no overflow, sized for the two characters every other row
                          uses, so a seven-glyph label spills out of it and into this heading. --}}
                     <span class="es-wire-port" aria-hidden="true">06</span>
                     <span class="es-wire-port" aria-hidden="true">07</span>
-                    <h3 class="es-wire-ink text-lg font-bold">PayPal and Payfast</h3>
+                    <span class="es-wire-port" aria-hidden="true">08</span>
+                    <h3 class="es-wire-ink text-lg font-bold">PayPal, Payfast and Razorpay</h3>
                     <span class="es-wire-dir">both</span>
                     <span class="es-wire-plan">Free</span>
                 </div>
                 <p class="es-wire-muted mb-5 text-sm">
-                    Two more ports out to a buyer and back again, open on every plan like the rest of them. Both let a selfhost operator supply one account for the whole install, which an owner who connects their own keeps overriding.
+                    Three more ports out to a buyer and back again, open on every plan like the rest of them. All three let a selfhost operator supply one account for the whole install, which an owner who connects their own keeps overriding.
                 </p>
                 <div class="es-wire-spec mb-5">
                     <span class="es-wire-spec-k">PayPal</span>
                     <span class="es-wire-spec-v es-wire-muted">The buyer approves at PayPal and the payment is taken by a call we make on their return, so the ticket is issued there rather than waiting for a callback. It can join the multi-event cart; it cannot be used for installments. Refunds, full or partial, go back through PayPal.</span>
                     <span class="es-wire-spec-k">Payfast</span>
                     <span class="es-wire-spec-v es-wire-muted">South African rand only, so it is offered on ZAR events and nowhere else, confirmed by an ITN callback. It can join neither the cart nor installments, and a refund is made in your Payfast dashboard.</span>
+                    <span class="es-wire-spec-k">Razorpay</span>
+                    <span class="es-wire-spec-v es-wire-muted">Indian rupees (INR) only, so it is offered on INR events and nowhere else. The buyer pays by UPI, card, netbanking or wallet on a Razorpay payment link and the ticket is issued on their return, or by a webhook if they never come back. It can join the multi-event cart; it cannot be used for installments. Refunds, full or partial, go back through Razorpay.</span>
                 </div>
                 <a href="{{ marketing_url('/paypal') }}" class="es-wire-link inline-flex items-center gap-1 text-sm font-semibold hover:underline">
                     PayPal payments
@@ -1171,7 +1180,7 @@
 
             <div id="eventbrite" class="es-wire-card mx-auto mt-6 max-w-4xl scroll-mt-24 p-7" data-reveal="panel">
                 <div class="mb-4 flex flex-wrap items-center gap-2">
-                    <span class="es-wire-port" aria-hidden="true">10</span>
+                    <span class="es-wire-port" aria-hidden="true">11</span>
                     <h3 class="es-wire-ink text-lg font-bold">If the money currently lands at Eventbrite</h3>
                     <span class="es-wire-dir">in</span>
                     <span class="es-wire-plan es-wire-plan-pro">Pro</span>
@@ -1220,7 +1229,7 @@
                 <div class="grid gap-6 lg:grid-cols-2" data-reveal-group="110">
                     <div class="es-wire-card p-7" data-reveal="panel">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
-                            <span class="es-wire-port" aria-hidden="true">08</span>
+                            <span class="es-wire-port" aria-hidden="true">09</span>
                             <span class="es-wire-dir">out</span>
                             <h3 class="text-xl font-bold es-wire-onband">Webhooks</h3>
                             <span class="es-wire-plan es-wire-plan-pro">Pro</span>
@@ -1249,7 +1258,7 @@
 
                     <div class="es-wire-card p-7" data-reveal="panel">
                         <div class="mb-4 flex flex-wrap items-center gap-2">
-                            <span class="es-wire-port" aria-hidden="true">09</span>
+                            <span class="es-wire-port" aria-hidden="true">10</span>
                             <span class="es-wire-dir">in</span>
                             <h3 class="text-xl font-bold es-wire-onband">REST API</h3>
                             <span class="es-wire-plan es-wire-plan-pro">Pro</span>
@@ -1299,7 +1308,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="100">
                 <div id="web-push" class="es-wire-card flex scroll-mt-24 flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <span class="es-wire-port" aria-hidden="true">11</span>
+                        <span class="es-wire-port" aria-hidden="true">12</span>
                         <span class="es-wire-dir">out</span>
                         <h3 class="es-wire-ink text-xl font-bold">Web push</h3>
                         <span class="es-wire-plan es-wire-plan-pro">Pro</span>
@@ -1314,7 +1323,7 @@
 
                 <div id="accommodation-map" class="es-wire-card flex scroll-mt-24 flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <span class="es-wire-port" aria-hidden="true">12</span>
+                        <span class="es-wire-port" aria-hidden="true">13</span>
                         <span class="es-wire-dir">out</span>
                         <h3 class="es-wire-ink text-xl font-bold">Accommodation map</h3>
                         <span class="es-wire-plan">Free</span>
@@ -1329,7 +1338,7 @@
 
                 <div class="es-wire-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <span class="es-wire-port" aria-hidden="true">13</span>
+                        <span class="es-wire-port" aria-hidden="true">14</span>
                         <span class="es-wire-dir">out</span>
                         <h3 class="es-wire-ink text-xl font-bold">Facebook and Instagram ads</h3>
                         <span class="es-wire-plan es-wire-plan-pro">Pro</span>
@@ -1347,7 +1356,7 @@
 
                 <div class="es-wire-card flex flex-col p-7" data-reveal="panel">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
-                        <span class="es-wire-port" aria-hidden="true">14</span>
+                        <span class="es-wire-port" aria-hidden="true">15</span>
                         <span class="es-wire-dir">in</span>
                         <h3 class="es-wire-ink text-xl font-bold">WhatsApp</h3>
                         <span class="es-wire-plan es-wire-plan-pro">Ent</span>
@@ -1366,7 +1375,7 @@
 
             <div id="google-wallet" class="es-wire-card mx-auto mt-6 max-w-4xl scroll-mt-24 p-7" data-reveal="panel">
                 <div class="mb-4 flex flex-wrap items-center gap-2">
-                    <span class="es-wire-port" aria-hidden="true">15</span>
+                    <span class="es-wire-port" aria-hidden="true">16</span>
                     <span class="es-wire-dir">out</span>
                     <h3 class="es-wire-ink text-lg font-bold">Google Wallet</h3>
                     <span class="es-wire-plan">Free</span>
@@ -1520,7 +1529,7 @@
                         <span class="es-wire-screw" style="bottom: 0.5rem; left: 0.5rem;"></span>
                         <span class="es-wire-screw" style="bottom: 0.5rem; right: 0.5rem;"></span>
                         <div class="mb-1.5 flex items-baseline justify-between gap-3 px-1">
-                            <p class="es-wire-tag">Port 16</p>
+                            <p class="es-wire-tag">Port 17</p>
                             <p class="es-wire-dir">open</p>
                         </div>
                         <div class="es-wire-bar mb-1"></div>

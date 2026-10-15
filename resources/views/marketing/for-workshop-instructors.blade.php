@@ -1349,11 +1349,11 @@
             ],
             [
                 'q' => 'Can I sell spots and cap the class?',
-                'a' => 'Yes. Sell spots with named ticket types, each with its own price, quantity and sales window, and take the money through your own Stripe or PayPal account, or as cash, a payment link, Invoice Ninja, or Payfast if you charge in rand. Charging for a spot is a Pro feature; classes you run for nothing can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
+                'a' => 'Yes. Sell spots with named ticket types, each with its own price, quantity and sales window, and take the money through your own Stripe or PayPal account, or as cash, a payment link, Invoice Ninja, or Payfast if you charge in rand, or Razorpay if you charge in Indian rupees. Charging for a spot is a Pro feature; classes you run for nothing can use registration with a seat limit instead, unlimited on every plan. Either way the count is kept per session date, so a full Saturday does not close the next one, and students see the number of spots left rather than who is on the sheet.',
             ],
             [
                 'q' => 'Can I refund a student?',
-                'a' => 'Yes, on Pro, from the Sales page, for a student who drops out or a class you call off. A Stripe or PayPal payment goes back through the provider, in full or in part, and a partial refund leaves the spot booked. A spot paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
+                'a' => 'Yes, on Pro, from the Sales page, for a student who drops out or a class you call off. A Stripe, PayPal or Razorpay payment goes back through the provider, in full or in part, and a partial refund leaves the spot booked. A spot paid in cash, through a payment link, Payfast or Invoice Ninja is marked as refunded instead, which records it without moving any money. Event Schedule does not email the student about a refund, so that message is yours to send.',
             ],
             [
                 'q' => 'How does a multi-class card work?',

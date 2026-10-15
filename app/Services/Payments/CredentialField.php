@@ -20,6 +20,9 @@ class CredentialField
      * @param  array<string, string>  $options  multiselect only, as value => already-translated label
      * @param  string|null  $help  translation key for the hint under the input
      * @param  bool  $secret  render as a password input and never echo the stored value back
+     * @param  string|null  $copy  a value the owner has to paste somewhere else, such as the webhook
+     *                             address a webhook secret belongs to, shown with a Copy button above
+     *                             the input
      */
     public function __construct(
         public readonly string $name,
@@ -29,6 +32,7 @@ class CredentialField
         public readonly ?string $help = null,
         public readonly bool $required = false,
         public readonly bool $secret = false,
+        public readonly ?string $copy = null,
     ) {}
 
     public function isSecret(): bool

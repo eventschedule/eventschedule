@@ -860,7 +860,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to a featured reading?',
-                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a ticket carry a price. Take the money through your own Stripe or PayPal account, or by payment link or cash, with the QR code scanned at the door like any other. Pro adds the live check-in dashboard as well, and it is also what a season pass across the whole series needs. A night you run for nothing takes free registrations on any plan. Event Schedule takes zero platform fees on any of it, so the only deduction is your payment provider\'s own, and a Stripe or PayPal sale can be refunded in full or in part from the Sales page.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a ticket carry a price. Take the money through your own Stripe or PayPal account, or by payment link or cash, with the QR code scanned at the door like any other. Pro adds the live check-in dashboard as well, and it is also what a season pass across the whole series needs. A night you run for nothing takes free registrations on any plan. Event Schedule takes zero platform fees on any of it, so the only deduction is your payment provider\'s own, and a Stripe, PayPal or Razorpay sale can be refunded in full or in part from the Sales page.',
             ],
             [
                 'q' => 'Can people ask to hear about a night before sign-up opens?',

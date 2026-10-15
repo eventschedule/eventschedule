@@ -82,6 +82,13 @@ class PaymentGatewayController extends Controller
         AuditService::log(AuditService::ADMIN_UPDATE, $request->user()->id, 'User', $request->user()->id,
             null, null, 'payment_gateway_connect:'.$gateway);
 
+        // A save that went through with a caveat (the credentials were stored but could not be
+        // checked) has flashed a warning. The layout shows a message ahead of a warning, so
+        // "Settings saved" on top of it would be the only thing the owner ever saw.
+        if (session()->has('warning')) {
+            return Redirect::to(route('profile.edit').'#section-payment-methods');
+        }
+
         return $this->backToSettings(__('messages.settings_saved'));
     }
 

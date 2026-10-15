@@ -664,7 +664,7 @@
                         // GiftCardController offer no PayPal branch, and appointments take any
                         // connected gateway but Invoice Ninja (PaymentGatewayManager::appointmentKeys()).
                         'q' => 'Can I take payment with PayPal?',
-                        'a' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Paid appointments can take PayPal too. Installment plans need Stripe, and gift cards do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Invoice Ninja, a payment link of your own, and cash.',
+                        'a' => 'Yes, on Pro, which is the plan that lets a ticket carry a price at all. Connect your own PayPal account under Settings, Payment Methods, where the credentials are checked with PayPal before they are saved, then choose PayPal as the event\'s payment method. The buyer approves the payment on PayPal\'s own page and the money lands in your PayPal account, with no platform fee. A buyer can pay for tickets to several of your events in one PayPal checkout. Paid appointments can take PayPal too. Installment plans need Stripe, and gift cards do not offer PayPal. The other ways to take money are Stripe, Payfast for South African rand, Razorpay for Indian rupees (INR), Invoice Ninja, a payment link of your own, and cash.',
                         'links' => [['PayPal checkout', marketing_url('/paypal')]],
                     ],
                     [
@@ -672,7 +672,7 @@
                         // leaves the sale paid, and only the full amount releases seats and stock.
                         // Rails whose driver answers supportsRefunds() false get Mark as Refunded.
                         'q' => 'Can I refund a ticket?',
-                        'a' => 'Yes, on Pro. From the Sales page, a Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded, so the page never says money moved when it did not. A partial refund leaves the sale paid and its tickets valid, and the page shows how much has gone back so far. A full refund puts the tickets, and any seats, back on sale. An installment plan is refunded leg by leg, in full only. A sale taken any other way, such as cash, a payment link, Invoice Ninja or Payfast, shows a Mark as Refunded button instead, which records the refund while you return the money yourself.',
+                        'a' => 'Yes, on Pro. From the Sales page, a Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider before the sale is marked refunded, so the page never says money moved when it did not. A partial refund leaves the sale paid and its tickets valid, and the page shows how much has gone back so far. A full refund puts the tickets, and any seats, back on sale. An installment plan is refunded leg by leg, in full only. A sale taken any other way, such as cash, a payment link, Invoice Ninja or Payfast, shows a Mark as Refunded button instead, which records the refund while you return the money yourself.',
                         'links' => [['Managing sales', marketing_url('/docs/tickets#managing-sales')]],
                     ],
                     [
@@ -808,9 +808,9 @@
                     [
                         'q' => 'Is payment processing secure?',
                         // Every gateway hands the buyer off: Stripe to its Checkout session, PayPal to its
-                        // approval page, Payfast to its process URL, Invoice Ninja to its invoice link,
+                        // approval page, Payfast to its process URL, Razorpay to its payment link, Invoice Ninja to its invoice link,
                         // a payment link to the owner's own URL. None of them posts a card to us.
-                        'a' => 'Card details never reach us. Buyers pay on the provider\'s own page: Stripe\'s checkout, PayPal\'s or Payfast\'s, or the Invoice Ninja invoice or payment link you set up. The money lands in your own account with that provider, and Stripe and PayPal are both PCI-DSS compliant. We hold the sale record, not the card number.',
+                        'a' => 'Card details never reach us. Buyers pay on the provider\'s own page: Stripe\'s checkout, PayPal\'s, Payfast\'s or Razorpay\'s, or the Invoice Ninja invoice or payment link you set up. The money lands in your own account with that provider, and Stripe and PayPal are both PCI-DSS compliant. We hold the sale record, not the card number.',
                         'links' => [['Stripe', marketing_url('/stripe')], ['PayPal', marketing_url('/paypal')]],
                     ],
                     [

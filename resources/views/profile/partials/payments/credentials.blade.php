@@ -94,13 +94,16 @@
 
             @else
                 <x-input-label :for="$gatewayKey . '_' . $field->name" :value="__($field->label)" />
+                @if ($field->copy)
+                    <x-copy-link :id="$gatewayKey . '_' . $field->name . '_copy'" :value="$field->copy" :label="__('messages.webhook_url')" class="mt-1 mb-2" />
+                @endif
                 <x-text-input
                     :id="$gatewayKey . '_' . $field->name"
                     :name="$field->name"
                     :type="$field->isSecret() ? 'password' : 'text'"
                     class="mt-1 block w-full"
                     :value="$field->isSecret() ? '' : old($field->name, $user->{$field->name})"
-                    :placeholder="$field->isSecret() && $isConnected ? $secretPlaceholder : ''"
+                    :placeholder="$field->isSecret() && $isConnected && filled($user->getRawOriginal($field->name)) ? $secretPlaceholder : ''"
                     autocomplete="off"
                     :required="$field->required && ! ($field->isSecret() && $isConnected)"
                     :disabled="is_demo_mode()" />

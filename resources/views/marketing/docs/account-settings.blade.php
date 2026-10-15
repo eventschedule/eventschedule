@@ -1,7 +1,7 @@
 <x-docs-page
     key="account-settings"
     title="Account Settings: Payments, API, Calendars - Event Schedule"
-    description="Manage your Event Schedule profile and theme, connect Stripe, PayPal, Payfast or Invoice Ninja, and set up API keys, webhooks, calendar sync and backups."
+    description="Manage your Event Schedule profile and theme, connect Stripe, PayPal, Payfast, Razorpay or Invoice Ninja, and set up API keys, webhooks, calendar sync and backups."
     lede="Everything on the Settings page: your profile, how the admin portal looks, the payment method your tickets are sold through, API and webhook access, connected calendars, backups and account security."
 >
     <x-slot:toc>
@@ -250,7 +250,7 @@
         </p>
         <div class="doc-callout doc-callout-plan mb-6">
             <div class="doc-callout-title">Selling priced tickets needs Pro <x-doc-badge plan="pro" /></div>
-            <p>Taking money for a ticket is the Pro plan, and it comes with all five methods. A free schedule sells nothing priced, apart from during a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">selling trial</a>, so until then it needs none of them.</p>
+            <p>Taking money for a ticket is the Pro plan, and it comes with all six methods. A free schedule sells nothing priced, apart from during a <a href="{{ route('marketing.docs.tickets') }}#selling-trial" class="doc-link">selling trial</a>, so until then it needs none of them.</p>
         </div>
 
         <h3 id="stripe" class="doc-subheading">Stripe</h3>
@@ -376,7 +376,7 @@
 
         <h3 id="razorpay" class="doc-subheading">Razorpay</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            <x-link href="https://razorpay.com" target="_blank">Razorpay</x-link> takes payment in Indian rupees by card, UPI, netbanking and wallets, and releases the ticket on its own once the buyer has paid. Buyers pay on a Razorpay payment page and come straight back. It settles rupees only - if your event is priced in anything else, Razorpay does not appear as an option.
+            <x-link href="https://razorpay.com" target="_blank">Razorpay</x-link> takes payment in Indian rupees by UPI, card, netbanking and wallets, and releases the ticket on its own once the buyer has paid. Buyers pay on a Razorpay payment page and come straight back, and we check every payment with Razorpay itself before marking a sale paid. It settles in Indian rupees (INR) only - if your event is priced in anything else, Razorpay does not appear as an option.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
@@ -384,18 +384,25 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Your <strong class="text-gray-900 dark:text-white">Key ID</strong> and <strong class="text-gray-900 dark:text-white">Key Secret</strong>, from the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; API Keys</strong>. The Key ID starts with <code>rzp_live_</code>, or <code>rzp_test_</code> for test mode.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Webhook (optional)</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A payment is confirmed when the buyer returns from Razorpay. To also confirm it when a buyer pays and closes the tab, add a webhook in the Razorpay Dashboard for the <code>payment_link.paid</code> event, pointing at the address shown on the Razorpay row, and enter its secret here. Either way, we check every payment with Razorpay itself before marking a sale paid.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">They are checked when you save</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">We ask Razorpay whether the keys work before storing them, so a mistyped secret is caught here rather than by a buyer. If Razorpay itself cannot be reached, the keys are saved anyway and you are told they could not be checked - take a test payment before you sell.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Webhook Secret (recommended)</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The Razorpay row shows a webhook URL with a <strong class="text-gray-900 dark:text-white">Copy</strong> button. In the Razorpay Dashboard, open <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; Webhooks</strong>, add that URL, tick <code>payment_link.paid</code> and <code>payment_link.expired</code>, choose a secret and enter the same secret here. With it, a buyer who pays but never comes back from Razorpay (common when paying in a UPI app) still gets their ticket, and a checkout nobody finishes gives its seats back when its payment page expires. Test Mode and Live Mode each need their own webhook. While no secret is saved, the row reads <strong class="text-gray-900 dark:text-white">No webhook</strong>.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Test mode</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Use your Test Mode keys and nothing is really charged. While they are in use, the payment method reads <strong class="text-gray-900 dark:text-white">Razorpay (Test mode)</strong> wherever you pick it. Switch to your live keys before you sell real tickets.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Use your Test Mode keys and nothing is really charged. While they are in use, the payment method reads <strong class="text-gray-900 dark:text-white">Razorpay (Test mode)</strong> wherever you pick it, the row reads <strong class="text-gray-900 dark:text-white">Test mode</strong> and the Tickets tab's Payment row shows a warning. Enter your live keys before you sell real tickets. Changing the Key ID from test to live, or back, clears a saved webhook secret, because the webhook belongs to the other mode.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Provided by this installation"</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one Razorpay account for everyone, exactly as with Payfast and PayPal. Enter your own keys to be paid into your own account instead.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On a selfhosted site, the administrator can set up one Razorpay account for everyone, exactly as with Payfast and PayPal. If you see this, you can start selling immediately and there is nothing to fill in - payments settle into the site's account. Enter your own keys to be paid into your own account instead, and disconnect them again to go back.</p>
             </div>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            For the full walkthrough, including what to do without a webhook and when a checkout is refused, see <a href="{{ route('marketing.docs.tickets') }}#razorpay" class="doc-link">Connecting Razorpay</a>.
+        </p>
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Which method to choose</div>
@@ -778,7 +785,7 @@
                 {
                     "@type": "HowToStep",
                     "name": "Configure Payment Methods",
-                    "text": "Connect Stripe, PayPal, Invoice Ninja or Payfast, or set a payment link, to start selling tickets.",
+                    "text": "Connect Stripe, PayPal, Invoice Ninja, Payfast or Razorpay, or set a payment link, to start selling tickets.",
                     "url": "{{ url(route('marketing.docs.account_settings')) }}#payments"
                 },
                 {

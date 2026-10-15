@@ -674,7 +674,7 @@
             ],
             [
                 'q' => 'Which payment methods work inside the widget?',
-                'a' => 'All of them: Stripe, PayPal, Payfast, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Every other method opens in the parent window instead, because payment portals frequently refuse to be framed, and the buyer finishes on their ticket page rather than back inside the frame.',
+                'a' => 'All of them: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a custom payment URL, and cash or at the door. Which window the checkout finishes in is decided by the event\'s payment method rather than by the amount. On cash it completes inside the frame. Every other method opens in the parent window instead, because payment portals frequently refuse to be framed, and the buyer finishes on their ticket page rather than back inside the frame.',
             ],
             [
                 'q' => 'Does the widget do everything my event page does?',
@@ -690,7 +690,7 @@
             ],
             [
                 'q' => 'What does it cost, and what do you take from a sale?',
-                'a' => 'The ticket widget is on the Pro plan. Event Schedule charges no platform fee on ticket sales at all: payment runs through your own Stripe, PayPal, Payfast or Invoice Ninja account, so what processing costs is between you and that provider. On a selfhosted install the widget is included at no extra cost.',
+                'a' => 'The ticket widget is on the Pro plan. Event Schedule charges no platform fee on ticket sales at all: payment runs through your own Stripe, PayPal, Payfast, Razorpay or Invoice Ninja account, so what processing costs is between you and that provider. On a selfhosted install the widget is included at no extra cost.',
             ],
             [
                 'q' => 'Will the framed page compete with my own page in search?',
@@ -1132,7 +1132,7 @@
                 </div>
                 <p class="es-widg-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
                     Event Schedule charges no platform fee on ticket sales. Payment runs through
-                    your own Stripe, PayPal, Payfast or Invoice Ninja account, so what processing
+                    your own Stripe, PayPal, Payfast, Razorpay or Invoice Ninja account, so what processing
                     costs is between you and that provider.
                 </p>
             </div>
@@ -1141,7 +1141,7 @@
                 @foreach ([
                     ['Stripe', 'Opens in the parent window', 'Your own connected account. The buyer leaves the frame for the payment page and lands on their ticket when it is done.'],
                     ['PayPal', 'Opens in the parent window', 'Your own connected account. The buyer approves on PayPal and lands on their ticket, issued the moment they return.'],
-                    ['Payfast', 'Opens in the parent window', 'South African rand only. The buyer pays on Payfast and lands on their ticket afterwards.'],
+                    ['Payfast and Razorpay', 'Opens in the parent window', 'South African rand (Payfast) or Indian rupees (Razorpay) only. The buyer pays on the provider\'s page and lands on their ticket afterwards.'],
                     ['Invoice Ninja', 'Opens in the parent window', 'For anyone already invoicing through Invoice Ninja, including the payment-link mode.'],
                     ['Custom payment URL', 'Opens in the parent window', 'Point the event at any payment page you already run, and it is used instead.'],
                     ['Cash or at the door', 'Finishes in the frame', 'No processor involved. The order is recorded, confirmed and emailed without the buyer leaving your page, and a free ticket on a cash event finishes here too.'],

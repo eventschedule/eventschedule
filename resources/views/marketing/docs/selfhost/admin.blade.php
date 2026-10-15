@@ -295,7 +295,7 @@
                     </tr>
                     <tr>
                         <td>Refunds awaiting confirmation</td>
-                        <td>A refund sent to Stripe or PayPal whose outcome the provider still has not confirmed after 15 minutes. The money may already have moved, so nothing retries it: you settle it in the provider's own dashboard. Links to a list on the Revenue page.</td>
+                        <td>A refund sent to Stripe, PayPal or Razorpay whose outcome the provider still has not confirmed after 15 minutes. The money may already have moved, so nothing retries it: you settle it in the provider's own dashboard. Links to a list on the Revenue page.</td>
                         <td>Every install</td>
                     </tr>
                     <tr>
@@ -537,7 +537,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">When the amount a payment provider reports does not match the amount the sale expected, the sale is parked as a mismatch rather than being treated as paid. Those sales, and any boost campaign in the same state, are listed in an amber panel, with two actions each:</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Approve</strong> - accept it and mark it paid. For a ticket sale, the buyer is then sent their tickets</li>
-            <li><strong class="text-gray-900 dark:text-white">Refund</strong> - for a ticket sale, send the whole payment back through the provider that took it, Stripe or PayPal, which the confirmation names. The button only appears when that provider can refund, so a mismatch paid through Invoice Ninja or Payfast offers Approve alone. A boost campaign's charge is refunded through Stripe</li>
+            <li><strong class="text-gray-900 dark:text-white">Refund</strong> - for a ticket sale, send the whole payment back through the provider that took it, Stripe, PayPal or Razorpay, which the confirmation names. The button only appears when that provider can refund, so a mismatch paid through Invoice Ninja or Payfast offers Approve alone. A boost campaign's charge is refunded through Stripe</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Both ask you to confirm, both are recorded in the audit log, and the row disappears from Needs attention once the queue is empty. Schedule owners refund their own sales, in full or in part, from their Sales page; see <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Managing sales</a>.</p>
 
@@ -548,7 +548,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">A red <strong class="text-gray-900 dark:text-white">Subscriptions on an Unrecognized Price</strong> panel lists live Stripe subscriptions whose price is none of the plan prices this install sells. The app cannot tell which plan such a customer is paying for, so the plan is withdrawn and the subscription counts as zero revenue while Stripe keeps charging. There is no button: either add that price ID to the <code class="doc-inline-code">STRIPE_PRICE_*</code> configuration, or move the subscription onto a current price in Stripe.</p>
 
         <h3 id="revenue-unconfirmed-refunds" class="doc-subheading">Refunds awaiting confirmation</h3>
-        <p class="text-gray-600 dark:text-gray-300">A refund that was sent to Stripe or PayPal and still has no confirmed outcome after 15 minutes is listed in a red <strong class="text-gray-900 dark:text-white">Refunds Awaiting Confirmation</strong> panel, with its date, event, amount, status, reference and last error. The money may or may not have moved, and nothing in the app retries it, because a retry after the provider's idempotency key has expired is how one refund becomes two. Look the reference up in the provider's own dashboard and settle it there. Until then the refund holds its amount against the sale, so the schedule owner cannot refund that money again.</p>
+        <p class="text-gray-600 dark:text-gray-300">A refund that was sent to Stripe, PayPal or Razorpay and still has no confirmed outcome after 15 minutes is listed in a red <strong class="text-gray-900 dark:text-white">Refunds Awaiting Confirmation</strong> panel, with its date, event, amount, status, reference and last error. The money may or may not have moved, and nothing in the app retries it, because a retry after the provider's idempotency key has expired is how one refund becomes two. Look the reference up in the provider's own dashboard and settle it there. Until then the refund holds its amount against the sale, so the schedule owner cannot refund that money again.</p>
     </section>
 
     <!-- Insights: Analytics -->

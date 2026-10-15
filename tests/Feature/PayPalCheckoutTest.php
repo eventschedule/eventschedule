@@ -476,9 +476,14 @@ class PayPalCheckoutTest extends TestCase
         $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'paypal']), [
             'paypal_client_id' => 'AaBbCc-client-id',
             'paypal_client_secret' => 'probably-fine',
-        ])->assertSessionHasNoErrors()->assertSessionHas('warning');
+        ])->assertSessionHasNoErrors()->assertSessionHas('warning')->assertSessionMissing('message');
 
         $this->assertSame('AaBbCc-client-id', $owner->fresh()->paypal_client_id);
+
+        // On the page, not only in the session: the layout shows a message ahead of a warning, so a
+        // "Settings saved" beside it was all the owner ever saw.
+        $this->get(route('profile.edit'))->assertOk()
+            ->assertSee(__('messages.paypal_credentials_unverified'), false);
     }
 
     /**

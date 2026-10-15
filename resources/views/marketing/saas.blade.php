@@ -2001,7 +2001,7 @@
             ],
             [
                 'q' => 'How do my customers get paid for their tickets?',
-                'a' => 'Straight into their own accounts. A customer connects Stripe through your platform\'s Stripe Connect, or connects their own PayPal account, which needs nothing set up on your side. Payfast (for rand), Invoice Ninja, a payment link and cash are there too, each connected by the customer. Nothing in the checkout takes a cut, so your revenue comes from subscriptions and the operator rails (ads, promotions, the accommodation map), not from your customers\' ticket sales. A Stripe or PayPal sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.',
+                'a' => 'Straight into their own accounts. A customer connects Stripe through your platform\'s Stripe Connect, or connects their own PayPal account, which needs nothing set up on your side. Payfast (for rand), Razorpay (for Indian rupees), Invoice Ninja, a payment link and cash are there too, each connected by the customer. Nothing in the checkout takes a cut, so your revenue comes from subscriptions and the operator rails (ads, promotions, the accommodation map), not from your customers\' ticket sales. A Stripe, PayPal or Razorpay sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.',
                 'more' => ['label' => 'How PayPal checkout works', 'href' => 'marketing.paypal'],
             ],
             [

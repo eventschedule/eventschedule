@@ -200,7 +200,7 @@
             ],
             [
                 'q' => 'Can people book our function room or studio time?',
-                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe, PayPal, Payfast, a payment link or cash if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
+                'a' => 'Yes. Create a bookable type for the space you rent out, set the hours you are available, add per-date overrides for holidays, and charge for it through Stripe, PayPal, Payfast, Razorpay, a payment link or cash if you want to. The free plan carries one bookable type and Pro removes the cap. Guests pick a time on your public booking page, and you can require approval before anything is confirmed.',
             ],
             [
                 'q' => 'Can we use our own domain and remove Event Schedule branding?',
@@ -212,7 +212,7 @@
             ],
             [
                 'q' => 'Can I refund a ticket?',
-                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid, and a full refund frees the tickets and seats to sell again. A sale taken in cash, by payment link, through Payfast or through Invoice Ninja is marked as refunded instead, which records it without moving any money.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider before the sale changes status. A partial refund keeps the tickets valid, and a full refund frees the tickets and seats to sell again. A sale taken in cash, by payment link, through Payfast or through Invoice Ninja is marked as refunded instead, which records it without moving any money.',
             ],
             [
                 'q' => 'Can people ask to hear when tickets go on sale?',
@@ -412,7 +412,7 @@
         accent="cyan"
         badge="Box office"
         heading="Sell tickets without giving away the door"
-        lede="Set your ticket types, connect your own Stripe or PayPal account, and keep every cent of the face value. Event Schedule takes no platform fee, so the only deduction is the processor's charge. Refund a Stripe or PayPal sale from the Sales page, in full or in part, and the money goes back the way it came."
+        lede="Set your ticket types, connect your own Stripe or PayPal account, and keep every cent of the face value. Event Schedule takes no platform fee, so the only deduction is the processor's charge. Refund a Stripe, PayPal or Razorpay sale from the Sales page, in full or in part, and the money goes back the way it came."
         :chips="['Zero platform fees', 'Stripe or PayPal', 'Full or partial refunds', 'Reserved seating', 'Promo codes', 'Gift cards', 'Waitlists', 'Free RSVPs']"
         :flip="true"
         frame="phone"

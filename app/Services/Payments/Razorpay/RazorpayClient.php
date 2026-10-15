@@ -34,6 +34,22 @@ class RazorpayClient
     }
 
     /**
+     * Ask Razorpay whether these keys are good, with the cheapest authenticated call there is: one
+     * page of one payment. Answers the HTTP status, or null when Razorpay could not be reached, so
+     * the caller can tell "refused" (4xx) from "could not ask".
+     */
+    public function verifyKeys(): ?int
+    {
+        try {
+            return $this->http()->get(self::BASE_URL.'/payments', ['count' => 1])->status();
+        } catch (\Throwable $e) {
+            Log::warning('Razorpay key check could not reach Razorpay', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    /**
      * Create a Payment Link and return it, or null if Razorpay refused or was unreachable.
      *
      * @param  array<string, mixed>  $payload

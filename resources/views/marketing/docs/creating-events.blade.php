@@ -206,7 +206,7 @@
             <li><strong class="text-gray-900 dark:text-white">When you cancel.</strong> Choosing <strong class="text-gray-900 dark:text-white">Cancel event</strong> from the Actions menu asks <strong class="text-gray-900 dark:text-white">Cancel this event?</strong> first. When there is someone to tell, the button reads <strong class="text-gray-900 dark:text-white">Cancel and notify</strong> and the notice goes to all of them, with your note if you add one; otherwise it reads <strong class="text-gray-900 dark:text-white">Cancel event</strong>. <strong class="text-gray-900 dark:text-white">Keep event</strong> backs out.</li>
             <li>Nothing is sent for a draft. A change to a one-time event whose start time has already passed notifies nobody, and on a recurring event only people with a date still to come are told.</li>
         </ul>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling keeps the event's tickets and refund records, stops any boost campaign and any installment plan still charging for it, and shows guests a notice that it has been cancelled. You can restore the event later. It does not refund anyone: refund each sale from the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a>, where a Stripe or PayPal payment goes back through the provider and any other method is marked as refunded.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Cancelling keeps the event's tickets and refund records, stops any boost campaign and any installment plan still charging for it, and shows guests a notice that it has been cancelled. You can restore the event later. It does not refund anyone: refund each sale from the <a href="{{ route('marketing.docs.tickets') }}#managing-sales" class="doc-link">Sales page</a>, where a Stripe, PayPal or Razorpay payment goes back through the provider and any other method is marked as refunded.</p>
     </section>
 
     <!-- Details -->
@@ -505,7 +505,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Sell tickets</span></td>
-                        <td>Sell tickets from your own event page, paid to your own account through the <strong>Payment Method</strong> you pick: Stripe, PayPal, Payfast, Invoice Ninja, a payment link, or cash. See <a href="{{ route('marketing.docs.tickets') }}#ticketing" class="doc-link">Sell tickets</a>.</td>
+                        <td>Sell tickets from your own event page, paid to your own account through the <strong>Payment Method</strong> you pick: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link, or cash. See <a href="{{ route('marketing.docs.tickets') }}#ticketing" class="doc-link">Sell tickets</a>.</td>
                         <td>The ticket types, one line each (price, quantity, type), then a row each for <strong>Payment</strong>, <strong>Options</strong>, <strong>Promo Codes</strong> and <strong>Add-ons</strong>. A row says what it holds and opens in place.</td>
                         <td>A ticket with a price needs <x-doc-badge plan="pro" />; a zero-price ticket sells on any plan</td>
                     </tr>

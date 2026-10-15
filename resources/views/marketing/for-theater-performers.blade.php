@@ -952,7 +952,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to my own show?',
-                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a seat carry a price. Named ticket types with their own prices, quantities and sales windows, payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), a payment link or cash, and the live check-in dashboard, promo codes, add-ons and per-attendee tickets come with it. Scanning the QR code at the door is free on any plan, and a free preview or a scratch night takes registrations without one. Event Schedule charges no platform fee on either plan.',
+                'a' => 'Yes, on the Pro plan at '.plan_price($proMonthly).' a month, which is what lets a seat carry a price. Named ticket types with their own prices, quantities and sales windows, payment through Stripe, PayPal, Invoice Ninja, Payfast (in rand), Razorpay (in Indian rupees), a payment link or cash, and the live check-in dashboard, promo codes, add-ons and per-attendee tickets come with it. Scanning the QR code at the door is free on any plan, and a free preview or a scratch night takes registrations without one. Event Schedule charges no platform fee on either plan.',
             ],
         ];
 
@@ -1327,7 +1327,7 @@
                         </div>
 
                         <p class="tp-box-fine">
-                            Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), a payment link or cash at the door. Event Schedule takes none of it.
+                            Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), Razorpay (in Indian rupees), a payment link or cash at the door. Event Schedule takes none of it.
                         </p>
                     </div>
                 </aside>

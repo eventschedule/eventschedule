@@ -2,7 +2,7 @@
     key="selfhost/index"
     title="Selfhost Guide: Run Event Schedule on Your Own Server"
     heading="Selfhost Event Schedule"
-    description="Selfhost Event Schedule: installation, email, Stripe, PayPal and Payfast payments, AI, calendar sync, Google Wallet, federation and the admin panel."
+    description="Selfhost Event Schedule: installation, email, Stripe, PayPal, Payfast and Razorpay payments, AI, calendar sync, Google Wallet, federation and the admin panel."
     lede="Run Event Schedule on your own server and your own database. A single-tenant install has no plan tiers, so every Pro and Enterprise feature is switched on."
     :with-toc="false"
 >
@@ -43,8 +43,8 @@
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Add a way to take payment</h4>
-                <p>Needed only if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal and Payfast (South African rand only) take ticket orders and paid appointments, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.</p>
-                <p><a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal and Payfast</a></p>
+                <p>Needed only if you sell tickets, passes, gift cards or paid appointments. Stripe covers all four and collects into the one account whose keys you put in <code class="doc-inline-code">.env</code>; paying each event owner into their own Stripe account takes Stripe Connect, which only runs in SaaS mode. PayPal, Payfast (South African rand only) and Razorpay (Indian rupees only) take ticket orders and paid appointments, through one account for the whole install or through each user's own, and Invoice Ninja needs no <code class="doc-inline-code">.env</code> configuration at all. No platform fee is ever added to a sale.</p>
+                <p><a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-link">Stripe, PayPal, Payfast and Razorpay</a></p>
             </li>
             <li class="doc-step">
                 <h4 class="doc-step-title">Add an AI key</h4>
@@ -119,8 +119,8 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Payments</span></td>
-                        <td>Stripe collects into the one account whose keys are in <code class="doc-inline-code">.env</code>. PayPal and Payfast can do the same for the whole install, or each user connects their own</td>
-                        <td>Each owner connects their own Stripe (through Stripe Connect), PayPal or Payfast account and is paid into it directly</td>
+                        <td>Stripe collects into the one account whose keys are in <code class="doc-inline-code">.env</code>. PayPal, Payfast and Razorpay can do the same for the whole install, or each user connects their own</td>
+                        <td>Each owner connects their own Stripe (through Stripe Connect), PayPal, Payfast or Razorpay account and is paid into it directly</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Auto Import</span></td>

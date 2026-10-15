@@ -1356,6 +1356,7 @@ unset** on the nexus. Each has a working default:
 | `EVENT_INTEREST_RECIPIENT_BATCH` | `2000`, the cap that bounds outbound interest mail |
 | `EVENT_INTEREST_TICKETS_MAX_AGE_DAYS` | `180` |
 | `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_SANDBOX` / `PAYPAL_WEBHOOK_ID` | unset. `PayPalGateway::platformCredentials()` returns `[]` when hosted, so these are selfhost-only by construction - each owner connects their own account |
+| `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | unset. `RazorpayGateway::platformCredentials()` returns `[]` when hosted, so these are selfhost-only by construction - each owner connects their own keys |
 | `GOOGLE_WALLET_ISSUER_ID` / `GOOGLE_WALLET_SERVICE_ACCOUNT` | unset. Wallet passes are opt-in **per install**, and `GoogleWalletService::isConfigured()` gates everything about them: every button, the route handler, the confirmation email, the privacy page's processor row and every marketing claim about the button. Unset, eventschedule.com neither offers passes nor says it does; `GoogleWalletMarketingClaimTest` pins the claims |
 | `GOOGLE_WALLET_ID_PREFIX` | `es`. Irrelevant until the two above are set |
 

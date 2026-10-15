@@ -301,7 +301,7 @@
         accent="cyan"
         badge="Sell the tickets"
         heading="Take the door yourself. We take none of it."
-        lede="Sell straight from your event page through your own Stripe or PayPal account, or take cash at the door. Buyers get a QR ticket, you scan them in, and the money lands with you. Only your payment processor's fee comes off a paid ticket, and a Stripe or PayPal sale can be refunded from the Sales page, in full or in part."
+        lede="Sell straight from your event page through your own Stripe or PayPal account, or take cash at the door. Buyers get a QR ticket, you scan them in, and the money lands with you. Only your payment processor's fee comes off a paid ticket, and a Stripe, PayPal or Razorpay sale can be refunded from the Sales page, in full or in part."
         :chips="['Zero platform fees', 'Free registration, unlimited', 'QR scanning, free', 'Paid tickets and passes, Pro']"
         ground="white"
         frame="phone">

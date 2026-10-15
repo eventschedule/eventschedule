@@ -196,7 +196,7 @@ class SettingsPageTest extends TestCase
         $this->assertStringNotContainsString(__('messages.connected'), $this->row($html, 'payment', 'paypal')['text']);
 
         // Every pane is on the page, closed, under the id the Help link and the gateway tests read.
-        foreach (['stripe', 'invoiceninja', 'payment-url', 'payfast', 'paypal'] as $tab) {
+        foreach (['stripe', 'invoiceninja', 'payment-url', 'payfast', 'paypal', 'razorpay'] as $tab) {
             $this->assertMatchesRegularExpression('/<div id="payment-tab-'.$tab.'" class="event-subrow-body" hidden>/', $html);
         }
         $this->assertStringNotContainsString('ap-tab-container', $html, 'no strip of tabs is left inside any section');
@@ -635,6 +635,26 @@ class SettingsPageTest extends TestCase
         $this->assertStringNotContainsString('data-section="section-app"', $html, 'the update tab is for an install that can update itself');
     }
 
+    public function test_a_razorpay_row_says_what_its_keys_are_missing(): void
+    {
+        $owner = $this->createOwner();
+        $owner->forceFill(['razorpay_key_id' => 'rzp_test_AbCdEf123456', 'razorpay_key_secret' => 'key-secret'])->save();
+        $html = $this->page($owner->fresh());
+
+        // Test keys take no money, and without a webhook a buyer who never comes back gets no ticket.
+        $this->assertSame(
+            ['text' => implode(' · ', [__('messages.connected'), __('messages.razorpay_test_mode'), __('messages.razorpay_no_webhook')]), 'warn' => false],
+            $this->row($html, 'payment', 'razorpay'),
+        );
+
+        // Dots stand for a stored value: the key secret has one, the webhook secret does not.
+        $this->assertMatchesRegularExpression('/<input[^>]*name="razorpay_key_secret"[^>]*placeholder="•+"/u', $html);
+        $this->assertDoesNotMatchRegularExpression('/<input[^>]*name="razorpay_webhook_secret"[^>]*placeholder="•+"/u', $html);
+
+        $owner->forceFill(['razorpay_key_id' => 'rzp_live_AbCdEf123456', 'razorpay_webhook_secret' => 'webhook-secret'])->save();
+        $this->assertSame(['text' => __('messages.connected'), 'warn' => false], $this->row($this->page($owner->fresh()), 'payment', 'razorpay'));
+    }
+
     public function test_a_payment_method_that_is_not_connected_says_what_it_is(): void
     {
         $html = $this->page($this->createOwner());
@@ -646,13 +666,14 @@ class SettingsPageTest extends TestCase
         // What the method is, not how to fill in its form: that is said inside the row.
         $this->assertSame(__('messages.settings_payfast_about'), $this->row($html, 'payment', 'payfast')['text']);
         $this->assertSame(__('messages.settings_paypal_about'), $this->row($html, 'payment', 'paypal')['text']);
+        $this->assertSame(__('messages.settings_razorpay_about'), $this->row($html, 'payment', 'razorpay')['text']);
         $this->assertStringContainsString('.event-subrow[aria-expanded="true"] .event-row-summary.is-empty', $html, 'an open row does not say it twice');
         $this->assertMatchesRegularExpression('/data-tab="stripe"[^>]*>.*?<span class="event-row-summary\s+is-empty"/s', $section, 'said quietly: it is not a state');
         $this->assertStringContainsString(__('messages.settings_payment_per_event'), $section);
 
         // A form that connects something says so on its button, and saves once it is connected.
         $submit = fn (string $html, string $tab) => preg_match('/<div id="payment-tab-'.$tab.'".*?<button[^>]*type="submit"[^>]*>\s*([^<]+?)\s*<\/button>/s', $html, $m) ? $m[1] : null;
-        foreach (['invoiceninja', 'payment-url', 'payfast', 'paypal'] as $tab) {
+        foreach (['invoiceninja', 'payment-url', 'payfast', 'paypal', 'razorpay'] as $tab) {
             $this->assertSame(__('messages.connect'), $submit($section, $tab), "{$tab}: nothing to save over yet");
         }
         $connected = $this->section($this->page($this->connected($this->createOwner())), 'section-payment-methods');

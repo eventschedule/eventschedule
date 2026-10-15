@@ -382,7 +382,7 @@ class BlogPost extends Model
         $rules = [
             'online' => '~online|virtual|live ?stream|youtube|webinar|hybrid~',
             'classes' => '~recurring|class(es)?\b|workshop|weekly|series|dojo|lesson~',
-            'selling-tickets' => '~ticket|pricing|price|sell|payment|stripe|paypal|fee|monetiz|revenue|refund~',
+            'selling-tickets' => '~ticket|pricing|price|sell|payment|stripe|paypal|razorpay|fee|monetiz|revenue|refund~',
             'on-the-day' => '~check-?in|door|volunteer|logistics|cancel|last-minute|waitlist|attendance track|on-site~',
             'email' => '~email|newsletter|subscriber|own your audience|fan connection|list\b~',
             'venues' => '~venue|booking|band and venue|gig|open house~',

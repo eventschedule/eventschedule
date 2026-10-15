@@ -1259,7 +1259,7 @@
             ],
             [
                 'q' => 'How do people pay for a tour, and can I refund one?',
-                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash on the day, or Payfast if you sell in rand, chosen per event. Event Schedule takes no platform fee on any of them. If a tour does not run, refund it from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part, and a partial refund leaves the ticket valid. Every other method is marked as refunded instead, which records it without moving money, so you return that one yourself.',
+                'a' => 'Through your own Stripe or PayPal account, an Invoice Ninja invoice, a payment link or cash on the day, or Payfast if you sell in rand or Razorpay if you sell in Indian rupees, chosen per event. Event Schedule takes no platform fee on any of them. If a tour does not run, refund it from the Sales page: a Stripe, PayPal or Razorpay sale goes back through the provider, in full or in part, and a partial refund leaves the ticket valid. Every other method is marked as refunded instead, which records it without moving money, so you return that one yourself.',
             ],
         ];
         $dotSections = [

@@ -20,7 +20,7 @@ use Tests\TestCase;
  * The rule this encodes:
  *
  *   - Selling tickets with a PRICE is Pro/Enterprise.
- *   - The payment gateways (Stripe, PayPal, Payfast, Invoice Ninja, a payment link, cash) and
+ *   - The payment gateways (Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link, cash) and
  *     refunds are presented as Pro, because Event::canSellPaidTickets() already makes charging
  *     for a ticket Pro-only: on Free a gateway has nothing to settle and a refund has nothing to
  *     reverse, so listing them as free features misleads.
@@ -133,8 +133,8 @@ class MarketingTicketingTierTest extends TestCase
         // a bare /plan-gated/: "nothing on this page is plan-gated on your own server"
         // (selfhost) and "Install-wide, and never plan-gated" (SMTP docs) are both true and
         // carry no payment noun.
-        '/\b(?:no|none|not|never|neither|nothing)\b[^.;]{0,60}?\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment method|payment port|payment gateway|gateway|refund)\w*\b[^.;]{0,60}?\bplan[ -]gated\b/i',
-        '/\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment method|payment port|payment gateway|gateway|refund)\w*\b[^.;]{0,60}?\b(?:not|never|no)\b[^.;]{0,25}?\bplan[ -]gated\b/i',
+        '/\b(?:no|none|not|never|neither|nothing)\b[^.;]{0,60}?\b(?:Stripe|PayPal|Payfast|Razorpay|Invoice Ninja|payment method|payment port|payment gateway|gateway|refund)\w*\b[^.;]{0,60}?\bplan[ -]gated\b/i',
+        '/\b(?:Stripe|PayPal|Payfast|Razorpay|Invoice Ninja|payment method|payment port|payment gateway|gateway|refund)\w*\b[^.;]{0,60}?\b(?:not|never|no)\b[^.;]{0,25}?\bplan[ -]gated\b/i',
 
         // The same claim stated as an absence of code rather than an absence of a tier:
         // "There is no plan check anywhere in the payments code". True of the source and
@@ -182,16 +182,16 @@ class MarketingTicketingTierTest extends TestCase
         // gets its own arm with a wider gap.
         '/\brefund(?:s|ed|ing)?\b[^.;"\']{0,60}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
         '/\bon\s+(?:every|any|all)\s+(?:plan|tier)\b[^.;"\']{0,60}?\brefund(?:s|ed|ing)?\b/i' => self::STILL_FREE,
-        '/(?:\brefund(?:s|ed|ing)?\b|\bStripe\b|\bPayPal\b|\bPayfast\b|\bInvoice Ninja\b|\bpayment method\b)[^.;]{0,40}?\?["\'],\s*["\']?(?:a|answer)["\']?\s*(?:=>|:)\s*["\'][^.;"\']{0,60}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
+        '/(?:\brefund(?:s|ed|ing)?\b|\bStripe\b|\bPayPal\b|\bPayfast\b|\bRazorpay\b|\bInvoice Ninja\b|\bpayment method\b)[^.;]{0,40}?\?["\'],\s*["\']?(?:a|answer)["\']?\s*(?:=>|:)\s*["\'][^.;"\']{0,60}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
 
         // "all four are open on every plan", "Invoice Ninja is free on any plan", "Stripe or
         // PayPal account is free on any plan". An availability word between the gateway and the
         // plan phrase is what separates this from the fee claim: "You keep the ticket price
         // minus what Stripe or PayPal charges to process the payment, on every plan" has none.
-        '/\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment (?:method|port|gateway|option|link)s?|gateways?)\b[^.;"\']{0,80}?\b(?:is|are|work|works|open|available|included|supported|live|enabled|stays?|free|no (?:extra )?cost|nothing extra)\b[^.;"\']{0,40}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
+        '/\b(?:Stripe|PayPal|Payfast|Razorpay|Invoice Ninja|payment (?:method|port|gateway|option|link)s?|gateways?)\b[^.;"\']{0,80}?\b(?:is|are|work|works|open|available|included|supported|live|enabled|stays?|free|no (?:extra )?cost|nothing extra)\b[^.;"\']{0,40}?\bon\s+(?:every|any|all)\s+(?:plan|tier)\b/i' => self::STILL_FREE,
 
         // The plan phrase first.
-        '/\bon\s+(?:every|any|all)\s+(?:plan|tier)\b[^.;"\']{0,60}?\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment (?:method|port|gateway|option)s?|gateways?)\b/i' => self::STILL_FREE,
+        '/\bon\s+(?:every|any|all)\s+(?:plan|tier)\b[^.;"\']{0,60}?\b(?:Stripe|PayPal|Payfast|Razorpay|Invoice Ninja|payment (?:method|port|gateway|option)s?|gateways?)\b/i' => self::STILL_FREE,
     ];
 
     /** Words that make an "allowance" or "cap" sentence about something still metered. */

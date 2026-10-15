@@ -278,7 +278,7 @@
             ],
             [
                 'q' => 'Where does the ticket money go?',
-                'a' => 'Straight to the organization. On Pro, a ticket is paid into your own Stripe or PayPal account, billed through your own Invoice Ninja company, taken by a payment link you control, or collected in cash at the door, chosen per event. Your payment provider charges its own processing fee, and Event Schedule adds nothing on top. If a guest cannot come, refund them from the Sales page: a Stripe or PayPal sale goes back through the provider in full or in part, and any other method is marked as refunded so your records stay straight.',
+                'a' => 'Straight to the organization. On Pro, a ticket is paid into your own Stripe or PayPal account, billed through your own Invoice Ninja company, taken by a payment link you control, or collected in cash at the door, chosen per event. Your payment provider charges its own processing fee, and Event Schedule adds nothing on top. If a guest cannot come, refund them from the Sales page: a Stripe, PayPal or Razorpay sale goes back through the provider in full or in part, and any other method is marked as refunded so your records stay straight.',
             ],
             [
                 'q' => 'How do volunteer sign-ups work?',
@@ -428,7 +428,7 @@
                             ['Several ticket types', 'Supporter, table of eight and student, each with its own price and its own stock.'],
                             ['Your own account', 'Paid into your Stripe or PayPal account, by an Invoice Ninja invoice, a payment link or cash at the door.'],
                             ['Codes and extras', 'A promo code for last year\'s volunteers, and add-ons like the raffle strip or the coach from town.'],
-                            ['Refunds you can do yourself', 'From the Sales page, back through Stripe or PayPal in full or in part when a guest cannot come.'],
+                            ['Refunds you can do yourself', 'From the Sales page, back through Stripe, PayPal or Razorpay in full or in part when a guest cannot come.'],
                         ] as [$t, $d])
                             <li class="flex items-start gap-3" data-reveal>
                                 <svg aria-hidden="true" class="es-cause-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

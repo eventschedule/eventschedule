@@ -649,17 +649,17 @@
             ['Currency', 'One currency per schedule. A card can only be spent at events priced in it, and the checkout says so plainly if they do not match.'],
             ['Valid for', 'A number of days, or empty for no expiry at all. The clock starts when the payment clears, so a card waiting on cash does not quietly burn its validity.'],
             // RoleUpdateRequest accepts cash, stripe, invoiceninja and payment_url only: the gift card
-            // controller never adopted the gateway seam, so PayPal and Payfast cannot sell a card.
-            ['How they pay', 'Stripe, Invoice Ninja, a payment link, or cash. PayPal and Payfast cannot take gift card payments, even when they are connected for tickets. Cash cards stay pending until you mark them paid, and only then is the recipient emailed.'],
+            // controller never adopted the gateway seam, so PayPal, Payfast and Razorpay cannot sell a card.
+            ['How they pay', 'Stripe, Invoice Ninja, a payment link, or cash. PayPal, Payfast and Razorpay cannot take gift card payments, even when they are connected for tickets. Cash cards stay pending until you mark them paid, and only then is the recipient emailed.'],
         ];
 
         $actions = [
             ['Mark paid', 'Activate a cash card once the money is in your hand. That is the moment the recipient is emailed the code.'],
             ['Resend email', 'Send the card to the recipient again when it is lost in a mailbox somewhere.'],
             ['Cancel', 'Stop a card being redeemed, whether it was ever paid for or not. Once cancelled it cannot be spent again.'],
-            // Status only (GiftCardController::handleAction). Ticket sales now refund through Stripe
-            // and PayPal, so the difference is said rather than left to be assumed.
-            ['Refund', 'Stop a paid card. Past redemptions stay as they are. Unlike a Stripe or PayPal ticket refund, this moves no money: you return it in your own payment provider.'],
+            // Status only (GiftCardController::handleAction). Ticket sales now refund through Stripe,
+            // PayPal and Razorpay, so the difference is said rather than left to be assumed.
+            ['Refund', 'Stop a paid card. Past redemptions stay as they are. Unlike a Stripe, PayPal or Razorpay ticket refund, this moves no money: you return it in your own payment provider.'],
         ];
 
         $faqs = [
@@ -679,7 +679,7 @@
             // own, so a refund can never hand the buyer the card's share as cash.
             [
                 'q' => 'What happens to the card when a ticket order is refunded?',
-                'a' => 'A full refund works like a cancellation: the amount the card paid goes back on to it, as long as the card is still active, and only the part that was actually charged goes back through Stripe or PayPal. On the Sunday Matinee order above, the card paid $60 and the buyer paid $21, so a full refund sends $21 back to the buyer and puts $60 back on the card. A partial refund leaves the order paid, so the card keeps its deduction and the money comes out of the charged part.',
+                'a' => 'A full refund works like a cancellation: the amount the card paid goes back on to it, as long as the card is still active, and only the part that was actually charged goes back through Stripe, PayPal or Razorpay. On the Sunday Matinee order above, the card paid $60 and the buyer paid $21, so a full refund sends $21 back to the buyer and puts $60 back on the card. A partial refund leaves the order paid, so the card keeps its deduction and the money comes out of the charged part.',
             ],
             [
                 'q' => 'Which plan includes gift cards?',
@@ -687,7 +687,7 @@
             ],
             [
                 'q' => 'Can a gift card be paid for with PayPal?',
-                'a' => 'No. A gift card is paid for through Stripe, Invoice Ninja, a payment link or cash, whichever you pick in the gift card settings. PayPal and Payfast take ticket payments but not gift card payments, even when they are connected. A card bought another way can still be spent on an event that takes PayPal: the code pays what it can and PayPal takes the rest.',
+                'a' => 'No. A gift card is paid for through Stripe, Invoice Ninja, a payment link or cash, whichever you pick in the gift card settings. PayPal, Payfast and Razorpay take ticket payments but not gift card payments, even when they are connected. A card bought another way can still be spent on an event that takes PayPal: the code pays what it can and PayPal takes the rest.',
             ],
             [
                 'q' => 'Do gift cards expire?',

@@ -4,7 +4,7 @@
 
 ## Platform Overview
 
-Event Schedule is an open-source event management platform available as hosted SaaS at eventschedule.com or as a selfhosted deployment. It provides public schedule pages, unlimited free registration on every plan, paid ticketing with zero platform fees on the Pro and Enterprise plans, refunds through Stripe and PayPal, two-way Google, Outlook and CalDAV calendar sync, AI-powered event parsing, newsletters and automatic new-event digests, analytics, and a full REST API with an OpenAPI 3.0 spec.
+Event Schedule is an open-source event management platform available as hosted SaaS at eventschedule.com or as a selfhosted deployment. It provides public schedule pages, unlimited free registration on every plan, paid ticketing with zero platform fees on the Pro and Enterprise plans, refunds through Stripe, PayPal and Razorpay, two-way Google, Outlook and CalDAV calendar sync, AI-powered event parsing, newsletters and automatic new-event digests, analytics, and a full REST API with an OpenAPI 3.0 spec.
 
 ### Schedule Types
 
@@ -16,8 +16,8 @@ Every account organizes events under one or more **schedules**. There are three 
 
 ### Deployment Modes
 
-- **Hosted** (eventschedule.com): Multi-tenant SaaS using subdomains (e.g., `my-venue.eventschedule.com`). Email verification required for registration. Each schedule owner connects their own payment account: Stripe (through Stripe Connect), PayPal, Payfast (South African rand only) or Invoice Ninja, or takes payment through a payment link or in cash.
-- **Selfhosted**: Single-tenant deployment using path-based routing (e.g., `yourdomain.com/my-venue`). No email verification needed. Stripe runs on the install's own API keys; PayPal and Payfast can be supplied for the whole install or connected per owner; Invoice Ninja, payment links and cash work as on the hosted service. Every Pro and Enterprise feature is included.
+- **Hosted** (eventschedule.com): Multi-tenant SaaS using subdomains (e.g., `my-venue.eventschedule.com`). Email verification required for registration. Each schedule owner connects their own payment account: Stripe (through Stripe Connect), PayPal, Payfast (South African rand only), Razorpay (Indian rupees only) or Invoice Ninja, or takes payment through a payment link or in cash.
+- **Selfhosted**: Single-tenant deployment using path-based routing (e.g., `yourdomain.com/my-venue`). No email verification needed. Stripe runs on the install's own API keys; PayPal, Payfast and Razorpay can be supplied for the whole install or connected per owner; Invoice Ninja, payment links and cash work as on the hosted service. Every Pro and Enterprise feature is included.
 
 ### Key Differentiators
 
@@ -1566,7 +1566,7 @@ curl -X PUT https://eventschedule.com/api/sales/sA9bC1 \
 ```
 
 **Notes**:
-- For a Stripe or PayPal sale, `refund` sends the money back through the provider and then updates the status. Every other method (Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand) only records the refund: return the money in that provider yourself.
+- For a Stripe, PayPal or Razorpay sale, `refund` sends the money back through the provider and then updates the status. Every other method (Invoice Ninja, Payfast, a payment link, cash, or a sale marked paid by hand) only records the refund: return the money in that provider yourself.
 - A refund the gateway refuses returns `422` and leaves the sale `paid`. A refund whose outcome could not be confirmed returns `409` and is not retried automatically; check your provider before acting.
 - A payment plan is refunded in full only; sending `amount` for one returns `422`.
 - Cancelling or refunding releases the seats back into stock and notifies anyone on the waitlist for that date. For a multi-event order, act on the primary sale: a non-primary row returns `403`, and the change cascades to the rest of the order.
@@ -1940,7 +1940,7 @@ List, view, update, or delete schedules.
 Beyond the API endpoints documented above, Event Schedule includes these platform features:
 
 - **Ticketing**: Ticket types with their own price, quantity and sales window, free RSVPs, QR tickets scanned at the door on every plan, per-occurrence inventory for recurring events, and a multi-event cart. Free registration and zero-price ticket types are unlimited on every plan; selling a ticket that carries a price needs Pro or Enterprise. Zero platform fees.
-- **Payments and refunds**: Stripe, PayPal, Payfast (South African rand only), Invoice Ninja, a payment link or cash, chosen per event. Putting a price on a ticket is Pro, and every payment method and refunds come with it. Stripe and PayPal sales can be refunded in full or in part from the Sales page or the API; other methods record the refund without moving money.
+- **Payments and refunds**: Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash, chosen per event. Putting a price on a ticket is Pro, and every payment method and refunds come with it. Stripe, PayPal and Razorpay sales can be refunded in full or in part from the Sales page or the API; other methods record the refund without moving money.
 - **Pro ticketing extras**: Promo codes, add-ons, passes and subscriptions, gift cards, the ticket waitlist, installment payments (Stripe), the live check-in dashboard, sales CSV export and bulk attendee import.
 - **Allocated seating** (Enterprise, venue schedules): Reusable seating plans, a guest seat picker with best-available selection, and a box office console.
 - **Interest list**: Once the organizer switches on the “Notify me” card (off by default), a visitor on a public event page leaves an email address to hear when tickets go on sale, if the event is cancelled and shortly before it starts, plus any notice the organizer chooses to send when the date or venue changes. Free, and no account is needed.
@@ -1988,8 +1988,8 @@ $5/month or $50/year.
 
 Pro adds:
 - Selling tickets that carry a price, unlimited and with zero platform fees
-- Every payment method: Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash
-- Full and partial refunds (Stripe and PayPal refund through the provider)
+- Every payment method: Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link or cash
+- Full and partial refunds (Stripe, PayPal and Razorpay refund through the provider)
 - Promo codes, add-ons, passes and subscriptions, gift cards, the ticket waitlist and installment payments
 - Live check-in dashboard, sales CSV export and bulk attendee import
 - REST API and webhooks
@@ -2043,6 +2043,13 @@ Event Schedule charges no percentage-based fees on ticket sales. You only pay th
 
 - For events and appointments priced in South African rand (ZAR) only. Cannot join the multi-event cart, use installments or sell gift cards.
 - Refunds are recorded in Event Schedule; return the money in Payfast.
+
+### Razorpay
+
+- For events and appointments priced in Indian rupees (INR) only. Buyers pay on a Razorpay payment link by UPI, card, netbanking or wallet. Each schedule owner connects their own Key ID and Key Secret; a selfhosted install can also supply one account for everyone in `.env`.
+- The sale is confirmed when the buyer returns, or by the optional `payment_link.paid` webhook if they never come back; `payment_link.expired` gives the seats of an abandoned checkout back. Every confirmation is checked against Razorpay before a sale is marked paid.
+- Works with the multi-event cart and with paid appointments. Not available for installments or gift cards.
+- Full or partial refunds go back through Razorpay.
 
 ### Invoice Ninja
 
@@ -2110,7 +2117,7 @@ Event Schedule supports 12 languages:
 
 Event Schedule can be selfhosted on your own infrastructure. Requires PHP 8.2+, MySQL, and a web server. Install via Softaculous (one-click), Docker, or manual setup.
 
-Key differences from hosted mode: path-based routing instead of subdomains, no email verification, every Pro and Enterprise feature included, Stripe on the install's own API keys (PayPal and Payfast can also be supplied for the whole install), one-click updates, and a daily automatic import from a list of URLs, filtered by city.
+Key differences from hosted mode: path-based routing instead of subdomains, no email verification, every Pro and Enterprise feature included, Stripe on the install's own API keys (PayPal, Payfast and Razorpay can also be supplied for the whole install), one-click updates, and a daily automatic import from a list of URLs, filtered by city.
 
 For full installation instructions, see the [Selfhost Guide](https://eventschedule.com/docs/selfhost/installation).
 

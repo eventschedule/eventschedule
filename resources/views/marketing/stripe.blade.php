@@ -664,7 +664,7 @@
         ];
 
         // Event.payment_method, per event. TicketController::checkout() resolves it through
-        // config/payments.php: cash, stripe, invoiceninja, payment_url, payfast, paypal.
+        // config/payments.php: cash, stripe, invoiceninja, payment_url, payfast, paypal, razorpay.
         $routes = [
             [
                 'name'  => 'Stripe',
@@ -685,6 +685,12 @@
                 'micro' => 'South African rand',
             ],
             [
+                'name'  => 'Razorpay',
+                'held'  => 'Your own Razorpay account',
+                'desc'  => 'UPI, cards, netbanking and wallets on a Razorpay payment link. Settles in Indian rupees, so it is offered on INR events only.',
+                'micro' => 'Indian rupees (INR)',
+            ],
+            [
                 'name'  => 'Invoice Ninja',
                 'held'  => 'Your Invoice Ninja gateway',
                 'desc'  => 'Raise a real invoice, or send a payment link, from your own Invoice Ninja instance. Choose which of the two on the Invoice Ninja tab under Payment Methods.',
@@ -701,6 +707,8 @@
                 'held'  => 'Your till',
                 'desc'  => 'No card at all. You write the payment instructions the buyer sees, and mark the sale paid when the money arrives.',
                 'micro' => 'Marked paid by hand',
+                // The seventh card closes the grid: a full row at both column counts.
+                'wide'  => true,
             ],
         ];
 
@@ -1110,7 +1118,7 @@
                 <div class="es-payout-mark mb-6" data-reveal aria-hidden="true">04</div>
                 <p class="es-payout-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Other routes</p>
                 <h2 class="es-balance es-payout-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Six lanes, <span class="es-payout-grad">all of them yours</span>.
+                    Seven lanes, <span class="es-payout-grad">all of them yours</span>.
                 </h2>
                 <p class="es-payout-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
                     Every event carries its own route, and a new one starts on cash at the door until you
@@ -1120,7 +1128,7 @@
 
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
                 @foreach ($routes as $route)
-                    <div class="es-payout-card es-payout-hover flex flex-col p-6" data-reveal>
+                    <div class="es-payout-card es-payout-hover flex flex-col p-6 {{ ! empty($route['wide']) ? 'md:col-span-2 lg:col-span-3' : '' }}" data-reveal>
                         <p class="es-payout-tag mb-3">{{ $route['micro'] }}</p>
                         <h3 class="es-payout-ink mb-2 text-lg font-bold">{{ $route['name'] }}</h3>
                         <p class="es-payout-muted mb-5 text-sm">{{ $route['desc'] }}</p>

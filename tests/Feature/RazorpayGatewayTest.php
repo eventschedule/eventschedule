@@ -10,6 +10,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -49,6 +50,15 @@ class RazorpayGatewayTest extends TestCase
     /** @var list<array<string, mixed>> */
     private array $existingRefunds = [];
 
+    /** What GET /payments (the key check on save) answers; null = Razorpay cannot be reached. */
+    private ?int $verifyStatus = 200;
+
+    /** Whether POST /payment_links fails. */
+    private bool $linkFails = false;
+
+    /** Key ids whose GET /payments/{id}/refunds answers 400, as Razorpay does for another account's payment. */
+    private array $refundsUnknownTo = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -57,7 +67,17 @@ class RazorpayGatewayTest extends TestCase
             $url = $request->url();
 
             if ($request->method() === 'POST' && str_ends_with($url, '/v1/payment_links')) {
-                return Http::response(['id' => self::LINK_ID, 'short_url' => self::SHORT_URL, 'status' => 'created']);
+                return $this->linkFails
+                    ? Http::response(['error' => ['description' => 'nope']], 500)
+                    : Http::response(['id' => self::LINK_ID, 'short_url' => self::SHORT_URL, 'status' => 'created']);
+            }
+
+            if ($request->method() === 'GET' && preg_match('#/v1/payments(\?|$)#', $url)) {
+                if ($this->verifyStatus === null) {
+                    throw new \Illuminate\Http\Client\ConnectionException('network is down');
+                }
+
+                return Http::response(['items' => []], $this->verifyStatus);
             }
 
             if ($request->method() === 'GET' && str_contains($url, '/v1/payment_links/')) {
@@ -65,7 +85,11 @@ class RazorpayGatewayTest extends TestCase
             }
 
             if ($request->method() === 'GET' && str_contains($url, '/refunds')) {
-                return Http::response(['items' => $this->existingRefunds]);
+                $keyId = explode(':', base64_decode(substr($request->header('Authorization')[0] ?? '', 6)))[0];
+
+                return in_array($keyId, $this->refundsUnknownTo, true)
+                    ? Http::response(['error' => ['description' => 'The id provided does not exist']], 400)
+                    : Http::response(['items' => $this->existingRefunds]);
             }
 
             if ($request->method() === 'POST' && str_ends_with($url, '/refund')) {
@@ -384,5 +408,289 @@ class RazorpayGatewayTest extends TestCase
         $sale->forceFill(['transaction_reference' => 'Manual payment'])->save();
 
         $this->assertNull(app(PaymentGatewayManager::class)->get('razorpay')->refundReferenceFor($sale->fresh()));
+    }
+
+    // ------------------------------------------------------------- appointments
+
+    /** A paid INR type on a schedule of the owner's, and a guest who has booked it. */
+    private function bookPaidType(): Sale
+    {
+        $role = $this->createRole($this->owner, 'talent', ['timezone' => 'America/New_York']);
+        $type = $this->createAppointmentType($role, [
+            'weekly_windows' => array_fill_keys(['0', '1', '2', '3', '4', '5', '6'], [['start' => '09:00', 'end' => '17:00']]),
+            'price' => 500, 'currency_code' => 'INR', 'payment_method' => 'razorpay',
+        ]);
+
+        $from = Carbon::now('America/New_York')->addDay()->format('Y-m-d');
+        $slots = app(\App\Services\AppointmentService::class)->availableSlots($type, $from, 1);
+        $slot = $slots['days'][array_key_first($slots['days'])][0]['utc'];
+
+        $this->postJson(route('appointments.book.store', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug]), [
+            'name' => 'Meera', 'email' => 'meera@gmail.com', 'slot' => $slot, 'guest_timezone' => 'America/New_York',
+        ])->assertOk();
+
+        return Sale::where('email', 'meera@gmail.com')->firstOrFail();
+    }
+
+    /** @return array<string, string> */
+    private function bookingParams(Sale $sale): array
+    {
+        return ['event_id' => UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret];
+    }
+
+    private function linkCreations(): int
+    {
+        return collect(Http::recorded())->filter(fn ($p) => $p[0]->method() === 'POST' && str_ends_with($p[0]->url(), '/v1/payment_links'))->count();
+    }
+
+    public function test_a_booking_is_paid_through_a_link_and_lands_on_its_page(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->assertSame(1, (int) $sale->event->expire_unpaid_tickets, 'held for an hour');
+
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+        $this->assertSame(50000, $this->linkRequestBody()['amount']);
+
+        $this->link = $this->paidLink($sale, ['amount' => 50000, 'amount_paid' => 50000]);
+        $this->returnFromRazorpay($sale)
+            ->assertRedirect(route('appointments.manage', $this->bookingParams($sale)).'?new=1');
+
+        $sale->refresh();
+        $this->assertSame('paid', $sale->status);
+        $this->assertSame(self::PAYMENT_ID, $sale->transaction_reference);
+        $this->assertNotNull($sale->confirmed_at);
+    }
+
+    public function test_a_link_razorpay_cannot_create_keeps_the_booking(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->linkFails = true;
+
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))
+            ->assertRedirect(route('appointments.manage', $this->bookingParams($sale)))
+            ->assertSessionHas('error', __('messages.razorpay_link_failed'));
+
+        // A passing failure: the guest keeps the time and can try again.
+        $this->assertSame('unpaid', $sale->fresh()->status);
+        $this->linkFails = false;
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+    }
+
+    public function test_a_link_made_late_in_the_hold_expires_before_it(): void
+    {
+        $sale = $this->bookPaidType();
+
+        $this->travel(40)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))->assertRedirect(self::SHORT_URL);
+
+        // Paid after the hold is released, the money would reach a booking that is gone.
+        $this->assertLessThanOrEqual(
+            $sale->created_at->copy()->addHour()->subMinute()->getTimestamp(),
+            $this->linkRequestBody()['expire_by'],
+        );
+        $this->assertGreaterThanOrEqual(now()->addMinutes(15)->getTimestamp(), $this->linkRequestBody()['expire_by']);
+    }
+
+    public function test_too_little_of_the_hold_left_releases_the_booking(): void
+    {
+        $sale = $this->bookPaidType();
+        $manage = route('appointments.manage', $this->bookingParams($sale));
+
+        $this->travel(44)->minutes();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)))
+            ->assertRedirect($manage)
+            ->assertSessionHas('error', __('messages.razorpay_too_late_to_pay'));
+
+        $this->assertSame(0, $this->linkCreations(), 'no link Razorpay would refuse, or that could outlive the hold');
+        $this->assertSame('expired', $sale->fresh()->status);
+
+        // Released, so the page offers a new time instead of a Complete payment that cannot work.
+        $this->get($manage)->assertOk()
+            ->assertSee(__('messages.this_reservation_has_expired'))
+            ->assertDontSee(route('appointments.pay', $this->bookingParams($sale)), false);
+    }
+
+    public function test_an_expired_link_leaves_a_booking_on_its_own_clock(): void
+    {
+        $sale = $this->bookPaidType();
+        $this->post(route('appointments.pay', $this->bookingParams($sale)));
+        $this->link = $this->paidLink($sale, ['status' => 'expired', 'payments' => []]);
+
+        $this->webhook($sale, null, 'payment_link.expired')->assertNoContent();
+
+        $this->assertSame('unpaid', $sale->fresh()->status);
+    }
+
+    // ------------------------------------------------------------ settlement guards
+
+    public function test_an_abandoned_ticket_checkout_gives_its_seats_back_when_the_link_expires(): void
+    {
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = $this->paidLink($sale, ['status' => 'expired', 'payments' => []]);
+
+        $this->webhook($sale, null, 'payment_link.expired')->assertNoContent();
+
+        $this->assertSame('expired', $sale->fresh()->status);
+        $this->assertSame(0, $this->ticket->fresh()->soldCountFor(Carbon::parse($this->event->starts_at)->format('Y-m-d')));
+    }
+
+    public function test_an_expiry_notice_for_a_link_that_was_paid_settles_it(): void
+    {
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = $this->paidLink($sale);
+
+        $this->webhook($sale, null, 'payment_link.expired')->assertNoContent();
+
+        $this->assertSame('paid', $sale->fresh()->status);
+    }
+
+    public function test_a_refunded_sales_replayed_return_raises_no_alarm(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = $this->paidLink($sale);
+        $this->returnFromRazorpay($sale);
+        $this->assertSame('paid', $sale->fresh()->status);
+
+        // Back to Razorpay's success page after a refund sends the browser to the return again.
+        $sale->fresh()->forceFill(['status' => 'refunded'])->save();
+        $this->returnFromRazorpay($sale)->assertRedirect();
+
+        $this->assertSame('refunded', $sale->fresh()->status);
+        Exceptions::assertNothingReported();
+    }
+
+    public function test_money_for_a_released_sale_is_reported_from_the_return(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $sale->forceFill(['status' => 'expired'])->save();
+        $this->link = $this->paidLink($sale);
+
+        $this->returnFromRazorpay($sale)->assertRedirect();
+
+        $this->assertSame('expired', $sale->fresh()->status, 'never revived');
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'can no longer be honoured'));
+    }
+
+    public function test_a_second_payment_for_a_paid_sale_is_reported(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $sale->forceFill(['status' => 'paid', 'transaction_reference' => 'pay_FirstPaymnt0001'])->save();
+        $this->link = $this->paidLink($sale);
+
+        $this->returnFromRazorpay($sale)->assertRedirect();
+
+        $this->assertSame('pay_FirstPaymnt0001', $sale->fresh()->transaction_reference);
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'already paid'));
+    }
+
+    public function test_a_refreshed_return_raises_no_alarm(): void
+    {
+        Exceptions::fake();
+        $this->checkout(2);
+        $sale = $this->sale();
+        $this->link = $this->paidLink($sale);
+
+        $this->returnFromRazorpay($sale);
+        $this->returnFromRazorpay($sale);
+        $this->webhook($sale)->assertNoContent();
+
+        $this->assertSame('paid', $sale->fresh()->status);
+        Exceptions::assertNothingReported();
+    }
+
+    // -------------------------------------------------------------- saving keys
+
+    private function connect(array $input)
+    {
+        $owner = $this->createOwner();
+
+        return [$owner, $this->actingAs($owner)->post(route('payments.connect', ['gateway' => 'razorpay']), $input)];
+    }
+
+    public function test_keys_razorpay_refuses_are_not_stored(): void
+    {
+        $this->verifyStatus = 401;
+
+        [$owner, $response] = $this->connect(['razorpay_key_id' => 'rzp_live_Mistyped0001', 'razorpay_key_secret' => 'wrong']);
+
+        $response->assertSessionHasErrors(['razorpay_key_id' => __('messages.razorpay_credentials_rejected')]);
+        $this->assertNull($owner->fresh()->razorpay_key_id);
+    }
+
+    public function test_keys_that_could_not_be_checked_are_stored_and_the_owner_is_told(): void
+    {
+        $this->verifyStatus = null;
+
+        [$owner, $response] = $this->connect(['razorpay_key_id' => 'rzp_live_Unchecked001', 'razorpay_key_secret' => 'probably-fine']);
+
+        $response->assertSessionHasNoErrors()->assertSessionMissing('message');
+        $this->assertSame('rzp_live_Unchecked001', $owner->fresh()->razorpay_key_id);
+
+        // On the page, not only in the session: "Settings saved" used to win the layout's toast.
+        $this->get(route('profile.edit'))->assertOk()
+            ->assertSee(__('messages.razorpay_credentials_unverified'), false)
+            ->assertDontSee(__('messages.settings_saved'), false);
+    }
+
+    public function test_good_keys_are_stored(): void
+    {
+        [$owner, $response] = $this->connect(['razorpay_key_id' => 'rzp_live_GoodKeys0001', 'razorpay_key_secret' => 'right']);
+
+        $response->assertSessionHasNoErrors()->assertSessionHas('message', __('messages.settings_saved'));
+        $this->assertSame('rzp_live_GoodKeys0001', $owner->fresh()->razorpay_key_id);
+        $this->assertSame('right', $owner->fresh()->razorpay_key_secret);
+    }
+
+    public function test_switching_from_test_keys_to_live_ones_drops_the_test_webhook_secret(): void
+    {
+        $this->actingAs($this->owner)->post(route('payments.connect', ['gateway' => 'razorpay']), [
+            'razorpay_key_id' => 'rzp_live_GoingLive0001',
+            'razorpay_key_secret' => 'live-secret',
+        ])->assertSessionHasNoErrors();
+
+        // Razorpay's Test Mode webhook never hears of a live payment.
+        $this->assertNull($this->owner->fresh()->razorpay_webhook_secret);
+
+        // A new secret sent with the switch is kept.
+        $this->actingAs($this->owner)->post(route('payments.connect', ['gateway' => 'razorpay']), [
+            'razorpay_key_id' => 'rzp_test_BackToTest001',
+            'razorpay_webhook_secret' => 'test-webhook-secret',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('test-webhook-secret', $this->owner->fresh()->razorpay_webhook_secret);
+    }
+
+    // ------------------------------------------------------------- refunds, forms
+
+    public function test_a_refund_moves_on_to_the_installation_account_that_holds_the_payment(): void
+    {
+        config(['app.hosted' => false, 'payments.razorpay.key_id' => 'rzp_live_Platform0001', 'payments.razorpay.key_secret' => 'p-secret']);
+        $this->refundsUnknownTo = [self::KEY_ID];
+        $sale = $this->paidSale();
+
+        $refundId = app(PaymentGatewayManager::class)->get('razorpay')->refund($sale, 10.0, 'key-2');
+
+        $this->assertSame('rfnd_TestRefund00001', $refundId);
+        $post = collect(Http::recorded())->first(fn ($p) => $p[0]->method() === 'POST' && str_ends_with($p[0]->url(), '/refund'));
+        $this->assertSame('Basic '.base64_encode('rzp_live_Platform0001:p-secret'), $post[0]->header('Authorization')[0]);
+    }
+
+    public function test_the_event_form_warns_about_test_keys_only(): void
+    {
+        $edit = fn () => $this->actingAs($this->owner)
+            ->get(route('event.edit', ['subdomain' => $this->role->subdomain, 'hash' => UrlUtils::encodeId($this->event->id)]))
+            ->assertOk();
+
+        $edit()->assertSee(__('messages.razorpay_test_mode_warning'), false);
+
+        $this->owner->forceFill(['razorpay_key_id' => 'rzp_live_AbCdEf123456'])->save();
+        $edit()->assertDontSee(__('messages.razorpay_test_mode_warning'), false);
     }
 }

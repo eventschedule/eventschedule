@@ -120,7 +120,7 @@
         $whyChoosePoints = $why_choose['points'] ?? [
             'Zero platform fees on ticket sales, at every plan level, into your own Stripe or PayPal account',
             'Free registration with no monthly ceiling, and a ticket scanned at the door on every plan',
-            'Refunds from the Sales page on Pro, in full or in part, that send the money back through Stripe or PayPal',
+            'Refunds from the Sales page on Pro, in full or in part, that send the money back through Stripe, PayPal or Razorpay',
             'One checkout for tickets to several of your events, and an interest list that emails people when tickets go on sale',
             'Passes, gift cards and installment payments on Pro, and allocated seating for venues on Enterprise',
             'Two-way Google, Outlook and CalDAV sync, free, so the public listing and your own diary cannot disagree',

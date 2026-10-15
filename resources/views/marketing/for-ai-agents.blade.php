@@ -859,7 +859,7 @@
         // The heading below counts these, so the two have to be changed together.
         $webhookEvents = [
             ['sale.created', 'A sale is created, still unpaid.'],
-            ['sale.paid', 'Confirmed paid, whether by Stripe, PayPal, Payfast, Invoice Ninja, by hand or free.'],
+            ['sale.paid', 'Confirmed paid, whether by Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, by hand or free.'],
             ['sale.refunded', 'A paid sale is refunded in full. A partial refund leaves it paid and fires nothing.'],
             ['sale.cancelled', 'A sale is cancelled.'],
             ['installment.paid', 'A payment of an installment plan is collected.'],
@@ -905,7 +905,7 @@
             ],
             [
                 'q' => 'Can the API refund a sale?',
-                'a' => 'Yes: PUT /api/sales/{id} with the action refund. On a Stripe or PayPal sale the money goes back through the provider before the status changes. Send an amount to return part of it, and the sale stays paid with its tickets valid; leave it out and the whole remaining balance goes back, the sale becomes refunded, its places return to stock and sale.refunded fires. Send an idempotency_key of your own so a retry returns the first attempt\'s outcome instead of refunding twice. A refund whose outcome could not be confirmed returns 409 and is never retried for you. Invoice Ninja, Payfast, payment-link and cash sales are only recorded as refunded, so return that money yourself, and a payment plan is refunded in full only.',
+                'a' => 'Yes: PUT /api/sales/{id} with the action refund. On a Stripe, PayPal or Razorpay sale the money goes back through the provider before the status changes. Send an amount to return part of it, and the sale stays paid with its tickets valid; leave it out and the whole remaining balance goes back, the sale becomes refunded, its places return to stock and sale.refunded fires. Send an idempotency_key of your own so a retry returns the first attempt\'s outcome instead of refunding twice. A refund whose outcome could not be confirmed returns 409 and is never retried for you. Invoice Ninja, Payfast, payment-link and cash sales are only recorded as refunded, so return that money yourself, and a payment plan is refunded in full only.',
             ],
             [
                 'q' => 'What is llms.txt, and why are there two of them?',
@@ -1432,7 +1432,7 @@ HTML,
                                     </div>
                                 </div>
                                 <p class="ax-call-note" data-reveal>
-                                    Three actions, and which ones are legal depends on where the sale is: <span class="ax-k">mark_paid</span> from unpaid, <span class="ax-k">refund</span> from paid, <span class="ax-k">cancel</span> from either. On a Stripe or PayPal sale, <span class="ax-k">refund</span> sends the money back before the status moves, and an <span class="ax-k">amount</span> makes it partial, which leaves the sale paid. You can also create a sale outright for a buyer who paid you off-platform.
+                                    Three actions, and which ones are legal depends on where the sale is: <span class="ax-k">mark_paid</span> from unpaid, <span class="ax-k">refund</span> from paid, <span class="ax-k">cancel</span> from either. On a Stripe, PayPal or Razorpay sale, <span class="ax-k">refund</span> sends the money back before the status moves, and an <span class="ax-k">amount</span> makes it partial, which leaves the sale paid. You can also create a sale outright for a buyer who paid you off-platform.
                                 </p>
                             </div>
 
@@ -1579,12 +1579,13 @@ HTML,
                             </div>
                             <h3>Money, without a middleman</h3>
                             <p>
-                                Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast for rand prices, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="ax-s">sale.paid</span> webhooks, with the ticket lines attached, and a Stripe or PayPal refund goes back through the provider.
+                                Ticket types created through the API sell through your own Stripe or PayPal account, or through Invoice Ninja, Payfast for rand prices, Razorpay for Indian rupee (INR) prices, a payment URL, or by hand. Event Schedule takes zero platform fees on ticket sales: the only deduction is your processor's. Sales come back through the sales endpoints and through <span class="ax-s">sale.paid</span> webhooks, with the ticket lines attached, and a Stripe, PayPal or Razorpay refund goes back through the provider.
                             </p>
                             <div class="ax-chips" dir="ltr">
                                 <span class="ax-chip">stripe</span>
                                 <span class="ax-chip">paypal</span>
                                 <span class="ax-chip">payfast</span>
+                                <span class="ax-chip">razorpay</span>
                                 <span class="ax-chip">invoiceninja</span>
                                 <span class="ax-chip">payment_url</span>
                                 <span class="ax-chip">cash</span>

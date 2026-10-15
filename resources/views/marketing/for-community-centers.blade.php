@@ -908,7 +908,7 @@
             ],
             [
                 'q' => 'Can we refund a class?',
-                'a' => 'Yes, from the Sales page, on Pro. A Stripe or PayPal sale is refunded through the provider, in full or in part, and its status only changes once the money has gone back; a partial refund leaves the ticket valid. Every other method (cash, a payment link, Invoice Ninja or Payfast) shows Mark as Refunded instead, which records the refund without moving money, so you hand that one back yourself. Event Schedule does not email the buyer about a refund, so let them know.',
+                'a' => 'Yes, from the Sales page, on Pro. A Stripe, PayPal or Razorpay sale is refunded through the provider, in full or in part, and its status only changes once the money has gone back; a partial refund leaves the ticket valid. Every other method (cash, a payment link, Invoice Ninja or Payfast) shows Mark as Refunded instead, which records the refund without moving money, so you hand that one back yourself. Event Schedule does not email the buyer about a refund, so let them know.',
             ],
             [
                 'q' => 'Can people ask to hear when a class opens for booking?',

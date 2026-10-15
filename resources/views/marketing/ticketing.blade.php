@@ -26,7 +26,7 @@
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "Connect a payment method",
-                "text": "Connect your own Stripe or PayPal account, or Invoice Ninja, Payfast, or a payment URL, or take cash at the door. Money from card sales settles into your account, not ours."
+                "text": "Connect your own Stripe or PayPal account, or Invoice Ninja, Payfast, Razorpay, or a payment URL, or take cash at the door. Money from card sales settles into your account, not ours."
             },
             {
                 "@type": "HowToStep",
@@ -598,7 +598,7 @@
             ['Your own Stripe or PayPal', 'Buyers pay by card, Apple Pay or Google Pay through Stripe, or from a PayPal balance or card, straight into your account. You choose the method per event.'],
             ['Installments', 'A buyer splits the price over monthly charges. The first is taken at checkout and the ticket is valid straight away; the rest come off the saved card on their own.'],
             ['One cart, several events', 'Somebody buying into three of your nights pays once, as a single amount, instead of running checkout three times.', 'cart'],
-            ['Refunds that move the money', 'Refund a Stripe or PayPal sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. On Pro, like the sale it reverses.', 'refunds'],
+            ['Refunds that move the money', 'Refund a Stripe, PayPal or Razorpay sale in full or in part from the Sales list, and the money goes back through the provider. A partial refund keeps the tickets valid; a full one puts them back on sale. On Pro, like the sale it reverses.', 'refunds'],
         ];
 
         $doorSide = [
@@ -628,7 +628,7 @@
         ];
 
         $steps = [
-            ['01', 'Connect a payment method', 'Your own Stripe or PayPal account, Invoice Ninja, Payfast, a payment URL, or cash at the door. The money settles into your account, not ours.'],
+            ['01', 'Connect a payment method', 'Your own Stripe or PayPal account, Invoice Ninja, Payfast, Razorpay, a payment URL, or cash at the door. The money settles into your account, not ours.'],
             ['02', 'Add your ticket types', 'A name, a price, a quantity, and a sales window if you want one. Promo codes, add-ons and custom questions have their own tabs.'],
             ['03', 'Scan at the door', 'Open Sales on your phone and tap Scan Tickets. Each ticket admits once, and the dashboard keeps the count.'],
         ];
@@ -661,11 +661,11 @@
             ],
             [
                 'q' => 'What payment methods are supported?',
-                'a' => 'Stripe for credit cards, Apple Pay and Google Pay; PayPal, where buyers pay from a PayPal balance or a card; Payfast for South African rand; Invoice Ninja for invoice or payment-link billing; a custom payment URL to send buyers to any system you already use; or cash, where you add payment instructions to the confirmation email and mark the sale paid yourself.',
+                'a' => 'Stripe for credit cards, Apple Pay and Google Pay; PayPal, where buyers pay from a PayPal balance or a card; Payfast for South African rand; Razorpay for Indian rupees (INR), by UPI, card, netbanking or wallet; Invoice Ninja for invoice or payment-link billing; a custom payment URL to send buyers to any system you already use; or cash, where you add payment instructions to the confirmation email and mark the sale paid yourself.',
             ],
             [
                 'q' => 'How are refunds handled?',
-                'a' => 'From the Sales list, on Pro. For a Stripe or PayPal sale the money goes back through the provider, in full or in part, and the list shows how much has been refunded so far. A partial refund leaves the sale paid and its tickets valid; a full refund, like a cancellation, returns the tickets to the pool for that date, which can trigger the next waitlist notification. An installment plan is refunded in full only, one charge at a time. Every other method shows Mark as Refunded, which records the refund while you return the money yourself. Either way, the refund policy stays yours.',
+                'a' => 'From the Sales list, on Pro. For a Stripe, PayPal or Razorpay sale the money goes back through the provider, in full or in part, and the list shows how much has been refunded so far. A partial refund leaves the sale paid and its tickets valid; a full refund, like a cancellation, returns the tickets to the pool for that date, which can trigger the next waitlist notification. An installment plan is refunded in full only, one charge at a time. Every other method shows Mark as Refunded, which records the refund while you return the money yourself. Either way, the refund policy stays yours.',
             ],
             [
                 'q' => 'Can I offer promo codes or discounts?',
@@ -1118,8 +1118,8 @@
 
                     <div data-reveal class="es-turn-card flex flex-col p-6">
                         <svg aria-hidden="true" class="es-turn-accent mb-4 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="es-turn-ink mb-2 text-base font-bold">Payfast</h3>
-                        <p class="es-turn-muted text-sm leading-relaxed">For events priced in South African rand, paid into your own Payfast account.</p>
+                        <h3 class="es-turn-ink mb-2 text-base font-bold">Payfast and Razorpay</h3>
+                        <p class="es-turn-muted text-sm leading-relaxed">For events priced in South African rand (Payfast) or Indian rupees (Razorpay), paid into your own account.</p>
                     </div>
 
                     <div data-reveal class="es-turn-card flex flex-col p-6">

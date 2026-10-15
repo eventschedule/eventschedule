@@ -64,7 +64,7 @@ Event Schedule gives a venue, a performer or a community one place to publish a 
 
 ### 🎟️ Ticketing
 
-- **Direct payments:** Paid tickets through Stripe, PayPal, Payfast, Invoice Ninja, payment links or cash, straight into your own accounts. The payment processor's fee is the only fee. Full and partial refunds.
+- **Direct payments:** Paid tickets through Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, payment links or cash, straight into your own accounts. The payment processor's fee is the only fee. Full and partial refunds.
 - **Advanced options:** Multiple ticket types, sales windows, group discounts, promo codes, add-ons, waitlists, multi-event carts, installment plans, gift cards and multi-use passes.
 - **Reserved seating:** A drag-and-drop seating plan builder, a guest seat picker and a box office console.
 - **Door management:** QR code tickets, a browser-based door scanner, a live check-in dashboard and Google Wallet passes.
@@ -161,6 +161,7 @@ Everything optional is switched on by adding your own credentials to `.env`. Unt
 | Stripe payments | `STRIPE_PLATFORM_KEY`, `STRIPE_PLATFORM_SECRET` | [Stripe](https://eventschedule.com/docs/selfhost/stripe) |
 | PayPal payments | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | [`.env.example`](.env.example) |
 | Payfast payments | `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE` | [`.env.example`](.env.example) |
+| Razorpay payments | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | [`.env.example`](.env.example) |
 | AI features | `GEMINI_API_KEY` or `OPENAI_API_KEY` | [AI](https://eventschedule.com/docs/selfhost/ai) |
 | Google Calendar sync | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | [Google Calendar](https://eventschedule.com/docs/selfhost/google-calendar) |
 | Outlook / Microsoft 365 sync | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | [Microsoft Calendar](https://eventschedule.com/docs/selfhost/microsoft-calendar) |
@@ -169,7 +170,7 @@ Everything optional is switched on by adding your own credentials to `.env`. Unt
 | Web push notifications | `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY` | [`.env.example`](.env.example) |
 | Bot protection (Cloudflare Turnstile) | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | [`.env.example`](.env.example) |
 
-Schedule owners can also connect their own PayPal, Payfast or Invoice Ninja account, and their own CalDAV server, from the app's settings. [`.env.example`](.env.example) documents every variable.
+Schedule owners can also connect their own PayPal, Payfast, Razorpay or Invoice Ninja account, and their own CalDAV server, from the app's settings. [`.env.example`](.env.example) documents every variable.
 
 ## What a fresh install connects to
 

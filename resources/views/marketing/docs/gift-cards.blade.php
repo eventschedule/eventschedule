@@ -93,7 +93,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Payment Method</span></td>
-                        <td>How buyers pay: Cash, Stripe, Invoice Ninja, or your payment link. Only the methods the schedule's owner has already connected are listed, and Cash is the default. Payfast and PayPal cannot be used for gift cards even when they are connected.</td>
+                        <td>How buyers pay: Cash, Stripe, Invoice Ninja, or your payment link. Only the methods the schedule's owner has already connected are listed, and Cash is the default. Payfast, PayPal and Razorpay cannot be used for gift cards even when they are connected.</td>
                     </tr>
                 </tbody>
             </table>
@@ -170,7 +170,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Stripe's minimum charge</div>
-            <p>Stripe will not process a charge below 50 of the currency's smallest units (0.50 USD or EUR, 50 JPY). Payfast has its own floor of R5.00. On an event taking payment through either, if applying the whole balance would leave less than that still to pay, slightly less is applied and the small remainder stays on the card, so checkout never lands on an amount the gateway would refuse. Events paid by cash, PayPal, Invoice Ninja or a payment link have no floor and are not adjusted.</p>
+            <p>Stripe will not process a charge below 50 of the currency's smallest units (0.50 USD or EUR, 50 JPY). Payfast has its own floor of R5.00, and Razorpay one of ₹1.00. On an event taking payment through any of them, if applying the whole balance would leave less than that still to pay, slightly less is applied and the small remainder stays on the card, so checkout never lands on an amount the gateway would refuse. Events paid by cash, PayPal, Invoice Ninja or a payment link have no floor and are not adjusted.</p>
         </div>
 
         <h3 id="abandoned-checkout" class="doc-subheading">An abandoned checkout gives the balance back</h3>
@@ -276,8 +276,8 @@
 
         <div class="doc-callout doc-callout-warning mb-2">
             <div class="doc-callout-title">Refunds move money manually</div>
-            <p>Marking a card refunded or cancelled stops it working, but it does not move any money in Stripe, Invoice Ninja or your bank. Do that yourself. Ticket sales are different: <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Refund Ticket</a> on a Stripe or PayPal sale does send the money back, but a gift card's own <strong class="text-gray-900 dark:text-white">Refund</strong> never contacts a payment provider.</p>
-            <p class="mt-2">When a ticket order that used a card is cancelled or refunded in full, the redeemed amount goes back on the card, but only while the card itself is still <strong class="text-gray-900 dark:text-white">Active</strong>: a card you have already cancelled or refunded is never credited back. A full refund through Stripe or PayPal returns only what the buyer paid on top of the card, and an order the card covered in full shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong>, which puts the whole amount back on the card. A partial refund leaves the card's balance as it is.</p>
+            <p>Marking a card refunded or cancelled stops it working, but it does not move any money in Stripe, Invoice Ninja or your bank. Do that yourself. Ticket sales are different: <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Refund Ticket</a> on a Stripe, PayPal or Razorpay sale does send the money back, but a gift card's own <strong class="text-gray-900 dark:text-white">Refund</strong> never contacts a payment provider.</p>
+            <p class="mt-2">When a ticket order that used a card is cancelled or refunded in full, the redeemed amount goes back on the card, but only while the card itself is still <strong class="text-gray-900 dark:text-white">Active</strong>: a card you have already cancelled or refunded is never credited back. A full refund through Stripe, PayPal or Razorpay returns only what the buyer paid on top of the card, and an order the card covered in full shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong>, which puts the whole amount back on the card. A partial refund leaves the card's balance as it is.</p>
         </div>
     </section>
 

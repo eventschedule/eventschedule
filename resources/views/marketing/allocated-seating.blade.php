@@ -471,7 +471,7 @@
                     </div>
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">Release a seat, or a party</h3>
-                        <p class="es-house-muted text-sm leading-relaxed">Three of four are coming: click the fourth and it goes back on sale while the rest of the booking stands. A party cancelling together goes back in one action. Releasing moves no money, so send that share of a Stripe or PayPal sale back as a partial refund from the Sales page, or return it yourself for any other payment method.</p>
+                        <p class="es-house-muted text-sm leading-relaxed">Three of four are coming: click the fourth and it goes back on sale while the rest of the booking stands. A party cancelling together goes back in one action. Releasing moves no money, so send that share of a Stripe, PayPal or Razorpay sale back as a partial refund from the Sales page, or return it yourself for any other payment method.</p>
                     </div>
                     <div class="es-house-card p-6" data-reveal="panel">
                         <h3 class="es-house-ink mb-2 text-base font-bold">Who is already inside</h3>
@@ -528,7 +528,7 @@
                 // A full refund flips Sale.status and Sale::booted hands the seats back through
                 // SeatHoldService::releaseForSale(). A box office release leaves the order paid and
                 // moves no money (BoxOfficeSeatingService::releaseSeat's docblock).
-                ['q' => 'What happens to the seats when I refund an order?', 'a' => 'A full refund puts every seat on the order back on sale, whether the money went back through Stripe or PayPal or you marked the sale refunded by hand. A partial refund leaves the seats booked. To take one seat back from a party, release it in the box office, then send that seat\'s share back as a partial refund of a Stripe or PayPal sale from the Sales page. Releasing a seat never moves money on its own.'],
+                ['q' => 'What happens to the seats when I refund an order?', 'a' => 'A full refund puts every seat on the order back on sale, whether the money went back through Stripe, PayPal or Razorpay or you marked the sale refunded by hand. A partial refund leaves the seats booked. To take one seat back from a party, release it in the box office, then send that seat\'s share back as a partial refund of a Stripe, PayPal or Razorpay sale from the Sales page. Releasing a seat never moves money on its own.'],
                 ['q' => 'Can I switch off the single-seat rule?', 'a' => 'Yes, room by room. The rule refuses a selection that would strand one seat between two bookings, and by default it lifts once the house is 90% sold. A bar or a comedy club that sells single seats all night can turn it off in the plan, and a stricter room can refuse gaps of up to four seats, not just one.'],
                 ['q' => 'What happens if I edit a plan that is already selling?', 'a' => 'You can keep editing. A seat somebody has bought will not be removed, and neither will one a customer is choosing at that moment. Everything else moves freely around them.'],
                 ['q' => 'Do buyers have to pick their own seats?', 'a' => 'No. They choose how many they want and can take the best available together, which keeps a party seated as a block. Choosing from the map is the other option, not the only one.'],

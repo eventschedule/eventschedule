@@ -132,7 +132,7 @@
 
         $steps = [
             ['Write the hours in', 'Open the Appointments tab, add a type, and set its duration, its start-time interval, and the hours you keep on each day. Buffers, minimum notice and how far ahead guests may book live on the same form.'],
-            ['Say where, and what it costs', 'In person with an address, online with a meeting link, or by phone with a number. Leave the price at zero, or set a price and take it by Stripe, PayPal, Payfast, a payment link, or cash.'],
+            ['Say where, and what it costs', 'In person with an address, online with a meeting link, or by phone with a number. Leave the price at zero, or set a price and take it by Stripe, PayPal, Payfast, Razorpay, a payment link, or cash.'],
             ['Share one link', 'Your booking page sits at /book on your schedule, and every type has its own address under it. A Book a Time button appears on your public page as well.'],
             ['They pick a line', 'A guest books an open time in their own timezone. You are emailed, the time is held, and the booking joins your calendar without joining your public page.'],
         ];
@@ -191,7 +191,7 @@
             ],
             [
                 'k' => 'Paid online',
-                'v' => 'Stripe, PayPal, Payfast or your own payment link. The line is held while they pay and lets go if they never do: an hour for Stripe and PayPal, a day for Payfast and a payment link.',
+                'v' => 'Stripe, PayPal, Payfast, Razorpay or your own payment link. The line is held while they pay and lets go if they never do: an hour for Stripe, PayPal and Razorpay, a day for Payfast and a payment link.',
             ],
             [
                 'k' => 'Cash',
@@ -223,11 +223,11 @@
             ],
             [
                 'q' => 'Can I charge for appointments?',
-                'a' => 'Yes, on the Pro plan. A type can be free or priced; every plan carries a free type, and putting a price on one is the Pro line, the same line that applies to tickets. Paid types take payment by Stripe, PayPal, Payfast, a payment link, or cash, whichever you have connected. Invoice Ninja is not offered for appointments, because it would set up a product and a subscription for every booking. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
+                'a' => 'Yes, on the Pro plan. A type can be free or priced; every plan carries a free type, and putting a price on one is the Pro line, the same line that applies to tickets. Paid types take payment by Stripe, PayPal, Payfast, Razorpay, a payment link, or cash, whichever you have connected. Invoice Ninja is not offered for appointments, because it would set up a product and a subscription for every booking. Free bookings are confirmed at once, a paid type stays hidden from guests until a payment method it can use is connected, and Event Schedule takes no cut of what you charge.',
             ],
             [
                 'q' => 'How do I refund a paid booking?',
-                'a' => 'Refund it on the Sales page rather than cancelling it. A Stripe or PayPal booking goes back through Stripe or PayPal, in full or in part: a partial refund leaves the booking in place, and a full one cancels it, puts the time back on offer and tells the guest it is cancelled. A Payfast, payment-link or cash booking is marked refunded instead, which cancels it the same way but moves no money. Refund only appears while the sale is paid, so if you cancel first, return the money with your provider using the amount and reference in your cancellation email.',
+                'a' => 'Refund it on the Sales page rather than cancelling it. A Stripe, PayPal or Razorpay booking goes back through that provider, in full or in part: a partial refund leaves the booking in place, and a full one cancels it, puts the time back on offer and tells the guest it is cancelled. A Payfast, payment-link or cash booking is marked refunded instead, which cancels it the same way but moves no money. Refund only appears while the sale is paid, so if you cancel first, return the money with your provider using the amount and reference in your cancellation email.',
             ],
             [
                 'q' => 'Can I approve bookings before they are confirmed?',
@@ -1527,7 +1527,7 @@
                         <p class="es-book-muted text-sm">
                             Cancelling a paid booking never moves money. Refunding it on the
                             <x-link href="{{ route('marketing.docs.tickets') }}#managing-sales">Sales page</x-link>
-                            does: a Stripe or PayPal booking goes back through the provider, in full or in
+                            does: a Stripe, PayPal or Razorpay booking goes back through the provider, in full or in
                             part, and only a full refund cancels it. A Payfast, payment-link or cash booking
                             is marked refunded instead, which cancels it without moving any money. Either way, it happens
                             because you said so.

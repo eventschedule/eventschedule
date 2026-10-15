@@ -288,7 +288,7 @@
                     $state = ['on' => true, 'warn' => false, 'text' => $settingsJoin([__('messages.connected'), $user->paymentUrlHost()])];
                 }
             } elseif ($gateway->hasOwnCredentials($user)) {
-                $state = ['on' => true, 'warn' => false, 'text' => __('messages.connected')];
+                $state = ['on' => true, 'warn' => false, 'text' => $settingsJoin(array_merge([__('messages.connected')], $gateway->settingsStatusNotes($user)))];
             } elseif ($gateway->platformCredentials() !== []) {
                 $state = ['on' => true, 'warn' => false, 'text' => __('messages.gateway_provided_by_install')];
             }

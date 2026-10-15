@@ -603,7 +603,7 @@
             ],
             [
                 'q' => 'Can I use Stripe and Invoice Ninja at the same time?',
-                'a' => 'Yes. Each connects once under Settings, Payment Methods, and then each event chooses how it takes money: Stripe, PayPal, Payfast for events priced in rand, Invoice Ninja, a plain payment URL or cash. A corporate booking that needs an invoice and a public show that wants a card payment can run side by side.',
+                'a' => 'Yes. Each connects once under Settings, Payment Methods, and then each event chooses how it takes money: Stripe, PayPal, Payfast for events priced in rand, Razorpay for events priced in Indian rupees, Invoice Ninja, a plain payment URL or cash. A corporate booking that needs an invoice and a public show that wants a card payment can run side by side.',
             ],
             [
                 'q' => 'Can I refund an Invoice Ninja sale from Event Schedule?',

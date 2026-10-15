@@ -205,6 +205,10 @@ class PaymentGatewayRoutesTest extends TestCase
             // registered by the driver, not typed by an owner, so it is not a credentialField().
             ->assertSee('payment-tab-paypal', escape: false)
             ->assertSee('paypal_client_id', escape: false)
-            ->assertDontSee('paypal_webhook_id', escape: false);
+            ->assertDontSee('paypal_webhook_id', escape: false)
+            // Razorpay from credentialFields() too, with its webhook address beside the secret.
+            ->assertSee('payment-tab-razorpay', escape: false)
+            ->assertSee('razorpay_key_id', escape: false)
+            ->assertSee('/payments/razorpay/webhook', escape: false);
     }
 }

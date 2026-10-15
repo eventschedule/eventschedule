@@ -1,9 +1,9 @@
 <x-docs-page
     key="selfhost/stripe"
-    title="Stripe, PayPal and Payfast for Selfhost - Event Schedule"
-    heading="Stripe, PayPal and Payfast"
-    description="Set up Stripe, PayPal or Payfast to sell tickets on a selfhosted Event Schedule install, refund from the Sales page, and run Connect and Cashier as a SaaS."
-    lede="A selfhosted install takes card payments through Stripe with one set of platform keys, and can switch PayPal or Payfast on for everyone the same way. A SaaS operator needs two Stripe integrations: Connect for ticket sales and Cashier for plan subscriptions."
+    title="Stripe, PayPal, Payfast, Razorpay on Selfhost - Event Schedule"
+    heading="Stripe, PayPal, Payfast and Razorpay"
+    description="Set up Stripe, PayPal, Payfast or Razorpay to sell tickets on a selfhosted Event Schedule install, refund from the Sales page, and run Connect and Cashier for SaaS."
+    lede="A selfhosted install takes card payments through Stripe with one set of platform keys, and can switch PayPal, Payfast or Razorpay on for everyone the same way. A SaaS operator needs two Stripe integrations: Connect for ticket sales and Cashier for plan subscriptions."
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
@@ -14,6 +14,7 @@
         <x-doc-nav-link href="#invoice-ninja">Invoice Ninja</x-doc-nav-link>
         <x-doc-nav-link href="#paypal">PayPal</x-doc-nav-link>
         <x-doc-nav-link href="#payfast">Payfast</x-doc-nav-link>
+        <x-doc-nav-link href="#razorpay">Razorpay</x-doc-nav-link>
         <x-doc-nav-link href="#refunds">Refunds</x-doc-nav-link>
         <x-doc-nav-link href="#testing">Testing</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
@@ -30,7 +31,7 @@
             Overview
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Ticket payments in Event Schedule run through <strong class="text-gray-900 dark:text-white">Stripe Checkout</strong>: the buyer pays on Stripe's own hosted page, Stripe calls a webhook back, and the sale is marked paid. What you have to configure depends on who collects the money - one account for the whole install, or a separate account per event owner.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases, paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> and <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plans</a>, so you only set this up once. <a href="#paypal" class="doc-link">PayPal</a> and <a href="#payfast" class="doc-link">Payfast</a>, further down, take ticket orders and paid appointments.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">The same keys and the same webhook endpoint also cover <a href="{{ route('marketing.docs.gift_cards') }}" class="doc-link">gift card</a> purchases, paid <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment bookings</a> and <a href="{{ route('marketing.docs.tickets') }}#installments" class="doc-link">installment plans</a>, so you only set this up once. <a href="#paypal" class="doc-link">PayPal</a>, <a href="#payfast" class="doc-link">Payfast</a> and <a href="#razorpay" class="doc-link">Razorpay</a>, further down, take ticket orders and paid appointments.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6"><strong class="text-gray-900 dark:text-white">There are no platform fees.</strong> Event Schedule never takes a cut of a ticket sale. The Checkout Session is created without an application fee or a transfer, so the full amount lands in the account that took the payment: the one named in your <code class="doc-inline-code">.env</code> on a selfhosted install, or the seller's own connected account under Connect. Stripe's own processing fee is the only deduction.</p>
 
@@ -40,8 +41,8 @@
         </div>
 
         <h3 class="doc-subheading">Where the payment method is chosen</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method on the event form, in the <strong class="text-gray-900 dark:text-white">Payment</strong> row of its <strong class="text-gray-900 dark:text-white">Tickets</strong> tab: Cash, Stripe, Invoice Ninja, Payment Link, Payfast or PayPal. Only the methods that are connected, and that can settle the event's currency, are listed. The six options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Each person's own connections live in <strong class="text-gray-900 dark:text-white">Settings</strong>, on the <strong class="text-gray-900 dark:text-white">Payment Methods</strong> tab. It lists one row per method (Stripe, Invoice Ninja, Payment Link, Payfast, PayPal), each saying whether it is connected, and a row opens in place to show its details.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Server configuration only makes Stripe <em>available</em>. Each event still picks one payment method on the event form, in the <strong class="text-gray-900 dark:text-white">Payment</strong> row of its <strong class="text-gray-900 dark:text-white">Tickets</strong> tab: Cash, Stripe, Invoice Ninja, Payment Link, Payfast, PayPal or Razorpay. Only the methods that are connected, and that can settle the event's currency, are listed. The seven options are described on the <a href="{{ route('marketing.docs.tickets') }}#payment" class="doc-link">Tickets</a> page.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Each person's own connections live in <strong class="text-gray-900 dark:text-white">Settings</strong>, on the <strong class="text-gray-900 dark:text-white">Payment Methods</strong> tab. It lists one row per method (Stripe, Invoice Ninja, Payment Link, Payfast, PayPal, Razorpay), each saying whether it is connected, and a row opens in place to show its details.</p>
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Plan requirement</div>
@@ -637,6 +638,70 @@
         <p class="text-gray-600 dark:text-gray-300">You may see <code class="doc-inline-code">Payfast ITN from an unrecognised source address - continuing, see confirmsPayment</code> in your logs on every successful payment. That is expected behind Cloudflare, a reverse proxy or Docker: the app sees your proxy's address rather than Payfast's, and the address check is advisory for exactly that reason. The notification is authenticated by its signature and by asking Payfast to confirm it, so no <code class="doc-inline-code">TRUSTED_PROXIES</code> configuration is needed for payments to work.</p>
     </section>
 
+    <!-- Razorpay -->
+    <section id="razorpay" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+            </svg>
+            Razorpay (Alternative Payment Method)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6"><a href="https://razorpay.com" target="_blank" rel="noopener noreferrer" class="doc-link">Razorpay</a> is the gateway for events in India: buyers pay by UPI, card, netbanking or wallet on a Razorpay payment page. It settles in Indian rupees (INR) only, from ₹1.00, and takes ticket orders, including a checkout that spans several events, and paid appointments, but not gift cards or installment plans. Setup is documented in the <a href="{{ route('marketing.docs.tickets') }}#razorpay" class="doc-link">user guide</a>; the notes below are the parts specific to running your own install.</p>
+
+        <h3 class="doc-subheading">Two ways to set it up</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same two as PayPal and Payfast, and you can mix them on one install:</p>
+
+        <div class="doc-fields doc-fields--2 mb-6">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">One account for the whole install</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Put your API keys in <code class="doc-inline-code">.env</code>. Every schedule can then sell in rupees straight away with no setup of their own, and all the money reaches your account.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Each user brings their own</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm">Leave <code class="doc-inline-code">.env</code> alone and each user connects an account from the <strong>Razorpay</strong> row of the <strong>Payment Methods</strong> tab in <strong>Settings</strong>, so different event owners on the same install are paid into different Razorpay accounts.</p>
+            </div>
+        </div>
+
+        <h3 class="doc-subheading">Install-wide configuration</h3>
+        <div class="doc-code-block">
+            <div class="doc-code-header">
+                <span>.env</span>
+                <button class="doc-copy-btn">Copy</button>
+            </div>
+            <pre><code><span class="code-variable">RAZORPAY_KEY_ID</span>=<span class="code-string">rzp_live_your-key-id</span>
+<span class="code-variable">RAZORPAY_KEY_SECRET</span>=<span class="code-string">your-key-secret</span>
+<span class="code-variable">RAZORPAY_WEBHOOK_SECRET</span>=</code></pre>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Both keys come from the <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer" class="doc-link">Razorpay Dashboard</a>, under Account &amp; Settings &gt; API Keys. Live keys exist only once Razorpay has activated the account.</p>
+
+        <ul class="doc-list mb-6">
+            <li><code class="doc-inline-code">RAZORPAY_KEY_ID</code> and <code class="doc-inline-code">RAZORPAY_KEY_SECRET</code> - required together. Set one without the other and Razorpay is not offered. Razorpay has no separate sandbox switch: a Key ID starting <code class="doc-inline-code">rzp_test_</code> is Test Mode, and the payment method is then labelled <strong class="text-gray-900 dark:text-white">Razorpay (Test mode)</strong> wherever it is picked. Test tickets look completely normal, so use live keys on a site taking real money.</li>
+            <li><code class="doc-inline-code">RAZORPAY_WEBHOOK_SECRET</code> - optional, but recommended. See <a href="#razorpay-webhook" class="doc-link">A webhook for the install-wide account</a>.</li>
+        </ul>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Run <code class="doc-inline-code">php artisan config:clear</code> after editing, and note that these are <strong class="text-gray-900 dark:text-white">a default rather than an override</strong>, exactly as with PayPal and Payfast: a user who connects their own Razorpay account keeps being paid into it. Users who have connected nothing see <strong class="text-gray-900 dark:text-white">Provided by this installation</strong> on their Razorpay row. Ignored entirely in hosted mode, where every owner connects their own.</p>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Like PayPal, this works on localhost</div>
+            <p>When the buyer comes back from Razorpay, the app confirms the payment with a call <em>we</em> make to Razorpay, so a purchase completes end to end on a laptop with no tunnel and no public hostname. Only the webhook needs a reachable site.</p>
+        </div>
+
+        <h3 id="razorpay-webhook" class="doc-subheading">A webhook for the install-wide account</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Razorpay has no way for the app to register a webhook for you, so add it in the dashboard, for the install-wide account here and by each user for their own:</p>
+        <ol class="doc-list doc-list-numbered mb-6">
+            <li>In the Razorpay Dashboard under <strong class="text-gray-900 dark:text-white">Account &amp; Settings &gt; Webhooks</strong>, add a webhook pointing at <code class="doc-inline-code">https://your-site/payments/razorpay/webhook</code></li>
+            <li>Tick <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code></li>
+            <li>Choose a secret, put the same value in <code class="doc-inline-code">RAZORPAY_WEBHOOK_SECRET</code> and run <code class="doc-inline-code">php artisan config:clear</code></li>
+        </ol>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Test Mode and Live Mode each have their own webhooks, so add it in the mode your keys are from.</p>
+
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Without it, two things are lost</div>
+            <p>A buyer who pays but never comes back from Razorpay (common when paying in a UPI app on a phone) is not issued a ticket, because the app never hears of the payment. And a checkout nobody finishes keeps its seats, since Razorpay's payment page has no cancel button to tell us; with the webhook, the seats go back when the page expires, about half an hour later. Without it, turn on <strong class="text-gray-900 dark:text-white">Expire unpaid tickets</strong> on your events, and set the webhook up on a site taking real money.</p>
+        </div>
+    </section>
+
     <!-- Refunds -->
     <section id="refunds" class="doc-section">
         <h2 class="doc-heading">
@@ -645,19 +710,20 @@
             </svg>
             Refunds
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Refund a sale from the <strong class="text-gray-900 dark:text-white">Sales</strong> page rather than from your provider's dashboard. Open the actions menu at the end of the sale's row (the three dots). On a Stripe or PayPal sale, <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> opens a dialog showing what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>. Lower the <strong class="text-gray-900 dark:text-white">Refund Amount</strong> for a partial refund, then press <strong class="text-gray-900 dark:text-white">Refund</strong>. The money goes back through the provider first, and only then does the sale change. The screen itself is covered in the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">user guide</a>; these are the parts that depend on how you set up the install.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Refund a sale from the <strong class="text-gray-900 dark:text-white">Sales</strong> page rather than from your provider's dashboard. Open the actions menu at the end of the sale's row (the three dots). On a Stripe, PayPal or Razorpay sale, <strong class="text-gray-900 dark:text-white">Refund Ticket</strong> opens a dialog showing what is <strong class="text-gray-900 dark:text-white">Available to refund</strong>. Lower the <strong class="text-gray-900 dark:text-white">Refund Amount</strong> for a partial refund, then press <strong class="text-gray-900 dark:text-white">Refund</strong>. The money goes back through the provider first, and only then does the sale change. The screen itself is covered in the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">user guide</a>; these are the parts that depend on how you set up the install.</p>
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Stripe</strong> refunds are issued with the keys in your <code class="doc-inline-code">.env</code> at the moment you refund, not the keys the sale was taken with. Keep <code class="doc-inline-code">STRIPE_PLATFORM_SECRET</code> on the account that took the money: after a move to a different Stripe account, older sales can no longer be refunded from the app.</li>
             <li><strong class="text-gray-900 dark:text-white">PayPal</strong> refunds try the schedule owner's own PayPal account first and then the install-wide one, so a sale taken on the install-wide account before the owner connected their own can still be refunded.</li>
+            <li><strong class="text-gray-900 dark:text-white">Razorpay</strong> refunds work the same way: the owner's own keys first, then the install-wide ones.</li>
             <li><strong class="text-gray-900 dark:text-white">A partial refund</strong> leaves the sale paid and its tickets valid, and the Sales page shows <strong class="text-gray-900 dark:text-white">Refunded so far</strong>. Once the whole charge is back, the sale is marked refunded, its tickets stop scanning, and its seats and stock are released.</li>
             <li><strong class="text-gray-900 dark:text-white">An installment plan</strong> is refunded one payment at a time, and only in full.</li>
             <li><strong class="text-gray-900 dark:text-white">Every other method</strong> (Payfast, Invoice Ninja, a payment link, cash, or a sale marked paid by hand) shows <strong class="text-gray-900 dark:text-white">Mark as Refunded</strong> instead. That records the refund and moves no money, so return it through the provider yourself.</li>
         </ul>
 
         <div class="doc-callout doc-callout-warning mb-6">
-            <div class="doc-callout-title">Refunds made in the Stripe or PayPal dashboard are not reported back</div>
-            <p>The app only listens for completed payments: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal. A refund issued in either dashboard therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
+            <div class="doc-callout-title">Refunds made in the Stripe, PayPal or Razorpay dashboard are not reported back</div>
+            <p>The app only listens for completed payments: <code class="doc-inline-code">checkout.session.completed</code> and <code class="doc-inline-code">payment_intent.succeeded</code> from Stripe, <code class="doc-inline-code">PAYMENT.CAPTURE.COMPLETED</code> and <code class="doc-inline-code">PAYMENT.CAPTURE.DENIED</code> from PayPal, <code class="doc-inline-code">payment_link.paid</code> and <code class="doc-inline-code">payment_link.expired</code> from Razorpay. A refund issued in any of those dashboards therefore leaves the sale paid and its tickets scanning at the door. Refund from the Sales page instead.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">A refund needs no webhook of its own, because the app calls the provider directly. The app sends no refund email, so tell the buyer yourself. The one message a refund can set off is for a paid appointment booking: refunding it in full cancels the booking, and the guest gets the usual cancellation email.</p>

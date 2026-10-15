@@ -490,7 +490,7 @@
                 // A partial refund leaves Sale.status paid, so the pass keeps working. A full refund
                 // releases its bookings (PassBookingService) and drops it off the paid-only
                 // Subscriptions tab (TicketController::getSubscriptionsData).
-                ['q' => 'Can I refund a pass?', 'a' => 'Yes, from the Sales page. A pass bought through Stripe or PayPal is refunded through the provider, in full or in part, and a partial refund leaves the pass working. A full refund ends it: the scanner reports it as refunded, any dates it had booked are released, and it drops off the Subscriptions tab with its visit log, so export first if you need the history. For any other payment method, Mark as Refunded records it and you return the money yourself.'],
+                ['q' => 'Can I refund a pass?', 'a' => 'Yes, from the Sales page. A pass bought through Stripe, PayPal or Razorpay is refunded through the provider, in full or in part, and a partial refund leaves the pass working. A full refund ends it: the scanner reports it as refunded, any dates it had booked are released, and it drops off the Subscriptions tab with its visit log, so export first if you need the history. For any other payment method, Mark as Refunded records it and you return the money yourself.'],
                 ['q' => 'Which plan do I need?', 'a' => 'Passes are on the Pro plan, and on every selfhosted install at no cost. A pass always has a price on it, and a ticket that costs money is Pro in its own right, so the two go together. Free registration and scanning a QR code at the door are on every plan, and there is no platform fee on any of them.'],
             ];
         @endphp

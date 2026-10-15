@@ -1357,7 +1357,7 @@
                         @endforeach
 
                         <p class="dg-bill-foot">
-                            Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), a payment link or cash at the door. Event Schedule takes no cut of it.
+                            Payment goes through your own Stripe or PayPal account, Invoice Ninja, Payfast (in rand), Razorpay (in Indian rupees), a payment link or cash at the door. Event Schedule takes no cut of it.
                         </p>
                     </div>
 

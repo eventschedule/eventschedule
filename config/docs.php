@@ -501,7 +501,7 @@ return [
             'feature' => 'marketing.stripe',
             'title' => 'Stripe Integration',
             'nav_title' => 'Stripe',
-            'blurb' => 'Stripe, PayPal, Payfast and Invoice Ninja on a selfhost or SaaS install, and how refunds work.',
+            'blurb' => 'Stripe, PayPal, Payfast, Razorpay and Invoice Ninja on a selfhost or SaaS install, and how refunds work.',
             'icon' => 'credit-card',
             'published' => '2024-01-01',
             'modified' => '2026-10-07',

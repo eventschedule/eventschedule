@@ -16,7 +16,7 @@ namespace Tests\Support;
 final class PlanSections
 {
     /** A way to take money, or a refund of it: Pro and above (docs/FEATURES.md). */
-    public const PAYMENT = '/\b(?:Stripe|PayPal|Payfast|Invoice Ninja|payment (?:methods?|gateways?|links?)|gateways?|cash|refunds?|refunded)\b/i';
+    public const PAYMENT = '/\b(?:Stripe|PayPal|Payfast|Razorpay|Invoice Ninja|payment (?:methods?|gateways?|links?)|gateways?|cash|refunds?|refunded)\b/i';
 
     /**
      * Every part of $markdown that describes the Free plan: the body under a heading naming it

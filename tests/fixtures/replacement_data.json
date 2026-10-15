@@ -154,7 +154,7 @@
             },
             {
                 "question": "Is Event Schedule really free?",
-                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Free registration is unlimited and every ticket scans at the door at no cost; selling paid tickets is on Pro at $5/month, which also adds the live check-in dashboard and every payment method: buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash. No credit card required to start."
+                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Free registration is unlimited and every ticket scans at the door at no cost; selling paid tickets is on Pro at $5/month, which also adds the live check-in dashboard and every payment method: buyers pay through Stripe or PayPal, or by Payfast for rand, Razorpay for Indian rupees, Invoice Ninja, a payment link or cash. No credit card required to start."
             },
             {
                 "question": "Can Event Schedule handle custom registration fields like Google Forms?",
@@ -930,7 +930,7 @@
             },
             {
                 "title": "Refunds, Recorded",
-                "description": "Refund a Stripe or PayPal sale in full or in part from the Sales page, and the money goes back through the provider. The sale shows how much has been refunded so far. Free on every plan.",
+                "description": "Refund a Stripe, PayPal or Razorpay sale in full or in part from the Sales page, and the money goes back through the provider. The sale shows how much has been refunded so far. Free on every plan.",
                 "icon": "dollar",
                 "gradient": "from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30",
                 "border": "border-cyan-200 dark:border-cyan-500/20",
@@ -977,7 +977,7 @@
             },
             {
                 "question": "Is there a free plan for Event Schedule?",
-                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Free registration is unlimited on every plan; selling paid tickets is on Pro at $5/month, which also adds the live check-in dashboard. Buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash, and every sale lands on the same Sales page."
+                "answer": "Yes. The free plan includes unlimited events, Google Calendar sync, newsletters, and fan engagement features. Free registration is unlimited on every plan; selling paid tickets is on Pro at $5/month, which also adds the live check-in dashboard. Buyers pay through Stripe or PayPal, or by Payfast for rand, Razorpay for Indian rupees, Invoice Ninja, a payment link or cash, and every sale lands on the same Sales page."
             },
             {
                 "question": "Can I still export data to a spreadsheet?",
@@ -993,7 +993,7 @@
             },
             {
                 "question": "Can I record refunds, including partial ones?",
-                "answer": "Yes, from the Sales page, on Pro, alongside the paid ticketing that took the money. A Stripe or PayPal sale can be refunded in full or in part, and the money goes back through the provider before the status changes. A partial refund keeps the sale paid and its tickets valid, and the sale shows how much has been refunded so far; a full refund returns the tickets to inventory. A sale paid in cash, by a payment link, Invoice Ninja or Payfast is marked as refunded instead, which records it without moving money."
+                "answer": "Yes, from the Sales page, on Pro, alongside the paid ticketing that took the money. A Stripe, PayPal or Razorpay sale can be refunded in full or in part, and the money goes back through the provider before the status changes. A partial refund keeps the sale paid and its tickets valid, and the sale shows how much has been refunded so far; a full refund returns the tickets to inventory. A sale paid in cash, by a payment link, Invoice Ninja or Payfast is marked as refunded instead, which records it without moving money."
             },
             {
                 "question": "Can I import the guest list I already keep in a spreadsheet?",
@@ -1126,7 +1126,7 @@
             },
             {
                 "title": "Appointment Booking",
-                "description": "Publish bookable hours and let people pick a slot in their own timezone, free with one booking type on any plan. On Pro a slot can take payment by Stripe, PayPal, Payfast, a payment link or cash, and nothing can be booked over an event already on your schedule, synced calendar entries included.",
+                "description": "Publish bookable hours and let people pick a slot in their own timezone, free with one booking type on any plan. On Pro a slot can take payment by Stripe, PayPal, Payfast, Razorpay, a payment link or cash, and nothing can be booked over an event already on your schedule, synced calendar entries included.",
                 "icon": "calendar",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -1177,7 +1177,7 @@
             },
             {
                 "title": "Set your bookable hours",
-                "description": "Add one appointment type free: weekly hours and slot length. Pro adds more types, payment by Stripe, PayPal, Payfast, a payment link or cash, and the scheduling rules - buffers, minimum notice and an approval step."
+                "description": "Add one appointment type free: weekly hours and slot length. Pro adds more types, payment by Stripe, PayPal, Payfast, Razorpay, a payment link or cash, and the scheduling rules - buffers, minimum notice and an approval step."
             },
             {
                 "title": "Sell tickets and grow",
@@ -1207,7 +1207,7 @@
             },
             {
                 "question": "Can people still book a slot with me one to one?",
-                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, and people pick a time in their own timezone from a public booking page. Nothing can be booked over something already on your schedule, synced calendar entries included. Pro adds more appointment types, the scheduling rules (buffers either side, a minimum notice period, how far ahead the calendar opens, date overrides and an approval step), and the ability to charge for a slot through Stripe, PayPal, Payfast, a payment link or cash."
+                "answer": "Yes, and that part is free with one appointment type. Publish the hours you are available, set the slot length and the interval between start times, and people pick a time in their own timezone from a public booking page. Nothing can be booked over something already on your schedule, synced calendar entries included. Pro adds more appointment types, the scheduling rules (buffers either side, a minimum notice period, how far ahead the calendar opens, date overrides and an approval step), and the ability to charge for a slot through Stripe, PayPal, Payfast, Razorpay, a payment link or cash."
             },
             {
                 "question": "What happens if somebody needs to move their booking?",
@@ -1215,7 +1215,7 @@
             },
             {
                 "question": "Can I refund a booking?",
-                "answer": "Yes, from the Sales page, where bookings sit with your other sales. A booking paid through Stripe or PayPal can be refunded in full or in part, and the money goes back the way it came; one paid through Payfast, a payment link or in cash is marked as refunded instead, which records it without moving money."
+                "answer": "Yes, from the Sales page, where bookings sit with your other sales. A booking paid through Stripe, PayPal or Razorpay can be refunded in full or in part, and the money goes back the way it came; one paid through Payfast, a payment link or in cash is marked as refunded instead, which records it without moving money."
             }
         ],
         "cross_links": [
@@ -1769,7 +1769,7 @@
             },
             {
                 "title": "Zero Platform Fees",
-                "description": "Every ticket sale carries zero platform fees, whether buyers pay through Stripe or PayPal; you pay only the processor fee. Payfast for rand, Invoice Ninja, a payment link and cash work too.",
+                "description": "Every ticket sale carries zero platform fees, whether buyers pay through Stripe or PayPal; you pay only the processor fee. Payfast for rand, Razorpay for Indian rupees, Invoice Ninja, a payment link and cash work too.",
                 "icon": "dollar",
                 "gradient": "from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30",
                 "border": "border-amber-200 dark:border-amber-500/20",
@@ -2046,7 +2046,7 @@
             },
             {
                 "question": "How do payments and refunds work?",
-                "answer": "Charging for a ticket is the Pro plan, and it opens every payment method: buyers pay through Stripe or PayPal, or by Payfast for rand, Invoice Ninja, a payment link or cash, and can buy tickets to several of your events in one checkout. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the provider. A CSV export of your sales is on Pro."
+                "answer": "Charging for a ticket is the Pro plan, and it opens every payment method: buyers pay through Stripe or PayPal, or by Payfast for rand, Razorpay for Indian rupees, Invoice Ninja, a payment link or cash, and can buy tickets to several of your events in one checkout. A Stripe, PayPal or Razorpay sale can be refunded from the Sales page in full or in part, with the money going back through the provider. A CSV export of your sales is on Pro."
             }
         ],
         "cross_links": [

@@ -2070,7 +2070,7 @@
                                 <span>A waitlist that tells people when a full screening frees up, free while the door is free registration and Pro once you are selling tickets. Promo codes and gift cards are Pro if you want them.</span>
                             </li>
                             <li>
-                                <span>Refunds come off the Sales page. A Stripe or PayPal payment goes back through the provider, in full or in part, and a full refund frees the place for somebody else.</span>
+                                <span>Refunds come off the Sales page. A Stripe, PayPal or Razorpay payment goes back through the provider, in full or in part, and a full refund frees the place for somebody else.</span>
                             </li>
                         </ul>
                         <p class="wp-fine" style="margin-top: 1.4rem;">

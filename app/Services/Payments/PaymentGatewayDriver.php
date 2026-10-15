@@ -570,6 +570,18 @@ abstract class PaymentGatewayDriver
         return null;
     }
 
+    /**
+     * What the Payment Methods row says after "Connected" for an owner's own credentials, beyond
+     * that they are there: test keys, a missing optional part that costs something. Each entry is
+     * already translated; the row joins them. Empty by default.
+     *
+     * @return list<string>
+     */
+    public function settingsStatusNotes(?User $owner): array
+    {
+        return [];
+    }
+
     // ---------------------------------------------------------------- checkout
 
     /**
@@ -856,7 +868,7 @@ abstract class PaymentGatewayDriver
         return $isEmbed ? $url.'?embed=true' : $url;
     }
 
-    private function appointmentManageUrl(Sale $sale): string
+    protected function appointmentManageUrl(Sale $sale): string
     {
         return route('appointments.manage', [
             'event_id' => UrlUtils::encodeId($sale->event_id),

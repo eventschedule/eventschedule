@@ -83,7 +83,7 @@ class RealtimeTracker
     /** Hosts a visitor passes through mid-visit (sign-in, payment); they never start a new source. */
     private const HANDOFF_HOSTS = [
         'accounts.google.com', 'appleid.apple.com', 'checkout.stripe.com', 'connect.stripe.com',
-        'paypal.com', 'payfast.co.za', 'invoicing.co', 'invoiceninja.com',
+        'paypal.com', 'payfast.co.za', 'razorpay.com', 'rzp.io', 'invoicing.co', 'invoiceninja.com',
     ];
 
     public static function enabled(): bool

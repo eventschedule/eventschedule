@@ -851,7 +851,7 @@
                 </div>
 
                 <p class="es-swap-band-muted mx-auto mt-8 max-w-3xl text-center text-sm" data-reveal>
-                    Two footnotes worth reading before you switch. Your follower list is never capped, but the monthly newsletter allowance counts recipients rather than sends, so one letter to 40 followers spends 40 of it; the automatic digest of new events that confirmed subscribers get does not count against it. And Free is a single team member; extra members are Enterprise. What does not change with the plan is the fee on ticket sales, which is zero on all three. Charging for a ticket is Pro, and it brings every way to get paid with it: Stripe, PayPal, Payfast for rand, Invoice Ninja, a payment link or cash. Past the processor's own fee, the money is yours, and a Stripe or PayPal sale can be refunded from the Sales page in full or in part.
+                    Two footnotes worth reading before you switch. Your follower list is never capped, but the monthly newsletter allowance counts recipients rather than sends, so one letter to 40 followers spends 40 of it; the automatic digest of new events that confirmed subscribers get does not count against it. And Free is a single team member; extra members are Enterprise. What does not change with the plan is the fee on ticket sales, which is zero on all three. Charging for a ticket is Pro, and it brings every way to get paid with it: Stripe, PayPal, Payfast for rand, Razorpay for Indian rupees, Invoice Ninja, a payment link or cash. Past the processor's own fee, the money is yours, and a Stripe, PayPal or Razorpay sale can be refunded from the Sales page in full or in part.
                 </p>
             </div>
         </div>

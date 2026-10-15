@@ -30,7 +30,7 @@ return [
     'what' => ['tier' => 'about', 'says' => 'Event Schedule is an open-source event calendar and ticketing platform. An organizer makes a "schedule": a public page of their events at its own address (name.eventschedule.com). Events and schedules are unlimited on every plan.', 'url' => '/features'],
     'types' => ['tier' => 'about', 'says' => 'There are three kinds of schedule: Talent (a performer or teacher), Venue (a place) and Curator (a listing of other people\'s events).'],
     'plans' => ['tier' => 'about', 'says' => 'Plans: Free (:free). Pro (:pro_monthly a month or :pro_yearly a year). Enterprise (:enterprise_monthly a month or :enterprise_yearly a year). Selfhosted installs have every feature.', 'url' => '/pricing'],
-    'fees' => ['tier' => 'about', 'says' => 'Event Schedule takes no platform fee or per-ticket fee on any plan. The payment processor (Stripe, PayPal) still charges its own card fee.', 'url' => '/ticket-fee-calculator'],
+    'fees' => ['tier' => 'about', 'says' => 'Event Schedule takes no platform fee or per-ticket fee on any plan. The payment processor (Stripe, PayPal, Razorpay) still charges its own card fee.', 'url' => '/ticket-fee-calculator'],
 
     // On every plan (Free included)
     'recurring' => ['tier' => 'free', 'says' => 'Recurring events: daily, weekly on chosen days, every N weeks, monthly by date or by weekday (the 2nd Tuesday), yearly, with single dates added or skipped.', 'url' => '/features/recurring-events', 'guide' => 'creating-events', 'match' => ['recurring', 'repeat', 'every']],
@@ -56,8 +56,8 @@ return [
     'visibility' => ['tier' => 'free', 'says' => 'An event is Public or Draft on every plan.'],
 
     // On the Pro plan and above (not on Free)
-    'paid-tickets' => ['tier' => 'pro', 'says' => 'Selling tickets that have a price: priced ticket types, paid through Stripe, PayPal, Payfast, Invoice Ninja, a payment link or cash at the door. A Free schedule can try selling for 7 days.', 'url' => '/features/ticketing', 'guide' => 'tickets', 'match' => ['ticket type', 'price', 'payment', 'stripe', 'sell tickets']],
-    'refunds' => ['tier' => 'pro', 'says' => 'Full and partial refunds through Stripe and PayPal.', 'guide' => 'tickets', 'match' => ['refund']],
+    'paid-tickets' => ['tier' => 'pro', 'says' => 'Selling tickets that have a price: priced ticket types, paid through Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash at the door. A Free schedule can try selling for 7 days.', 'url' => '/features/ticketing', 'guide' => 'tickets', 'match' => ['ticket type', 'price', 'payment', 'stripe', 'sell tickets']],
+    'refunds' => ['tier' => 'pro', 'says' => 'Full and partial refunds through Stripe, PayPal and Razorpay.', 'guide' => 'tickets', 'match' => ['refund']],
     'promo' => ['tier' => 'pro', 'says' => 'Promo codes: a percentage or a fixed amount off, with a usage limit and an expiry date.', 'url' => '/features/promo-codes', 'guide' => 'tickets', 'match' => ['promo']],
     'addons' => ['tier' => 'pro', 'says' => 'Add-ons sold beside a ticket, with their own stock.', 'guide' => 'tickets', 'match' => ['add-on']],
     'passes' => ['tier' => 'pro', 'says' => 'Passes: one purchase used across several events (class pack, visit pass, membership, season pass, festival pass), with use tracked.', 'url' => '/features/passes', 'guide' => 'subscriptions', 'match' => ['pass', 'subscription']],

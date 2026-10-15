@@ -821,6 +821,7 @@
             ['Stripe', 'Payment processing: paid plans and Boost, and ticket sales on schedules whose owner has connected Stripe, where Stripe receives the buyer\'s name and email address. Card details are entered with Stripe and never reach us.'],
             ['PayPal', 'Payment processing, on schedules whose owner has connected a PayPal account'],
             ['Payfast', 'Payment processing, on schedules whose owner has connected a Payfast account'],
+            ['Razorpay', 'Payment processing, on schedules whose owner has connected a Razorpay account'],
             ['Invoice Ninja', 'Invoicing, on schedules whose owner has connected Invoice Ninja: the buyer\'s name, email address and what they bought.'],
             google_analytics_enabled() ? ['Google Analytics', 'Site statistics, and only if you allow analytics cookies (clause 12).'] : null,
             config('services.google.backend') || config('services.google.maps') ? ['Google Maps', 'Placing venues on a map from their address. The interactive map on an event page loads only if you allow marketing cookies or ask to see it.'] : null,

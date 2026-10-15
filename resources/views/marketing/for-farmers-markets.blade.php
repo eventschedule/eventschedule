@@ -1071,7 +1071,7 @@
             ],
             [
                 'q' => 'Can I refund a pitch fee if a trader pulls out or the day is rained off?',
-                'a' => 'Yes, on every plan, from the Sales page, in full or in part. A fee paid through Stripe or PayPal goes back to the trader through that provider, and only then is the sale marked refunded. A fee paid by cash, a payment link or any other way shows Mark as Refunded instead, which records the refund without moving money. A partial refund keeps the pitch booked, and a full one frees it for somebody else. Event Schedule does not email the trader about a refund, so a word from you is still worth sending.',
+                'a' => 'Yes, on every plan, from the Sales page, in full or in part. A fee paid through Stripe, PayPal or Razorpay goes back to the trader through that provider, and only then is the sale marked refunded. A fee paid by cash, a payment link or any other way shows Mark as Refunded instead, which records the refund without moving money. A partial refund keeps the pitch booked, and a full one frees it for somebody else. Event Schedule does not email the trader about a refund, so a word from you is still worth sending.',
             ],
             [
                 'q' => 'How do shoppers hear about the market?',

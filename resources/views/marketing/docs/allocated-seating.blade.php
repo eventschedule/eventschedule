@@ -278,7 +278,7 @@
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Releasing a seat does not move any money</div>
-            <p>Release frees the seat and takes it off the booking, and anyone on the waitlist is offered it. The order itself stays paid. To give the money back on a Stripe or PayPal order, open it on the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>, choose <strong>Refund Ticket</strong> and enter the released seats' share as a partial refund. On any other payment method, return the money in your provider's own dashboard and leave the sale alone: <strong>Mark as Refunded</strong> marks the whole order refunded and puts every one of its seats back on sale.</p>
+            <p>Release frees the seat and takes it off the booking, and anyone on the waitlist is offered it. The order itself stays paid. To give the money back on a Stripe, PayPal or Razorpay order, open it on the <a href="{{ route('marketing.docs.tickets') }}#refunds" class="doc-link">Sales page</a>, choose <strong>Refund Ticket</strong> and enter the released seats' share as a partial refund. On any other payment method, return the money in your provider's own dashboard and leave the sale alone: <strong>Mark as Refunded</strong> marks the whole order refunded and puts every one of its seats back on sale.</p>
             <p class="mt-2">If the whole party is leaving, you do not need to release anything first. Refunding the whole order from the Sales page puts all of its seats back on sale by itself.</p>
         </div>
     </section>

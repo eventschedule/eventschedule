@@ -1347,7 +1347,7 @@
             ],
             [
                 'q' => 'Can I sell tickets to a ticketed night?',
-                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what a ticket with a price on it needs. Take the money through your own Stripe or PayPal account, or a payment link or cash at the bar, and sell straight from your calendar. Scanning the QR code at the door is not gated at all, on any plan. Pro also brings the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond the processor\'s own fee the money is yours. If a night is called off, refund it from the Sales page: a Stripe or PayPal sale goes back through the provider, in full or in part. Free registration with a capacity limit is there for the nights you do not charge for.',
+                'a' => 'Yes, on Pro at '.plan_price($proMonthly).' a month, which is what a ticket with a price on it needs. Take the money through your own Stripe or PayPal account, or a payment link or cash at the bar, and sell straight from your calendar. Scanning the QR code at the door is not gated at all, on any plan. Pro also brings the live check-in dashboard for a busy door, promo codes and add-ons. Event Schedule charges zero platform fees either way, so beyond the processor\'s own fee the money is yours. If a night is called off, refund it from the Sales page: a Stripe, PayPal or Razorpay sale goes back through the provider, in full or in part. Free registration with a capacity limit is there for the nights you do not charge for.',
             ],
             [
                 'q' => 'Can regulars put our whole week in their own calendar?',

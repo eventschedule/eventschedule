@@ -14,7 +14,7 @@
             ],
             [
                 'q' => 'Can buyers pay with PayPal, and can I refund them from Event Schedule?',
-                'a' => 'Yes to both, on Pro. You connect your own Stripe or PayPal account and choose one for each event, and the money goes to that account. A Stripe or PayPal sale can be refunded from the Sales page in full or in part, with the money going back through the same provider, and a partial refund leaves the tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving any money.',
+                'a' => 'Yes to both, on Pro. You connect your own Stripe or PayPal account and choose one for each event, and the money goes to that account. A Stripe, PayPal or Razorpay sale can be refunded from the Sales page in full or in part, with the money going back through the same provider, and a partial refund leaves the tickets valid. A sale taken another way, such as cash or a payment link, is marked as refunded instead, which records it without moving any money.',
             ],
             [
                 'q' => 'Does Event Schedule have reserved seating?',
