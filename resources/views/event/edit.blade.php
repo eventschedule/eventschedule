@@ -258,11 +258,11 @@
   $presetLiveSales = (int) $presetState['live_sales'];
   if ($presetLocked) {
       $presetFrozenText = $presetLiveSales > 0
-          ? trans_choice('messages.ticket_preset_frozen_team', $presetLiveSales, ['count' => $presetLiveSales, 'owner' => $presetOwner])
+          ? __('messages.ticket_preset_frozen_team', ['owner' => $presetOwner])
           : __('messages.ticket_preset_frozen_seating_team', ['owner' => $presetOwner]);
   } else {
       $presetFrozenText = $presetLiveSales > 0
-          ? trans_choice('messages.ticket_preset_frozen_owner', $presetLiveSales, ['count' => $presetLiveSales])
+          ? __('messages.ticket_preset_frozen_owner')
           : __('messages.ticket_preset_frozen_seating_owner');
   }
   // A sentence with a link in it, said in two halves around the link.
@@ -288,9 +288,9 @@
       'method_fallback' => __('messages.ticket_preset_method_fallback', ['preset' => ':preset', 'method' => ':method']),
   ];
   $presetSaveOn = (bool) old('save_ticket_preset');
-  $presetSaveName = (string) old('ticket_preset_name', $presetState['current_label'] ?? '');
+  $presetSaveName = (string) old('ticket_preset_name', '');
   $presetSaveDefault = (bool) old('ticket_preset_default');
-  $presetsForPage = $canSeeTicketData ? $presetState['presets'] : [];
+  $presetsForPage = $canSeeTicketData && $presetState['is_member'] ? $presetState['presets'] : [];
 @endphp
 
 {{-- The step band, for the guest-submit flow only. A first event of one's own is walked by the
@@ -6614,6 +6614,7 @@
         presetRebuilt: false,
         // The name of the last preset pressed, for the bar when its chip could not stay lit.
         presetPressed: '',
+        presetEditedSince: false,
         // Set once the page has settled: what it does on load is not a hand edit.
         presetArmed: false,
         presetMethodNote: '',
@@ -7131,8 +7132,16 @@
         if (section && section.id) {
           this.sectionDirty[section.id] = true;
           this.clearTabError(section.id);
+          this.notePresetEdit(section.id);
         }
         this.isDirty = true;
+      },
+      // Typed or pressed on the Tickets tab since the last preset was applied: a promo code, an
+      // add-on, a description. Another chip would replace it, so it asks first (applyPreset()).
+      notePresetEdit(sectionId) {
+        if (sectionId === 'section-tickets' && ! this.presetApplying) {
+          this.presetEditedSince = true;
+        }
       },
       markTabDirty(sectionId) {
         if (! this.dirtyArmed) {
@@ -7141,6 +7150,7 @@
         this.sectionDirty[sectionId] = true;
         this.clearTabError(sectionId);
         this.isDirty = true;
+        this.notePresetEdit(sectionId);
       },
       // A tab a refused save pointed at stops being pointed at once something on it is changed.
       // The list was never emptied, so the bar read "Check: ..." for as long as the page was
@@ -7250,7 +7260,7 @@
         if (preset.id === this.presetLit && ! refreshing) {
           return;
         }
-        if (this.presetLit === '' && this.sectionDirty['section-tickets']
+        if (((this.presetLit === '' && this.sectionDirty['section-tickets']) || this.presetEditedSince)
           && ! window.confirm(this.presetWords.replace_confirm.split(':preset').join(preset.label))) {
           return;
         }
@@ -7310,6 +7320,12 @@
           e.seating_plan_id = input.seating_plan_id || '';
         }
         if (input.tickets_enabled) {
+          document.querySelectorAll('#section-tickets textarea[name^="tickets["]').forEach(function (field) {
+            if (field._easyMDE) {
+              field._easyMDE._stopEditorObserver?.();
+              field._easyMDE.toTextArea();
+            }
+          });
           this.tickets = [];
           (input.tickets || []).forEach(function (row) {
             self.addTicket();
@@ -7343,8 +7359,11 @@
         this.presetPressed = preset.label;
         this.ticketsTouched = true;
         this.markTabDirty('section-tickets');
+        // Pressed again to take the preset as it is now: the tab matches it, and the note goes.
+        this.presetStale = false;
         this.$nextTick(function () {
           self.presetApplying = false;
+          self.presetEditedSince = false;
           // The rebuilt types are new rows: their description boxes want an editor too, which the
           // tickets.length watcher misses when the count did not change.
           if (typeof window.initHtmlEditors === 'function') {
@@ -9543,6 +9562,11 @@
         var self = this;
         return this.presets.find(function (preset) { return preset.id === self.presetLit; }) || null;
       },
+      // The tab's way of signing up is the chosen preset's (TicketPreset::effectiveKind()).
+      presetFitsMode() {
+        var chosen = this.presetChosen;
+        return !! chosen && (chosen.kind === 'none' ? null : chosen.kind) === this.ticketChoice;
+      },
       presetsUnusable() {
         return this.presets.filter(function (preset) { return ! preset.usable; });
       },
@@ -9576,6 +9600,11 @@
         if (this.presetLocked) {
           return chosen && this.presetApply ? this.presetWords.replaces.split(':preset').join(chosen.label) : '';
         }
+        // Pressed, then switched to free registration or Not needed: Save deletes the types, and the
+        // bar's own lines say so.
+        if (this.ticketMode !== 'tickets') {
+          return '';
+        }
         var label = chosen && this.presetLit !== this.presetSaved ? chosen.label : (this.presetRebuilt ? this.presetPressed : '');
         return label && this.savedTicketTypes > 0 ? this.presetWords.replaces.split(':preset').join(label) : '';
       },
@@ -9584,10 +9613,10 @@
         if (! this.savePreset.on) {
           return '';
         }
-        // No name: the preset the event stands on, else the default (TicketPresets::saveFromEvent()).
-        var self = this;
+        // No name: the preset the tab stands on, which the save links the event to, else the
+        // default (TicketPresets::saveFromEvent()).
         var name = (this.savePreset.name || '').trim()
-          || (this.presets.find(function (p) { return p.id === self.presetSaved; }) || this.presets.find(function (p) { return p.is_default; }) || { label: this.presetWords.usual }).label;
+          || (this.presetChosen || this.presets.find(function (p) { return p.is_default; }) || { label: this.presetWords.usual }).label;
         var exists = this.presets.some(function (preset) { return preset.label.toLowerCase() === name.toLowerCase(); });
         return (exists ? this.presetWords.updates : this.presetWords.adds).split(':preset').join(name);
       },
@@ -9607,7 +9636,7 @@
           // A bound team member's tab: the preset pressed, or what the event has.
           var picked = this.presetChosen;
           tickets = { text: picked && (this.presetApply || ! this.eventIsSaved) ? picked.chip : (picked ? picked.label + ' \u00b7 ' + this.presetEvent.types : this.presetEvent.types), empty: false };
-        } else if (this.presetChosen && this.event.tickets_enabled === (this.presetChosen.kind === 'tickets')
+        } else if (this.presetFitsMode
           && (! this.eventIsSaved || this.presetLit !== this.presetSaved || this.presetRebuilt)
           && ! this.tickets.some(function (t) { return self.soldCount(t) > 0; })) {
           // A preset just pressed (or a new event's default). A saved event keeps saying what it
@@ -9716,7 +9745,8 @@
             kind: 'new',
             visibility: L.visibility[this.visibility],
             // The tickets a new event will have, named, so a default preset is never taken unseen.
-            tickets: this.presetChosen ? this.presetChosen.chip : '',
+            // A bound member's tab shows no mode: the tile they pressed is what Save applies.
+            tickets: this.presetChosen && (this.presetLocked || this.presetFitsMode) ? this.presetChosen.chip : '',
           };
         }
         if (this.visibility !== this.savedVisibility && (this.visibility === 'public' || this.savedVisibility === 'public')) {
@@ -9987,6 +10017,13 @@
             body: '{}',
           }).catch(() => {});
         },
+      },
+      // The note that a preset's method could not be used is about that press: a method picked
+      // by hand after it answers it.
+      'event.payment_method'() {
+        if (! this.presetApplying) {
+          this.presetMethodNote = '';
+        }
       },
       'tickets.length'() {
         this.$nextTick(() => {

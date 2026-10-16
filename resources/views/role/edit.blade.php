@@ -3343,7 +3343,7 @@
                             <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_presets_help') }}</p>
                             {{-- ticket_presets_submitted is drawn by the island itself (see TicketPresetsEditor.vue). --}}
                             <p id="ticket-presets-empty" class="py-3 text-sm text-gray-500 dark:text-gray-400" @if ($presetEditor['presets']) hidden @endif>{{ __('messages.ticket_presets_empty') }}</p>
-                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}"></div>
+                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}" data-team-on="{{ $presetTeamOn ? 1 : 0 }}"></div>
                             <script type="application/json" id="ticket-preset-items-json" {!! nonce_attr() !!}>{!! $presetEditorJson !!}</script>
                             <x-input-error class="mt-2" :messages="$errors->get('ticket_presets.*')" />
                             @if ($presetEditor['canEdit'])
@@ -7644,8 +7644,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (! names.length) {
             return { text: words.none, empty: true };
         }
+        // The owner's toggle as it stands; anyone else has no toggle, and reads what is saved.
         var team = byId('ticket_presets_team');
-        return names.join(', ') + (team && team.checked ? ' · ' + words.preset_team : '');
+        var teamOn = team ? team.checked : host.dataset.teamOn === '1';
+        return names.join(', ') + (teamOn ? ' · ' + words.preset_team : '');
     });
     kit.summary('integration:advanced', function() {
         return labelsIn(byId('integration-tab-advanced'));

@@ -141,7 +141,22 @@ class TicketPresetEventFormTest extends TestCase
         $this->createSale($event, $this->venue, ['status' => 'unpaid', 'payment_method' => 'cash'], $entry, 2);
         $html = $this->editPage($this->member, Event::find($event->id));
         $this->assertStringContainsString('presetFrozen: true', $html);
-        $this->assertStringContainsString(e(trans_choice('messages.ticket_preset_frozen_team', 1, ['count' => 1, 'owner' => $this->owner->name])), $html);
+        $this->assertStringContainsString(e(__('messages.ticket_preset_frozen_team', ['owner' => $this->owner->name])), $html);
+    }
+
+    public function test_the_owner_is_told_too_when_the_events_preset_changed_since(): void
+    {
+        $event = $this->createEvent($this->venue, ['creator_role_id' => $this->venue->id, 'tickets_enabled' => true, 'ticket_currency_code' => 'EUR', 'payment_method' => 'cash']);
+        $this->createTicket($event, ['type' => 'Entry', 'price' => 4]);
+        $this->createTicket($event, ['type' => 'Reduced', 'price' => 3]);
+        \DB::table('tickets')->where('event_id', $event->id)->update(['quantity' => null]);
+        \DB::table('events')->where('id', $event->id)->update(['ticket_preset_id' => $this->regular->id]);
+
+        $html = $this->editPage($this->owner, Event::find($event->id));
+        $this->assertStringContainsString('presetStale: true', $html);
+        // The note and its button, under the owner's chips (drawn when presetStaleShown).
+        $this->assertSame(1, preg_match('~<div v-if="presetStaleShown && presetChosen"[^>]*id="ticket-preset-stale"~', $html));
+        $this->assertStringContainsString('@click="applyPreset(presetChosen)"', $html);
     }
 
     public function test_a_preset_is_applied_with_every_field_the_tab_posts(): void

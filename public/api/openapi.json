@@ -4244,7 +4244,8 @@
           },
           "ticket_preset_id": {
             "type": "string",
-            "description": "Encoded ID of one of the schedule's ticket presets. Its tickets, payment and options replace what the request sends for them. A team member the schedule's owner has pick from presets takes their tickets from a preset whatever they send."
+            "nullable": true,
+            "description": "Encoded ID of one of the schedule's ticket presets, or null to name none. Its tickets, payment and options replace what the request sends for them. A team member the schedule's owner has pick from presets takes their tickets from a preset whatever they send. Ignored for a caller who cannot change the event's tickets."
           },
           "ticket_preset_apply": {
             "type": "boolean",

@@ -555,6 +555,11 @@ class EventController extends Controller
                 }
                 // A preset's ticket types carry no seating bands.
                 $event->seating_plan_id = null;
+            } elseif ($clonedPreset && ! $clonedPreset->matches($event)) {
+                // The copy has the source's tickets, which are not the preset's any more (it changed
+                // since, or the source was edited by hand): its chip lit over them would name prices
+                // the copy does not have.
+                $event->ticket_preset_id = null;
             }
 
             // Clear cloned data from session
@@ -986,6 +991,8 @@ class EventController extends Controller
                     ->withInput();
             }
         }
+
+        $this->refuseUnsavablePreset($request, $event->ticketingRole() ?? $role);
 
         $this->eventRepo->saveEvent($role, $request, $event, true, $role->captureTimezone());
 
@@ -1561,6 +1568,17 @@ class EventController extends Controller
         return redirect()->route('home')->with('error', __('messages.set_default_schedule'));
     }
 
+    /**
+     * "Save these tickets as a preset" that Settings > Ticket presets could not hold is refused
+     * before the event is saved, so nothing is half done (TicketPresets::assertSavable()).
+     */
+    private function refuseUnsavablePreset(Request $request, Role $presetSchedule): void
+    {
+        if ($request->boolean('save_ticket_preset') && TicketPresets::mayEdit($request->user(), $presetSchedule)) {
+            TicketPresets::assertSavable($presetSchedule, $request);
+        }
+    }
+
     public function store(EventCreateRequest $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -1575,6 +1593,8 @@ class EventController extends Controller
         // stop counting as having made none (create() leaves them out of the first-event form too).
         $isFirstEvent = $request->user()->createdEvents()->doesntExist()
             && ! TicketPresets::lockedFor($request->user(), $role);
+
+        $this->refuseUnsavablePreset($request, $role);
 
         $event = $this->eventRepo->saveEvent($role, $request, null, true, $role->captureTimezone());
 

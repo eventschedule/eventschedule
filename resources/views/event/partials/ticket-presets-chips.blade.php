@@ -20,6 +20,12 @@
     <span class="text-sm text-gray-500 dark:text-gray-400">{{ $presetNoneYet[0] }}<a href="{{ $presetState['manage_url'] }}" class="event-row-link" style="margin-inline-end: 0">{{ __('messages.ticket_preset_set_up') }}</a>{{ $presetNoneYet[1] }}</span>
 </div>
 @endif
+{{-- The preset the event was saved with changed since: its chip stays lit (the event is still on
+     it, and the team is told the same), and this says so, with the press that takes it as it is now. --}}
+<div v-if="presetStaleShown && presetChosen" class="-mt-1 mb-4 preset-note" id="ticket-preset-stale">
+    <span v-text="presetWords.changed"></span>
+    <button type="button" class="event-link" @click="applyPreset(presetChosen)" v-text="presetWords.use_current"></button>
+</div>
 @if ($presetState['presets'] && $presetState['frozen'])
 <p class="-mt-1 mb-4 text-xs text-gray-500 dark:text-gray-400" v-pre>{{ $presetFrozenText }}</p>
 @endif

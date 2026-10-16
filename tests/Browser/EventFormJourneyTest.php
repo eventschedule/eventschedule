@@ -237,6 +237,40 @@ class EventFormJourneyTest extends DuskTestCase
         $this->assertNull($event->ticket_preset_id);
     }
 
+    public function test_a_chip_asks_before_replacing_what_was_typed_and_the_bar_says_what_save_removes(): void
+    {
+        [$regular, $special] = $this->makePresets();
+        $event = $this->ticketEvent();
+
+        $this->browse(function (Browser $browser) use ($special, $event) {
+            // A new event, on Regular: something typed on the tab that a chip would replace.
+            $this->openNew($browser);
+            $this->fillBasics($browser, 'Asked First');
+            $this->openTickets($browser);
+            $browser->script('window.__asked = 0; window.confirm = function () { window.__asked++; return false; };');
+            $browser->script('var el = document.querySelector("input[name=terms_url]"); el.value = "https://example.org/terms"; el.dispatchEvent(new Event("input", { bubbles: true }));');
+            $browser->pause(200);
+
+            $this->press($browser, '[data-preset-chip="'.$special->encodeId().'"]');
+            $state = $browser->script('return { asked: window.__asked, lit: document.querySelector("[data-preset-chip].is-on").innerText.trim(), terms: document.querySelector("input[name=terms_url]").value };')[0];
+            $this->assertSame(1, $state['asked'], 'a chip asks before it replaces what was typed');
+            $this->assertSame('Regular · $3 to $5', $state['lit'], 'and said no, nothing changed');
+            $this->assertSame('https://example.org/terms', $state['terms']);
+
+            // A saved event with ticket types: a chip, then Not needed. Save deletes the types,
+            // and the bar says that, not that a preset replaces them.
+            $this->leave($browser);
+            $this->openExisting($browser, $event);
+            $this->openTickets($browser);
+            $this->press($browser, '[data-preset-chip="'.$special->encodeId().'"]');
+            $this->assertStringContainsString('Special', $this->barText($browser));
+            $this->press($browser, '#ticket_choice_none');
+            $bar = $this->barText($browser);
+            $this->assertStringContainsString(__('messages.saving_removes_ticket_types'), $bar);
+            $this->assertStringNotContainsString('Special', $bar);
+        });
+    }
+
     public function test_a_team_member_picks_a_preset_and_never_types_a_price(): void
     {
         [, $special] = $this->makePresets();

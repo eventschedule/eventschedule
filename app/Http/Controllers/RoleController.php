@@ -6163,6 +6163,10 @@ class RoleController extends Controller
 
             if ($isOwner && TicketPresets::teamSwitchOffered($role)) {
                 TicketPresets::setTeamUsesPresets($role, $request->boolean('ticket_presets_team') && TicketPresets::for($role)->isNotEmpty());
+            } elseif ($isOwner && ! $request->boolean('ticket_presets_team') && TicketPresets::teamUsesPresets($role)) {
+                // A plan that no longer offers the switch (a hosted downgrade) still lets the owner
+                // turn it off; never on.
+                TicketPresets::setTeamUsesPresets($role, false);
             }
         }
 

@@ -1942,8 +1942,15 @@ class EventRepo
         // sends the key, and all it can do is leave an answer as it is.
         $acceptanceKeptFor = array_map('intval', (array) $request->input('acceptance_kept_for', []));
 
+        // An event a member made on ANOTHER schedule, which sells tickets or takes sign-ups, waits as
+        // a request on a schedule whose ticket preset switch binds that member: accepted at once,
+        // it was their prices on the owner's calendar, which is what the switch exists to stop.
+        $sellsOrSignsUp = $event->tickets_enabled || $event->rsvp_enabled || filled($event->registration_url);
+
         foreach ($roles as $role) {
-            if (! in_array((int) $role->id, $acceptanceKeptFor, true) && $role->autoAcceptsEventFrom($actingUser, $currentRole)) {
+            if (! in_array((int) $role->id, $acceptanceKeptFor, true) && $role->autoAcceptsEventFrom($actingUser, $currentRole)
+                && ! ($actingUser && $sellsOrSignsUp && (int) $role->id !== (int) $event->creator_role_id
+                    && \App\Services\TicketPresets::lockedFor($actingUser, $role))) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             }
 

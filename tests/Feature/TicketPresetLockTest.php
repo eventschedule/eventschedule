@@ -327,6 +327,137 @@ class TicketPresetLockTest extends TestCase
             ->assertSessionHasErrors('ticket_preset_name');
     }
 
+    public function test_a_bound_members_update_that_carries_prices_without_the_presets_tab_keeps_the_tickets(): void
+    {
+        $event = $this->eventFromRegular();
+
+        // Through the API, which never sends ticket_panel.
+        $this->putJson('/api/events/'.UrlUtils::encodeId($event->id), [
+            'tickets_enabled' => true, 'ticket_currency_code' => 'EUR',
+            'tickets' => [['type' => 'Free for all', 'price' => 0]],
+        ], $this->apiKeyFor($this->member))->assertOk();
+        $this->assertSame([['Entry', 5.0], ['Reduced', 3.0]], $this->types($event));
+
+        // Through the form with the panel marker left out.
+        $post = $this->freeTicketPost();
+        unset($post['ticket_panel']);
+        $this->update($this->member, $event, $post);
+        $this->assertSame([['Entry', 5.0], ['Reduced', 3.0]], $this->types($event));
+    }
+
+    public function test_a_bound_member_editing_through_another_schedules_address_is_still_bound(): void
+    {
+        // The member also runs a performer schedule the venue's event is on. The schedule in the
+        // address is that one, which has no presets: the venue's own still bind.
+        $talent = $this->createRole($this->member, 'talent');
+        $event = $this->eventFromRegular();
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $this->actingAs($this->member)->put(
+            route('event.update', ['subdomain' => $talent->subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+            ['name' => $event->name, 'starts_at' => $event->starts_at, 'duration' => 2, 'ticket_panel' => 'presets', 'ticket_preset_id' => $this->special->encodeId(), 'ticket_preset_apply' => 1]
+        )->assertSessionHasNoErrors();
+
+        $this->assertSame([[null, 20.0]], $this->types($event), 'the venue\'s preset, applied through the venue\'s lock');
+    }
+
+    public function test_a_seating_plan_freezes_the_preset_too(): void
+    {
+        $plan = \App\Models\SeatingPlan::create(['role_id' => $this->venue->id, 'name' => 'Main House']);
+        $event = $this->eventFromRegular();
+        \DB::table('events')->where('id', $event->id)->update(['seating_plan_id' => $plan->id]);
+
+        $this->update($this->member, Event::find($event->id), ['ticket_panel' => 'presets', 'ticket_preset_id' => $this->special->encodeId(), 'ticket_preset_apply' => 1])
+            ->assertSessionHasErrors('ticket_preset_id');
+        $this->assertSame([['Entry', 5.0], ['Reduced', 3.0]], $this->types($event));
+    }
+
+    public function test_an_appointment_booking_is_not_bound(): void
+    {
+        $type = $this->createAppointmentType($this->venue);
+        $booking = $this->eventFromRegular(['appointment_type_id' => $type->id]);
+
+        $this->update($this->member, $booking, $this->freeTicketPost())->assertSessionDoesntHaveErrors('ticket_preset_id');
+    }
+
+    public function test_the_payee_a_preset_is_checked_against_is_the_owner(): void
+    {
+        // The member could take Invoice Ninja; the owner, whose account a bound member's new event
+        // pays into, cannot. Checked against the member, it would go through.
+        $this->member->forceFill(['invoiceninja_api_key' => 'member-key'])->save();
+        $settings = $this->special->settings;
+        $settings['payment_method'] = 'invoiceninja';
+        $this->special->update(['settings' => $settings]);
+
+        $this->store($this->member, ['ticket_panel' => 'presets', 'ticket_preset_id' => $this->special->encodeId(), 'ticket_preset_apply' => 1])
+            ->assertSessionHasErrors('ticket_preset_id');
+    }
+
+    public function test_a_bound_admin_may_not_change_the_presets(): void
+    {
+        $this->assertFalse(TicketPresets::mayEdit($this->member, $this->venue));
+        $this->assertTrue(TicketPresets::mayEdit($this->owner, $this->venue));
+        TicketPresets::setTeamUsesPresets($this->venue, false);
+        $this->assertTrue(TicketPresets::mayEdit($this->member, $this->venue), 'an editor may while the team is not bound');
+    }
+
+    public function test_a_preset_that_holds_only_passes_is_refused(): void
+    {
+        $passes = TicketPreset::create(['role_id' => $this->venue->id, 'name' => 'Season', 'kind' => 'tickets', 'is_default' => false, 'sort_order' => 3, 'settings' => [
+            'currency_code' => 'EUR', 'payment_method' => 'cash', 'tickets' => [['type' => 'Season', 'price' => 50, 'is_pass' => true]],
+        ]]);
+        $event = $this->eventFromRegular();
+
+        $this->update($this->member, $event, ['ticket_panel' => 'presets', 'ticket_preset_id' => $passes->encodeId(), 'ticket_preset_apply' => 1])
+            ->assertSessionHasErrors('ticket_preset_id');
+        $this->assertSame([['Entry', 5.0], ['Reduced', 3.0]], $this->types($event), 'not emptied');
+
+        $tile = collect(TicketPresets::forForm($this->venue, $event, true))->firstWhere('id', $passes->encodeId());
+        $this->assertFalse($tile['usable']);
+    }
+
+    public function test_a_bound_members_event_on_their_own_schedule_waits_as_a_request_on_the_venue(): void
+    {
+        $talent = $this->createRole($this->member, 'talent');
+        $post = fn (array $data) => $this->actingAs($this->member)->post(route('event.store', ['subdomain' => $talent->subdomain]), array_merge([
+            'name' => 'My night '.Str::random(4),
+            'starts_at' => now()->addDays(10)->setTime(20, 0)->format('Y-m-d H:i:s'),
+            'duration' => 2, 'schedule_type' => 'one_time',
+            'venue_id' => UrlUtils::encodeId($this->venue->id), 'venue_submitted' => 1,
+        ], $data));
+        $accepted = fn () => \DB::table('event_role')->where('event_id', $this->latest()->id)->where('role_id', $this->venue->id)->value('is_accepted');
+
+        $post($this->freeTicketPost())->assertSessionHasNoErrors();
+        $this->assertNotEquals(1, $accepted(), 'their prices wait for the owner');
+
+        // Nothing to pay for or sign up to: listed at once, as before.
+        $post(['ticket_panel' => 'full', 'tickets_enabled' => 0, 'rsvp_enabled' => 0])->assertSessionHasNoErrors();
+        $this->assertEquals(1, $accepted());
+
+        // Nor with the switch off.
+        TicketPresets::setTeamUsesPresets($this->venue, false);
+        $post($this->freeTicketPost())->assertSessionHasNoErrors();
+        $this->assertEquals(1, $accepted());
+    }
+
+    public function test_a_copy_whose_preset_changed_since_is_not_linked_to_it(): void
+    {
+        $event = $this->eventFromRegular(['payment_instructions' => 'Pay at the door']);
+        $this->assertTrue($this->regular->matches($event), 'the fixture: the source is on Regular');
+        $open = function () use ($event) {
+            $this->actingAs($this->owner)->get(route('event.clone', ['subdomain' => $this->venue->subdomain, 'hash' => UrlUtils::encodeId($event->id)]));
+
+            return $this->actingAs($this->owner)->get(route('event.create', ['subdomain' => $this->venue->subdomain]))->assertOk()->viewData('event');
+        };
+
+        $this->assertSame($this->regular->id, (int) $open()->ticket_preset_id, 'the same tickets: still Regular');
+
+        $settings = $this->regular->settings;
+        $settings['tickets'][0]['price'] = 6;
+        $this->regular->update(['settings' => $settings]);
+        $this->assertNull($open()->ticket_preset_id, 'Regular is 6 now; the copy has 5');
+    }
+
     public function test_an_abandoned_checkout_does_not_freeze_it(): void
     {
         $event = $this->eventFromRegular();

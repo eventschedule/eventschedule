@@ -28,6 +28,19 @@ class TicketPresets
     /** The sales that mean somebody has a ticket: never an expired checkout, which is nobody's. */
     public const LIVE_SALE_STATUSES = ['unpaid', 'paid', 'amount_mismatch', 'refunded'];
 
+    /**
+     * What Settings > Ticket presets accepts (RoleUpdateRequest), and so what may be stored: the
+     * editor posts every preset on every save of the schedule form, and one it would refuse
+     * refuses that whole form, on any tab, with nothing on the page to fix it with.
+     */
+    public const MAX_PRESETS = 30;
+
+    public const MAX_TYPES = 30;
+
+    public const MAX_INSTRUCTIONS = 5000;
+
+    public const MAX_QUANTITY = 1000000;
+
     /** @return Collection<int, TicketPreset> */
     public static function for(?Role $role): Collection
     {
@@ -152,6 +165,14 @@ class TicketPresets
             return;
         }
 
+        // Saved from an event whose only types were passes: laid over an event it would switch
+        // tickets on and retire every type, leaving nothing to sell.
+        if (! $preset->ticketRows()) {
+            throw ValidationException::withMessages([
+                'ticket_preset_id' => __('messages.ticket_preset_only_passes', ['preset' => $preset->label()]),
+            ]);
+        }
+
         $method = $preset->paymentMethod();
         $available = payment_gateways()->availableFor($payee, $preset->currency($fallbackCurrency));
 
@@ -269,6 +290,36 @@ class TicketPresets
      * is replaced, a new name adds one. Written to the event's OWN schedule, not the one in the
      * address it was reached through.
      */
+    /**
+     * Refuse "Save these tickets as a preset" before the event is saved, when what it would store
+     * is more than Settings > Ticket presets accepts (MAX_*): a new name past the last preset a
+     * schedule may have, or a setup bigger than the editor takes. Keyed `ticket_preset_name`,
+     * which the block on the event form shows.
+     */
+    public static function assertSavable(Role $role, $request): void
+    {
+        $name = mb_substr(trim((string) $request->input('ticket_preset_name', '')), 0, 100);
+        $presets = self::for($role);
+        $isNew = $name !== '' && ! $presets->contains(fn (TicketPreset $p) => mb_strtolower($p->label()) === mb_strtolower($name));
+
+        if ($isNew && $presets->count() >= self::MAX_PRESETS) {
+            throw ValidationException::withMessages([
+                'ticket_preset_name' => __('messages.ticket_preset_too_many', ['count' => self::MAX_PRESETS]),
+            ]);
+        }
+
+        $types = collect((array) $request->input('tickets', []))->filter(fn ($ticket) => is_array($ticket) && empty($ticket['is_pass']));
+        $tooBig = mb_strlen((string) $request->input('payment_instructions', '')) > self::MAX_INSTRUCTIONS
+            || ($request->boolean('tickets_enabled') && ($types->count() > self::MAX_TYPES
+                || $types->contains(fn ($ticket) => is_scalar($ticket['quantity'] ?? null) && (int) $ticket['quantity'] > self::MAX_QUANTITY)));
+
+        if ($tooBig) {
+            throw ValidationException::withMessages([
+                'ticket_preset_name' => __('messages.ticket_preset_too_big', ['types' => self::MAX_TYPES, 'characters' => self::MAX_INSTRUCTIONS]),
+            ]);
+        }
+    }
+
     public static function saveFromEvent(Role $role, Event $event, string $name, bool $makeDefault): TicketPreset
     {
         $name = mb_substr(trim($name), 0, 100);
@@ -460,7 +511,9 @@ class TicketPresets
     {
         $owner = $role->user;
         $presets = self::for($role);
-        $fallbackCurrency = strtoupper((string) $role->events()->whereNotNull('ticket_currency_code')->orderByDesc('events.id')->value('ticket_currency_code'));
+        // The schedule's own newest priced event, by its owning column: through events() a curator
+        // listing many thousands of events sorted all of them on every load of the page.
+        $fallbackCurrency = strtoupper((string) Event::where('creator_role_id', $role->id)->whereNotNull('ticket_currency_code')->orderByDesc('id')->value('ticket_currency_code'));
         if (! in_array($fallbackCurrency, MoneyUtils::currencyCodes(), true)) {
             $fallbackCurrency = MoneyUtils::getCurrencyForCountry($role->country_code);
         }
@@ -559,8 +612,11 @@ class TicketPresets
             'symbols' => $currencies->mapWithKeys(fn ($currency) => [$currency['code'] => MoneyUtils::symbol($currency['code'])])->all(),
             'zeroDecimal' => $currencies->pluck('code')->filter(fn ($code) => MoneyUtils::decimalsFor($code) === 0)->values()->all(),
             'planNote' => config('app.hosted') && ! $role->canSellPaidTickets() ? __('messages.ticket_preset_plan_note') : '',
-            'switchOffered' => (int) $role->user_id === (int) $user->id && self::teamSwitchOffered($role),
+            // While it is on, the owner keeps it even after a plan that no longer offers it (a
+            // hosted downgrade), or it could never be turned off; only off is taken then.
+            'switchOffered' => (int) $role->user_id === (int) $user->id && (self::teamSwitchOffered($role) || self::teamUsesPresets($role)),
             'switchSaved' => self::teamUsesPresets($role),
+            'maxPresets' => self::MAX_PRESETS,
             'seen' => $seen,
             'defaultSeenId' => $defaultSeen,
             't' => [
@@ -626,6 +682,9 @@ class TicketPresets
             'stale' => $current && $event?->exists && ! $current->matches($event),
             'owner_name' => self::ownerName($owning),
             'is_owner' => $isOwner,
+            // Presets (their promo codes too) are sent only to the people who run the event's own
+            // schedule: a venue or a performer that edits the event is not one of them.
+            'is_member' => $isOwner || $user->isEditor($owning->subdomain),
             // "None yet" is said only to an owner who has a team to bind; one working alone keeps
             // the bottom switch, which is where a preset is made from an event. Counted only then.
             'has_team' => $presets->isEmpty() && $isOwner

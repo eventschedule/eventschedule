@@ -392,6 +392,84 @@ class TicketPresetScheduleTest extends TestCase
         $this->assertSame('Late night', TicketPresets::defaultFor($venue)->name);
     }
 
+    public function test_a_preset_past_what_the_settings_editor_takes_is_refused_before_the_event_saves(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($venue, ['creator_role_id' => $venue->id, 'tickets_enabled' => true, 'ticket_currency_code' => 'EUR', 'payment_method' => 'cash']);
+        $ticket = $this->createTicket($event, ['type' => 'Entry', 'price' => 5]);
+        foreach (range(1, TicketPresets::MAX_PRESETS) as $i) {
+            TicketPreset::create(['role_id' => $venue->id, 'name' => 'Night '.$i, 'kind' => 'tickets', 'is_default' => $i === 1, 'sort_order' => $i, 'settings' => ['tickets' => [['price' => $i]]]]);
+        }
+        $put = fn (array $data) => $this->actingAs($owner)->put(
+            route('event.update', ['subdomain' => $venue->subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
+            array_merge(['name' => 'Renamed', 'starts_at' => $event->starts_at, 'duration' => 2, 'ticket_panel' => 'full',
+                'tickets_enabled' => 1, 'ticket_currency_code' => 'EUR', 'payment_method' => 'cash',
+                'tickets' => [['id' => $ticket->id, 'type' => 'Entry', 'price' => 5]]], $data)
+        );
+
+        // A 31st would refuse every later save of the schedule form, on any tab.
+        $put(['save_ticket_preset' => 1, 'ticket_preset_name' => 'One more'])->assertSessionHasErrors('ticket_preset_name');
+        $this->assertSame(TicketPresets::MAX_PRESETS, TicketPreset::count());
+        $this->assertNotSame('Renamed', $event->fresh()->name, 'refused before anything was saved');
+
+        // One of the thirty, by name, is updated as before.
+        $put(['save_ticket_preset' => 1, 'ticket_preset_name' => 'night 3'])->assertSessionHasNoErrors();
+
+        // More types than the editor takes.
+        $rows = array_map(fn ($i) => ['type' => 'Row '.$i, 'price' => $i], range(1, TicketPresets::MAX_TYPES + 1));
+        $put(['save_ticket_preset' => 1, 'ticket_preset_name' => 'night 3', 'tickets' => $rows])->assertSessionHasErrors('ticket_preset_name');
+    }
+
+    public function test_a_venue_editing_a_performers_event_is_not_sent_the_performers_presets(): void
+    {
+        $talentOwner = $this->createOwner();
+        $talent = $this->createRole($talentOwner, 'talent');
+        $venueOwner = $this->createOwner();
+        $venue = $this->createRole($venueOwner, 'venue');
+        TicketPreset::create(['role_id' => $talent->id, 'name' => 'Backstage Night', 'kind' => 'tickets', 'is_default' => true, 'settings' => [
+            'currency_code' => 'EUR', 'payment_method' => 'cash', 'tickets' => [['type' => 'Entry', 'price' => 5]],
+            'promo_codes' => [['code' => 'CREWONLY50', 'type' => 'percentage', 'value' => 50, 'is_active' => true]],
+        ]]);
+        $event = $this->createEvent($talent, ['creator_role_id' => $talent->id, 'user_id' => $talentOwner->id, 'tickets_enabled' => true, 'ticket_currency_code' => 'EUR', 'payment_method' => 'cash']);
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        $this->createTicket($event, ['type' => 'Entry', 'price' => 5]);
+
+        $html = $this->actingAs($venueOwner)->get(route('event.edit', ['subdomain' => $venue->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))->assertOk()->getContent();
+        $this->assertStringNotContainsString('CREWONLY50', $html);
+        $this->assertStringNotContainsString('Backstage Night', $html);
+
+        // The performer's own people are.
+        $html = $this->actingAs($talentOwner)->get(route('event.edit', ['subdomain' => $talent->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))->assertOk()->getContent();
+        $this->assertStringContainsString('Backstage Night', $html);
+    }
+
+    public function test_after_a_downgrade_the_owner_can_turn_the_switch_off_and_not_on(): void
+    {
+        config(['app.hosted' => true]);
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['plan_type' => 'pro']);
+        $this->assertFalse(TicketPresets::teamSwitchOffered($venue), 'the fixture: no team on this plan');
+        $preset = TicketPreset::create(['role_id' => $venue->id, 'name' => 'Regular', 'kind' => 'tickets', 'is_default' => true, 'settings' => ['tickets' => [['price' => 5]]]]);
+        TicketPresets::setTeamUsesPresets($venue, true);
+
+        $props = $this->editorProps($owner, $venue);
+        $this->assertTrue($props['switchOffered'], 'still on, so still the owner\'s to turn off');
+
+        $base = ['ticket_presets_submitted' => 1, 'ticket_presets_seen' => [$preset->encodeId()], 'ticket_presets_default_seen' => $preset->encodeId(),
+            'ticket_presets' => [$this->row(['id' => $preset->encodeId(), 'is_default' => 1, 'tickets' => [['src' => '0', 'type' => '', 'price' => '5']]])]];
+
+        $this->save($owner, $venue, $base + ['ticket_presets_team' => 1])->assertSessionHasNoErrors();
+        $this->assertTrue(TicketPresets::teamUsesPresets($venue->fresh()), 'left on is left alone');
+
+        $this->save($owner, $venue, $base)->assertSessionHasNoErrors();
+        $this->assertFalse(TicketPresets::teamUsesPresets($venue->fresh()));
+
+        $this->save($owner, $venue, $base + ['ticket_presets_team' => 1])->assertSessionHasNoErrors();
+        $this->assertFalse(TicketPresets::teamUsesPresets($venue->fresh()), 'never on without a plan that offers it');
+        $this->assertFalse($this->editorProps($owner, $venue)['switchOffered']);
+    }
+
     public function test_saving_through_the_venue_does_not_write_the_events_own_schedules_presets(): void
     {
         // The venue an event is at may edit it (User::canEditEvent()), and is not bound by the

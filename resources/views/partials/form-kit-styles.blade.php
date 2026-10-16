@@ -654,7 +654,9 @@
        holds under them. On the schedule form: the list and its editor (TicketPresetsEditor.vue). */
     button.event-chip.is-on,
     form button.event-chip.is-on,
-    form button.event-chip.is-on:disabled {
+    form button.event-chip.is-on:disabled,
+    button.event-chip.is-on:disabled:hover,
+    form button.event-chip.is-on:disabled:hover {
       border-color: var(--brand-blue);
       background: var(--brand-blue-a10);
       color: var(--brand-blue);

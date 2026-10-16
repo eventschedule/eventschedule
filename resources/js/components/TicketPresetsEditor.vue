@@ -168,6 +168,7 @@ export default {
     planNote: { type: String, default: '' },
     switchOffered: { type: Boolean, default: false },
     switchSaved: { type: Boolean, default: false },
+    maxPresets: { type: Number, default: 30 },
     // After a refused save: what the page showed when it was first opened.
     seen: { type: Array, default: null },
     defaultSeenId: { type: String, default: null },
@@ -196,6 +197,7 @@ export default {
       handler() {
         this.paintSwitch();
         this.paintEmpty();
+        this.paintAdd();
         // The form's summaries are refreshed on the input event, which comes before this app has
         // drawn what was typed: the row's line said the name one keystroke late.
         this.$nextTick(() => {
@@ -209,6 +211,7 @@ export default {
   mounted() {
     this.paintSwitch();
     this.paintEmpty();
+    this.paintAdd();
     // What turning the switch does to the team is said in the save bar before Save does it
     // (partials/form-save-bar-script, formkit:says), measured against what is stored.
     const toggle = this.switchOffered && document.getElementById('ticket_presets_team');
@@ -339,6 +342,10 @@ export default {
     },
     // Called by the "+ Add preset" link under the list (role/edit), which sits outside this app.
     add() {
+      // As many as Settings > Ticket presets can save (TicketPresets::MAX_PRESETS).
+      if (this.rows.length >= this.maxPresets) {
+        return;
+      }
       const first = this.rows.length === 0;
       const base = this.rows.find((row) => row.is_default) || this.rows[0] || null;
       let preset;
@@ -374,6 +381,16 @@ export default {
       if (removed && this.open === removed.key) {
         this.open = null;
       }
+      // The keyboard goes to the row that took its place, or to "+ Add preset", never to the page.
+      this.$nextTick(() => {
+        const host = this.$el && this.$el.parentNode;
+        const next = this.rows[index] || this.rows[index - 1];
+        const target = (next && host && host.querySelector('[data-preset-key="' + next.key + '"] [data-preset-edit-button]'))
+          || document.querySelector('[data-action="add-ticket-preset"]');
+        if (target) {
+          target.focus();
+        }
+      });
     },
     kindChanged(row) {
       if (row.kind === 'tickets' && !row.tickets.length) {
@@ -397,6 +414,11 @@ export default {
         if (host) {
           host.dispatchEvent(new Event('change', { bubbles: true }));
         }
+      });
+    },
+    paintAdd() {
+      document.querySelectorAll('[data-action="add-ticket-preset"]').forEach((button) => {
+        button.hidden = this.rows.length >= this.maxPresets;
       });
     },
     paintEmpty() {
@@ -435,6 +457,12 @@ export default {
       if (blocker) {
         blocker.textContent = reason;
         blocker.hidden = reason === '';
+        // A screen reader on the disabled switch hears why.
+        if (reason) {
+          toggle.setAttribute('aria-describedby', blocker.id);
+        } else {
+          toggle.removeAttribute('aria-describedby');
+        }
       }
     },
   },
