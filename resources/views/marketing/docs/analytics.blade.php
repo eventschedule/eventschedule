@@ -9,8 +9,8 @@
         <x-doc-nav-link href="#filters">Filters</x-doc-nav-link>
         <x-doc-nav-group label="Web Analytics" href="#web-analytics">
             <x-doc-nav-link href="#web-counting">What Counts as a View</x-doc-nav-link>
-            <x-doc-nav-link href="#web-stats">Stats Cards</x-doc-nav-link>
-            <x-doc-nav-link href="#web-charts">Charts</x-doc-nav-link>
+            <x-doc-nav-link href="#web-stats">Figures and Chart</x-doc-nav-link>
+            <x-doc-nav-link href="#web-charts">Lists</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Realtime" href="#realtime">
             <x-doc-nav-link href="#realtime-traffic">Live Traffic</x-doc-nav-link>
@@ -19,12 +19,12 @@
             <x-doc-nav-link href="#realtime-privacy">Who Is Counted</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Revenue" href="#revenue">
-            <x-doc-nav-link href="#revenue-stats">Stats Cards</x-doc-nav-link>
+            <x-doc-nav-link href="#revenue-stats">Figures and Chart</x-doc-nav-link>
             <x-doc-nav-link href="#revenue-funnels">Funnels</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Check-ins" href="#checkins">
-            <x-doc-nav-link href="#checkins-stats">Stats Cards</x-doc-nav-link>
-            <x-doc-nav-link href="#checkins-charts">Charts</x-doc-nav-link>
+            <x-doc-nav-link href="#checkins-stats">Figures</x-doc-nav-link>
+            <x-doc-nav-link href="#checkins-charts">Arrivals and Events</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#no-data">No Data State</x-doc-nav-link>
         <x-doc-nav-link href="#see-also">See Also</x-doc-nav-link>
@@ -43,10 +43,10 @@
             Analytics shows how your schedule pages are performing. Open it by clicking <strong>Analytics</strong> in the sidebar. It is built in and on every plan, so there is nothing to install and no third-party tracking script to add.
         </p>
 
-        <x-doc-screenshot id="analytics--dashboard" alt="The Analytics page: the schedule and date range filters, four stats cards, and the Views Over Time and Device Breakdown charts" loading="eager" />
+        <x-doc-screenshot id="analytics--dashboard" alt="The Analytics page: the tabs, the schedule, event and date range filters, and one card holding the page views figure, its change and the views chart" loading="eager" />
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <a href="#filters" class="doc-link">filters</a> sit at the top of the page, and under them the tabs, in this order:
+            Under the page's title come the tabs, in this order, and under them the <a href="#filters" class="doc-link">filters</a>. Each tab opens on one card that holds its main figures and its chart, with the lists and tables below it:
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
@@ -60,7 +60,7 @@
                 <tbody>
                     <tr>
                         <td><a href="#web-analytics" class="doc-link font-semibold sm:whitespace-nowrap">Web Analytics</a></td>
-                        <td>Page views over time, device breakdown, top events, broken links, traffic sources, referrers, UTM parameters, visitor locations and social link clicks. This is the tab the page opens on.</td>
+                        <td>Page views over time with your events marked on the chart, top events, where visitors come from (channels, sites and campaigns), countries, devices, social link clicks and broken links. This is the tab the page opens on.</td>
                         <td>As soon as someone visits a schedule page</td>
                     </tr>
                     <tr>
@@ -70,7 +70,7 @@
                     </tr>
                     <tr>
                         <td><a href="#revenue" class="doc-link font-semibold sm:whitespace-nowrap">Revenue</a></td>
-                        <td>Total revenue, conversion rate, revenue per view, promo code performance, boost and newsletter funnels, and top events by revenue</td>
+                        <td>Total revenue and how it came in over time, sales, conversion rate, revenue per view, top events by revenue, promo code performance, and the boost and newsletter funnels</td>
                         <td>Once the range holds a completed sale, a boost campaign or a newsletter send. Selling a ticket that carries a price is a Pro feature; free registration and ticket types priced at zero are unlimited on every plan, but neither brings in revenue to report.</td>
                     </tr>
                     <tr>
@@ -96,7 +96,7 @@
             Filters
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The controls above the tabs decide which data is shown. Every filter is stored in the page URL, so you can bookmark a view or share it with a team member who has access to the same schedule. The <a href="#realtime" class="doc-link">Realtime</a> tab always covers the last half hour of every page, so there only the schedule selector is shown.
+            The row of controls under the tabs decides which data is shown, on every tab at once. Every filter is stored in the page URL, so you can bookmark a view or share it with a team member who has access to the same schedule. The <a href="#realtime" class="doc-link">Realtime</a> tab always covers the last half hour of every page, so there only the schedule selector is shown.
         </p>
 
         <div class="doc-fields">
@@ -110,11 +110,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Date range</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Last 7 Days, Last 30 Days, Last 90 Days, This Month, Last Month, This Year or All Time. The default is Last 30 Days, which is today and the 29 days before it. All Time reaches back ten years.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Last 7 Days, Last 30 Days, Last 90 Days, This Month, Last Month, This Year or All Time. The default is Last 30 Days, which is today and the 29 days before it. All Time reaches back ten years, and its chart starts at the first day with data.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Daily / Weekly / Monthly</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Sets the grouping of the Views Over Time chart. These buttons only appear on the Web Analytics tab, and Daily is the default. Daily suits short ranges, weekly gives a balanced overview, and monthly is better for spotting long-term patterns.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sets how the chart at the top of Web Analytics and Revenue groups its points. The switch sits above the chart, beside its key, and stays as you move between tabs. Daily is the default, except on All Time, which starts on Monthly. Daily suits short ranges, weekly gives a balanced overview, and monthly is better for spotting long-term patterns.</p>
             </div>
         </div>
 
@@ -148,48 +148,50 @@
             <li>The same visitor has already viewed that event 3 times that day. Each event keeps this count separately.</li>
         </ul>
 
-        <h3 id="web-stats" class="doc-subheading">Stats Cards</h3>
+        <h3 id="web-stats" class="doc-subheading">Figures and Chart</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The top of the tab shows summary cards. Which cards appear depends on the date range and the type of schedule you selected.
+            The tab opens on one card: the figures along its top and the chart under them. Which figures appear depends on the date range and the type of schedule you selected.
         </p>
 
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Card</th>
+                        <th>Figure</th>
                         <th>What it shows</th>
                         <th>When it appears</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Page views</span></td>
+                        <td>Views inside the selected date range, as the large figure. Beside it, the change against the window before (green with an up arrow, red with a down arrow) and that window's own count. The words follow the range: vs Previous 7 Days, vs Previous 30 Days, and so on. This Month and This Year are compared with the same days of the month or year before (vs the same days last month), so a month three days old is not set against a whole one. When the window before had no views it says so instead of showing a change.</td>
+                        <td>Always; the change on every range except All Time</td>
+                    </tr>
+                    <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Total Views</span></td>
                         <td>All page views ever recorded, ignoring the date range</td>
-                        <td>Always</td>
+                        <td>Every range except All Time, where it would repeat the large figure</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Views in Period</span></td>
-                        <td>Views inside the selected date range. On All Time this card falls back to the current calendar month.</td>
-                        <td>Always</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Previous Period</span></td>
-                        <td>Views in the equivalent range immediately before the one you selected</td>
-                        <td>Every range except All Time</td>
-                    </tr>
-                    <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">vs Previous 30 Days</span></td>
-                        <td>Percentage change against that previous period, green when up and red when down. The card label follows the range you picked, so it also reads vs Previous 7 Days, vs Last Month, vs Last Year and so on.</td>
-                        <td>Every range except All Time</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Busiest day</span></td>
+                        <td>The day in the range with the most views, and how many. With Weekly or Monthly chosen it is the busiest week or month.</td>
+                        <td>When the chart has more than one point and at least one of them has views</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Appearance Views</span></td>
                         <td>Views your events picked up while appearing on someone else's schedule</td>
-                        <td>Talent and venue schedules with at least one appearance view in range</td>
+                        <td>Talent and venue schedules with at least one appearance view in range, when no single event is selected</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="doc-fields doc-fields--grouped">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Views Over Time</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The chart plots page views by day, week or month. A grey line lays the window before under it point for point, the busiest point carries its number, and while the last day, week or month is not over its stretch of line is dashed and its tooltip says so far. Each one-off event dated in the range has its flyer under its date, and hovering a date names the events on it; a recurring series is not marked, since it would mark every week. Hover anywhere on the chart to read every line at that date. If you run <a href="{{ route('marketing.docs.boost') }}" class="doc-link">boost campaigns</a> or send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a>, more lines plot the views attributed to each of them against the same timeline, so you can see how much of a spike each one accounts for. Those lines are left out when a single event is selected, because they are counted for the whole schedule.</p>
+            </div>
         </div>
 
         <div class="doc-callout doc-callout-tip">
@@ -197,47 +199,38 @@
             <p>Use the comparison percentage to quickly identify whether your schedule is gaining or losing traction relative to the previous period. Because it compares equal-length windows, it is more useful than the raw view count when a range spans an unusually busy week.</p>
         </div>
 
-        <h3 id="web-charts" class="doc-subheading">Charts</h3>
+        <h3 id="web-charts" class="doc-subheading">Lists</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Below the stats cards the tab lays out its charts in the order shown here. A chart is hidden entirely when it has no data for the selected filters, so an empty dashboard is normal on a new schedule.
+            Under the chart the tab lays out its lists. Each prints every number beside a bar as long as that number against the largest in the list (Broken links has no bars), shows its first six rows and keeps the rest behind Show all. A list is hidden entirely when it has no data for the selected filters, so an empty tab is normal on a new schedule.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            With a single event selected, Sources, Countries, Social Link Clicks and the appearance lists still count the whole schedule, because a visit's source and country are recorded for the schedule and not for one event. Those lists are marked <strong>Whole schedule</strong>.
         </p>
 
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Views Over Time</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A line chart of page views grouped daily, weekly or monthly according to the period buttons. Hover a point to see the exact number. If you run <a href="{{ route('marketing.docs.boost') }}" class="doc-link">boost campaigns</a> or send <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a>, extra dashed lines plot the views attributed to each of them against the same timeline, so you can see how much of a spike each one accounts for.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Device Breakdown</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The split between desktop, mobile and tablet visitors, based on the browser's user agent. Visits whose device could not be identified are grouped as unknown. Categories with no views are left out.</p>
-            </div>
-            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your ten most-viewed events in the selected period. Hidden when you have filtered down to a single event.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your ten most-viewed events in the selected period, with their flyers. Click one to see the whole page for that event alone. Hidden when you have filtered down to a single event.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sources</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Where your visitors come from, in three views. <strong>Channels</strong> sorts every visit into eight categories with their shares: Direct, Search, Social, Email, Newsletter, Boost, Promo Code and Other, and <em>What each source means</em> under the list explains each one. Links carrying <code class="doc-inline-code">utm_source=boost</code>, <code class="doc-inline-code">utm_source=newsletter</code> or a <code class="doc-inline-code">promo</code> parameter are classified by that marker instead of by the referring site. <strong>Sites</strong> lists the ten domains that send you the most traffic; this is a domain-level list, not a list of individual pages, and visits referred by your own pages, whether from your schedule URL or your custom domain, are treated as Direct and never show up here. <strong>Campaigns</strong> lists the ten most common values of <code class="doc-inline-code">utm_campaign</code>, <code class="doc-inline-code">utm_source</code> and <code class="doc-inline-code">utm_medium</code> seen on incoming links, one parameter at a time. Tag the links you post yourself to tell your own channels apart. A view is offered only when it has data.</p>
+            </div>
+            <div id="web-geography" class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Countries</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your top ten countries by view count, resolved from the visitor's IP address, each with its share of every view whose country is known. Use it to see whether your audience is local, regional or international. There is no city or region breakdown.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Devices</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The split between mobile, desktop and tablet visitors as one bar, with each share and count, based on the browser's user agent. Visits whose device could not be identified are grouped as Other. Categories with no views are left out.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Views</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Views per schedule, busiest first, so you can compare them side by side. Click one to see that schedule alone. Shown only when you manage more than one schedule and have not filtered to a single event.</p>
             </div>
             <div id="web-broken-links" class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Broken links</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Addresses on your schedule that visitors opened and that match no event or page, with how many times each was opened in the period, busiest first, up to ten. Such an address shows a not-found page instead of quietly landing on your schedule, so this is where a mistyped link on a flyer or an old event address in a post turns up. Shown only when a single schedule is selected and no event is. Bots are filtered out, and one visitor can add at most five new addresses a day, so a real broken link outranks one-off noise.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Traffic Sources</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Where your visitors come from, in eight categories: Direct, Search, Social, Email, Newsletter, Boost, Promo Code and Other. A colour key under the chart explains each one. Links carrying <code class="doc-inline-code">utm_source=boost</code>, <code class="doc-inline-code">utm_source=newsletter</code> or a <code class="doc-inline-code">promo</code> parameter are classified by that marker instead of by the referring site.</p>
-            </div>
-            <div id="web-geography" class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Visitor Locations</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your top ten countries by view count, resolved from the visitor's IP address. Use it to see whether your audience is local, regional or international. There is no city or region breakdown.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Schedule Views</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Views broken down per schedule so you can compare them side by side. Shown only when you manage more than one schedule and have not filtered to a single event.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Referrers</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The ten domains that send you the most traffic. This is a domain-level list, not a list of individual pages. Visits referred by your own pages, whether from your schedule URL or your custom domain, are treated as Direct and never show up here.</p>
-            </div>
-            <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top UTM Sources, Mediums and Campaigns</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Three separate charts, each listing the ten most common values of <code class="doc-inline-code">utm_source</code>, <code class="doc-inline-code">utm_medium</code> and <code class="doc-inline-code">utm_campaign</code> seen on incoming links. Tag the links you post yourself to tell your own channels apart. A chart is hidden when no link carried that parameter.</p>
             </div>
             <div id="web-social-clicks" class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Social Link Clicks</h4>
@@ -456,29 +449,33 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">The tab is on every plan; taking money is Pro</div>
-            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling a ticket</a> that carries a price is a Pro feature, and so is taking payment for an <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment</a>, so revenue appears once you are on Pro or Enterprise. Free registration and ticket types priced at zero stay unlimited on the Free plan: they are completed sales, so the cards below still appear, with revenue at zero. The Boost Funnel also needs Pro, because boost campaigns are a Pro feature.</p>
+            <p><a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling a ticket</a> that carries a price is a Pro feature, and so is taking payment for an <a href="{{ route('marketing.docs.appointments') }}" class="doc-link">appointment</a>, so revenue appears once you are on Pro or Enterprise. Free registration and ticket types priced at zero stay unlimited on the Free plan: they are completed sales, so the card below still appears, with revenue at zero. The Boost Funnel also needs Pro, because boost campaigns are a Pro feature.</p>
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Paid appointment bookings are sales, so they count in the revenue figures alongside tickets. They are left out of the conversion rate, because a booking is not made from an event page.
         </p>
 
-        <h3 id="revenue-stats" class="doc-subheading">Stats Cards</h3>
+        <h3 id="revenue-stats" class="doc-subheading">Figures and Chart</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Three cards summarise the period. They appear only once there is at least one completed sale in the selected range, and a free registration is one.
+            The tab opens on one card with four figures and the money over time. It appears once there is at least one completed sale in the selected range, and a free registration is one.
         </p>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Card</th>
+                        <th>Figure</th>
                         <th>What it shows</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Total Revenue</span></td>
-                        <td>What the paid sales made during the period took, by purchase date. It is not net of refunds: a partially refunded sale stays paid and counts in full, and only a fully refunded or deleted sale drops out. If your sales span more than one currency, each currency is listed on its own line rather than added together.</td>
+                        <td>What the paid sales made during the period took, by purchase date. It is not net of refunds: a partially refunded sale stays paid and counts in full, and only a fully refunded or deleted sale drops out. Beside it, the change against the window before in the same currency, compared the same way as page views on Web Analytics. If your sales span more than one currency, each currency is listed on its own line rather than added together, and there is no change.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Sales</span></td>
+                        <td>Completed purchases in the period. One checkout is one sale, however many tickets or guests it holds.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Conversion Rate</span></td>
@@ -491,10 +488,13 @@
                 </tbody>
             </table>
         </div>
-
-        <h3 id="revenue-funnels" class="doc-subheading">Funnels and Charts</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Below the cards, each panel appears only when it has data for the selected filters.
+            Under the figures, a bar for each day, week or month shows what came in, with a grey line for the window before and the flyers of your one-off events under their dates, so a run of sales can be read against the show it led up to. The bar for a day that is not over is drawn lighter. The chart needs the range's revenue to be in one currency: a bar cannot add euros to dollars, so with more than one it is left out.
+        </p>
+
+        <h3 id="revenue-funnels" class="doc-subheading">Lists and Funnels</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Below the card, each panel appears only when it has data for the selected filters. A boost or a newsletter belongs to the whole schedule, so with a single event selected the two funnels still count the whole schedule and are marked <strong>Whole schedule</strong>.
         </p>
         <div class="doc-fields">
             <div class="doc-field">
@@ -503,15 +503,15 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Boost Funnel <x-doc-badge plan="pro" /></h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The full path from ad impressions to clicks, page views and sales, with spend, click-through rate, cost per click, cost per view, cost per sale and a return-on-ad-spend figure. A table underneath lists each <a href="{{ route('marketing.docs.boost') }}" class="doc-link">boost campaign</a> running in the period with a link to its details.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The full path from ad impressions to clicks, page views and sales, one step to a tile, with the rate from the step before on each (click-through rate, the share that landed, the share that bought), spend, cost per click, cost per view, cost per sale and a return-on-ad-spend figure. A table underneath lists each <a href="{{ route('marketing.docs.boost') }}" class="doc-link">boost campaign</a> running in the period with a link to its details.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Newsletter Performance</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The path from emails sent to opens, clicks, page views and sales, with open and click rates. A table underneath lists each <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a> sent in the period with its subject, send date and per-newsletter open and click counts.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The path from emails sent to opens, clicks, page views and sales, with open and click rates. A reader can open a page more than once, so page views can outnumber clicks; the share that landed is then left out. A table underneath lists each <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletter</a> sent in the period with its subject, send date and per-newsletter open and click counts.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Events by Revenue</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Your ten highest-earning events in the period. It renders as a bar chart in the usual single-currency case, and as a table when your sales span more than one currency. Events that took no money are left out, and the whole panel is hidden when you have filtered down to a single event.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Your ten highest-earning events in the period, with their flyers, how many sales each made and what it took. Each row has a bar as long as its share in the usual single-currency case; when your sales span more than one currency the bars are left out, since a longer bar would not mean more money. Events that took no money are left out, and the whole panel is hidden when you have filtered down to a single event. Click an event to see the tab for it alone.</p>
             </div>
         </div>
     </section>
@@ -530,52 +530,52 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Note</div>
-            <p>Attendance comes from scanning tickets with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event reads as 100% no-shows rather than as missing data. Appointment bookings are left out of this tab, since nobody scans a booking at a door, so a schedule that takes bookings keeps a clean attendance rate.</p>
+            <p>Attendance comes from scanning tickets with the <a href="{{ route('marketing.docs.tickets') }}#check-in" class="doc-link">check-in feature</a>, which is free on every plan. Without a scan a ticket counts as sold but never as attended, so an unscanned event that has happened reads as 100% no-shows rather than as missing data. A ticket for a show that has not begun is counted as sold and is never a no-show: a show begins at its start time in its schedule's own timezone, or as soon as one of its tickets is scanned, whichever comes first. Appointment bookings are left out of this tab, since nobody scans a booking at a door, so a schedule that takes bookings keeps a clean attendance rate.</p>
         </div>
 
-        <h3 id="checkins-stats" class="doc-subheading">Stats Cards</h3>
+        <h3 id="checkins-stats" class="doc-subheading">Figures</h3>
         <div class="doc-table-wrap">
             <table class="doc-table">
                 <thead>
                     <tr>
-                        <th>Card</th>
+                        <th>Figure</th>
                         <th>What it shows</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Tickets Sold</span></td>
-                        <td>Tickets from paid sales for events dated in the selected range, including free registrations and events still to come</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Attendance Rate</span></td>
+                        <td>Tickets scanned at the door as a percentage of the tickets for shows that have begun, with a bar and the two counts under it (120 of 147)</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Checked In</span></td>
-                        <td>How many of those tickets were scanned at the door</td>
+                        <td>How many tickets were scanned at the door</td>
                     </tr>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Attendance Rate</span></td>
-                        <td>Checked in as a percentage of tickets sold</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Tickets Sold</span></td>
+                        <td>Tickets from paid sales for events dated in the selected range, including free registrations. The ones for shows still to come are counted under it, as For upcoming events.</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">No-Shows</span></td>
-                        <td>The remaining percentage: 100% minus the attendance rate</td>
+                        <td>Tickets for shows that have begun that were not scanned, as a count and a percentage</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <h3 id="checkins-charts" class="doc-subheading">Charts</h3>
+        <h3 id="checkins-charts" class="doc-subheading">Arrivals and Events</h3>
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Arrival Times</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A bar chart of check-ins by hour of the day, from 12 AM to 11 PM, in the schedule's own timezone. Use it to see when the queue actually forms and to staff the door accordingly. It is not measured relative to each event's start time, so it is most useful when your events start at a consistent hour.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A bar chart of check-ins by hour of the day, from the hour before the first arrival to the hour after the last, in the schedule's own timezone. Use it to see when the queue actually forms and to staff the door accordingly. It is not measured relative to each event's start time, so it is most useful when your events start at a consistent hour.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Attendance Rate</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A chart with the same name as the card above it: check-in rates broken down by ticket type, so you can see which types turn up. Shown only when the period contains more than one ticket type.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">By Ticket Type</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Beside the arrivals: the attendance rate of each ticket type, with how many came of how many, so you can see which types turn up. Types are matched by name across your events, so every event's General is one row. Shown only when the period contains more than one ticket type.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Events</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A table of per-event check-in data - event name, date, sold, checked in and attendance rate - sorted with the most recent event date first.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A table of per-event check-in data, sorted with the most recent event date first: event name, date, tickets sold for the dates that have begun (with a +N for the event's later dates), checked in, and the attendance rate with a bar. A show still to come reads Upcoming.</p>
             </div>
         </div>
     </section>
@@ -589,7 +589,7 @@
             No Data State
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Each tab shows its own empty state when it has nothing to display: "No analytics data available yet", "No revenue data available yet", "No check-in data" or, on Realtime, "Quiet right now". Common causes:
+            Each tab shows its own empty state when it has nothing to display: its card drawn quietly, with zeros, and a line saying what will appear: "No analytics data available yet", "No revenue data available yet", "No check-in data" or, on Realtime, "Quiet right now". Common causes:
         </p>
         <ul class="doc-list mb-6">
             <li>The schedule is new and has not been visited yet.</li>

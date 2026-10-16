@@ -7,6 +7,7 @@ use App\Services\AnalyticsService;
 use App\Services\ScheduleActivity;
 use App\Services\ScheduleRealtime;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -141,7 +142,9 @@ class AnalyticsController extends Controller
             'last_30_days' => [now()->subDays(29)->startOfDay(), now()->endOfDay()],
             'last_90_days' => [now()->subDays(89)->startOfDay(), now()->endOfDay()],
             'this_month' => [now()->startOfMonth(), now()->endOfDay()],
-            'last_month' => [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()],
+            // NoOverflow: on Oct 31 subMonth() is Oct 1 and on Mar 30 it is Mar 2, so "last
+            // month" was this one.
+            'last_month' => [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()],
             'this_year' => [now()->startOfYear(), now()->endOfDay()],
             'all_time' => [now()->subYears(10)->startOfDay(), now()->endOfDay()],
             default => [now()->subDays(29)->startOfDay(), now()->endOfDay()],
@@ -154,6 +157,12 @@ class AnalyticsController extends Controller
         // of the show and then appears, which reads exactly like data going missing. Null means
         // "no upper bound"; a closed historical range keeps both ends.
         $eventDateEnd = $range === 'last_month' ? $end : null;
+
+        // How the charts group: by day, week or month. Whitelisted here because the tab links and
+        // the switch in each chart carry it from tab to tab. All Time groups by month unless asked:
+        // by day it was a thousand points for a schedule a few years old.
+        $defaultPeriod = $range === 'all_time' ? 'monthly' : 'daily';
+        $period = in_array($request->period, ['daily', 'weekly', 'monthly'], true) ? $request->period : $defaultPeriod;
 
         if ($tab === 'realtime') {
             // The picker on this tab lists the schedules the live view covers, and nothing it
@@ -180,6 +189,8 @@ class AnalyticsController extends Controller
                 'tabEventId',
                 'events',
                 'range',
+                'period',
+                'defaultPeriod',
                 'tab',
                 'realtime'
             ))->with($realtimeTab);
@@ -196,6 +207,8 @@ class AnalyticsController extends Controller
                 'tabEventId',
                 'events',
                 'range',
+                'period',
+                'defaultPeriod',
                 'tab',
                 'checkinStats'
             ))->with($realtimeTab);
@@ -219,6 +232,46 @@ class AnalyticsController extends Controller
             // Get newsletter stats
             $newsletterStats = $analytics->getNewsletterStats($user, $start, $end, $selectedRoleId);
 
+            // The money over time, and what it was the window before. Only in one currency: a bar
+            // cannot add euros to dollars, and with more than one the figures above say each.
+            $revenueChart = null;
+            $revenueComparison = null;
+            if ($conversionStats['currency_count'] === 1) {
+                $currency = $conversionStats['primary_currency'];
+                // All Time begins at the first month that took money (by month: a few dozen rows,
+                // where by day it was every day of ten years).
+                $chartStart = $start;
+                if ($range === 'all_time') {
+                    $months = array_keys($analytics->getRevenueByPeriod($user, 'monthly', $start, $end, $currency, $selectedRoleId, $selectedEventId));
+                    sort($months);
+                    $chartStart = $months ? Carbon::createFromFormat('Y-m-d', $months[0].'-01')->startOfDay() : $end->copy()->subDays(29)->startOfDay();
+                }
+                [$keys, $values] = AnalyticsService::fillPeriods(
+                    $analytics->getRevenueByPeriod($user, $period, $chartStart, $end, $currency, $selectedRoleId, $selectedEventId),
+                    $period, $chartStart, $end
+                );
+                $revenueChart = ['keys' => $keys, 'values' => $values, 'currency' => $currency, 'previous' => [], 'previousKeys' => []];
+                $revenueChart['events'] = $this->chartEvents($analytics->getChartEvents($user, $chartStart, $end, $selectedRoleId, $selectedEventId, true), $period);
+
+                if ($range !== 'all_time') {
+                    [$previousStart, $previousEnd, $label] = $analytics->previousWindow($range);
+                    $previous = $analytics->getRevenueTotal($user, $previousStart, $previousEnd, $currency, $selectedRoleId, $selectedEventId);
+                    [$previousKeys, $previousValues] = AnalyticsService::fillPeriods(
+                        $analytics->getRevenueByPeriod($user, $period, $previousStart, $previousEnd, $currency, $selectedRoleId, $selectedEventId),
+                        $period, $previousStart, $previousEnd
+                    );
+                    $revenueChart['previous'] = array_slice($previousValues, 0, count($keys));
+                    $revenueChart['previousKeys'] = array_slice($previousKeys, 0, count($keys));
+                    $revenueComparison = [
+                        'previous' => $previous,
+                        'percentage_change' => $previous > 0
+                            ? round((($conversionStats['total_revenue'] - $previous) / $previous) * 100, 1)
+                            : null,
+                        'label' => $label,
+                    ];
+                }
+            }
+
             return view('analytics.index', compact(
                 'roles',
                 'selectedRoleId',
@@ -232,15 +285,13 @@ class AnalyticsController extends Controller
                 'promoCodeStats',
                 'topEventsByRevenue',
                 'boostStats',
-                'newsletterStats'
+                'newsletterStats',
+                'period',
+                'defaultPeriod',
+                'revenueChart',
+                'revenueComparison'
             ))->with($realtimeTab);
         }
-
-        // Period determines chart grouping
-        $period = $request->period ?? 'daily';
-
-        // Get month-over-month comparison (for fixed stats cards)
-        $momComparison = $analytics->getMonthOverMonthComparison($user, $selectedRoleId, $selectedEventId);
 
         // Get period comparison based on selected range (for dynamic comparison card)
         $periodComparison = $range !== 'all_time'
@@ -307,8 +358,9 @@ class AnalyticsController extends Controller
         // Get social link click stats
         $socialClickStats = $analytics->getSocialClickStats($user, $start, $end, $selectedRoleId);
 
-        // Get visitor locations
+        // Get visitor locations, and the whole each listed country is a share of
         $locationBreakdown = $analytics->getLocationBreakdown($user, 10, $start, $end, $selectedRoleId);
+        $locationTotal = $locationBreakdown->isNotEmpty() ? $analytics->getLocationTotal($user, $start, $end, $selectedRoleId) : 0;
 
         // Get boost views by period for chart overlay
         $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
@@ -322,6 +374,34 @@ class AnalyticsController extends Controller
             ? $analytics->getNewsletterViewsByPeriod($user, $period, $start, $end, $selectedRoleId)
             : collect();
 
+        // The hero chart's series, one point for every day, week or month of the range, and the
+        // range before it laid under it point for point. "All time" starts where the data does
+        // and not ten years back. The overlays are views that came from a boost or a newsletter.
+        [$chartStart] = $this->chartStart($range, $start, $period, $viewsByPeriod->pluck('period')->all());
+        $pluck = fn ($rows) => collect($rows)->pluck('view_count', 'period')->all();
+        [$keys, $values] = AnalyticsService::fillPeriods($pluck($viewsByPeriod), $period, $chartStart, $end);
+        $viewsChart = [
+            'keys' => $keys,
+            'views' => $values,
+            'boost' => $boostViewsByPeriod->isNotEmpty() ? AnalyticsService::fillPeriods($pluck($boostViewsByPeriod), $period, $chartStart, $end)[1] : [],
+            'newsletter' => $newsletterViewsByPeriod->isNotEmpty() ? AnalyticsService::fillPeriods($pluck($newsletterViewsByPeriod), $period, $chartStart, $end)[1] : [],
+            'previous' => [],
+            'previousKeys' => [],
+        ];
+        // The events of the window, marked on the chart under the period they fall in.
+        $viewsChart['events'] = $this->chartEvents($analytics->getChartEvents($user, $chartStart, $end, $selectedRoleId, $selectedEventId), $period);
+        if ($periodComparison) {
+            [$previousStart, $previousEnd] = $analytics->previousWindow($range);
+            [$previousKeys, $previousValues] = AnalyticsService::fillPeriods(
+                $pluck($analytics->getViewsByPeriod($user, $period, $previousStart, $previousEnd, $selectedRoleId, $selectedEventId)),
+                $period, $previousStart, $previousEnd
+            );
+            // Day for day from the start of each: "this month" so far is laid over the same
+            // days of last month, not all of it.
+            $viewsChart['previous'] = array_slice($previousValues, 0, count($keys));
+            $viewsChart['previousKeys'] = array_slice($previousKeys, 0, count($keys));
+        }
+
         return view('analytics.index', compact(
             'roles',
             'selectedRoleId',
@@ -330,7 +410,6 @@ class AnalyticsController extends Controller
             'tabEventId',
             'events',
             'totalViews',
-            'momComparison',
             'periodComparison',
             'topEvents',
             'missingLinks',
@@ -351,7 +430,52 @@ class AnalyticsController extends Controller
             'topUtmMediums',
             'topUtmCampaigns',
             'socialClickStats',
-            'locationBreakdown'
+            'locationBreakdown',
+            'locationTotal',
+            'defaultPeriod',
+            'viewsChart',
+            'boostStats',
+            'newsletterStats'
         ))->with($realtimeTab);
+    }
+
+    /**
+     * The events of a chart's window, each given the key of the period it falls in, so the chart
+     * can mark it under that day, week or month.
+     */
+    private function chartEvents(array $events, string $period): array
+    {
+        return array_map(fn ($e) => $e + ['key' => match ($period) {
+            'weekly' => Carbon::parse($e['date'])->format('o-W'),
+            'monthly' => substr($e['date'], 0, 7),
+            default => $e['date'],
+        }], $events);
+    }
+
+    /**
+     * Where a chart begins. "All time" is ten years back as a WHERE clause, and as a chart that
+     * is ten years of empty days before the first view: it begins at the first period that has
+     * data instead. $keys are the period keys of the rows (any order).
+     */
+    private function chartStart(string $range, Carbon $start, string $period, array $keys): array
+    {
+        if ($range !== 'all_time') {
+            return [$start];
+        }
+        // All Time with no views at all (only appearances or broken links): the last 30 days,
+        // not ten years of empty days.
+        if (! $keys) {
+            return [now()->subDays(29)->startOfDay()];
+        }
+
+        sort($keys);
+        $first = (string) $keys[0];
+
+        return [match (true) {
+            (bool) preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $first) => Carbon::parse($first)->startOfDay(),
+            (bool) preg_match('/^(\d{4})-(\d{2})$/', $first, $m) && $period === 'monthly' => Carbon::create((int) $m[1], (int) $m[2], 1)->startOfDay(),
+            (bool) preg_match('/^(\d{4})-(\d{2})$/', $first, $m) => Carbon::now()->setISODate((int) $m[1], (int) $m[2])->startOfWeek(Carbon::MONDAY)->startOfDay(),
+            default => $start,
+        }];
     }
 }

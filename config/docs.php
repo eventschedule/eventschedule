@@ -435,7 +435,7 @@ return [
             'shot' => 'analytics--dashboard',
             'shot_alt' => 'The Analytics page',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-16',
         ],
 
         'account-settings' => [

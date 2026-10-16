@@ -40,7 +40,7 @@ return [
     '/docs/account-settings' => '2026-10-15',
     '/docs/ai-import' => '2026-10-08',
     '/docs/allocated-seating' => '2026-10-15',
-    '/docs/analytics' => '2026-10-07',
+    '/docs/analytics' => '2026-10-16',
     '/docs/appointments' => '2026-10-15',
     '/docs/boost' => '2026-10-15',
     '/docs/creating-events' => '2026-10-15',

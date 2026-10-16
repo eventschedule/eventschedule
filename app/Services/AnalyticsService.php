@@ -28,6 +28,9 @@ use Illuminate\Support\Facades\DB;
 
 class AnalyticsService
 {
+    /** ownedEventIdsForRoles(), by viewer and schedules, for the life of the service. */
+    private array $ownedEventIds = [];
+
     /**
      * Record a page view (returns false if bot detected)
      */
@@ -159,53 +162,17 @@ class AnalyticsService
     }
 
     /**
-     * Get month-over-month comparison
+     * The window a range is compared with, and the words for it: [start, end, label key]. For the
+     * rolling ranges the current window is today and the N - 1 days before it, so the one before
+     * it is the N days ending the day before THAT: the same number of dates on both sides, with no
+     * day in neither. This Month and This Year are not over, so they are measured against the
+     * same stretch of the month and year before (October 1 to 3 against September 1 to 3): set
+     * against all of last month, a month three days old always read about -90%. The views figure,
+     * the revenue figure and the chart's grey line all ask this one place, so they agree.
      */
-    public function getMonthOverMonthComparison(User $user, ?int $roleId = null, ?int $eventId = null): array
+    public function previousWindow(string $range): array
     {
-        $thisMonthStart = now()->startOfMonth();
-        $thisMonthEnd = now()->endOfMonth();
-        $lastMonthStart = now()->subMonth()->startOfMonth();
-        $lastMonthEnd = now()->subMonth()->endOfMonth();
-
-        if ($eventId) {
-            $thisMonthViews = $this->getPeriodViewsForEvent($eventId, $thisMonthStart, $thisMonthEnd);
-            $lastMonthViews = $this->getPeriodViewsForEvent($eventId, $lastMonthStart, $lastMonthEnd);
-        } else {
-            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
-
-            if ($roleIds->isEmpty()) {
-                return [
-                    'this_month' => 0,
-                    'last_month' => 0,
-                    'percentage_change' => 0,
-                ];
-            }
-
-            $thisMonthViews = $this->getPeriodViewsForRoles($roleIds, $thisMonthStart, $thisMonthEnd);
-            $lastMonthViews = $this->getPeriodViewsForRoles($roleIds, $lastMonthStart, $lastMonthEnd);
-        }
-
-        $percentageChange = $lastMonthViews > 0
-            ? round((($thisMonthViews - $lastMonthViews) / $lastMonthViews) * 100, 1)
-            : ($thisMonthViews > 0 ? 100 : 0);
-
-        return [
-            'this_month' => $thisMonthViews,
-            'last_month' => $lastMonthViews,
-            'percentage_change' => $percentageChange,
-        ];
-    }
-
-    /**
-     * Get period comparison based on date range
-     */
-    public function getPeriodComparison(User $user, string $range, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
-    {
-        // Calculate previous period based on range. For the rolling ranges the current window is
-        // today and the N - 1 days before it, so the one before it is the N days ending the day
-        // before THAT: the same number of dates on both sides, with no day in neither.
-        [$previousStart, $previousEnd, $label] = match ($range) {
+        return match ($range) {
             'last_7_days' => [
                 now()->subDays(13)->startOfDay(),
                 now()->subDays(7)->endOfDay(),
@@ -222,19 +189,21 @@ class AnalyticsService
                 'vs_previous_90_days',
             ],
             'this_month' => [
-                now()->subMonth()->startOfMonth(),
-                now()->subMonth()->endOfMonth(),
-                'vs_last_month',
+                now()->subMonthNoOverflow()->startOfMonth(),
+                now()->subMonthNoOverflow()->endOfDay(),
+                'an_vs_month_to_date',
             ],
+            // NoOverflow: on Oct 31, subMonths(2) is Aug 31 but subMonth() is Oct 1, and on
+            // Mar 30 "Feb 30" is Mar 2, so last month was this month.
             'last_month' => [
-                now()->subMonths(2)->startOfMonth(),
-                now()->subMonths(2)->endOfMonth(),
+                now()->subMonthsNoOverflow(2)->startOfMonth(),
+                now()->subMonthsNoOverflow(2)->endOfMonth(),
                 'vs_previous_month',
             ],
             'this_year' => [
-                now()->subYear()->startOfYear(),
-                now()->subYear()->endOfYear(),
-                'vs_last_year',
+                now()->subYearNoOverflow()->startOfYear(),
+                now()->subYearNoOverflow()->endOfDay(),
+                'an_vs_year_to_date',
             ],
             default => [
                 now()->subDays(59)->startOfDay(),
@@ -242,6 +211,115 @@ class AnalyticsService
                 'vs_previous_30_days',
             ],
         };
+    }
+
+    /**
+     * A series with a point for EVERY period from $start to $end, empty ones as 0. The queries
+     * group by period and return only the periods that had a row, and a line drawn through those
+     * alone joined a Friday to the next Wednesday as though the days between had been busy.
+     *
+     * $rows maps a period key (the DATE_FORMAT of getViewsByPeriod(): Y-m-d, ISO year-week, Y-m)
+     * to its value. Returns [period keys, values], in order.
+     */
+    public static function fillPeriods(array $rows, string $period, Carbon $start, Carbon $end): array
+    {
+        $cursor = $start->copy()->startOfDay();
+        $last = $end->copy()->startOfDay();
+        [$step, $format] = match ($period) {
+            'weekly' => ['addWeek', 'o-W'],
+            'monthly' => ['addMonth', 'Y-m'],
+            default => ['addDay', 'Y-m-d'],
+        };
+        if ($period === 'weekly') {
+            $cursor->startOfWeek(Carbon::MONDAY);
+        } elseif ($period === 'monthly') {
+            $cursor->startOfMonth();
+        }
+
+        $keys = [];
+        $values = [];
+        // A ceiling, so a range that has somehow run to years of days stays a chart.
+        for ($i = 0; $cursor->lte($last) && $i < 4000; $i++) {
+            $key = $cursor->format($format);
+            $keys[] = $key;
+            $values[] = (float) ($rows[$key] ?? 0);
+            $cursor->{$step}();
+        }
+
+        return [$keys, $values];
+    }
+
+    /**
+     * The one-off events dated inside a chart's window, for the marks along the views chart: a
+     * rise reads at once when the show it led up to stands under it. [['date' => Y-m-d in the
+     * event's own schedule's timezone, 'name', 'image'], ...], oldest first.
+     *
+     * Left out: a series (a mark under every Tuesday says nothing), a draft, an appointment
+     * booking (an event named after its guest), and an event the schedule never accepted: a
+     * request waiting at a venue was drawn on its chart, flyer and name, though it was never on the
+     * venue's page. On Revenue ($ownedDataOnly) only the schedules' own events, whose money it is.
+     * The newest $limit, for a long range.
+     */
+    public function getChartEvents(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null, bool $ownedDataOnly = false, int $limit = 60): array
+    {
+        $query = Event::query()
+            ->where('is_draft', false)
+            ->whereNull('days_of_week')
+            ->whereNull('appointment_type_id')
+            // A day either side: starts_at is UTC and the day that matters is the schedule's.
+            ->whereBetween('starts_at', [$start->copy()->subDay(), $end->copy()->addDay()]);
+
+        if ($eventId) {
+            $query->where('id', $eventId);
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+            if ($roleIds->isEmpty()) {
+                return [];
+            }
+            $query->where(function ($q) use ($roleIds, $ownedDataOnly) {
+                $q->whereIn('creator_role_id', $roleIds);
+                if (! $ownedDataOnly) {
+                    $q->orWhereHas('roles', fn ($r) => $r->whereIn('roles.id', $roleIds)->where('event_role.is_accepted', true));
+                }
+            });
+        }
+
+        $from = $start->toDateString();
+        $to = $end->toDateString();
+
+        // roles: an event with no flyer shows a schedule's picture (getImageUrl()).
+        return $query->with(['creatorRole', 'roles'])
+            ->orderByDesc('starts_at')
+            ->limit($limit)
+            ->get()
+            ->reverse()
+            ->map(fn (Event $event) => [
+                'date' => self::occurrenceStart($event)->format('Y-m-d'),
+                'name' => $event->translatedName(),
+                'image' => $event->getImageUrl() ?: null,
+            ])
+            ->filter(fn ($row) => $row['date'] >= $from && $row['date'] <= $to)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * When an occurrence of an event begins: its start on that date, in its own schedule's
+     * timezone. getStartDateTime() without $locale sets the date on the UTC time, which put a 9pm
+     * New York show (01:00 UTC the next day) on the evening before: on show day all its tickets
+     * read as no-shows, and its mark on the chart stood under the next day.
+     */
+    public static function occurrenceStart(Event $event, ?string $date = null): Carbon
+    {
+        return $event->getStartDateTime($date, true);
+    }
+
+    /**
+     * Get period comparison based on date range
+     */
+    public function getPeriodComparison(User $user, string $range, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
+    {
+        [$previousStart, $previousEnd, $label] = $this->previousWindow($range);
 
         if ($eventId) {
             $currentViews = $this->getPeriodViewsForEvent($eventId, $start, $end);
@@ -555,7 +633,11 @@ class AnalyticsService
      */
     protected function ownedEventIdsForRoles(User $user, Collection $roleIds): Collection
     {
-        return DB::table('event_role')
+        // Asked five or six times by one load of the Revenue tab (the figures, the chart, the
+        // window before, the lists), each a scan of the schedules' events.
+        $key = $user->id.':'.$roleIds->sort()->implode(',');
+
+        return $this->ownedEventIds[$key] ??= DB::table('event_role')
             ->join('roles', 'roles.id', '=', 'event_role.role_id')
             ->join('events', 'events.id', '=', 'event_role.event_id')
             ->whereIn('event_role.role_id', $roleIds)
@@ -825,6 +907,73 @@ class AnalyticsService
     }
 
     /**
+     * The events whose money this page may show: one event, or what the schedules own. The same
+     * set getConversionStats() reads, so a chart and the figures above it add up.
+     */
+    protected function revenueEventIds(User $user, ?int $roleId, ?int $eventId): Collection
+    {
+        if ($eventId) {
+            return collect([$eventId]);
+        }
+
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        return $roleIds->isEmpty() ? collect() : $this->ownedEventIdsForRoles($user, $roleIds);
+    }
+
+    /**
+     * Revenue by day, week or month in ONE currency, for the Revenue tab's chart: [period => amount].
+     * A bar cannot add euros to dollars, so the tab draws the chart only when the window's revenue
+     * is in a single currency and asks for that one. The rows are the figures' own (paid, not
+     * deleted, by when the sale was made), so the bars add up to the revenue beside them.
+     */
+    public function getRevenueByPeriod(User $user, string $period, Carbon $start, Carbon $end, string $currency, ?int $roleId = null, ?int $eventId = null): array
+    {
+        $eventIds = $this->revenueEventIds($user, $roleId, $eventId);
+
+        if ($eventIds->isEmpty()) {
+            return [];
+        }
+
+        // Whitelisted, as getViewsByPeriod(): the period comes from the address.
+        $format = match ($period) {
+            'weekly' => '%x-%v',
+            'monthly' => '%Y-%m',
+            default => '%Y-%m-%d',
+        };
+
+        return DB::table('sales')
+            ->join('events', 'sales.event_id', '=', 'events.id')
+            ->whereIn('sales.event_id', $eventIds->toArray())
+            ->where('sales.status', 'paid')
+            ->where('sales.is_deleted', false)
+            ->whereBetween('sales.created_at', [$start, $end])
+            // salesByCurrency() reads an event with no currency as USD; so does this.
+            ->whereRaw("COALESCE(NULLIF(events.ticket_currency_code, ''), 'USD') = ?", [$currency])
+            ->groupBy('period')
+            ->selectRaw("DATE_FORMAT(sales.created_at, '{$format}') as period, COALESCE(SUM(sales.payment_amount), 0) as amount")
+            ->pluck('amount', 'period')
+            ->map(fn ($amount) => (float) $amount)
+            ->all();
+    }
+
+    /**
+     * Revenue in one currency over a window: the figure the Revenue tab compares its own with.
+     */
+    public function getRevenueTotal(User $user, Carbon $start, Carbon $end, string $currency, ?int $roleId = null, ?int $eventId = null): float
+    {
+        $eventIds = $this->revenueEventIds($user, $roleId, $eventId);
+
+        if ($eventIds->isEmpty()) {
+            return 0.0;
+        }
+
+        $row = collect($this->salesByCurrency($eventIds, $start, $end))->firstWhere('currency_code', $currency);
+
+        return $row ? (float) $row['amount'] : 0.0;
+    }
+
+    /**
      * Get top events by revenue
      */
     public function getTopEventsByRevenue(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null, ?int $roleId = null): Collection
@@ -855,7 +1004,9 @@ class AnalyticsService
             ->where('is_deleted', false)
             ->whereBetween('created_at', [$start, $end])
             ->groupBy('event_id')
-            ->selectRaw('event_id, COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as revenue')
+            // Purchases, not rows, as everywhere else on the page: one checkout writes a row per
+            // named guest and per event in a cart.
+            ->selectRaw('event_id, COUNT(DISTINCT COALESCE(order_id, group_id, id)) as sales_count, COALESCE(SUM(payment_amount), 0) as revenue')
             ->havingRaw('COALESCE(SUM(payment_amount), 0) > 0')
             ->orderByDesc('revenue')
             ->limit($limit)
@@ -877,7 +1028,8 @@ class AnalyticsService
             ->get()
             ->keyBy('event_id');
 
-        $events = Event::whereIn('id', $salesEventIds)->get()->keyBy('id');
+        // roles: a row links to its event under one of the viewer's schedules it is on.
+        $events = Event::with('roles')->whereIn('id', $salesEventIds)->get()->keyBy('id');
 
         return $salesData
             ->filter(fn ($item) => isset($events[$item->event_id]))
@@ -1034,6 +1186,17 @@ class AnalyticsService
                 'country_name' => CountryUtils::getName($item->country_code),
                 'view_count' => (int) $item->view_count,
             ]);
+    }
+
+    /**
+     * Views with a known country over the window: the whole that each listed country is a share
+     * of (getLocationBreakdown() lists ten).
+     */
+    public function getLocationTotal(User $user, Carbon $start, Carbon $end, ?int $roleId = null): int
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        return $roleIds->isEmpty() ? 0 : (int) AnalyticsLocationsDaily::forRoles($roleIds)->inDateRange($start, $end)->sum('views');
     }
 
     /**
@@ -1392,7 +1555,7 @@ class AnalyticsService
                 ->where('event_date', '>=', $start->toDateString())
                 ->when($eventDateEnd, fn ($q2) => $q2->where('event_date', '<=', $eventDateEnd->toDateString()));
         })
-            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en,creator_role_id', 'ticket:id,type'])
+            ->with(['sale:id,event_id,event_date', 'sale.event:id,name,name_en,creator_role_id,starts_at', 'sale.event.creatorRole:id,timezone', 'ticket:id,type'])
             ->get();
 
         if ($saleTickets->isEmpty()) {
@@ -1413,7 +1576,25 @@ class AnalyticsService
             $timezone = $saleTickets->first()?->sale?->event?->scheduleTimezone();
         }
 
+        // A ticket for a show that has not begun is sold and cannot be a no-show. The rates are
+        // over the occurrences that have begun, each by its own start in its own schedule's
+        // time, and the tickets for later ones are counted on their own. Counted together, a
+        // schedule with its next three shows on sale read a 48% attendance and 52% no-shows, in
+        // red, and on show day tonight's tickets were no-shows from midnight. A ticket already
+        // scanned has begun whatever the clock says (doors open early).
+        $begun = [];
+        $scanned = [];
+        foreach ($saleTickets as $saleTicket) {
+            foreach (json_decode($saleTicket->seats, true) ?? [] as $timestamp) {
+                if ($timestamp !== null) {
+                    $scanned[$saleTicket->sale?->event_id.'|'.$saleTicket->sale?->event_date] = true;
+                    break;
+                }
+            }
+        }
+
         $totalSold = 0;
+        $pastSold = 0;
         $totalCheckedIn = 0;
         $arrivalHours = array_fill(0, 24, 0);
         $eventsData = [];
@@ -1439,8 +1620,18 @@ class AnalyticsService
                 }
             }
 
+            // A show has begun at its start in its own schedule's time, or once any of its
+            // tickets is scanned (doors open early): the whole show, not only the sales scanned.
+            $occurrence = $event->id.'|'.$saleTicket->sale->event_date;
+            $begun[$occurrence] ??= $saleTicket->sale->event_date === null
+                || isset($scanned[$occurrence])
+                || self::occurrenceStart($event, $saleTicket->sale->event_date)->lte(now());
+            $happened = $begun[$occurrence];
             $totalSold += $quantity;
             $totalCheckedIn += $checkedIn;
+            if ($happened) {
+                $pastSold += $quantity;
+            }
 
             // Events breakdown
             $eventId = $saleTicket->sale->event_id;
@@ -1450,32 +1641,40 @@ class AnalyticsService
                     'event_date' => $saleTicket->sale->event_date,
                     'sold' => 0,
                     'checked_in' => 0,
+                    'is_upcoming' => false,
                 ];
             }
             $eventsData[$eventId]['sold'] += $quantity;
             $eventsData[$eventId]['checked_in'] += $checkedIn;
+            $eventsData[$eventId]['past_sold'] = ($eventsData[$eventId]['past_sold'] ?? 0) + ($happened ? $quantity : 0);
+            $eventsData[$eventId]['is_upcoming'] = $eventsData[$eventId]['past_sold'] === 0;
 
-            // Ticket type breakdown
-            $ticketId = $saleTicket->ticket_id;
-            $ticketName = $saleTicket->ticket?->type ?? __('messages.unknown');
-            if (! isset($ticketTypesData[$ticketId])) {
-                $ticketTypesData[$ticketId] = [
+            // Ticket type breakdown, by the type's NAME: every event has its own "General", and
+            // keyed by ticket id a schedule's chart listed "General" six times with no way to
+            // tell them apart. Only the nights that have begun, as the rates above.
+            if (! $happened) {
+                continue;
+            }
+            $ticketName = $saleTicket->ticket?->type ?: __('messages.unknown');
+            $typeKey = mb_strtolower(trim($ticketName));
+            if (! isset($ticketTypesData[$typeKey])) {
+                $ticketTypesData[$typeKey] = [
                     'name' => $ticketName,
                     'sold' => 0,
                     'checked_in' => 0,
                 ];
             }
-            $ticketTypesData[$ticketId]['sold'] += $quantity;
-            $ticketTypesData[$ticketId]['checked_in'] += $checkedIn;
+            $ticketTypesData[$typeKey]['sold'] += $quantity;
+            $ticketTypesData[$typeKey]['checked_in'] += $checkedIn;
         }
 
-        // Calculate rates
-        $attendanceRate = $totalSold > 0 ? round(($totalCheckedIn / $totalSold) * 100, 1) : 0;
+        // Calculate rates, over the nights that have begun
+        $attendanceRate = $pastSold > 0 ? round(($totalCheckedIn / $pastSold) * 100, 1) : 0;
 
         // Sort events by date descending
         $eventsBreakdown = collect($eventsData)->map(function ($event) {
-            $event['attendance_rate'] = $event['sold'] > 0
-                ? round(($event['checked_in'] / $event['sold']) * 100, 1) : 0;
+            $event['attendance_rate'] = $event['past_sold'] > 0
+                ? round(($event['checked_in'] / $event['past_sold']) * 100, 1) : 0;
 
             return $event;
         })->sortByDesc('event_date')->values()->toArray();
@@ -1491,9 +1690,13 @@ class AnalyticsService
         return [
             'has_data' => true,
             'total_sold' => $totalSold,
+            // Sold for nights that have begun, and for nights still to come.
+            'past_sold' => $pastSold,
+            'upcoming_sold' => $totalSold - $pastSold,
             'total_checked_in' => $totalCheckedIn,
             'attendance_rate' => $attendanceRate,
-            'no_show_rate' => round(100 - $attendanceRate, 1),
+            'no_shows' => max(0, $pastSold - $totalCheckedIn),
+            'no_show_rate' => $pastSold > 0 ? round(100 - $attendanceRate, 1) : 0,
             'events_breakdown' => $eventsBreakdown,
             'ticket_types' => $ticketTypes,
             'arrival_hours' => $arrivalHours,
