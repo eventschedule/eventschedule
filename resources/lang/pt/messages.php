@@ -7131,6 +7131,7 @@ return [
     'boost_partner_stop_pending' => 'O boost está interrompido aqui. Ainda não foi possível acessar o Facebook, então continuaremos tentando pausar o anúncio.',
     'boost_partner_changed_while_reviewing' => 'Esta solicitação mudou enquanto você a revisava.',
     'boost_partner_ids_invalid' => 'Informe o ID da Página e o ID da conta de anúncios como números, ou cole os endereços deles do Facebook.',
+    'boost_partner_ids_taken' => 'Esta Página ou conta de anúncios já está conectada a outra conta. Fale conosco se ela for sua.',
     'boost_partner_disconnected_reason' => 'A rede desconectou sua Página e sua conta de anúncios.',
     'boost_partner_disconnected' => 'Sua Página e sua conta de anúncios estão desconectadas. Os boosts em andamento foram interrompidos.',
     'boost_partner_login_failed' => 'O Facebook não concluiu a conexão. Tente novamente.',

@@ -7202,6 +7202,7 @@ return [
     'boost_partner_stop_pending' => 'The boost is stopped here. Facebook could not be reached yet, so we will keep trying to pause the ad.',
     'boost_partner_changed_while_reviewing' => 'This request changed while you were reviewing it.',
     'boost_partner_ids_invalid' => 'Enter the Page ID and the ad account ID as numbers, or paste their addresses from Facebook.',
+    'boost_partner_ids_taken' => 'This Page or ad account is already connected to another account. Contact us if it is yours.',
     'boost_partner_disconnected_reason' => 'The network disconnected its Page and ad account.',
     'boost_partner_disconnected' => 'Your Page and ad account are disconnected. Any running boosts were stopped.',
     'boost_partner_login_failed' => 'Facebook did not complete the connection. Try again.',

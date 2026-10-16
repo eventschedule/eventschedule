@@ -153,6 +153,9 @@ class PromotionController extends Controller
                 'metadata' => [
                     'type' => 'promo',
                     'event_id' => (string) $event->id,
+                    // Who made it: only they can have it given back from a refused submit
+                    // (BoostBillingService::intentIsFor()), and only their campaign can take it.
+                    'user_id' => (string) auth()->id(),
                     'user_budget' => (string) $budget,
                     'markup_rate' => '0',
                 ],
@@ -493,6 +496,7 @@ class PromotionController extends Controller
             'promo_abandon_',
             ($eventId = UrlUtils::decodeId($request->event_id)) ? (int) $eventId : null,
             'promo',
+            auth()->id() ? (int) auth()->id() : null,
         );
     }
 

@@ -241,7 +241,7 @@ class BoostController extends Controller
             // The partner was switched on while this form was open, and the card may already have
             // been charged for the platform's own boost. The boost is a request to the partner,
             // who is paid separately, so that payment goes back.
-            app(BoostBillingService::class)->abandonPaymentIntent($request->payment_intent_id, 'boost_partner_request', 'boost_abandon_', (int) $partnerEvent->id, 'boost');
+            app(BoostBillingService::class)->abandonPaymentIntent($request->payment_intent_id, 'boost_partner_request', 'boost_abandon_', (int) $partnerEvent->id, 'boost', (int) auth()->id());
 
             return app(BoostPartnerController::class)->store($request, $partnerEvent, $partner);
         }
@@ -948,11 +948,13 @@ class BoostController extends Controller
             if ($request->previous_payment_intent_id) {
                 try {
                     $previous = $stripe->paymentIntents->retrieve($request->previous_payment_intent_id);
-                    if (isset($previous->metadata->event_id) && (int) $previous->metadata->event_id !== $eventId) {
-                        Log::warning('Previous payment intent does not belong to this event', [
+                    // Only one this form made for this event and this person: the id is the
+                    // request's, and anything else on the account (another advertiser's
+                    // checkout, a boost partner's fee waiting on 3-D Secure) must not be cancelled.
+                    if (! BoostBillingService::intentIsFor($previous->metadata ? $previous->metadata->toArray() : [], 'boost', (int) $eventId, (int) auth()->id())) {
+                        Log::warning('Previous payment intent is not this checkout\'s', [
                             'previous_id' => $request->previous_payment_intent_id,
                             'expected_event_id' => $eventId,
-                            'actual_event_id' => $previous->metadata->event_id,
                         ]);
                     } elseif (in_array($previous->status, ['requires_payment_method', 'requires_confirmation', 'requires_action'])) {
                         $stripe->paymentIntents->cancel($request->previous_payment_intent_id);
@@ -973,6 +975,9 @@ class BoostController extends Controller
                 'metadata' => [
                     'type' => 'boost',
                     'event_id' => $eventId,
+                    // Who made it: only they can have it given back or cancelled from a request
+                    // (BoostBillingService::intentIsFor()), and only their campaign can take it.
+                    'user_id' => (string) auth()->id(),
                     'user_budget' => $budget,
                     'markup_rate' => $markupRate,
                 ],

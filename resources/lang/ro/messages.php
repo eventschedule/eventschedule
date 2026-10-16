@@ -7150,6 +7150,7 @@ return [
     'boost_partner_stop_pending' => 'Promovarea este oprită aici. Facebook nu a putut fi contactat încă, așa că vom continua să încercăm să punem reclama pe pauză.',
     'boost_partner_changed_while_reviewing' => 'Această cerere s-a modificat în timp ce o verificați.',
     'boost_partner_ids_invalid' => 'Introduceți ID-ul Paginii și ID-ul contului publicitar ca numere sau lipiți adresele lor din Facebook.',
+    'boost_partner_ids_taken' => 'Această Pagină sau acest cont publicitar este deja conectat la alt cont. Contactați-ne dacă vă aparține.',
     'boost_partner_disconnected_reason' => 'Rețeaua și-a deconectat Pagina și contul publicitar.',
     'boost_partner_disconnected' => 'Pagina și contul publicitar sunt deconectate. Promovările în desfășurare au fost oprite.',
     'boost_partner_login_failed' => 'Facebook nu a finalizat conectarea. Încercați din nou.',

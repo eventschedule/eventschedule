@@ -142,6 +142,17 @@ class SentryScrubberTest extends TestCase
         );
     }
 
+    /** A token exchange's transfer error ends with the address it asked: the app secret, the code, the token. */
+    public function test_it_scrubs_oauth_credentials_from_an_address_in_a_message(): void
+    {
+        $this->assertSame(
+            'cURL error 56: reset for https://graph.facebook.com/v21.0/oauth/access_token?client_id=1234&client_secret=[secret]&redirect_uri=x&code=[secret]',
+            SentryScrubber::scrub('cURL error 56: reset for https://graph.facebook.com/v21.0/oauth/access_token?client_id=1234&client_secret=app-secret-xyz&redirect_uri=x&code=AQBx9')
+        );
+        $this->assertSame('https://graph.facebook.com/v21.0/me?access_token=[secret]&fields=id', SentryScrubber::scrub('https://graph.facebook.com/v21.0/me?access_token=EAAG123&fields=id'));
+        $this->assertSame('refresh_token=[secret]', SentryScrubber::scrub('refresh_token=r3fr3sh'));
+    }
+
     /** The anchor must not turn any parameter ending in "secret" into a false positive. */
     public function test_it_leaves_unrelated_parameters_readable(): void
     {

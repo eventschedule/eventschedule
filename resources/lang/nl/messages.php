@@ -7132,6 +7132,7 @@ return [
     'boost_partner_stop_pending' => 'De boost is hier gestopt. Facebook was nog niet bereikbaar, dus we blijven proberen de advertentie te pauzeren.',
     'boost_partner_changed_while_reviewing' => 'Dit verzoek is gewijzigd terwijl je het beoordeelde.',
     'boost_partner_ids_invalid' => 'Vul de pagina-ID en de advertentieaccount-ID in als getallen, of plak hun adressen uit Facebook.',
+    'boost_partner_ids_taken' => 'Deze pagina of dit advertentieaccount is al gekoppeld aan een ander account. Neem contact met ons op als het van jou is.',
     'boost_partner_disconnected_reason' => 'Het netwerk heeft zijn pagina en advertentieaccount losgekoppeld.',
     'boost_partner_disconnected' => 'Je pagina en advertentieaccount zijn losgekoppeld. Lopende boosts zijn gestopt.',
     'boost_partner_login_failed' => 'Facebook heeft de koppeling niet voltooid. Probeer het opnieuw.',

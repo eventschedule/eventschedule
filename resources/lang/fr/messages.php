@@ -7135,6 +7135,7 @@ return [
     'boost_partner_stop_pending' => 'Le boost est arrêté ici. Facebook n\'a pas encore pu être joint, nous continuons donc d\'essayer de mettre la publicité en pause.',
     'boost_partner_changed_while_reviewing' => 'Cette demande a été modifiée pendant que vous l\'examiniez.',
     'boost_partner_ids_invalid' => 'Saisissez l\'ID de la Page et l\'ID du compte publicitaire sous forme de nombres, ou collez leurs adresses depuis Facebook.',
+    'boost_partner_ids_taken' => 'Cette Page ou ce compte publicitaire est déjà connecté à un autre compte. Contactez-nous s\'il vous appartient.',
     'boost_partner_disconnected_reason' => 'Le réseau a déconnecté sa Page et son compte publicitaire.',
     'boost_partner_disconnected' => 'Votre Page et votre compte publicitaire sont déconnectés. Les boosts en cours ont été arrêtés.',
     'boost_partner_login_failed' => 'Facebook n\'a pas terminé la connexion. Réessayez.',

@@ -44,6 +44,14 @@ class BoostPartnerSettingsController extends Controller
 
         $changed = $pageId !== $partner->page_id || $adAccountId !== $partner->ad_account_id || $partner->connection_method !== BoostPartner::METHOD_PARTNER_SHARE;
 
+        // A share is read with the PLATFORM's token (accessToken() is null for one), so any IDs
+        // already shared with our Business would pass every check, show their account's, Business's
+        // and Page's names here, and leave only an admin's eye between this account and boosts run
+        // and billed on them. Another partner's, or the platform's own, are refused outright.
+        if ($this->heldElsewhere($partner, $adAccountId, $pageId)) {
+            return $this->back()->withErrors(['ad_account_id' => __('messages.boost_partner_ids_taken')])->withInput();
+        }
+
         if ($refusal = $this->refuseChange($partner, BoostPartner::METHOD_PARTNER_SHARE, $adAccountId, $pageId)) {
             return $refusal;
         }
@@ -158,15 +166,19 @@ class BoostPartnerSettingsController extends Controller
 
             $assets = (new MetaAdsService($token, '', ''))->listOwnAssets();
             $metaUserId = (string) Http::timeout(30)->get('https://graph.facebook.com/'.config('services.meta.api_version', 'v21.0').'/me', ['access_token' => $token, 'fields' => 'id'])->json('id');
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            // Its message ends with the address asked, which carries the app secret, the code
-            // or the token in its query string: never reported as it is.
-            report(new \RuntimeException('Boost partner login: Meta could not be reached'));
+        } catch (\Throwable $e) {
+            // A transfer failure's message ends with the address asked, which carries the app
+            // secret, the code or the token in its query string, and not only for the five cURL
+            // errors Laravel turns into a ConnectionException: never reported as it is.
+            report(new \RuntimeException('Boost partner login failed: '.class_basename($e).': '.self::withoutQueries($e->getMessage())));
 
             return $this->back()->with('error', __('messages.boost_partner_login_failed'));
-        } catch (\Exception $e) {
-            report($e);
+        }
 
+        // Who the token belongs to is what Meta's deauthorize and data-deletion callbacks name
+        // (forgetMetaUser()): a token stored without it, or under the id of the person who logged
+        // in before, would outlive its owner's withdrawal or be wiped by somebody else's.
+        if ($metaUserId === '') {
             return $this->back()->with('error', __('messages.boost_partner_login_failed'));
         }
 
@@ -185,7 +197,7 @@ class BoostPartnerSettingsController extends Controller
             && $reachableAccounts->contains((string) $partner->ad_account_id) && $reachablePages->contains((string) $partner->page_id)) {
             $partner->forceFill([
                 'meta_token' => $token,
-                'meta_user_id' => $metaUserId ?: $partner->meta_user_id,
+                'meta_user_id' => $metaUserId,
                 'meta_token_expires_at' => $response->json('expires_in') ? now()->addSeconds((int) $response->json('expires_in')) : null,
             ])->save();
             $request->session()->put('boost_partner_assets', $offered);
@@ -211,7 +223,7 @@ class BoostPartnerSettingsController extends Controller
             'ad_account_name' => null,
             'connection_method' => BoostPartner::METHOD_LOGIN,
             'meta_token' => $token,
-            'meta_user_id' => $metaUserId ?: null,
+            'meta_user_id' => $metaUserId,
             'meta_token_expires_at' => $response->json('expires_in') ? now()->addSeconds((int) $response->json('expires_in')) : null,
             'confirmed_at' => null,
         ])->save();
@@ -221,6 +233,27 @@ class BoostPartnerSettingsController extends Controller
         AuditService::log(AuditService::BOOST_PARTNER_CONNECT, auth()->id(), 'BoostPartner', $partner->id, null, ['method' => 'login']);
 
         return $this->back()->with('message', __('messages.boost_partner_pick_assets'));
+    }
+
+    /** Whether another partner holds this ad account or Page, or they are the platform's own. */
+    protected function heldElsewhere(BoostPartner $partner, string $adAccountId, string $pageId): bool
+    {
+        $platformAccount = MetaAdsService::bareAccountId((string) config('services.meta.ad_account_id'));
+        $platformPage = (string) config('services.meta.page_id');
+
+        if (($platformAccount !== '' && $adAccountId === $platformAccount) || ($platformPage !== '' && $pageId === $platformPage)) {
+            return true;
+        }
+
+        return BoostPartner::where('id', '!=', $partner->id)
+            ->where(fn ($q) => $q->where('ad_account_id', $adAccountId)->orWhere('page_id', $pageId))
+            ->exists();
+    }
+
+    /** A message with every address's query string taken out. */
+    private static function withoutQueries(string $message): string
+    {
+        return (string) preg_replace('~(\bhttps?://[^\s?#]+)\?\S*~i', '$1?[query removed]', $message);
     }
 
     public function selectAssets(Request $request)

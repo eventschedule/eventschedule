@@ -7129,6 +7129,7 @@ return [
     'boost_partner_stop_pending' => 'הקידום נעצר כאן. עדיין לא הצלחנו להתחבר ל-Facebook, אז נמשיך לנסות להשהות את המודעה.',
     'boost_partner_changed_while_reviewing' => 'הבקשה הזו השתנתה בזמן שבדקת אותה.',
     'boost_partner_ids_invalid' => 'יש להזין את מזהה העמוד ואת מזהה חשבון המודעות כמספרים, או להדביק את הכתובות שלהם מ-Facebook.',
+    'boost_partner_ids_taken' => 'העמוד או חשבון המודעות הזה כבר מחובר לחשבון אחר. אם הוא שלך, יש ליצור איתנו קשר.',
     'boost_partner_disconnected_reason' => 'הרשת ניתקה את העמוד ואת חשבון המודעות שלה.',
     'boost_partner_disconnected' => 'העמוד וחשבון המודעות שלך מנותקים. כל הקידומים הפעילים נעצרו.',
     'boost_partner_login_failed' => 'Facebook לא השלים את החיבור. נסו שוב.',

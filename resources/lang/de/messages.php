@@ -7130,6 +7130,7 @@ return [
     'boost_partner_stop_pending' => 'Der Boost ist hier gestoppt. Facebook war noch nicht erreichbar, daher versuchen wir weiter, die Anzeige zu pausieren.',
     'boost_partner_changed_while_reviewing' => 'Diese Anfrage wurde geändert, während Sie sie geprüft haben.',
     'boost_partner_ids_invalid' => 'Geben Sie die Seiten-ID und die Werbekonto-ID als Zahlen ein, oder fügen Sie ihre Adressen aus Facebook ein.',
+    'boost_partner_ids_taken' => 'Diese Seite oder dieses Werbekonto ist bereits mit einem anderen Konto verbunden. Kontaktieren Sie uns, wenn es Ihnen gehört.',
     'boost_partner_disconnected_reason' => 'Das Netzwerk hat seine Seite und sein Werbekonto getrennt.',
     'boost_partner_disconnected' => 'Ihre Seite und Ihr Werbekonto sind getrennt. Laufende Boosts wurden gestoppt.',
     'boost_partner_login_failed' => 'Facebook hat die Verbindung nicht abgeschlossen. Versuchen Sie es erneut.',

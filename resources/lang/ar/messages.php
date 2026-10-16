@@ -7130,6 +7130,7 @@ return [
     'boost_partner_stop_pending' => 'تم إيقاف التعزيز هنا. لم نتمكن من الوصول إلى Facebook بعد، لذا سنواصل محاولة إيقاف الإعلان مؤقتًا.',
     'boost_partner_changed_while_reviewing' => 'تغيّر هذا الطلب أثناء مراجعتك له.',
     'boost_partner_ids_invalid' => 'أدخل معرّف الصفحة ومعرّف الحساب الإعلاني كأرقام، أو الصق عناوينهما من Facebook.',
+    'boost_partner_ids_taken' => 'هذه الصفحة أو هذا الحساب الإعلاني متصل بالفعل بحساب آخر. تواصل معنا إذا كان لك.',
     'boost_partner_disconnected_reason' => 'فصلت الشبكة صفحتها وحسابها الإعلاني.',
     'boost_partner_disconnected' => 'تم فصل صفحتك وحسابك الإعلاني. تم إيقاف أي تعزيزات قيد العرض.',
     'boost_partner_login_failed' => 'لم يُكمل Facebook عملية الربط. حاول مرة أخرى.',

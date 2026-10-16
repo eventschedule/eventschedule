@@ -7129,6 +7129,7 @@ return [
     'boost_partner_stop_pending' => 'Il boost è interrotto qui. Facebook non è ancora raggiungibile, quindi continueremo a provare a mettere in pausa l\'annuncio.',
     'boost_partner_changed_while_reviewing' => 'Questa richiesta è cambiata mentre la stavi esaminando.',
     'boost_partner_ids_invalid' => 'Inserisci l\'ID della Pagina e l\'ID dell\'account pubblicitario come numeri, oppure incolla i loro indirizzi da Facebook.',
+    'boost_partner_ids_taken' => 'Questa Pagina o questo account pubblicitario è già collegato a un altro account. Contattaci se è tuo.',
     'boost_partner_disconnected_reason' => 'La rete ha scollegato la sua Pagina e il suo account pubblicitario.',
     'boost_partner_disconnected' => 'La tua Pagina e il tuo account pubblicitario sono scollegati. I boost in corso sono stati interrotti.',
     'boost_partner_login_failed' => 'Facebook non ha completato il collegamento. Riprova.',

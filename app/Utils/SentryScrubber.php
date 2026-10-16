@@ -56,8 +56,13 @@ class SentryScrubber
      * i.e. still ship the credential.
      *
      * Matches the value up to the next separator so a following parameter stays readable.
+     *
+     * The OAuth names too (client_secret, access_token, refresh_token, code): an HTTP client's
+     * transfer error ends with the address it asked, and a token exchange carries the app secret
+     * and the user's code or token in that address (BoostPartnerSettingsController::callback()).
+     * Named one by one, so a parameter that merely ends in "secret" stays readable.
      */
-    private const SECRET_QUERY = '#((?:^|[?&])(?:secret|token|api_key|email|sig)=)[^&\s"\']+#i';
+    private const SECRET_QUERY = '#((?:^|[?&])(?:secret|token|api_key|email|sig|client_secret|access_token|refresh_token|code)=)[^&\s"\']+#i';
 
     /**
      * Request headers that carry the visitor's real IP address. Sentry's own sanitiser drops

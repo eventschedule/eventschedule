@@ -526,18 +526,18 @@ class BoostPartnerPagesTest extends TestCase
     }
 
     /** What Meta answers a login: these Pages and ad accounts, and the two the partner uses. */
-    private function fakeMetaLogin(array $pageIds, array $accountIds): void
+    private function fakeMetaLogin(array $pageIds, array $accountIds, ?string $meId = '424242'): void
     {
         config(['services.meta.app_id' => '1234', 'services.meta.app_secret' => 'app-secret-xyz']);
 
-        Http::fake(function ($request) use ($pageIds, $accountIds) {
+        Http::fake(function ($request) use ($pageIds, $accountIds, $meId) {
             $url = $request->url();
 
             return match (true) {
                 str_contains($url, '/oauth/access_token') => Http::response(['access_token' => 'FRESH_TOKEN', 'expires_in' => 5184000]),
                 str_contains($url, '/me/accounts') => Http::response(['data' => array_map(fn ($id) => ['id' => $id, 'name' => 'Page '.$id], $pageIds)]),
                 str_contains($url, '/me/adaccounts') => Http::response(['data' => array_map(fn ($id) => ['id' => 'act_'.$id, 'name' => 'Ads '.$id, 'currency' => 'USD'], $accountIds)]),
-                (bool) preg_match('#/me(\?|$)#', $url) => Http::response(['id' => '424242']),
+                (bool) preg_match('#/me(\?|$)#', $url) => $meId !== null ? Http::response(['id' => $meId]) : Http::response(['error' => ['message' => 'Service temporarily unavailable']], 503),
                 str_contains($url, '/act_999888777') => Http::response(['name' => 'Network Ads', 'currency' => 'USD', 'timezone_name' => 'America/New_York', 'account_status' => 1]),
                 str_contains($url, '/111222333') => Http::response(['name' => 'Harbor Events Page']),
                 default => Http::response(['error' => ['message' => 'unexpected '.$url]], 400),
@@ -605,8 +605,66 @@ class BoostPartnerPagesTest extends TestCase
 
         $this->loginAgain()->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_login_failed'));
 
-        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'could not be reached'));
-        Exceptions::assertNotReported(fn (\Throwable $e) => str_contains($e->getMessage(), 'app-secret-xyz'));
+        // One report, and it is the cleaned one. (A closure typed \Throwable in assertNotReported()
+        // matches no class at all, so it would pass whatever was reported.)
+        Exceptions::assertReportedCount(1);
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'oauth/access_token?[query removed]')
+            && ! str_contains($e->getMessage(), 'app-secret-xyz'));
+    }
+
+    /** Laravel turns five cURL errors into a ConnectionException; the rest arrive as Guzzle's own. */
+    public function test_a_login_broken_off_some_other_way_never_reports_the_app_secret(): void
+    {
+        Exceptions::fake();
+        config(['services.meta.app_id' => '1234', 'services.meta.app_secret' => 'app-secret-xyz']);
+        Http::fake(fn () => throw new \GuzzleHttp\Exception\TransferException('cURL error 56: Connection reset by peer for https://graph.facebook.com/v21.0/oauth/access_token?client_id=1234&client_secret=app-secret-xyz&code=c0de'));
+
+        $this->loginAgain()->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_login_failed'));
+
+        Exceptions::assertReportedCount(1);
+        Exceptions::assertReported(fn (\RuntimeException $e) => str_contains($e->getMessage(), 'Connection reset by peer')
+            && ! str_contains($e->getMessage(), 'app-secret-xyz') && ! str_contains($e->getMessage(), 'c0de'));
+    }
+
+    public function test_a_login_whose_facebook_user_cannot_be_read_is_refused(): void
+    {
+        $this->runningLoginBoost();
+        $this->partner->forceFill(['meta_user_id' => '111'])->save();
+        // Meta answers the token exchange and the asset lists, and not /me.
+        $this->fakeMetaLogin(['111222333'], ['999888777'], null);
+
+        $this->loginAgain()->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_login_failed'));
+
+        // Stored under the previous person's id, the token would outlive its own owner's
+        // withdrawal (forgetMetaUser()) and be wiped by somebody else's.
+        $partner = $this->partner->fresh();
+        $this->assertSame('OLD_TOKEN', $partner->accessToken());
+        $this->assertSame('111', (string) $partner->meta_user_id);
+    }
+
+    public function test_a_share_cannot_name_another_partners_or_the_platforms_account_or_page(): void
+    {
+        config(['services.meta.ad_account_id' => 'act_70000001', 'services.meta.page_id' => '80000001']);
+        $other = $this->makePartner($this->createOwner(), ['page_id' => '555000555', 'ad_account_id' => '666000666']);
+        $save = fn (string $page, string $account) => $this->actingAs($this->partnerUser)
+            ->post(route('boost.partner.settings.share'), ['page_id' => $page, 'ad_account_id' => $account]);
+
+        // Another partner's ad account, or its Page.
+        $save('121212121', '666000666')->assertRedirect()->assertSessionHasErrors(['ad_account_id' => __('messages.boost_partner_ids_taken')]);
+        $save('555000555', '343434343')->assertRedirect()->assertSessionHasErrors(['ad_account_id' => __('messages.boost_partner_ids_taken')]);
+        // The platform's own.
+        $save('121212121', '70000001')->assertRedirect()->assertSessionHasErrors(['ad_account_id' => __('messages.boost_partner_ids_taken')]);
+        $save('80000001', '343434343')->assertRedirect()->assertSessionHasErrors(['ad_account_id' => __('messages.boost_partner_ids_taken')]);
+
+        $partner = $this->partner->fresh();
+        $this->assertSame('999888777', (string) $partner->ad_account_id, 'nothing was saved');
+        $this->assertSame('111222333', (string) $partner->page_id);
+        $this->assertSame([], MetaAdsServiceFake::$calls, 'nothing was read from Meta with the platform\'s token');
+        $this->assertSame('666000666', (string) $other->fresh()->ad_account_id);
+
+        // Its own new pair is taken.
+        $save('121212121', '343434343')->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame('343434343', (string) $this->partner->fresh()->ad_account_id);
     }
 
     public function test_the_boost_forms_card_step_charges_nothing_for_a_partners_event(): void
@@ -622,7 +680,7 @@ class BoostPartnerPagesTest extends TestCase
         // The form was opened before the partner was, and its card was confirmed for this site.
         $this->mock(\App\Services\BoostBillingService::class)
             ->shouldReceive('abandonPaymentIntent')->once()
-            ->with('pi_3QxCharged', 'boost_partner_request', 'boost_abandon_', $this->event->id, 'boost');
+            ->with('pi_3QxCharged', 'boost_partner_request', 'boost_abandon_', $this->event->id, 'boost', $this->business->id);
 
         $this->actingAs($this->business)->post(route('boost.store'), [
             'event_id' => UrlUtils::encodeId($this->event->id),

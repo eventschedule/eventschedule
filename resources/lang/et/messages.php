@@ -7131,6 +7131,7 @@ return [
     'boost_partner_stop_pending' => 'Edendus on siin peatatud. Facebookiga ei saanud veel ühendust, seega proovime reklaami jätkuvalt peatada.',
     'boost_partner_changed_while_reviewing' => 'Seda taotlust muudeti ajal, kui te seda üle vaatasite.',
     'boost_partner_ids_invalid' => 'Sisestage lehe ID ja reklaamikonto ID numbritena või kleepige nende aadressid Facebookist.',
+    'boost_partner_ids_taken' => 'See leht või reklaamikonto on juba ühendatud teise kontoga. Võtke meiega ühendust, kui see on teie oma.',
     'boost_partner_disconnected_reason' => 'Võrgustik ühendas oma lehe ja reklaamikonto lahti.',
     'boost_partner_disconnected' => 'Teie leht ja reklaamikonto on lahti ühendatud. Käimasolevad edendused peatati.',
     'boost_partner_login_failed' => 'Facebook ei lõpetanud ühendamist. Proovige uuesti.',
