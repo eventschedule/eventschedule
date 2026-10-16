@@ -258,6 +258,17 @@ const mountVenueMapEditor = () => {
         .catch(() => {});
 };
 
+// Settings > Ticket presets on the schedule form. Only where the form drew its list.
+const mountTicketPresetsEditor = () => {
+    if (! document.getElementById('ticket-preset-items')) {
+        return;
+    }
+
+    import('./ticket-presets-editor-boot.js')
+        .then((module) => module.mountTicketPresetsEditor())
+        .catch(() => {});
+};
+
 const mountVueWidgets = () => {
     mountAccessibilityWidget();
     // Each bails out immediately when its host element is absent, so this stays cheap on
@@ -267,6 +278,7 @@ const mountVueWidgets = () => {
     mountSetupGuide();
     mountVenueMap();
     mountVenueMapEditor();
+    mountTicketPresetsEditor();
 };
 
 if (document.readyState === 'loading') {

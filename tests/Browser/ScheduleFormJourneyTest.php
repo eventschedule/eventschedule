@@ -5,6 +5,7 @@ namespace Tests\Browser;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Role;
+use App\Models\TicketPreset;
 use App\Models\User;
 use App\Utils\ColorUtils;
 use App\Utils\GuestTheme;
@@ -122,6 +123,55 @@ class ScheduleFormJourneyTest extends DuskTestCase
     {
         $browser->script('var el = document.querySelector('.json_encode($selector).'); el.value = '.json_encode($value).'; el.dispatchEvent(new Event("input", { bubbles: true }));');
         $browser->pause(150);
+    }
+
+    public function test_a_ticket_preset_is_added_and_the_team_switch_waits_for_one(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->open($browser, '#settings-tab-tickets');
+            $browser->waitUntil('document.getElementById("ticket-preset-items").dataset.mounted === "1"', 15);
+
+            $state = $browser->script('return {
+                disabled: document.getElementById("ticket_presets_team").disabled,
+                blocker: document.getElementById("ticket-presets-team-blocker").innerText.trim(),
+                bar: document.querySelector("#form-save-bar .event-save-status").innerText.trim(),
+            };')[0];
+            $this->assertTrue($state['disabled'], 'nothing to pick from yet');
+            $this->assertSame(__('messages.ticket_preset_team_needs_presets'), $state['blocker']);
+
+            $this->press($browser, '[data-action="add-ticket-preset"]');
+            $browser->waitFor('.preset-editor', 10);
+            $browser->script('
+                var set = function (el, value) { el.value = value; el.dispatchEvent(new Event("input", { bubbles: true })); };
+                set(document.querySelector(".preset-editor input[type=text]"), "Regular");
+                set(document.querySelector(".preset-editor .cell-price input"), "5");
+                set(document.querySelector(".preset-editor .cell-type input"), "Entry");
+            ');
+            $browser->pause(300);
+
+            $state = $browser->script('return {
+                disabled: document.getElementById("ticket_presets_team").disabled,
+                line: document.querySelector("#ticket-preset-items [data-list-row] .event-list-sub").innerText.trim(),
+                summary: document.querySelector(\'[data-summary="settings:tickets"]\').textContent.trim(),
+            };')[0];
+            $this->assertFalse($state['disabled']);
+            $this->assertStringContainsString('Entry $5', $state['line']);
+            $this->assertSame('Regular ('.__('messages.ticket_preset_default').')', $state['summary']);
+            $this->assertStringContainsString(__('messages.settings'), $this->barText($browser), 'the tab is marked unsaved');
+
+            $browser->script('document.querySelector("label[for=ticket_presets_team]").click();');
+            $browser->pause(200);
+            // What the switch does to the team is said before Save does it.
+            $this->assertSame(__('messages.ticket_presets_team_bar_on'), $this->barText($browser));
+            $browser->script('window._skipUnsavedWarning = true; document.getElementById("edit-form").requestSubmit();');
+            $browser->waitForLocation('/journeyquartet/schedule', 30);
+        });
+
+        $preset = TicketPreset::where('role_id', $this->talent->id)->sole();
+        $this->assertSame('Regular', $preset->name);
+        $this->assertTrue($preset->is_default);
+        $this->assertSame([['src' => 0, 'type' => 'Entry', 'price' => 5.0, 'quantity' => null, 'description' => null, 'custom_fields' => null, 'volume_discount' => null, 'max_per_order' => null]], $preset->ticketRows());
+        $this->assertTrue(\App\Services\TicketPresets::teamUsesPresets($this->talent->fresh()));
     }
 
     public function test_the_tabs_say_what_they_hold_and_the_rows_say_their_setting(): void

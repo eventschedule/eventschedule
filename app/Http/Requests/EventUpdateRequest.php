@@ -33,6 +33,11 @@ class EventUpdateRequest extends FormRequest
             // printed back on this form and on every price, so a made-up one is refused, not stored.
             // A select locked after a sale posts nothing, and the API has its own rule.
             'ticket_currency_code' => ['nullable', 'string', Rule::in(MoneyUtils::currencyCodes())],
+            // Ticket presets (App\Services\TicketPresets): one string each, or a hand-made list would be
+            // a 500 where it is read as one.
+            'ticket_preset_id' => ['nullable', 'string', 'max:64'],
+            'ticket_preset_name' => ['nullable', 'string', 'max:100'],
+            'ticket_panel' => ['nullable', 'in:full,presets'],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
 
             'flyer_image_url' => ['image', 'max:2500'],

@@ -502,6 +502,11 @@
                 }
             }
 
+            // A ticket preset, as the owner's chip or a team member's tile.
+            if (e.target.closest('[data-preset-chip], [data-preset-tile], #ticket_preset_custom') && anchorMap['ticket-presets']) {
+                updateHelpLinks(anchorMap['ticket-presets']);
+            }
+
             // The event form's "Not needed" has no page of its own: with tickets off, Help goes
             // back to the Tickets tab's page instead of staying on the choice that was just left.
             if (e.target.closest('#ticket_choice_none') && anchorMap['section-tickets']) {

@@ -14,6 +14,12 @@
     </div>
     @endif
 
+    {{-- A team member the owner's ticket preset switch binds: what they import takes its tickets
+         from the default preset (EventRepo::saveEvent()), whatever the source sold. --}}
+    @if (\App\Services\TicketPresets::lockedFor(auth()->user(), $role))
+    <x-page-notice tone="info" class="mb-4"><span v-pre>{{ __('messages.ticket_preset_import_note', ['schedule' => $role->name]) }}</span></x-page-notice>
+    @endif
+
     @include('event.import')
 
     <script {!! nonce_attr() !!}>

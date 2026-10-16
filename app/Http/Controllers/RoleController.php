@@ -48,6 +48,7 @@ use App\Services\OneSignalService;
 use App\Services\ScheduleDeletionService;
 use App\Services\ScheduleTransferService;
 use App\Services\SmsService;
+use App\Services\TicketPresets;
 use App\Services\UsageTrackingService;
 use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
@@ -6145,6 +6146,25 @@ class RoleController extends Controller
         }
 
         $role->save();
+
+        // Settings > Ticket presets, right after the schedule's own save and before the image
+        // checks below can return early. Only from a page that showed the list, and only by whoever
+        // may change it (the owner, or an editor while the team does not pick from presets); the
+        // switch is the owner's alone and is offered where a schedule can have a team.
+        if ($request->has('ticket_presets_submitted') && TicketPresets::mayEdit(auth()->user(), $role)) {
+            TicketPresets::saveFromSchedule(
+                $role,
+                (array) $request->input('ticket_presets', []),
+                // What the page showed. None posted (a page opened with no presets, or one from before
+                // the list was sent) removes nothing.
+                (array) $request->input('ticket_presets_seen', []),
+                $request->input('ticket_presets_default_seen'),
+            );
+
+            if ($isOwner && TicketPresets::teamSwitchOffered($role)) {
+                TicketPresets::setTeamUsesPresets($role, $request->boolean('ticket_presets_team') && TicketPresets::for($role)->isNotEmpty());
+            }
+        }
 
         // A new shared notification address gets its confirmation straight after the save that
         // stored it, before the image checks below can return early: an address saved with no

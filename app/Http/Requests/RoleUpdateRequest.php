@@ -6,6 +6,8 @@ use App\Models\Role;
 use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
 use App\Rules\UsableTimezone;
+use App\Services\TicketPresets;
+use App\Utils\MoneyUtils;
 use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Http\FormRequest;
@@ -297,11 +299,79 @@ class RoleUpdateRequest extends FormRequest
             'social_links' => ['nullable', 'json'],
             'payment_links' => ['nullable', 'json'],
             'logo_wall_order' => ['nullable', 'string', 'json', 'max:2000'],
+            // Settings > Ticket presets (App\Services\TicketPresets::saveFromSchedule()). Every
+            // ticket type in a preset has a price, 0 for a free one: a blank price saving as a free
+            // ticket is what issue #130 was about.
+            'ticket_presets' => ['nullable', 'array', 'max:30'],
+            'ticket_presets.*.id' => ['nullable', 'string', 'max:64'],
+            'ticket_presets.*.name' => ['required_without:ticket_presets.*.id', 'nullable', 'string', 'max:100'],
+            'ticket_presets.*.kind' => ['nullable', 'in:rsvp,tickets,none'],
+            'ticket_presets.*.is_default' => ['nullable', 'boolean'],
+            'ticket_presets.*.currency_code' => ['nullable', 'string', Rule::in(MoneyUtils::currencyCodes())],
+            'ticket_presets.*.payment_method' => ['nullable', 'string', 'in:'.implode(',', payment_gateways()->selectableKeys())],
+            'ticket_presets.*.payment_instructions' => ['nullable', 'string', 'max:5000'],
+            'ticket_presets.*.rsvp_limit' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'ticket_presets.*.copy_event' => ['nullable', 'string', 'max:64'],
+            'ticket_presets.*.tickets' => ['nullable', 'array', 'max:30'],
+            'ticket_presets.*.tickets.*.type' => ['nullable', 'string', 'max:255'],
+            'ticket_presets.*.tickets.*.price' => ['required', 'numeric', 'min:0', 'max:99999999'],
+            'ticket_presets.*.tickets.*.quantity' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'ticket_presets.*.tickets.*.src' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'ticket_presets_team' => ['nullable', 'boolean'],
+            'ticket_presets_seen' => ['nullable', 'array', 'max:30'],
+            'ticket_presets_seen.*' => ['nullable', 'string', 'max:64'],
+            'ticket_presets_default_seen' => ['nullable', 'string', 'max:64'],
+        ];
+    }
+
+    /** Settings > Ticket presets: messages name the field as the editor labels it, not by its key. */
+    public function attributes(): array
+    {
+        return [
+            'ticket_presets.*.name' => __('messages.name'),
+            'ticket_presets.*.kind' => __('messages.ticket_preset_how'),
+            'ticket_presets.*.currency_code' => __('messages.currency'),
+            'ticket_presets.*.payment_method' => __('messages.payment'),
+            'ticket_presets.*.payment_instructions' => __('messages.payment_instructions'),
+            'ticket_presets.*.rsvp_limit' => __('messages.ticket_preset_limit'),
+            'ticket_presets.*.tickets.*.price' => __('messages.price'),
+            'ticket_presets.*.tickets.*.quantity' => __('messages.quantity'),
+            'ticket_presets.*.tickets.*.type' => __('messages.type'),
         ];
     }
 
     public function withValidator($validator): void
     {
+        // The owner's "Team members pick from these presets" needs presets to pick from, and each
+        // must say how people sign up (the one copied from the old single default never did).
+        // Refused here, before RoleController::update() starts saving: the calendar blocks there
+        // save as they go.
+        $validator->after(function ($validator) {
+            $role = $this->role();
+
+            if (! $this->has('ticket_presets_submitted') || ! $this->boolean('ticket_presets_team')
+                || (int) $role->user_id !== (int) auth()->id() || ! TicketPresets::teamSwitchOffered($role)) {
+                return;
+            }
+
+            $rows = array_values((array) $this->input('ticket_presets', []));
+            if (! $rows) {
+                $validator->errors()->add('ticket_presets_team', __('messages.ticket_preset_team_needs_presets'));
+
+                return;
+            }
+
+            $stored = TicketPresets::for($role)->keyBy('id');
+            foreach ($rows as $i => $row) {
+                $raw = ! empty($row['id']) ? UrlUtils::decodeId((string) $row['id']) : null;
+                $kind = $row['kind'] ?? ($raw ? $stored->get($raw)?->kind : null);
+                if (! in_array($kind, \App\Models\TicketPreset::KINDS, true)) {
+                    $name = trim((string) ($row['name'] ?? '')) ?: ($raw ? $stored->get($raw)?->label() : '');
+                    $validator->errors()->add("ticket_presets.{$i}.kind", __('messages.ticket_preset_needs_kind', ['preset' => $name]));
+                }
+            }
+        });
+
         $validator->after(function ($validator) {
             // A custom field's validation pattern is owner-authored, so reject anything PCRE
             // cannot compile here - otherwise it saves silently and is skipped at validation time,

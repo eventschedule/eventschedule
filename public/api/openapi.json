@@ -4050,6 +4050,11 @@
             "enum": ["stripe", "invoiceninja", "payment_url", "manual"],
             "description": "Payment method for ticket sales"
           },
+          "ticket_preset_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Encoded ID of the schedule's ticket preset the event's tickets came from, null when they were set up by hand"
+          },
           "terms_url": {
             "type": "string",
             "format": "uri",
@@ -4236,6 +4241,14 @@
             "type": "string",
             "maxLength": 5000,
             "description": "Instructions for manual payment"
+          },
+          "ticket_preset_id": {
+            "type": "string",
+            "description": "Encoded ID of one of the schedule's ticket presets. Its tickets, payment and options replace what the request sends for them. A team member the schedule's owner has pick from presets takes their tickets from a preset whatever they send."
+          },
+          "ticket_preset_apply": {
+            "type": "boolean",
+            "description": "On an update, apply the preset named in ticket_preset_id even when it is the one the event already has, to take its current prices after it changed."
           },
           "schedule_type": {
             "type": "string",

@@ -284,6 +284,8 @@ class ApiEventController extends Controller
                 'ticket_currency_code' => 'nullable|string|size:3',
                 'payment_method' => 'nullable|string|in:'.implode(',', $allowedPaymentMethods),
                 'payment_instructions' => 'nullable|string|max:5000',
+                'ticket_preset_id' => 'nullable|string|max:64',
+                'ticket_preset_apply' => 'nullable|boolean',
                 'schedule_type' => 'nullable|string|in:single,recurring',
                 'recurring_frequency' => 'required_if:schedule_type,recurring|nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
                 'recurring_interval' => 'nullable|integer|min:2',
@@ -351,8 +353,18 @@ class ApiEventController extends Controller
             'schedule_type', 'recurring_frequency', 'recurring_interval',
             'recurring_end_type', 'recurring_end_value', 'days_of_week',
             'venue_id', 'venue_name', 'venue_address1',
-            'members', 'schedule', 'tickets', 'event_parts', 'addons',
+            'members', 'schedule', 'tickets', 'event_parts', 'addons', 'ticket_preset_id',
         ]));
+
+        // A ticket preset the caller names is applied, as pressing it on the Tickets tab does
+        // (EventRepo::saveEvent()). An empty one names nothing: a client that writes back what it
+        // read must not unlink the event from its preset.
+        if ($request->filled('ticket_preset_id')) {
+            $request->merge(['ticket_preset_apply' => 1]);
+        } else {
+            $request->request->remove('ticket_preset_id');
+            $request->json()->remove('ticket_preset_id');
+        }
 
         // On a new event every row is a new row. An id copied from a read of another event names
         // a row that is not this event's, and saveEvent() skips a row whose id it cannot find: the
@@ -574,6 +586,8 @@ class ApiEventController extends Controller
                 'ticket_currency_code' => 'nullable|string|size:3',
                 'payment_method' => 'nullable|string|in:'.implode(',', $allowedPaymentMethods),
                 'payment_instructions' => 'nullable|string|max:5000',
+                'ticket_preset_id' => 'nullable|string|max:64',
+                'ticket_preset_apply' => 'nullable|boolean',
                 'schedule_type' => 'nullable|string|in:single,recurring',
                 'recurring_frequency' => 'required_if:schedule_type,recurring|nullable|string|in:daily,weekly,every_n_weeks,monthly_date,monthly_weekday,yearly',
                 'recurring_interval' => 'nullable|integer|min:2',
@@ -676,8 +690,25 @@ class ApiEventController extends Controller
             'schedule_type', 'recurring_frequency', 'recurring_interval',
             'recurring_end_type', 'recurring_end_value', 'days_of_week',
             'venue_id', 'venue_name', 'venue_address1',
-            'members', 'schedule', 'tickets', 'event_parts', 'addons',
+            'members', 'schedule', 'tickets', 'event_parts', 'addons', 'ticket_preset_id', 'ticket_preset_apply',
         ]));
+
+        // A ticket preset the caller names is applied, as pressing it on the Tickets tab does
+        // (EventRepo::saveEvent()), when it is not the one the event already has, or when the caller
+        // asks for it again with ticket_preset_apply (after the preset's prices changed). The one
+        // the event has, sent back as it was read, applies nothing: a read-modify-write would
+        // otherwise replace the tickets it sent with the preset's, or be refused on a sold event.
+        // An empty one names nothing and leaves the link alone.
+        $sameAsStored = $request->filled('ticket_preset_id') && $event->ticket_preset_id
+            && UrlUtils::decodeId((string) $request->input('ticket_preset_id')) === (int) $event->ticket_preset_id;
+        if ($request->filled('ticket_preset_id') && (! $sameAsStored || $request->boolean('ticket_preset_apply'))) {
+            $request->merge(['ticket_preset_apply' => 1]);
+        } else {
+            foreach (['ticket_preset_id', 'ticket_preset_apply'] as $field) {
+                $request->request->remove($field);
+                $request->json()->remove($field);
+            }
+        }
 
         // What the caller named, read before the blocks below start carrying over what it did
         // not. EventRepo::saveEvent() was written for the event form, which posts every section

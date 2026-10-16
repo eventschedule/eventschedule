@@ -27,6 +27,9 @@
                 anyDirty: false,
                 removes: [],
                 removed: [],
+                // Sentences a page has for what Save will do that is not a removal, by key
+                // (formkit:says): "Team members will pick from presets".
+                says: {},
                 errors: [],
                 saving: false,
                 waiting: '',
@@ -55,6 +58,10 @@
                     });
 
                     return { kind: 'tabs', label: words.removes, tabs: things.concat(named(unnamed)), strong: true };
+                }
+                var said = Object.keys(this.says).map(function (key) { return this.says[key]; }, this).filter(Boolean);
+                if (said.length) {
+                    return { kind: 'text', text: said.join(' · '), strong: true };
                 }
                 if (named(this.dirtyTabs).length) {
                     return { kind: 'tabs', label: words.unsaved, tabs: named(this.dirtyTabs) };
@@ -99,6 +106,11 @@
     document.addEventListener('formkit:removes', function (event) {
         bar.removes = event.detail.sections || [];
         bar.removed = event.detail.items || [];
+    });
+    document.addEventListener('formkit:says', function (event) {
+        var says = Object.assign({}, bar.says);
+        says[event.detail.key] = event.detail.text || '';
+        bar.says = says;
     });
     document.addEventListener('formkit:errors', function (event) {
         bar.errors = event.detail.sections || [];

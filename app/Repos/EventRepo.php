@@ -23,6 +23,7 @@ use App\Utils\AiImageIssuance;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
+use App\Utils\MoneyUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\SponsorUtils;
 use App\Utils\UrlUtils;
@@ -84,8 +85,13 @@ class EventRepo
         'sell_after_start', 'show_unavailable_tickets',
         'expire_unpaid_tickets', 'expire_unpaid_tickets_checkbox',
         'custom_fields', 'seating_plan_id', 'total_tickets_mode',
-        'ticket_notes', 'terms_url', 'save_default_tickets',
+        'ticket_notes', 'terms_url',
         'tickets', 'promo_codes', 'addons', 'addon_image_data',
+        // Ticket presets (App\Services\TicketPresets): which preset, whether it was pressed, the
+        // "Save these tickets as a preset" switch with its name and default, and which Tickets tab
+        // was on the page (the full one, or a bound team member's presets).
+        'ticket_preset_id', 'ticket_preset_apply', 'ticket_panel',
+        'save_ticket_preset', 'ticket_preset_name', 'ticket_preset_default',
     ];
 
     /**
@@ -136,6 +142,9 @@ class EventRepo
         $clonedEventData['custom_field_values_role_id'] = $event->custom_field_values_role_id ?? $event->creator_role_id;
         $clonedEventData['recurring_include_dates'] = $event->recurring_include_dates;
         $clonedEventData['recurring_exclude_dates'] = $event->recurring_exclude_dates;
+        // Not fillable. Carried so a copy made by a team member the preset switch binds keeps the
+        // preset (EventController::create() keeps it only if it is the copying schedule's own).
+        $clonedEventData['ticket_preset_id'] = $event->ticket_preset_id;
 
         // Reset fields that shouldn't be carried to a new event
         $clonedEventData['flyer_image_url'] = null;
@@ -314,6 +323,102 @@ class EventRepo
                 });
             })
             ->first();
+    }
+
+    /**
+     * Decide what a save does with ticket presets (App\Services\TicketPresets), before any write.
+     *
+     * Someone the owner's switch binds (TicketPresets::lockedFor()) never saves prices of their
+     * own: on a new event, or when they pressed a preset (`ticket_preset_apply`), the Tickets tab's
+     * fields are replaced by the preset's; otherwise the stored tickets are kept, as for a curator.
+     * A preset cannot replace the tickets of an event somebody holds a ticket to, or one a seating
+     * plan maps (TicketPresets::frozen()). Anyone else applies a preset only by asking for it
+     * (the API's `ticket_preset_id`); the event form fills the tab itself and only names the
+     * preset. Every refusal is keyed `ticket_preset_id`, which the team's Tickets tab shows.
+     *
+     * Returns: whether the person is bound, the preset applied, the owning schedule, and whether
+     * the stored tickets are kept as they are.
+     *
+     * @return array{0: bool, 1: ?\App\Models\TicketPreset, 2: ?Role, 3: bool}
+     */
+    private function settleTicketPreset($currentRole, $request, ?Event $event, bool $mayEditTickets): array
+    {
+        $owning = ($event?->exists ? $event->ticketingRole() : null) ?? $currentRole;
+        $postedId = $request->input('ticket_preset_id');
+        $wantsApply = $request->boolean('ticket_preset_apply');
+        $panel = $request->input('ticket_panel');
+        $request->request->remove('ticket_preset_apply');
+
+        if (! $owning || ($event && $event->isAppointment())) {
+            return [false, null, $owning, false];
+        }
+
+        $locked = \App\Services\TicketPresets::lockedFor($request->user(), $owning);
+
+        if ($locked && $panel === 'full') {
+            // The full Tickets tab was posted by someone the switch now binds: it was turned on
+            // while their page was open. Their typed prices would be dropped without a word.
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'ticket_preset_id' => __('messages.ticket_preset_switched_on', ['owner' => \App\Services\TicketPresets::ownerName($owning)]),
+            ]);
+        }
+
+        // The other way round: the presets-only tab, from a page opened while the switch was on,
+        // posted by someone it no longer binds (the switch went off, the presets went, the schedule
+        // changed hands). That tab carries no ticket fields, and read as the full one, its silence
+        // would retire every ticket type, add-on and promo code. It is read as what it is.
+        $presetsTab = $mayEditTickets && $panel === 'presets';
+
+        $apply = ($locked || $presetsTab) ? (! $event || $wantsApply) : ($wantsApply && $mayEditTickets);
+
+        if (! $apply) {
+            if ($locked || $presetsTab) {
+                $this->dropTicketPanelInput($request);
+            }
+
+            return [$locked, null, $owning, $locked || $presetsTab];
+        }
+
+        // Pressed (or named) on an event a preset can no longer change, because a ticket sold or
+        // a seating plan was attached while the page was open: said, never dropped without a word.
+        if (\App\Services\TicketPresets::frozen($event)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'ticket_preset_id' => __('messages.ticket_preset_frozen_api'),
+            ]);
+        }
+
+        $preset = \App\Services\TicketPresets::find($owning, $postedId);
+        if ($postedId && ! $preset) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'ticket_preset_id' => __('messages.ticket_preset_not_found'),
+            ]);
+        }
+        if (! $preset && ! $event) {
+            $preset = \App\Services\TicketPresets::defaultFor($owning);
+        }
+        if (! $preset) {
+            if ($presetsTab && ! $locked) {
+                // Nothing left to apply (the presets were removed): keep what is stored.
+                $this->dropTicketPanelInput($request);
+
+                return [false, null, $owning, true];
+            }
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'ticket_preset_id' => __('messages.ticket_preset_choose'),
+            ]);
+        }
+
+        // Whose account is paid: a bound member's new event is the owner's (saveEvent() stamps it),
+        // an existing one keeps the account it has. One currency for the check and the fields.
+        $payee = $event?->exists ? $event->user : ($locked ? $owning->user : $request->user());
+        $fallbackCurrency = $event?->ticket_currency_code ?: MoneyUtils::getCurrencyForCountry($owning->country_code);
+        \App\Services\TicketPresets::assertPayable($preset, $payee, $fallbackCurrency);
+
+        $this->dropTicketPanelInput($request);
+        \App\Services\TicketPresets::applyTo($request, $preset, $fallbackCurrency);
+
+        return [$locked, $preset, $owning, false];
     }
 
     /**
@@ -639,6 +744,13 @@ class EventRepo
         $mayEditTickets = ! $event || ! $request->user() || $request->user()->canViewEventData($event);
         if (! $mayEditTickets) {
             $this->dropTicketPanelInput($request);
+        }
+
+        // Ticket presets (issue #130). Read before anything can drop the two fields, and settled
+        // before any write: a refusal here must leave nothing behind.
+        [$presetLocked, $appliedPreset, $presetOwningRole, $presetKeepsTickets] = $this->settleTicketPreset($currentRole, $request, $event, $mayEditTickets);
+        if ($presetKeepsTickets) {
+            $mayEditTickets = false;
         }
 
         $this->validatePassConfiguration($request);
@@ -1019,6 +1131,12 @@ class EventRepo
         if ($isNewEvent) {
             $event = new Event;
             $event->user_id = $user->id;
+            // A team member the owner's preset switch binds adds events on the owner's account:
+            // payment gateways pay events.user_id (Stripe Connect, Invoice Ninja, a payment link),
+            // and the prices are the owner's. TicketPresets::lockedFor().
+            if ($presetLocked && $presetOwningRole?->user_id) {
+                $event->user_id = $presetOwningRole->user_id;
+            }
             $event->is_guest_submission = $isGuestSubmission;
             $event->creator_role_id = $creatorRoleId;
             // Which import made this event, and in which sitting. Stamped here, once, from what
@@ -1146,6 +1264,20 @@ class EventRepo
 
         // Not the columns only the server writes: see SERVER_OWNED_FIELDS.
         $event->fill($request->except(self::SERVER_OWNED_FIELDS));
+
+        // Which preset the event's tickets came from. Not fillable: a preset applied above names
+        // itself; otherwise the event form names the preset its tab still matches (or none, after a
+        // hand edit) and the API's carry-over never mentions it, so absent keeps what is stored.
+        if ($appliedPreset) {
+            $event->ticket_preset_id = $appliedPreset->id;
+        } elseif (! $presetLocked && $mayEditTickets && $request->has('ticket_preset_id')) {
+            $presetNamed = \App\Services\TicketPresets::find($presetOwningRole, $request->input('ticket_preset_id'));
+            // The link the event already has is kept as it is, even when the preset changed since:
+            // that is what tells the team "older prices". Only a NEW link is checked against what
+            // was saved.
+            $presetToConfirm = $presetNamed && (int) $presetNamed->id !== (int) $event->getOriginal('ticket_preset_id') ? $presetNamed : null;
+            $event->ticket_preset_id = $presetNamed?->id;
+        }
 
         // Record whose field definitions key those values: this form showed $currentRole's fields,
         // and it need not be the creator (a venue editing a talent's event). Not fillable, so set
@@ -2501,6 +2633,18 @@ class EventRepo
                 $event->invoiceninja_subscription_id = null;
                 $event->invoiceninja_subscription_url = null;
                 $event->save();
+            }
+        }
+
+        // The preset the form named is kept only if the tickets just saved still are that preset: a
+        // chip left lit over a payment method this person's account could not take, or a change
+        // the page did not see, would otherwise link the event to prices it does not have.
+        if (! empty($presetToConfirm)) {
+            $stillMatches = $presetToConfirm->matches($event->fresh(['tickets']));
+            if (! $stillMatches) {
+                DB::table('events')->where('id', $event->id)->update(['ticket_preset_id' => null]);
+                $event->ticket_preset_id = null;
+                $event->syncOriginalAttribute('ticket_preset_id');
             }
         }
 

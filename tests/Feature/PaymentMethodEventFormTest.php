@@ -237,10 +237,14 @@ class PaymentMethodEventFormTest extends TestCase
 
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue', ['country_code' => 'ZA']);
-        $role->forceFill(['default_tickets' => json_encode([
-            'currency_code' => 'ZAR',
-            'payment_method' => 'cash',
-        ])])->save();
+        // The schedule's default ticket preset, which took over from roles.default_tickets.
+        \App\Models\TicketPreset::create([
+            'role_id' => $role->id,
+            'name' => null,
+            'kind' => null,
+            'is_default' => true,
+            'settings' => ['currency_code' => 'ZAR', 'payment_method' => 'cash'],
+        ]);
 
         $this->assertSame('cash', $this->createFormPaymentMethod($owner, $role));
     }

@@ -41,6 +41,8 @@ class MarkdownUtils
         'payment-element', 'promo-form-app', 'promo-payment-element', 'realtime-app', 'rsvp-form',
         'scan-agenda-app', 'schedule-realtime', 'suggestions-app', 'support-admin-app',
         'support-chat-widget', 'support-presence-app', 'translations-app', 'videos-app',
+        // Mounted by getElementById from a module (ticket-presets-editor-boot.js), not .mount('#x').
+        'ticket-preset-items',
     ];
 
     public static function convertToHtml($markdown, bool $tables = false)

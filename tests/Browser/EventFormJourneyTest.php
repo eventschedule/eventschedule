@@ -9,6 +9,7 @@ use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\Ticket;
+use App\Models\TicketPreset;
 use App\Models\User;
 use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
@@ -170,6 +171,108 @@ class EventFormJourneyTest extends DuskTestCase
         }
 
         return $event->fresh();
+    }
+
+    /** Regular (the default) and Special on the talent schedule, as Settings > Ticket presets saves them. */
+    private function makePresets(): array
+    {
+        $regular = TicketPreset::create(['role_id' => $this->talent->id, 'name' => 'Regular', 'kind' => 'tickets', 'is_default' => true, 'sort_order' => 0, 'settings' => [
+            'currency_code' => 'USD', 'payment_method' => 'cash', 'payment_instructions' => 'Pay at the door',
+            'tickets' => [['type' => 'Entry', 'price' => 5], ['type' => 'Reduced', 'price' => 3]],
+        ]]);
+        $special = TicketPreset::create(['role_id' => $this->talent->id, 'name' => 'Special', 'kind' => 'tickets', 'is_default' => false, 'sort_order' => 1, 'settings' => [
+            'currency_code' => 'USD', 'payment_method' => 'cash', 'payment_instructions' => 'Pay online before the show',
+            'tickets' => [['type' => null, 'price' => 20]],
+        ]]);
+
+        return [$regular, $special];
+    }
+
+    public function test_a_preset_chip_fills_the_tab_and_a_hand_edit_puts_it_out(): void
+    {
+        [, $special] = $this->makePresets();
+
+        $this->browse(function (Browser $browser) use ($special) {
+            $this->openNew($browser);
+            $this->fillBasics($browser, 'Preset Night');
+            $browser->click('a[data-section="section-tickets"]');
+            $browser->waitUntil('document.getElementById("section-tickets").style.display === "block"', 10);
+
+            // A new event starts on the default, both of its types.
+            $state = $browser->script('return {
+                lit: document.querySelector("[data-preset-chip].is-on") && document.querySelector("[data-preset-chip].is-on").innerText.trim(),
+                prices: window.vueApp.tickets.map(function (t) { return [t.type, t.price]; }),
+            };')[0];
+            $this->assertSame('Regular · $3 to $5', $state['lit']);
+            $this->assertSame([['Entry', 5], ['Reduced', 3]], $state['prices']);
+
+            $this->press($browser, '[data-preset-chip="'.$special->encodeId().'"]');
+            $state = $browser->script('return {
+                lit: document.querySelector("[data-preset-chip].is-on").innerText.trim(),
+                prices: window.vueApp.tickets.map(function (t) { return [t.type, t.price]; }),
+                summary: document.querySelector("a[data-section=section-tickets] .section-nav-summary").innerText.trim(),
+                posted: document.querySelector("input[name=ticket_preset_id]").value,
+            };')[0];
+            $this->assertSame('Special · $20', $state['lit']);
+            $this->assertSame([['', 20]], $state['prices']);
+            $this->assertSame('Special · $20', $state['summary']);
+            $this->assertSame($special->encodeId(), $state['posted']);
+            $this->assertStringContainsString('Tickets: Special · $20', $this->barText($browser));
+            // The instructions box is a markdown editor that keeps its own text and writes it back
+            // on submit: the preset's instructions must be in the editor, not only in the model.
+            $this->assertSame('Pay online before the show', $browser->script('var f = document.getElementById("payment_instructions"); return f._easyMDE ? f._easyMDE.value() : f.value;')[0]);
+
+            // The first change by hand: the tab no longer stands on the preset.
+            $browser->script('var el = document.querySelector("input[name=\"tickets[0][price]\"]"); el.value = "18"; el.dispatchEvent(new Event("input", { bubbles: true }));');
+            $browser->pause(300);
+            $this->assertSame(0, $browser->script('return document.querySelectorAll("[data-preset-chip].is-on").length;')[0]);
+            $this->assertSame('', $browser->script('return document.querySelector("input[name=ticket_preset_id]").value;')[0]);
+
+            $this->save($browser);
+        });
+
+        $event = Event::where('name', 'Preset Night')->firstOrFail();
+        $this->assertSame([18.0], Ticket::where('event_id', $event->id)->where('is_deleted', false)->pluck('price')->map(fn ($p) => (float) $p)->all());
+        $this->assertSame('Pay online before the show', $event->payment_instructions);
+        $this->assertNull($event->ticket_preset_id);
+    }
+
+    public function test_a_team_member_picks_a_preset_and_never_types_a_price(): void
+    {
+        [, $special] = $this->makePresets();
+        $member = User::factory()->create(['email_verified_at' => now()]);
+        $this->talent->users()->attach($member->id, ['level' => 'admin']);
+        \App\Services\TicketPresets::setTeamUsesPresets($this->talent, true);
+
+        $this->browse(function (Browser $browser) use ($member, $special) {
+            $this->leave($browser);
+            $browser->loginAs($member)
+                ->visit('/journeytalent/add-event?visit='.uniqid())
+                ->waitFor('#event_name', 15)
+                ->waitUntil('window.vueApp !== undefined', 15);
+            $this->fillBasics($browser, 'Staff Night');
+            $browser->click('a[data-section="section-tickets"]');
+            $browser->waitUntil('document.getElementById("section-tickets").style.display === "block"', 10);
+
+            $state = $browser->script('return {
+                priceFields: document.querySelectorAll("#section-tickets input[name*=price]").length,
+                modeTiles: document.querySelectorAll("#section-tickets .ticket-mode-radio").length,
+                lit: document.querySelector("[data-preset-tile].is-on").innerText.trim(),
+            };')[0];
+            $this->assertSame(0, $state['priceFields'], 'nothing on a bound member\'s tab takes a price');
+            $this->assertSame(0, $state['modeTiles']);
+            $this->assertStringContainsString('Regular', $state['lit']);
+
+            $this->press($browser, '[data-preset-tile="'.$special->encodeId().'"]');
+            $this->assertStringContainsString('$20', $browser->script('return document.getElementById("ticket-preset-picked").innerText;')[0]);
+            $this->assertSame('1', $browser->script('return document.querySelector("input[name=ticket_preset_apply]").value;')[0]);
+
+            $this->save($browser);
+        });
+
+        $event = Event::where('name', 'Staff Night')->firstOrFail();
+        $this->assertSame([20.0], Ticket::where('event_id', $event->id)->where('is_deleted', false)->pluck('price')->map(fn ($p) => (float) $p)->all());
+        $this->assertSame($this->owner->id, (int) $event->user_id, 'on the owner\'s account');
     }
 
     public function test_free_registration_is_one_press_on_the_tickets_tab(): void

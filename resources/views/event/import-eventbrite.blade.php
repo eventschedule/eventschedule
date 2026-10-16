@@ -5,6 +5,12 @@
     <x-page-header :title="__('messages.import_from_eventbrite')" :image="$role->profile_image_url ?: null"
         :back="route('event.show_import', ['subdomain' => $role->subdomain])" :back-label="__('messages.import_events')" />
 
+    {{-- A team member the owner's ticket preset switch binds: what they import takes its tickets
+         from the default preset (EventRepo::saveEvent()), whatever the source sold. --}}
+    @if (\App\Services\TicketPresets::lockedFor(auth()->user(), $role))
+    <x-page-notice tone="info" class="mb-4"><span v-pre>{{ __('messages.ticket_preset_import_note', ['schedule' => $role->name]) }}</span></x-page-notice>
+    @endif
+
     <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 
     <style {!! nonce_attr() !!}>

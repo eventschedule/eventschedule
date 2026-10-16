@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Http\Controllers\MarketingController;
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\TicketPreset;
 use App\Models\User;
+use App\Services\TicketPresets;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -167,10 +169,46 @@ class EventFormHelpTest extends TestCase
             $this->assertStringContainsString($branch, $html);
         }
 
+        // A preset chip, a team member's preset tile or their Custom tile: one place in the guide.
+        $this->assertStringContainsString("e.target.closest('[data-preset-chip], [data-preset-tile], #ticket_preset_custom')", $html);
+
         // A phone's accordion headers name the same tabs.
         preg_match_all('/class="mobile-section-header[^"]*"[^>]*data-section="(section-[a-z-]+)"/', $html, $headers);
         preg_match_all('/<a href="#(section-[a-z-]+)" class="section-nav-link"/', $html, $tabs);
         $this->assertNotEmpty($headers[1]);
         $this->assertEqualsCanonicalizing($tabs[1], array_values(array_unique($headers[1])));
+    }
+
+    /**
+     * A team member the owner's preset switch binds has no ticket tiles and no rows on the Tickets
+     * tab, only the presets: pressing one opens the guide on presets, which the page's map names
+     * and the guide's search lists.
+     */
+    public function test_a_team_member_picking_a_preset_is_sent_to_presets(): void
+    {
+        config(['app.hosted' => false]);
+        $member = $this->createOwner();
+        $this->role->users()->attach($member->id, ['level' => 'admin']);
+        $preset = TicketPreset::create(['role_id' => $this->role->id, 'name' => 'Regular', 'kind' => 'tickets', 'is_default' => true, 'settings' => [
+            'currency_code' => 'USD', 'payment_method' => 'cash', 'tickets' => [['type' => 'Entry', 'price' => 5]],
+        ]]);
+        TicketPresets::setTeamUsesPresets($this->role, true);
+
+        $index = (new \ReflectionMethod(MarketingController::class, 'getDocSearchIndex'))->invoke(app(MarketingController::class));
+        $indexed = array_map(fn ($entry) => parse_url($entry['url'], PHP_URL_PATH).'#'.parse_url($entry['url'], PHP_URL_FRAGMENT), $index);
+
+        foreach ($this->pages() as $name => $url) {
+            $html = $this->actingAs($member)->get($url)->assertOk()->getContent();
+            $this->assertStringContainsString(':data-preset-tile="preset.id"', $html, "the {$name} page draws the team's tiles");
+            $this->assertStringNotContainsString('ticket-mode-radio" id="ticket_choice_', $html, "and not the three ticket tiles on the {$name} page");
+            $this->assertStringContainsString("e.target.closest('[data-preset-chip], [data-preset-tile], #ticket_preset_custom')", $html);
+
+            $map = $this->anchorMap($html);
+            $this->assertArrayHasKey('ticket-presets', $map, "the {$name} page's Help map names presets");
+            $this->assertSame(1, preg_match('~(/docs/[a-z/-]+)#([a-z0-9-]+)$~', $map['ticket-presets'], $parts));
+            $this->assertContains($parts[2], $this->idsInTheGuide($parts[1]));
+            $this->assertContains($parts[1].'#'.$parts[2], $indexed, 'the guide\'s search lists it');
+        }
+        $this->assertNotNull($preset->fresh());
     }
 }

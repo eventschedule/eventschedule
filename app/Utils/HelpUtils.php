@@ -66,6 +66,7 @@ class HelpUtils
                 'section-integrations' => '/docs/creating-schedules#integrations',
                 'integration-tab-email' => '/docs/creating-schedules#integrations-email',
                 'settings-tab-general' => '/docs/creating-schedules#settings-general',
+                'settings-tab-tickets' => '/docs/creating-schedules#ticket-presets',
                 'settings-tab-notifications' => '/docs/creating-schedules#settings-notifications',
                 'settings-tab-advanced' => '/docs/creating-schedules#settings-advanced',
                 'integration-tab-google' => '/docs/creating-schedules#integrations-google',
@@ -98,6 +99,8 @@ class HelpUtils
                 'ticket-tab-options' => '/docs/tickets#options',
                 'ticket-tab-promo_codes' => '/docs/tickets#promo-codes',
                 'ticket-tab-add_ons' => '/docs/tickets#add-ons',
+                // A preset chip or tile pressed (event/partials/ticket-presets-*).
+                'ticket-presets' => '/docs/tickets#ticket-presets',
                 'section-event-settings' => '/docs/creating-events#sponsors',
                 'settings-tab-sponsors' => '/docs/creating-events#sponsors',
                 'section-engagement' => '/docs/creating-events#engagement',
@@ -134,6 +137,8 @@ class HelpUtils
                 'ticket-tab-options' => '/docs/tickets#options',
                 'ticket-tab-promo_codes' => '/docs/tickets#promo-codes',
                 'ticket-tab-add_ons' => '/docs/tickets#add-ons',
+                // A preset chip or tile pressed (event/partials/ticket-presets-*).
+                'ticket-presets' => '/docs/tickets#ticket-presets',
                 'section-event-settings' => '/docs/creating-events#sponsors',
                 'settings-tab-sponsors' => '/docs/creating-events#sponsors',
                 'section-engagement' => '/docs/creating-events#engagement',

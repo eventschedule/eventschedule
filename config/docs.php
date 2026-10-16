@@ -209,7 +209,7 @@ return [
             'shot' => 'creating-schedules--section-details',
             'shot_alt' => 'The schedule form, open on its Details tab',
             'published' => '2024-01-01',
-            'modified' => '2026-10-09',
+            'modified' => '2026-10-16',
         ],
 
         'schedule-styling' => [
@@ -283,7 +283,7 @@ return [
             'shot' => 'tickets--sales',
             'shot_alt' => 'The Sales page, listing orders',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-16',
         ],
 
         'subscriptions' => [
@@ -504,7 +504,7 @@ return [
             'blurb' => 'Stripe, PayPal, Payfast, Razorpay and Invoice Ninja on a selfhost or SaaS install, and how refunds work.',
             'icon' => 'credit-card',
             'published' => '2024-01-01',
-            'modified' => '2026-10-07',
+            'modified' => '2026-10-16',
         ],
 
         'selfhost/google-calendar' => [
@@ -706,7 +706,7 @@ return [
             'blurb' => 'Programmatically manage schedules and events over REST.',
             'icon' => 'code',
             'published' => '2024-01-01',
-            'modified' => '2026-10-15',
+            'modified' => '2026-10-16',
         ],
 
         'developer/webhooks' => [

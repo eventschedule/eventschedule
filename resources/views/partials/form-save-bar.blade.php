@@ -5,7 +5,7 @@
 
      It is a Vue island of its own: there is nothing server-rendered inside it to re-create, and
      no text of anyone's in its markup. The page tells it what happened through events
-     (formkit:dirty, formkit:removes, formkit:errors, formkit:saving), which partials/form-kit-script
+     (formkit:dirty, formkit:removes, formkit:says, formkit:errors, formkit:saving), which partials/form-kit-script
      and the page's own script dispatch.
 
      Must sit inside the <form> it saves; partials/form-save-bar-script goes with the page's other
@@ -22,7 +22,7 @@
                     <button type="button" class="event-link" @click="goToTab(tab.id)" v-text="tab.label"></button>
                 </template>
             </span>
-            <span v-cloak v-else :class="{ 'event-save-quiet': status.quiet }" v-text="status.text"></span>
+            <span v-cloak v-else :class="{ 'event-save-quiet': status.quiet, 'event-save-strong': status.strong }" v-text="status.text"></span>
         </div>
 
         <div class="event-save-actions" v-show="! confirmingDiscard">

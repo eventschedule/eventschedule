@@ -768,7 +768,9 @@
             'email' => __('messages.email'),
             'not_connected' => __('messages.settings_not_connected'),
             'gallery_prompt' => __('messages.gallery_add_first'),
-            'settings_holds' => implode(', ', [__('messages.schedule_url'), __('messages.notifications'), __('messages.advanced')]),
+            'settings_holds' => implode(', ', array_filter([__('messages.schedule_url'), $role->exists ? __('messages.ticket_presets') : null, __('messages.notifications'), __('messages.advanced')])),
+            'preset_default' => __('messages.ticket_preset_default'),
+            'preset_team' => __('messages.ticket_presets_team_summary'),
             'gallery_count' => count($galleryState['images'] ?? []),
             'email_failing' => $role->isEmailSettingsFailureActive() ? __('messages.email_settings_failed_warning_title') : '',
             // "Connected" is said of a schedule that syncs, not of an account that could.
@@ -3319,6 +3321,54 @@
                         <!-- End Tab Content: General -->
 
                         <div class="event-subrows">
+                        @if ($role->exists)
+                        {{-- Ticket presets (issue #130): the ticket setups an event's Tickets tab starts from,
+                             one the default for new events, and the owner's switch that has the rest of
+                             the team pick one instead of typing prices. The list is a Vue island mounted
+                             ON #ticket-preset-items (resources/js/components/TicketPresetsEditor.vue), so
+                             its rows are direct children of the element the list watcher below observes;
+                             every value reaches it through the JSON blob, never as markup. A schedule not
+                             yet saved has no events to start, so the row waits for one. --}}
+                        @php
+                            $presetEditor = \App\Services\TicketPresets::scheduleEditorState($role, auth()->user());
+                            $presetEditorJson = json_encode($presetEditor, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                            $presetTeamOn = \App\Services\TicketPresets::teamUsesPresets($role);
+                            $presetSummary = collect($presetEditor['presets'])->map(fn ($p) => ($p['name'] !== '' ? $p['name'] : ($p['label'] ?? '')).(! empty($p['is_default']) ? ' ('.__('messages.ticket_preset_default').')' : ''))->implode(', ');
+                            if ($presetSummary !== '' && $presetTeamOn) {
+                                $presetSummary .= ' · '.__('messages.ticket_presets_team_summary');
+                            }
+                        @endphp
+                        <x-form-row group="settings" tab="tickets" :title="__('messages.ticket_presets')" :summary="$presetSummary !== '' ? $presetSummary : __('messages.none')" :muted="$presetSummary === ''" class="settings-tab" />
+                        <div id="settings-tab-tickets" class="event-subrow-body settings-tab-content" hidden>
+                            <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_presets_help') }}</p>
+                            {{-- ticket_presets_submitted is drawn by the island itself (see TicketPresetsEditor.vue). --}}
+                            <p id="ticket-presets-empty" class="py-3 text-sm text-gray-500 dark:text-gray-400" @if ($presetEditor['presets']) hidden @endif>{{ __('messages.ticket_presets_empty') }}</p>
+                            <div id="ticket-preset-items" class="event-list" data-island data-summary="{{ $presetSummary }}"></div>
+                            <script type="application/json" id="ticket-preset-items-json" {!! nonce_attr() !!}>{!! $presetEditorJson !!}</script>
+                            <x-input-error class="mt-2" :messages="$errors->get('ticket_presets.*')" />
+                            @if ($presetEditor['canEdit'])
+                            <button type="button" data-action="add-ticket-preset" class="event-link mt-3" disabled>+ {{ __('messages.ticket_preset_add') }}</button>
+                            @endif
+
+                            @if ($presetEditor['switchOffered'])
+                            <div class="preset-switch">
+                                <x-toggle name="ticket_presets_team" id="ticket_presets_team"
+                                    :checked="(bool) old('ticket_presets_team', $presetTeamOn)"
+                                    label="{{ __('messages.ticket_presets_team') }}"
+                                    help="{{ __('messages.ticket_presets_team_help') }}" />
+                                <p id="ticket-presets-team-blocker" class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-14" hidden></p>
+                                <x-input-error class="mt-2 ms-14" :messages="$errors->get('ticket_presets_team')" />
+                            </div>
+                            @elseif ($presetTeamOn)
+                            <div class="mt-4 mb-4 preset-note">
+                                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                                <span v-pre>{{ __('messages.ticket_presets_locked_note', ['owner' => \App\Services\TicketPresets::ownerName($role)]) }}</span>
+                            </div>
+                            @endif
+                        </div>
+                        <!-- End Tab Content: Ticket presets -->
+                        @endif
+
                         <!-- Tab Content: Notifications -->
                         <x-form-row group="settings" tab="notifications" :title="__('messages.notifications')" class="settings-tab" />
                         <div id="settings-tab-notifications" class="event-subrow-body settings-tab-content" hidden>
@@ -7576,6 +7626,27 @@ document.addEventListener('DOMContentLoaded', function() {
     kit.summary('settings:advanced', function() {
         return labelsIn(byId('settings-tab-advanced'));
     });
+    // The presets by name, the default marked, as the island draws them; the server's words until
+    // it has (TicketPresetsEditor.vue mounts on the list).
+    kit.summary('settings:tickets', function() {
+        var host = byId('ticket-preset-items');
+        if (! host) {
+            return '';
+        }
+        if (! host.dataset.mounted) {
+            return host.dataset.summary ? host.dataset.summary : { text: words.none, empty: true };
+        }
+        var names = Array.prototype.map.call(host.querySelectorAll(':scope > [data-list-row]'), function(row) {
+            var named = row.querySelector('[data-row-name]');
+            var name = named ? named.textContent.replace(/\s+/g, ' ').trim() : '';
+            return name && row.querySelector('.event-chip') ? name + ' (' + words.preset_default + ')' : name;
+        }).filter(Boolean);
+        if (! names.length) {
+            return { text: words.none, empty: true };
+        }
+        var team = byId('ticket_presets_team');
+        return names.join(', ') + (team && team.checked ? ' · ' + words.preset_team : '');
+    });
     kit.summary('integration:advanced', function() {
         return labelsIn(byId('integration-tab-advanced'));
     });
@@ -7845,6 +7916,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ['section-engagement', '#approved-subdomains-items'],
         ['section-sources', '#source-schedule-items'],
         ['section-gift-cards', '#gift-card-amounts-items'],
+        ['section-settings', '#ticket-preset-items'],
         ['section-auto-import', '#import-url-items'],
         ['section-auto-import', '#import-city-items'],
         ['section-links', '#links-tab-youtube_videos'],
@@ -7883,16 +7955,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // After the page's own setup (pickers mounting, lists being drawn), which is not a change.
         setTimeout(function() {
             lists.forEach(function(entry) {
-                // The two link lists are redrawn whole on every change, so a redraw is not a removal.
-                entry.saved = entry.section === 'section-links' ? [] : Array.prototype.slice.call(entry.element.children).map(function(row) {
-                    return { row: row, name: rowName(row) };
-                });
-                new MutationObserver(function() {
-                    kit.markDirty(entry.section);
-                    if (window._markFormDirty) { window._markFormDirty(); }
-                    kit.refresh();
-                    removals();
-                }).observe(entry.element, { childList: true, subtree: entry.section === 'section-links' });
+                var watch = function() {
+                    // The two link lists are redrawn whole on every change, so a redraw is not a removal.
+                    entry.saved = entry.section === 'section-links' ? [] : Array.prototype.slice.call(entry.element.children).map(function(row) {
+                        return { row: row, name: rowName(row) };
+                    });
+                    new MutationObserver(function() {
+                        kit.markDirty(entry.section);
+                        if (window._markFormDirty) { window._markFormDirty(); }
+                        kit.refresh();
+                        removals();
+                    }).observe(entry.element, { childList: true, subtree: entry.section === 'section-links' });
+                };
+                // A list a Vue island draws (data-island, Settings > Ticket presets) is counted once
+                // it has drawn its rows: drawn late, they read as a change nobody made, and a row
+                // removed later was never in the snapshot to be announced.
+                if (entry.element.hasAttribute('data-island') && ! entry.element.dataset.mounted) {
+                    entry.element.addEventListener('island:mounted', watch, { once: true });
+                } else {
+                    watch();
+                }
             });
             kit.arm();
         }, 600);

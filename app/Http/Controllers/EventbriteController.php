@@ -327,6 +327,16 @@ class EventbriteController extends Controller
                 ],
                 'venue' => $venueData,
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // A refusal with a reason the person can act on (the schedule's ticket preset cannot be
+            // used, say), not a failure: said as it is, and not reported.
+            if ($imageFilename) {
+                @unlink(storage_path('app/temp').'/'.$imageFilename);
+            }
+
+            return response()->json([
+                'error' => collect($e->errors())->flatten()->first() ?: __('messages.eventbrite_import_failed'),
+            ], 422);
         } catch (\Exception $e) {
             if ($imageFilename) {
                 @unlink(storage_path('app/temp').'/'.$imageFilename);

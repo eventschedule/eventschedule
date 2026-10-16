@@ -647,6 +647,158 @@
     .event-tile-narrow {
       max-width: 14rem;
     }
+
+    /* Ticket presets (issue #130). On the event form: the owner's chips above the tiles, lit for
+       the preset the tab still matches and resting (dashed, not pressable) once an event has
+       tickets; a bound team member's preset tiles, frozen the same way, with what the chosen one
+       holds under them. On the schedule form: the list and its editor (TicketPresetsEditor.vue). */
+    button.event-chip.is-on,
+    form button.event-chip.is-on,
+    form button.event-chip.is-on:disabled {
+      border-color: var(--brand-blue);
+      background: var(--brand-blue-a10);
+      color: var(--brand-blue);
+    }
+    button.event-chip.is-on::before {
+      content: "\2713\00a0";
+    }
+    button.event-chip:disabled,
+    form button.event-chip:disabled {
+      border-color: rgb(var(--ap-border));
+      border-style: dashed;
+      background: transparent;
+      color: rgb(var(--ap-ink-3));
+      cursor: not-allowed;
+    }
+    button.event-chip:disabled:hover,
+    form button.event-chip:disabled:hover {
+      border-color: rgb(var(--ap-border));
+      color: rgb(var(--ap-ink-3));
+    }
+    /* A preset tile that cannot be pressed (its payment cannot be taken), frozen or not. */
+    button.event-tile:disabled,
+    form button.event-tile:disabled,
+    .event-tiles.is-frozen button.event-tile,
+    form .event-tiles.is-frozen button.event-tile {
+      border-color: rgb(var(--ap-border));
+      background: var(--ap-tint-1);
+      cursor: not-allowed;
+    }
+    .event-tiles.is-frozen button.event-tile.is-on,
+    form .event-tiles.is-frozen button.event-tile.is-on {
+      border-color: var(--brand-blue);
+      background: var(--brand-blue-a10);
+    }
+    .preset-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-3));
+    }
+    .preset-picked {
+      margin-top: 1rem;
+      padding: 0.875rem 1rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+    }
+    .preset-picked dl {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0.375rem 1.25rem;
+      margin: 0;
+      font-size: 0.875rem;
+    }
+    .preset-picked dt {
+      color: rgb(var(--ap-ink-3));
+    }
+    .preset-picked dd {
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: rgb(var(--ap-ink));
+    }
+    .preset-row-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .event-list-row.preset-row {
+      flex-wrap: wrap;
+    }
+    .preset-row > .preset-editor {
+      flex-basis: 100%;
+    }
+    .preset-editor {
+      margin-top: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+      background: var(--ap-tint-1);
+    }
+    .preset-types {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+    }
+    .preset-types .h {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: rgb(var(--ap-ink-2));
+    }
+    .preset-type {
+      display: contents;
+    }
+    .preset-type .lbl {
+      display: none;
+    }
+    /* A phone: each ticket type its own small box with its own labels, so a price plainly belongs
+       to its type. */
+    @media (max-width: 639px) {
+      .preset-types {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+      }
+      .preset-types > .h {
+        display: none;
+      }
+      .preset-type {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.5rem 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid rgb(var(--ap-border));
+        border-radius: 0.625rem;
+      }
+      .preset-type .lbl {
+        display: block;
+        margin-bottom: 0.125rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: rgb(var(--ap-ink-2));
+      }
+      .preset-type .cell-type {
+        grid-column: 1 / 3;
+        grid-row: 1;
+        padding-inline-end: 2rem;
+      }
+      .preset-type .event-icon-btn {
+        position: absolute;
+        top: 0.5rem;
+        inset-inline-end: 0.5rem;
+      }
+    }
+    .preset-switch {
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .preset-switch.is-off {
+      opacity: 0.6;
+    }
     button.event-link.event-link-quiet,
     form button.event-link.event-link-quiet {
       color: rgb(var(--ap-ink-3));

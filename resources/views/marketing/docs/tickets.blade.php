@@ -12,6 +12,7 @@
             <x-doc-nav-link href="#ticket-types">Ticket Types</x-doc-nav-link>
             <x-doc-nav-link href="#free-events">Free Tickets</x-doc-nav-link>
             <x-doc-nav-link href="#external">Tickets Elsewhere</x-doc-nav-link>
+            <x-doc-nav-link href="#ticket-presets">Ticket Presets</x-doc-nav-link>
             <x-doc-nav-link href="#cart">Multi-Event Cart</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-group label="Payment" href="#payment">
@@ -332,7 +333,7 @@
 
         <div class="doc-callout doc-callout-tip">
             <div class="doc-callout-title">Reuse a setup on the next event</div>
-            <p>At the bottom of the Tickets tab, turn on <strong class="text-gray-900 dark:text-white">Save as default</strong> before saving. New events on this schedule then start with the same ticket types, payment method, currency, options, promo codes and add-ons.</p>
+            <p>At the bottom of the Tickets tab, turn on <strong class="text-gray-900 dark:text-white">Save these tickets as a preset</strong> before saving, and name it. Your next events can start from it with one press. See <a href="#ticket-presets" class="doc-link">Ticket presets</a>.</p>
         </div>
     </section>
 
@@ -507,6 +508,16 @@
                 </tbody>
             </table>
         </div>
+    </section>
+
+    <!-- Ticket presets -->
+    <section id="ticket-presets" class="doc-section">
+        <h3 class="doc-subheading">Ticket presets</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A preset is a ticket setup with a name, kept on the schedule: <em>Free event</em>, <em>Regular</em> at 5, <em>Special</em> at 20. They are set up under <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets" class="doc-link">Edit schedule &rarr; Settings &rarr; Ticket presets</a>, and one of them is the default every new event starts on.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">On the Tickets tab the presets are a row of chips above the three tiles, with <strong class="text-gray-900 dark:text-white">Manage presets</strong> beside them. Pressing one fills the tab: how people sign up, the ticket types and prices, payment, options, promo codes and add-ons. The chip stays lit while the tab still matches it, and goes out when you change how people sign up, a ticket type, a price or a quantity, the currency, the payment method or its instructions, or the limit. Once somebody has a ticket, or the event has a seating plan, the chips rest: a preset can no longer replace ticket types people hold.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">To keep a setup as a preset, turn on <strong class="text-gray-900 dark:text-white">Save these tickets as a preset</strong> at the bottom of the tab and give it a name. The same name replaces that preset, a new name adds one, and <strong class="text-gray-900 dark:text-white">Use for new events</strong> makes it the default. The save bar says which it will do.</p>
+        <h4 id="ticket-presets-team" class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">When the team picks from presets</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">With the owner's <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets-team" class="doc-link">Team members pick from these presets</a> on, a team member's Tickets tab holds the presets and nothing else: they choose one and see what the event will have, and cannot type a price. A new event starts on the default, and is on the owner's account, so its online payments go to the owner. An event set up by hand shows as <strong class="text-gray-900 dark:text-white">Custom</strong> and keeps its tickets unless another preset is chosen. When the owner changes a preset after an event was saved with it, the event keeps its prices and its tile says so, with <strong class="text-gray-900 dark:text-white">Use the current prices</strong> to take the new ones. Once somebody holds a ticket or a reservation (an unpaid or a refunded order counts), the event's tickets stay as they are until the owner changes them. The same rule holds for events added through the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API</a> and the imports; an event that comes in through calendar sync arrives with tickets off.</p>
     </section>
 
     <!-- Multi-event cart -->
