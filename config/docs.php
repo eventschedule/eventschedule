@@ -420,7 +420,7 @@ return [
             'shot' => 'managing-schedules--requests-tab',
             'shot_alt' => 'The Requests tab, with an event waiting for an answer',
             'published' => '2024-01-01',
-            'modified' => '2026-10-08',
+            'modified' => '2026-10-16',
         ],
 
         'analytics' => [

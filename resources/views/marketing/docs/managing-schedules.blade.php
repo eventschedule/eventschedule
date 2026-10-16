@@ -764,7 +764,7 @@
                     <tr>
                         <td><strong>Admin</strong></td>
                         <td>Run the schedule day to day: add and edit events, accept and decline requests, edit the schedule settings, sell tickets, see the schedule's sales, waitlist and check-in dashboard, refund a sale, scan tickets at the door, invite new members</td>
-                        <td>Change anyone's level, remove another member, manage the plan, transfer ownership, or delete the schedule</td>
+                        <td>Change anyone's level, remove another member, manage the plan, transfer ownership, or delete the schedule; and while the owner has the team pick from <a href="{{ route('marketing.docs.creating_schedules') }}#ticket-presets-team" class="doc-link">ticket presets</a>, type an event's ticket prices or change the presets</td>
                     </tr>
                     <tr>
                         <td><strong>Viewer</strong></td>
